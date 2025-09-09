@@ -1,14 +1,25 @@
-/* 珠宝轮播图样式 */
+/* 珠宝轮播图样式 - 修复版 */
 .jewelry-slideshow {
     position: relative;
     overflow: hidden;
     width: 100%;
+    height: 100vh;
 }
 
 .jewelry-slideshow__slide {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+}
+
+.jewelry-slideshow__slide--active {
+    opacity: 1;
+    z-index: 2;
 }
 
 .jewelry-slideshow__media {
@@ -33,12 +44,17 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    z-index: 3;
 }
 
 .jewelry-slideshow__text {
     pointer-events: auto;
     max-width: 600px;
     text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 40px;
+    border-radius: 8px;
 }
 
 /* 控制区域样式 */
@@ -49,6 +65,7 @@
     right: 0;
     bottom: 0;
     pointer-events: none;
+    z-index: 4;
 }
 
 /* 悬停区域样式 */
@@ -67,7 +84,7 @@
     flex: 1;
     pointer-events: auto;
     cursor: pointer;
-    z-index: 2;
+    z-index: 5;
 }
 
 .jewelry-slideshow__hover-area--left {
@@ -119,7 +136,7 @@
     right: 30px;
     display: flex;
     gap: 8px;
-    z-index: 3;
+    z-index: 6;
     pointer-events: auto;
 }
 
@@ -162,6 +179,10 @@
 
 /* 响应式设计 */
 @media screen and (max-width: 749px) {
+    .jewelry-slideshow {
+        height: 60vh;
+    }
+
     .jewelry-slideshow__dots-container {
         bottom: 20px;
         right: 20px;
@@ -184,27 +205,7 @@
     .jewelry-slideshow__hover-area--right .jewelry-slideshow__arrow {
         right: 10px;
     }
-}
 
-/* 动画效果 */
-.jewelry-slideshow__slide {
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-}
-
-.jewelry-slideshow__slide--active {
-    opacity: 1;
-}
-
-/* 文字样式增强 */
-.jewelry-slideshow__text {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    padding: 40px;
-    border-radius: 8px;
-}
-
-@media screen and (max-width: 749px) {
     .jewelry-slideshow__text {
         padding: 20px;
         margin: 0 20px;
@@ -227,4 +228,31 @@
     background: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* 修复：确保幻灯片容器有固定高度 */
+.banner--large {
+    height: 100vh;
+}
+
+.banner--medium {
+    height: 70vh;
+}
+
+.banner--small {
+    height: 50vh;
+}
+
+@media screen and (max-width: 749px) {
+    .banner--large {
+        height: 60vh;
+    }
+
+    .banner--medium {
+        height: 50vh;
+    }
+
+    .banner--small {
+        height: 40vh;
+    }
 }

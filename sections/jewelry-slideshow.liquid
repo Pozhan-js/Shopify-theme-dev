@@ -1,217 +1,293 @@
-{{ 'component-slider.css' | asset_url | stylesheet_tag }}
-{{ 'component-slideshow.css' | asset_url | stylesheet_tag }}
-{{ 'jewelry-slideshow.css' | asset_url | stylesheet_tag }}
-
-{%- if section.settings.slide_height == 'adapt_image' and section.blocks.first.settings.image != blank -%}
-  {%- style -%}
-    @media screen and (max-width: 749px) {
-      #JewelrySlider-{{ section.id }}::before,
-      #JewelrySlider-{{ section.id }} .media::before,
-      #JewelrySlider-{{ section.id }}:not(.banner--mobile-bottom) .banner__content::before {
-        padding-bottom: {{ 1 | divided_by: section.blocks.first.settings.image.aspect_ratio | times: 100 }}%;
-        content: '';
-        display: block;
-      }
-    }
-
-    @media screen and (min-width: 750px) {
-      #JewelrySlider-{{ section.id }}::before,
-      #JewelrySlider-{{ section.id }} .media::before {
-        padding-bottom: {{ 1 | divided_by: section.blocks.first.settings.image.aspect_ratio | times: 100 }}%;
-        content: '';
-        display: block;
-      }
-    }
-  {%- endstyle -%}
-{%- endif -%}
-
-<jewelry-slideshow-component
-  class="slider-mobile-gutter{% if section.settings.layout == 'grid' %} page-width{% endif %}{% if section.settings.show_text_below %} mobile-text-below{% endif %}"
-  role="region"
-  aria-roledescription="{{ 'sections.slideshow.carousel' | t }}"
-  aria-label="{{ section.settings.accessibility_info | escape }}"
->
-  <div
-    class="jewelry-slideshow banner banner--{{ section.settings.slide_height }} grid grid--1-col slider slider--everywhere{% if section.settings.show_text_below %} banner--mobile-bottom{% endif %}{% if section.blocks.first.settings.image == blank %} slideshow--placeholder{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
-    id="JewelrySlider-{{ section.id }}"
-    aria-live="polite"
-    aria-atomic="true"
-    data-autoplay="{{ section.settings.auto_rotate }}"
-    data-speed="{{ section.settings.change_slides_speed }}"
-  >
-    {%- for block in section.blocks -%}
-      <style>
-        #JewelrySlide-{{ section.id }}-{{ forloop.index }} .banner__media::after {
-          opacity: {{ block.settings.image_overlay_opacity | divided_by: 100.0 }};
-        }
-      </style>
-      <div
-        class="jewelry-slideshow__slide grid__item grid--1-col slider__slide"
-        id="JewelrySlide-{{ section.id }}-{{ forloop.index }}"
-        {{ block.shopify_attributes }}
-        role="group"
-        aria-roledescription="{{ 'sections.slideshow.slide' | t }}"
-        aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
-        tabindex="-1"
-      >
-        <div class="jewelry-slideshow__media banner__media media{% if block.settings.image == blank %} placeholder{% endif %}{% if section.settings.image_behavior != 'none' %} animate--{{ section.settings.image_behavior }}{% endif %}">
-          {%- if block.settings.image -%}
-            {%- liquid
-              assign height = block.settings.image.width | divided_by: block.settings.image.aspect_ratio | round
-              if section.settings.image_behavior == 'ambient'
-                assign sizes = '120vw'
-                assign widths = '450, 660, 900, 1320, 1800, 2136, 2400, 3600, 7680'
-              else
-                assign sizes = '100vw'
-                assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 3000, 3840'
-              endif
-              assign fetch_priority = 'auto'
-              if section.index == 1
-                assign fetch_priority = 'high'
-              endif
-            -%}
-            {%- if forloop.first %}
-              {{
-                block.settings.image
-                | image_url: width: 3840
-                | image_tag: height: height, sizes: sizes, widths: widths, fetchpriority: fetch_priority
-              }}
-            {%- else -%}
-              {{
-                block.settings.image
-                | image_url: width: 3840
-                | image_tag: loading: 'lazy', height: height, sizes: sizes, widths: widths
-              }}
-            {%- endif -%}
-          {%- else -%}
-            {%- assign placeholder_slide = forloop.index | modulo: 2 -%}
-            {%- if placeholder_slide == 1 -%}
-              {{ 'hero-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
-            {%- else -%}
-              {{ 'hero-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
-            {%- endif -%}
-          {%- endif -%}
+<!-- 珠宝轮播图 - 简化版 -->
+<div class="jewelry-slideshow-container">
+    <div class="jewelry-slideshow">
+        <div class="slideshow-wrapper">
+            <!-- 幻灯片1 -->
+            <div class="slide active">
+                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&h=1080&fit=crop" alt="钻石系列">
+                <div class="slide-content">
+                    <h2>钻石系列</h2>
+                    <p>永恒之美的象征，每一件都是艺术品</p>
+                    <a href="/collections/all" class="btn">探索系列</a>
+                </div>
+            </div>
+            
+            <!-- 幻灯片2 -->
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1596944924591-4b6b1df4c0c9?w=1920&h=1080&fit=crop" alt="珍珠系列">
+                <div class="slide-content">
+                    <h2>珍珠系列</h2>
+                    <p>优雅与纯洁的化身，经典永不过时</p>
+                    <a href="/collections/all" class="btn">查看详情</a>
+                </div>
+            </div>
+            
+            <!-- 幻灯片3 -->
+            <div class="slide">
+                <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1920&h=1080&fit=crop" alt="彩宝系列">
+                <div class="slide-content">
+                    <h2>彩宝系列</h2>
+                    <p>绚丽色彩的艺术，大自然的馈赠</p>
+                    <a href="/collections/all" class="btn">立即选购</a>
+                </div>
+            </div>
         </div>
         
-        {%- if block.settings.heading != blank or block.settings.subheading != blank or block.settings.button_label != blank -%}
-        <div class="jewelry-slideshow__text-wrapper banner__content banner__content--{{ block.settings.box_align }} page-width{% if block.settings.show_text_box == false %} banner--desktop-transparent{% endif %}{% if settings.animations_reveal_on_scroll and forloop.index == 1 %} scroll-trigger animate--slide-in{% endif %}">
-          <div class="jewelry-slideshow__text banner__box content-container content-container--full-width-mobile color-{{ block.settings.color_scheme }} gradient slideshow__text--{{ block.settings.text_alignment }} slideshow__text-mobile--{{ block.settings.text_alignment_mobile }}">
-            {%- if block.settings.heading != blank -%}
-              <h2 class="banner__heading inline-richtext {{ block.settings.heading_size }}">
-                {{ block.settings.heading }}
-              </h2>
-            {%- endif -%}
-            {%- if block.settings.subheading != blank -%}
-              <div class="banner__text rte">
-                <p>{{ block.settings.subheading }}</p>
-              </div>
-            {%- endif -%}
-            {%- if block.settings.button_label != blank -%}
-              <div class="banner__buttons">
-                <a
-                  {% if block.settings.link %}
-                    href="{{ block.settings.link }}"
-                  {% else %}
-                    role="link" aria-disabled="true"
-                  {% endif %}
-                  class="button {% if block.settings.button_style_secondary %}button--secondary{% else %}button--primary{% endif %}"
-                >
-                  {{- block.settings.button_label | escape -}}
-                </a>
-              </div>
-            {%- endif -%}
-          </div>
+        <!-- 导航箭头 -->
+        <div class="nav-arrows">
+            <button class="arrow prev" onclick="changeSlide(-1)">❮</button>
+            <button class="arrow next" onclick="changeSlide(1)">❯</button>
         </div>
-        {%- endif -%}
-      </div>
-    {%- endfor -%}
-  </div>
-
-  {%- if section.blocks.size > 1 -%}
-    <div class="jewelry-slideshow__controls">
-      <div class="jewelry-slideshow__hover-areas">
-        <div class="jewelry-slideshow__hover-area jewelry-slideshow__hover-area--left" data-direction="prev">
-          <div class="jewelry-slideshow__arrow jewelry-slideshow__arrow--left">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15.41 7.41L14 6L8 12L14 18L15.41 16.59L10.83 12L15.41 7.41Z" fill="currentColor"/>
-            </svg>
-          </div>
+        
+        <!-- 小圆点导航 -->
+        <div class="dots-container">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
         </div>
-        <div class="jewelry-slideshow__hover-area jewelry-slideshow__hover-area--right" data-direction="next">
-          <div class="jewelry-slideshow__arrow jewelry-slideshow__arrow--right">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8.59 16.59L10 18L16 12L10 6L8.59 7.41L13.17 12L8.59 16.59Z" fill="currentColor"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-      
-      <div class="jewelry-slideshow__dots-container">
-        {%- for block in section.blocks -%}
-          <button
-            class="jewelry-slideshow__dot{% if forloop.first %} jewelry-slideshow__dot--active{% endif %}"
-            data-slide="{{ forloop.index0 }}"
-            aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
-            aria-controls="JewelrySlider-{{ section.id }}"
-          >
-            <span class="jewelry-slideshow__dot-inner"></span>
-          </button>
-        {%- endfor -%}
-      </div>
     </div>
-  {%- endif -%}
-</jewelry-slideshow-component>
+</div>
 
-<script src="{{ 'jewelry-slideshow.js' | asset_url }}" defer="defer"></script>
+<style>
+.jewelry-slideshow-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
 
-{%- if request.design_mode -%}
-  <script src="{{ 'theme-editor.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
+.jewelry-slideshow {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slideshow-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 1;
+}
+
+.slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.slide-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    backdrop-filter: none;
+}
+
+.slide-content h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+.slide-content p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    padding: 15px 40px;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: white;
+    transform: translateY(-2px);
+}
+
+/* 导航箭头 */
+.nav-arrows {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    transition: background 0.3s ease;
+}
+
+.arrow:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.prev {
+    left: 20px;
+}
+
+.next {
+    right: 20px;
+}
+
+/* 小圆点导航 */
+.dots-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 2;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.dot.active {
+    background: white;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 749px) {
+    .jewelry-slideshow-container {
+        height: 60vh;
+    }
+    
+    .slide-content h2 {
+        font-size: 32px;
+    }
+    
+    .slide-content p {
+        font-size: 16px;
+    }
+    
+    .arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .prev {
+        left: 10px;
+    }
+    
+    .next {
+        right: 10px;
+    }
+}
+</style>
+
+<script>
+let currentSlideIndex = 0;
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.dot');
+const totalSlides = slides.length;
+
+// 初始化轮播图
+function initSlideshow() {
+    showSlide(currentSlideIndex);
+    setInterval(() => {
+        changeSlide(1);
+    }, 5000);
+}
+
+// 显示指定幻灯片
+function showSlide(index) {
+    slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === index);
+    });
+    
+    dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+    });
+}
+
+// 切换幻灯片
+function changeSlide(direction) {
+    currentSlideIndex += direction;
+    
+    if (currentSlideIndex >= totalSlides) {
+        currentSlideIndex = 0;
+    } else if (currentSlideIndex < 0) {
+        currentSlideIndex = totalSlides - 1;
+    }
+    
+    showSlide(currentSlideIndex);
+}
+
+// 跳转到指定幻灯片
+function currentSlide(index) {
+    currentSlideIndex = index - 1;
+    showSlide(currentSlideIndex);
+}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', initSlideshow);
+</script>
 
 {% schema %}
 {
   "name": "珠宝轮播图",
   "tag": "section",
   "class": "section",
-  "disabled_on": {
-    "groups": ["header", "footer"]
-  },
   "settings": [
-    {
-      "type": "select",
-      "id": "layout",
-      "options": [
-        {
-          "value": "full_bleed",
-          "label": "全宽"
-        },
-        {
-          "value": "grid",
-          "label": "网格布局"
-        }
-      ],
-      "default": "full_bleed",
-      "label": "布局"
-    },
     {
       "type": "select",
       "id": "slide_height",
       "options": [
         {
-          "value": "adapt_image",
-          "label": "适应图片"
-        },
-        {
-          "value": "small",
-          "label": "小"
+          "value": "large",
+          "label": "大"
         },
         {
           "value": "medium",
           "label": "中"
         },
         {
-          "value": "large",
-          "label": "大"
+          "value": "small",
+          "label": "小"
         }
       ],
       "default": "large",
@@ -232,254 +308,16 @@
       "unit": "秒",
       "label": "切换速度",
       "default": 5
-    },
-    {
-      "type": "select",
-      "id": "image_behavior",
-      "options": [
-        {
-          "value": "none",
-          "label": "无动画"
-        },
-        {
-          "value": "ambient",
-          "label": "环境动画"
-        }
-      ],
-      "default": "none",
-      "label": "图片行为"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_text_below",
-      "label": "在移动端显示文字在下方",
-      "default": false
-    },
-    {
-      "type": "header",
-      "content": "辅助功能"
-    },
-    {
-      "type": "text",
-      "id": "accessibility_info",
-      "label": "辅助功能描述",
-      "default": "珠宝轮播图"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "slide",
-      "name": "轮播图片",
-      "limit": 8,
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "图片"
-        },
-        {
-          "type": "range",
-          "id": "image_overlay_opacity",
-          "min": 0,
-          "max": 100,
-          "step": 10,
-          "unit": "%",
-          "label": "图片叠加透明度",
-          "default": 20
-        },
-        {
-          "type": "header",
-          "content": "文字内容"
-        },
-        {
-          "type": "inline_richtext",
-          "id": "heading",
-          "default": "奢华珠宝系列",
-          "label": "标题"
-        },
-        {
-          "type": "select",
-          "id": "heading_size",
-          "options": [
-            {
-              "value": "h2",
-              "label": "小"
-            },
-            {
-              "value": "h1",
-              "label": "中"
-            },
-            {
-              "value": "h0",
-              "label": "大"
-            },
-            {
-              "value": "hxl",
-              "label": "特大"
-            }
-          ],
-          "default": "h0",
-          "label": "标题大小"
-        },
-        {
-          "type": "inline_richtext",
-          "id": "subheading",
-          "default": "探索我们精选的高级珠宝系列",
-          "label": "副标题"
-        },
-        {
-          "type": "header",
-          "content": "按钮设置"
-        },
-        {
-          "type": "text",
-          "id": "button_label",
-          "default": "立即探索",
-          "label": "按钮文字"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "链接"
-        },
-        {
-          "type": "checkbox",
-          "id": "button_style_secondary",
-          "label": "次要按钮样式",
-          "default": false
-        },
-        {
-          "type": "header",
-          "content": "布局设置"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_text_box",
-          "label": "显示文字框",
-          "default": true
-        },
-        {
-          "type": "select",
-          "id": "box_align",
-          "options": [
-            {
-              "value": "top-left",
-              "label": "左上"
-            },
-            {
-              "value": "top-center",
-              "label": "中上"
-            },
-            {
-              "value": "top-right",
-              "label": "右上"
-            },
-            {
-              "value": "middle-left",
-              "label": "左中"
-            },
-            {
-              "value": "middle-center",
-              "label": "中心"
-            },
-            {
-              "value": "middle-right",
-              "label": "右中"
-            },
-            {
-              "value": "bottom-left",
-              "label": "左下"
-            },
-            {
-              "value": "bottom-center",
-              "label": "中下"
-            },
-            {
-              "value": "bottom-right",
-              "label": "右下"
-            }
-          ],
-          "default": "middle-center",
-          "label": "文字框位置"
-        },
-        {
-          "type": "select",
-          "id": "text_alignment",
-          "options": [
-            {
-              "value": "left",
-              "label": "左对齐"
-            },
-            {
-              "value": "center",
-              "label": "居中"
-            },
-            {
-              "value": "right",
-              "label": "右对齐"
-            }
-          ],
-          "default": "center",
-          "label": "文字对齐"
-        },
-        {
-          "type": "select",
-          "id": "text_alignment_mobile",
-          "options": [
-            {
-              "value": "left",
-              "label": "左对齐"
-            },
-            {
-              "value": "center",
-              "label": "居中"
-            },
-            {
-              "value": "right",
-              "label": "右对齐"
-            }
-          ],
-          "default": "center",
-          "label": "移动端文字对齐"
-        },
-        {
-          "type": "color_scheme",
-          "id": "color_scheme",
-          "label": "配色方案",
-          "default": "scheme-1"
-        }
-      ]
     }
   ],
   "presets": [
     {
       "name": "珠宝轮播图",
-      "blocks": [
-        {
-          "type": "slide",
-          "settings": {
-            "heading": "钻石系列",
-            "subheading": "永恒之美的象征",
-            "button_label": "探索系列"
-          }
-        },
-        {
-          "type": "slide",
-          "settings": {
-            "heading": "珍珠系列",
-            "subheading": "优雅与纯洁的化身",
-            "button_label": "查看详情"
-          }
-        },
-        {
-          "type": "slide",
-          "settings": {
-            "heading": "彩宝系列",
-            "subheading": "绚丽色彩的艺术",
-            "button_label": "立即选购"
-          }
-        }
-      ]
+      "settings": {
+        "slide_height": "large",
+        "auto_rotate": true,
+        "change_slides_speed": 5
+      }
     }
   ]
 }
