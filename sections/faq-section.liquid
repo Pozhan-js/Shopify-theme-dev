@@ -1,0 +1,490 @@
+{% comment %} FAQ Section {% endcomment %}
+<div class="faq-section">
+  {% if section.settings.show_header %}
+  <div class="faq-header">
+    <h1>{{ section.settings.title | default: "常见问题" }}</h1>
+    <p>{{ section.settings.subtitle | default: "为您解答购物过程中的各种疑问" }}</p>
+  </div>
+  {% endif %}
+
+  {% if section.settings.show_categories %}
+  <div class="faq-categories">
+    <div class="category-nav">
+      <button class="category-btn active" data-category="all">{{ section.settings.all_text | default: "全部" }}</button>
+      {% for block in section.blocks %}
+        {% if block.type == 'category' %}
+          <button class="category-btn" data-category="{{ block.settings.handle }}">{{ block.settings.name }}</button>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="faq-content">
+    {% for block in section.blocks %}
+      {% if block.type == 'faq_item' %}
+        <div class="faq-item" data-category="{{ block.settings.category }}">
+          <div class="faq-question">
+            <h3>{{ block.settings.question }}</h3>
+            <span class="toggle-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            {{ block.settings.answer }}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  {% if section.settings.show_contact %}
+  <div class="faq-contact">
+    <h2>{{ section.settings.contact_title | default: "还有其他问题？" }}</h2>
+    <p>{{ section.settings.contact_subtitle | default: "如果以上问题未能解答您的疑问，请随时联系我们" }}</p>
+    <div class="contact-options">
+      {% if section.settings.contact_page != blank %}
+        <a href="{{ section.settings.contact_page }}" class="contact-btn">{{ section.settings.contact_btn_text | default: "联系客服" }}</a>
+      {% endif %}
+      {% if section.settings.phone != blank %}
+        <a href="tel:{{ section.settings.phone }}" class="contact-btn">{{ section.settings.phone_btn_text | default: "电话咨询" }}</a>
+      {% endif %}
+      {% if section.settings.email != blank %}
+        <a href="mailto:{{ section.settings.email }}" class="contact-btn">{{ section.settings.email_btn_text | default: "邮件咨询" }}</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.faq-section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.faq-header h1 {
+  font-size: 42px;
+  font-weight: 300;
+  color: #333;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.faq-header p {
+  font-size: 18px;
+  color: #666;
+}
+
+.faq-categories {
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.category-btn {
+  padding: 12px 24px;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.category-btn.active,
+.category-btn:hover {
+  background: #333;
+  color: #fff;
+  border-color: #333;
+}
+
+.faq-content {
+  margin-bottom: 60px;
+}
+
+.faq-item {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.faq-question {
+  padding: 25px 30px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.3s ease;
+}
+
+.faq-question:hover {
+  background: #f9f9f9;
+}
+
+.faq-question h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
+}
+
+.toggle-icon {
+  font-size: 24px;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.faq-item.active .toggle-icon {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  padding: 0 30px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.active .faq-answer {
+  padding: 0 30px 25px;
+  max-height: 1000px;
+}
+
+.faq-answer p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.faq-answer ul,
+.faq-answer ol {
+  margin-bottom: 15px;
+  padding-left: 20px;
+}
+
+.faq-answer li {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 8px;
+}
+
+.faq-answer strong {
+  color: #333;
+}
+
+.faq-contact {
+  text-align: center;
+  padding: 60px 40px;
+  background: #f9f9f9;
+  border-radius: 12px;
+}
+
+.faq-contact h2 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.faq-contact p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.contact-options {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.contact-btn {
+  display: inline-block;
+  background: #333;
+  color: #fff;
+  padding: 15px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.contact-btn:hover {
+  background: #555;
+}
+
+@media (max-width: 768px) {
+  .faq-section {
+    padding: 40px 15px;
+  }
+  
+  .faq-header h1 {
+    font-size: 32px;
+  }
+  
+  .category-nav {
+    gap: 10px;
+  }
+  
+  .category-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .faq-question {
+    padding: 20px;
+  }
+  
+  .faq-answer {
+    padding: 0 20px;
+  }
+  
+  .faq-item.active .faq-answer {
+    padding: 0 20px 20px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const categoryBtns = document.querySelectorAll('.category-btn');
+  const faqItems = document.querySelectorAll('.faq-item');
+  const questions = document.querySelectorAll('.faq-question');
+
+  // 分类筛选
+  categoryBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const category = btn.dataset.category;
+      
+      // 更新按钮状态
+      categoryBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // 显示/隐藏FAQ项目
+      faqItems.forEach(item => {
+        if (category === 'all' || item.dataset.category === category) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // 展开/收起FAQ
+  questions.forEach(question => {
+    question.addEventListener('click', () => {
+      const item = question.parentElement;
+      const isActive = item.classList.contains('active');
+      
+      // 关闭所有其他FAQ
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('active');
+      });
+      
+      // 切换当前FAQ
+      if (!isActive) {
+        item.classList.add('active');
+      }
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "FAQ Section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_header",
+      "label": "显示标题",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "主标题",
+      "default": "常见问题"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "副标题",
+      "default": "为您解答购物过程中的各种疑问"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_categories",
+      "label": "显示分类导航",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "all_text",
+      "label": "全部分类文字",
+      "default": "全部"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact",
+      "label": "显示联系区域",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "联系区域标题",
+      "default": "还有其他问题？"
+    },
+    {
+      "type": "text",
+      "id": "contact_subtitle",
+      "label": "联系区域副标题",
+      "default": "如果以上问题未能解答您的疑问，请随时联系我们"
+    },
+    {
+      "type": "url",
+      "id": "contact_page",
+      "label": "联系页面链接"
+    },
+    {
+      "type": "text",
+      "id": "contact_btn_text",
+      "label": "联系按钮文字",
+      "default": "联系客服"
+    },
+    {
+      "type": "text",
+      "id": "phone",
+      "label": "客服电话"
+    },
+    {
+      "type": "text",
+      "id": "phone_btn_text",
+      "label": "电话按钮文字",
+      "default": "电话咨询"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "客服邮箱"
+    },
+    {
+      "type": "text",
+      "id": "email_btn_text",
+      "label": "邮件按钮文字",
+      "default": "邮件咨询"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "分类",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "分类名称",
+          "default": "购物流程"
+        },
+        {
+          "type": "text",
+          "id": "handle",
+          "label": "分类标识符",
+          "default": "shopping"
+        }
+      ]
+    },
+    {
+      "type": "faq_item",
+      "name": "FAQ项目",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category",
+          "label": "所属分类",
+          "default": "shopping"
+        },
+        {
+          "type": "text",
+          "id": "question",
+          "label": "问题",
+          "default": "如何注册成为会员？"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "回答",
+          "default": "<p>注册成为会员非常简单：</p><ol><li>点击网站右上角的\"注册\"按钮</li><li>填写您的邮箱地址和设置密码</li><li>完善个人信息</li><li>验证邮箱后即可完成注册</li></ol>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Section",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "name": "购物流程",
+            "handle": "shopping"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "name": "支付方式",
+            "handle": "payment"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "name": "配送服务",
+            "handle": "shipping"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "name": "退换货",
+            "handle": "returns"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "category": "shopping",
+            "question": "如何注册成为会员？",
+            "answer": "<p>注册成为会员非常简单：</p><ol><li>点击网站右上角的\"注册\"按钮</li><li>填写您的邮箱地址和设置密码</li><li>完善个人信息（姓名、电话、地址等）</li><li>验证邮箱后即可完成注册</li></ol><p>注册会员后可享受积分累积、生日优惠、专属折扣等特权。</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "category": "payment",
+            "question": "支持哪些支付方式？",
+            "answer": "<p>我们支持多种支付方式：</p><ul><li><strong>信用卡：</strong>Visa、MasterCard、JCB、American Express</li><li><strong>电子支付：</strong>PayPay、LINE Pay、Rakuten Pay</li><li><strong>银行转账：</strong>支持日本各大银行</li><li><strong>货到付款：</strong>部分商品支持</li></ul><p>所有支付方式均采用SSL加密技术，确保您的支付安全。</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
