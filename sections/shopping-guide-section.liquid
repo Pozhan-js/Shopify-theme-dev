@@ -1,0 +1,506 @@
+<div class="shopping-guide-section">
+  <div class="guide-hero">
+    <div class="guide-hero-content">
+      <h1 class="guide-title">{{ section.settings.title }}</h1>
+      <p class="guide-subtitle">{{ section.settings.subtitle }}</p>
+    </div>
+  </div>
+
+  <div class="guide-container">
+    <!-- 購入ガイドセクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.purchase_title | default: "ご購入ガイド" }}</h2>
+      <div class="guide-grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'step' %}
+            <div class="guide-card">
+              <div class="guide-icon">{{ block.settings.icon }}</div>
+              <h3>{{ block.settings.title }}</h3>
+              <p>{{ block.settings.description }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 支払い方法セクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.payment_title | default: "お支払い方法" }}</h2>
+      <div class="payment-methods">
+        {% for block in section.blocks %}
+          {% if block.type == 'payment' %}
+            <div class="payment-card">
+              <h4>{{ block.settings.title }}</h4>
+              <p>{{ block.settings.description }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 配送・送料セクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.shipping_title | default: "配送・送料について" }}</h2>
+      <div class="shipping-info">
+        {% for block in section.blocks %}
+          {% if block.type == 'shipping' %}
+            <div class="info-card">
+              <h4>{{ block.settings.title }}</h4>
+              <ul>
+                {% for item in block.settings.items %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- 返品・交換セクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.return_title | default: "返品・交換について" }}</h2>
+      <div class="return-info">
+        {% for block in section.blocks %}
+          {% if block.type == 'return' %}
+            <div class="return-card">
+              <h4>{{ block.settings.title }}</h4>
+              <p>{{ block.settings.description }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- アフターサービスセクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.service_title | default: "アフターサービス" }}</h2>
+      <div class="service-grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'service' %}
+            <div class="service-card">
+              <h4>{{ block.settings.title }}</h4>
+              <p>{{ block.settings.description }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- お問い合わせセクション -->
+    <section class="guide-section">
+      <h2 class="section-title">{{ section.settings.contact_title | default: "お問い合わせ" }}</h2>
+      <div class="contact-info">
+        {% for block in section.blocks %}
+          {% if block.type == 'contact' %}
+            <div class="contact-card">
+              <h4>{{ block.settings.title }}</h4>
+              <p>{{ block.settings.description | newline_to_br }}</p>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+.shopping-guide-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.guide-hero {
+  background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+  padding: 80px 0;
+  text-align: center;
+  margin-bottom: 60px;
+  border-radius: 8px;
+}
+
+.guide-title {
+  font-size: 42px;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.guide-subtitle {
+  font-size: 18px;
+  color: #666;
+  font-weight: 300;
+}
+
+.guide-container {
+  padding: 0 20px;
+}
+
+.guide-section {
+  margin-bottom: 60px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 300;
+  color: #1a1a1a;
+  margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: #1a1a1a;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.guide-card {
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.guide-card:hover {
+  transform: translateY(-5px);
+}
+
+.guide-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.guide-card h3 {
+  font-size: 20px;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+}
+
+.guide-card p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.payment-methods,
+.shipping-info,
+.return-info,
+.service-grid,
+.contact-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.payment-card,
+.info-card,
+.return-card,
+.service-card,
+.contact-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.payment-card h4,
+.info-card h4,
+.return-card h4,
+.service-card h4,
+.contact-card h4 {
+  font-size: 18px;
+  font-weight: 400;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+}
+
+.info-card ul,
+.return-card p,
+.service-card p,
+.contact-card p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.8;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-card li {
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.info-card li:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .guide-title {
+    font-size: 32px;
+  }
+  
+  .guide-grid,
+  .payment-methods,
+  .shipping-info,
+  .return-info,
+  .service-grid,
+  .contact-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .guide-card {
+    padding: 30px 20px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Shopping Guide Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "メインタイトル",
+      "default": "ショッピングガイド"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "サブタイトル",
+      "default": "安心してお買い物いただくためのご案内"
+    },
+    {
+      "type": "text",
+      "id": "purchase_title",
+      "label": "購入ガイドタイトル",
+      "default": "ご購入ガイド"
+    },
+    {
+      "type": "text",
+      "id": "payment_title",
+      "label": "支払い方法タイトル",
+      "default": "お支払い方法"
+    },
+    {
+      "type": "text",
+      "id": "shipping_title",
+      "label": "配送タイトル",
+      "default": "配送・送料について"
+    },
+    {
+      "type": "text",
+      "id": "return_title",
+      "label": "返品タイトル",
+      "default": "返品・交換について"
+    },
+    {
+      "type": "text",
+      "id": "service_title",
+      "label": "サービスタイトル",
+      "default": "アフターサービス"
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "お問い合わせタイトル",
+      "default": "お問い合わせ"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "購入ステップ",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "アイコン",
+          "default": "🛍️"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "ステップタイトル",
+          "default": "お選びいただく"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "説明文",
+          "default": "カテゴリーやコレクションからお好みの商品をお選びください。"
+        }
+      ]
+    },
+    {
+      "type": "payment",
+      "name": "支払い方法",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "支払い方法名",
+          "default": "クレジットカード"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "説明文",
+          "default": "VISA、MasterCard、JCB、American Express"
+        }
+      ]
+    },
+    {
+      "type": "shipping",
+      "name": "配送情報",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "配送項目名",
+          "default": "送料"
+        },
+        {
+          "type": "list",
+          "id": "items",
+          "label": "項目リスト",
+          "default": ["全国一律：無料", "沖縄・離島：別途費用"]
+        }
+      ]
+    },
+    {
+      "type": "return",
+      "name": "返品情報",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "返品項目名",
+          "default": "返品期限"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "説明文",
+          "default": "商品到着後7日以内にご連絡ください"
+        }
+      ]
+    },
+    {
+      "type": "service",
+      "name": "サービス情報",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "サービス名",
+          "default": "修理・メンテナンス"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "説明文",
+          "default": "ジュエリーの修理、サイズ直し、クリーニングなどを承っております。"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "name": "お問い合わせ",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "連絡方法",
+          "default": "お電話でのお問い合わせ"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "連絡先情報",
+          "default": "03-1234-5678\n営業時間：10:00-19:00（定休日：水曜日）"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shopping Guide Section",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "icon": "🛍️",
+            "title": "お選びいただく",
+            "description": "カテゴリーやコレクションからお好みの商品をお選びください。各商品ページに詳細な情報を掲載しております。"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "📞",
+            "title": "お問い合わせ",
+            "description": "ご不明な点がございましたら、お気軽にお問い合わせください。専門スタッフが丁寧にご対応いたします。"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "✅",
+            "title": "ご注文確定",
+            "description": "商品の詳細をご確認いただき、ご注文を確定してください。在庫状況をお知らせいたします。"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon": "🚚",
+            "title": "お届け",
+            "description": "丁寧な梱包で、安全にお届けいたします。配送状況は随時ご案内いたします。"
+          }
+        },
+        {
+          "type": "payment",
+          "settings": {
+            "title": "クレジットカード",
+            "description": "VISA、MasterCard、JCB、American Express"
+          }
+        },
+        {
+          "type": "payment",
+          "settings": {
+            "title": "銀行振込",
+            "description": "各金融機関からのお振込み"
+          }
+        },
+        {
+          "type": "payment",
+          "settings": {
+            "title": "代金引換",
+            "description": "商品お届け時に現金でお支払い"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
