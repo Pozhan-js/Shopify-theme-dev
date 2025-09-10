@@ -1,0 +1,575 @@
+<!-- 面包甜点产品展示section - 带TAB切换功能 -->
+<div class="bakery-products-container">
+    <div class="bakery-products-wrapper">
+        <h2 class="section-title">精选面包甜点</h2>
+        
+        <!-- TAB导航栏 -->
+        <div class="tab-navigation">
+            <button type="button" class="tab-btn active" data-tab="all">全部商品</button>
+            <button type="button" class="tab-btn" data-tab="bread">面包</button>
+            <button type="button" class="tab-btn" data-tab="cake">蛋糕</button>
+            <button type="button" class="tab-btn" data-tab="dessert">甜点</button>
+            <button type="button" class="tab-btn" data-tab="drink">饮品</button>
+        </div>
+        
+        <!-- 商品列表容器 -->
+        <div class="tab-content">
+            <!-- 全部商品 -->
+            <div class="tab-pane active" id="tab-all">
+                <div class="products-grid">
+                    {%- assign all_products = collections.all.products -%}
+                    {%- if all_products and all_products.size > 0 -%}
+                        {%- for product in all_products limit: 6 -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        {%- if product.featured_image -%}
+                                            <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                                 alt="{{ product.title }}" 
+                                                 class="product-image"
+                                                 loading="lazy">
+                                        {%- else -%}
+                                            <div class="placeholder-image">
+                                                <span>暂无图片</span>
+                                            </div>
+                                        {%- endif -%}
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title | default: '商品名称' }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            加入购物车
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <h3>暂无产品展示</h3>
+                            <p>请检查以下设置：</p>
+                            <ul>
+                                <li>确保后台已添加产品</li>
+                                <li>产品状态为"活跃"</li>
+                                <li>产品已发布到在线商店</li>
+                                <li>产品有库存</li>
+                            </ul>
+                            <a href="/admin/products" class="admin-link">前往后台添加产品</a>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+            
+            <!-- 面包 -->
+            <div class="tab-pane" id="tab-bread">
+                <div class="products-grid">
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign bread_products = all_products | where: 'type', '面包' | limit: 6 -%}
+                    {%- if bread_products and bread_products.size > 0 -%}
+                        {%- for product in bread_products -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        {%- if product.featured_image -%}
+                                            <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                                 alt="{{ product.title }}" 
+                                                 class="product-image"
+                                                 loading="lazy">
+                                        {%- else -%}
+                                            <div class="placeholder-image">
+                                                <span>暂无图片</span>
+                                            </div>
+                                        {%- endif -%}
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title | default: '面包名称' }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            加入购物车
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <h3>暂无面包商品</h3>
+                            <p>请检查以下设置：</p>
+                            <ul>
+                                <li>确保后台已添加面包类产品</li>
+                                <li>产品类型设置为"面包"</li>
+                                <li>产品状态为"活跃"</li>
+                            </ul>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+            
+            <!-- 蛋糕 -->
+            <div class="tab-pane" id="tab-cake">
+                <div class="products-grid">
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign cake_products = all_products | where: 'type', '蛋糕' | limit: 6 -%}
+                    {%- if cake_products and cake_products.size > 0 -%}
+                        {%- for product in cake_products -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        {%- if product.featured_image -%}
+                                            <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                                 alt="{{ product.title }}" 
+                                                 class="product-image"
+                                                 loading="lazy">
+                                        {%- else -%}
+                                            <div class="placeholder-image">
+                                                <span>暂无图片</span>
+                                            </div>
+                                        {%- endif -%}
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title | default: '蛋糕名称' }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            加入购物车
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <h3>暂无蛋糕商品</h3>
+                            <p>请检查以下设置：</p>
+                            <ul>
+                                <li>确保后台已添加蛋糕类产品</li>
+                                <li>产品类型设置为"蛋糕"</li>
+                                <li>产品状态为"活跃"</li>
+                            </ul>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+            
+            <!-- 甜点 -->
+            <div class="tab-pane" id="tab-dessert">
+                <div class="products-grid">
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign dessert_products = all_products | where: 'type', '甜点' | limit: 6 -%}
+                    {%- if dessert_products and dessert_products.size > 0 -%}
+                        {%- for product in dessert_products -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        {%- if product.featured_image -%}
+                                            <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                                 alt="{{ product.title }}" 
+                                                 class="product-image"
+                                                 loading="lazy">
+                                        {%- else -%}
+                                            <div class="placeholder-image">
+                                                <span>暂无图片</span>
+                                            </div>
+                                        {%- endif -%}
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title | default: '甜点名称' }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            加入购物车
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <h3>暂无甜点商品</h3>
+                            <p>请检查以下设置：</p>
+                            <ul>
+                                <li>确保后台已添加甜点类产品</li>
+                                <li>产品类型设置为"甜点"</li>
+                                <li>产品状态为"活跃"</li>
+                            </ul>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+            
+            <!-- 饮品 -->
+            <div class="tab-pane" id="tab-drink">
+                <div class="products-grid">
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign drink_products = all_products | where: 'type', '饮品' | limit: 6 -%}
+                    {%- if drink_products and drink_products.size > 0 -%}
+                        {%- for product in drink_products -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        {%- if product.featured_image -%}
+                                            <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                                 alt="{{ product.title }}" 
+                                                 class="product-image"
+                                                 loading="lazy">
+                                        {%- else -%}
+                                            <div class="placeholder-image">
+                                                <span>暂无图片</span>
+                                            </div>
+                                        {%- endif -%}
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title | default: '饮品名称' }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            加入购物车
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <h3>暂无饮品商品</h3>
+                            <p>请检查以下设置：</p>
+                            <ul>
+                                <li>确保后台已添加饮品类产品</li>
+                                <li>产品类型设置为"饮品"</li>
+                                <li>产品状态为"活跃"</li>
+                            </ul>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bakery-products-container {
+    padding: 60px 0;
+    background-color: #fafafa;
+}
+
+.bakery-products-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 40px;
+}
+
+.tab-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    border: 2px solid #ddd;
+    background: white;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.tab-btn.active {
+    background: #ff6b6b;
+    border-color: #ff6b6b;
+    color: white;
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.product-image-container {
+    position: relative;
+    padding-bottom: 100%;
+    overflow: hidden;
+}
+
+.product-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    color: #999;
+    font-size: 14px;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.product-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.product-title a:hover {
+    color: #ff6b6b;
+}
+
+.product-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 14px;
+}
+
+.current-price {
+    font-size: 20px;
+    font-weight: 600;
+    color: #ff6b6b;
+}
+
+.add-to-cart-form {
+    margin-top: 15px;
+}
+
+.add-to-cart-btn {
+    width: 100%;
+    padding: 12px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+    background: #ff5252;
+}
+
+.no-products-message {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.no-products-message h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.no-products-message ul {
+    text-align: left;
+    max-width: 400px;
+    margin: 0 auto 20px;
+}
+
+.no-products-message li {
+    margin-bottom: 8px;
+}
+
+.admin-link {
+    color: #ff6b6b;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .tab-navigation {
+        gap: 10px;
+    }
+    
+    .tab-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+            
+            // 移除所有活动状态
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+            
+            // 添加活动状态到当前标签
+            this.classList.add('active');
+            document.getElementById(`tab-${targetTab}`).classList.add('active');
+        });
+    });
+});
+</script>

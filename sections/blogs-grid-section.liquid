@@ -1,0 +1,446 @@
+<!-- Blogs Grid Section - 可后台编辑的博客展示 -->
+<div class="blogs-grid-section">
+    <div class="section-container">
+        {% if section.settings.show_title %}
+            <div class="section-header">
+                <h2 class="section-title" style="color: {{ section.settings.title_color }};">
+                    {{ section.settings.title | default: '烘焙博客' }}
+                </h2>
+                {% if section.settings.subtitle != blank %}
+                    <p class="section-subtitle">{{ section.settings.subtitle }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% assign blog_handle = section.settings.blog | default: 'news' %}
+        {% assign target_blog = blogs[blog_handle] %}
+
+        {% if target_blog and target_blog.articles.size > 0 %}
+            <div class="articles-grid">
+                {% for article in target_blog.articles limit: section.settings.articles_per_page %}
+                    <article class="article-card">
+                        {% if article.image %}
+                            <div class="article-image">
+                                <a href="{{ article.url }}">
+                                    <img src="{{ article.image | image_url: width: 300, height: 200, crop: 'center' }}" 
+                                         alt="{{ article.title }}" 
+                                         loading="lazy">
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="article-image placeholder">
+                                <span>📝</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="article-content">
+                            {% if section.settings.show_date or section.settings.show_tags %}
+                                <div class="article-meta">
+                                    {% if section.settings.show_date %}
+                                        <time class="article-date">{{ article.published_at | date: "%Y年%m月%d日" }}</time>
+                                    {% endif %}
+                                    {% if section.settings.show_tags and article.tags.size > 0 %}
+                                        <div class="article-tags">
+                                            {% for tag in article.tags limit: 2 %}
+                                                <span class="tag">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                            
+                            <h3 class="article-title">
+                                <a href="{{ article.url }}">{{ article.title }}</a>
+                            </h3>
+                            
+                            {% if section.settings.show_excerpt %}
+                                <p class="article-excerpt">
+                                    {{ article.excerpt | strip_html | truncate: section.settings.excerpt_length }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if section.settings.show_read_more %}
+                                <a href="{{ article.url }}" class="read-more">
+                                    {{ section.settings.read_more_text | default: '阅读全文 →' }}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+            
+            {% if section.settings.show_view_more and target_blog.articles.size > section.settings.articles_per_page %}
+                <div class="view-more">
+                    <a href="{{ target_blog.url }}" class="view-more-btn">
+                        {{ section.settings.view_more_text | default: '查看更多文章' }}
+                    </a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h3>{{ section.settings.empty_title | default: '暂无博客文章' }}</h3>
+                <p>{{ section.settings.empty_message | default: '我们正在准备精彩的烘焙内容，敬请期待！' }}</p>
+                {% if section.settings.show_empty_button %}
+                    <a href="{{ section.settings.empty_button_link | default: '/' }}" class="back-home-btn">
+                        {{ section.settings.empty_button_text | default: '返回首页' }}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .blogs-grid-section {
+        padding: 40px 20px;
+    }
+
+    .section-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .section-title {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+        font-size: 16px;
+        color: #666;
+    }
+
+    .articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+    }
+
+    .article-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .article-image {
+        position: relative;
+        padding-bottom: 66.67%;
+        overflow: hidden;
+    }
+
+    .article-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .article-card:hover .article-image img {
+        transform: scale(1.05);
+    }
+
+    .article-image.placeholder {
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #D8A26C;
+        font-size: 24px;
+    }
+
+    .article-content {
+        padding: 20px;
+    }
+
+    .article-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
+
+    .article-date {
+        color: #D8A26C;
+    }
+
+    .article-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        background: #f0f0f0;
+        color: #666;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+
+    .article-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .article-title a {
+        color: #333;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .article-title a:hover {
+        color: #D8A26C;
+    }
+
+    .article-excerpt {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+
+    .read-more {
+        color: #D8A26C;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .read-more:hover {
+        color: #c6925a;
+    }
+
+    .view-more {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .view-more-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: #D8A26C;
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .view-more-btn:hover {
+        background: #c6925a;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 16px;
+    }
+
+    .back-home-btn {
+        display: inline-block;
+        padding: 10px 24px;
+        background: #D8A26C;
+        color: white;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+
+    .back-home-btn:hover {
+        background: #c6925a;
+    }
+
+    @media (max-width: 768px) {
+        .blogs-grid-section {
+            padding: 30px 15px;
+        }
+
+        .section-title {
+            font-size: 28px;
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+        }
+
+        .articles-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .article-content {
+            padding: 15px;
+        }
+
+        .article-title {
+            font-size: 16px;
+        }
+    }
+</style>
+
+{% schema %}
+{
+  "name": "博客网格展示",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "烘焙博客"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "副标题"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#D8A26C"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "选择博客"
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "label": "每页显示文章数量",
+      "min": 3,
+      "max": 24,
+      "step": 3,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "显示标题",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "显示发布日期",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "显示标签",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "显示摘要",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "excerpt_length",
+      "label": "摘要长度",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "default": 120
+    },
+    {
+      "type": "checkbox",
+      "id": "show_read_more",
+      "label": "显示阅读更多按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "read_more_text",
+      "label": "阅读更多按钮文字",
+      "default": "阅读全文 →"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_more",
+      "label": "显示查看更多按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_more_text",
+      "label": "查看更多按钮文字",
+      "default": "查看更多文章"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_button",
+      "label": "显示空状态按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "empty_title",
+      "label": "空状态标题",
+      "default": "暂无博客文章"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "空状态消息",
+      "default": "我们正在准备精彩的烘焙内容，敬请期待！"
+    },
+    {
+      "type": "text",
+      "id": "empty_button_text",
+      "label": "空状态按钮文字",
+      "default": "返回首页"
+    },
+    {
+      "type": "url",
+      "id": "empty_button_link",
+      "label": "空状态按钮链接",
+      "default": "/"
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客网格展示",
+      "category": "博客"
+    }
+  ]
+}
+{% endschema %}
