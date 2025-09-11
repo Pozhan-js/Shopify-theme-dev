@@ -1,28 +1,31 @@
-<!-- 戒指展示模块 - 左侧模特图 + 右侧商品列表（单滚动条版） -->
+<!-- 戒指展示模块 - 后台可编辑版 -->
 <div class="rings-showcase-container">
     <div class="rings-showcase-wrapper">
         <!-- 左侧模特图 -->
         <div class="model-image-section">
-            <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&h=1200&fit=crop" 
-                 alt="戒指模特展示" 
-                 class="model-image"
-                 loading="lazy">
+            {% if section.settings.model_image %}
+                <img src="{{ section.settings.model_image | image_url: width: 800, height: 1200, crop: 'center' }}" 
+                     alt="{{ section.settings.model_image_alt | default: '戒指模特展示' }}" 
+                     class="model-image"
+                     loading="lazy">
+            {% else %}
+                <div class="model-placeholder" style="background: {{ section.settings.placeholder_color }};"></div>
+            {% endif %}
         </div>
         
         <!-- 右侧商品列表 -->
         <div class="products-section">
             <div class="products-container">
-                <h2 class="section-title">戒指系列</h2>
+                <h2 class="section-title" style="color: {{ section.settings.title_color }}; font-size: {{ section.settings.title_size }}px;">
+                    {{ section.settings.section_title | default: '戒指系列' }}
+                </h2>
                 
                 <div class="products-grid">
-                    {%- assign all_products = collections.all.products -%}
-                    {%- assign product_count = all_products.size -%}
+                    {%- assign rings_products = collections[section.settings.collection_handle].products -%}
+                    {%- assign product_count = rings_products.size -%}
                     
                     {%- if product_count > 0 -%}
-                        {%- for i in (1..12) -%}
-                            {%- assign product_index = forloop.index0 | modulo: product_count -%}
-                            {%- assign product = all_products[product_index] -%}
-                            
+                        {%- for product in rings_products limit: section.settings.max_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -59,14 +62,16 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>暂无商品，请在后台添加产品</p>
+                            <p>{{ section.settings.empty_message | default: '暂无商品，请在后台添加产品' }}</p>
                         </div>
                     {%- endif -%}
                 </div>
                 
-                {%- if all_products.size > 0 -%}
+                {%- if rings_products.size > section.settings.max_products -%}
                     <div class="view-more-container">
-                        <a href="/collections/all" class="view-more-btn">查看更多商品</a>
+                        <a href="{{ collections[section.settings.collection_handle].url }}" class="view-more-btn">
+                            {{ section.settings.view_more_text | default: '查看更多商品' }}
+                        </a>
                     </div>
                 {%- endif -%}
             </div>
@@ -77,7 +82,7 @@
 <style>
     .rings-showcase-container {
         width: 100%;
-        margin: 60px 0 0 0;
+        margin: {{ section.settings.top_margin }}px 0 {{ section.settings.bottom_margin }}px 0;
         padding: 0;
     }
 
@@ -96,17 +101,21 @@
         overflow: hidden;
     }
 
-    .model-image {
+    .model-image, .model-placeholder {
         width: 100%;
         height: 100%;
         object-fit: cover;
         object-position: center;
     }
 
+    .model-placeholder {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
     /* 右侧商品列表 */
     .products-section {
         flex: 1;
-        background: #fff;
+        background: {{ section.settings.background_color }};
     }
 
     .products-container {
@@ -116,12 +125,11 @@
     }
 
     .section-title {
-        font-size: 32px;
         font-weight: 300;
-        color: #333;
         margin-bottom: 40px;
         text-align: center;
         letter-spacing: 2px;
+        line-height: 1.2;
     }
 
     .products-grid {
@@ -213,11 +221,11 @@
     }
 
     .add-to-cart-btn {
-        background: #F5F5F5;
-        color: #333;
-        border: 1px solid #ddd;
+        background: {{ section.settings.button_bg_color }};
+        color: {{ section.settings.button_text_color }};
+        border: 1px solid {{ section.settings.button_border_color }};
         padding: 8px 16px;
-        border-radius: 4px;
+        border-radius: {{ section.settings.button_border_radius }}px;
         font-size: 12px;
         cursor: pointer;
         display: flex;
@@ -229,7 +237,7 @@
     }
 
     .add-to-cart-btn:hover {
-        background: #e0e0e0;
+        background: {{ section.settings.button_hover_color }};
     }
 
     .add-to-cart-btn svg {
@@ -244,17 +252,17 @@
 
     .view-more-btn {
         display: inline-block;
-        background: #333;
-        color: #fff;
+        background: {{ section.settings.view_more_bg_color }};
+        color: {{ section.settings.view_more_text_color }};
         padding: 12px 30px;
-        border-radius: 25px;
+        border-radius: {{ section.settings.view_more_border_radius }}px;
         text-decoration: none;
         font-size: 14px;
         transition: background 0.3s ease;
     }
 
     .view-more-btn:hover {
-        background: #555;
+        background: {{ section.settings.view_more_hover_color }};
     }
 
     .no-products-message {
@@ -333,3 +341,188 @@
         }
     }
 </style>
+
+{% schema %}
+{
+  "name": "戒指展示模块",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "model_image",
+      "label": "模特图片"
+    },
+    {
+      "type": "text",
+      "id": "model_image_alt",
+      "label": "模特图片alt文字",
+      "default": "戒指模特展示"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "区块标题",
+      "default": "戒指系列"
+    },
+    {
+      "type": "select",
+      "id": "title_size",
+      "options": [
+        {
+          "value": "28",
+          "label": "小"
+        },
+        {
+          "value": "32",
+          "label": "中"
+        },
+        {
+          "value": "36",
+          "label": "大"
+        }
+      ],
+      "default": "32",
+      "label": "标题大小"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "text",
+      "id": "collection_handle",
+      "label": "产品分类handle",
+      "default": "rings"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "label": "显示产品数量",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "占位背景颜色",
+      "default": "#667eea"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "按钮背景颜色",
+      "default": "#F5F5F5"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "按钮文字颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "按钮边框颜色",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "按钮悬停颜色",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "按钮圆角",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "view_more_bg_color",
+      "label": "查看更多按钮背景颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "view_more_text_color",
+      "label": "查看更多按钮文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "view_more_hover_color",
+      "label": "查看更多按钮悬停颜色",
+      "default": "#555555"
+    },
+    {
+      "type": "range",
+      "id": "view_more_border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "查看更多按钮圆角",
+      "default": "25"
+    },
+    {
+      "type": "text",
+      "id": "view_more_text",
+      "label": "查看更多按钮文字",
+      "default": "查看更多商品"
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "空列表提示文字",
+      "default": "暂无商品，请在后台添加产品"
+    },
+    {
+      "type": "range",
+      "id": "top_margin",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "上边距",
+      "default": "60"
+    },
+    {
+      "type": "range",
+      "id": "bottom_margin",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "下边距",
+      "default": "0"
+    }
+  ],
+  "presets": [
+    {
+      "name": "戒指展示模块",
+      "settings": {
+        "section_title": "戒指系列",
+        "collection_handle": "rings",
+        "max_products": 12,
+        "view_more_text": "查看更多商品"
+      }
+    }
+  ]
+}
+{% endschema %}
