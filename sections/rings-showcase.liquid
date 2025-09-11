@@ -21,7 +21,8 @@
                 </h2>
                 
                 <div class="products-grid">
-                    {%- assign rings_products = collections[section.settings.collection_handle].products -%}
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign rings_products = all_products | where: 'type', section.settings.product_type | default: '戒指' -%}
                     {%- assign product_count = rings_products.size -%}
                     
                     {%- if product_count > 0 -%}
@@ -69,7 +70,7 @@
                 
                 {%- if rings_products.size > section.settings.max_products -%}
                     <div class="view-more-container">
-                        <a href="{{ collections[section.settings.collection_handle].url }}" class="view-more-btn">
+                        <a href="/collections/all?filter.p.product.type=戒指" class="view-more-btn">
                             {{ section.settings.view_more_text | default: '查看更多商品' }}
                         </a>
                     </div>
@@ -238,3 +239,217 @@
 
     .add-to-cart-btn:hover {
         background: {{ section.settings.button_hover_color }};
+        border-color: {{ section.settings.button_hover_color }};
+        transform: translateY(-1px);
+    }
+
+    .no-products-message {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+    .view-more-container {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .view-more-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: transparent;
+        color: #333;
+        text-decoration: none;
+        border: 1px solid #333;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+
+    .view-more-btn:hover {
+        background: #333;
+        color: white;
+    }
+
+    /* 响应式设计 */
+    @media screen and (max-width: 1024px) {
+        .rings-showcase-wrapper {
+            flex-direction: column;
+        }
+
+        .model-image-section {
+            position: relative;
+            height: 50vh;
+            flex: none;
+        }
+
+        .products-section {
+            flex: none;
+        }
+
+        .products-container {
+            padding: 40px 20px;
+        }
+    }
+
+    @media screen and (max-width: 749px) {
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .product-image-container {
+            height: 150px;
+        }
+
+        .section-title {
+            font-size: 24px;
+        }
+    }
+</style>
+
+{% schema %}
+{
+  "name": "戒指展示模块",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "模块标题",
+      "default": "戒指系列"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "标题大小",
+      "default": 36
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "color",
+      "id": "placeholder_color",
+      "label": "占位背景颜色",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "image_picker",
+      "id": "model_image",
+      "label": "模特图片"
+    },
+    {
+      "type": "text",
+      "id": "model_image_alt",
+      "label": "模特图片alt文本",
+      "default": "戒指模特展示"
+    },
+    {
+      "type": "text",
+      "id": "product_type",
+      "label": "产品类型",
+      "default": "戒指",
+      "info": "请输入要显示的产品类型，例如：戒指"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "label": "最大显示产品数",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "按钮背景颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "按钮文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "按钮边框颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "按钮悬停颜色",
+      "default": "#555555"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "label": "按钮圆角",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "top_margin",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "上边距",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "bottom_margin",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "下边距",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "empty_message",
+      "label": "空集合提示文字",
+      "default": "暂无商品，请在后台添加产品"
+    },
+    {
+      "type": "text",
+      "id": "view_more_text",
+      "label": "查看更多按钮文字",
+      "default": "查看更多商品"
+    }
+  ],
+  "presets": [
+    {
+      "name": "戒指展示模块",
+      "settings": {
+        "section_title": "戒指系列",
+        "product_type": "戒指",
+        "max_products": 8
+      }
+    }
+  ]
+}
+{% endschema %}

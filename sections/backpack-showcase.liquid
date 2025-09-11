@@ -9,7 +9,8 @@
                 </h2>
                 
                 <div class="products-grid">
-                    {%- assign backpack_products = collections[section.settings.collection_handle].products -%}
+                    {%- assign all_products = collections.all.products -%}
+                    {%- assign backpack_products = all_products | where: 'type', section.settings.product_type | default: '背包' -%}
                     {%- assign product_count = backpack_products.size -%}
                     
                     {%- if product_count > 0 -%}
@@ -57,7 +58,7 @@
                 
                 {%- if backpack_products.size > section.settings.max_products -%}
                     <div class="view-more-container">
-                        <a href="{{ collections[section.settings.collection_handle].url }}" class="view-more-btn">
+                        <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | default: '背包' | url_encode }}" class="view-more-btn">
                             {{ section.settings.view_more_text | default: '查看更多商品' }}
                         </a>
                     </div>
@@ -217,11 +218,15 @@
 
     .add-to-cart-btn:hover {
         background: {{ section.settings.button_hover_color }};
+        border-color: {{ section.settings.button_hover_color }};
+        transform: translateY(-1px);
     }
 
-    .add-to-cart-btn svg {
-        width: 14px;
-        height: 14px;
+    .no-products-message {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        grid-column: 1 / -1;
     }
 
     .view-more-container {
@@ -231,9 +236,9 @@
 
     .view-more-btn {
         display: inline-block;
+        padding: 12px 30px;
         background: {{ section.settings.view_more_bg_color }};
         color: {{ section.settings.view_more_text_color }};
-        padding: 12px 30px;
         border-radius: {{ section.settings.view_more_border_radius }}px;
         text-decoration: none;
         font-size: 14px;
@@ -242,13 +247,6 @@
 
     .view-more-btn:hover {
         background: {{ section.settings.view_more_hover_color }};
-    }
-
-    .no-products-message {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-        grid-column: 1 / -1;
     }
 
     /* 右侧模特图 */
@@ -392,9 +390,10 @@
     },
     {
       "type": "text",
-      "id": "collection_handle",
-      "label": "产品分类handle",
-      "default": "backpacks"
+      "id": "product_type",
+      "label": "产品类型",
+      "default": "背包",
+      "info": "请输入要显示的产品类型，例如：背包"
     },
     {
       "type": "range",
@@ -517,7 +516,7 @@
       "name": "背包展示模块",
       "settings": {
         "section_title": "背包系列",
-        "collection_handle": "backpacks",
+        "product_type": "背包",
         "max_products": 12,
         "view_more_text": "查看更多商品"
       }
