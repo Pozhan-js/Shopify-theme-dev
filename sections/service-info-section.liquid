@@ -1,0 +1,206 @@
+{% comment %}
+  Service Info Section - 物流、服务时间、食品质量信息展示
+  样式：左侧灰色圆形小图标，右侧上下文字描述，横排展示
+{% endcomment %}
+
+<div class="service-info-section">
+  <div class="page-width">
+    <div class="service-grid">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'service_item' %}
+            <div class="service-item" {{ block.shopify_attributes }}>
+              <div class="service-icon-circle">
+                {% if block.settings.icon_image != blank %}
+                  <img src="{{ block.settings.icon_image | image_url: width: 40 }}" 
+                       alt="{{ block.settings.title | escape }}" 
+                       class="service-icon"
+                       loading="lazy">
+                {% else %}
+                  <div class="service-icon-placeholder">
+                    <span>{{ block.settings.title | first | upcase }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="service-content">
+                <h3 class="service-title">{{ block.settings.title | escape }}</h3>
+                <p class="service-description">{{ block.settings.description | escape }}</p>
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+.service-info-section {
+  padding: 60px 0;
+  background-color: {{ section.settings.background_color }};
+}
+
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px 30px;
+  align-items: flex-start;
+}
+
+.service-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.service-icon-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.service-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.service-icon-placeholder {
+  font-size: 16px;
+  font-weight: bold;
+  color: #666;
+}
+
+.service-content {
+  flex: 1;
+}
+
+.service-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: {{ section.settings.title_color }};
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.service-description {
+  font-size: 14px;
+  color: {{ section.settings.description_color }};
+  margin: 0;
+  line-height: 1.4;
+}
+
+@media screen and (max-width: 768px) {
+  .service-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .service-item {
+    gap: 12px;
+  }
+  
+  .service-icon-circle {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .service-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .service-title {
+    font-size: 16px;
+  }
+  
+  .service-description {
+    font-size: 13px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Service Info Section",
+  "tag": "section",
+  "class": "service-info-section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "描述文字颜色",
+      "default": "#666666"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "service_item",
+      "name": "服务信息",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "图标"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "快速配送"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "描述",
+          "default": "24小时内发货，全国配送"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Service Info Section",
+      "blocks": [
+        {
+          "type": "service_item",
+          "settings": {
+            "title": "快速配送",
+            "description": "24小时内发货，全国配送"
+          }
+        },
+        {
+          "type": "service_item",
+          "settings": {
+            "title": "服务时间",
+            "description": "周一至周日 9:00-21:00"
+          }
+        },
+        {
+          "type": "service_item",
+          "settings": {
+            "title": "食品质量",
+            "description": "新鲜食材，严格质检"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
