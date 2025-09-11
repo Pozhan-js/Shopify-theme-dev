@@ -1,49 +1,34 @@
 {% comment %}
-  Category Grid Section - 显示产品系列的圆形分类模块
-  基于您现有的Cookles、Pastry、Cup Coke、Switch Roll系列
+  Category Grid Section - 圆形分类模块，名字在圆形内
+  样式：圆形边框，名字在内部，hover时仅边框颜色变为#DE9B57
+  无标题和副标题
 {% endcomment %}
 
 <div class="category-grid-section">
   <div class="page-width">
-    {% if section.settings.show_title %}
-      <div class="section-header text-center">
-        <h2 class="section-title">{{ section.settings.title | escape }}</h2>
-        {% if section.settings.subtitle != blank %}
-          <p class="section-subtitle">{{ section.settings.subtitle | escape }}</p>
-        {% endif %}
-      </div>
-    {% endif %}
-
     <div class="category-grid">
-      {% for block in section.blocks %}
-        {% case block.type %}
-          {% when 'category' %}
-            {% assign collection = collections[block.settings.collection_handle] %}
-            {% if collection and collection.all_products_count > 0 %}
-              <div class="category-item" {{ block.shopify_attributes }}>
-                <a href="{{ collection.url }}" class="category-link">
-                  <div class="category-circle">
-                    {% if block.settings.custom_image != blank %}
-                      <img src="{{ block.settings.custom_image | image_url: width: 200 }}" 
-                           alt="{{ collection.title | escape }}" 
-                           class="category-image"
-                           loading="lazy">
-                    {% elsif collection.image != blank %}
-                      <img src="{{ collection.image | image_url: width: 200 }}" 
-                           alt="{{ collection.title | escape }}" 
-                           class="category-image"
-                           loading="lazy">
-                    {% else %}
-                      <div class="category-placeholder">
-                        <span>{{ collection.title | first | upcase }}</span>
-                      </div>
-                    {% endif %}
-                  </div>
+      {% for collection in collections %}
+        {% unless collection.handle == 'frontpage' or collection.handle == 'all' %}
+          {% if collection.all_products_count > 0 %}
+            <div class="category-item">
+              <a href="{{ collection.url }}" class="category-link">
+                <div class="category-circle">
+                  {% if collection.image != blank %}
+                    <img src="{{ collection.image | image_url: width: 150, height: 150, crop: center }}" 
+                         alt="{{ collection.title | escape }}" 
+                         class="category-image"
+                         loading="lazy">
+                  {% else %}
+                    <div class="category-placeholder">
+                      <span>{{ collection.title | first | upcase }}</span>
+                    </div>
+                  {% endif %}
                   <h3 class="category-title">{{ collection.title | escape }}</h3>
-                </a>
-              </div>
-            {% endif %}
-        {% endcase %}
+                </div>
+              </a>
+            </div>
+          {% endif %}
+        {% endunless %}
       {% endfor %}
     </div>
   </div>
@@ -53,24 +38,6 @@
 .category-grid-section {
   padding: 60px 0;
   background-color: {{ section.settings.background_color }};
-}
-
-.section-header {
-  margin-bottom: 48px;
-}
-
-.section-title {
-  font-size: {{ section.settings.title_size }}px;
-  font-weight: 700;
-  color: {{ section.settings.title_color }};
-  margin-bottom: 12px;
-}
-
-.section-subtitle {
-  font-size: 18px;
-  color: {{ section.settings.subtitle_color }};
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .category-grid {
@@ -100,42 +67,49 @@
   border-radius: 50%;
   border: 2px solid #ccc;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
   overflow: hidden;
   background-color: #fff;
   transition: border-color 0.3s ease;
 }
 
 .category-item:hover .category-circle {
-  border-color: {{ section.settings.hover_border_color }};
+  border-color: #DE9B57;
 }
 
 .category-image {
-  width: 90px;
-  height: 90px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 50%;
+  margin-bottom: 8px;
 }
 
 .category-placeholder {
-  width: 100%;
-  height: 100%;
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #f5f5f5;
   color: #666;
-  font-size: 48px;
+  font-size: 32px;
   font-weight: bold;
+  border-radius: 50%;
+  margin-bottom: 8px;
 }
 
 .category-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: {{ section.settings.text_color }};
-  margin-bottom: 8px;
+  text-align: center;
+  max-width: 140px;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0 10px;
 }
 
 @media screen and (max-width: 768px) {
@@ -150,8 +124,19 @@
   }
   
   .category-image {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .category-placeholder {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .category-title {
+    font-size: 14px;
+    max-width: 120px;
   }
 }
 
@@ -170,24 +155,6 @@
   "class": "category-grid-section",
   "settings": [
     {
-      "type": "checkbox",
-      "id": "show_title",
-      "label": "显示标题",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "标题",
-      "default": "产品分类"
-    },
-    {
-      "type": "text",
-      "id": "subtitle",
-      "label": "副标题",
-      "default": "浏览我们的产品系列"
-    },
-    {
       "type": "color",
       "id": "background_color",
       "label": "背景颜色",
@@ -195,86 +162,14 @@
     },
     {
       "type": "color",
-      "id": "title_color",
-      "label": "标题颜色",
-      "default": "#000000"
-    },
-    {
-      "type": "range",
-      "id": "title_size",
-      "label": "标题大小",
-      "min": 24,
-      "max": 48,
-      "step": 2,
-      "default": 36,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "subtitle_color",
-      "label": "副标题颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
       "id": "text_color",
       "label": "文字颜色",
       "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "hover_border_color",
-      "label": "悬停边框颜色",
-      "default": "#000000"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "category",
-      "name": "分类",
-      "settings": [
-        {
-          "type": "collection",
-          "id": "collection_handle",
-          "label": "选择系列"
-        },
-        {
-          "type": "image_picker",
-          "id": "custom_image",
-          "label": "自定义图片（可选）"
-        }
-      ]
     }
   ],
   "presets": [
     {
-      "name": "Category Grid",
-      "blocks": [
-        {
-          "type": "category",
-          "settings": {
-            "collection_handle": "cookles"
-          }
-        },
-        {
-          "type": "category",
-          "settings": {
-            "collection_handle": "pastry"
-          }
-        },
-        {
-          "type": "category",
-          "settings": {
-            "collection_handle": "cup-coke"
-          }
-        },
-        {
-          "type": "category",
-          "settings": {
-            "collection_handle": "switch-roll"
-          }
-        }
-      ]
+      "name": "Category Grid"
     }
   ]
 }

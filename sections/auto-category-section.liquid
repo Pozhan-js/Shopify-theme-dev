@@ -1,65 +1,45 @@
 {% comment %}
-  Auto Category Section
-  This section automatically displays all product collections in circular format
-  Categories are dynamically fetched from all available collections
+  Auto Category Section - 圆形分类模块，名字在圆形内
+  样式：圆形边框，名字在内部，hover时仅边框颜色变为#DE9B57
 {% endcomment %}
 
 <div class="auto-category-section">
   <div class="page-width">
     {% if section.settings.show_section_title %}
       <div class="section-header text-center">
-        <h2 class="section-title">{{ section.settings.section_title | escape }}</h2>
-        {% if section.settings.section_subtitle != blank %}
-          <p class="section-subtitle">{{ section.settings.section_subtitle | escape }}</p>
-        {% endif %}
       </div>
     {% endif %}
 
     <div class="category-grid">
-      {% assign collections_to_show = '' | split: '' %}
-      
       {% for collection in collections %}
         {% unless collection.handle == 'frontpage' or collection.handle == 'all' %}
           {% if collection.all_products_count > 0 %}
-            {% assign collections_to_show = collections_to_show | push: collection %}
+            <div class="category-item">
+              <a href="{{ collection.url }}" class="category-link">
+                <div class="category-circle">
+                  {% if collection.image != blank %}
+                    <img src="{{ collection.image | image_url: width: 150, height: 150, crop: center }}" 
+                         alt="{{ collection.title | escape }}" 
+                         class="category-image"
+                         loading="lazy">
+                  {% else %}
+                    <div class="category-placeholder">
+                      <span>{{ collection.title | first | upcase }}</span>
+                    </div>
+                  {% endif %}
+                  <h3 class="category-title">{{ collection.title | escape }}</h3>
+                </div>
+              </a>
+            </div>
           {% endif %}
         {% endunless %}
-      {% endfor %}
-      
-      {% comment %} Limit to specified number of collections {% endcomment %}
-      {% assign max_collections = section.settings.max_collections | times: 1 %}
-      {% if max_collections > 0 %}
-        {% assign collections_to_show = collections_to_show | slice: 0, max_collections %}
-      {% endif %}
-      
-      {% for collection in collections_to_show %}
-        <div class="category-item">
-          <a href="{{ collection.url }}" class="category-link">
-            <div class="category-circle">
-              {% if collection.image != blank %}
-                <img src="{{ collection.image | image_url: width: 200, height: 200, crop: center }}" 
-                     alt="{{ collection.title | escape }}" 
-                     class="category-image"
-                     loading="lazy">
-              {% else %}
-                <div class="category-placeholder">
-                  <span>{{ collection.title | first | upcase }}</span>
-                </div>
-              {% endif %}
-            </div>
-            <h3 class="category-title">{{ collection.title | escape }}</h3>
-            {% if section.settings.show_product_count %}
-              <p class="category-count">{{ collection.all_products_count }} products</p>
-            {% endif %}
-          </a>
-        </div>
       {% endfor %}
     </div>
 
     {% if section.settings.show_view_all and section.settings.view_all_link != blank %}
       <div class="view-all-wrapper text-center">
         <a href="{{ section.settings.view_all_link }}" class="button button--primary">
-          {{ section.settings.view_all_text | default: 'View All Categories' }}
+          {{ section.settings.view_all_text | default: '查看所有分类' }}
         </a>
       </div>
     {% endif %}
@@ -117,52 +97,49 @@
   border-radius: 50%;
   border: 2px solid #ccc;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
   overflow: hidden;
   background-color: #fff;
   transition: border-color 0.3s ease;
 }
 
 .category-item:hover .category-circle {
-  border-color: {{ section.settings.hover_border_color }};
+  border-color: #DE9B57;
 }
 
 .category-image {
-  width: 90px;
-  height: 90px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
   border-radius: 50%;
+  margin-bottom: 8px;
 }
 
 .category-placeholder {
-  width: 100%;
-  height: 100%;
+  width: 70px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #f5f5f5;
   color: #666;
-  font-size: 48px;
+  font-size: 32px;
   font-weight: bold;
-}
-
-.category-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: {{ section.settings.text_color }};
+  border-radius: 50%;
   margin-bottom: 8px;
 }
 
-.category-count {
-  font-size: 14px;
-  color: {{ section.settings.count_color }};
+.category-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: {{ section.settings.text_color }};
+  text-align: center;
+  max-width: 140px;
+  line-height: 1.2;
   margin: 0;
-}
-
-.view-all-wrapper {
-  margin-top: 48px;
+  padding: 0 10px;
 }
 
 @media screen and (max-width: 768px) {
@@ -177,8 +154,19 @@
   }
   
   .category-image {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .category-placeholder {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .category-title {
+    font-size: 14px;
+    max-width: 120px;
   }
 }
 
@@ -199,37 +187,25 @@
     {
       "type": "checkbox",
       "id": "show_section_title",
-      "label": "Show section title",
+      "label": "显示标题",
       "default": true
-    },
-    {
-      "type": "text",
-      "id": "section_title",
-      "label": "Section title",
-      "default": "Shop by Category"
-    },
-    {
-      "type": "text",
-      "id": "section_subtitle",
-      "label": "Section subtitle",
-      "default": "Discover our curated collections"
     },
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background color",
+      "label": "背景颜色",
       "default": "#ffffff"
     },
     {
       "type": "color",
       "id": "title_color",
-      "label": "Title color",
+      "label": "标题颜色",
       "default": "#000000"
     },
     {
       "type": "range",
       "id": "title_font_size",
-      "label": "Title font size",
+      "label": "标题大小",
       "min": 24,
       "max": 48,
       "step": 2,
@@ -239,59 +215,20 @@
     {
       "type": "color",
       "id": "subtitle_color",
-      "label": "Subtitle color",
+      "label": "副标题颜色",
       "default": "#666666"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text color",
+      "label": "文字颜色",
       "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "count_color",
-      "label": "Product count color",
-      "default": "#666666"
     },
     {
       "type": "color",
       "id": "hover_border_color",
-      "label": "Hover border color",
-      "default": "#000000"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_product_count",
-      "label": "Show product count",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "max_collections",
-      "label": "Maximum collections to show",
-      "min": 0,
-      "max": 20,
-      "step": 1,
-      "default": 8,
-      "info": "Set to 0 to show all collections"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_view_all",
-      "label": "Show view all button",
-      "default": false
-    },
-    {
-      "type": "text",
-      "id": "view_all_text",
-      "label": "View all button text",
-      "default": "View All Categories"
-    },
-    {
-      "type": "url",
-      "id": "view_all_link",
-      "label": "View all link"
+      "label": "悬停边框颜色",
+      "default": "#DE9B57"
     }
   ],
   "presets": [
