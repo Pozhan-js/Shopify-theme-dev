@@ -1,34 +1,73 @@
 {% comment %}
-  Service Info Section - 物流、服务时间、食品质量信息展示
-  样式：左侧灰色圆形小图标，右侧上下文字描述，横排展示
+  Service Info Section - Logistics, service hours, food quality information display
+  Style: Left side gray circular small icon, right side text description, horizontal layout
+  Default display 3 service information items
 {% endcomment %}
 
 <div class="service-info-section">
   <div class="page-width">
     <div class="service-grid">
-      {% for block in section.blocks %}
-        {% case block.type %}
-          {% when 'service_item' %}
-            <div class="service-item" {{ block.shopify_attributes }}>
-              <div class="service-icon-circle">
-                {% if block.settings.icon_image != blank %}
-                  <img src="{{ block.settings.icon_image | image_url: width: 40 }}" 
-                       alt="{{ block.settings.title | escape }}" 
-                       class="service-icon"
-                       loading="lazy">
-                {% else %}
-                  <div class="service-icon-placeholder">
-                    <span>{{ block.settings.title | first | upcase }}</span>
-                  </div>
-                {% endif %}
+      {% comment %} Default display 3 service information items {% endcomment %}
+      {% if section.blocks.size == 0 %}
+        {% comment %} Default service information {% endcomment %}
+        <div class="service-item">
+          <div class="service-icon-circle">
+            <div class="service-icon-placeholder">📦</div>
+          </div>
+          <div class="service-content">
+            <h3 class="service-title">Fast Delivery</h3>
+            <p class="service-description">Ship within 24 hours, nationwide delivery</p>
+          </div>
+        </div>
+        
+        <div class="service-item">
+          <div class="service-icon-circle">
+            <div class="service-icon-placeholder">⏰</div>
+          </div>
+          <div class="service-content">
+            <h3 class="service-title">Service Hours</h3>
+            <p class="service-description">Monday to Sunday 9:00-21:00</p>
+          </div>
+        </div>
+        
+        <div class="service-item">
+          <div class="service-icon-circle">
+            <div class="service-icon-placeholder">✅</div>
+          </div>
+          <div class="service-content">
+            <h3 class="service-title">Food Quality</h3>
+            <p class="service-description">Fresh ingredients, strict quality control</p>
+          </div>
+        </div>
+      {% else %}
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'service_item' %}
+              <div class="service-item" {{ block.shopify_attributes }}>
+                <div class="service-icon-circle">
+                  {% if block.settings.icon_image != blank %}
+                    <img src="{{ block.settings.icon_image | image_url: width: 40 }}" 
+                         alt="{{ block.settings.title | escape }}" 
+                         class="service-icon"
+                         loading="lazy">
+                  {% else %}
+                    <div class="service-icon-placeholder">
+                      {% if block.settings.title != blank %}
+                        {{ block.settings.title | first | upcase }}
+                      {% else %}
+                        ✓
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="service-content">
+                  <h3 class="service-title">{{ block.settings.title | default: 'Service Title' | escape }}</h3>
+                  <p class="service-description">{{ block.settings.description | default: 'Service Description' | escape }}</p>
+                </div>
               </div>
-              <div class="service-content">
-                <h3 class="service-title">{{ block.settings.title | escape }}</h3>
-                <p class="service-description">{{ block.settings.description | escape }}</p>
-              </div>
-            </div>
-        {% endcase %}
-      {% endfor %}
+          {% endcase %}
+        {% endfor %}
+      {% endif %}
     </div>
   </div>
 </div>
@@ -70,7 +109,7 @@
 }
 
 .service-icon-placeholder {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   color: #666;
 }
@@ -133,43 +172,43 @@
     {
       "type": "color",
       "id": "background_color",
-      "label": "背景颜色",
-      "default": "#ffffff"
+      "label": "Background Color",
+      "default": "#f9f9f9"
     },
     {
       "type": "color",
       "id": "title_color",
-      "label": "标题颜色",
+      "label": "Title Color",
       "default": "#000000"
     },
     {
       "type": "color",
       "id": "description_color",
-      "label": "描述文字颜色",
+      "label": "Description Color",
       "default": "#666666"
     }
   ],
   "blocks": [
     {
       "type": "service_item",
-      "name": "服务信息",
+      "name": "Service Info",
       "settings": [
         {
           "type": "image_picker",
           "id": "icon_image",
-          "label": "图标"
+          "label": "Icon"
         },
         {
           "type": "text",
           "id": "title",
-          "label": "标题",
-          "default": "快速配送"
+          "label": "Title",
+          "default": "Fast Delivery"
         },
         {
           "type": "text",
           "id": "description",
-          "label": "描述",
-          "default": "24小时内发货，全国配送"
+          "label": "Description",
+          "default": "Ship within 24 hours, nationwide delivery"
         }
       ]
     }
@@ -181,22 +220,22 @@
         {
           "type": "service_item",
           "settings": {
-            "title": "快速配送",
-            "description": "24小时内发货，全国配送"
+            "title": "Fast Delivery",
+            "description": "Ship within 24 hours, nationwide delivery"
           }
         },
         {
           "type": "service_item",
           "settings": {
-            "title": "服务时间",
-            "description": "周一至周日 9:00-21:00"
+            "title": "Service Hours",
+            "description": "Monday to Sunday 9:00-21:00"
           }
         },
         {
           "type": "service_item",
           "settings": {
-            "title": "食品质量",
-            "description": "新鲜食材，严格质检"
+            "title": "Food Quality",
+            "description": "Fresh ingredients, strict quality control"
           }
         }
       ]
