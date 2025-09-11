@@ -1,0 +1,170 @@
+{% comment %}
+  Brand Story Section - 品牌故事展示模块
+  可编辑的品牌故事内容，英文显示
+{% endcomment %}
+
+<div class="brand-story-section">
+  <div class="page-width">
+    <div class="story-content">
+      <div class="story-text">
+        <h2 class="story-title">{{ section.settings.title | default: 'Our Story' | escape }}</h2>
+        <div class="story-description">
+          {{ section.settings.description | default: 'Since 2015, we have insisted on handmade production, using high-quality ingredients, and carefully baking every product. From a small family workshop to multiple stores today, we have always stayed true to our original intention.' | escape }}
+        </div>
+        {% if section.settings.show_button %}
+          <a href="{{ section.settings.button_link | default: '/pages/about' }}" class="story-button">
+            {{ section.settings.button_text | default: 'Learn More' | escape }}
+          </a>
+        {% endif %}
+      </div>
+      <div class="story-image">
+        {% if section.settings.image != blank %}
+          <img src="{{ section.settings.image | image_url: width: 600 }}" 
+               alt="{{ section.settings.title | default: 'Brand Story' | escape }}"
+               loading="lazy">
+        {% else %}
+          <img src="{{ '2025-08-25 000215.jpg' | asset_url }}" 
+               alt="Brand Story"
+               loading="lazy">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.brand-story-section {
+  padding: 80px 0;
+  background-color: {{ section.settings.background_color }};
+}
+
+.story-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.story-title {
+  font-size: 36px;
+  color: {{ section.settings.title_color }};
+  margin-bottom: 20px;
+}
+
+.story-description {
+  font-size: 16px;
+  line-height: 1.8;
+  color: {{ section.settings.description_color }};
+  margin-bottom: 30px;
+}
+
+.story-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background: {{ section.settings.button_color }};
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.story-button:hover {
+  background: {{ section.settings.button_hover_color }};
+}
+
+.story-image img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .story-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .story-title {
+    font-size: 28px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Brand Story Section",
+  "tag": "section",
+  "class": "brand-story-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Story"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Since 2015, we have insisted on handmade production, using high-quality ingredients, and carefully baking every product. From a small family workshop to multiple stores today, we have always stayed true to our original intention."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Show Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Learn More"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#D8A26C"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button Color",
+      "default": "#D8A26C"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button Hover Color",
+      "default": "#c6925a"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story Section"
+    }
+  ]
+}
+{% endschema %}
