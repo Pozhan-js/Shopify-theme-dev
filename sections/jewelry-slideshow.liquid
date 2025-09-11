@@ -1,57 +1,91 @@
-<!-- 珠宝轮播图 - 简化版 -->
-<div class="jewelry-slideshow-container">
+<!-- 珠宝轮播图 - 支持后台编辑版 -->
+<div class="jewelry-slideshow-container" style="height: {% if section.settings.slide_height == 'large' %}100vh{% elsif section.settings.slide_height == 'medium' %}70vh{% else %}50vh{% endif %};">
     <div class="jewelry-slideshow">
         <div class="slideshow-wrapper">
-            <!-- 幻灯片1 -->
-            <div class="slide active">
-                <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&h=1080&fit=crop" alt="钻石系列">
-                <div class="slide-content">
-                    <h2>钻石系列</h2>
-                    <p>永恒之美的象征，每一件都是艺术品</p>
-                    <a href="/collections/all" class="btn">探索系列</a>
+            {% if section.blocks.size > 0 %}
+                {% for block in section.blocks %}
+                    {% if block.type == 'slide' %}
+                        <div class="slide {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.index0 }}">
+                            {% if block.settings.image %}
+                                <img src="{{ block.settings.image | image_url: width: 1920, height: 1080, crop: 'center' }}" 
+                                     alt="{{ block.settings.title | escape }}">
+                            {% else %}
+                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            {% endif %}
+                            <div class="slide-content" style="text-align: {{ block.settings.text_alignment }};">
+                                <h2 style="color: {{ block.settings.title_color }}; font-size: {{ block.settings.title_size }}px;">{{ block.settings.title | default: '珠宝系列' }}</h2>
+                                <p style="color: {{ block.settings.text_color }}; font-size: {{ block.settings.text_size }}px;">{{ block.settings.description | default: '精美珠宝，匠心打造' }}</p>
+                                {% if block.settings.button_text != blank %}
+                                    <a href="{{ block.settings.button_link }}" 
+                                       class="btn" 
+                                       style="background-color: {{ block.settings.button_bg_color }}; 
+                                              color: {{ block.settings.button_text_color }}; 
+                                              border-radius: {{ block.settings.button_border_radius }}px;">
+                                        {{ block.settings.button_text }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <!-- 默认显示内容，当没有配置数据时 -->
+                <div class="slide active">
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    <div class="slide-content" style="text-align: center;">
+                        <h2 style="color: #ffffff; font-size: 48px;">钻石系列</h2>
+                        <p style="color: #ffffff; font-size: 20px;">永恒之美的象征，每一件都是艺术品</p>
+                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">探索系列</a>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- 幻灯片2 -->
-            <div class="slide">
-                <img src="https://images.unsplash.com/photo-1596944924591-4b6b1df4c0c9?w=1920&h=1080&fit=crop" alt="珍珠系列">
-                <div class="slide-content">
-                    <h2>珍珠系列</h2>
-                    <p>优雅与纯洁的化身，经典永不过时</p>
-                    <a href="/collections/all" class="btn">查看详情</a>
+                <div class="slide">
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                    <div class="slide-content" style="text-align: center;">
+                        <h2 style="color: #ffffff; font-size: 48px;">珍珠系列</h2>
+                        <p style="color: #ffffff; font-size: 20px;">优雅与纯洁的化身，经典永不过时</p>
+                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">查看详情</a>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- 幻灯片3 -->
-            <div class="slide">
-                <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1920&h=1080&fit=crop" alt="彩宝系列">
-                <div class="slide-content">
-                    <h2>彩宝系列</h2>
-                    <p>绚丽色彩的艺术，大自然的馈赠</p>
-                    <a href="/collections/all" class="btn">立即选购</a>
+                <div class="slide">
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                    <div class="slide-content" style="text-align: center;">
+                        <h2 style="color: #ffffff; font-size: 48px;">彩宝系列</h2>
+                        <p style="color: #ffffff; font-size: 20px;">绚丽色彩的艺术，大自然的馈赠</p>
+                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">立即选购</a>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
         
         <!-- 导航箭头 -->
-        <div class="nav-arrows">
-            <button class="arrow prev" onclick="changeSlide(-1)">❮</button>
-            <button class="arrow next" onclick="changeSlide(1)">❯</button>
-        </div>
-        
-        <!-- 小圆点导航 -->
-        <div class="dots-container">
-            <span class="dot active" onclick="currentSlide(1)"></span>
-            <span class="dot" onclick="currentSlide(2)"></span>
-            <span class="dot" onclick="currentSlide(3)"></span>
-        </div>
+        {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+            <div class="nav-arrows">
+                <button class="arrow prev" onclick="changeSlide(-1)">❮</button>
+                <button class="arrow next" onclick="changeSlide(1)">❯</button>
+            </div>
+            
+            <!-- 小圆点导航 -->
+            <div class="dots-container">
+                {% if section.blocks.size > 0 %}
+                    {% for block in section.blocks %}
+                        {% if block.type == 'slide' %}
+                            <span class="dot {% if forloop.first %}active{% endif %}" 
+                                  onclick="currentSlide({{ forloop.index }})"></span>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span class="dot active" onclick="currentSlide(1)"></span>
+                    <span class="dot" onclick="currentSlide(2)"></span>
+                    <span class="dot" onclick="currentSlide(3)"></span>
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 </div>
 
 <style>
 .jewelry-slideshow-container {
     width: 100%;
-    height: 100vh;
     position: relative;
     overflow: hidden;
 }
@@ -94,39 +128,38 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-align: center;
     color: white;
     background: transparent;
     padding: 0;
     border-radius: 0;
     backdrop-filter: none;
+    z-index: 2;
 }
 
 .slide-content h2 {
-    font-size: 48px;
     margin-bottom: 20px;
     font-weight: 300;
+    line-height: 1.2;
 }
 
 .slide-content p {
-    font-size: 20px;
     margin-bottom: 30px;
+    line-height: 1.5;
 }
 
 .btn {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.9);
-    color: #333;
     padding: 15px 40px;
     text-decoration: none;
-    border-radius: 30px;
     font-size: 16px;
     transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
 .btn:hover {
-    background: white;
     transform: translateY(-2px);
+    opacity: 0.9;
 }
 
 /* 导航箭头 */
@@ -151,6 +184,7 @@
     cursor: pointer;
     font-size: 20px;
     transition: background 0.3s ease;
+    z-index: 3;
 }
 
 .arrow:hover {
@@ -192,15 +226,15 @@
 /* 响应式设计 */
 @media screen and (max-width: 749px) {
     .jewelry-slideshow-container {
-        height: 60vh;
+        height: 60vh !important;
     }
     
     .slide-content h2 {
-        font-size: 32px;
+        font-size: 28px !important;
     }
     
     .slide-content p {
-        font-size: 16px;
+        font-size: 16px !important;
     }
     
     .arrow {
@@ -216,36 +250,57 @@
     .next {
         right: 10px;
     }
+    
+    .btn {
+        padding: 12px 30px;
+        font-size: 14px;
+    }
 }
 </style>
 
 <script>
 let currentSlideIndex = 0;
-const slides = document.querySelectorAll('.slide');
-const dots = document.querySelectorAll('.dot');
-const totalSlides = slides.length;
+let autoRotateInterval;
+let slides, dots, totalSlides;
 
 // 初始化轮播图
 function initSlideshow() {
-    showSlide(currentSlideIndex);
-    setInterval(() => {
-        changeSlide(1);
-    }, 5000);
+    slides = document.querySelectorAll('.slide');
+    dots = document.querySelectorAll('.dot');
+    totalSlides = slides.length;
+    
+    if (totalSlides > 0) {
+        showSlide(currentSlideIndex);
+        
+        {% if section.settings.auto_rotate %}
+            {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+                autoRotateInterval = setInterval(() => {
+                    changeSlide(1);
+                }, {{ section.settings.change_slides_speed | times: 1000 }});
+            {% endif %}
+        {% endif %}
+    }
 }
 
 // 显示指定幻灯片
 function showSlide(index) {
+    if (!slides || slides.length === 0) return;
+    
     slides.forEach((slide, i) => {
         slide.classList.toggle('active', i === index);
     });
     
-    dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-    });
+    if (dots && dots.length > 0) {
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
+    }
 }
 
 // 切换幻灯片
 function changeSlide(direction) {
+    if (!slides || slides.length <= 1) return;
+    
     currentSlideIndex += direction;
     
     if (currentSlideIndex >= totalSlides) {
@@ -259,12 +314,42 @@ function changeSlide(direction) {
 
 // 跳转到指定幻灯片
 function currentSlide(index) {
+    if (!slides || slides.length <= 1) return;
+    
     currentSlideIndex = index - 1;
     showSlide(currentSlideIndex);
+    
+    // 重置自动轮播计时器
+    {% if section.settings.auto_rotate %}
+        clearInterval(autoRotateInterval);
+        {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+            autoRotateInterval = setInterval(() => {
+                changeSlide(1);
+            }, {{ section.settings.change_slides_speed | times: 1000 }});
+        {% endif %}
+    {% endif %}
 }
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', initSlideshow);
+
+// 鼠标悬停时暂停自动轮播
+const slideshowContainer = document.querySelector('.jewelry-slideshow-container');
+if (slideshowContainer) {
+    slideshowContainer.addEventListener('mouseenter', () => {
+        clearInterval(autoRotateInterval);
+    });
+    
+    slideshowContainer.addEventListener('mouseleave', () => {
+        {% if section.settings.auto_rotate %}
+            {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+                autoRotateInterval = setInterval(() => {
+                    changeSlide(1);
+                }, {{ section.settings.change_slides_speed | times: 1000 }});
+            {% endif %}
+        {% endif %}
+    });
+}
 </script>
 
 {% schema %}
@@ -279,15 +364,15 @@ document.addEventListener('DOMContentLoaded', initSlideshow);
       "options": [
         {
           "value": "large",
-          "label": "大"
+          "label": "大 (100vh)"
         },
         {
           "value": "medium",
-          "label": "中"
+          "label": "中 (70vh)"
         },
         {
           "value": "small",
-          "label": "小"
+          "label": "小 (50vh)"
         }
       ],
       "default": "large",
@@ -310,6 +395,136 @@ document.addEventListener('DOMContentLoaded', initSlideshow);
       "default": 5
     }
   ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "轮播图幻灯片",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "背景图片"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "钻石系列"
+        },
+        {
+          "type": "select",
+          "id": "title_size",
+          "options": [
+            {
+              "value": "32",
+              "label": "小"
+            },
+            {
+              "value": "48",
+              "label": "中"
+            },
+            {
+              "value": "64",
+              "label": "大"
+            }
+          ],
+          "default": "48",
+          "label": "标题大小"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "标题颜色",
+          "default": "#ffffff"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "描述文字",
+          "default": "永恒之美的象征，每一件都是艺术品"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "options": [
+            {
+              "value": "16",
+              "label": "小"
+            },
+            {
+              "value": "20",
+              "label": "中"
+            },
+            {
+              "value": "24",
+              "label": "大"
+            }
+          ],
+          "default": "20",
+          "label": "文字大小"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "文字颜色",
+          "default": "#ffffff"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "左对齐"
+            },
+            {
+              "value": "center",
+              "label": "居中"
+            },
+            {
+              "value": "right",
+              "label": "右对齐"
+            }
+          ],
+          "default": "center",
+          "label": "文字对齐方式"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文字",
+          "default": "探索系列"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "按钮链接"
+        },
+        {
+          "type": "color",
+          "id": "button_bg_color",
+          "label": "按钮背景颜色",
+          "default": "rgba(255, 255, 255, 0.9)"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "按钮文字颜色",
+          "default": "#333333"
+        },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "px",
+          "label": "按钮圆角",
+          "default": 30
+        }
+      ]
+    }
+  ],
   "presets": [
     {
       "name": "珠宝轮播图",
@@ -317,7 +532,36 @@ document.addEventListener('DOMContentLoaded', initSlideshow);
         "slide_height": "large",
         "auto_rotate": true,
         "change_slides_speed": 5
-      }
+      },
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "title": "钻石系列",
+            "description": "永恒之美的象征，每一件都是艺术品",
+            "button_text": "探索系列",
+            "button_link": "/collections/all"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "title": "珍珠系列",
+            "description": "优雅与纯洁的化身，经典永不过时",
+            "button_text": "查看详情",
+            "button_link": "/collections/all"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "title": "彩宝系列",
+            "description": "绚丽色彩的艺术，大自然的馈赠",
+            "button_text": "立即选购",
+            "button_link": "/collections/all"
+          }
+        }
+      ]
     }
   ]
 }
