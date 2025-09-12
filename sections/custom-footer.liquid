@@ -1,0 +1,236 @@
+{% comment %}
+  Custom Footer Section
+  Features:
+  - Background color: #342113
+  - Jagged top edge design
+  - Contact info layout with icons on left, content on right
+  - Icon background color: #CBC9C6
+{% endcomment %}
+
+<div class="custom-footer-section">
+  <div class="custom-footer-container">
+    <div class="footer-jagged-top"></div>
+    
+    <div class="footer-content">
+      <div class="contact-info-grid">
+        {% for block in section.blocks %}
+          <div class="contact-item">
+            <div class="contact-icon-wrapper">
+              <div class="contact-icon">
+                {% if block.settings.icon_type == 'phone' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="#342113" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                {% elsif block.settings.icon_type == 'email' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#342113" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="22,6 12,13 2,6" stroke="#342113" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                {% elsif block.settings.icon_type == 'address' %}
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#342113" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="10" r="3" stroke="#342113" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                {% endif %}
+              </div>
+            </div>
+            
+            <div class="contact-content">
+              <h3 class="contact-title">{{ block.settings.title }}</h3>
+              <p class="contact-description">{{ block.settings.description }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.custom-footer-section {
+  background-color: #342113;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+.custom-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-jagged-top {
+  position: relative;
+  height: 40px;
+  background: linear-gradient(135deg, transparent 33.33%, #342113 33.33%, #342113 66.66%, transparent 66.66%);
+  background-size: 30px 40px;
+  background-repeat: repeat-x;
+  margin-top: -20px;
+}
+
+.footer-jagged-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background-color: #342113;
+}
+
+.footer-content {
+  padding: 60px 0 80px;
+}
+
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.contact-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.contact-icon {
+  width: 60px;
+  height: 60px;
+  background-color: #CBC9C6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.contact-icon:hover {
+  transform: scale(1.1);
+}
+
+.contact-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.contact-content {
+  flex: 1;
+}
+
+.contact-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.contact-description {
+  font-size: 16px;
+  color: #e0e0e0;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .contact-info-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .contact-item {
+    justify-content: center;
+    text-align: left;
+  }
+  
+  .footer-content {
+    padding: 40px 0 60px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Custom Footer",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "contact_info",
+      "name": "Contact Info",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_type",
+          "label": "Icon Type",
+          "options": [
+            {
+              "value": "phone",
+              "label": "Phone"
+            },
+            {
+              "value": "email",
+              "label": "Email"
+            },
+            {
+              "value": "address",
+              "label": "Address"
+            }
+          ],
+          "default": "phone"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Phone"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "+1 (555) 123-4567"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Footer",
+      "blocks": [
+        {
+          "type": "contact_info",
+          "settings": {
+            "icon_type": "phone",
+            "title": "电话",
+            "description": "400-123-4567"
+          }
+        },
+        {
+          "type": "contact_info",
+          "settings": {
+            "icon_type": "email",
+            "title": "邮箱",
+            "description": "info@example.com"
+          }
+        },
+        {
+          "type": "contact_info",
+          "settings": {
+            "icon_type": "address",
+            "title": "地址",
+            "description": "北京市朝阳区建国门外大街1号"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
