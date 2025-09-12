@@ -1,31 +1,50 @@
 {% comment %}
-  Brand Story Section - 品牌故事展示模块
-  可编辑的品牌故事内容，英文显示
+  Brand Story Section - 重新设计的品牌故事展示
+  简洁优雅的纯文字布局，无图片设计
 {% endcomment %}
 
 <div class="brand-story-section">
   <div class="page-width">
-    <div class="story-content">
-      <div class="story-text">
+    <div class="story-container">
+      <div class="story-header">
         <h2 class="story-title">{{ section.settings.title | default: 'Our Story' | escape }}</h2>
-        <div class="story-description">
+        <div class="story-subtitle">{{ section.settings.subtitle | default: 'Since 2015' | escape }}</div>
+      </div>
+      
+      <div class="story-content">
+        <div class="story-text">
           {{ section.settings.description | default: 'Since 2015, we have insisted on handmade production, using high-quality ingredients, and carefully baking every product. From a small family workshop to multiple stores today, we have always stayed true to our original intention.' | escape }}
         </div>
+        
+        <div class="story-features">
+          {% if section.settings.feature1 != blank %}
+            <div class="feature-item">
+              <span class="feature-icon">🥐</span>
+              <span class="feature-text">{{ section.settings.feature1 | default: 'Handmade with Love' | escape }}</span>
+            </div>
+          {% endif %}
+          
+          {% if section.settings.feature2 != blank %}
+            <div class="feature-item">
+              <span class="feature-icon">🌾</span>
+              <span class="feature-text">{{ section.settings.feature2 | default: 'Premium Ingredients' | escape }}</span>
+            </div>
+          {% endif %}
+          
+          {% if section.settings.feature3 != blank %}
+            <div class="feature-item">
+              <span class="feature-icon">❤️</span>
+              <span class="feature-text">{{ section.settings.feature3 | default: 'Family Tradition' | escape }}</span>
+            </div>
+          {% endif %}
+        </div>
+        
         {% if section.settings.show_button %}
-          <a href="{{ section.settings.button_link | default: '/pages/about' }}" class="story-button">
-            {{ section.settings.button_text | default: 'Learn More' | escape }}
-          </a>
-        {% endif %}
-      </div>
-      <div class="story-image">
-        {% if section.settings.image != blank %}
-          <img src="{{ section.settings.image | image_url: width: 600 }}" 
-               alt="{{ section.settings.title | default: 'Brand Story' | escape }}"
-               loading="lazy">
-        {% else %}
-          <img src="{{ '2025-08-25 000215.jpg' | asset_url }}" 
-               alt="Brand Story"
-               loading="lazy">
+          <div class="story-cta">
+            <a href="{{ section.settings.button_link | default: '/pages/about' }}" class="story-button">
+              {{ section.settings.button_text | default: 'Learn More' | escape }}
+            </a>
+          </div>
         {% endif %}
       </div>
     </div>
@@ -34,58 +53,120 @@
 
 <style>
 .brand-story-section {
-  padding: 80px 0;
-  background-color: {{ section.settings.background_color }};
+  padding: 50px 0;
+  background: linear-gradient(135deg, #F9F2EB 0%, #F4EEE6 100%);
 }
 
-.story-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
+.story-container {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.story-header {
+  margin-bottom: 24px;
 }
 
 .story-title {
-  font-size: 36px;
-  color: {{ section.settings.title_color }};
-  margin-bottom: 20px;
+  font-size: 28px;
+  color: #8B4513;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
-.story-description {
+.story-subtitle {
   font-size: 16px;
-  line-height: 1.8;
-  color: {{ section.settings.description_color }};
+  color: #D8A26C;
+  font-weight: 500;
+}
+
+.story-content {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.story-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 24px;
+}
+
+.story-features {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.feature-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.feature-text {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.story-cta {
+  margin-top: 24px;
 }
 
 .story-button {
   display: inline-block;
-  padding: 15px 30px;
-  background: {{ section.settings.button_color }};
+  padding: 12px 28px;
+  background: #D8A26C;
   color: white;
   text-decoration: none;
-  border-radius: 30px;
+  border-radius: 24px;
+  font-size: 14px;
   font-weight: 600;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(216, 162, 108, 0.3);
 }
 
 .story-button:hover {
-  background: {{ section.settings.button_hover_color }};
-}
-
-.story-image img {
-  width: 100%;
-  border-radius: 10px;
+  background: #c6925a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(216, 162, 108, 0.4);
 }
 
 @media (max-width: 768px) {
-  .story-content {
-    grid-template-columns: 1fr;
-    gap: 30px;
+  .brand-story-section {
+    padding: 60px 20px;
   }
   
   .story-title {
-    font-size: 28px;
+    font-size: 32px;
+  }
+  
+  .story-subtitle {
+    font-size: 16px;
+  }
+  
+  .story-text {
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+  
+  .story-features {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .feature-item {
+    flex-direction: row;
+    gap: 12px;
   }
 }
 </style>
@@ -103,15 +184,34 @@
       "default": "Our Story"
     },
     {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Since 2015"
+    },
+    {
       "type": "textarea",
       "id": "description",
       "label": "Description",
       "default": "Since 2015, we have insisted on handmade production, using high-quality ingredients, and carefully baking every product. From a small family workshop to multiple stores today, we have always stayed true to our original intention."
     },
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Image"
+      "type": "text",
+      "id": "feature1",
+      "label": "Feature 1",
+      "default": "Handmade with Love"
+    },
+    {
+      "type": "text",
+      "id": "feature2",
+      "label": "Feature 2",
+      "default": "Premium Ingredients"
+    },
+    {
+      "type": "text",
+      "id": "feature3",
+      "label": "Feature 3",
+      "default": "Family Tradition"
     },
     {
       "type": "checkbox",
@@ -129,36 +229,6 @@
       "type": "url",
       "id": "button_link",
       "label": "Button Link"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background Color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "title_color",
-      "label": "Title Color",
-      "default": "#D8A26C"
-    },
-    {
-      "type": "color",
-      "id": "description_color",
-      "label": "Description Color",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "Button Color",
-      "default": "#D8A26C"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_color",
-      "label": "Button Hover Color",
-      "default": "#c6925a"
     }
   ],
   "presets": [
