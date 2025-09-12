@@ -1,0 +1,190 @@
+<!-- Featured Products - 精选产品展示 -->
+<div class="featured-products">
+    <div class="section-header">
+        {% if section.settings.title != blank %}
+            <h2 class="section-title" style="color: {{ section.settings.title_color }};">{{ section.settings.title }}</h2>
+        {% endif %}
+    </div>
+    
+    <div class="products-container">
+        {% assign collection_handle = section.settings.collection | default: 'all' %}
+        {% assign target_collection = collections[collection_handle] %}
+        
+        {% if target_collection and target_collection.products.size > 0 %}
+            <div class="products-grid">
+                {% for product in target_collection.products %}
+                    {% if product.tags contains 'featured' %}
+                        <a href="{{ product.url }}" class="product-card">
+                            <div class="product-image">
+                                {% if product.featured_image %}
+                                    <img src="{{ product.featured_image | image_url: width: 200, height: 200, crop: 'center' }}" 
+                                         alt="{{ product.title }}" 
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="placeholder-image">⭐</div>
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-title">{{ product.title }}</h3>
+                            </div>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">⭐</div>
+                <h3>暂无精选产品</h3>
+                <p>我们正在挑选更多精选烘焙产品</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.featured-products {
+    padding: 40px 20px;
+    background-color: #F9F9F9;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.products-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    color: #8B4513;
+    font-size: 24px;
+}
+
+.product-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.product-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 20px;
+    }
+    
+    .product-card {
+        margin-bottom: 10px;
+    }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Featured Products",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "Featured Products"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#8B4513"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "选择产品集合"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Products",
+      "category": "产品"
+    }
+  ]
+}
+{% endschema %}
