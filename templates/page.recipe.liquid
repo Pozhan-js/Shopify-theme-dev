@@ -1,0 +1,234 @@
+<div class="recipe-detail-page">
+    <div class="recipe-container">
+        <!-- 食谱头部 -->
+        <div class="recipe-header">
+            <h1 class="recipe-title">{{ page.title }}</h1>
+            <div class="recipe-meta">
+                <span class="recipe-time">制作时间: {{ page.metafields.recipe.prep_time }} + {{ page.metafields.recipe.cook_time }}</span>
+                <span class="recipe-difficulty">难度: {{ page.metafields.recipe.difficulty }}</span>
+                <span class="recipe-servings">份量: {{ page.metafields.recipe.servings }}</span>
+            </div>
+        </div>
+
+        <!-- 食谱图片 -->
+        {% if page.image %}
+            <div class="recipe-image">
+                <img src="{{ page.image | image_url: width: 800 }}" alt="{{ page.title }}" />
+            </div>
+        {% endif %}
+
+        <div class="recipe-content-wrapper">
+            <!-- 材料清单 -->
+            <div class="recipe-ingredients">
+                <h2>所需材料</h2>
+                <ul class="ingredients-list">
+                    {% assign ingredients = page.metafields.recipe.ingredients | newline_to_br | split: '<br />' %}
+                    {% for ingredient in ingredients %}
+                        {% if ingredient != blank %}
+                            <li>{{ ingredient | strip }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- 制作步骤 -->
+            <div class="recipe-steps">
+                <h2>制作步骤</h2>
+                <div class="steps-content">
+                    {{ page.content }}
+                </div>
+            </div>
+
+            <!-- 小贴士 -->
+            {% if page.metafields.recipe.tips %}
+                <div class="recipe-tips">
+                    <h3>小贴士</h3>
+                    <div class="tips-content">
+                        {{ page.metafields.recipe.tips }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 相关标签 -->
+        {% if page.tags.size > 0 %}
+            <div class="recipe-tags">
+                <h3>相关标签</h3>
+                <div class="tags-list">
+                    {% for tag in page.tags %}
+                        <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .recipe-detail-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .recipe-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .recipe-header {
+        text-align: center;
+        padding: 40px;
+        background: linear-gradient(135deg, #8B4513, #D8A26C);
+        color: white;
+    }
+
+    .recipe-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .recipe-meta {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .recipe-meta span {
+        background: rgba(255,255,255,0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+    }
+
+    .recipe-image {
+        width: 100%;
+        max-height: 400px;
+        overflow: hidden;
+    }
+
+    .recipe-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .recipe-content-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 40px;
+        padding: 40px;
+    }
+
+    .recipe-ingredients {
+        background: #f9f9f9;
+        padding: 30px;
+        border-radius: 8px;
+    }
+
+    .recipe-ingredients h2,
+    .recipe-steps h2 {
+        color: #8B4513;
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .ingredients-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .ingredients-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .ingredients-list li:before {
+        content: "•";
+        color: #8B4513;
+        position: absolute;
+        left: 0;
+    }
+
+    .recipe-steps {
+        padding: 30px;
+    }
+
+    .steps-content {
+        line-height: 1.8;
+    }
+
+    .steps-content h3 {
+        color: #8B4513;
+        margin: 30px 0 15px;
+    }
+
+    .steps-content p {
+        margin-bottom: 15px;
+    }
+
+    .recipe-tips {
+        grid-column: 1 / -1;
+        background: #fff8e1;
+        padding: 30px;
+        border-radius: 8px;
+        border-left: 4px solid #8B4513;
+    }
+
+    .recipe-tips h3 {
+        color: #8B4513;
+        margin-bottom: 15px;
+    }
+
+    .recipe-tags {
+        grid-column: 1 / -1;
+        padding: 30px;
+        border-top: 1px solid #eee;
+    }
+
+    .recipe-tags h3 {
+        color: #8B4513;
+        margin-bottom: 15px;
+    }
+
+    .tags-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tag {
+        background: #8B4513;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+        .recipe-content-wrapper {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .recipe-header {
+            padding: 30px 20px;
+        }
+
+        .recipe-title {
+            font-size: 28px;
+        }
+
+        .recipe-meta {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>

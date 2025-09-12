@@ -42,21 +42,10 @@
                                 <a href="{{ product.url }}">{{ product.title | default: '商品名称' }}</a>
                             </h3>
                             
-                            <div class="product-price">
-                                {% if product.compare_at_price > product.price %}
-                                    <span class="original-price">{{ product.compare_at_price | money }}</span>
-                                {% endif %}
-                                <span class="current-price">{{ product.price | money | default: '价格待定' }}</span>
-                            </div>
-                            
                             {% if section.settings.show_add_to_cart %}
-                                <form method="post" action="/cart/add" class="add-to-cart-form">
-                                    <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="add-to-cart-btn">
-                                        {{ section.settings.add_to_cart_text | default: '加入购物车' }}
-                                    </button>
-                                </form>
+                                <a href="{{ product.url | replace: '/products/', '/recipes/' }}" class="view-recipe-btn">
+                                    {{ section.settings.add_to_cart_text | default: '查看制作方法' }}
+                                </a>
                             {% endif %}
                         </div>
                     </div>
@@ -192,43 +181,22 @@
         color: #D8A26C;
     }
 
-    .product-price {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 10px;
-    }
-
-    .original-price {
-        text-decoration: line-through;
-        color: #999;
-        font-size: 12px;
-    }
-
-    .current-price {
-        font-size: 16px;
-        font-weight: 600;
-        color: #D8A26C;
-    }
-
-    .add-to-cart-form {
-        margin-top: 8px;
-    }
-
-    .add-to-cart-btn {
+    .view-recipe-btn {
+        display: block;
         width: 100%;
         padding: 8px 12px;
-        background: #D8A26C;
+        background: #8B4513;
         color: white;
-        border: none;
+        text-align: center;
+        text-decoration: none;
         border-radius: 4px;
         font-size: 13px;
         cursor: pointer;
         transition: background-color 0.2s ease;
     }
 
-    .add-to-cart-btn:hover {
-        background: #c6925a;
+    .view-recipe-btn:hover {
+        background: #654321;
     }
 
     .view-more {
@@ -384,8 +352,8 @@
     {
       "type": "text",
       "id": "add_to_cart_text",
-      "label": "加入购物车按钮文字",
-      "default": "加入购物车"
+      "label": "查看制作方法按钮文字",
+      "default": "查看制作方法"
     },
     {
       "type": "checkbox",
