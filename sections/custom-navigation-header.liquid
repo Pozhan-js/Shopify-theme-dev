@@ -1,0 +1,411 @@
+<link rel="stylesheet" href="{{ 'custom-navigation-header.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-list-menu.css' | asset_url }}" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="{{ 'component-localization-form.css' | asset_url }}" media="print" onload="this.media='all'">
+
+<style>
+  .custom-nav-header {
+    position: relative;
+    background: var(--color-background);
+  }
+
+  .custom-nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .custom-logo {
+    flex-shrink: 0;
+  }
+
+  .custom-logo img {
+    height: 60px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+  }
+
+  .custom-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-left: auto;
+  }
+
+  .custom-nav-item {
+    position: relative;
+  }
+
+  .custom-nav-link {
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+
+  .custom-nav-link:hover {
+    color: #C89F73;
+  }
+
+  .custom-mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 2rem;
+    min-width: 600px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .custom-nav-item:hover .custom-mega-menu {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mega-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .mega-menu-item {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .mega-menu-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .mega-menu-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+  }
+
+  .mega-menu-title {
+    font-size: 0.9rem;
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
+
+  .custom-localization {
+    display: flex;
+    align-items: center;
+    margin-left: 2rem;
+  }
+
+  .language-switcher {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .language-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+
+  .language-btn:hover {
+    background: #C89F73;
+    color: white;
+    border-color: #C89F73;
+  }
+
+  .language-btn.active {
+    background: #C89F73;
+    color: white;
+    border-color: #C89F73;
+  }
+
+  .mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+
+  .mobile-menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: var(--color-foreground);
+    margin: 5px 0;
+    transition: 0.3s;
+  }
+
+  @media screen and (max-width: 768px) {
+    .custom-nav-container {
+      padding: 1rem;
+    }
+
+    .custom-nav-menu {
+      display: none;
+    }
+
+    .mobile-menu-toggle {
+      display: block;
+    }
+
+    .custom-mega-menu {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      box-shadow: none;
+      min-width: auto;
+      padding: 1rem;
+      transform: none;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .custom-localization {
+      margin-left: 1rem;
+    }
+  }
+
+  .mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    transition: right 0.3s ease;
+    z-index: 2000;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .mobile-menu-drawer.open {
+    right: 0;
+  }
+
+  .mobile-menu-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+
+  .mobile-nav-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .mobile-nav-link {
+    text-decoration: none;
+    color: var(--color-foreground);
+    font-weight: 500;
+  }
+</style>
+
+<header class="custom-nav-header color-{{ section.settings.color_scheme }} gradient">
+  <div class="custom-nav-container">
+    <!-- Logo -->
+    <div class="custom-logo">
+      {%- if settings.logo != blank -%}
+        <a href="{{ routes.root_url }}" class="custom-logo-link">
+          {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
+          {{ settings.logo | image_url: width: 300 | image_tag:
+            class: 'custom-logo-image',
+            alt: logo_alt,
+            height: 60,
+            width: settings.logo.width | divided_by: settings.logo.height | times: 60
+          }}
+        </a>
+      {%- else -%}
+        <a href="{{ routes.root_url }}" class="custom-logo-link">
+          <span class="h2">{{ shop.name }}</span>
+        </a>
+      {%- endif -%}
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="custom-nav-menu">
+      {%- for link in section.settings.menu.links -%}
+        <div class="custom-nav-item">
+          {%- if link.links.size > 0 -%}
+            <span class="custom-nav-link">{{ link.title }} ▼</span>
+            <div class="custom-mega-menu">
+              <div class="mega-menu-grid">
+                {%- for child_link in link.links -%}
+                  <div class="mega-menu-item">
+                    {%- assign collection = collections[child_link.handle] -%}
+                    {%- if collection and collection.image -%}
+                      <img src="{{ collection.image | image_url: width: 150, height: 120, crop: 'center' }}" 
+                           alt="{{ child_link.title }}" 
+                           class="mega-menu-image">
+                    {%- else -%}
+                      <div class="mega-menu-placeholder" style="width: 150px; height: 120px; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: #999; font-size: 2rem;">📦</span>
+                      </div>
+                    {%- endif -%}
+                    <div class="mega-menu-title">{{ child_link.title }}</div>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- else -%}
+            <a href="{{ link.url }}" class="custom-nav-link">{{ link.title }}</a>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </nav>
+
+    <!-- Language Switcher -->
+    <div class="custom-localization">
+      <div class="language-switcher">
+        {%- if localization.available_languages.size > 1 -%}
+          {%- for language in localization.available_languages -%}
+            <button class="language-btn {% if language == localization.language %}active{% endif %}" 
+                    onclick="switchLanguage('{{ language.iso_code }}')">
+              {{ language.endonym_name | capitalize }}
+            </button>
+          {%- endfor -%}
+        {%- else -%}
+          <button class="language-btn active">EN</button>
+          <button class="language-btn">中文</button>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Drawer -->
+  <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+    <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
+    <nav>
+      {%- for link in section.settings.menu.links -%}
+        <div class="mobile-nav-item">
+          {%- if link.links.size > 0 -%}
+            <div class="mobile-nav-link">{{ link.title }}</div>
+            <div style="padding-left: 1rem; margin-top: 0.5rem;">
+              {%- for child_link in link.links -%}
+                <div style="padding: 0.5rem 0;">
+                  <a href="{{ child_link.url }}" class="mobile-nav-link">{{ child_link.title }}</a>
+                </div>
+              {%- endfor -%}
+            </div>
+          {%- else -%}
+            <a href="{{ link.url }}" class="mobile-nav-link">{{ link.title }}</a>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </nav>
+  </div>
+</header>
+
+<script>
+  function toggleMobileMenu() {
+    const drawer = document.getElementById('mobileMenuDrawer');
+    drawer.classList.toggle('open');
+  }
+
+  function switchLanguage(languageCode) {
+    {%- if localization.available_languages.size > 1 -%}
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ routes.root_url }}';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'locale_code';
+      input.value = languageCode;
+      
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    {%- else -%}
+      // Demo functionality for testing
+      const buttons = document.querySelectorAll('.language-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    {%- endif -%}
+  }
+
+  // Close mobile menu when clicking outside
+  document.addEventListener('click', function(event) {
+    const drawer = document.getElementById('mobileMenuDrawer');
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    
+    if (!drawer.contains(event.target) && !toggle.contains(event.target)) {
+      drawer.classList.remove('open');
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Custom Navigation Header",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Navigation Menu"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Logo Settings"
+    },
+    {
+      "type": "range",
+      "id": "logo_height",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Logo Height",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Navigation Header",
+      "category": "Header"
+    }
+  ]
+}
+{% endschema %}

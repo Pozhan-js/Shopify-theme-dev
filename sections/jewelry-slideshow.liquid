@@ -1,5 +1,7 @@
 <!-- 珠宝轮播图 - 支持后台编辑版 -->
-<div class="jewelry-slideshow-container" style="height: {% if section.settings.slide_height == 'large' %}500px{% elsif section.settings.slide_height == 'medium' %}400px{% else %}300px{% endif %};">
+<div class="jewelry-slideshow-container" 
+     style="height: {% if section.settings.slide_height == 'fullscreen' %}100vh{% elsif section.settings.slide_height == 'large' %}80vh{% elsif section.settings.slide_height == 'medium' %}60vh{% else %}40vh{% endif %}; {% if section.settings.fullscreen_width %}width: 100vw; max-width: none; margin: 0; padding: 0;{% endif %}"
+     {% if section.settings.fullscreen_width %}data-fullscreen="true"{% endif %}>
     <div class="jewelry-slideshow">
         <div class="slideshow-wrapper">
             {% if section.blocks.size > 0 %}
@@ -365,20 +367,30 @@ if (slideshowContainer) {
       "id": "slide_height",
       "options": [
         {
+          "value": "fullscreen",
+          "label": "全屏 (100vh)"
+        },
+        {
           "value": "large",
-          "label": "大 (100vh)"
+          "label": "大 (80vh)"
         },
         {
           "value": "medium",
-          "label": "中 (70vh)"
+          "label": "中 (60vh)"
         },
         {
           "value": "small",
-          "label": "小 (50vh)"
+          "label": "小 (40vh)"
         }
       ],
-      "default": "large",
+      "default": "fullscreen",
       "label": "轮播图高度"
+    },
+    {
+      "type": "checkbox",
+      "id": "fullscreen_width",
+      "label": "全屏宽度 (100vw)",
+      "default": true
     },
     {
       "type": "checkbox",
@@ -531,7 +543,8 @@ if (slideshowContainer) {
     {
       "name": "珠宝轮播图",
       "settings": {
-        "slide_height": "large",
+        "slide_height": "fullscreen",
+        "fullscreen_width": true,
         "auto_rotate": true,
         "change_slides_speed": 5
       },
