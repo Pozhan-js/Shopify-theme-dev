@@ -94,59 +94,37 @@
     color: var(--custom-theme-color);
   }
 
-  .custom-header__mobile-toggle {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
+  .custom-header__menu {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
   }
 
   @media screen and (max-width: 768px) {
     .custom-header__menu {
-      display: none;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-
-    .custom-header__mobile-toggle {
-      display: block;
+    
+    .custom-header__menu-item {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
     }
+  }
 
+  @media screen and (max-width: 480px) {
     .custom-header__navigation {
-      padding: 1rem;
+      padding: 0.5rem;
     }
-  }
-
-  .custom-header__mobile-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: rgb(var(--color-background));
-    border-top: 1px solid rgba(var(--color-foreground), 0.08);
-    padding: 1rem;
-  }
-
-  .custom-header__mobile-menu.active {
-    display: block;
-  }
-
-  .custom-header__mobile-menu-item {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: rgba(var(--color-foreground), 0.85);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(var(--color-foreground), 0.05);
-  }
-
-  .custom-header__mobile-menu-item:hover {
-    color: var(--custom-theme-color);
-    background-color: rgba(var(--color-foreground), 0.02);
-  }
-
-  .custom-header__mobile-menu-item--active {
-    color: var(--custom-theme-color);
-    background-color: rgba(var(--color-foreground), 0.05);
+    
+    .custom-header__menu {
+      gap: 0.5rem;
+    }
+    
+    .custom-header__menu-item {
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+    }
   }
 </style>
 
@@ -195,36 +173,9 @@
           <span class="cart-count-bubble">{{ cart.item_count }}</span>
         {%- endif -%}
       </a>
-
-      <button class="custom-header__mobile-toggle" aria-label="Toggle menu">
-        <span class="svg-wrapper">{{ 'icon-hamburger.svg' | inline_asset_content }}</span>
-      </button>
     </div>
   </nav>
-
-  <div class="custom-header__mobile-menu">
-    {%- for link in linklists[section.settings.menu].links -%}
-      <a href="{{ link.url }}" 
-         class="custom-header__mobile-menu-item{% if link.active %} custom-header__mobile-menu-item--active{% endif %}"
-         {% if link.active %}aria-current="page"{% endif %}>
-        {{ link.title }}
-      </a>
-    {%- endfor -%}
-  </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const mobileToggle = document.querySelector('.custom-header__mobile-toggle');
-    const mobileMenu = document.querySelector('.custom-header__mobile-menu');
-    
-    if (mobileToggle && mobileMenu) {
-      mobileToggle.addEventListener('click', function() {
-        mobileMenu.classList.toggle('active');
-      });
-    }
-  });
-</script>
 
 {% schema %}
 {
