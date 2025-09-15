@@ -1,358 +1,818 @@
-<!-- 珠宝轮播图 - 支持后台编辑版 -->
-<div class="jewelry-slideshow-container" 
+<!-- 珠宝轮播图 - 完整版 -->
+<div class="jewelry-hero-banner" 
      style="height: {% if section.settings.slide_height == 'fullscreen' %}100vh{% elsif section.settings.slide_height == 'large' %}80vh{% elsif section.settings.slide_height == 'medium' %}60vh{% else %}40vh{% endif %}; {% if section.settings.fullscreen_width %}width: 100vw; max-width: none; margin: 0; padding: 0;{% endif %}"
      {% if section.settings.fullscreen_width %}data-fullscreen="true"{% endif %}>
-    <div class="jewelry-slideshow">
-        <div class="slideshow-wrapper">
-            {% if section.blocks.size > 0 %}
-                {% for block in section.blocks %}
-                    {% if block.type == 'slide' %}
-                        <div class="slide {% if forloop.first %}active{% endif %}" data-slide-index="{{ forloop.index0 }}">
-                            {% if block.settings.image %}
-                                <img src="{{ block.settings.image | image_url: width: 1920, height: 1080, crop: 'center' }}" 
-                                     alt="{{ block.settings.title | escape }}">
-                            {% else %}
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                            {% endif %}
-                            <div class="slide-content" style="text-align: {{ block.settings.text_alignment }};">
-                                <h2 style="color: {{ block.settings.title_color }}; font-size: {{ block.settings.title_size }}px;">{{ block.settings.title | default: '珠宝系列' }}</h2>
-                                <p style="color: {{ block.settings.text_color }}; font-size: {{ block.settings.text_size }}px;">{{ block.settings.description | default: '精美珠宝，匠心打造' }}</p>
-                                {% if block.settings.button_text != blank %}
-                                    <a href="{{ block.settings.button_link }}" 
-                                       class="btn" 
-                                       style="background-color: {{ block.settings.button_bg_color }}; 
-                                              color: {{ block.settings.button_text_color }}; 
-                                              border-radius: {{ block.settings.button_border_radius }}px;">
-                                        {{ block.settings.button_text }}
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <!-- 默认显示内容，当没有配置数据时 -->
-                <div class="slide active">
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                    <div class="slide-content" style="text-align: center;">
-                        <h2 style="color: #ffffff; font-size: 48px;">钻石系列</h2>
-                        <p style="color: #ffffff; font-size: 20px;">永恒之美的象征，每一件都是艺术品</p>
-                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">探索系列</a>
-                    </div>
-                </div>
-                <div class="slide">
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
-                    <div class="slide-content" style="text-align: center;">
-                        <h2 style="color: #ffffff; font-size: 48px;">珍珠系列</h2>
-                        <p style="color: #ffffff; font-size: 20px;">优雅与纯洁的化身，经典永不过时</p>
-                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">查看详情</a>
-                    </div>
-                </div>
-                <div class="slide">
-                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
-                    <div class="slide-content" style="text-align: center;">
-                        <h2 style="color: #ffffff; font-size: 48px;">彩宝系列</h2>
-                        <p style="color: #ffffff; font-size: 20px;">绚丽色彩的艺术，大自然的馈赠</p>
-                        <a href="/collections/all" class="btn" style="background-color: rgba(255, 255, 255, 0.9); color: #333333; border-radius: 30px;">立即选购</a>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- 导航箭头 -->
-        {% if section.blocks.size > 1 or section.blocks.size == 0 %}
-            <div class="nav-arrows">
-                <button class="arrow prev" onclick="changeSlide(-1)">❮</button>
-                <button class="arrow next" onclick="changeSlide(1)">❯</button>
-            </div>
-            
-            <!-- 小圆点导航 -->
-            <div class="dots-container">
-                {% if section.blocks.size > 0 %}
-                    {% for block in section.blocks %}
-                        {% if block.type == 'slide' %}
-                            <span class="dot {% if forloop.first %}active{% endif %}" 
-                                  onclick="currentSlide({{ forloop.index }})"></span>
-                        {% endif %}
-                    {% endfor %}
+  
+  <div class="hero-slideshow">
+    <div class="slideshow-wrapper">
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          {% if block.type == 'slide' %}
+            <div class="hero-slide {% if forloop.first %}active{% endif %}" 
+                 data-slide-index="{{ forloop.index0 }}"
+                 style="{% if block.settings.overlay_opacity > 0 %}--overlay-opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};{% endif %}">
+              
+              <!-- 背景图片或视频 -->
+              <div class="slide-media">
+                {% if block.settings.video_url != blank %}
+                  <video autoplay muted loop playsinline>
+                    <source src="{{ block.settings.video_url }}" type="video/mp4">
+                  </video>
+                {% elsif block.settings.image %}
+                  <img src="{{ block.settings.image | image_url: width: 1920, height: 1080, crop: 'center' }}" 
+                       alt="{{ block.settings.title | escape }}"
+                       loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
                 {% else %}
-                    <span class="dot active" onclick="currentSlide(1)"></span>
-                    <span class="dot" onclick="currentSlide(2)"></span>
-                    <span class="dot" onclick="currentSlide(3)"></span>
+                  <div class="default-gradient" style="background: linear-gradient(135deg, {{ block.settings.gradient_start | default: '#667eea' }} 0%, {{ block.settings.gradient_end | default: '#764ba2' }} 100%);"></div>
                 {% endif %}
+                
+                <!-- 遮罩层 -->
+                {% if block.settings.overlay_opacity > 0 %}
+                  <div class="slide-overlay" style="background-color: {{ block.settings.overlay_color | default: '#000000' }}; opacity: {{ block.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+                {% endif %}
+              </div>
+              
+              <!-- 内容区域 -->
+              <div class="slide-content-wrapper">
+                <div class="slide-content" 
+                     style="text-align: {{ block.settings.text_alignment | default: 'left' }}; 
+                            {% if block.settings.content_position %}transform: translateY({{ block.settings.vertical_offset }}px);{% endif %}">
+                  
+                  {% if block.settings.subtitle != blank %}
+                    <div class="slide-subtitle" 
+                         style="color: {{ block.settings.subtitle_color }}; 
+                                font-size: {{ block.settings.subtitle_size }}px;
+                                {% if block.settings.subtitle_font_weight %}font-weight: {{ block.settings.subtitle_font_weight }};{% endif %}">
+                      {{ block.settings.subtitle }}
+                    </div>
+                  {% endif %}
+                  
+                  {% if block.settings.title != blank %}
+                    <h1 class="slide-title" 
+                        style="color: {{ block.settings.title_color }}; 
+                               font-size: {{ block.settings.title_size }}px;
+                               {% if block.settings.title_font_weight %}font-weight: {{ block.settings.title_font_weight }};{% endif %}
+                               {% if block.settings.title_letter_spacing %}letter-spacing: {{ block.settings.title_letter_spacing }}px;{% endif %}">
+                      {{ block.settings.title }}
+                    </h1>
+                  {% endif %}
+                  
+                  {% if block.settings.description != blank %}
+                    <p class="slide-description" 
+                       style="color: {{ block.settings.text_color }}; 
+                              font-size: {{ block.settings.text_size }}px;
+                              {% if block.settings.text_font_weight %}font-weight: {{ block.settings.text_font_weight }};{% endif %}">
+                      {{ block.settings.description }}
+                    </p>
+                  {% endif %}
+                  
+                  {% if block.settings.button_text != blank %}
+                    <div class="slide-buttons">
+                      <a href="{{ block.settings.button_link | default: '#' }}" 
+                         class="hero-btn primary-btn"
+                         style="background-color: {{ block.settings.button_bg_color }}; 
+                                color: {{ block.settings.button_text_color }}; 
+                                border-radius: {{ block.settings.button_border_radius }}px;
+                                {% if block.settings.button_border_width > 0 %}border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};{% endif %}">
+                        {{ block.settings.button_text }}
+                      </a>
+                      
+                      {% if block.settings.secondary_button_text != blank %}
+                        <a href="{{ block.settings.secondary_button_link | default: '#' }}" 
+                           class="hero-btn secondary-btn"
+                           style="color: {{ block.settings.secondary_button_color }}; 
+                                  border: 2px solid {{ block.settings.secondary_button_color }};
+                                  border-radius: {{ block.settings.button_border_radius }}px;">
+                          {{ block.settings.secondary_button_text }}
+                        </a>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <!-- 滚动提示 -->
+              {% if forloop.first and section.settings.show_scroll_indicator %}
+                <div class="scroll-indicator">
+                  <div class="scroll-text">Scroll</div>
+                  <div class="scroll-line"></div>
+                </div>
+              {% endif %}
             </div>
-        {% endif %}
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <!-- 默认幻灯片 -->
+        <div class="hero-slide active">
+          <div class="slide-media">
+            <div class="default-gradient" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);"></div>
+            <div class="slide-overlay" style="background-color: #000000; opacity: 0.3;"></div>
+          </div>
+          <div class="slide-content-wrapper">
+            <div class="slide-content" style="text-align: left;">
+              <div class="slide-subtitle" style="color: #d4af37; font-size: 14px; font-weight: 300;">LUXURY COLLECTION</div>
+              <h1 class="slide-title" style="color: #ffffff; font-size: 56px; font-weight: 300; letter-spacing: 2px;">钻石系列</h1>
+              <p class="slide-description" style="color: #ffffff; font-size: 20px; font-weight: 300;">永恒之美的象征，每一件都是艺术品<br>精工细作，传承经典</p>
+              <div class="slide-buttons">
+                <a href="/collections/all" class="hero-btn primary-btn" style="background-color: #d4af37; color: #000000; border-radius: 0;">探索系列</a>
+                <a href="/pages/about" class="hero-btn secondary-btn" style="color: #ffffff; border-radius: 0;">了解更多</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-slide">
+          <div class="slide-media">
+            <div class="default-gradient" style="background: linear-gradient(135deg, #2c1810 0%, #8b4513 50%, #daa520 100%);"></div>
+            <div class="slide-overlay" style="background-color: #000000; opacity: 0.4;"></div>
+          </div>
+          <div class="slide-content-wrapper">
+            <div class="slide-content" style="text-align: left;">
+              <div class="slide-subtitle" style="color: #f5f5dc; font-size: 14px; font-weight: 300;">PEARL ELEGANCE</div>
+              <h1 class="slide-title" style="color: #ffffff; font-size: 56px; font-weight: 300; letter-spacing: 2px;">珍珠系列</h1>
+              <p class="slide-description" style="color: #ffffff; font-size: 20px; font-weight: 300;">优雅与纯洁的化身，经典永不过时<br>海洋的馈赠，时光的见证</p>
+              <div class="slide-buttons">
+                <a href="/collections/pearls" class="hero-btn primary-btn" style="background-color: #f5f5dc; color: #2c1810; border-radius: 0;">查看详情</a>
+                <a href="/pages/craftsmanship" class="hero-btn secondary-btn" style="color: #ffffff; border-radius: 0;">工艺介绍</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-slide">
+          <div class="slide-media">
+            <div class="default-gradient" style="background: linear-gradient(135deg, #4a0e4e 0%, #81007f 50%, #ff6b9d 100%);"></div>
+            <div class="slide-overlay" style="background-color: #000000; opacity: 0.3;"></div>
+          </div>
+          <div class="slide-content-wrapper">
+            <div class="slide-content" style="text-align: left;">
+              <div class="slide-subtitle" style="color: #ff6b9d; font-size: 14px; font-weight: 300;">GEMSTONE ARTISTRY</div>
+              <h1 class="slide-title" style="color: #ffffff; font-size: 56px; font-weight: 300; letter-spacing: 2px;">彩宝系列</h1>
+              <p class="slide-description" style="color: #ffffff; font-size: 20px; font-weight: 300;">绚丽色彩的艺术，大自然的馈赠<br>每一颗宝石都诉说着独特的故事</p>
+              <div class="slide-buttons">
+                <a href="/collections/gemstones" class="hero-btn primary-btn" style="background-color: #ff6b9d; color: #ffffff; border-radius: 0;">立即选购</a>
+                <a href="/pages/gemstone-guide" class="hero-btn secondary-btn" style="color: #ffffff; border-radius: 0;">宝石指南</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
     </div>
+    
+    <!-- 导航控制 -->
+    {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+      <!-- 箭头导航 -->
+      {% if section.settings.show_arrows %}
+        <div class="hero-navigation">
+          <button class="nav-arrow prev-arrow" onclick="changeHeroSlide(-1)" aria-label="Previous slide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="nav-arrow next-arrow" onclick="changeHeroSlide(1)" aria-label="Next slide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      {% endif %}
+      
+      <!-- 圆点导航 -->
+      {% if section.settings.show_dots %}
+        <div class="hero-dots">
+          {% if section.blocks.size > 0 %}
+            {% for block in section.blocks %}
+              {% if block.type == 'slide' %}
+                <button class="hero-dot {% if forloop.first %}active{% endif %}" 
+                        onclick="goToHeroSlide({{ forloop.index0 }})"
+                        aria-label="Go to slide {{ forloop.index }}">
+                  <span class="dot-progress"></span>
+                </button>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <button class="hero-dot active" onclick="goToHeroSlide(0)"><span class="dot-progress"></span></button>
+            <button class="hero-dot" onclick="goToHeroSlide(1)"><span class="dot-progress"></span></button>
+            <button class="hero-dot" onclick="goToHeroSlide(2)"><span class="dot-progress"></span></button>
+          {% endif %}
+        </div>
+      {% endif %}
+      
+      <!-- 进度条 -->
+      {% if section.settings.show_progress and section.settings.auto_rotate %}
+        <div class="hero-progress">
+          <div class="progress-bar"></div>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
 </div>
 
 <style>
-.jewelry-slideshow-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
+/* 基础样式 */
+.jewelry-hero-banner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: #000;
 }
 
-.jewelry-slideshow {
-    position: relative;
-    width: 100%;
-    height: 100%;
+.jewelry-hero-banner[data-fullscreen="true"] {
+  max-width: none;
+}
+
+.hero-slideshow {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 .slideshow-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
-.slide {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+/* 幻灯片样式 */
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform: scale(1.05);
 }
 
-.slide.active {
-    opacity: 1;
-    z-index: 1;
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+  transform: scale(1);
 }
 
-.slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.slide-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.slide-media img,
+.slide-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 8s ease-out;
+}
+
+.hero-slide.active .slide-media img,
+.hero-slide.active .slide-media video {
+  transform: scale(1.02);
+}
+
+.default-gradient {
+  width: 100%;
+  height: 100%;
+}
+
+.slide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* 内容样式 */
+.slide-content-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 2;
+  padding: 0 8% 0 8%;
 }
 
 .slide-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    backdrop-filter: none;
-    z-index: 2;
+  position: relative;
+  max-width: 600px;
+  width: 100%;
+  animation: slideContentIn 1s ease-out 0.3s both;
 }
 
-.slide-content h2 {
-    margin-bottom: 20px;
-    font-weight: 300;
-    line-height: 1.2;
+@keyframes slideContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.slide-content p {
-    margin-bottom: 30px;
-    line-height: 1.5;
+.slide-subtitle {
+  display: block;
+  margin-bottom: 15px;
+  font-family: 'Georgia', serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.9;
+  animation: fadeInUp 0.8s ease-out 0.5s both;
 }
 
-.btn {
-    display: inline-block;
-    padding: 15px 40px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
+.slide-title {
+  margin: 0 0 25px 0;
+  font-family: 'Georgia', serif;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: fadeInUp 0.8s ease-out 0.7s both;
 }
 
-.btn:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+.slide-description {
+  margin: 0 0 40px 0;
+  line-height: 1.6;
+  opacity: 0.95;
+  animation: fadeInUp 0.8s ease-out 0.9s both;
 }
 
-/* 导航箭头 */
-.nav-arrows {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    transform: translateY(-50%);
-    z-index: 2;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    border: none;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    transition: background 0.3s ease;
-    z-index: 3;
+/* 按钮样式 */
+.slide-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  animation: fadeInUp 0.8s ease-out 1.1s both;
 }
 
-.arrow:hover {
-    background: rgba(0, 0, 0, 0.6);
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 36px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-width: 160px;
 }
 
-.prev {
-    left: 20px;
+.primary-btn {
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
 }
 
-.next {
-    right: 20px;
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  background-position: 0% 0;
 }
 
-/* 小圆点导航 */
-.dots-container {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 2;
+.secondary-btn {
+  background: transparent;
+  backdrop-filter: blur(10px);
 }
 
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    transition: background 0.3s ease;
+.secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
-.dot.active {
-    background: white;
+/* 导航样式 */
+.hero-navigation {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.prev-arrow {
+  left: 30px;
+}
+
+.next-arrow {
+  right: 30px;
+}
+
+/* 圆点导航 */
+.hero-dots {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  z-index: 3;
+}
+
+.hero-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-dot.active {
+  background: white;
+}
+
+.dot-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+}
+
+.hero-dot.active .dot-progress {
+  transform: scale(1);
+}
+
+/* 进度条 */
+.hero-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 3;
+}
+
+.progress-bar {
+  height: 100%;
+  background: white;
+  width: 0%;
+  transition: width linear;
+}
+
+/* 滚动指示器 */
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  z-index: 3;
+  animation: fadeIn 2s ease-out 2s both;
+}
+
+.scroll-text {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
+.scroll-line {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, white, transparent);
+  position: relative;
+}
+
+.scroll-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: white;
+  animation: scrollMove 2s ease-in-out infinite;
+}
+
+@keyframes scrollMove {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* 响应式设计 */
-@media screen and (max-width: 749px) {
-    .jewelry-slideshow-container {
-        height: 60vh !important;
-    }
-    
-    .slide-content h2 {
-        font-size: 28px !important;
-    }
-    
-    .slide-content p {
-        font-size: 16px !important;
-    }
-    
-    .arrow {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-    }
-    
-    .prev {
-        left: 10px;
-    }
-    
-    .next {
-        right: 10px;
-    }
-    
-    .btn {
-        padding: 12px 30px;
-        font-size: 14px;
-    }
+@media screen and (max-width: 1024px) {
+  .slide-content {
+    max-width: 600px;
+  }
+  
+  .slide-title {
+    font-size: 42px !important;
+  }
+  
+  .slide-description {
+    font-size: 18px !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .jewelry-hero-banner {
+    height: 70vh !important;
+  }
+  
+  .slide-content-wrapper {
+    padding: 0 20px;
+  }
+  
+  .slide-subtitle {
+    font-size: 12px !important;
+  }
+  
+  .slide-title {
+    font-size: 32px !important;
+    margin-bottom: 20px;
+  }
+  
+  .slide-description {
+    font-size: 16px !important;
+    margin-bottom: 30px;
+  }
+  
+  .hero-btn {
+    padding: 15px 30px;
+    font-size: 14px;
+    min-width: 140px;
+  }
+  
+  .slide-buttons {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .nav-arrow {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .prev-arrow {
+    left: 20px;
+  }
+  
+  .next-arrow {
+    right: 20px;
+  }
+  
+  .hero-dots {
+    bottom: 30px;
+    gap: 12px;
+  }
+  
+  .scroll-indicator {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .jewelry-hero-banner {
+    height: 60vh !important;
+  }
+  
+  .slide-content-wrapper {
+    padding: 0 15px;
+  }
+  
+  .slide-title {
+    font-size: 28px !important;
+  }
+  
+  .slide-description {
+    font-size: 14px !important;
+  }
+  
+  .hero-btn {
+    padding: 12px 24px;
+    font-size: 13px;
+  }
+  
+  .nav-arrow {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .prev-arrow {
+    left: 15px;
+  }
+  
+  .next-arrow {
+    right: 15px;
+  }
 }
 </style>
 
 <script>
-let currentSlideIndex = 0;
-let autoRotateInterval;
-let slides, dots, totalSlides;
+let heroCurrentSlide = 0;
+let heroAutoRotateInterval;
+let heroSlides, heroDots, heroTotalSlides;
+let heroProgressBar;
 
 // 初始化轮播图
-function initSlideshow() {
-    slides = document.querySelectorAll('.slide');
-    dots = document.querySelectorAll('.dot');
-    totalSlides = slides.length;
+function initHeroSlideshow() {
+  heroSlides = document.querySelectorAll('.hero-slide');
+  heroDots = document.querySelectorAll('.hero-dot');
+  heroProgressBar = document.querySelector('.progress-bar');
+  heroTotalSlides = heroSlides.length;
+  
+  if (heroTotalSlides > 0) {
+    showHeroSlide(heroCurrentSlide);
     
-    if (totalSlides > 0) {
-        showSlide(currentSlideIndex);
-        
-        {% if section.settings.auto_rotate %}
-            {% if section.blocks.size > 1 or section.blocks.size == 0 %}
-                autoRotateInterval = setInterval(() => {
-                    changeSlide(1);
-                }, {{ section.settings.change_slides_speed | times: 1000 }});
-            {% endif %}
-        {% endif %}
-    }
+    {% if section.settings.auto_rotate %}
+      {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+        startHeroAutoRotate();
+      {% endif %}
+    {% endif %}
+  }
 }
 
 // 显示指定幻灯片
-function showSlide(index) {
-    if (!slides || slides.length === 0) return;
-    
-    slides.forEach((slide, i) => {
-        slide.classList.toggle('active', i === index);
+function showHeroSlide(index) {
+  if (!heroSlides || heroSlides.length === 0) return;
+  
+  heroSlides.forEach((slide, i) => {
+    slide.classList.toggle('active', i === index);
+  });
+  
+  if (heroDots && heroDots.length > 0) {
+    heroDots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
     });
-    
-    if (dots && dots.length > 0) {
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === index);
-        });
-    }
+  }
+  
+  // 重置进度条
+  if (heroProgressBar) {
+    heroProgressBar.style.width = '0%';
+    setTimeout(() => {
+      if (heroProgressBar) {
+        heroProgressBar.style.transitionDuration = '{{ section.settings.change_slides_speed }}s';
+        heroProgressBar.style.width = '100%';
+      }
+    }, 100);
+  }
 }
 
 // 切换幻灯片
-function changeSlide(direction) {
-    if (!slides || slides.length <= 1) return;
-    
-    currentSlideIndex += direction;
-    
-    if (currentSlideIndex >= totalSlides) {
-        currentSlideIndex = 0;
-    } else if (currentSlideIndex < 0) {
-        currentSlideIndex = totalSlides - 1;
-    }
-    
-    showSlide(currentSlideIndex);
+function changeHeroSlide(direction) {
+  if (!heroSlides || heroSlides.length <= 1) return;
+  
+  heroCurrentSlide += direction;
+  
+  if (heroCurrentSlide >= heroTotalSlides) {
+    heroCurrentSlide = 0;
+  } else if (heroCurrentSlide < 0) {
+    heroCurrentSlide = heroTotalSlides - 1;
+  }
+  
+  showHeroSlide(heroCurrentSlide);
+  restartHeroAutoRotate();
 }
 
 // 跳转到指定幻灯片
-function currentSlide(index) {
-    if (!slides || slides.length <= 1) return;
-    
-    currentSlideIndex = index - 1;
-    showSlide(currentSlideIndex);
-    
-    // 重置自动轮播计时器
-    {% if section.settings.auto_rotate %}
-        clearInterval(autoRotateInterval);
-        {% if section.blocks.size > 1 or section.blocks.size == 0 %}
-            autoRotateInterval = setInterval(() => {
-                changeSlide(1);
-            }, {{ section.settings.change_slides_speed | times: 1000 }});
-        {% endif %}
+function goToHeroSlide(index) {
+  if (!heroSlides || heroSlides.length <= 1) return;
+  
+  heroCurrentSlide = index;
+  showHeroSlide(heroCurrentSlide);
+  restartHeroAutoRotate();
+}
+
+// 开始自动轮播
+function startHeroAutoRotate() {
+  {% if section.settings.auto_rotate %}
+    {% if section.blocks.size > 1 or section.blocks.size == 0 %}
+      heroAutoRotateInterval = setInterval(() => {
+        changeHeroSlide(1);
+      }, {{ section.settings.change_slides_speed | times: 1000 }});
     {% endif %}
+  {% endif %}
+}
+
+// 重启自动轮播
+function restartHeroAutoRotate() {
+  clearInterval(heroAutoRotateInterval);
+  startHeroAutoRotate();
+}
+
+// 停止自动轮播
+function stopHeroAutoRotate() {
+  clearInterval(heroAutoRotateInterval);
+  if (heroProgressBar) {
+    heroProgressBar.style.width = '0%';
+  }
 }
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', initSlideshow);
+document.addEventListener('DOMContentLoaded', initHeroSlideshow);
 
-// 鼠标悬停时暂停自动轮播
-const slideshowContainer = document.querySelector('.jewelry-slideshow-container');
-if (slideshowContainer) {
-    slideshowContainer.addEventListener('mouseenter', () => {
-        clearInterval(autoRotateInterval);
-    });
-    
-    slideshowContainer.addEventListener('mouseleave', () => {
-        {% if section.settings.auto_rotate %}
-            {% if section.blocks.size > 1 or section.blocks.size == 0 %}
-                autoRotateInterval = setInterval(() => {
-                    changeSlide(1);
-                }, {{ section.settings.change_slides_speed | times: 1000 }});
-            {% endif %}
-        {% endif %}
-    });
+// 鼠标悬停控制
+const heroContainer = document.querySelector('.jewelry-hero-banner');
+if (heroContainer) {
+  heroContainer.addEventListener('mouseenter', stopHeroAutoRotate);
+  heroContainer.addEventListener('mouseleave', restartHeroAutoRotate);
+}
+
+// 键盘控制
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft') {
+    changeHeroSlide(-1);
+  } else if (e.key === 'ArrowRight') {
+    changeHeroSlide(1);
+  }
+});
+
+// 触摸滑动支持
+let heroTouchStartX = 0;
+let heroTouchEndX = 0;
+
+if (heroContainer) {
+  heroContainer.addEventListener('touchstart', (e) => {
+    heroTouchStartX = e.changedTouches[0].screenX;
+  });
+  
+  heroContainer.addEventListener('touchend', (e) => {
+    heroTouchEndX = e.changedTouches[0].screenX;
+    handleHeroSwipe();
+  });
+}
+
+function handleHeroSwipe() {
+  const swipeThreshold = 50;
+  const diff = heroTouchStartX - heroTouchEndX;
+  
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0) {
+      changeHeroSlide(1); // 向左滑动，下一张
+    } else {
+      changeHeroSlide(-1); // 向右滑动，上一张
+    }
+  }
 }
 </script>
 
@@ -362,6 +822,10 @@ if (slideshowContainer) {
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
     {
       "type": "select",
       "id": "slide_height",
@@ -393,6 +857,10 @@ if (slideshowContainer) {
       "default": true
     },
     {
+      "type": "header",
+      "content": "自动播放设置"
+    },
+    {
       "type": "checkbox",
       "id": "auto_rotate",
       "label": "自动轮播",
@@ -402,11 +870,39 @@ if (slideshowContainer) {
       "type": "range",
       "id": "change_slides_speed",
       "min": 3,
-      "max": 9,
+      "max": 12,
       "step": 1,
       "unit": "秒",
       "label": "切换速度",
-      "default": 5
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "导航控制"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "显示箭头导航",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "显示圆点导航",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress",
+      "label": "显示进度条",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "显示滚动指示器",
+      "default": true
     }
   ],
   "blocks": [
@@ -415,41 +911,167 @@ if (slideshowContainer) {
       "name": "轮播图幻灯片",
       "settings": [
         {
+          "type": "header",
+          "content": "媒体设置"
+        },
+        {
           "type": "image_picker",
           "id": "image",
           "label": "背景图片"
         },
         {
           "type": "text",
-          "id": "title",
-          "label": "标题",
-          "default": "钻石系列"
+          "id": "video_url",
+          "label": "视频URL (MP4格式)",
+          "info": "如果设置了视频，将优先显示视频而非图片"
+        },
+        {
+          "type": "color",
+          "id": "gradient_start",
+          "label": "渐变起始颜色",
+          "default": "#667eea",
+          "info": "当没有图片或视频时使用"
+        },
+        {
+          "type": "color",
+          "id": "gradient_end",
+          "label": "渐变结束颜色",
+          "default": "#764ba2",
+          "info": "当没有图片或视频时使用"
+        },
+        {
+          "type": "header",
+          "content": "遮罩设置"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "label": "遮罩透明度",
+          "default": 30
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "遮罩颜色",
+          "default": "#000000"
+        },
+        {
+          "type": "header",
+          "content": "内容设置"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "副标题",
+          "default": "LUXURY COLLECTION"
+        },
+        {
+          "type": "range",
+          "id": "subtitle_size",
+          "min": 10,
+          "max": 20,
+          "step": 1,
+          "unit": "px",
+          "label": "副标题大小",
+          "default": 14
+        },
+        {
+          "type": "color",
+          "id": "subtitle_color",
+          "label": "副标题颜色",
+          "default": "#d4af37"
         },
         {
           "type": "select",
-          "id": "title_size",
+          "id": "subtitle_font_weight",
           "options": [
             {
-              "value": "32",
-              "label": "小"
+              "value": "300",
+              "label": "细体"
             },
             {
-              "value": "48",
-              "label": "中"
+              "value": "400",
+              "label": "正常"
             },
             {
-              "value": "64",
-              "label": "大"
+              "value": "500",
+              "label": "中等"
+            },
+            {
+              "value": "600",
+              "label": "半粗"
+            },
+            {
+              "value": "700",
+              "label": "粗体"
             }
           ],
-          "default": "48",
-          "label": "标题大小"
+          "default": "300",
+          "label": "副标题字重"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "主标题",
+          "default": "钻石系列"
+        },
+        {
+          "type": "range",
+          "id": "title_size",
+          "min": 32,
+          "max": 80,
+          "step": 2,
+          "unit": "px",
+          "label": "主标题大小",
+          "default": 56
         },
         {
           "type": "color",
           "id": "title_color",
-          "label": "标题颜色",
+          "label": "主标题颜色",
           "default": "#ffffff"
+        },
+        {
+          "type": "select",
+          "id": "title_font_weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "细体"
+            },
+            {
+              "value": "400",
+              "label": "正常"
+            },
+            {
+              "value": "500",
+              "label": "中等"
+            },
+            {
+              "value": "600",
+              "label": "半粗"
+            },
+            {
+              "value": "700",
+              "label": "粗体"
+            }
+          ],
+          "default": "300",
+          "label": "主标题字重"
+        },
+        {
+          "type": "range",
+          "id": "title_letter_spacing",
+          "min": 0,
+          "max": 5,
+          "step": 0.5,
+          "unit": "px",
+          "label": "主标题字间距",
+          "default": 2
         },
         {
           "type": "textarea",
@@ -458,30 +1080,40 @@ if (slideshowContainer) {
           "default": "永恒之美的象征，每一件都是艺术品"
         },
         {
-          "type": "select",
+          "type": "range",
           "id": "text_size",
-          "options": [
-            {
-              "value": "16",
-              "label": "小"
-            },
-            {
-              "value": "20",
-              "label": "中"
-            },
-            {
-              "value": "24",
-              "label": "大"
-            }
-          ],
-          "default": "20",
-          "label": "文字大小"
+          "min": 14,
+          "max": 28,
+          "step": 1,
+          "unit": "px",
+          "label": "描述文字大小",
+          "default": 20
         },
         {
           "type": "color",
           "id": "text_color",
-          "label": "文字颜色",
+          "label": "描述文字颜色",
           "default": "#ffffff"
+        },
+        {
+          "type": "select",
+          "id": "text_font_weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "细体"
+            },
+            {
+              "value": "400",
+              "label": "正常"
+            },
+            {
+              "value": "500",
+              "label": "中等"
+            }
+          ],
+          "default": "300",
+          "label": "描述文字字重"
         },
         {
           "type": "select",
@@ -491,40 +1123,55 @@ if (slideshowContainer) {
               "value": "left",
               "label": "左对齐"
             },
-            {
-              "value": "center",
-              "label": "居中"
-            },
+        {
+          "value": "center",
+          "label": "居中"
+        },
             {
               "value": "right",
               "label": "右对齐"
             }
           ],
-          "default": "center",
+          "default": "left",
           "label": "文字对齐方式"
+        },
+        {
+          "type": "range",
+          "id": "vertical_offset",
+          "min": -100,
+          "max": 100,
+          "step": 10,
+          "unit": "px",
+          "label": "垂直偏移",
+          "default": 0,
+          "info": "正值向下，负值向上"
+        },
+        {
+          "type": "header",
+          "content": "主按钮设置"
         },
         {
           "type": "text",
           "id": "button_text",
-          "label": "按钮文字",
+          "label": "主按钮文字",
           "default": "探索系列"
         },
         {
           "type": "url",
           "id": "button_link",
-          "label": "按钮链接"
+          "label": "主按钮链接"
         },
         {
           "type": "color",
           "id": "button_bg_color",
-          "label": "按钮背景颜色",
-          "default": "rgba(255, 255, 255, 0.9)"
+          "label": "主按钮背景颜色",
+          "default": "#d4af37"
         },
         {
           "type": "color",
           "id": "button_text_color",
-          "label": "按钮文字颜色",
-          "default": "#333333"
+          "label": "主按钮文字颜色",
+          "default": "#000000"
         },
         {
           "type": "range",
@@ -534,7 +1181,43 @@ if (slideshowContainer) {
           "step": 1,
           "unit": "px",
           "label": "按钮圆角",
-          "default": 30
+          "default": 0
+        },
+        {
+          "type": "range",
+          "id": "button_border_width",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "unit": "px",
+          "label": "按钮边框宽度",
+          "default": 0
+        },
+        {
+          "type": "color",
+          "id": "button_border_color",
+          "label": "按钮边框颜色",
+          "default": "#d4af37"
+        },
+        {
+          "type": "header",
+          "content": "次要按钮设置"
+        },
+        {
+          "type": "text",
+          "id": "secondary_button_text",
+          "label": "次要按钮文字"
+        },
+        {
+          "type": "url",
+          "id": "secondary_button_link",
+          "label": "次要按钮链接"
+        },
+        {
+          "type": "color",
+          "id": "secondary_button_color",
+          "label": "次要按钮颜色",
+          "default": "#ffffff"
         }
       ]
     }
@@ -546,34 +1229,47 @@ if (slideshowContainer) {
         "slide_height": "fullscreen",
         "fullscreen_width": true,
         "auto_rotate": true,
-        "change_slides_speed": 5
+        "change_slides_speed": 6,
+        "show_arrows": true,
+        "show_dots": true,
+        "show_progress": true,
+        "show_scroll_indicator": true
       },
       "blocks": [
         {
           "type": "slide",
           "settings": {
+            "subtitle": "LUXURY COLLECTION",
             "title": "钻石系列",
-            "description": "永恒之美的象征，每一件都是艺术品",
+            "description": "永恒之美的象征，每一件都是艺术品\n精工细作，传承经典",
             "button_text": "探索系列",
-            "button_link": "/collections/all"
+            "button_link": "/collections/diamonds",
+            "secondary_button_text": "了解更多",
+            "secondary_button_link": "/pages/about"
           }
         },
         {
           "type": "slide",
           "settings": {
+            "subtitle": "PEARL ELEGANCE",
             "title": "珍珠系列",
-            "description": "优雅与纯洁的化身，经典永不过时",
+            "description": "优雅与纯洁的化身，经典永不过时\n海洋的馈赠，时光的见证",
             "button_text": "查看详情",
-            "button_link": "/collections/all"
+            "button_link": "/collections/pearls",
+            "secondary_button_text": "工艺介绍",
+            "secondary_button_link": "/pages/craftsmanship"
           }
         },
         {
           "type": "slide",
           "settings": {
+            "subtitle": "GEMSTONE ARTISTRY",
             "title": "彩宝系列",
-            "description": "绚丽色彩的艺术，大自然的馈赠",
+            "description": "绚丽色彩的艺术，大自然的馈赠\n每一颗宝石都诉说着独特的故事",
             "button_text": "立即选购",
-            "button_link": "/collections/all"
+            "button_link": "/collections/gemstones",
+            "secondary_button_text": "宝石指南",
+            "secondary_button_link": "/pages/gemstone-guide"
           }
         }
       ]
