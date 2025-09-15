@@ -1,0 +1,150 @@
+{% layout 'theme' %}
+
+<div class="page-width">
+  {% section 'fengshui-faq-section' %}
+</div>
+
+<style>
+  .faq-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .faq-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .faq-category-btn {
+    padding: 10px 20px;
+    background: {{ settings.color_button_bg }};
+    color: {{ settings.color_button_text }};
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .faq-category-btn:hover {
+    background: {{ settings.color_button_bg | color_darken: 10 }};
+  }
+
+  .faq-category-section {
+    display: none;
+    margin-bottom: 40px;
+  }
+
+  .faq-category-section.active {
+    display: block;
+  }
+
+  .faq-category-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    color: {{ settings.color_heading }};
+    border-bottom: 1px solid {{ settings.color_borders }};
+    padding-bottom: 10px;
+  }
+
+  .faq-item {
+    margin-bottom: 15px;
+    border: 1px solid {{ settings.color_borders }};
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .faq-question {
+    width: 100%;
+    padding: 15px 20px;
+    text-align: left;
+    background: {{ settings.color_body_bg }};
+    border: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .faq-question:hover {
+    background: {{ settings.color_body_bg | color_darken: 2 }};
+  }
+
+  .faq-toggle {
+    font-size: 1.2em;
+  }
+
+  .faq-answer {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    background: {{ settings.color_body_bg | color_lighten: 2 }};
+  }
+
+  .faq-item.active .faq-answer {
+    padding: 20px;
+    max-height: 500px;
+  }
+
+  .faq-item.active .faq-toggle {
+    transform: rotate(45deg);
+  }
+
+  @media (min-width: 750px) {
+    .faq-container {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .faq-categories {
+      flex-direction: column;
+      position: sticky;
+      top: 20px;
+      width: 250px;
+    }
+
+    .faq-questions {
+      flex: 1;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 默认显示第一个分类
+    const firstCategory = document.querySelector('.faq-category-section');
+    if (firstCategory) firstCategory.classList.add('active');
+
+    // 分类切换
+    const categoryBtns = document.querySelectorAll('.faq-category-btn');
+    categoryBtns.forEach((btn) => {
+      btn.addEventListener('click', function () {
+        const category = this.dataset.category;
+        document.querySelectorAll('.faq-category-section').forEach((section) => {
+          section.classList.remove('active');
+        });
+        document.querySelector(`.faq-category-section[data-category="${category}"]`).classList.add('active');
+
+        // 更新活动按钮样式
+        categoryBtns.forEach((b) => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // 问题展开/收起
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach((question) => {
+      question.addEventListener('click', function () {
+        const item = this.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+  });
+</script>

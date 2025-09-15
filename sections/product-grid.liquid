@@ -1,0 +1,77 @@
+{%- assign products_per_row = section.settings.products_per_row | default: 4 -%}
+{%- assign collection = collections[section.settings.collection] -%}
+
+<div class="product-grid-container">
+  <div class="product-grid grid grid--{{ section.settings.grid_mobile_items_per_row }}-col-tablet-down grid--{{ products_per_row }}-col-desktop">
+    {% for product in collection.products %}
+      <div class="grid__item">
+        {% render 'card-product',
+          card_product: product,
+          show_secondary_image: section.settings.show_secondary_image,
+          show_vendor: section.settings.show_vendor,
+          show_rating: section.settings.show_rating
+        %}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .product-grid-container {
+    padding: 0 20px;
+  }
+
+  .product-grid {
+    gap: 30px;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "产品网格",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "选择集合"
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4,
+      "label": "每行产品数"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "default": false,
+      "label": "显示第二张产品图"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": false,
+      "label": "显示供应商"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "default": false,
+      "label": "显示评分"
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品网格",
+      "settings": {
+        "products_per_row": 4
+      }
+    }
+  ]
+}
+{% endschema %}
