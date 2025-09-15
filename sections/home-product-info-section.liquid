@@ -1,0 +1,403 @@
+{% comment %}
+  Home Product Info Section - 产品信息展示区域
+  支持后台配置产品图片、价格、描述等
+{% endcomment %}
+
+<style>
+  .product-info-section {
+    padding: 4rem 0;
+    background: white;
+  }
+
+  .product-info-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .product-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .product-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .product-badge {
+    display: inline-block;
+    background: #ef4444;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    width: fit-content;
+  }
+
+  .product-title {
+    font-size: 2.25rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .product-description {
+    font-size: 1.125rem;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+
+  .product-price {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+  }
+
+  .current-price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1f2937;
+  }
+
+  .original-price {
+    font-size: 1.25rem;
+    color: #9ca3af;
+    text-decoration: line-through;
+  }
+
+  .discount-badge {
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .quantity-section {
+    margin: 1.5rem 0;
+  }
+
+  .quantity-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .quantity-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    width: fit-content;
+  }
+
+  .quantity-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #6b7280;
+    transition: color 0.2s;
+  }
+
+  .quantity-btn:hover {
+    color: #1f2937;
+  }
+
+  .quantity-value {
+    padding: 0 1rem;
+    font-weight: 600;
+    min-width: 2rem;
+    text-align: center;
+  }
+
+  .product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .product-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    background: #ef4444;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #dc2626;
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: #1f2937;
+    border: 1px solid #d1d5db;
+  }
+
+  .btn-outline:hover {
+    background: #f3f4f6;
+  }
+
+  .product-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 24rem;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+
+  .thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+  }
+
+  .thumbnail {
+    border: 2px solid transparent;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .thumbnail:hover {
+    border-color: #ef4444;
+    transform: scale(1.05);
+  }
+
+  .thumbnail.active {
+    border-color: #ef4444;
+  }
+
+  .thumbnail img {
+    width: 100%;
+    height: 5rem;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .product-info-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .product-title {
+      font-size: 1.875rem;
+    }
+    
+    .current-price {
+      font-size: 1.5rem;
+    }
+    
+    .thumbnail-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+
+<section class="product-info-section">
+  <div class="product-info-container">
+    <div class="product-info-grid">
+      <div class="product-info-left">
+        {% if section.settings.badge_text != blank %}
+          <span class="product-badge">{{ section.settings.badge_text }}</span>
+        {% endif %}
+        
+        <h1 class="product-title">{{ section.settings.product_title }}</h1>
+        <p class="product-description">{{ section.settings.product_description }}</p>
+        
+        <div class="product-price">
+          <span class="current-price">${{ section.settings.current_price }}</span>
+          {% if section.settings.original_price > section.settings.current_price %}
+            <span class="original-price">${{ section.settings.original_price }}</span>
+            <span class="discount-badge">
+              {{ section.settings.discount_percentage }}% OFF
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="quantity-section">
+          <label class="quantity-label">Quantity</label>
+          <div class="quantity-control">
+            <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+            <span class="quantity-value" id="quantity">1</span>
+            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+          </div>
+        </div>
+
+        <div class="product-actions">
+          <button class="product-btn btn-primary" onclick="addToCart()">
+            <i class="fas fa-shopping-cart"></i>
+            Add to Cart
+          </button>
+          <button class="product-btn btn-outline" onclick="addToWishlist()">
+            <i class="fas fa-heart"></i>
+            Add to Wishlist
+          </button>
+        </div>
+      </div>
+
+      <div class="product-gallery">
+        <img src="{{ section.settings.product_images.first | image_url: width: 600 }}" 
+             alt="{{ section.settings.product_title }}" 
+             class="main-image" 
+             id="mainImage">
+        
+        <div class="thumbnail-grid">
+          {% for image in section.settings.product_images %}
+            <div class="thumbnail {% if forloop.index0 == 0 %}active{% endif %}" 
+                 onclick="changeImage('{{ image | image_url: width: 600 }}', this)">
+              <img src="{{ image | image_url: width: 150 }}" 
+                   alt="{{ section.settings.product_title }} {{ forloop.index }}">
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  let quantity = 1;
+
+  function updateQuantity() {
+    document.getElementById('quantity').textContent = quantity;
+  }
+
+  function increaseQuantity() {
+    quantity++;
+    updateQuantity();
+  }
+
+  function decreaseQuantity() {
+    if (quantity > 1) {
+      quantity--;
+      updateQuantity();
+    }
+  }
+
+  function changeImage(src, thumbnail) {
+    document.getElementById('mainImage').src = src;
+    
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumbnail.classList.add('active');
+  }
+
+  function addToCart() {
+    // Add your cart functionality here
+    alert(`Added ${quantity} ${quantity === 1 ? 'item' : 'items'} to cart!`);
+  }
+
+  function addToWishlist() {
+    // Add your wishlist functionality here
+    alert('Added to wishlist!');
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Home Product Info Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Information"
+    },
+    {
+      "type": "text",
+      "id": "product_title",
+      "label": "Product Title",
+      "default": "Premium Quality Product"
+    },
+    {
+      "type": "textarea",
+      "id": "product_description",
+      "label": "Product Description",
+      "default": "Crafted with premium materials and timeless design."
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Best Seller"
+    },
+    {
+      "type": "header",
+      "content": "Pricing"
+    },
+    {
+      "type": "text",
+      "id": "current_price",
+      "label": "Current Price",
+      "default": "89.99"
+    },
+    {
+      "type": "text",
+      "id": "original_price",
+      "label": "Original Price",
+      "default": "119.99"
+    },
+    {
+      "type": "range",
+      "id": "discount_percentage",
+      "label": "Discount Percentage",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "default": 25
+    },
+    {
+      "type": "header",
+      "content": "Product Images"
+    },
+    {
+      "type": "list",
+      "id": "product_images",
+      "label": "Product Images",
+      "info": "Add product images for gallery",
+      "limit": 6,
+      "item": {
+        "type": "image_picker",
+        "name": "Image"
+      }
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home Product Info",
+      "category": "Home Page"
+    }
+  ]
+}
+{% endschema %}

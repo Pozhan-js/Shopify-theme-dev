@@ -1,0 +1,449 @@
+{% comment %}
+  Home FAQ Section - 常见问题区域
+  支持后台配置问题分类、搜索功能、问题列表等
+{% endcomment %}
+
+<style>
+  .faq-section {
+    padding: 4rem 0;
+    background: white;
+  }
+
+  .faq-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .faq-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .faq-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+
+  .faq-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .faq-search {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+
+  .faq-search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 1.125rem;
+    transition: border-color 0.2s;
+  }
+
+  .faq-search-input:focus {
+    outline: none;
+    border-color: #ef4444;
+  }
+
+  .faq-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+  }
+
+  .faq-categories {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .faq-category {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    background: #f3f4f6;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+  }
+
+  .faq-category:hover {
+    background: #e5e7eb;
+  }
+
+  .faq-category.active {
+    background: #ef4444;
+    color: white;
+  }
+
+  .faq-list {
+    max-width: 64rem;
+    margin: 0 auto;
+  }
+
+  .faq-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .faq-item:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    cursor: pointer;
+    background: white;
+    transition: background 0.2s;
+  }
+
+  .faq-question:hover {
+    background: #f9fafb;
+  }
+
+  .faq-question-left {
+    display: flex;
+    align-items: center;
+  }
+
+  .faq-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+    color: #6b7280;
+  }
+
+  .faq-question-text {
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .faq-toggle {
+    color: #6b7280;
+    transition: transform 0.3s ease;
+  }
+
+  .faq-item.expanded .faq-toggle {
+    transform: rotate(180deg);
+  }
+
+  .faq-answer {
+    padding: 0 1.5rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+
+  .faq-item.expanded .faq-answer {
+    max-height: 300px;
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    border-top: 1px solid #f3f4f6;
+  }
+
+  .faq-answer-text {
+    color: #4b5563;
+    line-height: 1.6;
+  }
+
+  .no-results {
+    text-align: center;
+    color: #6b7280;
+    padding: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .faq-title {
+      font-size: 2rem;
+    }
+    
+    .faq-subtitle {
+      font-size: 1.125rem;
+    }
+    
+    .faq-categories {
+      justify-content: flex-start;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    
+    .faq-category {
+      white-space: nowrap;
+    }
+  }
+</style>
+
+<section class="faq-section">
+  <div class="faq-container">
+    <div class="faq-header">
+      <h2 class="faq-title">{{ section.settings.title }}</h2>
+      <p class="faq-subtitle">{{ section.settings.subtitle }}</p>
+    </div>
+
+    <div class="faq-search">
+      <i class="fas fa-search faq-search-icon"></i>
+      <input type="text" 
+             class="faq-search-input" 
+             placeholder="搜索问题..." 
+             id="faqSearch">
+    </div>
+
+    <div class="faq-categories">
+      {% for category in section.settings.categories %}
+        <button class="faq-category {% if forloop.index0 == 0 %}active{% endif %}" 
+                data-category="{{ category.id }}">
+          {% if category.icon != blank %}
+            <i class="{{ category.icon }}"></i>
+          {% endif %}
+          {{ category.label }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <div class="faq-list" id="faqList">
+      {% for faq in section.settings.faqs %}
+        <div class="faq-item" data-category="{{ faq.category }}">
+          <div class="faq-question" onclick="toggleFAQ(this)">
+            <div class="faq-question-left">
+              <div class="faq-number">{{ forloop.index }}</div>
+              <span class="faq-question-text">{{ faq.question }}</span>
+            </div>
+            <i class="fas fa-chevron-down faq-toggle"></i>
+          </div>
+          <div class="faq-answer">
+            <p class="faq-answer-text">{{ faq.answer }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="no-results" id="noResults" style="display: none;">
+      没有找到相关问题，请尝试其他关键词
+    </div>
+  </div>
+</section>
+
+<script>
+  let currentCategory = 'all';
+  let searchTerm = '';
+
+  function toggleFAQ(element) {
+    const faqItem = element.closest('.faq-item');
+    faqItem.classList.toggle('expanded');
+  }
+
+  function filterFAQs() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    const noResults = document.getElementById('noResults');
+    let visibleCount = 0;
+
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question-text').textContent.toLowerCase();
+      const answer = item.querySelector('.faq-answer-text').textContent.toLowerCase();
+      const category = item.dataset.category;
+      
+      const matchesSearch = searchTerm === '' || 
+                           question.includes(searchTerm.toLowerCase()) || 
+                           answer.includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = currentCategory === 'all' || category === currentCategory;
+      
+      if (matchesSearch && matchesCategory) {
+        item.style.display = 'block';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  // Search functionality
+  document.getElementById('faqSearch').addEventListener('input', function(e) {
+    searchTerm = e.target.value;
+    filterFAQs();
+  });
+
+  // Category filtering
+  document.querySelectorAll('.faq-category').forEach(button => {
+    button.addEventListener('click', function() {
+      document.querySelectorAll('.faq-category').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      
+      currentCategory = this.dataset.category;
+      filterFAQs();
+    });
+  });
+
+  // Initialize
+  filterFAQs();
+</script>
+
+{% schema %}
+{
+  "name": "Home FAQ Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Title"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "常见问题"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Section Subtitle",
+      "default": "为您整理了最常见的问题和详细解答，如有其他疑问请随时联系我们"
+    },
+    {
+      "type": "header",
+      "content": "Categories"
+    },
+    {
+      "type": "list",
+      "id": "categories",
+      "label": "FAQ Categories",
+      "info": "Add FAQ categories for filtering",
+      "item": {
+        "type": "object",
+        "name": "Category",
+        "settings": [
+          {
+            "type": "text",
+            "id": "id",
+            "label": "Category ID",
+            "info": "Unique identifier for filtering"
+          },
+          {
+            "type": "text",
+            "id": "label",
+            "label": "Category Label",
+            "default": "General"
+          },
+          {
+            "type": "text",
+            "id": "icon",
+            "label": "Icon Class",
+            "info": "Font Awesome icon class (e.g., fas fa-question)"
+          }
+        ]
+      },
+      "default": [
+        {
+          "id": "all",
+          "label": "全部",
+          "icon": "fas fa-list"
+        },
+        {
+          "id": "shipping",
+          "label": "配送",
+          "icon": "fas fa-shipping-fast"
+        },
+        {
+          "id": "returns",
+          "label": "退换货",
+          "icon": "fas fa-undo"
+        },
+        {
+          "id": "product",
+          "label": "产品",
+          "icon": "fas fa-box"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Questions & Answers"
+    },
+    {
+      "type": "list",
+      "id": "faqs",
+      "label": "FAQ Items",
+      "info": "Add frequently asked questions",
+      "limit": 10,
+      "item": {
+        "type": "object",
+        "name": "FAQ",
+        "settings": [
+          {
+            "type": "text",
+            "id": "category",
+            "label": "Category ID",
+            "info": "Match with category ID above"
+          },
+          {
+            "type": "text",
+            "id": "question",
+            "label": "Question",
+            "default": "常见问题示例"
+          },
+          {
+            "type": "textarea",
+            "id": "answer",
+            "label": "Answer",
+            "default": "详细解答内容..."
+          }
+        ]
+      },
+      "default": [
+        {
+          "category": "shipping",
+          "question": "配送时间是多久？",
+          "answer": "标准配送通常需要3-5个工作日，加急配送1-2个工作日。"
+        },
+        {
+          "category": "returns",
+          "question": "如何申请退换货？",
+          "answer": "收到商品后7天内可申请退换货，请保持商品完好并联系客服。"
+        },
+        {
+          "category": "product",
+          "question": "产品材质是什么？",
+          "answer": "我们使用高品质材料制作，具体材质请参考产品详情页。"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home FAQ",
+      "category": "Home Page"
+    }
+  ]
+}
+{% endschema %}

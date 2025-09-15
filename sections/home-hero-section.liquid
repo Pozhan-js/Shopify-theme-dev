@@ -1,0 +1,307 @@
+{% comment %}
+  Home Hero Section - 英雄轮播区域
+  支持后台配置轮播图、标题、副标题等
+{% endcomment %}
+
+<style>
+  /* Hero Banner Styles */
+  .hero-section {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .hero-slide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-slide.active {
+    opacity: 1;
+  }
+
+  .hero-content {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    padding: 2rem;
+    max-width: 600px;
+    margin-left: 10%;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+
+  .hero-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    font-size: 1.2rem;
+    transition: background 0.3s ease;
+  }
+
+  .hero-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .hero-nav.prev {
+    left: 1rem;
+  }
+
+  .hero-nav.next {
+    right: 1rem;
+  }
+
+  .hero-indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .hero-indicator {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .hero-indicator.active {
+    background: white;
+  }
+
+  .hero-btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .hero-btn-primary {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+  }
+
+  .hero-btn-primary:hover {
+    background-color: #dc2626;
+  }
+
+  @media (max-width: 768px) {
+    .hero-content {
+      margin-left: 5%;
+      margin-right: 5%;
+      max-width: none;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<div class="hero-section">
+  {% for slide in section.settings.slides %}
+    <div class="hero-slide {% if forloop.index0 == 0 %}active{% endif %}"
+         style="background-image: url('{{ slide.image | image_url: width: 1920 }}');">
+      <div class="hero-content">
+        <h1 class="hero-title">{{ slide.title }}</h1>
+        <p class="hero-subtitle">{{ slide.subtitle }}</p>
+        {% if slide.button_text != blank and slide.button_link != blank %}
+          <a href="{{ slide.button_link }}" class="hero-btn hero-btn-primary">{{ slide.button_text }}</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <button class="hero-nav prev" aria-label="Previous slide">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  <button class="hero-nav next" aria-label="Next slide">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+
+  <div class="hero-indicators">
+    {% for slide in section.settings.slides %}
+      <div class="hero-indicator {% if forloop.index0 == 0 %}active{% endif %}" 
+           data-slide="{{ forloop.index0 }}"></div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const slides = document.querySelectorAll('.hero-slide');
+    const indicators = document.querySelectorAll('.hero-indicator');
+    const prevBtn = document.querySelector('.hero-nav.prev');
+    const nextBtn = document.querySelector('.hero-nav.next');
+    let currentSlide = 0;
+    let autoSlideInterval;
+
+    function showSlide(index) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      indicators.forEach(indicator => indicator.classList.remove('active'));
+      
+      slides[index].classList.add('active');
+      indicators[index].classList.add('active');
+      currentSlide = index;
+    }
+
+    function nextSlide() {
+      const nextIndex = (currentSlide + 1) % slides.length;
+      showSlide(nextIndex);
+    }
+
+    function prevSlide() {
+      const prevIndex = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(prevIndex);
+    }
+
+    function startAutoSlide() {
+      autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+
+    function stopAutoSlide() {
+      clearInterval(autoSlideInterval);
+    }
+
+    // Event listeners
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      stopAutoSlide();
+      startAutoSlide();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      stopAutoSlide();
+      startAutoSlide();
+    });
+
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        showSlide(index);
+        stopAutoSlide();
+        startAutoSlide();
+      });
+    });
+
+    // Pause on hover
+    const heroSection = document.querySelector('.hero-section');
+    heroSection.addEventListener('mouseenter', stopAutoSlide);
+    heroSection.addEventListener('mouseleave', startAutoSlide);
+
+    // Start auto slide
+    startAutoSlide();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Home Hero Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hero Slideshow Settings"
+    },
+    {
+      "type": "list",
+      "id": "slides",
+      "label": "Hero Slides",
+      "info": "Add up to 5 slides for the hero banner",
+      "limit": 5,
+      "item": {
+        "type": "object",
+        "name": "Slide",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Background Image",
+            "info": "Recommended size: 1920x1080px"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title",
+            "default": "Premium Quality Products"
+          },
+          {
+            "type": "text",
+            "id": "subtitle",
+            "label": "Subtitle",
+            "default": "Discover our collection of premium products crafted with excellence"
+          },
+          {
+            "type": "text",
+            "id": "button_text",
+            "label": "Button Text",
+            "default": "Shop Now"
+          },
+          {
+            "type": "url",
+            "id": "button_link",
+            "label": "Button Link"
+          }
+        ]
+      },
+      "default": [
+        {
+          "title": "Premium Quality Products",
+          "subtitle": "Discover our collection of premium products crafted with excellence",
+          "button_text": "Shop Now"
+        },
+        {
+          "title": "Exclusive Collection",
+          "subtitle": "Limited edition items available now",
+          "button_text": "View Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home Hero",
+      "category": "Home Page"
+    }
+  ]
+}
+{% endschema %}

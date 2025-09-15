@@ -1,0 +1,337 @@
+{% comment %}
+  Home Endorsement Section - 网红推荐区域
+  支持后台配置网红信息、推荐语、图片等
+{% endcomment %}
+
+<style>
+  .endorsement-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  .endorsement-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .endorsement-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .endorsement-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+
+  .endorsement-subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .endorsement-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .endorsement-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .endorsement-tab {
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    background: #e2e8f0;
+    color: #475569;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+  }
+
+  .endorsement-tab.active {
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+  }
+
+  .endorsement-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .endorser-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .endorser-avatar {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+  }
+
+  .endorser-info h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: #1f2937;
+  }
+
+  .endorser-title {
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .endorser-social {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .endorser-social i {
+    margin-right: 0.25rem;
+  }
+
+  .endorsement-quote {
+    font-style: italic;
+    color: #4b5563;
+    line-height: 1.7;
+    font-size: 1.125rem;
+  }
+
+  .endorsement-image {
+    width: 100%;
+    height: 24rem;
+    object-fit: cover;
+    border-radius: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .endorsement-content {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .endorsement-title {
+      font-size: 2rem;
+    }
+    
+    .endorsement-subtitle {
+      font-size: 1.125rem;
+    }
+    
+    .endorsement-tabs {
+      justify-content: center;
+    }
+  }
+</style>
+
+<section class="endorsement-section">
+  <div class="endorsement-container">
+    <div class="endorsement-header">
+      <h2 class="endorsement-title">{{ section.settings.title }}</h2>
+      <p class="endorsement-subtitle">{{ section.settings.subtitle }}</p>
+    </div>
+
+    <div class="endorsement-content">
+      <div>
+        <div class="endorsement-tabs">
+          {% for endorser in section.settings.endorsements %}
+            <button class="endorsement-tab {% if forloop.index0 == 0 %}active{% endif %}"
+                    data-index="{{ forloop.index0 }}">
+              {{ endorser.name }}
+            </button>
+          {% endfor %}
+        </div>
+
+        <div class="endorsement-card">
+          {% for endorser in section.settings.endorsements limit:1 %}
+            <div class="endorser-profile">
+              <img src="{{ endorser.image | image_url: width: 200 }}" 
+                   alt="{{ endorser.name }}" 
+                   class="endorser-avatar">
+              <div class="endorser-info">
+                <h3>{{ endorser.name }}</h3>
+                <p class="endorser-title">{{ endorser.title }}</p>
+                <div class="endorser-social">
+                  <i class="fab fa-instagram"></i>
+                  <span>{{ endorser.social_handle }} • {{ endorser.followers }} followers</span>
+                </div>
+              </div>
+            </div>
+            <p class="endorsement-quote">"{{ endorser.quote }}"</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <img src="{{ section.settings.endorsements.first.image | image_url: width: 600 }}" 
+             alt="Endorsement" 
+             class="endorsement-image">
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.endorsement-tab');
+    const endorsementCard = document.querySelector('.endorsement-card');
+    const endorsementImage = document.querySelector('.endorsement-image');
+    
+    const endorsements = {{ section.settings.endorsements | json }};
+
+    function updateEndorsement(index) {
+      const endorser = endorsements[index];
+      
+      // Update active tab
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabs[index].classList.add('active');
+      
+      // Update card content
+      endorsementCard.innerHTML = `
+        <div class="endorser-profile">
+          <img src="${endorser.image}" alt="${endorser.name}" class="endorser-avatar">
+          <div class="endorser-info">
+            <h3>${endorser.name}</h3>
+            <p class="endorser-title">${endorser.title}</p>
+            <div class="endorser-social">
+              <i class="fab fa-instagram"></i>
+              <span>${endorser.social_handle} • ${endorser.followers} followers</span>
+            </div>
+          </div>
+        </div>
+        <p class="endorsement-quote">"${endorser.quote}"</p>
+      `;
+      
+      // Update image
+      endorsementImage.src = endorser.image;
+    }
+
+    // Add click listeners to tabs
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        updateEndorsement(index);
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Home Endorsement Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Title"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Influencer Reviews"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Section Subtitle",
+      "default": "Hear what top influencers and lifestyle creators say about our products"
+    },
+    {
+      "type": "header",
+      "content": "Endorsements"
+    },
+    {
+      "type": "list",
+      "id": "endorsements",
+      "label": "Influencer Endorsements",
+      "info": "Add influencer endorsements",
+      "limit": 5,
+      "item": {
+        "type": "object",
+        "name": "Endorser",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Portrait Image",
+            "info": "Recommended size: 400x400px"
+          },
+          {
+            "type": "text",
+            "id": "name",
+            "label": "Name",
+            "default": "Influencer Name"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "Title/Profession",
+            "default": "Lifestyle Creator"
+          },
+          {
+            "type": "text",
+            "id": "social_handle",
+            "label": "Social Media Handle",
+            "default": "@influencer"
+          },
+          {
+            "type": "text",
+            "id": "followers",
+            "label": "Followers Count",
+            "default": "100K"
+          },
+          {
+            "type": "textarea",
+            "id": "quote",
+            "label": "Endorsement Quote",
+            "default": "This product is absolutely amazing! The quality is outstanding and I love the design."
+          }
+        ]
+      },
+      "default": [
+        {
+          "name": "Sarah Johnson",
+          "title": "Fashion Influencer",
+          "social_handle": "@sarahstyles",
+          "followers": "250K",
+          "quote": "Absolutely love the quality and design of these products! They have become my go-to accessories."
+        },
+        {
+          "name": "Mike Chen",
+          "title": "Lifestyle Creator",
+          "social_handle": "@mikelifestyle",
+          "followers": "180K",
+          "quote": "The craftsmanship is exceptional. These pieces truly stand out in my collection."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Home Endorsements",
+      "category": "Home Page"
+    }
+  ]
+}
+{% endschema %}
