@@ -191,9 +191,19 @@
 
       <!-- 右侧主图 -->
       <div>
-        <img src="{{ section.settings.main_image | image_url: '600x' }}"
-             alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
-             class="main-image">
+        {% if section.settings.main_image != blank %}
+          <img src="{{ section.settings.main_image | image_url: '600x' }}"
+               alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
+               class="main-image">
+        {% elsif section.settings.fallback_image != blank %}
+          <img src="{{ section.settings.fallback_image | image_url: '600x' }}"
+               alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
+               class="main-image">
+        {% else %}
+          <div class="main-image placeholder-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
+            <span style="color: #9ca3af;">请上传图片</span>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -242,6 +252,12 @@
       "id": "main_image",
       "label": "主图",
       "info": "建议尺寸：600x600 或更高"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "备用图片",
+      "info": "当主图未设置时显示"
     },
     {
       "type": "text",
