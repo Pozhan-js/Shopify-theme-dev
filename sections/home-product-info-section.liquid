@@ -1,13 +1,12 @@
 {% comment %}
-  Home Product Info Section - 简化版
-  左侧：AG1 订阅套餐文案 + 价格 + 赠品
-  右侧：单张主图
+  Home Product Info Section - 可后台编辑版
+  支持后台修改所有内容和图片
 {% endcomment %}
 
 <style>
   .product-info-section {
-    padding: 4rem 0;
-    background: white;
+    padding: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px 0 {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px 0;
+    background: {{ section.settings.background_color }};
   }
 
   .product-info-container {
@@ -31,8 +30,8 @@
 
   .product-badge {
     display: inline-block;
-    background: #ef4444;
-    color: white;
+    background: {{ section.settings.badge_background_color }};
+    color: {{ section.settings.badge_text_color }};
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.875rem;
@@ -41,33 +40,35 @@
   }
 
   .product-title {
-    font-size: 2.25rem;
+    font-size: {{ section.settings.title_font_size }}px;
     font-weight: bold;
-    color: #1f2937;
+    color: {{ section.settings.title_color }};
     margin: 0;
+    line-height: 1.2;
   }
 
   .product-description {
-    font-size: 1.125rem;
-    color: #6b7280;
+    font-size: {{ section.settings.description_font_size }}px;
+    color: {{ section.settings.description_color }};
     line-height: 1.6;
   }
 
   .price-row {
     display: flex;
     justify-content: space-between;
-    font-size: 1.125rem;
+    font-size: {{ section.settings.price_font_size }}px;
     font-weight: 600;
-    color: #1f2937;
+    color: {{ section.settings.price_color }};
+    align-items: center;
   }
 
   .price-old {
-    color: #9ca3af;
+    color: {{ section.settings.old_price_color }};
     text-decoration: line-through;
   }
 
   .price-discount {
-    color: #ef4444;
+    color: {{ section.settings.discount_color }};
     font-weight: bold;
   }
 
@@ -82,12 +83,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1rem;
-    color: #1f2937;
+    font-size: {{ section.settings.benefit_font_size }}px;
+    color: {{ section.settings.benefit_color }};
   }
 
   .benefit-item .value {
-    color: #6b7280;
+    color: {{ section.settings.benefit_value_color }};
     font-weight: normal;
   }
 
@@ -97,34 +98,34 @@
     border-top: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
-    font-size: 1.25rem;
+    font-size: {{ section.settings.total_font_size }}px;
     font-weight: bold;
-    color: #1f2937;
+    color: {{ section.settings.total_color }};
   }
 
   .disclaimer {
     margin-top: 1rem;
     font-size: 0.875rem;
-    color: #6b7280;
+    color: {{ section.settings.disclaimer_color }};
     line-height: 1.5;
   }
 
   .guarantee {
     margin-top: 1rem;
     font-weight: 600;
-    color: #1f2937;
+    color: {{ section.settings.guarantee_color }};
   }
 
   .flexible {
     font-size: 0.875rem;
-    color: #6b7280;
+    color: {{ section.settings.flexible_color }};
   }
 
   .main-image {
     width: 100%;
-    height: 28rem;
+    height: {{ section.settings.image_height }}px;
     object-fit: cover;
-    border-radius: 0.75rem;
+    border-radius: {{ section.settings.image_border_radius }}px;
   }
 
   @media (max-width: 768px) {
@@ -134,11 +135,11 @@
     }
 
     .product-title {
-      font-size: 1.875rem;
+      font-size: {{ section.settings.title_font_size_mobile }}px;
     }
 
     .benefit-item, .price-row, .total-row {
-      font-size: 1rem;
+      font-size: {{ section.settings.benefit_font_size_mobile }}px;
       flex-direction: column;
       align-items: flex-start;
       gap: 0.25rem;
@@ -156,46 +157,42 @@
     <div class="product-info-grid">
       <!-- 左侧文案 -->
       <div class="product-info-left">
-        <span class="product-badge">Best Seller</span>
-        <h1 class="product-title">Get started with your AG1 Welcome Kit^</h1>
-        <p class="product-description">AG1 Pouch</p>
+        <span class="product-badge">{{ section.settings.badge_text }}</span>
+        <h1 class="product-title">{{ section.settings.product_title }}</h1>
+        <p class="product-description">{{ section.settings.product_description }}</p>
 
         <div class="price-row">
-          <span>$79/mo USD</span>
-          <span class="price-old price-discount">$99 USD†</span>
+          <span>{{ section.settings.current_price }}</span>
+          <span class="price-old price-discount">{{ section.settings.old_price }}</span>
         </div>
 
-        <p><strong>30 day supply per pouch, ships every 30 days</strong></p>
+        <p><strong>{{ section.settings.shipping_info }}</strong></p>
 
         <div class="benefits-list">
-          <div class="benefit-item">
-            <span>Welcome Kit</span>
-            <span class="value">Free ($28 USD)</span>
-          </div>
-          <div class="benefit-item">
-            <span>AG1 Shaker, Scoop, and Canister</span>
-            <span class="value">Free</span>
-          </div>
-          <div class="benefit-item">
-            <span>AG1 Travel Packs (5 count)</span>
-            <span class="value">Free ($19 USD)</span>
-          </div>
+          {% for block in section.blocks %}
+            {% if block.type == 'benefit' %}
+              <div class="benefit-item">
+                <span>{{ block.settings.benefit_name }}</span>
+                <span class="value">{{ block.settings.benefit_value }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
 
         <div class="total-row">
-          <span>Total</span>
-          <span>$79/mo USD</span>
+          <span>{{ section.settings.total_label }}</span>
+          <span>{{ section.settings.total_price }}</span>
         </div>
-        <p class="disclaimer">† Value of one-time purchase</p>
+        <p class="disclaimer">{{ section.settings.disclaimer_text }}</p>
 
-        <p class="guarantee">90-day money back guarantee</p>
-        <p class="flexible">Update or cancel anytime</p>
+        <p class="guarantee">{{ section.settings.guarantee_text }}</p>
+        <p class="flexible">{{ section.settings.flexible_text }}</p>
       </div>
 
       <!-- 右侧主图 -->
       <div>
         <img src="{{ section.settings.main_image | image_url: '600x' }}"
-             alt="AG1 Welcome Kit"
+             alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
              class="main-image">
       </div>
     </div>
@@ -208,7 +205,37 @@
   "settings": [
     {
       "type": "header",
-      "content": "Product Information"
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "顶部内边距",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "底部内边距",
+      "default": 64
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "图片设置"
     },
     {
       "type": "image_picker",
@@ -218,9 +245,267 @@
     },
     {
       "type": "text",
+      "id": "main_image_alt",
+      "label": "图片Alt文本",
+      "default": "产品主图"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "图片高度",
+      "default": 450
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "图片圆角",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "产品信息"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "徽章文字",
+      "default": "Best Seller"
+    },
+    {
+      "type": "color",
+      "id": "badge_background_color",
+      "label": "徽章背景色",
+      "default": "#ef4444"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "徽章文字色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
       "id": "product_title",
       "label": "产品标题",
       "default": "Get started with your AG1 Welcome Kit^"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "标题字体大小",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "title_font_size_mobile",
+      "min": 20,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "label": "移动端标题字体大小",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "product_description",
+      "label": "产品描述",
+      "default": "AG1 Pouch"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "描述文字颜色",
+      "default": "#6b7280"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "描述字体大小",
+      "default": 18
+    },
+    {
+      "type": "text",
+      "id": "current_price",
+      "label": "当前价格",
+      "default": "$79/mo USD"
+    },
+    {
+      "type": "text",
+      "id": "old_price",
+      "label": "原价",
+      "default": "$99 USD†"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "价格颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "old_price_color",
+      "label": "原价颜色",
+      "default": "#9ca3af"
+    },
+    {
+      "type": "color",
+      "id": "discount_color",
+      "label": "折扣颜色",
+      "default": "#ef4444"
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "价格字体大小",
+      "default": 18
+    },
+    {
+      "type": "text",
+      "id": "shipping_info",
+      "label": "配送信息",
+      "default": "30 day supply per pouch, ships every 30 days"
+    },
+    {
+      "type": "text",
+      "id": "total_label",
+      "label": "总价标签",
+      "default": "Total"
+    },
+    {
+      "type": "text",
+      "id": "total_price",
+      "label": "总价",
+      "default": "$79/mo USD"
+    },
+    {
+      "type": "color",
+      "id": "total_color",
+      "label": "总价颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "total_font_size",
+      "min": 16,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "总价字体大小",
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "disclaimer_text",
+      "label": "免责声明",
+      "default": "† Value of one-time purchase"
+    },
+    {
+      "type": "color",
+      "id": "disclaimer_color",
+      "label": "免责声明颜色",
+      "default": "#6b7280"
+    },
+    {
+      "type": "text",
+      "id": "guarantee_text",
+      "label": "保证文字",
+      "default": "90-day money back guarantee"
+    },
+    {
+      "type": "color",
+      "id": "guarantee_color",
+      "label": "保证文字颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "text",
+      "id": "flexible_text",
+      "label": "灵活文字",
+      "default": "Update or cancel anytime"
+    },
+    {
+      "type": "color",
+      "id": "flexible_color",
+      "label": "灵活文字颜色",
+      "default": "#6b7280"
+    },
+    {
+      "type": "color",
+      "id": "benefit_color",
+      "label": "福利项颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "benefit_value_color",
+      "label": "福利值颜色",
+      "default": "#6b7280"
+    },
+    {
+      "type": "range",
+      "id": "benefit_font_size",
+      "min": 14,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "福利字体大小",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "benefit_font_size_mobile",
+      "min": 12,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "移动端福利字体大小",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "福利项",
+      "settings": [
+        {
+          "type": "text",
+          "id": "benefit_name",
+          "label": "福利名称",
+          "default": "福利名称"
+        },
+        {
+          "type": "text",
+          "id": "benefit_value",
+          "label": "福利值",
+          "default": "福利值"
+        }
+      ]
     }
   ],
   "presets": [
@@ -230,7 +515,30 @@
       "settings": {
         "product_title": "Get started with your AG1 Welcome Kit^",
         "main_image": ""
-      }
+      },
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_name": "Welcome Kit",
+            "benefit_value": "Free ($28 USD)"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_name": "AG1 Shaker, Scoop, and Canister",
+            "benefit_value": "Free"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefit_name": "AG1 Travel Packs (5 count)",
+            "benefit_value": "Free ($19 USD)"
+          }
+        }
+      ]
     }
   ]
 }
