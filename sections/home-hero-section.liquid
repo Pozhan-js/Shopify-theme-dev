@@ -1,6 +1,6 @@
 {% comment %}
   Home Hero Section - 英雄轮播区域
-  支持后台配置轮播图、标题、副标题等
+  使用 blocks 实现轮播图，兼容所有 Shopify 主题
 {% endcomment %}
 
 <style>
@@ -139,17 +139,19 @@
 </style>
 
 <div class="hero-section">
-  {% for slide in section.settings.slides %}
-    <div class="hero-slide {% if forloop.index0 == 0 %}active{% endif %}"
-         style="background-image: url('{{ slide.image | image_url: width: 1920 }}');">
-      <div class="hero-content">
-        <h1 class="hero-title">{{ slide.title }}</h1>
-        <p class="hero-subtitle">{{ slide.subtitle }}</p>
-        {% if slide.button_text != blank and slide.button_link != blank %}
-          <a href="{{ slide.button_link }}" class="hero-btn hero-btn-primary">{{ slide.button_text }}</a>
-        {% endif %}
+  {% for block in section.blocks %}
+    {% if block.type == 'slide' %}
+      <div class="hero-slide {% if forloop.index0 == 0 %}active{% endif %}"
+           style="background-image: url('{{ block.settings.image | image_url: width: 1920 }}');">
+        <div class="hero-content">
+          <h1 class="hero-title">{{ block.settings.title }}</h1>
+          <p class="hero-subtitle">{{ block.settings.subtitle }}</p>
+          {% if block.settings.button_text != blank and block.settings.button_link != blank %}
+            <a href="{{ block.settings.button_link }}" class="hero-btn hero-btn-primary">{{ block.settings.button_text }}</a>
+          {% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   {% endfor %}
 
   <button class="hero-nav prev" aria-label="Previous slide">
@@ -160,9 +162,11 @@
   </button>
 
   <div class="hero-indicators">
-    {% for slide in section.settings.slides %}
-      <div class="hero-indicator {% if forloop.index0 == 0 %}active{% endif %}" 
-           data-slide="{{ forloop.index0 }}"></div>
+    {% for block in section.blocks %}
+      {% if block.type == 'slide' %}
+        <div class="hero-indicator {% if forloop.index0 == 0 %}active{% endif %}" 
+             data-slide="{{ forloop.index0 }}"></div>
+      {% endif %}
     {% endfor %}
   </div>
 </div>
@@ -203,7 +207,7 @@
       clearInterval(autoSlideInterval);
     }
 
-    // Event listeners
+    // 导航按钮
     prevBtn.addEventListener('click', () => {
       prevSlide();
       stopAutoSlide();
@@ -216,6 +220,7 @@
       startAutoSlide();
     });
 
+    // 指示器点击
     indicators.forEach((indicator, index) => {
       indicator.addEventListener('click', () => {
         showSlide(index);
@@ -224,12 +229,12 @@
       });
     });
 
-    // Pause on hover
+    // 悬停暂停
     const heroSection = document.querySelector('.hero-section');
     heroSection.addEventListener('mouseenter', stopAutoSlide);
     heroSection.addEventListener('mouseleave', startAutoSlide);
 
-    // Start auto slide
+    // 启动自动轮播
     startAutoSlide();
   });
 </script>
@@ -240,59 +245,49 @@
   "settings": [
     {
       "type": "header",
-      "content": "Hero Slideshow Settings"
+      "content": "Hero Settings"
     },
     {
-      "type": "list",
-      "id": "slides",
-      "label": "Hero Slides",
-      "info": "Add up to 5 slides for the hero banner",
-      "limit": 5,
-      "item": {
-        "type": "object",
-        "name": "Slide",
-        "settings": [
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "Background Image",
-            "info": "Recommended size: 1920x1080px"
-          },
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Title",
-            "default": "Premium Quality Products"
-          },
-          {
-            "type": "text",
-            "id": "subtitle",
-            "label": "Subtitle",
-            "default": "Discover our collection of premium products crafted with excellence"
-          },
-          {
-            "type": "text",
-            "id": "button_text",
-            "label": "Button Text",
-            "default": "Shop Now"
-          },
-          {
-            "type": "url",
-            "id": "button_link",
-            "label": "Button Link"
-          }
-        ]
-      },
-      "default": [
+      "type": "text",
+      "id": "title",
+      "label": "Default Title (Unused)",
+      "default": "Hero Section",
+      "info": "This section uses blocks for slides. Add 'slide' blocks below."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "轮播图",
+      "settings": [
         {
-          "title": "Premium Quality Products",
-          "subtitle": "Discover our collection of premium products crafted with excellence",
-          "button_text": "Shop Now"
+          "type": "image_picker",
+          "id": "image",
+          "label": "背景图片",
+          "info": "建议尺寸：1920x1080px"
         },
         {
-          "title": "Exclusive Collection",
-          "subtitle": "Limited edition items available now",
-          "button_text": "View Collection"
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "Premium Quality Products"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "副标题",
+          "default": "Discover our collection of premium products crafted with excellence"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文字",
+          "default": "Shop Now"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "按钮链接"
         }
       ]
     }
@@ -300,7 +295,29 @@
   "presets": [
     {
       "name": "Home Hero",
-      "category": "Home Page"
+      "category": "Home Page",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "image": "",
+            "title": "Premium Quality Products",
+            "subtitle": "Discover our collection of premium products crafted with excellence",
+            "button_text": "Shop Now",
+            "button_link": "/collections/all"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "image": "",
+            "title": "Exclusive Collection",
+            "subtitle": "Limited edition items available now",
+            "button_text": "View Collection",
+            "button_link": "/collections/new-arrivals"
+          }
+        }
+      ]
     }
   ]
 }

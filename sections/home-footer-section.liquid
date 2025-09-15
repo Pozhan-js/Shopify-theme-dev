@@ -1,6 +1,6 @@
 {% comment %}
   Home Footer Section - 页脚区域
-  支持后台配置通知信息、订阅表单、社交媒体链接等
+  完全兼容版：避免嵌套 list，使用固定字段替代
 {% endcomment %}
 
 <style>
@@ -276,23 +276,37 @@
   <div class="footer-notices">
     <div class="footer-container">
       <div class="notices-grid">
-        {% for notice in section.settings.notices %}
-          <div class="notice-card">
-            <div class="notice-header">
-              <div class="notice-icon">
-                <i class="{{ notice.icon }}"></i>
+        {% for block in section.blocks %}
+          {% if block.type == 'notice' %}
+            <div class="notice-card">
+              <div class="notice-header">
+                <div class="notice-icon">
+                  <i class="{{ block.settings.icon }}"></i>
+                </div>
+                <h3 class="notice-title">{{ block.settings.title }}</h3>
               </div>
-              <h3 class="notice-title">{{ notice.title }}</h3>
-            </div>
-            <ul>
-              {% for item in notice.items %}
+              <ul>
+                {% if block.settings.item_1 != blank %}
                 <li class="notice-item">
                   <i class="fas fa-check"></i>
-                  {{ item }}
+                  {{ block.settings.item_1 }}
                 </li>
-              {% endfor %}
-            </ul>
-          </div>
+                {% endif %}
+                {% if block.settings.item_2 != blank %}
+                <li class="notice-item">
+                  <i class="fas fa-check"></i>
+                  {{ block.settings.item_2 }}
+                </li>
+                {% endif %}
+                {% if block.settings.item_3 != blank %}
+                <li class="notice-item">
+                  <i class="fas fa-check"></i>
+                  {{ block.settings.item_3 }}
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
@@ -342,10 +356,12 @@
         <div class="footer-social">
           <h4>Follow Us</h4>
           <div class="social-links">
-            {% for social in section.settings.social_links %}
-              <a href="{{ social.url }}" class="social-link" target="_blank">
-                <i class="{{ social.icon }}"></i>
-              </a>
+            {% for block in section.blocks %}
+              {% if block.type == 'social_link' %}
+                <a href="{{ block.settings.url }}" class="social-link" target="_blank">
+                  <i class="{{ block.settings.icon }}"></i>
+                </a>
+              {% endif %}
             {% endfor %}
           </div>
           <div class="app-download">
@@ -383,16 +399,14 @@
     const form = event.target;
     const email = form.querySelector('.subscribe-input').value;
     
-    // Here you would typically send the email to your backend
     console.log('Subscribing email:', email);
     
-    // Show success message
-    document.getElementById('subscribeSuccess').style.display = 'inline-block';
+    const success = document.getElementById('subscribeSuccess');
+    success.style.display = 'inline-block';
     form.reset();
     
-    // Hide success message after 3 seconds
     setTimeout(() => {
-      document.getElementById('subscribeSuccess').style.display = 'none';
+      success.style.display = 'none';
     }, 3000);
   }
 </script>
@@ -437,63 +451,6 @@
     },
     {
       "type": "header",
-      "content": "Notices"
-    },
-    {
-      "type": "list",
-      "id": "notices",
-      "label": "Notice Cards",
-      "info": "Add notice cards for important information",
-      "limit": 3,
-      "item": {
-        "type": "object",
-        "name": "Notice",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Notice Title",
-            "default": "Important Notice"
-          },
-          {
-            "type": "text",
-            "id": "icon",
-            "label": "Icon Class",
-            "default": "fas fa-info-circle"
-          },
-          {
-            "type": "list",
-            "id": "items",
-            "label": "Notice Items",
-            "item": {
-              "type": "text",
-              "name": "Item"
-            },
-            "default": [
-              "Free shipping on orders over $50",
-              "30-day return policy",
-              "24/7 customer support"
-            ]
-          }
-        ]
-      },
-      "default": [
-        {
-          "title": "Shipping Info",
-          "icon": "fas fa-shipping-fast"
-        },
-        {
-          "title": "Return Policy",
-          "icon": "fas fa-undo"
-        },
-        {
-          "title": "Customer Support",
-          "icon": "fas fa-headset"
-        }
-      ]
-    },
-    {
-      "type": "header",
       "content": "Subscribe Section"
     },
     {
@@ -507,44 +464,59 @@
       "id": "subscribe_subtitle",
       "label": "Subscribe Subtitle",
       "default": "Get the latest updates on new products, exclusive offers, and care tips"
-    },
+    }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Social Links"
-    },
-    {
-      "type": "list",
-      "id": "social_links",
-      "label": "Social Media Links",
-      "item": {
-        "type": "object",
-        "name": "Social Link",
-        "settings": [
-          {
-            "type": "url",
-            "id": "url",
-            "label": "Social Media URL"
-          },
-          {
-            "type": "text",
-            "id": "icon",
-            "label": "Icon Class",
-            "default": "fab fa-facebook"
-          }
-        ]
-      },
-      "default": [
+      "type": "notice",
+      "name": "通知卡片",
+      "settings": [
         {
-          "url": "https://facebook.com",
-          "icon": "fab fa-facebook"
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "Shipping Info"
         },
         {
-          "url": "https://instagram.com",
-          "icon": "fab fa-instagram"
+          "type": "text",
+          "id": "icon",
+          "label": "图标类名",
+          "default": "fas fa-shipping-fast"
         },
         {
-          "url": "https://twitter.com",
-          "icon": "fab fa-twitter"
+          "type": "text",
+          "id": "item_1",
+          "label": "条目 1",
+          "default": "Free shipping on orders over $50"
+        },
+        {
+          "type": "text",
+          "id": "item_2",
+          "label": "条目 2",
+          "default": "Fast delivery"
+        },
+        {
+          "type": "text",
+          "id": "item_3",
+          "label": "条目 3",
+          "default": "Worldwide shipping"
+        }
+      ]
+    },
+    {
+      "type": "social_link",
+      "name": "社交链接",
+      "settings": [
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        },
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "图标类名",
+          "default": "fab fa-facebook"
         }
       ]
     }
@@ -552,7 +524,69 @@
   "presets": [
     {
       "name": "Home Footer",
-      "category": "Home Page"
+      "category": "Home Page",
+      "settings": {
+        "brand_name": "Premium",
+        "brand_description": "We are committed to providing our customers with the highest quality products and services.",
+        "contact_phone": "+1-800-123-4567",
+        "contact_email": "support@premium.com",
+        "business_hours": "Mon-Sun 9:00-21:00 EST",
+        "subscribe_title": "Subscribe to Our Newsletter",
+        "subscribe_subtitle": "Get the latest updates on new products, exclusive offers, and care tips"
+      },
+      "blocks": [
+        {
+          "type": "notice",
+          "settings": {
+            "title": "Shipping Info",
+            "icon": "fas fa-shipping-fast",
+            "item_1": "Free shipping on orders over $50",
+            "item_2": "Fast delivery",
+            "item_3": "Worldwide shipping"
+          }
+        },
+        {
+          "type": "notice",
+          "settings": {
+            "title": "Return Policy",
+            "icon": "fas fa-undo",
+            "item_1": "30-day return policy",
+            "item_2": "Easy returns",
+            "item_3": "No questions asked"
+          }
+        },
+        {
+          "type": "notice",
+          "settings": {
+            "title": "Customer Support",
+            "icon": "fas fa-headset",
+            "item_1": "24/7 customer support",
+            "item_2": "Live chat available",
+            "item_3": "Dedicated support team"
+          }
+        },
+        {
+          "type": "social_link",
+          "settings": {
+            "url": "https://facebook.com",
+            "icon": "fab fa-facebook"
+          }
+        },
+        {
+          "type": "social_link",
+          "settings": {
+            "url": "https://instagram.com",
+            "icon": "fab fa-instagram"
+          }
+        },
+        {
+          "type": "social_link",
+          "settings": {
+            "url": "https://twitter.com",
+            "icon": "fab fa-twitter"
+          }
+        }
+      ]
     }
   ]
 }

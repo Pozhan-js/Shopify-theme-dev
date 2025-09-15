@@ -1,6 +1,6 @@
 {% comment %}
   Home Product Info Section - 产品信息展示区域
-  支持后台配置产品图片、价格、描述等
+  使用 blocks 实现图片画廊，避免 schema 报错
 {% endcomment %}
 
 <style>
@@ -269,18 +269,27 @@
       </div>
 
       <div class="product-gallery">
-        <img src="{{ section.settings.product_images.first | image_url: width: 600 }}" 
-             alt="{{ section.settings.product_title }}" 
-             class="main-image" 
-             id="mainImage">
+        <!-- 主图：使用第一个 image block -->
+        {% assign first_image_block = section.blocks | where: 'type', 'image' | first %}
+        {% if first_image_block and first_image_block.settings.image %}
+          <img src="{{ first_image_block.settings.image | image_url: width: 600 }}" 
+               alt="{{ section.settings.product_title }}" 
+               class="main-image" 
+               id="mainImage">
+        {% else %}
+          <img src="//via.placeholder.com/600x400" class="main-image" id="mainImage" alt="Placeholder">
+        {% endif %}
         
+        <!-- 缩略图 -->
         <div class="thumbnail-grid">
-          {% for image in section.settings.product_images %}
-            <div class="thumbnail {% if forloop.index0 == 0 %}active{% endif %}" 
-                 onclick="changeImage('{{ image | image_url: width: 600 }}', this)">
-              <img src="{{ image | image_url: width: 150 }}" 
-                   alt="{{ section.settings.product_title }} {{ forloop.index }}">
-            </div>
+          {% for block in section.blocks %}
+            {% if block.type == 'image' and block.settings.image %}
+              <div class="thumbnail {% if forloop.index0 == 0 %}active{% endif %}" 
+                   onclick="changeImage('{{ block.settings.image | image_url: width: 600 }}', this)">
+                <img src="{{ block.settings.image | image_url: width: 150 }}" 
+                     alt="{{ section.settings.product_title }} {{ forloop.index }}">
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
       </div>
@@ -310,18 +319,16 @@
   function changeImage(src, thumbnail) {
     document.getElementById('mainImage').src = src;
     
-    // Update active thumbnail
+    // 更新缩略图激活状态
     document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
     thumbnail.classList.add('active');
   }
 
   function addToCart() {
-    // Add your cart functionality here
     alert(`Added ${quantity} ${quantity === 1 ? 'item' : 'items'} to cart!`);
   }
 
   function addToWishlist() {
-    // Add your wishlist functionality here
     alert('Added to wishlist!');
   }
 </script>
@@ -376,27 +383,53 @@
       "max": 90,
       "step": 5,
       "default": 25
-    },
+    }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Product Images"
-    },
-    {
-      "type": "list",
-      "id": "product_images",
-      "label": "Product Images",
-      "info": "Add product images for gallery",
-      "limit": 6,
-      "item": {
-        "type": "image_picker",
-        "name": "Image"
-      }
+      "type": "image",
+      "name": "产品图片",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "上传图片"
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Home Product Info",
-      "category": "Home Page"
+      "category": "Home Page",
+      "settings": {
+        "product_title": "Premium Quality Product",
+        "product_description": "Crafted with premium materials and timeless design.",
+        "badge_text": "Best Seller",
+        "current_price": "89.99",
+        "original_price": "119.99",
+        "discount_percentage": 25
+      },
+      "blocks": [
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "image": ""
+          }
+        }
+      ]
     }
   ]
 }

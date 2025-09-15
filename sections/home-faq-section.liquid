@@ -1,6 +1,7 @@
 {% comment %}
   Home FAQ Section - 常见问题区域
-  支持后台配置问题分类、搜索功能、问题列表等
+  完全基于 blocks 构建，兼容所有 Shopify 主题版本
+  支持分类筛选 + 搜索 + 展开收起
 {% endcomment %}
 
 <style>
@@ -205,11 +206,13 @@
 
 <section class="faq-section">
   <div class="faq-container">
+    <!-- 标题 -->
     <div class="faq-header">
       <h2 class="faq-title">{{ section.settings.title }}</h2>
       <p class="faq-subtitle">{{ section.settings.subtitle }}</p>
     </div>
 
+    <!-- 搜索框 -->
     <div class="faq-search">
       <i class="fas fa-search faq-search-icon"></i>
       <input type="text" 
@@ -218,32 +221,49 @@
              id="faqSearch">
     </div>
 
+    <!-- 分类按钮 -->
     <div class="faq-categories">
-      {% for category in section.settings.categories %}
-        <button class="faq-category {% if forloop.index0 == 0 %}active{% endif %}" 
-                data-category="{{ category.id }}">
-          {% if category.icon != blank %}
-            <i class="{{ category.icon }}"></i>
-          {% endif %}
-          {{ category.label }}
-        </button>
+      {% assign has_categories = false %}
+      {% for block in section.blocks %}
+        {% if block.type == 'category_filter' %}
+          {% unless has_categories %}
+            {% assign has_categories = true %}
+          {% endunless %}
+          <button class="faq-category {% if forloop.first %}active{% endif %}" 
+                  data-category="{{ block.settings.category_id }}">
+            {% if block.settings.icon != blank %}
+              <i class="{{ block.settings.icon }}"></i>
+            {% endif %}
+            {{ block.settings.label }}
+          </button>
+        {% endif %}
       {% endfor %}
+
+      <!-- 如果没有定义分类，默认显示“全部” -->
+      {% if has_categories == false %}
+        <button class="faq-category active" data-category="all">全部</button>
+      {% endif %}
     </div>
 
+    <!-- FAQ 列表 -->
     <div class="faq-list" id="faqList">
-      {% for faq in section.settings.faqs %}
-        <div class="faq-item" data-category="{{ faq.category }}">
-          <div class="faq-question" onclick="toggleFAQ(this)">
-            <div class="faq-question-left">
-              <div class="faq-number">{{ forloop.index }}</div>
-              <span class="faq-question-text">{{ faq.question }}</span>
+      {% assign index = 1 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'faq_item' %}
+          <div class="faq-item" data-category="{{ block.settings.category }}">
+            <div class="faq-question" onclick="toggleFAQ(this)">
+              <div class="faq-question-left">
+                <div class="faq-number">{{ index }}</div>
+                <span class="faq-question-text">{{ block.settings.question }}</span>
+              </div>
+              <i class="fas fa-chevron-down faq-toggle"></i>
             </div>
-            <i class="fas fa-chevron-down faq-toggle"></i>
+            <div class="faq-answer">
+              <p class="faq-answer-text">{{ block.settings.answer }}</p>
+            </div>
           </div>
-          <div class="faq-answer">
-            <p class="faq-answer-text">{{ faq.answer }}</p>
-          </div>
-        </div>
+          {% assign index = index | plus: 1 %}
+        {% endif %}
       {% endfor %}
     </div>
 
@@ -270,9 +290,9 @@
     faqItems.forEach(item => {
       const question = item.querySelector('.faq-question-text').textContent.toLowerCase();
       const answer = item.querySelector('.faq-answer-text').textContent.toLowerCase();
-      const category = item.dataset.category;
+      const category = item.dataset.category || '';
       
-      const matchesSearch = searchTerm === '' || 
+      const matchesSearch = !searchTerm || 
                            question.includes(searchTerm.toLowerCase()) || 
                            answer.includes(searchTerm.toLowerCase());
       
@@ -289,25 +309,24 @@
     noResults.style.display = visibleCount === 0 ? 'block' : 'none';
   }
 
-  // Search functionality
+  // 搜索
   document.getElementById('faqSearch').addEventListener('input', function(e) {
-    searchTerm = e.target.value;
+    searchTerm = e.target.value.trim();
     filterFAQs();
   });
 
-  // Category filtering
+  // 分类切换
   document.querySelectorAll('.faq-category').forEach(button => {
     button.addEventListener('click', function() {
       document.querySelectorAll('.faq-category').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      
       currentCategory = this.dataset.category;
       filterFAQs();
     });
   });
 
-  // Initialize
-  filterFAQs();
+  // 初始化
+  document.addEventListener('DOMContentLoaded', filterFAQs);
 </script>
 
 {% schema %}
@@ -315,134 +334,137 @@
   "name": "Home FAQ Section",
   "settings": [
     {
-      "type": "header",
-      "content": "Section Title"
-    },
-    {
       "type": "text",
       "id": "title",
-      "label": "Section Title",
+      "label": "标题",
       "default": "常见问题"
     },
     {
       "type": "text",
       "id": "subtitle",
-      "label": "Section Subtitle",
+      "label": "副标题",
       "default": "为您整理了最常见的问题和详细解答，如有其他疑问请随时联系我们"
-    },
+    }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Categories"
-    },
-    {
-      "type": "list",
-      "id": "categories",
-      "label": "FAQ Categories",
-      "info": "Add FAQ categories for filtering",
-      "item": {
-        "type": "object",
-        "name": "Category",
-        "settings": [
-          {
-            "type": "text",
-            "id": "id",
-            "label": "Category ID",
-            "info": "Unique identifier for filtering"
-          },
-          {
-            "type": "text",
-            "id": "label",
-            "label": "Category Label",
-            "default": "General"
-          },
-          {
-            "type": "text",
-            "id": "icon",
-            "label": "Icon Class",
-            "info": "Font Awesome icon class (e.g., fas fa-question)"
-          }
-        ]
-      },
-      "default": [
+      "type": "category_filter",
+      "name": "分类标签",
+      "settings": [
         {
-          "id": "all",
-          "label": "全部",
-          "icon": "fas fa-list"
+          "type": "text",
+          "id": "category_id",
+          "label": "分类ID",
+          "default": "all",
+          "info": "如：all, shipping, returns"
         },
         {
-          "id": "shipping",
-          "label": "配送",
-          "icon": "fas fa-shipping-fast"
+          "type": "text",
+          "id": "label",
+          "label": "显示名称",
+          "default": "全部"
         },
         {
-          "id": "returns",
-          "label": "退换货",
-          "icon": "fas fa-undo"
-        },
-        {
-          "id": "product",
-          "label": "产品",
-          "icon": "fas fa-box"
+          "type": "text",
+          "id": "icon",
+          "label": "图标类名",
+          "default": "fas fa-list",
+          "info": "Font Awesome 图标类"
         }
       ]
     },
     {
-      "type": "header",
-      "content": "Questions & Answers"
-    },
-    {
-      "type": "list",
-      "id": "faqs",
-      "label": "FAQ Items",
-      "info": "Add frequently asked questions",
-      "limit": 10,
-      "item": {
-        "type": "object",
-        "name": "FAQ",
-        "settings": [
-          {
-            "type": "text",
-            "id": "category",
-            "label": "Category ID",
-            "info": "Match with category ID above"
-          },
-          {
-            "type": "text",
-            "id": "question",
-            "label": "Question",
-            "default": "常见问题示例"
-          },
-          {
-            "type": "textarea",
-            "id": "answer",
-            "label": "Answer",
-            "default": "详细解答内容..."
-          }
-        ]
-      },
-      "default": [
+      "type": "faq_item",
+      "name": "问题与答案",
+      "settings": [
         {
-          "category": "shipping",
-          "question": "配送时间是多久？",
-          "answer": "标准配送通常需要3-5个工作日，加急配送1-2个工作日。"
+          "type": "text",
+          "id": "category",
+          "label": "所属分类ID",
+          "default": "all",
+          "info": "需与分类标签的ID一致"
         },
         {
-          "category": "returns",
-          "question": "如何申请退换货？",
-          "answer": "收到商品后7天内可申请退换货，请保持商品完好并联系客服。"
+          "type": "text",
+          "id": "question",
+          "label": "问题",
+          "default": "配送时间是多久？"
         },
         {
-          "category": "product",
-          "question": "产品材质是什么？",
-          "answer": "我们使用高品质材料制作，具体材质请参考产品详情页。"
+          "type": "textarea",
+          "id": "answer",
+          "label": "答案",
+          "default": "标准配送通常需要3-5个工作日。"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Home FAQ",
-      "category": "Home Page"
+      "name": "常见问题",
+      "category": "主页模块",
+      "settings": {
+        "title": "常见问题",
+        "subtitle": "为您整理了最常见的问题和详细解答，如有其他疑问请随时联系我们"
+      },
+      "blocks": [
+        {
+          "type": "category_filter",
+          "settings": {
+            "category_id": "all",
+            "label": "全部",
+            "icon": "fas fa-list"
+          }
+        },
+        {
+          "type": "category_filter",
+          "settings": {
+            "category_id": "shipping",
+            "label": "配送",
+            "icon": "fas fa-shipping-fast"
+          }
+        },
+        {
+          "type": "category_filter",
+          "settings": {
+            "category_id": "returns",
+            "label": "退换货",
+            "icon": "fas fa-undo"
+          }
+        },
+        {
+          "type": "category_filter",
+          "settings": {
+            "category_id": "product",
+            "label": "产品",
+            "icon": "fas fa-box"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "category": "shipping",
+            "question": "配送时间是多久？",
+            "answer": "标准配送通常需要3-5个工作日，加急配送1-2个工作日。"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "category": "returns",
+            "question": "如何申请退换货？",
+            "answer": "收到商品后7天内可申请退换货，请保持商品完好并联系客服。"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "category": "product",
+            "question": "产品材质是什么？",
+            "answer": "我们使用高品质材料制作，具体材质请参考产品详情页。"
+          }
+        }
+      ]
     }
   ]
 }

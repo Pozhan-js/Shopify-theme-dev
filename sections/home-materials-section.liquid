@@ -1,6 +1,6 @@
 {% comment %}
   Home Materials Section - 材质展示区域
-  支持后台配置材质卡片、标题、描述等
+  使用 blocks 实现可编辑材质卡片，兼容所有 Shopify 主题
 {% endcomment %}
 
 <style>
@@ -126,24 +126,38 @@
     </div>
 
     <div class="materials-grid">
-      {% for material in section.settings.materials %}
-        <div class="material-card">
-          <img src="{{ material.image | image_url: width: 600 }}" 
-               alt="{{ material.title }}" 
-               class="material-image">
-          <div class="material-content">
-            <h3 class="material-title">{{ material.title }}</h3>
-            <p class="material-description">{{ material.description }}</p>
-            <div class="material-features">
-              {% for feature in material.features %}
-                <div class="feature-item">
-                  <i class="fas fa-check-circle feature-icon"></i>
-                  {{ feature }}
-                </div>
-              {% endfor %}
+      {% for block in section.blocks %}
+        {% if block.type == 'material' %}
+          <div class="material-card">
+            <img src="{{ block.settings.image | image_url: width: 600 }}" 
+                 alt="{{ block.settings.title }}" 
+                 class="material-image">
+            <div class="material-content">
+              <h3 class="material-title">{{ block.settings.title }}</h3>
+              <p class="material-description">{{ block.settings.description }}</p>
+              <div class="material-features">
+                {% if block.settings.feature_1 != blank %}
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    {{ block.settings.feature_1 }}
+                  </div>
+                {% endif %}
+                {% if block.settings.feature_2 != blank %}
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    {{ block.settings.feature_2 }}
+                  </div>
+                {% endif %}
+                {% if block.settings.feature_3 != blank %}
+                  <div class="feature-item">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    {{ block.settings.feature_3 }}
+                  </div>
+                {% endif %}
+              </div>
             </div>
           </div>
-        </div>
+        {% endif %}
       {% endfor %}
     </div>
   </div>
@@ -168,67 +182,48 @@
       "id": "subtitle",
       "label": "Section Subtitle",
       "default": "We are committed to using the finest materials and most skilled craftsmanship to deliver exceptional products"
-    },
+    }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Material Cards"
-    },
-    {
-      "type": "list",
-      "id": "materials",
-      "label": "Material Cards",
-      "info": "Add material showcase cards",
-      "limit": 6,
-      "item": {
-        "type": "object",
-        "name": "Material",
-        "settings": [
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "Material Image",
-            "info": "Recommended size: 600x400px"
-          },
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Material Title",
-            "default": "Premium Material"
-          },
-          {
-            "type": "textarea",
-            "id": "description",
-            "label": "Description",
-            "default": "High-quality material description"
-          },
-          {
-            "type": "list",
-            "id": "features",
-            "label": "Features",
-            "item": {
-              "type": "text",
-              "name": "Feature"
-            },
-            "default": [
-              "Premium Quality",
-              "Durable",
-              "Eco-friendly"
-            ]
-          }
-        ]
-      },
-      "default": [
+      "type": "material",
+      "name": "材质卡片",
+      "settings": [
         {
-          "title": "Premium Leather",
-          "description": "Genuine leather with exceptional durability and timeless appeal"
+          "type": "image_picker",
+          "id": "image",
+          "label": "材质图片",
+          "info": "推荐尺寸：600x400px"
         },
         {
-          "title": "Solid Gold",
-          "description": "18K solid gold for lasting beauty and value"
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "Premium Material"
         },
         {
-          "title": "Natural Gemstones",
-          "description": "Hand-selected natural gemstones with brilliant clarity"
+          "type": "textarea",
+          "id": "description",
+          "label": "描述",
+          "default": "High-quality material description"
+        },
+        {
+          "type": "text",
+          "id": "feature_1",
+          "label": "特性 1",
+          "default": "Premium Quality"
+        },
+        {
+          "type": "text",
+          "id": "feature_2",
+          "label": "特性 2",
+          "default": "Durable"
+        },
+        {
+          "type": "text",
+          "id": "feature_3",
+          "label": "特性 3",
+          "default": "Eco-friendly"
         }
       ]
     }
@@ -236,7 +231,46 @@
   "presets": [
     {
       "name": "Home Materials",
-      "category": "Home Page"
+      "category": "Home Page",
+      "settings": {
+        "title": "Premium Materials & Craftsmanship",
+        "subtitle": "We are committed to using the finest materials and most skilled craftsmanship to deliver exceptional products"
+      },
+      "blocks": [
+        {
+          "type": "material",
+          "settings": {
+            "image": "",
+            "title": "Premium Leather",
+            "description": "Genuine leather with exceptional durability and timeless appeal",
+            "feature_1": "Natural Grain",
+            "feature_2": "Long-lasting",
+            "feature_3": "Soft Touch"
+          }
+        },
+        {
+          "type": "material",
+          "settings": {
+            "image": "",
+            "title": "Solid Gold",
+            "description": "18K solid gold for lasting beauty and value",
+            "feature_1": "Hypoallergenic",
+            "feature_2": "Tarnish Resistant",
+            "feature_3": "Luxurious Shine"
+          }
+        },
+        {
+          "type": "material",
+          "settings": {
+            "image": "",
+            "title": "Natural Gemstones",
+            "description": "Hand-selected natural gemstones with brilliant clarity",
+            "feature_1": "Unique Patterns",
+            "feature_2": "Vibrant Colors",
+            "feature_3": "Ethically Sourced"
+          }
+        }
+      ]
     }
   ]
 }

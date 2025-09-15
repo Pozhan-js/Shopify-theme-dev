@@ -1,6 +1,6 @@
 {% comment %}
   Home Endorsement Section - 网红推荐区域
-  支持后台配置网红信息、推荐语、图片等
+  使用 blocks 实现，避免 schema 报错，兼容所有 Shopify 主题
 {% endcomment %}
 
 <style>
@@ -155,39 +155,46 @@
 
     <div class="endorsement-content">
       <div>
+        <!-- 选项卡 -->
         <div class="endorsement-tabs">
-          {% for endorser in section.settings.endorsements %}
-            <button class="endorsement-tab {% if forloop.index0 == 0 %}active{% endif %}"
-                    data-index="{{ forloop.index0 }}">
-              {{ endorser.name }}
-            </button>
+          {% for block in section.blocks %}
+            {% if block.type == 'endorser' %}
+              <button class="endorsement-tab {% if forloop.index0 == 0 %}active{% endif %}"
+                      data-index="{{ forloop.index0 }}">
+                {{ block.settings.name }}
+              </button>
+            {% endif %}
           {% endfor %}
         </div>
 
-        <div class="endorsement-card">
-          {% for endorser in section.settings.endorsements limit:1 %}
-            <div class="endorser-profile">
-              <img src="{{ endorser.image | image_url: width: 200 }}" 
-                   alt="{{ endorser.name }}" 
-                   class="endorser-avatar">
-              <div class="endorser-info">
-                <h3>{{ endorser.name }}</h3>
-                <p class="endorser-title">{{ endorser.title }}</p>
-                <div class="endorser-social">
-                  <i class="fab fa-instagram"></i>
-                  <span>{{ endorser.social_handle }} • {{ endorser.followers }} followers</span>
-                </div>
+        <!-- 推荐卡片 -->
+        <div class="endorsement-card" id="endorsementCard">
+          {% assign first_block = section.blocks | where: 'type', 'endorser' | first %}
+          {% if first_block %}
+          <div class="endorser-profile">
+            <img src="{{ first_block.settings.image | image_url: width: 200 }}" 
+                 alt="{{ first_block.settings.name }}" 
+                 class="endorser-avatar">
+            <div class="endorser-info">
+              <h3>{{ first_block.settings.name }}</h3>
+              <p class="endorser-title">{{ first_block.settings.title }}</p>
+              <div class="endorser-social">
+                <i class="fab fa-instagram"></i>
+                <span>{{ first_block.settings.social_handle }} • {{ first_block.settings.followers }} followers</span>
               </div>
             </div>
-            <p class="endorsement-quote">"{{ endorser.quote }}"</p>
-          {% endfor %}
+          </div>
+          <p class="endorsement-quote">"{{ first_block.settings.quote }}"</p>
+          {% endif %}
         </div>
       </div>
 
+      <!-- 右侧大图 -->
       <div>
-        <img src="{{ section.settings.endorsements.first.image | image_url: width: 600 }}" 
+        <img src="{% if first_block %}{{ first_block.settings.image | image_url: width: 600 }}{% else %}//via.placeholder.com/600x400{% endif %}" 
              alt="Endorsement" 
-             class="endorsement-image">
+             class="endorsement-image"
+             id="endorsementImage">
       </div>
     </div>
   </div>
@@ -196,42 +203,58 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('.endorsement-tab');
-    const endorsementCard = document.querySelector('.endorsement-card');
-    const endorsementImage = document.querySelector('.endorsement-image');
-    
-    const endorsements = {{ section.settings.endorsements | json }};
+    const card = document.getElementById('endorsementCard');
+    const image = document.getElementById('endorsementImage');
+
+    // 将每个 block 转为 JS 对象
+    const endorsements = [
+      {% for block in section.blocks %}
+        {% if block.type == 'endorser' %}
+          {
+            image: "{{ block.settings.image | img_url: '600x' }}",
+            name: {{ block.settings.name | json }},
+            title: {{ block.settings.title | json }},
+            social_handle: {{ block.settings.social_handle | json }},
+            followers: {{ block.settings.followers | json }},
+            quote: {{ block.settings.quote | json }}
+          }{% unless forloop.last %},{% endunless %}
+        {% endif %}
+      {% endfor %}
+    ];
 
     function updateEndorsement(index) {
-      const endorser = endorsements[index];
-      
-      // Update active tab
+      const e = endorsements[index];
+
+      // 更新选项卡
       tabs.forEach(tab => tab.classList.remove('active'));
       tabs[index].classList.add('active');
-      
-      // Update card content
-      endorsementCard.innerHTML = `
+
+      // 更新内容
+      card.innerHTML = `
         <div class="endorser-profile">
-          <img src="${endorser.image}" alt="${endorser.name}" class="endorser-avatar">
+          <img src="${e.image}" alt="${e.name}" class="endorser-avatar">
           <div class="endorser-info">
-            <h3>${endorser.name}</h3>
-            <p class="endorser-title">${endorser.title}</p>
+            <h3>${e.name}</h3>
+            <p class="endorser-title">${e.title}</p>
             <div class="endorser-social">
               <i class="fab fa-instagram"></i>
-              <span>${endorser.social_handle} • ${endorser.followers} followers</span>
+              <span>${e.social_handle} • ${e.followers} followers</span>
             </div>
           </div>
         </div>
-        <p class="endorsement-quote">"${endorser.quote}"</p>
+        <p class="endorsement-quote">"${e.quote}"</p>
       `;
-      
-      // Update image
-      endorsementImage.src = endorser.image;
+
+      // 更新图片
+      image.src = e.image;
     }
 
-    // Add click listeners to tabs
+    // 绑定点击事件
     tabs.forEach((tab, index) => {
       tab.addEventListener('click', () => {
-        updateEndorsement(index);
+        if (index < endorsements.length) {
+          updateEndorsement(index);
+        }
       });
     });
   });
@@ -256,73 +279,48 @@
       "id": "subtitle",
       "label": "Section Subtitle",
       "default": "Hear what top influencers and lifestyle creators say about our products"
-    },
+    }
+  ],
+  "blocks": [
     {
-      "type": "header",
-      "content": "Endorsements"
-    },
-    {
-      "type": "list",
-      "id": "endorsements",
-      "label": "Influencer Endorsements",
-      "info": "Add influencer endorsements",
-      "limit": 5,
-      "item": {
-        "type": "object",
-        "name": "Endorser",
-        "settings": [
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "Portrait Image",
-            "info": "Recommended size: 400x400px"
-          },
-          {
-            "type": "text",
-            "id": "name",
-            "label": "Name",
-            "default": "Influencer Name"
-          },
-          {
-            "type": "text",
-            "id": "title",
-            "label": "Title/Profession",
-            "default": "Lifestyle Creator"
-          },
-          {
-            "type": "text",
-            "id": "social_handle",
-            "label": "Social Media Handle",
-            "default": "@influencer"
-          },
-          {
-            "type": "text",
-            "id": "followers",
-            "label": "Followers Count",
-            "default": "100K"
-          },
-          {
-            "type": "textarea",
-            "id": "quote",
-            "label": "Endorsement Quote",
-            "default": "This product is absolutely amazing! The quality is outstanding and I love the design."
-          }
-        ]
-      },
-      "default": [
+      "type": "endorser",
+      "name": "网红推荐人",
+      "settings": [
         {
-          "name": "Sarah Johnson",
-          "title": "Fashion Influencer",
-          "social_handle": "@sarahstyles",
-          "followers": "250K",
-          "quote": "Absolutely love the quality and design of these products! They have become my go-to accessories."
+          "type": "image_picker",
+          "id": "image",
+          "label": "头像图片",
+          "info": "建议尺寸：400x400px"
         },
         {
-          "name": "Mike Chen",
-          "title": "Lifestyle Creator",
-          "social_handle": "@mikelifestyle",
-          "followers": "180K",
-          "quote": "The craftsmanship is exceptional. These pieces truly stand out in my collection."
+          "type": "text",
+          "id": "name",
+          "label": "姓名",
+          "default": "Sarah Johnson"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "职业",
+          "default": "Fashion Influencer"
+        },
+        {
+          "type": "text",
+          "id": "social_handle",
+          "label": "社交媒体账号",
+          "default": "@sarahstyles"
+        },
+        {
+          "type": "text",
+          "id": "followers",
+          "label": "粉丝数",
+          "default": "250K"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "推荐语",
+          "default": "Absolutely love the quality and design of these products!"
         }
       ]
     }
@@ -330,7 +328,35 @@
   "presets": [
     {
       "name": "Home Endorsements",
-      "category": "Home Page"
+      "category": "Home Page",
+      "settings": {
+        "title": "Influencer Reviews",
+        "subtitle": "Hear what top influencers and lifestyle creators say about our products"
+      },
+      "blocks": [
+        {
+          "type": "endorser",
+          "settings": {
+            "image": "",
+            "name": "Sarah Johnson",
+            "title": "Fashion Influencer",
+            "social_handle": "@sarahstyles",
+            "followers": "250K",
+            "quote": "Absolutely love the quality and design of these products! They have become my go-to accessories."
+          }
+        },
+        {
+          "type": "endorser",
+          "settings": {
+            "image": "",
+            "name": "Mike Chen",
+            "title": "Lifestyle Creator",
+            "social_handle": "@mikelifestyle",
+            "followers": "180K",
+            "quote": "The craftsmanship is exceptional. These pieces truly stand out in my collection."
+          }
+        }
+      ]
     }
   ]
 }
