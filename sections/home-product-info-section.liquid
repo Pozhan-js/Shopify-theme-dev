@@ -1,6 +1,7 @@
 {% comment %}
-  Home Product Info Section - 产品信息展示区域
-  使用 blocks 实现图片画廊，避免 schema 报错
+  Home Product Info Section - 简化版
+  左侧：AG1 订阅套餐文案 + 价格 + 赠品
+  右侧：单张主图
 {% endcomment %}
 
 <style>
@@ -52,158 +53,78 @@
     line-height: 1.6;
   }
 
-  .product-price {
+  .price-row {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin: 1rem 0;
-  }
-
-  .current-price {
-    font-size: 2rem;
-    font-weight: bold;
+    justify-content: space-between;
+    font-size: 1.125rem;
+    font-weight: 600;
     color: #1f2937;
   }
 
-  .original-price {
-    font-size: 1.25rem;
+  .price-old {
     color: #9ca3af;
     text-decoration: line-through;
   }
 
-  .discount-badge {
-    background: #fee2e2;
-    color: #dc2626;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+  .price-discount {
+    color: #ef4444;
+    font-weight: bold;
   }
 
-  .quantity-section {
+  .benefits-list {
     margin: 1.5rem 0;
-  }
-
-  .quantity-label {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: block;
-  }
-
-  .quantity-control {
-    display: flex;
-    align-items: center;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    width: fit-content;
-  }
-
-  .quantity-btn {
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    color: #6b7280;
-    transition: color 0.2s;
-  }
-
-  .quantity-btn:hover {
-    color: #1f2937;
-  }
-
-  .quantity-value {
-    padding: 0 1rem;
-    font-weight: 600;
-    min-width: 2rem;
-    text-align: center;
-  }
-
-  .product-actions {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    margin-top: 1.5rem;
   }
 
-  .product-btn {
+  .benefit-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    cursor: pointer;
-    border: none;
     font-size: 1rem;
-  }
-
-  .btn-primary {
-    background: #ef4444;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background: #dc2626;
-  }
-
-  .btn-outline {
-    background: transparent;
     color: #1f2937;
-    border: 1px solid #d1d5db;
   }
 
-  .btn-outline:hover {
-    background: #f3f4f6;
+  .benefit-item .value {
+    color: #6b7280;
+    font-weight: normal;
   }
 
-  .product-gallery {
+  .total-row {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    justify-content: space-between;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1f2937;
+  }
+
+  .disclaimer {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+
+  .guarantee {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .flexible {
+    font-size: 0.875rem;
+    color: #6b7280;
   }
 
   .main-image {
     width: 100%;
-    height: 24rem;
+    height: 28rem;
     object-fit: cover;
     border-radius: 0.75rem;
-  }
-
-  .thumbnail-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-  }
-
-  .thumbnail {
-    border: 2px solid transparent;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .thumbnail:hover {
-    border-color: #ef4444;
-    transform: scale(1.05);
-  }
-
-  .thumbnail.active {
-    border-color: #ef4444;
-  }
-
-  .thumbnail img {
-    width: 100%;
-    height: 5rem;
-    object-fit: cover;
   }
 
   @media (max-width: 768px) {
@@ -211,17 +132,21 @@
       grid-template-columns: 1fr;
       gap: 2rem;
     }
-    
+
     .product-title {
       font-size: 1.875rem;
     }
-    
-    .current-price {
-      font-size: 1.5rem;
+
+    .benefit-item, .price-row, .total-row {
+      font-size: 1rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
     }
-    
-    .thumbnail-grid {
-      grid-template-columns: repeat(3, 1fr);
+
+    .total-row {
+      flex-direction: row;
+      justify-content: space-between;
     }
   }
 </style>
@@ -229,109 +154,53 @@
 <section class="product-info-section">
   <div class="product-info-container">
     <div class="product-info-grid">
+      <!-- 左侧文案 -->
       <div class="product-info-left">
-        {% if section.settings.badge_text != blank %}
-          <span class="product-badge">{{ section.settings.badge_text }}</span>
-        {% endif %}
-        
-        <h1 class="product-title">{{ section.settings.product_title }}</h1>
-        <p class="product-description">{{ section.settings.product_description }}</p>
-        
-        <div class="product-price">
-          <span class="current-price">${{ section.settings.current_price }}</span>
-          {% if section.settings.original_price > section.settings.current_price %}
-            <span class="original-price">${{ section.settings.original_price }}</span>
-            <span class="discount-badge">
-              {{ section.settings.discount_percentage }}% OFF
-            </span>
-          {% endif %}
+        <span class="product-badge">Best Seller</span>
+        <h1 class="product-title">Get started with your AG1 Welcome Kit^</h1>
+        <p class="product-description">AG1 Pouch</p>
+
+        <div class="price-row">
+          <span>$79/mo USD</span>
+          <span class="price-old price-discount">$99 USD†</span>
         </div>
 
-        <div class="quantity-section">
-          <label class="quantity-label">Quantity</label>
-          <div class="quantity-control">
-            <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
-            <span class="quantity-value" id="quantity">1</span>
-            <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+        <p><strong>30 day supply per pouch, ships every 30 days</strong></p>
+
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <span>Welcome Kit</span>
+            <span class="value">Free ($28 USD)</span>
+          </div>
+          <div class="benefit-item">
+            <span>AG1 Shaker, Scoop, and Canister</span>
+            <span class="value">Free</span>
+          </div>
+          <div class="benefit-item">
+            <span>AG1 Travel Packs (5 count)</span>
+            <span class="value">Free ($19 USD)</span>
           </div>
         </div>
 
-        <div class="product-actions">
-          <button class="product-btn btn-primary" onclick="addToCart()">
-            <i class="fas fa-shopping-cart"></i>
-            Add to Cart
-          </button>
-          <button class="product-btn btn-outline" onclick="addToWishlist()">
-            <i class="fas fa-heart"></i>
-            Add to Wishlist
-          </button>
+        <div class="total-row">
+          <span>Total</span>
+          <span>$79/mo USD</span>
         </div>
+        <p class="disclaimer">† Value of one-time purchase</p>
+
+        <p class="guarantee">90-day money back guarantee</p>
+        <p class="flexible">Update or cancel anytime</p>
       </div>
 
-      <div class="product-gallery">
-        <!-- 主图：使用第一个 image block -->
-        {% assign first_image_block = section.blocks | where: 'type', 'image' | first %}
-        {% if first_image_block and first_image_block.settings.image %}
-          <img src="{{ first_image_block.settings.image | image_url: width: 600 }}" 
-               alt="{{ section.settings.product_title }}" 
-               class="main-image" 
-               id="mainImage">
-        {% else %}
-          <img src="//via.placeholder.com/600x400" class="main-image" id="mainImage" alt="Placeholder">
-        {% endif %}
-        
-        <!-- 缩略图 -->
-        <div class="thumbnail-grid">
-          {% for block in section.blocks %}
-            {% if block.type == 'image' and block.settings.image %}
-              <div class="thumbnail {% if forloop.index0 == 0 %}active{% endif %}" 
-                   onclick="changeImage('{{ block.settings.image | image_url: width: 600 }}', this)">
-                <img src="{{ block.settings.image | image_url: width: 150 }}" 
-                     alt="{{ section.settings.product_title }} {{ forloop.index }}">
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
+      <!-- 右侧主图 -->
+      <div>
+        <img src="{{ section.settings.main_image | image_url: '600x' }}"
+             alt="AG1 Welcome Kit"
+             class="main-image">
       </div>
     </div>
   </div>
 </section>
-
-<script>
-  let quantity = 1;
-
-  function updateQuantity() {
-    document.getElementById('quantity').textContent = quantity;
-  }
-
-  function increaseQuantity() {
-    quantity++;
-    updateQuantity();
-  }
-
-  function decreaseQuantity() {
-    if (quantity > 1) {
-      quantity--;
-      updateQuantity();
-    }
-  }
-
-  function changeImage(src, thumbnail) {
-    document.getElementById('mainImage').src = src;
-    
-    // 更新缩略图激活状态
-    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
-    thumbnail.classList.add('active');
-  }
-
-  function addToCart() {
-    alert(`Added ${quantity} ${quantity === 1 ? 'item' : 'items'} to cart!`);
-  }
-
-  function addToWishlist() {
-    alert('Added to wishlist!');
-  }
-</script>
 
 {% schema %}
 {
@@ -342,60 +211,16 @@
       "content": "Product Information"
     },
     {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "主图",
+      "info": "建议尺寸：600x600 或更高"
+    },
+    {
       "type": "text",
       "id": "product_title",
-      "label": "Product Title",
-      "default": "Premium Quality Product"
-    },
-    {
-      "type": "textarea",
-      "id": "product_description",
-      "label": "Product Description",
-      "default": "Crafted with premium materials and timeless design."
-    },
-    {
-      "type": "text",
-      "id": "badge_text",
-      "label": "Badge Text",
-      "default": "Best Seller"
-    },
-    {
-      "type": "header",
-      "content": "Pricing"
-    },
-    {
-      "type": "text",
-      "id": "current_price",
-      "label": "Current Price",
-      "default": "89.99"
-    },
-    {
-      "type": "text",
-      "id": "original_price",
-      "label": "Original Price",
-      "default": "119.99"
-    },
-    {
-      "type": "range",
-      "id": "discount_percentage",
-      "label": "Discount Percentage",
-      "min": 0,
-      "max": 90,
-      "step": 5,
-      "default": 25
-    }
-  ],
-  "blocks": [
-    {
-      "type": "image",
-      "name": "产品图片",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "上传图片"
-        }
-      ]
+      "label": "产品标题",
+      "default": "Get started with your AG1 Welcome Kit^"
     }
   ],
   "presets": [
@@ -403,33 +228,9 @@
       "name": "Home Product Info",
       "category": "Home Page",
       "settings": {
-        "product_title": "Premium Quality Product",
-        "product_description": "Crafted with premium materials and timeless design.",
-        "badge_text": "Best Seller",
-        "current_price": "89.99",
-        "original_price": "119.99",
-        "discount_percentage": 25
-      },
-      "blocks": [
-        {
-          "type": "image",
-          "settings": {
-            "image": ""
-          }
-        },
-        {
-          "type": "image",
-          "settings": {
-            "image": ""
-          }
-        },
-        {
-          "type": "image",
-          "settings": {
-            "image": ""
-          }
-        }
-      ]
+        "product_title": "Get started with your AG1 Welcome Kit^",
+        "main_image": ""
+      }
     }
   ]
 }
