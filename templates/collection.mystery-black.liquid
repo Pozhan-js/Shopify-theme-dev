@@ -21,7 +21,27 @@
     {% if collection.products.size > 0 %}
       {% for product in collection.products %}
         <div class="product-container">
-          <!-- 产品卡片内容 -->
+          <a href="{{ product.url }}" class="product-image-link">
+            <img src="{{ product.featured_image | image_url: '400x400' }}" 
+                 alt="{{ product.title }}"
+                 loading="lazy"
+                 width="400"
+                 height="400">
+          </a>
+          <div class="product-info">
+            <h3 class="product-title">
+              <a href="{{ product.url }}">{{ product.title }}</a>
+            </h3>
+            <div class="product-price">
+              {{ product.price | money }}
+            </div>
+            <div class="product-actions">
+              <form method="post" action="/cart/add" class="add-to-cart-form">
+                <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                <button type="submit" class="add-to-cart-btn">加入购物车</button>
+              </form>
+            </div>
+          </div>
         </div>
       {% endfor %}
     {% else %}
@@ -38,9 +58,127 @@
 {% endpaginate %}
 
 <style>
-  /* 样式内容 */
+/* 黑白神秘系列专属样式 */
+.collection-template.mystery-black {
+  background: #000;
+  color: #fff;
+  min-height: 100vh;
+}
+
+/* Banner样式 */
+.banner-image-container {
+  position: relative;
+  height: 60vh;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2);
+}
+
+/* 产品网格样式 */
+.product-grid-wrapper {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.product-container {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.product-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* 分页样式 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-image-container {
+    height: 40vh;
+  }
+  
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 
 <script>
-  // JavaScript内容
+document.addEventListener('DOMContentLoaded', function() {
+  // AJAX加入购物车
+  document.querySelectorAll('.add-to-cart-form').forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const submitBtn = form.querySelector('button');
+      const originalText = submitBtn.textContent;
+      
+      try {
+        submitBtn.textContent = '添加中...';
+        submitBtn.disabled = true;
+        
+        const response = await fetch('/cart/add.js', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if(result.status === 'success') {
+          submitBtn.textContent = '已添加';
+          setTimeout(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+          }, 2000);
+          
+          // 更新购物车数量
+          fetch('/cart.js')
+            .then(res => res.json())
+            .then(cart => {
+              const cartCount = document.querySelector('.cart-count');
+              if(cartCount) {
+                cartCount.textContent = cart.item_count;
+              }
+            });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        submitBtn.textContent = '添加失败';
+        setTimeout(() => {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }, 2000);
+      }
+    });
+  });
+});
 </script>
