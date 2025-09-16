@@ -1,2 +1,744 @@
-{% comment %} 默认产品系列模板 - 使用主题默认实现 {% endcomment %}
-{% section 'collection-template' %}
+{% comment %}
+  产品系列模板 - 黑白神秘色系
+{% endcomment %}
+
+<div class="collection-template">
+  <!-- 产品系列 Banner -->
+  <section class="collection-banner">
+    {% if collection.image %}
+      <div class="banner-image-container">
+        <img 
+          src="{{ collection.image | img_url: '1920x600' }}" 
+          alt="{{ collection.title }}"
+          class="banner-image"
+          loading="lazy"
+        >
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+          <h1 class="collection-title">{{ collection.title }}</h1>
+          {% if collection.description != blank %}
+            <p class="collection-description">{{ collection.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="banner-placeholder">
+        <div class="banner-content">
+          <h1 class="collection-title">{{ collection.title }}</h1>
+          {% if collection.description != blank %}
+            <p class="collection-description">{{ collection.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- 产品筛选和排序 -->
+  <section class="collection-filters">
+    <div class="container">
+      <div class="filters-wrapper">
+        <div class="product-count">
+          <span class="count-text">{{ collection.products_count }} 件商品</span>
+        </div>
+        
+        <div class="sort-wrapper">
+          <label for="sort-by" class="sort-label">排序方式:</label>
+          <select id="sort-by" class="sort-select">
+            <option value="manual">推荐</option>
+            <option value="best-selling">最畅销</option>
+            <option value="title-ascending">名称 A-Z</option>
+            <option value="title-descending">名称 Z-A</option>
+            <option value="price-ascending">价格从低到高</option>
+            <option value="price-descending">价格从高到低</option>
+            <option value="created-ascending">最旧</option>
+            <option value="created-descending">最新</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 产品网格 -->
+  <section class="collection-products">
+    <div class="container">
+      {% if collection.products.size > 0 %}
+        <div class="products-grid">
+          {% for product in collection.products %}
+            <div class="product-card">
+              <div class="product-image-wrapper">
+                <!-- 产品状态标签 -->
+                <div class="product-badges">
+                  {% unless product.available %}
+                    <span class="badge sold-out">售罄</span>
+                  {% else %}
+                    {% if product.compare_at_price > product.price %}
+                      <span class="badge on-sale">促销</span>
+                    {% endif %}
+                    {% if product.tags contains 'new' %}
+                      <span class="badge new">新品</span>
+                    {% endif %}
+                    {% if product.tags contains 'hot' %}
+                      <span class="badge hot">热销</span>
+                    {% endif %}
+                  {% endunless %}
+                </div>
+
+                <!-- 产品图片 -->
+                <a href="{{ product.url }}" class="product-link">
+                  {% if product.featured_image %}
+                    <img 
+                      src="{{ product.featured_image | image_url: '400x400' }}" 
+                      alt="{{ product.title }}"
+                      class="product-image primary-image"
+                      loading="lazy"
+                      width="400"
+                      height="400"
+                    />
+                    {% if product.images[1] %}
+                      <img 
+                        src="{{ product.images[1] | image_url: '400x400' }}" 
+                        alt="{{ product.title }}"
+                        class="product-image hover-image"
+                        loading="lazy"
+                        width="400"
+                        height="400"
+                      >
+                    {% endif %}
+                  {% else %}
+                    <div class="product-image-placeholder">
+                      <svg viewBox="0 0 100 100" class="placeholder-icon">
+                        <rect width="100" height="100" fill="#f5f5f5"/>
+                        <text x="50" y="50" text-anchor="middle" dy=".3em" fill="#999">无图片</text>
+                      </svg>
+                    </div>
+                  {% endif %}
+                </a>
+
+                <!-- 快速查看按钮 -->
+                <div class="quick-actions">
+                  <button class="quick-view-btn" data-product-id="{{ product.id }}">
+                    <svg class="icon" viewBox="0 0 24 24">
+                      <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 产品信息 -->
+              <div class="product-info">
+                <h3 class="product-title">
+                  <a href="{{ product.url }}">{{ product.title }}</a>
+                </h3>
+                
+                <div class="product-price">
+                  {% if product.compare_at_price > product.price %}
+                    <span class="price-sale">{{ product.price | money }}</span>
+                    <span class="price-compare">{{ product.compare_at_price | money }}</span>
+                  {% else %}
+                    <span class="price-regular">{{ product.price | money }}</span>
+                  {% endif %}
+                </div>
+
+                <!-- 产品变体选择器 -->
+                {% if product.variants.size > 1 %}
+                  <div class="product-variants">
+                    {% for option in product.options_with_values %}
+                      {% if option.name == 'Color' or option.name == '颜色' %}
+                        <div class="color-swatches">
+                          {% for value in option.values %}
+                            <span class="color-swatch" style="background-color: {{ value | downcase }};" title="{{ value }}"></span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <!-- 添加到购物车按钮 -->
+                <div class="product-actions">
+                  {% if product.available %}
+                    <button class="add-to-cart-btn" data-product-id="{{ product.id }}">
+                      加入购物车
+                    </button>
+                  {% else %}
+                    <button class="sold-out-btn" disabled>
+                      售罄
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- 分页 -->
+        {% if paginate.pages > 1 %}
+          <nav class="pagination-wrapper">
+            {{ paginate | default_pagination }}
+          </nav>
+        {% endif %}
+
+      {% else %}
+        <div class="empty-collection">
+          <div class="empty-content">
+            <svg class="empty-icon" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="#ccc" stroke-width="2"/>
+              <path d="M35 45 L45 55 L65 35" fill="none" stroke="#ccc" stroke-width="2"/>
+            </svg>
+            <h2>暂无商品</h2>
+            <p>该系列暂时没有商品，请稍后再来查看。</p>
+            <a href="{{ routes.collections_url }}" class="continue-shopping">浏览其他系列</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+
+<style>
+/* 产品系列模板样式 - 黑白神秘色系 */
+.collection-template {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+/* Banner 样式 */
+.collection-banner {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.banner-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2) brightness(0.7);
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+.banner-placeholder {
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.collection-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(45deg, #ffffff, #cccccc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  letter-spacing: -0.02em;
+}
+
+.collection-description {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 筛选器样式 */
+.collection-filters {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.filters-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.count-text {
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+.sort-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sort-label {
+  color: #cccccc;
+  font-size: 0.9rem;
+}
+
+.sort-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* 产品网格样式 */
+.collection-products {
+  padding: 60px 0;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.product-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.product-image-wrapper {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.product-badges {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge.sold-out {
+  background: rgba(220, 38, 127, 0.9);
+  color: white;
+}
+
+.badge.on-sale {
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.badge.new {
+  background: rgba(34, 197, 94, 0.9);
+  color: white;
+}
+
+.badge.hot {
+  background: rgba(251, 146, 60, 0.9);
+  color: white;
+}
+
+.product-link {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.3s ease;
+  filter: grayscale(20%) contrast(1.1);
+}
+
+.hover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.product-card:hover .hover-image {
+  opacity: 1;
+}
+
+.product-card:hover .primary-image {
+  opacity: 0;
+}
+
+.product-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-icon {
+  width: 60px;
+  height: 60px;
+  opacity: 0.3;
+}
+
+.quick-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover .quick-actions {
+  opacity: 1;
+}
+
+.quick-view-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-view-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.quick-view-btn .icon {
+  width: 18px;
+  height: 18px;
+  fill: #333;
+}
+
+/* 产品信息样式 */
+.product-info {
+  padding: 20px;
+}
+
+.product-title {
+  margin-bottom: 12px;
+}
+
+.product-title a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.product-title a:hover {
+  color: #cccccc;
+}
+
+.product-price {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-sale {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.price-compare {
+  color: #888888;
+  text-decoration: line-through;
+  font-size: 0.9rem;
+}
+
+.price-regular {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.product-variants {
+  margin-bottom: 16px;
+}
+
+.color-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.product-actions {
+  margin-top: 16px;
+}
+
+.add-to-cart-btn,
+.sold-out-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+
+.add-to-cart-btn {
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  color: #000000;
+}
+
+.add-to-cart-btn:hover {
+  background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+  transform: translateY(-2px);
+}
+
+.sold-out-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #888888;
+  cursor: not-allowed;
+}
+
+/* 空状态样式 */
+.empty-collection {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.empty-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 24px;
+  opacity: 0.3;
+}
+
+.empty-collection h2 {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.empty-collection p {
+  color: #cccccc;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.continue-shopping {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(45deg, #ffffff, #f0f0f0);
+  color: #000000;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.continue-shopping:hover {
+  background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+  transform: translateY(-2px);
+}
+
+/* 分页样式 */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .collection-title {
+    font-size: 2.5rem;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .filters-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .sort-wrapper {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .product-info {
+    padding: 15px;
+  }
+  
+  .collection-banner {
+    height: 40vh;
+    min-height: 300px;
+  }
+}
+</style>
+
+<script>
+// 产品系列页面交互功能
+document.addEventListener('DOMContentLoaded', function() {
+  // 排序功能
+  const sortSelect = document.getElementById('sort-by');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', function() {
+      const sortValue = this.value;
+      const url = new URL(window.location);
+      url.searchParams.set('sort_by', sortValue);
+      window.location.href = url.toString();
+    });
+    
+    // 设置当前排序值
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort_by');
+    if (currentSort) {
+      sortSelect.value = currentSort;
+    }
+  }
+  
+  // 快速查看功能
+  const quickViewBtns = document.querySelectorAll('.quick-view-btn');
+  quickViewBtns.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const productId = this.dataset.productId;
+      // 这里可以添加快速查看模态框的逻辑
+      console.log('Quick view for product:', productId);
+    });
+  });
+  
+  // 添加到购物车功能
+  const addToCartBtns = document.querySelectorAll('.add-to-cart-btn');
+  addToCartBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const productId = this.dataset.productId;
+      // 这里可以添加添加到购物车的逻辑
+      console.log('Add to cart:', productId);
+      
+      // 简单的反馈效果
+      const originalText = this.textContent;
+      this.textContent = '已添加';
+      this.style.background = 'linear-gradient(45deg, #10b981, #059669)';
+      
+      setTimeout(() => {
+        this.textContent = originalText;
+        this.style.background = '';
+      }, 2000);
+    });
+  });
+  
+  // 颜色样本点击事件
+  const colorSwatches = document.querySelectorAll('.color-swatch');
+  colorSwatches.forEach(swatch => {
+    swatch.addEventListener('click', function() {
+      // 移除其他选中状态
+      this.parentNode.querySelectorAll('.color-swatch').forEach(s => {
+        s.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      });
+      
+      // 添加选中状态
+      this.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+    });
+  });
+});
+</script>

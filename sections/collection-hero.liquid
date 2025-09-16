@@ -1,0 +1,736 @@
+{% comment %}
+  产品系列横幅区块 - 可在主题编辑器中自定义
+{% endcomment %}
+
+<section class="collection-hero-section" id="collection-hero-{{ section.id }}">
+  <div class="hero-container">
+    {% if section.settings.show_collection_image and collection.image %}
+      <div class="hero-image-wrapper">
+        <img 
+          src="{{ collection.image | img_url: '1920x800' }}" 
+          alt="{{ collection.title }}"
+          class="hero-image"
+          loading="eager"
+        >
+        <div class="hero-overlay" style="background: {{ section.settings.overlay_color }}; opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+      </div>
+    {% elsif section.settings.fallback_image %}
+      <div class="hero-image-wrapper">
+        <img 
+          src="{{ section.settings.fallback_image | img_url: '1920x800' }}" 
+          alt="{{ collection.title }}"
+          class="hero-image"
+          loading="eager"
+        >
+        <div class="hero-overlay" style="background: {{ section.settings.overlay_color }}; opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+      </div>
+    {% else %}
+      <div class="hero-placeholder" style="background: {{ section.settings.background_color }};">
+        <div class="placeholder-pattern"></div>
+      </div>
+    {% endif %}
+    
+    <div class="hero-content">
+      <div class="content-wrapper">
+        {% if section.settings.show_breadcrumb %}
+          <nav class="breadcrumb">
+            <a href="{{ routes.root_url }}">首页</a>
+            <span class="separator">/</span>
+            <a href="{{ routes.collections_url }}">所有系列</a>
+            <span class="separator">/</span>
+            <span class="current">{{ collection.title }}</span>
+          </nav>
+        {% endif %}
+        
+        <h1 class="hero-title" style="color: {{ section.settings.title_color }};">
+          {% if section.settings.custom_title != blank %}
+            {{ section.settings.custom_title }}
+          {% else %}
+            {{ collection.title }}
+          {% endif %}
+        </h1>
+        
+        {% if section.settings.show_description and collection.description != blank %}
+          <div class="hero-description" style="color: {{ section.settings.text_color }};">
+            {{ collection.description }}
+          </div>
+        {% elsif section.settings.custom_description != blank %}
+          <div class="hero-description" style="color: {{ section.settings.text_color }};">
+            {{ section.settings.custom_description }}
+          </div>
+        {% endif %}
+        
+        {% if section.settings.show_product_count %}
+          <div class="product-count-badge">
+            <span class="count-number">{{ collection.products_count }}</span>
+            <span class="count-text">件商品</span>
+          </div>
+        {% endif %}
+        
+        {% if section.settings.cta_text != blank and section.settings.cta_link != blank %}
+          <div class="hero-cta">
+            <a href="{{ section.settings.cta_link }}" class="cta-button" style="background: {{ section.settings.cta_bg_color }}; color: {{ section.settings.cta_text_color }};">
+              {{ section.settings.cta_text }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+#collection-hero-{{ section.id }} {
+  position: relative;
+  height: {{ section.settings.section_height }}vh;
+  min-height: {{ section.settings.min_height }}px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#collection-hero-{{ section.id }} .hero-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+#collection-hero-{{ section.id }} .hero-image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#collection-hero-{{ section.id }} .hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale({{ section.settings.image_grayscale }}%) contrast({{ section.settings.image_contrast }}%) brightness({{ section.settings.image_brightness }}%);
+}
+
+#collection-hero-{{ section.id }} .hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    {{ section.settings.overlay_direction }}deg,
+    {{ section.settings.overlay_color }} 0%,
+    transparent 50%,
+    {{ section.settings.overlay_color }} 100%
+  );
+}
+
+#collection-hero-{{ section.id }} .hero-placeholder {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#collection-hero-{{ section.id }} .placeholder-pattern {
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: 0 0, 25px 25px;
+}
+
+#collection-hero-{{ section.id }} .hero-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: {{ section.settings.text_alignment }};
+  z-index: 2;
+  width: 100%;
+  max-width: {{ section.settings.content_width }}px;
+  padding: 0 20px;
+}
+
+#collection-hero-{{ section.id }} .breadcrumb {
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+#collection-hero-{{ section.id }} .breadcrumb a {
+  color: {{ section.settings.text_color }};
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+#collection-hero-{{ section.id }} .breadcrumb a:hover {
+  opacity: 0.7;
+}
+
+#collection-hero-{{ section.id }} .separator {
+  margin: 0 8px;
+  color: {{ section.settings.text_color }};
+  opacity: 0.6;
+}
+
+#collection-hero-{{ section.id }} .current {
+  color: {{ section.settings.text_color }};
+  opacity: 0.9;
+}
+
+#collection-hero-{{ section.id }} .hero-title {
+  font-size: clamp(2rem, {{ section.settings.title_size }}vw, {{ section.settings.max_title_size }}rem);
+  font-weight: {{ section.settings.title_weight }};
+  margin-bottom: {{ section.settings.title_spacing }}px;
+  line-height: 1.2;
+  letter-spacing: {{ section.settings.title_letter_spacing }}em;
+  {% if section.settings.title_shadow %}
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  {% endif %}
+  {% if section.settings.title_gradient %}
+    background: linear-gradient(45deg, {{ section.settings.title_color }}, {{ section.settings.title_gradient_color }});
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  {% endif %}
+}
+
+#collection-hero-{{ section.id }} .hero-description {
+  font-size: {{ section.settings.description_size }}rem;
+  line-height: 1.6;
+  margin-bottom: {{ section.settings.description_spacing }}px;
+  max-width: {{ section.settings.description_width }}px;
+  {% if section.settings.text_alignment == 'center' %}
+    margin-left: auto;
+    margin-right: auto;
+  {% endif %}
+  opacity: 0.9;
+}
+
+#collection-hero-{{ section.id }} .product-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#collection-hero-{{ section.id }} .count-number {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: {{ section.settings.title_color }};
+}
+
+#collection-hero-{{ section.id }} .count-text {
+  font-size: 0.9rem;
+  color: {{ section.settings.text_color }};
+  opacity: 0.8;
+}
+
+#collection-hero-{{ section.id }} .hero-cta {
+  margin-top: 30px;
+}
+
+#collection-hero-{{ section.id }} .cta-button {
+  display: inline-block;
+  padding: {{ section.settings.cta_padding_y }}px {{ section.settings.cta_padding_x }}px;
+  border-radius: {{ section.settings.cta_border_radius }}px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: {{ section.settings.cta_font_size }}rem;
+  transition: all 0.3s ease;
+  border: {{ section.settings.cta_border_width }}px solid {{ section.settings.cta_border_color }};
+  text-transform: {{ section.settings.cta_text_transform }};
+  letter-spacing: 0.5px;
+}
+
+#collection-hero-{{ section.id }} .cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  #collection-hero-{{ section.id }} {
+    height: {{ section.settings.mobile_height }}vh;
+    min-height: {{ section.settings.mobile_min_height }}px;
+  }
+  
+  #collection-hero-{{ section.id }} .hero-title {
+    font-size: clamp(1.5rem, 8vw, 2.5rem);
+    margin-bottom: 15px;
+  }
+  
+  #collection-hero-{{ section.id }} .hero-description {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  #collection-hero-{{ section.id }} .breadcrumb {
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "产品系列横幅",
+  "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
+      "label": "区块高度",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "min_height",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "最小高度",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "min": 30,
+      "max": 80,
+      "step": 5,
+      "unit": "vh",
+      "label": "移动端高度",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "mobile_min_height",
+      "min": 200,
+      "max": 600,
+      "step": 50,
+      "unit": "px",
+      "label": "移动端最小高度",
+      "default": 300
+    },
+    {
+      "type": "header",
+      "content": "背景设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": "显示系列图片",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "备用背景图片"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "图片效果"
+    },
+    {
+      "type": "range",
+      "id": "image_grayscale",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "%",
+      "label": "灰度",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "image_contrast",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "%",
+      "label": "对比度",
+      "default": 110
+    },
+    {
+      "type": "range",
+      "id": "image_brightness",
+      "min": 30,
+      "max": 150,
+      "step": 10,
+      "unit": "%",
+      "label": "亮度",
+      "default": 70
+    },
+    {
+      "type": "header",
+      "content": "遮罩设置"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "遮罩颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "label": "遮罩透明度",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "overlay_direction",
+      "min": 0,
+      "max": 360,
+      "step": 45,
+      "unit": "deg",
+      "label": "遮罩方向",
+      "default": 45
+    },
+    {
+      "type": "header",
+      "content": "内容设置"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "文本对齐",
+      "options": [
+        {
+          "value": "left",
+          "label": "左对齐"
+        },
+        {
+          "value": "center",
+          "label": "居中"
+        },
+        {
+          "value": "right",
+          "label": "右对齐"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "content_width",
+      "min": 400,
+      "max": 1200,
+      "step": 50,
+      "unit": "px",
+      "label": "内容最大宽度",
+      "default": 800
+    },
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "text",
+      "id": "custom_title",
+      "label": "自定义标题",
+      "info": "留空则使用系列名称"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 2,
+      "max": 8,
+      "step": 0.5,
+      "unit": "vw",
+      "label": "标题大小",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "max_title_size",
+      "min": 2,
+      "max": 6,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "标题最大尺寸",
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "标题字重",
+      "options": [
+        {
+          "value": "300",
+          "label": "细体"
+        },
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "600",
+          "label": "半粗体"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        },
+        {
+          "value": "900",
+          "label": "特粗体"
+        }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "range",
+      "id": "title_spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "标题下边距",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "min": -0.05,
+      "max": 0.1,
+      "step": 0.01,
+      "unit": "em",
+      "label": "标题字间距",
+      "default": -0.02
+    },
+    {
+      "type": "checkbox",
+      "id": "title_shadow",
+      "label": "标题阴影",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "title_gradient",
+      "label": "标题渐变",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "title_gradient_color",
+      "label": "渐变结束颜色",
+      "default": "#cccccc"
+    },
+    {
+      "type": "header",
+      "content": "描述设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "显示系列描述",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "custom_description",
+      "label": "自定义描述",
+      "info": "留空则使用系列描述"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文本颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "min": 0.8,
+      "max": 1.5,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "描述字体大小",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "description_spacing",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "描述下边距",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "description_width",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "描述最大宽度",
+      "default": 600
+    },
+    {
+      "type": "header",
+      "content": "其他功能"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumb",
+      "label": "显示面包屑导航",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_count",
+      "label": "显示商品数量",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "行动按钮"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "按钮文本"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "按钮链接"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg_color",
+      "label": "按钮背景色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cta_text_color",
+      "label": "按钮文字色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "cta_border_color",
+      "label": "按钮边框色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_x",
+      "min": 15,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "按钮水平内边距",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "cta_padding_y",
+      "min": 8,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "按钮垂直内边距",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "cta_border_radius",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "label": "按钮圆角",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "cta_border_width",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "unit": "px",
+      "label": "按钮边框宽度",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "cta_font_size",
+      "min": 0.8,
+      "max": 1.2,
+      "step": 0.1,
+      "unit": "rem",
+      "label": "按钮字体大小",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "cta_text_transform",
+      "label": "按钮文字转换",
+      "options": [
+        {
+          "value": "none",
+          "label": "无"
+        },
+        {
+          "value": "uppercase",
+          "label": "大写"
+        },
+        {
+          "value": "lowercase",
+          "label": "小写"
+        },
+        {
+          "value": "capitalize",
+          "label": "首字母大写"
+        }
+      ],
+      "default": "uppercase"
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品系列横幅"
+    }
+  ]
+}
+{% endschema %}
