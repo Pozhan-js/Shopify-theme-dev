@@ -1,0 +1,144 @@
+{%- liquid
+  assign heading = section.settings.heading
+  assign blurb = section.settings.blurb
+  assign cta_text = section.settings.cta_text
+  assign cta_link = section.settings.cta_link
+-%}
+
+<div class="about-section">
+  <div class="about-container">
+    <div class="about-content">
+      <h3 class="section-heading">{{ heading }}</h3>
+      <div class="brand-blurb">
+        {{ blurb }}
+      </div>
+      <a href="{{ cta_link }}" class="button">{{ cta_text }}</a>
+    </div>
+    {% if section.settings.brand_image != blank %}
+      <div class="brand-image">
+        {{ section.settings.brand_image | image_url: width: 800 | image_tag }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .about-container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    max-height: 400px;
+    overflow: auto;
+  }
+
+  .about-content {
+    flex: 5;
+  }
+
+  .brand-image {
+    flex: 3;
+    position: sticky;
+    top: 20px;
+  }
+
+  .brand-image img {
+    width: 100%;
+    height: auto;
+    max-height: 380px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  @media screen and (max-width: 768px) {
+    .about-container {
+      flex-direction: column;
+      max-height: none;
+    }
+
+    .brand-image {
+      margin-top: 30px;
+      width: 100%;
+      padding: 0 15px;
+      box-sizing: border-box;
+    }
+
+    .about-content {
+      padding: 0 15px;
+    }
+
+    .brand-image img {
+      max-height: 300px;
+      width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .brand-image img {
+      max-height: 250px;
+    }
+
+    .about-section .button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+  }
+
+  .about-section .button {
+    background-color: #f8f8f8;
+    color: #333;
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    display: block;
+    margin: 20px auto 0;
+    width: fit-content;
+    transition: all 0.3s ease;
+  }
+
+  .about-section .button:hover {
+    background-color: #e0e0e0;
+    color: #000;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "About Preview",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "brand_image",
+      "label": "品牌宣传图"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "区块标题",
+      "default": "About Preview"
+    },
+    {
+      "type": "richtext",
+      "id": "blurb",
+      "label": "Poetic brand blurb"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "按钮文字",
+      "default": "Our Story"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "按钮链接"
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Preview"
+    }
+  ]
+}
+{% endschema %}
