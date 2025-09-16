@@ -1,0 +1,161 @@
+<div class="image-text-slider">
+  <div class="page-width">
+    <div class="slider-header">
+      <h2 class="slider-title">{{ section.settings.title }}</h2>
+      <div class="slider-controls">
+        <button class="slider-prev">←</button>
+        <button class="slider-next">→</button>
+      </div>
+    </div>
+    
+    <div class="slider-container">
+      {% for block in section.blocks %}
+        <div class="slide" {{ block.shopify_attributes }}>
+          <div class="slide-content">
+            <div class="slide-image">
+              {% if block.settings.image != blank %}
+                <img src="{{ block.settings.image | img_url: '800x' }}" 
+                     alt="{{ block.settings.image.alt | escape }}"
+                     width="800"
+                     height="600"
+                     loading="lazy"
+                     style="object-fit: cover;">
+              {% else %}
+                <div class="placeholder-image">{{ 'image' | placeholder_svg_tag }}</div>
+              {% endif %}
+            </div>
+            <div class="slide-text">
+              {{ block.settings.text }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .slider-controls button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  .slider-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .slide-content {
+    display: flex;
+    gap: 30px;
+  }
+  .slide-image {
+    flex: 1;
+  }
+  .slide-image img {
+    width: 100%;
+    height: auto;
+  }
+  .slide-text {
+    flex: 1;
+    text-align: left;
+  }
+  .placeholder-image {
+    background: #f5f5f5;
+    padding: 20px;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const slider = document.querySelector('.slider-container');
+  const slides = document.querySelectorAll('.slide');
+  const prevBtn = document.querySelector('.slider-prev');
+  const nextBtn = document.querySelector('.slider-next');
+  let currentIndex = 0;
+  let autoPlayInterval;
+
+  function goToSlide(index) {
+    slider.style.transform = `translateX(-${index * 100}%)`;
+    currentIndex = index;
+  }
+
+  function startAutoPlay() {
+    autoPlayInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      goToSlide(currentIndex);
+    }, 5000);
+  }
+
+  prevBtn.addEventListener('click', () => {
+    clearInterval(autoPlayInterval);
+    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+    goToSlide(currentIndex);
+    startAutoPlay();
+  });
+
+  nextBtn.addEventListener('click', () => {
+    clearInterval(autoPlayInterval);
+    currentIndex = (currentIndex + 1) % slides.length;
+    goToSlide(currentIndex);
+    startAutoPlay();
+  });
+
+  startAutoPlay();
+});
+</script>
+
+{% schema %}
+{
+  "name": "图文轮播",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "轮播标题"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "轮播项",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "文本内容",
+          "default": "<p>在这里输入文本内容</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "图文轮播",
+      "category": "轮播",
+      "blocks": [
+        {
+          "type": "slide"
+        },
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
