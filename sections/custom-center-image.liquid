@@ -1,0 +1,182 @@
+<div class="custom-center-image" style="max-height: 150px; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+  <div class="page-width">
+    <div class="three-column-layout">
+      <!-- 左侧文本 -->
+      <div class="text-column left-column">
+        <h3 class="column-title">{{ section.settings.left_title }}</h3>
+        <div class="column-text">{{ section.settings.left_text }}</div>
+      </div>
+
+      <!-- 中间图片 -->
+      <div class="image-column">
+        {% if section.settings.center_image != blank %}
+          <img src="{{ section.settings.center_image | img_url: '150x150' }}" 
+               alt="{{ section.settings.image_alt | escape }}"
+               width="150"
+               height="150"
+               loading="lazy"
+               style="object-fit: contain;">
+        {% else %}
+          <div class="placeholder-image" style="width: 150px; height: 150px; background: #f5f5f5;"></div>
+        {% endif %}
+      </div>
+
+      <!-- 右侧文本 -->
+      <div class="text-column right-column">
+        <h3 class="column-title">{{ section.settings.right_title }}</h3>
+        <div class="column-text">{{ section.settings.right_text }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-center-image {
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .three-column-layout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+  }
+  .text-column {
+    flex: 1;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .image-column {
+    flex: 0 0 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .column-title {
+    margin: 0 0 8px 0;
+    font-size: {{ section.settings.title_font_size }}px;
+  }
+  .column-text {
+    font-size: {{ section.settings.text_font_size }}px;
+    line-height: 1.4;
+  }
+  @media screen and (max-width: 749px) {
+    .three-column-layout {
+      flex-direction: column;
+      max-height: none;
+    }
+    .text-column {
+      padding: 10px 0;
+    }
+    .image-column {
+      order: -1;
+      margin-bottom: 15px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "居中图片布局",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "上边距",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "下边距",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "图片设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "center_image",
+      "label": "居中图片"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "图片替代文本"
+    },
+    {
+      "type": "header",
+      "content": "左侧内容"
+    },
+    {
+      "type": "text",
+      "id": "left_title",
+      "label": "左侧标题",
+      "default": "左侧标题"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "标题字体大小",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "正文字体大小",
+      "default": 14
+    },
+    {
+      "type": "richtext",
+      "id": "left_text",
+      "label": "左侧文本",
+      "default": "<p>左侧文本内容</p>"
+    },
+    {
+      "type": "header",
+      "content": "右侧内容"
+    },
+    {
+      "type": "text",
+      "id": "right_title",
+      "label": "右侧标题",
+      "default": "右侧标题"
+    },
+    {
+      "type": "richtext",
+      "id": "right_text",
+      "label": "右侧文本",
+      "default": "<p>右侧文本内容</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "居中图片布局",
+      "category": "自定义"
+    }
+  ]
+}
+{% endschema %}
