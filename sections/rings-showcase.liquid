@@ -1,10 +1,10 @@
-<!-- 戒指展示模块 - 后台可编辑版 -->
+<!-- 戒指展示模块 - 模特图+系列商品版 -->
 <div class="rings-showcase-container">
     <div class="rings-showcase-wrapper">
-        <!-- 左侧模特图 -->
+        <!-- 模特图 -->
         <div class="model-image-section">
             {% if section.settings.model_image %}
-                <img src="{{ section.settings.model_image | image_url: width: 800, height: 1200, crop: 'center' }}" 
+                <img src="{{ section.settings.model_image | image_url: width: 1200, height: 1600, crop: 'center' }}" 
                      alt="{{ section.settings.model_image_alt | default: '戒指模特展示' }}" 
                      class="model-image"
                      loading="lazy">
@@ -12,84 +12,83 @@
                 <div class="model-placeholder" style="background: {{ section.settings.placeholder_color }};"></div>
             {% endif %}
         </div>
-        
-        <!-- 右侧商品列表 -->
+
+        <!-- 系列商品展示 -->
         <div class="products-section">
-            <div class="products-container">
-                <h2 class="section-title" style="color: {{ section.settings.title_color }}; font-size: {{ section.settings.title_size }}px;">
-                    {{ section.settings.section_title | default: '戒指系列' }}
-                </h2>
+            {% if section.settings.collection_handle != blank %}
+                {% assign featured_collection = collections[section.settings.collection_handle] %}
                 
+                <!-- 系列标题 -->
+                <div class="collection-header">
+                    <h2 class="collection-title">{{ section.settings.collection_title | default: featured_collection.title }}</h2>
+                    {% if section.settings.collection_description != blank %}
+                        <p class="collection-description">{{ section.settings.collection_description }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- 商品网格 -->
                 <div class="products-grid">
-                    {%- comment -%} 获取商品系列 {%- endcomment -%}
-                    {%- if section.settings.collection != blank -%}
-                        {%- assign selected_collection = collections[section.settings.collection] -%}
-                        {%- assign collection_products = selected_collection.products -%}
-                    {%- else -%}
-                        {%- comment -%} 如果没有选择系列，则根据产品类型筛选 {%- endcomment -%}
-                        {%- assign all_products = collections.all.products -%}
-                        {%- assign collection_products = all_products | where: 'type', section.settings.product_type | default: '戒指' -%}
-                    {%- endif -%}
-                    
-                    {%- assign product_count = collection_products.size -%}
-                    
-                    {%- if product_count > 0 -%}
-                        {%- for product in collection_products limit: section.settings.max_products -%}
-                            <div class="product-card">
-                                <div class="product-image-container">
-                                    <a href="{{ product.url }}" class="product-link">
-                                        <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
-                                             alt="{{ product.title }}" 
-                                             class="product-image"
-                                             loading="lazy">
+                    {% assign products_limit = section.settings.products_limit | default: 6 %}
+                    {% for product in featured_collection.products limit: products_limit %}
+                        <div class="product-card">
+                            <div class="product-image-wrapper">
+                                {% if product.featured_image %}
+                                    <img src="{{ product.featured_image | image_url: width: 400, height: 400, crop: 'center' }}" 
+                                         alt="{{ product.featured_image.alt | default: product.title }}" 
+                                         class="product-image"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="product-image-placeholder"></div>
+                                {% endif %}
+                                
+                                <!-- 快速查看按钮 -->
+                                <div class="product-overlay">
+                                    <a href="{{ product.url }}" class="quick-view-btn">
+                                        {{ section.settings.quick_view_text | default: '查看详情' }}
                                     </a>
                                 </div>
-                                
-                                <div class="product-info">
-                                    <h3 class="product-title">
-                                        <a href="{{ product.url }}">{{ product.title }}</a>
-                                    </h3>
-                                    <div class="product-price">
-                                        {%- if product.compare_at_price > product.price -%}
-                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
-                                        {%- endif -%}
-                                        <span class="current-price">{{ product.price | money }}</span>
-                                    </div>
-                                    
-                                    <form method="post" action="/cart/add" class="add-to-cart-form">
-                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="add-to-cart-btn">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                                            </svg>
-                                            加入购物车
-                                        </button>
-                                    </form>
-                                </div>
                             </div>
-                        {%- endfor -%}
-                    {%- else -%}
-                        <div class="no-products-message">
-                            <p>{{ section.settings.empty_message | default: '暂无商品，请在后台添加产品或选择商品系列' }}</p>
+                            
+                            <div class="product-info">
+                                <h3 class="product-title">
+                                    <a href="{{ product.url }}">{{ product.title }}</a>
+                                </h3>
+                                
+                                <div class="product-price">
+                                    {% if product.compare_at_price > product.price %}
+                                        <span class="price-sale">{{ product.price | money }}</span>
+                                        <span class="price-compare">{{ product.compare_at_price | money }}</span>
+                                    {% else %}
+                                        <span class="price-regular">{{ product.price | money }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if section.settings.show_product_rating %}
+                                    <div class="product-rating">
+                                        <!-- 这里可以集成评分系统 -->
+                                        <div class="stars">★★★★★</div>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
-                    {%- endif -%}
+                    {% endfor %}
                 </div>
-                
-                {%- if collection_products.size > section.settings.max_products -%}
-                    <div class="view-more-container">
-                        {%- if section.settings.collection != blank -%}
-                            <a href="{{ collections[section.settings.collection].url }}" class="view-more-btn">
-                                {{ section.settings.view_more_text | default: '查看更多商品' }}
-                            </a>
-                        {%- else -%}
-                            <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | default: '戒指' | url_encode }}" class="view-more-btn">
-                                {{ section.settings.view_more_text | default: '查看更多商品' }}
-                            </a>
-                        {%- endif -%}
+
+                <!-- 查看更多按钮 -->
+                {% if section.settings.show_view_all %}
+                    <div class="view-all-wrapper">
+                        <a href="{{ featured_collection.url }}" class="view-all-btn">
+                            {{ section.settings.view_all_text | default: '查看全部' }}
+                        </a>
                     </div>
-                {%- endif -%}
-            </div>
+                {% endif %}
+            {% else %}
+                <!-- 未选择系列时的占位内容 -->
+                <div class="no-collection-placeholder">
+                    <h3>请在后台选择要展示的商品系列</h3>
+                    <p>在模块设置中选择一个商品系列来展示相关产品</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -98,22 +97,29 @@
     .rings-showcase-container {
         width: 100%;
         margin: {{ section.settings.top_margin }}px 0 {{ section.settings.bottom_margin }}px 0;
-        padding: 0;
+        padding: 0 20px;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .rings-showcase-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: {{ section.settings.image_width }}% 1fr;
+        gap: {{ section.settings.content_gap }}px;
+        align-items: start;
+        min-height: {{ section.settings.min_height }}px;
     }
 
-    /* 左侧模特图 */
+    /* 模特图样式 */
     .model-image-section {
-        flex: 1;
-        position: sticky;
-        top: 0;
-        height: 100vh;
+        width: 100%;
+        height: {{ section.settings.image_height }}px;
         overflow: hidden;
+        border-radius: {{ section.settings.border_radius }}px;
+        box-shadow: {{ section.settings.shadow_enabled | default: false | if: '0 10px 30px rgba(0,0,0,0.1)', 'none' }};
+        position: sticky;
+        top: 20px;
     }
 
     .model-image, .model-placeholder {
@@ -121,63 +127,77 @@
         height: 100%;
         object-fit: cover;
         object-position: center;
+        transition: transform 0.3s ease;
+    }
+
+    .model-image:hover {
+        transform: scale({{ section.settings.hover_scale | default: 1.05 }});
     }
 
     .model-placeholder {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-
-    /* 右侧商品列表 */
-    .products-section {
-        flex: 1;
-        background: {{ section.settings.background_color }};
-    }
-
-    .products-container {
-        padding: 60px 40px;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .section-title {
+        background: linear-gradient(135deg, {{ section.settings.placeholder_color }} 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.8);
+        font-size: 18px;
         font-weight: 300;
-        margin-bottom: 40px;
-        text-align: center;
-        letter-spacing: 2px;
+    }
+
+    .model-placeholder::after {
+        content: "{{ section.settings.placeholder_text | default: '请上传模特图片' }}";
+    }
+
+    /* 商品展示区域 */
+    .products-section {
+        padding: 20px 0;
+    }
+
+    .collection-header {
+        margin-bottom: 30px;
+        text-align: {{ section.settings.text_alignment }};
+    }
+
+    .collection-title {
+        font-size: {{ section.settings.title_font_size }}px;
+        font-weight: {{ section.settings.title_font_weight }};
+        color: {{ section.settings.title_color }};
+        margin: 0 0 10px 0;
         line-height: 1.2;
     }
 
+    .collection-description {
+        font-size: {{ section.settings.description_font_size }}px;
+        color: {{ section.settings.description_color }};
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* 商品网格 */
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-        gap: 30px;
-        margin-bottom: 40px;
+        grid-template-columns: repeat({{ section.settings.products_per_row }}, 1fr);
+        gap: {{ section.settings.product_gap }}px;
+        margin-bottom: 30px;
     }
 
     .product-card {
-        background: #fff;
-        border-radius: 8px;
+        background: {{ section.settings.card_background }};
+        border-radius: {{ section.settings.card_border_radius }}px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: {{ section.settings.card_border_width }}px solid {{ section.settings.card_border_color }};
     }
 
     .product-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
 
-    .product-image-container {
+    .product-image-wrapper {
         position: relative;
-        width: 100%;
-        height: 190px;
+        aspect-ratio: 1;
         overflow: hidden;
-    }
-
-    .product-link {
-        display: block;
-        width: 100%;
-        height: 100%;
     }
 
     .product-image {
@@ -187,136 +207,172 @@
         transition: transform 0.3s ease;
     }
 
-    .product-card:hover .product-image {
-        transform: scale(1.1);
+    .product-image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+
+    .quick-view-btn {
+        background: {{ section.settings.button_background }};
+        color: {{ section.settings.button_text_color }};
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .quick-view-btn:hover {
+        background: {{ section.settings.button_hover_background }};
+        color: {{ section.settings.button_hover_text_color }};
+        transform: scale(1.05);
     }
 
     .product-info {
-        padding: 15px;
+        padding: 20px;
         text-align: center;
     }
 
     .product-title {
-        font-size: 14px;
+        margin: 0 0 10px 0;
+        font-size: {{ section.settings.product_title_size }}px;
         font-weight: 500;
-        margin-bottom: 8px;
-        line-height: 1.4;
-        height: 40px;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
     }
 
     .product-title a {
-        color: #333;
+        color: {{ section.settings.product_title_color }};
         text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .product-title a:hover {
+        color: {{ section.settings.product_title_hover_color }};
     }
 
     .product-price {
-        font-size: 16px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
 
-    .original-price {
+    .price-regular, .price-sale {
+        font-size: {{ section.settings.price_font_size }}px;
+        font-weight: 600;
+        color: {{ section.settings.price_color }};
+    }
+
+    .price-compare {
+        font-size: {{ section.settings.price_font_size | minus: 2 }}px;
+        color: {{ section.settings.compare_price_color }};
         text-decoration: line-through;
-        color: #999;
-        margin-right: 8px;
+        margin-left: 8px;
+    }
+
+    .product-rating {
+        color: {{ section.settings.rating_color }};
         font-size: 14px;
     }
 
-    .current-price {
-        color: #333;
-    }
-
-    .add-to-cart-form {
-        margin: 0;
-    }
-
-    .add-to-cart-btn {
-        background: {{ section.settings.button_bg_color }};
-        color: {{ section.settings.button_text_color }};
-        border: 1px solid {{ section.settings.button_border_color }};
-        padding: 8px 16px;
-        border-radius: {{ section.settings.button_border_radius }}px;
-        font-size: 12px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-
-    .add-to-cart-btn:hover {
-        background: {{ section.settings.button_hover_color }};
-        border-color: {{ section.settings.button_hover_color }};
-        transform: translateY(-1px);
-    }
-
-    .no-products-message {
+    /* 查看更多按钮 */
+    .view-all-wrapper {
         text-align: center;
-        padding: 40px;
+        margin-top: 30px;
+    }
+
+    .view-all-btn {
+        display: inline-block;
+        background: {{ section.settings.view_all_background }};
+        color: {{ section.settings.view_all_text_color }};
+        padding: 15px 30px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid {{ section.settings.view_all_background }};
+    }
+
+    .view-all-btn:hover {
+        background: transparent;
+        color: {{ section.settings.view_all_background }};
+    }
+
+    /* 占位内容 */
+    .no-collection-placeholder {
+        text-align: center;
+        padding: 60px 20px;
         color: #666;
     }
 
-    .view-more-container {
-        text-align: center;
-        margin-top: 40px;
-    }
-
-    .view-more-btn {
-        display: inline-block;
-        padding: 12px 30px;
-        background: transparent;
+    .no-collection-placeholder h3 {
+        margin: 0 0 10px 0;
+        font-size: 24px;
         color: #333;
-        text-decoration: none;
-        border: 1px solid #333;
-        border-radius: 25px;
-        transition: all 0.3s ease;
     }
 
-    .view-more-btn:hover {
-        background: #333;
-        color: white;
+    .no-collection-placeholder p {
+        margin: 0;
+        font-size: 16px;
     }
 
     /* 响应式设计 */
     @media screen and (max-width: 1024px) {
         .rings-showcase-wrapper {
-            flex-direction: column;
+            grid-template-columns: 1fr;
+            gap: 40px;
         }
-
+        
         .model-image-section {
-            position: relative;
-            height: 50vh;
-            flex: none;
+            height: {{ section.settings.tablet_height }}px;
+            position: static;
         }
-
-        .products-section {
-            flex: none;
-        }
-
-        .products-container {
-            padding: 40px 20px;
+        
+        .products-grid {
+            grid-template-columns: repeat({{ section.settings.tablet_products_per_row }}, 1fr);
         }
     }
 
     @media screen and (max-width: 749px) {
+        .rings-showcase-container {
+            padding: 0 15px;
+        }
+        
+        .model-image-section {
+            height: {{ section.settings.mobile_height }}px;
+            border-radius: {{ section.settings.mobile_border_radius }}px;
+        }
+        
         .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat({{ section.settings.mobile_products_per_row }}, 1fr);
+            gap: 15px;
         }
-
-        .product-image-container {
-            height: 150px;
+        
+        .product-info {
+            padding: 15px;
         }
-
-        .section-title {
-            font-size: 24px;
+        
+        .collection-title {
+            font-size: {{ section.settings.title_font_size | minus: 4 }}px;
         }
     }
 </style>
@@ -327,38 +383,6 @@
   "tag": "section",
   "class": "section",
   "settings": [
-    {
-      "type": "header",
-      "content": "基本设置"
-    },
-    {
-      "type": "text",
-      "id": "section_title",
-      "label": "模块标题",
-      "default": "戒指系列"
-    },
-    {
-      "type": "color",
-      "id": "title_color",
-      "label": "标题颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "range",
-      "id": "title_size",
-      "min": 24,
-      "max": 48,
-      "step": 2,
-      "unit": "px",
-      "label": "标题大小",
-      "default": 36
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "背景颜色",
-      "default": "#f8f8f8"
-    },
     {
       "type": "header",
       "content": "模特图片设置"
@@ -378,83 +402,420 @@
       "type": "color",
       "id": "placeholder_color",
       "label": "占位背景颜色",
-      "default": "#f0f0f0"
+      "default": "#667eea"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_text",
+      "label": "占位文字",
+      "default": "请上传模特图片"
     },
     {
       "type": "header",
-      "content": "商品设置"
+      "content": "商品系列设置"
     },
     {
       "type": "collection",
-      "id": "collection",
-      "label": "选择商品系列",
-      "info": "选择要显示的商品系列。如果不选择，将根据产品类型筛选商品。"
+      "id": "collection_handle",
+      "label": "选择商品系列"
     },
     {
       "type": "text",
-      "id": "product_type",
-      "label": "产品类型（备用）",
-      "default": "戒指",
-      "info": "当未选择商品系列时，根据此产品类型筛选商品"
+      "id": "collection_title",
+      "label": "自定义系列标题",
+      "info": "留空则使用系列默认标题"
+    },
+    {
+      "type": "textarea",
+      "id": "collection_description",
+      "label": "系列描述"
     },
     {
       "type": "range",
-      "id": "max_products",
-      "min": 1,
-      "max": 20,
+      "id": "products_limit",
+      "min": 3,
+      "max": 12,
       "step": 1,
-      "label": "最大显示产品数",
-      "default": 8
+      "label": "显示商品数量",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "显示查看全部按钮",
+      "default": true
     },
     {
       "type": "text",
-      "id": "empty_message",
-      "label": "空集合提示文字",
-      "default": "暂无商品，请在后台添加产品或选择商品系列"
+      "id": "view_all_text",
+      "label": "查看全部按钮文字",
+      "default": "查看全部"
     },
     {
       "type": "text",
-      "id": "view_more_text",
-      "label": "查看更多按钮文字",
-      "default": "查看更多商品"
+      "id": "quick_view_text",
+      "label": "快速查看按钮文字",
+      "default": "查看详情"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_rating",
+      "label": "显示商品评分",
+      "default": false
     },
     {
       "type": "header",
-      "content": "按钮样式设置"
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 30,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "label": "模特图宽度占比",
+      "default": 45
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 20,
+      "max": 80,
+      "step": 10,
+      "unit": "px",
+      "label": "图片与商品间距",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "每行商品数（桌面）",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "tablet_products_per_row",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "label": "每行商品数（平板）",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "mobile_products_per_row",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "label": "每行商品数（手机）",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "product_gap",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "商品间距",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "文字对齐",
+      "options": [
+        {
+          "value": "left",
+          "label": "左对齐"
+        },
+        {
+          "value": "center",
+          "label": "居中"
+        },
+        {
+          "value": "right",
+          "label": "右对齐"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "尺寸设置"
+    },
+    {
+      "type": "range",
+      "id": "min_height",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "最小高度",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "min": 400,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "图片高度（桌面）",
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "tablet_height",
+      "min": 300,
+      "max": 600,
+      "step": 25,
+      "unit": "px",
+      "label": "图片高度（平板）",
+      "default": 450
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "min": 250,
+      "max": 500,
+      "step": 25,
+      "unit": "px",
+      "label": "图片高度（手机）",
+      "default": 350
+    },
+    {
+      "type": "header",
+      "content": "样式设置"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "圆角大小",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "手机圆角大小",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "shadow_enabled",
+      "label": "启用阴影效果",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hover_scale",
+      "min": 1.0,
+      "max": 1.2,
+      "step": 0.1,
+      "label": "悬停缩放比例",
+      "default": 1.1
+    },
+    {
+      "type": "header",
+      "content": "商品卡片样式"
     },
     {
       "type": "color",
-      "id": "button_bg_color",
-      "label": "按钮背景颜色",
+      "id": "card_background",
+      "label": "卡片背景色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "卡片圆角",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "unit": "px",
+      "label": "卡片边框宽度",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "卡片边框颜色",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "header",
+      "content": "文字样式"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 20,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "标题字体大小",
+      "default": 28
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "标题字体粗细",
+      "options": [
+        {
+          "value": "300",
+          "label": "细体"
+        },
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "描述字体大小",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "描述颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "商品标题字体大小",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "product_title_color",
+      "label": "商品标题颜色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "button_text_color",
-      "label": "按钮文字颜色",
+      "id": "product_title_hover_color",
+      "label": "商品标题悬停颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "价格字体大小",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "价格颜色",
+      "default": "#e74c3c"
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "对比价格颜色",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "rating_color",
+      "label": "评分颜色",
+      "default": "#ffc107"
+    },
+    {
+      "type": "header",
+      "content": "按钮样式"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "快速查看按钮背景",
       "default": "#ffffff"
     },
     {
       "type": "color",
-      "id": "button_border_color",
-      "label": "按钮边框颜色",
+      "id": "button_text_color",
+      "label": "快速查看按钮文字",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "button_hover_color",
-      "label": "按钮悬停颜色",
-      "default": "#555555"
+      "id": "button_hover_background",
+      "label": "快速查看按钮悬停背景",
+      "default": "#333333"
     },
     {
-      "type": "range",
-      "id": "button_border_radius",
-      "min": 0,
-      "max": 25,
-      "step": 1,
-      "unit": "px",
-      "label": "按钮圆角",
-      "default": 4
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "快速查看按钮悬停文字",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "view_all_background",
+      "label": "查看全部按钮背景",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "view_all_text_color",
+      "label": "查看全部按钮文字",
+      "default": "#ffffff"
     },
     {
       "type": "header",
@@ -468,7 +829,7 @@
       "step": 10,
       "unit": "px",
       "label": "上边距",
-      "default": 0
+      "default": 40
     },
     {
       "type": "range",
@@ -478,16 +839,17 @@
       "step": 10,
       "unit": "px",
       "label": "下边距",
-      "default": 0
+      "default": 40
     }
   ],
   "presets": [
     {
       "name": "戒指展示模块",
       "settings": {
-        "section_title": "戒指系列",
-        "product_type": "戒指",
-        "max_products": 8
+        "min_height": 600,
+        "image_height": 600,
+        "products_limit": 6,
+        "products_per_row": 2
       }
     }
   ]
