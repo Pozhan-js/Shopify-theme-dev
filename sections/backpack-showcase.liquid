@@ -9,12 +9,56 @@
                 </h2>
                 
                 <div class="products-grid">
-                    {%- assign all_products = collections.all.products -%}
-                    {%- assign backpack_products = all_products | where: 'type', section.settings.product_type | default: '背包' -%}
-                    {%- assign product_count = backpack_products.size -%}
+                    {%- comment -%}
+                    获取指定系列的商品
+                    优先级：指定系列 > 产品类型 > 所有商品
+                    {%- endcomment -%}
+                    
+                    {%- assign target_products = blank -%}
+                    
+                    {%- if section.settings.collection_handle != blank -%}
+                        {%- comment -%} 如果指定了系列，获取该系列的商品 {%- endcomment -%}
+                        {%- assign target_collection = collections[section.settings.collection_handle] -%}
+                        {%- if target_collection -%}
+                            {%- assign target_products = target_collection.products -%}
+                        {%- endif -%}
+                    {%- elsif section.settings.product_type != blank -%}
+                        {%- comment -%} 如果没有指定系列但指定了产品类型，按类型筛选 {%- endcomment -%}
+                        {%- assign target_products = collections.all.products | where: 'type', section.settings.product_type -%}
+                    {%- else -%}
+                        {%- comment -%} 都没有指定则显示所有商品 {%- endcomment -%}
+                        {%- assign target_products = collections.all.products -%}
+                    {%- endif -%}
+                    
+                    {%- comment -%} 如果启用了产品类型过滤，在系列基础上再次过滤 {%- endcomment -%}
+                    {%- if section.settings.enable_type_filter and section.settings.product_type != blank and section.settings.collection_handle != blank -%}
+                        {%- assign target_products = target_products | where: 'type', section.settings.product_type -%}
+                    {%- endif -%}
+                    
+                    {%- comment -%} 按照设置的排序方式排序 {%- endcomment -%}
+                    {%- case section.settings.sort_by -%}
+                        {%- when 'price_ascending' -%}
+                            {%- assign target_products = target_products | sort: 'price' -%}
+                        {%- when 'price_descending' -%}
+                            {%- assign target_products = target_products | sort: 'price' | reverse -%}
+                        {%- when 'title_ascending' -%}
+                            {%- assign target_products = target_products | sort: 'title' -%}
+                        {%- when 'title_descending' -%}
+                            {%- assign target_products = target_products | sort: 'title' | reverse -%}
+                        {%- when 'created_ascending' -%}
+                            {%- assign target_products = target_products | sort: 'created_at' -%}
+                        {%- when 'created_descending' -%}
+                 = target_products | sort: 'created_at' | reverse -%}
+                        {%- when 'best_selling' -%}
+                            {%- comment -%} 保持原有顺序，通常系列已按销量排序 {%- endcomment -%}
+                        {%- else -%}
+                            {%- comment -%} 默认保持原有顺序 {%- endcomment -%}
+                    {%- endcase -%}
+                    
+                    {%- assign product_count = target_products.size -%}
                     
                     {%- if product_count > 0 -%}
-                        {%- for product in backpack_products limit: section.settings.max_products -%}
+                        {%- for product in target_products limit: section.settings.max_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -23,6 +67,12 @@
                                              class="product-image"
                                              loading="lazy">
                                     </a>
+                                    
+                                    {%- if product.compare_at_price > product.price -%}
+                                        <div class="sale-badge">
+                                            {{ section.settings.sale_badge_text | default: '特价' }}
+                                        </div>
+                                    {%- endif -%}
                                 </div>
                                 
                                 <div class="product-info">
@@ -36,16 +86,22 @@
                                         <span class="current-price">{{ product.price | money }}</span>
                                     </div>
                                     
-                                    <form method="post" action="/cart/add" class="add-to-cart-form">
-                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="add-to-cart-btn">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                                            </svg>
-                                            加入购物车
-                                        </button>
-                                    </form>
+                                    {%- if section.settings.show_add_to_cart -%}
+                                        <form method="post" action="/cart/add" class="add-to-cart-form">
+                                            <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="add-to-cart-btn" {% unless product.available %}disabled{% endunless %}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                                </svg>
+                                                {% if product.available %}
+                                                    {{ section.settings.add_to_cart_text | default: '加入购物车' }}
+                                                {% else %}
+                                                    {{ section.settings.sold_out_text | default: '已售完' }}
+                                                {% endif %}
+                                            </button>
+                                        </form>
+                                    {%- endif -%}
                                 </div>
                             </div>
                         {%- endfor -%}
@@ -56,9 +112,15 @@
                     {%- endif -%}
                 </div>
                 
-                {%- if backpack_products.size > section.settings.max_products -%}
+                {%- if target_products.size > section.settings.max_products -%}
                     <div class="view-more-container">
-                        <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | default: '背包' | url_encode }}" class="view-more-btn">
+                        {%- if section.settings.collection_handle != blank -%}
+                            <a href="/collections/{{ section.settings.collection_handle }}" class="view-more-btn">
+                        {%- elsif section.settings.product_type != blank -%}
+                            <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | url_encode }}" class="view-more-btn">
+                        {%- else -%}
+                            <a href="/collections/all" class="view-more-btn">
+                        {%- endif -%}
                             {{ section.settings.view_more_text | default: '查看更多商品' }}
                         </a>
                     </div>
@@ -156,6 +218,19 @@
         transform: scale(1.1);
     }
 
+    .sale-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: {{ section.settings.sale_badge_color }};
+        color: {{ section.settings.sale_badge_text_color }};
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 2;
+    }
+
     .product-info {
         padding: 15px;
         text-align: center;
@@ -216,10 +291,17 @@
         width: 100%;
     }
 
-    .add-to-cart-btn:hover {
+    .add-to-cart-btn:hover:not(:disabled) {
         background: {{ section.settings.button_hover_color }};
         border-color: {{ section.settings.button_hover_color }};
         transform: translateY(-1px);
+    }
+
+    .add-to-cart-btn:disabled {
+        background: #f5f5f5;
+        color: #999;
+        border-color: #ddd;
+        cursor: not-allowed;
     }
 
     .no-products-message {
@@ -346,6 +428,83 @@
   "class": "section",
   "settings": [
     {
+      "type": "header",
+      "content": "商品设置"
+    },
+    {
+      "type": "collection",
+      "id": "collection_handle",
+      "label": "选择商品系列",
+      "info": "选择要显示的商品系列。如果不选择，将根据产品类型筛选。"
+    },
+    {
+      "type": "text",
+      "id": "product_type",
+      "label": "产品类型",
+      "default": "背包",
+      "info": "当未选择系列时，按此类型筛选商品。也可用于在选定系列基础上进一步筛选。"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_type_filter",
+      "label": "在选定系列基础上按产品类型筛选",
+      "default": false,
+      "info": "启用后，即使选择了系列，也会按产品类型进一步筛选"
+    },
+    {
+      "type": "select",
+      "id": "sort_by",
+      "options": [
+        {
+          "value": "default",
+          "label": "默认排序"
+        },
+        {
+          "value": "best_selling",
+          "label": "最畅销"
+        },
+        {
+          "value": "price_ascending",
+          "label": "价格：低到高"
+        },
+        {
+          "value": "price_descending",
+          "label": "价格：高到低"
+        },
+        {
+          "value": "title_ascending",
+          "label": "标题：A-Z"
+        },
+        {
+          "value": "title_descending",
+          "label": "标题：Z-A"
+        },
+        {
+          "value": "created_ascending",
+          "label": "创建时间：旧到新"
+        },
+        {
+          "value": "created_descending",
+          "label": "创建时间：新到旧"
+        }
+      ],
+      "default": "default",
+      "label": "商品排序方式"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "label": "显示产品数量",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "外观设置"
+    },
+    {
       "type": "image_picker",
       "id": "model_image",
       "label": "模特图片"
@@ -389,22 +548,6 @@
       "default": "#333333"
     },
     {
-      "type": "text",
-      "id": "product_type",
-      "label": "产品类型",
-      "default": "背包",
-      "info": "请输入要显示的产品类型，例如：背包"
-    },
-    {
-      "type": "range",
-      "id": "max_products",
-      "min": 4,
-      "max": 20,
-      "step": 1,
-      "label": "显示产品数量",
-      "default": 12
-    },
-    {
       "type": "color",
       "id": "background_color",
       "label": "背景颜色",
@@ -415,6 +558,28 @@
       "id": "placeholder_color",
       "label": "占位背景颜色",
       "default": "#4facfe"
+    },
+    {
+      "type": "header",
+      "content": "按钮设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_add_to_cart",
+      "label": "显示加入购物车按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "加入购物车按钮文字",
+      "default": "加入购物车"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_text",
+      "label": "售完按钮文字",
+      "default": "已售完"
     },
     {
       "type": "color",
@@ -451,6 +616,32 @@
       "default": 4
     },
     {
+      "type": "header",
+      "content": "特价标签设置"
+    },
+    {
+      "type": "text",
+      "id": "sale_badge_text",
+      "label": "特价标签文字",
+      "default": "特价"
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_color",
+      "label": "特价标签背景颜色",
+      "default": "#ff4444"
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_text_color",
+      "label": "特价标签文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "查看更多设置"
+    },
+    {
       "type": "color",
       "id": "view_more_bg_color",
       "label": "查看更多按钮背景颜色",
@@ -483,6 +674,10 @@
       "id": "view_more_text",
       "label": "查看更多按钮文字",
       "default": "查看更多商品"
+    },
+    {
+      "type": "header",
+      "content": "其他设置"
     },
     {
       "type": "text",
@@ -518,7 +713,10 @@
         "section_title": "背包系列",
         "product_type": "背包",
         "max_products": 12,
-        "view_more_text": "查看更多商品"
+        "view_more_text": "查看更多商品",
+        "show_add_to_cart": true,
+        "enable_type_filter": false,
+        "sort_by": "default"
       }
     }
   ]
