@@ -88,11 +88,13 @@
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     letter-spacing: 0.3px;
+    /* 修复跳动问题：预设透明边框 */
+    border-bottom: 2px solid transparent;
   }
 
-  /* 鼠标悬停时只显示下划线 */
+  /* 鼠标悬停时只改变边框颜色，不改变尺寸 */
   .modern-nav-link:hover {
-    border-bottom: 2px solid #E5E5E5;
+    border-bottom-color: #E5E5E5;
     background: none;
     transform: none;
     box-shadow: none;
@@ -132,7 +134,7 @@
     transition: opacity 0.3s ease-in, visibility 0.3s ease-in, transform 0.3s ease-in;
   }
 
-  /* 产品类型网格 - 强制一行展示 */
+  /* 产品类型网格 - 靠左对齐布局 */
   .auto-collections-grid {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -143,9 +145,6 @@
     width: 100%;
     margin: 0 auto;
     padding: 0 3rem;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
     min-height: 200px;
   }
 
@@ -159,9 +158,6 @@
     width: 100%;
     margin: 0 auto;
     padding: 0 3rem;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
     min-height: 200px;
   }
 
@@ -171,11 +167,9 @@
     align-items: center;
     text-decoration: none;
     color: inherit;
-    min-width: 175px !important;
-    width: 175px !important;
-    max-width: 175px !important;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
+    flex: 1;
+    min-width: calc(33.333% - 1rem);
+    max-width: calc(33.333% - 1rem);
     background: transparent;
     border-radius: 0;
     overflow: visible;
@@ -193,36 +187,31 @@
 
   .mega-menu-image-container {
     position: relative;
-    width: 175px !important;
-    height: 95px !important;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 宽高比 */
     overflow: hidden;
     border-radius: 8px;
     background: #f5f2ed;
-    border: 2px solid #ede8e0;
     margin-bottom: 0.6rem;
     transition: all 0.3s ease;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
   }
 
   .mega-menu-image {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .mega-menu-item:hover .mega-menu-image {
-    transform: scale(1.05);
   }
 
   .mega-menu-item:hover .mega-menu-image-container {
-    border-color: #d4c4a8;
     box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
   }
 
   .mega-menu-content {
-    text-align: center;
+    text-align: left;
     background: transparent;
     width: 100%;
     padding: 0.8rem 0.5rem 0 0.5rem;
@@ -237,14 +226,13 @@
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.4rem;
-    text-align: center;
+    text-align: left;
     width: 100%;
     white-space: nowrap !important;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 175px;
     margin: 0;
   }
 
@@ -255,29 +243,30 @@
     color: #64748b;
   }
 
+  /* 箭头hover颜色改为橙色 */
   .mega-menu-item:hover .mega-menu-arrow {
     transform: translateX(4px);
     opacity: 1;
-    color: #667eea;
+    color: #ff6b35;
   }
 
+  /* 移除hover时标题颜色变化 */
   .mega-menu-item:hover .mega-menu-item-title {
-    color: #667eea;
+    color: #2d3748;
   }
 
   .mega-menu-placeholder {
-    width: 175px !important;
-    height: 95px !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: #f5f2ed;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    border: 2px solid #ede8e0;
-    position: relative;
     overflow: hidden;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
   }
 
   .mega-menu-placeholder::before {
@@ -625,13 +614,7 @@
     }
 
     .modern-mega-menu {
-      min-width: 700px;
       padding: 2.5rem;
-    }
-
-    .mega-menu-grid {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
     }
   }
 
@@ -645,18 +628,7 @@
     }
 
     .modern-mega-menu {
-      min-width: 700px;
-      max-width: 900px;
       padding: 2rem;
-    }
-
-    .mega-menu-grid {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .mega-menu-image-container {
-      height: 150px;
     }
 
     .mega-menu-content {
@@ -761,12 +733,12 @@
                       <div class="mega-menu-image-container">
                         {%- assign collection = collections[childlink.handle] -%}
                         {%- if collection and collection.image -%}
-                          <img src="{{ collection.image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                          <img src="{{ collection.image | image_url: width: 600, height: 338, crop: 'center' }}" 
                                alt="{{ childlink.title }}" 
                                class="mega-menu-image"
                                loading="lazy">
                         {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                          <img src="{{ collection.products.first.featured_image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                          <img src="{{ collection.products.first.featured_image | image_url: width: 600, height: 338, crop: 'center' }}" 
                                alt="{{ childlink.title }}" 
                                class="mega-menu-image"
                                loading="lazy">
@@ -796,12 +768,12 @@
                       <a href="{{ collection.url }}" class="mega-menu-item">
                         <div class="mega-menu-image-container">
                           {%- if collection.image -%}
-                            <img src="{{ collection.image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                            <img src="{{ collection.image | image_url: width: 600, height: 338, crop: 'center' }}" 
                                  alt="{{ collection.title }}" 
                                  class="mega-menu-image"
                                  loading="lazy">
                           {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                            <img src="{{ collection.products.first.featured_image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                            <img src="{{ collection.products.first.featured_image | image_url: width: 600, height: 338, crop: 'center' }}" 
                                  alt="{{ collection.title }}" 
                                  class="mega-menu-image"
                                  loading="lazy">
