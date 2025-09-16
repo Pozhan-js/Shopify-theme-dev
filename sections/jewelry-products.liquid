@@ -1,68 +1,29 @@
 <!-- 珠宝产品展示section - 带TAB切换功能 -->
 <div class="jewelry-products-container">
     <div class="jewelry-products-wrapper">
-        <h2 class="section-title">精选珠宝</h2>
+        <div class="section-title-wrapper">
+            <h2 class="section-title">Featured Collections</h2>
+            <div class="title-underline"></div>
+        </div>
         
         <!-- TAB导航栏 -->
         <div class="tab-navigation">
-            <button type="button" class="tab-btn active" data-tab="all">全部商品</button>
-            <button type="button" class="tab-btn" data-tab="rings">戒指</button>
-            <button type="button" class="tab-btn" data-tab="necklaces">项链</button>
-            <button type="button" class="tab-btn" data-tab="earrings">耳环</button>
-            <button type="button" class="tab-btn" data-tab="bracelets">手链</button>
+            <button type="button" class="tab-btn active" data-tab="all">ルビー</button>
+            <button type="button" class="tab-btn" data-tab="sapphire">サファイア</button>
+            <button type="button" class="tab-btn" data-tab="emerald">エメラルド</button>
+            <button type="button" class="tab-btn" data-tab="birthstone">SATAKE 誕生石</button>
+            <button type="button" class="tab-btn" data-tab="pairring">satakeペアリング</button>
         </div>
         
         <!-- 商品列表容器 -->
         <div class="tab-content">
-            <!-- 全部商品 -->
+            <!-- ルビー -->
             <div class="tab-pane active" id="tab-all">
                 <div class="products-grid">
-                    {%- assign all_products = collections.all.products | limit: 6 -%}
-                    {%- for product in all_products -%}
-                        <div class="product-card">
-                            <div class="product-image-container">
-                                <a href="{{ product.url }}" class="product-link">
-                                    <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
-                                         alt="{{ product.title }}" 
-                                         class="product-image"
-                                         loading="lazy">
-                                </a>
-                            </div>
-                            
-                            <div class="product-info">
-                                <h3 class="product-title">
-                                    <a href="{{ product.url }}">{{ product.title }}</a>
-                                </h3>
-                                <div class="product-price">
-                                    {%- if product.compare_at_price > product.price -%}
-                                        <span class="original-price">{{ product.compare_at_price | money }}</span>
-                                    {%- endif -%}
-                                    <span class="current-price">{{ product.price | money }}</span>
-                                </div>
-                                
-                                <form method="post" action="/cart/add" class="add-to-cart-form">
-                                    <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                                    <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="add-to-cart-btn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                            <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                                        </svg>
-                                        加入购物车
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    {%- endfor -%}
-                </div>
-            </div>
-            
-            <!-- 戒指 -->
-            <div class="tab-pane" id="tab-rings">
-                <div class="products-grid">
-                    {%- assign rings_products = collections.rings.products | default: collections.all.products -%}
-                    {%- assign rings_products = rings_products | where: 'type', '戒指' | limit: 6 -%}
-                    {%- if rings_products.size > 0 -%}
-                        {%- for product in rings_products -%}
+                    {%- assign ruby_products = collections.ruby.products | default: collections.all.products -%}
+                    {%- assign ruby_products = ruby_products | where: 'type', 'ルビー' | limit: 6 -%}
+                    {%- if ruby_products.size > 0 -%}
+                        {%- for product in ruby_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -91,7 +52,7 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                                             </svg>
-                                            加入购物车
+                                            カートに追加
                                         </button>
                                     </form>
                                 </div>
@@ -99,19 +60,19 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>暂无戒指商品，请在后台添加产品</p>
+                            <p>ルビー商品がありません。管理画面で商品を追加してください。</p>
                         </div>
                     {%- endif -%}
                 </div>
             </div>
             
-            <!-- 项链 -->
-            <div class="tab-pane" id="tab-necklaces">
+            <!-- サファイア -->
+            <div class="tab-pane" id="tab-sapphire">
                 <div class="products-grid">
-                    {%- assign necklaces_products = collections.necklaces.products | default: collections.all.products -%}
-                    {%- assign necklaces_products = necklaces_products | where: 'type', '项链' | limit: 6 -%}
-                    {%- if necklaces_products.size > 0 -%}
-                        {%- for product in necklaces_products -%}
+                    {%- assign sapphire_products = collections.sapphire.products | default: collections.all.products -%}
+                    {%- assign sapphire_products = sapphire_products | where: 'type', 'サファイア' | limit: 6 -%}
+                    {%- if sapphire_products.size > 0 -%}
+                        {%- for product in sapphire_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -140,7 +101,7 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                                             </svg>
-                                            加入购物车
+                                            カートに追加
                                         </button>
                                     </form>
                                 </div>
@@ -148,19 +109,19 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>暂无项链商品，请在后台添加产品</p>
+                            <p>サファイア商品がありません。管理画面で商品を追加してください。</p>
                         </div>
                     {%- endif -%}
                 </div>
             </div>
             
-            <!-- 耳环 -->
-            <div class="tab-pane" id="tab-earrings">
+            <!-- エメラルド -->
+            <div class="tab-pane" id="tab-emerald">
                 <div class="products-grid">
-                    {%- assign earrings_products = collections.earrings.products | default: collections.all.products -%}
-                    {%- assign earrings_products = earrings_products | where: 'type', '耳环' | limit: 6 -%}
-                    {%- if earrings_products.size > 0 -%}
-                        {%- for product in earrings_products -%}
+                    {%- assign emerald_products = collections.emerald.products | default: collections.all.products -%}
+                    {%- assign emerald_products = emerald_products | where: 'type', 'エメラルド' | limit: 6 -%}
+                    {%- if emerald_products.size > 0 -%}
+                        {%- for product in emerald_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -189,7 +150,7 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                                             </svg>
-                                            加入购物车
+                                            カートに追加
                                         </button>
                                     </form>
                                 </div>
@@ -197,19 +158,19 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>暂无耳环商品，请在后台添加产品</p>
+                            <p>エメラルド商品がありません。管理画面で商品を追加してください。</p>
                         </div>
                     {%- endif -%}
                 </div>
             </div>
             
-            <!-- 手链 -->
-            <div class="tab-pane" id="tab-bracelets">
+            <!-- SATAKE 誕生石 -->
+            <div class="tab-pane" id="tab-birthstone">
                 <div class="products-grid">
-                    {%- assign bracelets_products = collections.bracelets.products | default: collections.all.products -%}
-                    {%- assign bracelets_products = bracelets_products | where: 'type', '手链' | limit: 6 -%}
-                    {%- if bracelets_products.size > 0 -%}
-                        {%- for product in bracelets_products -%}
+                    {%- assign birthstone_products = collections.birthstone.products | default: collections.all.products -%}
+                    {%- assign birthstone_products = birthstone_products | where: 'type', '誕生石' | limit: 6 -%}
+                    {%- if birthstone_products.size > 0 -%}
+                        {%- for product in birthstone_products -%}
                             <div class="product-card">
                                 <div class="product-image-container">
                                     <a href="{{ product.url }}" class="product-link">
@@ -238,7 +199,7 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                                             </svg>
-                                            加入购物车
+                                            カートに追加
                                         </button>
                                     </form>
                                 </div>
@@ -246,7 +207,56 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>暂无手链商品，请在后台添加产品</p>
+                            <p>誕生石商品がありません。管理画面で商品を追加してください。</p>
+                        </div>
+                    {%- endif -%}
+                </div>
+            </div>
+            
+            <!-- satakeペアリング -->
+            <div class="tab-pane" id="tab-pairring">
+                <div class="products-grid">
+                    {%- assign pairring_products = collections.pairring.products | default: collections.all.products -%}
+                    {%- assign pairring_products = pairring_products | where: 'type', 'ペアリング' | limit: 6 -%}
+                    {%- if pairring_products.size > 0 -%}
+                        {%- for product in pairring_products -%}
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <a href="{{ product.url }}" class="product-link">
+                                        <img src="{{ product.featured_image | image_url: width: 190, height: 190, crop: 'center' }}" 
+                                             alt="{{ product.title }}" 
+                                             class="product-image"
+                                             loading="lazy">
+                                    </a>
+                                </div>
+                                
+                                <div class="product-info">
+                                    <h3 class="product-title">
+                                        <a href="{{ product.url }}">{{ product.title }}</a>
+                                    </h3>
+                                    <div class="product-price">
+                                        {%- if product.compare_at_price > product.price -%}
+                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                                        {%- endif -%}
+                                        <span class="current-price">{{ product.price | money }}</span>
+                                    </div>
+                                    
+                                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="add-to-cart-btn">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                            </svg>
+                                            カートに追加
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {%- endfor -%}
+                    {%- else -%}
+                        <div class="no-products-message">
+                            <p>ペアリング商品がありません。管理画面で商品を追加してください。</p>
                         </div>
                     {%- endif -%}
                 </div>
@@ -255,14 +265,16 @@
         
         {%- if collections.all.products.size > 6 -%}
             <div class="view-more-container">
-                <a href="/collections/all" class="view-more-btn">查看更多</a>
+                <a href="/collections/all" class="view-more-btn">もっと見る</a>
             </div>
         {%- endif -%}
     </div>
 </div>
 
 <style>
+    /* 日文无衬线字体设置 */
     .jewelry-products-container {
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
         padding: 40px 20px;
         max-width: 1200px;
         margin: 0 auto;
@@ -272,20 +284,36 @@
         text-align: center;
     }
 
+    /* 标题样式 - Featured Collections 带下划线 */
+    .section-title-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
     .section-title {
         font-size: 28px;
         font-weight: 300;
         color: #333;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
         letter-spacing: 1px;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
-    /* TAB导航样式 - 极简设计 */
+    .title-underline {
+        width: 60px;
+        height: 2px;
+        background-color: #D9D9D9;
+        margin: 0 auto;
+    }
+
+    /* TAB导航样式 - 日文标签 */
     .tab-navigation {
         display: flex;
         justify-content: center;
-        gap: 30px;
-        margin-bottom: 30px;
+        gap: 20px;
+        margin-bottom: 40px;
         flex-wrap: wrap;
     }
 
@@ -293,11 +321,13 @@
         background: none;
         color: #666;
         border: none;
-        padding: 8px 20px;
+        padding: 12px 20px;
         font-size: 16px;
         cursor: pointer;
         transition: all 0.3s ease;
-        border-radius: 20px;
+        border-radius: 25px;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+        white-space: nowrap;
     }
 
     .tab-btn:hover {
@@ -385,6 +415,7 @@
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
     .product-title a {
@@ -435,10 +466,11 @@
         transition: all 0.3s ease;
         width: 100%;
         margin-top: 4px;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
     .add-to-cart-btn:hover {
-        background: #F5F5F5;
+        background: #E8E8E8;
         color: #333;
         border-color: #ccc;
     }
@@ -461,6 +493,7 @@
         text-decoration: none;
         font-size: 14px;
         transition: background 0.3s ease;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
     .view-more-btn:hover {
@@ -475,17 +508,20 @@
 
         .section-title {
             font-size: 24px;
-            margin-bottom: 20px;
+        }
+
+        .section-title-wrapper {
+            margin-bottom: 30px;
         }
 
         .tab-navigation {
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 30px;
         }
 
         .tab-btn {
-            padding: 6px 15px;
-            font-size: 15px;
+            padding: 10px 16px;
+            font-size: 14px;
         }
 
         .products-grid {
@@ -504,12 +540,16 @@
 
     @media (max-width: 480px) {
         .tab-navigation {
-            gap: 15px;
+            gap: 10px;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
 
         .tab-btn {
-            padding: 5px 12px;
-            font-size: 14px;
+            padding: 8px 14px;
+            font-size: 13px;
+            flex-shrink: 0;
         }
 
         .products-grid {
@@ -545,6 +585,7 @@
         text-align: center;
         padding: 60px 20px;
         color: #666;
+        font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     }
 
     .no-products-message p {
@@ -582,7 +623,7 @@
 
 {%- if collections.all.products.size == 0 -%}
     <div class="no-products-message">
-        <p>暂无产品展示，请在后台添加产品</p>
-        <p><a href="/admin/products">前往后台添加产品</a></p>
+        <p>商品がありません。管理画面で商品を追加してください。</p>
+        <p><a href="/admin/products">管理画面へ移動</a></p>
     </div>
 {%- endif -%}
