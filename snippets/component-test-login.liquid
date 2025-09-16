@@ -1,0 +1,140 @@
+{% comment %}
+  登录表单组件
+  用法: {% render 'component-test-login', title: "登录" %}
+{% endcomment %}
+
+<div class="login-form">
+  <h2 class="login-title">{{ title | default: "用户登录" }}</h2>
+  
+  <form id="loginForm" class="login-form__container">
+    <div class="form-group">
+      <label for="email">邮箱/用户名</label>
+      <input type="text" id="email" name="email" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="password">密码</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="login-button">登录</button>
+      <div class="login-links">
+        <a href="/pages/reg">注册账号</a>
+        <a href="/pages/forget">忘记密码?</a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  let timer
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    console.log('登录尝试:', email);
+    clearTimeout(timer)
+    timer = setTimeout(()=>{
+      alert('登陆成功')
+      location.href= '/'
+    },1500)
+  });
+</script>
+
+<style>
+  .login-form {
+    max-width: 400px;
+    margin: 30px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
+  .login-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  .login-button {
+    width: 100%;
+    padding: 12px;
+    background: #3a3a3a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .login-button:hover {
+    background: #2a2a2a;
+  }
+  .login-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  .login-links a {
+    color: #666;
+    text-decoration: none;
+  }
+  .login-links a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+{% comment %} {% schema %}
+{
+  "name": "登录表单",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "表单标题",
+      "default": "用户登录"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_register_link",
+      "label": "显示注册链接",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_forgot_link",
+      "label": "显示忘记密码链接",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "按钮文字",
+      "default": "登录"
+    }
+  ],
+  "presets": [
+    {
+      "name": "登录表单",
+      "category": "表单"
+    }
+  ]
+}
+{% endschema %} {% endcomment %}

@@ -1,0 +1,332 @@
+{% schema %}
+{
+  "name": "产品详情",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "table_headers",
+      "label": "表格表头",
+      "default": "[\"规格\",\"参数\"]"
+    },
+    {
+      "type": "text",
+      "id": "table_data",
+      "label": "表格数据",
+      "default": "[[\"材质\",\"纯棉\"],[\"尺寸\",\"M/L/XL\"],[\"颜色\",\"多种可选\"]]"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": true,
+      "label": "显示供应商"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "default": true,
+      "label": "显示评分"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "description",
+      "name": "描述",
+      "limit": 1
+    },
+    {
+      "type": "inventory",
+      "name": "库存信息",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_inventory_count",
+          "label": "显示库存数量",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_sold_count",
+          "label": "显示已售数量", 
+          "default": true
+        },
+        {
+          "type": "number",
+          "id": "inventory_threshold",
+          "label": "低库存阈值",
+          "default": 10
+        }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "变体选择器",
+      "limit": 1
+    },
+    {
+      "type": "buy_buttons",
+      "name": "购买按钮",
+      "limit": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品详情"
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+.product-details {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 3rem;
+}
+
+.product-details__gallery {
+  display: grid;
+  gap: 1rem;
+}
+
+.product-details__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.product-details__title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-details__price {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-price);
+}
+
+.product-details__description {
+  line-height: 1.6;
+}
+
+.product-inventory {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin: 1rem 0;
+}
+
+.inventory-count,
+.sold-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inventory-quantity,
+.sold-quantity {
+  font-weight: 600;
+}
+
+.low-inventory {
+  color: #ff5c33;
+  font-size: 0.9rem;
+}
+
+.variant-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.variant-option {
+  margin-bottom: 1.5rem;
+}
+
+.variant-option__name {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.variant-option__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variant-radio {
+  display: none;
+}
+
+.variant-label {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.variant-radio:checked + .variant-label {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.add-to-cart {
+  padding: 1rem 2rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-to-cart:hover {
+  opacity: 0.9;
+}
+{%- endstyle -%}
+
+{%- assign index = request.query.index | default: 0 | plus: 0 -%}
+{%- assign current_product = collections.all.products[index] -%}
+
+<div class="product-details">
+  {% comment %} {{collections | json}}
+  1111
+    {{collection | json}}
+    22222
+        {{section | json}} {% endcomment %}
+  <div class="product-details__gallery">
+    {% for media in current_product.media %}
+      <div class="product-media">
+        {{ media | image_url: width: 500 | image_tag: loading: 'lazy' }}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="product-details__info">
+    <h1 class="product-details__title">{{ current_product.title }}</h1>
+    
+    {% if section.settings.show_vendor %}
+      <div class="product-details__vendor">{{ current_product.vendor }}</div>
+    {% endif %}
+
+    <div class="product-details__price">
+      {{ current_product.price | money }}
+      {% if current_product.compare_at_price > current_product.price %}
+        <s>{{ current_product.compare_at_price | money }}</s>
+      {% endif %}
+    </div>
+
+    {% if section.settings.show_rating %}
+      <div class="product-details__rating">
+        {% render 'product-rating', product: current_product %}
+      </div>
+    {% endif %}
+
+    {% render 'component-table-list', section: section %}
+
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'inventory' %}
+          <div class="product-inventory" {{ block.shopify_attributes }}>
+            {% if block.settings.show_inventory_count %}
+              <div class="inventory-count">
+                库存: 
+                <span class="inventory-quantity">
+                  {% if current_product.selected_or_first_available_variant.inventory_quantity > 0 %}
+                    {{ current_product.selected_or_first_available_variant.inventory_quantity }}
+                  {% else %}
+                    缺货
+                  {% endif %}
+                </span>
+                {% if current_product.selected_or_first_available_variant.inventory_quantity <= block.settings.inventory_threshold %}
+                  <span class="low-inventory">(库存紧张)</span>
+                {% endif %}
+              </div>
+            {% endif %}
+            
+            {% if block.settings.show_sold_count %}
+              <div class="sold-count">
+                已售: <span class="sold-quantity">{{ current_product.metafields.custom.sold_count.value | default: 0 }}</span>
+              </div>
+            {% endif %}
+          </div>
+      {% endcase %}
+    {% endfor %}
+
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'description' %}
+          <div class="product-details__description" {{ block.shopify_attributes }}>
+            {{ current_product.description }}
+          </div>
+
+        {% when 'variant_picker' %}
+          <div class="variant-selector" {{ block.shopify_attributes }}>
+            {% for option in current_product.options_with_values %}
+              <div class="variant-option">
+                <div class="variant-option__name">{{ option.name }}</div>
+                <div class="variant-option__values">
+                  {% for value in option.values %}
+                    <input 
+                      type="radio" 
+                      id="Option-{{ section.id }}-{{ forloop.parentloop.index0 }}-{{ forloop.index0 }}"
+                      name="options[{{ option.name | escape }}]"
+                      value="{{ value | escape }}"
+                      class="variant-radio"
+                      {% if option.selected_value == value %}checked{% endif %}
+                    >
+                    <label 
+                      for="Option-{{ section.id }}-{{ forloop.parentloop.index0 }}-{{ forloop.index0 }}"
+                      class="variant-label"
+                    >
+                      {{ value }}
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+        {% when 'buy_buttons' %}
+          <div class="product-buttons" {{ block.shopify_attributes }}>
+            <button type="submit" class="add-to-cart">
+              加入购物车
+            </button>
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 变体选择逻辑
+    const variantRadios = document.querySelectorAll('.variant-radio');
+    
+    variantRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        // 这里可以添加变体切换逻辑
+        console.log('变体选择:', this.value);
+      });
+    });
+
+    // 加入购物车逻辑
+    const addToCartBtn = document.querySelector('.add-to-cart');
+    
+    addToCartBtn.addEventListener('click', function() {
+      // 这里可以添加加入购物车逻辑
+      console.log('加入购物车');
+    });
+  });
+</script>

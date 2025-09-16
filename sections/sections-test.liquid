@@ -1,0 +1,67 @@
+{%- if section.settings.component_type == 'table' -%}
+  {% render 'component-table-list', section: section %}
+{%- else -%}
+  {% render 'component-test-list', section: section %}
+{%- endif -%}
+
+{% assign product = section.settings.featured_product %}
+{% if product %}
+  <div>
+    <h2>{{ product.title }}</h2>
+    <p>{{ product.description }}</p>
+    <img src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
+    <a href="{{ product.url }}">查看详情</a>
+  </div>
+{% else %}
+  <p>请在主题编辑器中选择一个产品。</p>
+{% endif %}
+
+{% schema %}
+{
+  "name": "测试区块",
+  "settings": [
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "选择一个产品"
+    },
+    {
+      "type": "select",
+      "id": "component_type",
+      "label": "组件类型",
+      "options": [
+        {"value": "table", "label": "表格组件"},
+        {"value": "list", "label": "列表组件"}
+      ],
+      "default": "table"
+    },
+    {
+      "type": "text",
+      "id": "table_headers",
+      "label": "表头(表格组件使用)",
+      "default": "列1,列2,列3",
+      "info": "用英文逗号分隔"
+    },
+    {
+      "type": "textarea",
+      "id": "table_data",
+      "label": "表格数据(表格组件使用)",
+      "default": "行1数据1,行1数据2,行1数据3\n行2数据1,行2数据2,行2数据3",
+      "info": "每行用换行符分隔，每列用逗号分隔"
+    },
+    {
+      "type": "text",
+      "id": "list_title",
+      "label": "标题(列表组件使用)",
+      "default": "测试列表标题"
+    },
+    {
+      "type": "textarea",
+      "id": "list_items",
+      "label": "列表项(列表组件使用)",
+      "default": "项目1,项目2,项目3",
+      "info": "用英文逗号分隔"
+    }
+  ]
+}
+{% endschema %}
