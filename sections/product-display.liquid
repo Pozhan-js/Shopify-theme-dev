@@ -1,0 +1,351 @@
+{% comment %}
+  商品展示 Section - 支持商品选择 + 悬停换图 + 图片画廊
+  左侧：自动拉取商品信息，鼠标悬停切换图片
+  右侧：多图画廊滚动展示
+{% endcomment %}
+
+<div class="product-display-section">
+  <!-- 左侧商品信息区域 -->
+  <div class="product-info-area">
+    {% assign product = all_products[section.settings.selected_product] %}
+    
+    {% if product %}
+      <div class="product-card">
+        <div class="product-image-container">
+          {% assign hover_img = section.settings.product_hover_image %}
+          <img 
+            class="product-image" 
+            src="{{ product.featured_image | img_url: '400x400', crop: 'center' }}"
+            alt="{{ product.title }}"
+            id="productMainImage"
+            data-original-src="{{ product.featured_image | img_url: '600x600', crop: 'center' }}"
+            data-hover-src="{% if hover_img %}{{ hover_img | image_url: width: 600, height: 600, crop: 'center' }}{% endif %}"
+            crossorigin="anonymous"
+          />
+          <button class="shop-now-btn" onclick="window.location.href='{{ product.url }}'">
+            SHOP NOW
+          </button>
+        </div>
+        
+        <div class="product-details">
+          <h3 class="product-title">{{ product.title }}</h3>
+          <p class="product-description">{{ product.description | strip_html | truncate: 120 }}</p>
+          <div class="product-price">
+            {{ product.price | money }}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p style="color: #6b7280; font-size: 0.875rem;">请在后台选择一个商品</p>
+    {% endif %}
+  </div>
+
+  <!-- 右侧图片画廊区域 -->
+  <div class="gallery-area" id="galleryArea">
+    {% for block in section.blocks %}
+      {% if block.type == 'gallery_image' and block.settings.image %}
+        <img
+          class="gallery-image"
+          src="{{ block.settings.image | img_url: '800x1200', crop: 'center' }}"
+          alt="{{ block.settings.alt_text }}"
+          loading="{% if forloop.index > 3 %}lazy{% else %}eager{% endif %}"
+        />
+      {% endif %}
+    {% endfor %}
+    
+    <!-- 滚动提示 -->
+    <div class="scroll-indicator">
+      <svg class="scroll-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-display-section {
+    display: flex;
+    height: 100vh;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  }
+  
+  .product-info-area {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .product-card {
+    background: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 24rem;
+    margin: 0 auto;
+  }
+  
+  .product-image-container {
+    position: relative;
+    height: 20rem;
+    overflow: hidden;
+  }
+  
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .product-image.loading {
+    opacity: 0.4;
+    transition: opacity 0.2s ease-in;
+  }
+  
+  .shop-now-btn {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: black;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  }
+  
+  .product-card:hover .shop-now-btn {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .shop-now-btn:hover {
+    background: #374151;
+  }
+  
+  .product-details {
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .product-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+  
+  .product-description {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  
+  .product-price {
+    font-size: 1.125rem;
+    font-weight: 300;
+    color: #111827;
+  }
+  
+  .gallery-area {
+    width: 50%;
+    position: relative;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .gallery-area::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .gallery-image {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .scroll-indicator {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    padding: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    animation: bounce 2s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+      transform: translate3d(0,0,0);
+    }
+    40%, 43% {
+      transform: translate3d(0,-8px,0);
+    }
+    70% {
+      transform: translate3d(0,-4px,0);
+    }
+    90% {
+      transform: translate3d(0,-2px,0);
+    }
+  }
+  
+  .scroll-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #4b5563;
+  }
+  
+  @media (max-width: 768px) {
+    .product-display-section {
+      flex-direction: column;
+      height: auto;
+    }
+    
+    .product-info-area,
+    .gallery-area {
+      width: 100%;
+    }
+    
+    .gallery-area {
+      height: 50vh;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productCard = document.querySelector('.product-card');
+  const mainImage = document.getElementById('productMainImage');
+
+  if (!productCard || !mainImage) return;
+
+  const originalSrc = mainImage.dataset.originalSrc?.trim();
+  let hoverSrc = mainImage.dataset.hoverSrc?.trim();
+
+  // 确保原始图存在
+  if (!originalSrc) {
+    console.error('[Product Display] Missing original image URL.');
+    return;
+  }
+
+  // 若无悬停图或与原图相同，则不启用切换
+  if (!hoverSrc) {
+    console.warn('[Product Display] No hover image set.');
+    return;
+  }
+
+  if (hoverSrc === originalSrc) {
+    console.warn('[Product Display] Hover image is the same as original, skipping switch.');
+    return;
+  }
+
+  console.log('[Product Display] Original:', originalSrc);
+  console.log('[Product Display] Hover:   ', hoverSrc);
+
+  // 预加载悬停图以提升体验
+  const preloadImg = new Image();
+  preloadImg.src = hoverSrc;
+
+  // 鼠标进入：切换为悬停图（加时间戳防止缓存）
+  productCard.addEventListener('mouseenter', () => {
+    if (mainImage.src === hoverSrc) return;
+    mainImage.classList.add('loading');
+    mainImage.src = hoverSrc + (hoverSrc.includes('?') ? '&' : '?') + 'v=' + Date.now();
+  });
+
+  // 鼠标离开：恢复为主图
+  productCard.addEventListener('mouseleave', () => {
+    if (mainImage.src === originalSrc) return;
+    mainImage.classList.add('loading');
+    mainImage.src = originalSrc + (originalSrc.includes('?') ? '&' : '?') + 'v=' + Date.now();
+  });
+
+  // 加载成功后移除 loading 效果
+  mainImage.onload = () => {
+    mainImage.classList.remove('loading');
+  };
+
+  // 加载失败时回退到原图
+  mainImage.onerror = () => {
+    console.error('Failed to load image:', mainImage.src);
+    mainImage.classList.remove('loading');
+    if (mainImage.src !== originalSrc) {
+      mainImage.src = originalSrc;
+    }
+  };
+});
+</script>
+
+{% schema %}
+{
+  "name": "商品展示",
+  "settings": [
+    {
+      "type": "product",
+      "id": "selected_product",
+      "label": "选择商品",
+      "info": "商品的标题、价格、描述和链接将自动填充"
+    },
+    {
+      "type": "image_picker",
+      "id": "product_hover_image",
+      "label": "悬停时显示的图片（可选）",
+      "info": "鼠标悬停时替换主图。请上传一张不同的图片（如侧面、佩戴效果图），否则无法看到切换效果"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "gallery_image",
+      "name": "画廊图片",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "图片描述",
+          "default": "商品展示图片"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "商品展示",
+      "settings": {
+        "selected_product": ""
+      },
+      "blocks": [
+        {
+          "type": "gallery_image"
+        },
+        {
+          "type": "gallery_image"
+        },
+        {
+          "type": "gallery_image"
+        },
+        {
+          "type": "gallery_image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

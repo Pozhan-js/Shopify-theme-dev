@@ -1,0 +1,796 @@
+{% comment %}
+  Carousel de bijoux - Section Liquid
+  Affichage des collections de bijoux avec navigation par onglets
+{% endcomment %}
+
+<div class="jewelry-carousel-section" data-section-id="{{ section.id }}">
+  <div class="container">
+    
+    <!-- Navigation par onglets -->
+    <div class="tab-navigation">
+      <div class="tab-container">
+        {% for block in section.blocks %}
+          {% if block.type == 'collection_tab' %}
+            <button
+              class="tab-button"
+              data-tab="{{ block.id }}"
+              data-collection="{{ block.settings.collection.handle }}"
+            >
+              {{ block.settings.tab_title | upcase }}
+              <div class="tab-indicator"></div>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Conteneur du carousel -->
+    <div class="carousel-wrapper">
+      {% for block in section.blocks %}
+        {% if block.type == 'collection_tab' %}
+          <div 
+            class="carousel-content"
+            data-content="{{ block.id }}"
+          >
+            <div class="carousel-track">
+              
+              <!-- Première carte - Image de collection -->
+              <div class="card-container large-card">
+                <div class="card-inner">
+          <!-- Première carte - Image de collection -->
+<div class="card-container large-card">
+  <div class="card-inner">
+    <div class="image-container">
+      {% assign collection_obj = collections[block.settings.collection.handle] %}
+      
+      {% if block.settings.collection_image %}
+        {% assign img = block.settings.collection_image %}
+      {% elsif collection_obj and collection_obj.featured_image %}
+        {% assign img = collection_obj.featured_image %}
+      {% else %}
+        {% assign img = nil %}
+      {% endif %}
+
+      {% if img %}
+        <img
+          src="{{ img | img_url: '600x800' }}"
+          alt="{% if block.settings.collection.title %}{{ block.settings.collection.title }}{% else %}{{ collection_obj.title }}{% endif %}"
+          class="card-image"
+        >
+      {% else %}
+        <div class="placeholder-image">
+          <span>Image de collection</span>
+        </div>
+      {% endif %}
+      
+      <!-- Badge Best Seller si activé -->
+      {% if block.settings.show_bestseller_badge %}
+        <div class="bestseller-badge">
+          BEST SELLER
+        </div>
+      {% endif %}
+      
+      <!-- Texte et bouton en bas à gauche -->
+      <div class="card-overlay">
+        <h2 class="overlay-title">
+          {{ block.settings.collection_title | default: block.settings.collection.title }}
+        </h2>
+        <p class="overlay-subtitle">
+          {{ block.settings.collection_subtitle | default: 'Collection' }}
+        </p>
+        {% if block.settings.collection_button_text %}
+          <a 
+            href="{{ block.settings.collection.url | default: collection_obj.url }}"
+            class="overlay-button"
+          >
+            {{ block.settings.collection_button_text | upcase }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+                </div>
+              </div>
+
+              <!-- Cartes produits -->
+              {% assign collection = collections[block.settings.collection.handle] %}
+              {% if collection and collection.products.size > 0 %}
+                {% for product in collection.products limit: block.settings.products_limit %}
+                  <div class="card-container small-card">
+                    <div class="card-inner">
+                      <!-- Carte image produit -->
+                      <div class="image-container product-card">
+                        {% if product.featured_image %}
+                          <img
+                            src="{{ product.featured_image | img_url: '400x500' }}"
+                            alt="{{ product.title }}"
+                            class="card-image main-image"
+                          >
+                          {% if product.images[1] %}
+                            <img
+                              src="{{ product.images[1] | img_url: '400x500' }}"
+                              alt="{{ product.title }}"
+                              class="card-image hover-image"
+                            >
+                          {% endif %}
+                        {% else %}
+                          <div class="placeholder-image">
+                            <span>{{ product.title }}</span>
+                          </div>
+                        {% endif %}
+                        
+                        <!-- Badge Best Seller conditionnel -->
+                        {% if product.tags contains 'bestseller' %}
+                          <div class="bestseller-badge">
+                            BEST SELLER
+                          </div>
+                        {% endif %}
+                        
+                        <!-- Bouton Ajouter au panier au survol -->
+                        <div class="cart-button-container">
+                          <form action="/cart/add" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                            <button 
+                              type="submit"
+                              class="cart-button"
+                            >
+                              shop now
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                      
+                      <!-- Informations produit -->
+                      <div class="product-info">
+                        <h3 class="product-title">
+                          <a href="{{ product.url }}">{{ product.title }}</a>
+                        </h3>
+                        <p class="product-price">
+                          {{ product.price | money }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Boutons de navigation -->
+      <button class="nav-button prev-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button class="nav-button next-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Variables CSS */
+:root {
+  --cream: #F5F1EB;
+  --warm-beige: #E8DDD4;
+  --soft-brown: #C4A484;
+  --pearl-white: #FFF8F0;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --white: #FFFFFF;
+  --amber-400: #FBBF24;
+  --orange-400: #FB923C;
+}
+
+/* Section principale */
+.jewelry-carousel-section {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: transparent;
+  min-height: 50vh;
+  padding: 1rem 0;
+
+}
+
+/* Container principal */
+.container {
+  max-width: 100rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Navigation des onglets */
+.tab-navigation {
+  margin-bottom: 3rem;
+}
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.tab-button {
+  position: relative;
+  padding-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--gray-500);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.tab-button:hover {
+  color: var(--gray-700);
+}
+
+.tab-button.active {
+  color: var(--gray-900);
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--soft-brown);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tab-button.active .tab-indicator {
+  opacity: 1;
+}
+
+/* Carousel wrapper */
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-content {
+  display: none;
+}
+
+.carousel-content.active {
+  display: block;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 1.5rem;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Cards containers */
+.card-container {
+  flex-shrink: 0;
+}
+
+.large-card {
+  width: 24rem;
+}
+
+.small-card {
+  width: 18rem;
+}
+
+.card-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Image containers */
+.image-container {
+  position: relative;
+  background-color: var(--white);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.large-card .image-container {
+  height: 31.25rem;
+}
+
+.small-card .image-container {
+  height: 25rem;
+}
+
+.image-container:hover {
+  transform: translateY(-4px);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.hover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.product-card:hover .hover-image {
+  opacity: 1;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background-color: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+}
+
+/* Badges */
+.bestseller-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, var(--amber-400) 0%, var(--orange-400) 100%);
+  color: var(--white);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+  z-index: 2;
+}
+
+/* Overlay pour grande carte */
+.card-overlay {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  color: var(--white);
+  z-index: 2;
+}
+
+.overlay-title {
+  font-size: 1.5rem;
+  font-family: Georgia, serif;
+  margin-bottom: 0.5rem;
+  line-height: 1.25;
+  font-weight: normal;
+}
+
+.overlay-subtitle {
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.overlay-button {
+  display: inline-block;
+  background: var(--white);
+  color: var(--gray-900);
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.overlay-button:hover {
+  background-color: var(--gray-100);
+}
+
+/* Bouton panier */
+.cart-button-container {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.product-card:hover .cart-button-container {
+  opacity: 1;
+}
+
+.cart-button {
+  background: var(--white);
+  color: var(--gray-900);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+.cart-button:hover {
+  background-color: var(--gray-100);
+}
+
+/* Informations produit */
+.product-info {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.product-title {
+  font-weight: 500;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.375;
+}
+
+.product-title a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.product-title a:hover {
+  color: var(--soft-brown);
+}
+
+.product-price {
+  font-weight: 400;
+  color: var(--gray-900);
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Boutons de navigation */
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-button:hover {
+  background-color: var(--gray-50);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.nav-button.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.prev-button {
+  left: 1rem;
+}
+
+.next-button {
+  right: 1rem;
+}
+
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .tab-container {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .carousel-track {
+    gap: 1rem;
+  }
+  
+  .large-card {
+    width: 20rem;
+  }
+  
+  .small-card {
+    width: 16rem;
+  }
+  
+  .large-card .image-container {
+    height: 28rem;
+  }
+  
+  .small-card .image-container {
+    height: 22rem;
+  }
+  
+  .overlay-title {
+    font-size: 1.25rem;
+  }
+  
+  .nav-button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .nav-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .large-card {
+    width: 18rem;
+  }
+  
+  .small-card {
+    width: 14rem;
+  }
+  
+  .large-card .image-container {
+    height: 24rem;
+  }
+  
+  .small-card .image-container {
+    height: 20rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sectionId = '{{ section.id }}';
+  const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+  
+  if (!section) return;
+  
+  const tabButtons = section.querySelectorAll('.tab-button');
+  const carouselContents = section.querySelectorAll('.carousel-content');
+  const prevButton = section.querySelector('.prev-button');
+  const nextButton = section.querySelector('.next-button');
+  
+  let currentTabIndex = 0;
+  let currentSlideIndex = 0;
+  
+  // Initialiser le premier onglet
+  if (tabButtons.length > 0) {
+    activateTab(0);
+  }
+  
+  // Gestion des onglets
+  tabButtons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+      activateTab(index);
+    });
+  });
+  
+  function activateTab(index) {
+    // Désactiver tous les onglets
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    carouselContents.forEach(content => content.classList.remove('active'));
+    
+    // Activer l'onglet sélectionné
+    tabButtons[index].classList.add('active');
+    carouselContents[index].classList.add('active');
+    
+    currentTabIndex = index;
+    currentSlideIndex = 0;
+    updateCarousel();
+    updateNavigationButtons();
+  }
+  
+  // Gestion du carousel
+  prevButton.addEventListener('click', () => {
+    if (currentSlideIndex > 0) {
+      currentSlideIndex--;
+      updateCarousel();
+      updateNavigationButtons();
+    }
+  });
+  
+  nextButton.addEventListener('click', () => {
+    const activeContent = carouselContents[currentTabIndex];
+    const cards = activeContent.querySelectorAll('.card-container');
+    const maxSlides = Math.max(0, cards.length - getVisibleCards());
+    
+    if (currentSlideIndex < maxSlides) {
+      currentSlideIndex++;
+      updateCarousel();
+      updateNavigationButtons();
+    }
+  });
+  
+  function getVisibleCards() {
+    const containerWidth = section.querySelector('.carousel-wrapper').offsetWidth;
+    // Estimation basée sur la largeur des cartes + gaps
+    return Math.floor(containerWidth / 320); // 288px + 32px gap approximatif
+  }
+  
+  function updateCarousel() {
+    const activeContent = carouselContents[currentTabIndex];
+    const track = activeContent.querySelector('.carousel-track');
+    const cards = activeContent.querySelectorAll('.card-container');
+    
+    let offset = 0;
+    for (let i = 0; i < currentSlideIndex; i++) {
+      const card = cards[i];
+      if (card) {
+        const cardWidth = card.offsetWidth + 24; // 24px = gap
+        offset += cardWidth;
+      }
+    }
+    
+    track.style.transform = `translateX(-${offset}px)`;
+  }
+  
+  function updateNavigationButtons() {
+    const activeContent = carouselContents[currentTabIndex];
+    const cards = activeContent.querySelectorAll('.card-container');
+    const visibleCards = getVisibleCards();
+    const maxSlides = Math.max(0, cards.length - visibleCards);
+    
+    // Bouton précédent
+    if (currentSlideIndex > 0) {
+      prevButton.classList.add('visible');
+    } else {
+      prevButton.classList.remove('visible');
+    }
+    
+    // Bouton suivant
+    if (currentSlideIndex < maxSlides) {
+      nextButton.classList.add('visible');
+    } else {
+      nextButton.classList.remove('visible');
+    }
+  }
+  
+  // Mise à jour lors du redimensionnement
+  window.addEventListener('resize', () => {
+    updateNavigationButtons();
+  });
+  
+  // Initialiser les boutons de navigation
+  updateNavigationButtons();
+});
+</script>
+
+{% schema %}
+{
+  "name": "Carousel de bijoux",
+  "tag": "section",
+  "class": "jewelry-carousel-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Configuration générale"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Titre de la section",
+      "default": "Nos collections"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tab",
+      "name": "Onglet de collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_title",
+          "label": "Titre de l'onglet",
+          "default": "Colliers"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "collection_image",
+          "label": "Image de la collection"
+        },
+        {
+          "type": "text",
+          "id": "collection_title",
+          "label": "Titre de la collection",
+          "info": "Laissez vide pour utiliser le nom de la collection"
+        },
+        {
+          "type": "text",
+          "id": "collection_subtitle",
+          "label": "Sous-titre de la collection",
+          "default": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "collection_button_text",
+          "label": "Texte du bouton",
+          "default": "Découvrir"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_bestseller_badge",
+          "label": "Afficher le badge Best Seller",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "products_limit",
+          "label": "Nombre de produits à afficher",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "default": 8
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel de bijoux",
+      "blocks": [
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Colliers",
+            "collection_subtitle": "Collection Perles",
+            "collection_button_text": "Découvrir"
+          }
+        },
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Boucles d'oreilles",
+            "collection_subtitle": "Collection Diamant",
+            "collection_button_text": "Découvrir"
+          }
+        },
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Bagues",
+            "collection_subtitle": "Collection Vintage",
+            "collection_button_text": "Découvrir"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
