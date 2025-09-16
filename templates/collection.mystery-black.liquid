@@ -33,8 +33,8 @@
                  height="400">
           </a>
           <div class="product-info">
-            <h3 class="product-title">
-              <a href="{{ product.url }}">{{ product.title }}</a>
+            <h3 class="product-title" style="color: white;">
+              <a href="{{ product.url }}" style="color: white;">{{ product.title }}</a>
             </h3>
             <div class="product-price">
               {{ product.price | money }}
@@ -119,11 +119,14 @@
 }
 
 .product-container {
-  width: 250px ;
-  max-width: 250px ;
-  min-width: 250px ;
-  margin: 0 ;
-  padding: 15px ;
+  width: 250px;
+  max-width: 250px;
+  min-width: 250px;
+  margin: 0;
+  padding: 15px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
 }
 
 .product-grid-wrapper {
@@ -245,53 +248,4 @@
 }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // AJAX加入购物车
-  document.querySelectorAll('.add-to-cart-form').forEach(form => {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const submitBtn = form.querySelector('button');
-      const originalText = submitBtn.textContent;
-      
-      try {
-        submitBtn.textContent = '添加中...';
-        submitBtn.disabled = true;
-        
-        const response = await fetch('/cart/add.js', {
-          method: 'POST',
-          body: formData
-        });
-        
-        const result = await response.json();
-        
-        if(result.status === 'success') {
-          submitBtn.textContent = '已添加';
-          setTimeout(() => {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-          }, 2000);
-          
-          // 更新购物车数量
-          fetch('/cart.js')
-            .then(res => res.json())
-            .then(cart => {
-              const cartCount = document.querySelector('.cart-count');
-              if(cartCount) {
-                cartCount.textContent = cart.item_count;
-              }
-            });
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        submitBtn.textContent = '添加失败';
-        setTimeout(() => {
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-        }, 2000);
-      }
-    });
-  });
-});
-</script>
+{% comment %} 使用Shopify原生表单提交 {% endcomment %}
