@@ -100,7 +100,7 @@
     box-shadow: none;
   }
 
-  /* 优化的产品类型下拉菜单 - 100%全屏 */
+  /* 优化的产品系列下拉菜单 - 100%全屏 */
   .modern-mega-menu {
     position: fixed;
     top: 100%;
@@ -134,134 +134,153 @@
     transition: opacity 0.3s ease-in, visibility 0.3s ease-in, transform 0.3s ease-in;
   }
 
-  /* 产品类型网格 - 靠左对齐布局 */
-  .auto-collections-grid {
+  /* 产品系列网格 - 靠左对齐布局 */
+  .collections-grid {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    flex-direction: row !important;
-    gap: 1.5rem;
+    flex-wrap: wrap !important;
+    gap: 2rem;
     justify-content: flex-start;
     align-items: flex-start;
     width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 3rem;
-    min-height: 200px;
   }
 
   .mega-menu-grid {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    flex-direction: row !important;
-    gap: 1.5rem;
+    flex-wrap: wrap !important;
+    gap: 2rem;
     justify-content: flex-start;
     align-items: flex-start;
     width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 3rem;
-    min-height: 200px;
   }
 
-  .mega-menu-item {
+  /* 动态计算每个系列的宽度 */
+  .collections-grid .collection-item {
+    flex: 0 0 calc(30% - 1.33rem);
+    max-width: calc(30% - 1.33rem);
+  }
+
+  .mega-menu-grid .collection-item {
+    flex: 0 0 calc(30% - 1.33rem);
+    max-width: calc(30% - 1.33rem);
+  }
+
+  /* 当系列数量超过3个时，调整宽度 */
+  .collections-grid[data-count="4"] .collection-item,
+  .mega-menu-grid[data-count="4"] .collection-item {
+    flex: 0 0 calc(22.5% - 1.5rem);
+    max-width: calc(22.5% - 1.5rem);
+  }
+
+  .collections-grid[data-count="5"] .collection-item,
+  .mega-menu-grid[data-count="5"] .collection-item {
+    flex: 0 0 calc(18% - 1.6rem);
+    max-width: calc(18% - 1.6rem);
+  }
+
+  .collections-grid[data-count="6"] .collection-item,
+  .mega-menu-grid[data-count="6"] .collection-item {
+    flex: 0 0 calc(15% - 1.67rem);
+    max-width: calc(15% - 1.67rem);
+  }
+
+  .collections-grid[data-count="7"] .collection-item,
+  .mega-menu-grid[data-count="7"] .collection-item,
+  .collections-grid[data-count="8"] .collection-item,
+  .mega-menu-grid[data-count="8"] .collection-item,
+  .collections-grid[data-count="9"] .collection-item,
+  .mega-menu-grid[data-count="9"] .collection-item,
+  .collections-grid[data-count="10"] .collection-item,
+  .mega-menu-grid[data-count="10"] .collection-item,
+  .collections-grid[data-count="11"] .collection-item,
+  .mega-menu-grid[data-count="11"] .collection-item,
+  .collections-grid[data-count="12"] .collection-item,
+  .mega-menu-grid[data-count="12"] .collection-item {
+    flex: 0 0 calc(12.5% - 1.75rem);
+    max-width: calc(12.5% - 1.75rem);
+  }
+
+  .collection-item {
     display: flex !important;
     flex-direction: column !important;
-    align-items: center;
+    align-items: flex-start;
     text-decoration: none;
     color: inherit;
-    flex: 1;
-    min-width: calc(33.333% - 1rem);
-    max-width: calc(33.333% - 1rem);
     background: transparent;
-    border-radius: 0;
-    overflow: visible;
+    border-radius: 12px;
+    overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
     cursor: pointer;
-    padding: 0.5rem;
-    white-space: nowrap;
-    vertical-align: top;
+    box-shadow: none;
+    border: none;
   }
 
-  .mega-menu-item:hover {
+  .collection-item:hover {
     transform: translateY(-8px);
+    box-shadow: none;
   }
 
-  .mega-menu-image-container {
+  .collection-image-container {
     position: relative;
     width: 100%;
-    height: 0;
-    padding-bottom: 56.25%; /* 16:9 宽高比 */
+    height: 180px;
     overflow: hidden;
-    border-radius: 8px;
     background: #f5f2ed;
-    margin-bottom: 0.6rem;
-    transition: all 0.3s ease;
   }
 
-  .mega-menu-image {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .collection-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
   }
 
-  .mega-menu-item:hover .mega-menu-image-container {
-    box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+  .collection-item:hover .collection-image {
+    transform: scale(1.05);
   }
 
-  .mega-menu-content {
-    text-align: left;
-    background: transparent;
+  .collection-content {
+    padding: 1.2rem;
     width: 100%;
-    padding: 0.8rem 0.5rem 0 0.5rem;
   }
 
-  .mega-menu-item-title {
-    font-size: 0.85rem;
+  .collection-title {
+    font-size: 1.1rem;
     color: #2d3748;
     font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: 0.2px;
-    transition: all 0.3s ease;
+    line-height: 1.4;
+    margin: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 0.4rem;
-    text-align: left;
-    width: 100%;
-    white-space: nowrap !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: 0;
+    gap: 0.5rem;
   }
 
-  .mega-menu-arrow {
-    font-size: 0.8rem;
+  .collection-arrow {
+    font-size: 1rem;
     transition: transform 0.3s ease;
-    opacity: 0.8;
+    opacity: 0.6;
     color: #64748b;
   }
 
-  /* 箭头hover颜色改为橙色 */
-  .mega-menu-item:hover .mega-menu-arrow {
+  .collection-item:hover .collection-arrow {
     transform: translateX(4px);
     opacity: 1;
     color: #ff6b35;
   }
 
-  /* 移除hover时标题颜色变化 */
-  .mega-menu-item:hover .mega-menu-item-title {
-    color: #2d3748;
-  }
-
-  .mega-menu-placeholder {
+  .collection-placeholder {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: #f5f2ed;
+    background: linear-gradient(135deg, #f5f2ed 0%, #ede8e0 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -269,14 +288,14 @@
     overflow: hidden;
   }
 
-  .mega-menu-placeholder::before {
+  .collection-placeholder::before {
     content: '';
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
     animation: shimmer 2s infinite;
   }
 
@@ -616,6 +635,15 @@
     .modern-mega-menu {
       padding: 2.5rem;
     }
+
+    .collections-grid {
+      padding: 0 2.5rem;
+    }
+
+    .collections-grid .collection-item {
+      flex: 0 0 calc(45% - 1rem);
+      max-width: calc(45% - 1rem);
+    }
   }
 
   @media screen and (max-width: 1024px) {
@@ -631,8 +659,13 @@
       padding: 2rem;
     }
 
-    .mega-menu-content {
-      padding: 1.5rem;
+    .collections-grid {
+      padding: 0 2rem;
+    }
+
+    .collections-grid .collection-item {
+      flex: 0 0 calc(45% - 1rem);
+      max-width: calc(45% - 1rem);
     }
   }
 
@@ -666,6 +699,11 @@
     .language-flag {
       width: 20px;
       height: 15px;
+    }
+
+    .collections-grid .collection-item {
+      flex: 0 0 calc(100% - 0rem);
+      max-width: calc(100% - 0rem);
     }
 
     body.mobile-menu-open {
@@ -719,78 +757,92 @@
       <!-- 桌面端导航菜单 -->
       <nav class="modern-nav-menu">
         {%- for link in section.settings.menu.links -%}
-          <div class="modern-nav-item {% if link.links.size > 0 or link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' %}has-dropdown{% endif %}">
+          <div class="modern-nav-item {% if link.links.size > 0 %}has-dropdown{% elsif link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' or link.title contains 'Products' or link.title contains 'Collections' or link.title contains '系列' %}has-dropdown{% endif %}">
             <a href="{{ link.url }}" class="modern-nav-link">
               {{ link.title }}
             </a>
             
-            {%- comment -%} 如果有子链接，显示子链接 {%- endcomment -%}
+            {%- comment -%} 如果有子链接，显示子链接对应的产品系列 {%- endcomment -%}
             {%- if link.links.size > 0 -%}
               <div class="modern-mega-menu">
-                <div class="mega-menu-grid">
+                <div class="collections-grid" data-count="{{ link.links.size }}">
                   {%- for childlink in link.links -%}
-                    <a href="{{ childlink.url }}" class="mega-menu-item">
-                      <div class="mega-menu-image-container">
-                        {%- assign collection = collections[childlink.handle] -%}
-                        {%- if collection and collection.image -%}
-                          <img src="{{ collection.image | image_url: width: 600, height: 338, crop: 'center' }}" 
-                               alt="{{ childlink.title }}" 
-                               class="mega-menu-image"
-                               loading="lazy">
-                        {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                          <img src="{{ collection.products.first.featured_image | image_url: width: 600, height: 338, crop: 'center' }}" 
-                               alt="{{ childlink.title }}" 
-                               class="mega-menu-image"
-                               loading="lazy">
-                        {%- else -%}
-                          <div class="mega-menu-placeholder">
-                            <span class="placeholder-icon">💎</span>
-                          </div>
-                        {%- endif -%}
-                      </div>
-                      <div class="mega-menu-content">
-                        <div class="mega-menu-item-title">
-                          {{ childlink.title }}
-                          <span class="mega-menu-arrow">→</span>
+                    {%- assign collection = collections[childlink.handle] -%}
+                    {%- if collection -%}
+                      <a href="{{ collection.url }}" class="collection-item">
+                        <div class="collection-image-container">
+                          {%- if collection.image -%}
+                            <img src="{{ collection.image | image_url: width: 400, height: 240, crop: 'center' }}" 
+                                 alt="{{ collection.title }}" 
+                                 class="collection-image"
+                                 loading="lazy">
+                          {%- elsif collection.products.first and collection.products.first.featured_image -%}
+                            <img src="{{ collection.products.first.featured_image | image_url: width: 400, height: 240, crop: 'center' }}" 
+                                 alt="{{ collection.title }}" 
+                                 class="collection-image"
+                                 loading="lazy">
+                          {%- else -%}
+                            <div class="collection-placeholder">
+                              <span class="placeholder-icon">🛍️</span>
+                            </div>
+                          {%- endif -%}
                         </div>
-                      </div>
-                    </a>
+                        <div class="collection-content">
+                          <div class="collection-title">
+                            {{ collection.title }}
+                            <span class="collection-arrow">→</span>
+                          </div>
+                        </div>
+                      </a>
+                    {%- else -%}
+                      <a href="{{ childlink.url }}" class="collection-item">
+                        <div class="collection-image-container">
+                          <div class="collection-placeholder">
+                            <span class="placeholder-icon">🛍️</span>
+                          </div>
+                        </div>
+                        <div class="collection-content">
+                          <div class="collection-title">
+                            {{ childlink.title }}
+                            <span class="collection-arrow">→</span>
+                          </div>
+                        </div>
+                      </a>
+                    {%- endif -%}
                   {%- endfor -%}
                 </div>
               </div>
             
-            {%- comment -%} 如果是Category链接但没有子链接，自动显示所有集合 {%- endcomment -%}
-            {%- elsif link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' -%}
+            {%- comment -%} 如果是产品相关链接但没有子链接，显示所有产品系列 {%- endcomment -%}
+            {%- elsif link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' or link.title contains 'Products' or link.title contains 'Collections' or link.title contains '系列' -%}
               <div class="modern-mega-menu">
-                <div class="auto-collections-grid">
-                  {%- for collection in collections limit: 12 -%}
-                    {%- unless collection.handle == 'frontpage' -%}
-                      <a href="{{ collection.url }}" class="mega-menu-item">
-                        <div class="mega-menu-image-container">
-                          {%- if collection.image -%}
-                            <img src="{{ collection.image | image_url: width: 600, height: 338, crop: 'center' }}" 
-                                 alt="{{ collection.title }}" 
-                                 class="mega-menu-image"
-                                 loading="lazy">
-                          {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                            <img src="{{ collection.products.first.featured_image | image_url: width: 600, height: 338, crop: 'center' }}" 
-                                 alt="{{ collection.title }}" 
-                                 class="mega-menu-image"
-                                 loading="lazy">
-                          {%- else -%}
-                            <div class="mega-menu-placeholder">
-                              <span class="placeholder-icon">💎</span>
-                            </div>
-                          {%- endif -%}
-                        </div>
-                        <div class="mega-menu-content">
-                          <div class="mega-menu-item-title">
+                <div class="collections-grid" data-count="{{ collections.size }}">
+                  {%- for collection in collections -%}
+                    <a href="{{ collection.url }}" class="collection-item">
+                      <div class="collection-image-container">
+                        {%- if collection.image -%}
+                          <img src="{{ collection.image | image_url: width: 400, height: 240, crop: 'center' }}" 
+                               alt="{{ collection.title }}" 
+                               class="collection-image"
+                               loading="lazy">
+                        {%- elsif collection.products.first and collection.products.first.featured_image -%}
+                          <img src="{{ collection.products.first.featured_image | image_url: width: 400, height: 240, crop: 'center' }}" 
+                               alt="{{ collection.title }}" 
+                               class="collection-image"
+                               loading="lazy">
+                        {%- else -%}
+                          <div class="collection-placeholder">
+                            <span class="placeholder-icon">🛍️</span>
+                          </div>
+                        {%- endif -%}
+                      </div>
+                        <div class="collection-content">
+                          <div class="collection-title">
                             {{ collection.title }}
-                            <span class="mega-menu-arrow">→</span>
+                            <span class="collection-arrow">→</span>
                           </div>
                         </div>
-                      </a>
-                    {%- endunless -%}
+                    </a>
                   {%- endfor -%}
                 </div>
               </div>
@@ -864,7 +916,12 @@
             <div class="mobile-submenu">
               {%- for childlink in link.links -%}
                 <div class="mobile-submenu-item">
-                  <a href="{{ childlink.url }}" class="mobile-submenu-link">{{ childlink.title }}</a>
+                  {%- assign collection = collections[childlink.handle] -%}
+                  {%- if collection -%}
+                    <a href="{{ collection.url }}" class="mobile-submenu-link">{{ collection.title }}</a>
+                  {%- else -%}
+                    <a href="{{ childlink.url }}" class="mobile-submenu-link">{{ childlink.title }}</a>
+                  {%- endif -%}
                 </div>
               {%- endfor -%}
             </div>
