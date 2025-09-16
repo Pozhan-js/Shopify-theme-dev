@@ -1,4 +1,4 @@
-<!-- 戒指展示模块 - 简化版 -->
+<!-- 戒指展示模块 - 后台可编辑版 -->
 <div class="rings-showcase-container">
     <div class="rings-showcase-wrapper">
         <!-- 左侧模特图 -->
@@ -21,9 +21,15 @@
                 </h2>
                 
                 <div class="products-grid">
-                    {%- comment -%} 根据产品类型筛选商品 {%- endcomment -%}
-                    {%- assign all_products = collections.all.products -%}
-                    {%- assign collection_products = all_products | where: 'type', section.settings.product_type | default: '戒指' -%}
+                    {%- comment -%} 获取商品系列 {%- endcomment -%}
+                    {%- if section.settings.collection != blank -%}
+                        {%- assign selected_collection = collections[section.settings.collection] -%}
+                        {%- assign collection_products = selected_collection.products -%}
+                    {%- else -%}
+                        {%- comment -%} 如果没有选择系列，则根据产品类型筛选 {%- endcomment -%}
+                        {%- assign all_products = collections.all.products -%}
+                        {%- assign collection_products = all_products | where: 'type', section.settings.product_type | default: '戒指' -%}
+                    {%- endif -%}
                     
                     {%- assign product_count = collection_products.size -%}
                     
@@ -65,16 +71,22 @@
                         {%- endfor -%}
                     {%- else -%}
                         <div class="no-products-message">
-                            <p>{{ section.settings.empty_message | default: '暂无商品，请在后台添加产品' }}</p>
+                            <p>{{ section.settings.empty_message | default: '暂无商品，请在后台添加产品或选择商品系列' }}</p>
                         </div>
                     {%- endif -%}
                 </div>
                 
                 {%- if collection_products.size > section.settings.max_products -%}
                     <div class="view-more-container">
-                        <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | default: '戒指' | url_encode }}" class="view-more-btn">
-                            {{ section.settings.view_more_text | default: '查看更多商品' }}
-                        </a>
+                        {%- if section.settings.collection != blank -%}
+                            <a href="{{ collections[section.settings.collection].url }}" class="view-more-btn">
+                                {{ section.settings.view_more_text | default: '查看更多商品' }}
+                            </a>
+                        {%- else -%}
+                            <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | default: '戒指' | url_encode }}" class="view-more-btn">
+                                {{ section.settings.view_more_text | default: '查看更多商品' }}
+                            </a>
+                        {%- endif -%}
                     </div>
                 {%- endif -%}
             </div>
@@ -144,7 +156,6 @@
         gap: 20px;
         margin-bottom: 40px;
         justify-content: flex-start;
-        align-content: flex-start;
     }
 
     .product-card {
@@ -346,14 +357,6 @@
         
         .product-card {
             width: calc(50% - 10px);
-            margin-bottom: 20px;
-        }
-        
-        .products-grid {
-            flex-direction: row;
-            flex-wrap: wrap;
-            justify-content: flex-start;
-            align-items: flex-start;
         }
     }
 
@@ -440,11 +443,17 @@
       "content": "商品设置"
     },
     {
+      "type": "collection",
+      "id": "collection",
+      "label": "选择商品系列",
+      "info": "选择要显示的商品系列。如果不选择，将根据产品类型筛选商品。"
+    },
+    {
       "type": "text",
       "id": "product_type",
-      "label": "产品类型",
+      "label": "产品类型（备用）",
       "default": "戒指",
-      "info": "根据此产品类型筛选商品"
+      "info": "当未选择商品系列时，根据此产品类型筛选商品"
     },
     {
       "type": "range",
@@ -459,7 +468,7 @@
       "type": "text",
       "id": "empty_message",
       "label": "空集合提示文字",
-      "default": "暂无商品，请在后台添加产品"
+      "default": "暂无商品，请在后台添加产品或选择商品系列"
     },
     {
       "type": "text",
