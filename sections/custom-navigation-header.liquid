@@ -1,196 +1,679 @@
-<link rel="stylesheet" href="{{ 'custom-navigation-header.css' | asset_url }}" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="{{ 'component-list-menu.css' | asset_url }}" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="{{ 'component-localization-form.css' | asset_url }}" media="print" onload="this.media='all'">
-
+<!-- 现代化导航栏 - 全新设计 -->
 <style>
-  .custom-nav-header {
+  /* 主导航容器 */
+  .modern-nav-header {
     position: relative;
-    background: var(--color-background);
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+    z-index: 1000;
+    backdrop-filter: blur(10px);
   }
 
-  .custom-nav-container {
+  .modern-nav-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 2rem;
-    max-width: 1400px;
+    padding: 1.2rem 3rem;
+    max-width: 1600px;
     margin: 0 auto;
-  }
-
-  .custom-logo {
-    flex-shrink: 0;
-  }
-
-  .custom-logo img {
-    height: 60px;
-    width: auto;
-    max-width: 200px;
-    object-fit: contain;
-  }
-
-  .custom-nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    margin-left: auto;
-  }
-
-  .custom-nav-item {
     position: relative;
   }
 
-  .custom-nav-link {
+  /* Logo 区域 - 左对齐 */
+  .modern-logo {
+    flex-shrink: 0;
+    z-index: 1001;
+  }
+
+  .modern-logo-link {
+    display: block;
     text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    transition: color 0.3s ease;
-    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  .custom-nav-link:hover {
-    color: #E5E5E5;
+  .modern-logo-link:hover {
+    transform: scale(1.02);
   }
 
-  .custom-mega-menu {
-    position: absolute;
+  .modern-logo-image {
+    height: {{ section.settings.logo_height | default: 65 }}px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .modern-logo h2 {
+    margin: 0;
+    color: #1a1a1a;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* 右侧导航区域 */
+  .nav-right-section {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    margin-left: auto;
+  }
+
+  /* 主导航菜单 - 右对齐 */
+  .modern-nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 2.8rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .modern-nav-item {
+    position: relative;
+  }
+
+  .modern-nav-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 1rem 1.5rem;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    letter-spacing: 0.3px;
+  }
+
+  /* 鼠标悬停时只显示下划线 */
+  .modern-nav-link:hover {
+    border-bottom: 2px solid #E5E5E5;
+    background: none;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* 优化的产品类型下拉菜单 - 100%全屏 */
+  .modern-mega-menu {
+    position: fixed;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #E5E5E5;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    padding: 2rem;
-    min-width: 600px;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    background: #faf9f7;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border-radius: 0;
+    padding: 3rem 0;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
-    z-index: 1000;
+    transition: opacity 0.15s ease-out, visibility 0.15s ease-out, transform 0.15s ease-out;
+    z-index: 999;
+    border-top: 1px solid #ede8e0;
+    transform: translateY(-10px);
   }
 
-  .custom-nav-item:hover .custom-mega-menu {
+  .modern-nav-item:hover .modern-mega-menu {
     opacity: 1;
     visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-in, visibility 0.3s ease-in, transform 0.3s ease-in;
+  }
+
+  /* 为所有导航项显示下拉菜单 */
+  .modern-nav-item.has-dropdown:hover .modern-mega-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-in, visibility 0.3s ease-in, transform 0.3s ease-in;
+  }
+
+  /* 产品类型网格 - 强制一行展示 */
+  .auto-collections-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
+    gap: 1.5rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 3rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    min-height: 200px;
   }
 
   .mega-menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    flex-direction: row !important;
     gap: 1.5rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 3rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    min-height: 200px;
   }
 
   .mega-menu-item {
-    text-align: center;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    min-width: 175px !important;
+    width: 175px !important;
+    max-width: 175px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+    transition: all 0.3s ease;
+    position: relative;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    padding: 0.5rem;
+    white-space: nowrap;
+    vertical-align: top;
   }
 
   .mega-menu-item:hover {
-    transform: translateY(-2px);
+    transform: translateY(-8px);
+  }
+
+  .mega-menu-image-container {
+    position: relative;
+    width: 175px !important;
+    height: 95px !important;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f5f2ed;
+    border: 2px solid #ede8e0;
+    margin-bottom: 0.6rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
   }
 
   .mega-menu-image {
     width: 100%;
-    height: 120px;
+    height: 100%;
     object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
+    transition: transform 0.3s ease;
   }
 
-  .mega-menu-title {
-    font-size: 0.9rem;
-    color: var(--color-foreground);
-    font-weight: 500;
+  .mega-menu-item:hover .mega-menu-image {
+    transform: scale(1.05);
   }
 
-  .mega-menu-placeholder {
+  .mega-menu-item:hover .mega-menu-image-container {
+    border-color: #d4c4a8;
+    box-shadow: 0 8px 24px rgba(139, 115, 85, 0.15);
+  }
+
+  .mega-menu-content {
+    text-align: center;
+    background: transparent;
     width: 100%;
-    height: 120px;
-    background: #E5E5E5;
-    border-radius: 8px;
+    padding: 0.8rem 0.5rem 0 0.5rem;
+  }
+
+  .mega-menu-item-title {
+    font-size: 0.85rem;
+    color: #2d3748;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0.2px;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  /* Language Switcher - 中英日三语 */
-  .custom-localization {
-    display: flex;
-    align-items: center;
-    margin-left: 2rem;
-  }
-
-  .language-switcher {
-    display: flex;
-    gap: 0.25rem;
-    align-items: center;
-    background: #fff;
-    border: 1px solid #E5E5E5;
-    border-radius: 20px;
-    padding: 0.25rem;
-    box-shadow: 0 2px 8px rgba(229, 229, 229, 0.2);
-  }
-
-  .language-btn {
-    padding: 0.4rem 0.8rem;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #666;
-    min-width: 32px;
+    gap: 0.4rem;
     text-align: center;
+    width: 100%;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 175px;
+    margin: 0;
   }
 
-  .language-btn:hover {
-    color: #333;
-    background-color: #E5E5E5;
+  .mega-menu-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+    opacity: 0.8;
+    color: #64748b;
   }
 
-  .language-btn.active {
-    color: #fff;
-    background-color: #E5E5E5;
-    box-shadow: 0 2px 6px rgba(229, 229, 229, 0.4);
+  .mega-menu-item:hover .mega-menu-arrow {
+    transform: translateX(4px);
+    opacity: 1;
+    color: #667eea;
   }
 
-  .language-btn[data-lang="zh"]::before {
-    content: "中";
+  .mega-menu-item:hover .mega-menu-item-title {
+    color: #667eea;
   }
 
-  .language-btn[data-lang="en"]::before {
-    content: "EN";
+  .mega-menu-placeholder {
+    width: 175px !important;
+    height: 95px !important;
+    background: #f5f2ed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid #ede8e0;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
   }
 
-  .language-btn[data-lang="ja"]::before {
-    content: "日";
+  .mega-menu-placeholder::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    animation: shimmer 2s infinite;
   }
 
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+
+  .placeholder-icon {
+    font-size: 2.5rem;
+    color: #d4c4a8;
+    z-index: 1;
+    position: relative;
+  }
+
+  /* 现代语言切换器 */
+  .modern-localization {
+    position: relative;
+  }
+
+  .language-selector {
+    position: relative;
+    display: inline-block;
+  }
+
+  .language-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2d3748;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-width: 120px;
+  }
+
+  .language-toggle:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .language-flag {
+    width: 24px;
+    height: 18px;
+    border-radius: 4px;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .language-flag.zh {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="%23de2910"/><polygon points="6,2 7.5,6.5 2.5,4 9.5,4 4.5,6.5" fill="%23ffde00"/></svg>');
+  }
+
+  .language-flag.en {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="%23012169"/><path d="M0,0 L30,20 M30,0 L0,20" stroke="%23fff" stroke-width="2"/><path d="M15,0 L15,20 M0,10 L30,10" stroke="%23fff" stroke-width="3"/><path d="M15,0 L15,20 M0,10 L30,10" stroke="%23c8102e" stroke-width="2"/></svg>');
+  }
+
+  .language-flag.ja {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="%23fff"/><circle cx="15" cy="10" r="6" fill="%23bc002d"/></svg>');
+  }
+
+  .language-dropdown-icon {
+    font-size: 0.7rem;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0.7;
+  }
+
+  .language-selector.open .language-dropdown-icon {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+
+  .language-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1001;
+    min-width: 180px;
+    overflow: hidden;
+  }
+
+  .language-selector.open .language-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .language-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #2d3748;
+    font-weight: 500;
+  }
+
+  .language-option:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  .language-option.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    font-weight: 600;
+  }
+
+  /* 手机端汉堡菜单 */
   .mobile-menu-toggle {
     display: none;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0.8rem;
+    z-index: 1002;
+    position: relative;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
   }
 
-  .mobile-menu-toggle span {
+  .mobile-menu-toggle:hover {
+    background: rgba(102, 126, 234, 0.1);
+  }
+
+  .hamburger-line {
     display: block;
-    width: 25px;
+    width: 28px;
     height: 3px;
-    background: #333;
-    margin: 5px 0;
-    transition: 0.3s;
+    background: #2d3748;
+    margin: 6px 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 2px;
+  }
+
+  .mobile-menu-toggle.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+  }
+
+  .mobile-menu-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  .mobile-menu-toggle.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  /* 手机端抽屉菜单 */
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1998;
+    backdrop-filter: blur(4px);
+  }
+
+  .mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 90%;
+    max-width: 420px;
+    height: 100vh;
+    background: white;
+    box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
+    transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 1999;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .mobile-menu-drawer.active {
+    right: 0;
+  }
+
+  .mobile-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem;
+    border-bottom: 2px solid #f1f5f9;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  .mobile-menu-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .mobile-menu-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: #64748b;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-menu-close:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+
+  .mobile-nav-content {
+    padding: 2rem 0;
+  }
+
+  .mobile-nav-item {
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .mobile-nav-link {
+    display: block;
+    padding: 1.5rem 2rem;
+    text-decoration: none;
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .mobile-nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-nav-link:hover::before {
+    transform: scaleY(1);
+  }
+
+  .mobile-nav-link:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #667eea;
+  }
+
+  .mobile-submenu {
+    background: #f8fafc;
+    padding-left: 1rem;
+  }
+
+  .mobile-submenu-item {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mobile-submenu-link {
+    display: block;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+
+  .mobile-submenu-link:hover {
+    color: #667eea;
+  }
+
+  .mobile-language-section {
+    padding: 2rem;
+    border-top: 2px solid #f1f5f9;
+    margin-top: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+
+  .mobile-language-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+  }
+
+  .mobile-language-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  /* 响应式设计 */
+  @media screen and (max-width: 1200px) {
+    .modern-nav-container {
+      padding: 1rem 2rem;
+    }
+
+    .modern-nav-menu {
+      gap: 2.2rem;
+    }
+
+    .modern-mega-menu {
+      min-width: 700px;
+      padding: 2.5rem;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+  }
+
+  @media screen and (max-width: 1024px) {
+    .nav-right-section {
+      gap: 2rem;
+    }
+
+    .modern-nav-menu {
+      gap: 2rem;
+    }
+
+    .modern-mega-menu {
+      min-width: 700px;
+      max-width: 900px;
+      padding: 2rem;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .mega-menu-image-container {
+      height: 150px;
+    }
+
+    .mega-menu-content {
+      padding: 1.5rem;
+    }
   }
 
   @media screen and (max-width: 768px) {
-    .custom-nav-container {
-      padding: 1rem;
+    .modern-nav-container {
+      padding: 1rem 1.5rem;
     }
 
-    .custom-nav-menu {
+    .nav-right-section {
+      gap: 1rem;
+    }
+
+    .modern-nav-menu {
       display: none;
     }
 
@@ -198,188 +681,218 @@
       display: block;
     }
 
-    .custom-localization {
-      margin-left: auto;
-      margin-right: 1rem;
+    .modern-localization {
+      order: -1;
     }
 
-    .language-switcher {
-      gap: 0.2rem;
-      padding: 0.2rem;
+    .language-toggle {
+      padding: 0.8rem 1.2rem;
+      font-size: 0.9rem;
+      min-width: 100px;
     }
 
-    .language-btn {
-      padding: 0.3rem 0.6rem;
-      font-size: 0.75rem;
-      min-width: 28px;
+    .language-flag {
+      width: 20px;
+      height: 15px;
     }
 
-    .custom-mega-menu {
-      position: static;
-      opacity: 1;
-      visibility: visible;
-      box-shadow: none;
-      min-width: auto;
-      max-width: none;
-      padding: 1rem;
-      transform: none;
-      margin-top: 0;
-      background: #E5E5E5;
-    }
-
-    .mega-menu-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    .mega-menu-image {
-      height: 100px;
+    body.mobile-menu-open {
+      overflow: hidden;
     }
   }
 
   @media screen and (max-width: 480px) {
-    .custom-logo-image {
-      height: 45px;
+    .modern-nav-container {
+      padding: 1rem;
     }
 
-    .mega-menu-grid {
-      grid-template-columns: 1fr;
+    .modern-logo-image {
+      height: 50px;
     }
-  }
 
-  .mobile-menu-drawer {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 80%;
-    max-width: 400px;
-    height: 100vh;
-    background: #E5E5E5;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-    transition: right 0.3s ease;
-    z-index: 2000;
-    padding: 2rem;
-    overflow-y: auto;
-  }
+    .mobile-menu-drawer {
+      width: 95%;
+    }
 
-  .mobile-menu-drawer.open {
-    right: 0;
-  }
-
-  .mobile-menu-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-  }
-
-  .mobile-nav-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid #eee;
-  }
-
-  .mobile-nav-link {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-  }
-
-  .mobile-nav-link:hover {
-    color: #E5E5E5;
+    .language-toggle {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      min-width: 90px;
+    }
   }
 </style>
 
-<header class="custom-nav-header color-{{ section.settings.color_scheme }} gradient">
-  <div class="custom-nav-container">
-    <!-- Logo -->
-    <div class="custom-logo">
+<header class="modern-nav-header color-{{ section.settings.color_scheme }} gradient">
+  <div class="modern-nav-container">
+    <!-- Logo - 左对齐 -->
+    <div class="modern-logo">
       {%- if settings.logo != blank -%}
-        <a href="{{ routes.root_url }}" class="custom-logo-link">
+        <a href="{{ routes.root_url }}" class="modern-logo-link">
           {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-          {{ settings.logo | image_url: width: 300 | image_tag:
-            class: 'custom-logo-image',
+          {{ settings.logo | image_url: width: 440 | image_tag:
+            class: 'modern-logo-image',
             alt: logo_alt,
-            height: 60,
-            width: settings.logo.width | divided_by: settings.logo.height | times: 60
+            loading: 'eager'
           }}
         </a>
       {%- else -%}
-        <a href="{{ routes.root_url }}" class="custom-logo-link">
-          <span class="h2">{{ shop.name }}</span>
+        <a href="{{ routes.root_url }}" class="modern-logo-link">
+          <h2>{{ shop.name }}</h2>
         </a>
       {%- endif -%}
     </div>
 
-    <!-- Navigation Menu -->
-    <nav class="custom-nav-menu">
-      {%- for link in section.settings.menu.links -%}
-        <div class="custom-nav-item">
-          {%- if link.links.size > 0 -%}
-            <span class="custom-nav-link">{{ link.title }} ▼</span>
-            <div class="custom-mega-menu">
-              <div class="mega-menu-grid">
-                {%- for child_link in link.links -%}
-                  <div class="mega-menu-item">
-                    {%- assign collection = collections[child_link.handle] -%}
-                    {%- if collection and collection.image -%}
-                      <img src="{{ collection.image | image_url: width: 150, height: 120, crop: 'center' }}" 
-                           alt="{{ child_link.title }}" 
-                           class="mega-menu-image">
-                    {%- else -%}
-                      <div class="mega-menu-placeholder">
-                        <span style="color: #999; font-size: 2rem;">📦</span>
+    <!-- 右侧导航区域 -->
+    <div class="nav-right-section">
+      <!-- 桌面端导航菜单 -->
+      <nav class="modern-nav-menu">
+        {%- for link in section.settings.menu.links -%}
+          <div class="modern-nav-item {% if link.links.size > 0 or link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' %}has-dropdown{% endif %}">
+            <a href="{{ link.url }}" class="modern-nav-link">
+              {{ link.title }}
+            </a>
+            
+            {%- comment -%} 如果有子链接，显示子链接 {%- endcomment -%}
+            {%- if link.links.size > 0 -%}
+              <div class="modern-mega-menu">
+                <div class="mega-menu-grid">
+                  {%- for childlink in link.links -%}
+                    <a href="{{ childlink.url }}" class="mega-menu-item">
+                      <div class="mega-menu-image-container">
+                        {%- assign collection = collections[childlink.handle] -%}
+                        {%- if collection and collection.image -%}
+                          <img src="{{ collection.image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                               alt="{{ childlink.title }}" 
+                               class="mega-menu-image"
+                               loading="lazy">
+                        {%- elsif collection.products.first and collection.products.first.featured_image -%}
+                          <img src="{{ collection.products.first.featured_image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                               alt="{{ childlink.title }}" 
+                               class="mega-menu-image"
+                               loading="lazy">
+                        {%- else -%}
+                          <div class="mega-menu-placeholder">
+                            <span class="placeholder-icon">💎</span>
+                          </div>
+                        {%- endif -%}
                       </div>
-                    {%- endif -%}
-                    <div class="mega-menu-title">{{ child_link.title }}</div>
-                  </div>
-                {%- endfor -%}
+                      <div class="mega-menu-content">
+                        <div class="mega-menu-item-title">
+                          {{ childlink.title }}
+                          <span class="mega-menu-arrow">→</span>
+                        </div>
+                      </div>
+                    </a>
+                  {%- endfor -%}
+                </div>
               </div>
+            
+            {%- comment -%} 如果是Category链接但没有子链接，自动显示所有集合 {%- endcomment -%}
+            {%- elsif link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' -%}
+              <div class="modern-mega-menu">
+                <div class="auto-collections-grid">
+                  {%- for collection in collections limit: 12 -%}
+                    {%- unless collection.handle == 'frontpage' -%}
+                      <a href="{{ collection.url }}" class="mega-menu-item">
+                        <div class="mega-menu-image-container">
+                          {%- if collection.image -%}
+                            <img src="{{ collection.image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                                 alt="{{ collection.title }}" 
+                                 class="mega-menu-image"
+                                 loading="lazy">
+                          {%- elsif collection.products.first and collection.products.first.featured_image -%}
+                            <img src="{{ collection.products.first.featured_image | image_url: width: 350, height: 190, crop: 'center' }}" 
+                                 alt="{{ collection.title }}" 
+                                 class="mega-menu-image"
+                                 loading="lazy">
+                          {%- else -%}
+                            <div class="mega-menu-placeholder">
+                              <span class="placeholder-icon">💎</span>
+                            </div>
+                          {%- endif -%}
+                        </div>
+                        <div class="mega-menu-content">
+                          <div class="mega-menu-item-title">
+                            {{ collection.title }}
+                            <span class="mega-menu-arrow">→</span>
+                          </div>
+                        </div>
+                      </a>
+                    {%- endunless -%}
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </nav>
+
+      <!-- 现代语言切换器 -->
+      <div class="modern-localization">
+        {%- if localization.available_languages.size > 1 -%}
+          <div class="language-selector" id="languageSelector">
+            <div class="language-toggle" onclick="toggleLanguageDropdown()">
+              <div class="language-flag {{ localization.language.iso_code }}"></div>
+              <span>
+                {%- case localization.language.iso_code -%}
+                  {%- when 'zh' -%}中文
+                  {%- when 'en' -%}English
+                  {%- when 'ja' -%}日本語
+                  {%- else -%}{{ localization.language.endonym_name }}
+                {%- endcase -%}
+              </span>
+              <span class="language-dropdown-icon">▼</span>
             </div>
-          {%- else -%}
-            <a href="{{ link.url }}" class="custom-nav-link">{{ link.title }}</a>
-          {%- endif -%}
-        </div>
-      {%- endfor -%}
-    </nav>
-
-    <!-- Language Switcher - 中英日三语 -->
-    <div class="custom-localization">
-      <div class="language-switcher">
-        <button class="language-btn {% if localization.language.iso_code == 'zh' %}active{% endif %}" 
-                data-lang="zh" 
-                onclick="switchLanguage('zh')">中</button>
-        <button class="language-btn {% if localization.language.iso_code == 'en' %}active{% endif %}" 
-                data-lang="en" 
-                onclick="switchLanguage('en')">EN</button>
-        <button class="language-btn {% if localization.language.iso_code == 'ja' %}active{% endif %}" 
-                data-lang="ja" 
-                onclick="switchLanguage('ja')">日</button>
+            <div class="language-dropdown" id="languageDropdown">
+              {%- for language in localization.available_languages -%}
+                <form action="{{ routes.root_url }}" method="post" style="margin: 0;">
+                  <input type="hidden" name="locale_code" value="{{ language.iso_code }}">
+                  <button type="submit" class="language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}">
+                    <div class="language-flag {{ language.iso_code }}"></div>
+                    <span>
+                      {%- case language.iso_code -%}
+                        {%- when 'zh' -%}中文
+                        {%- when 'en' -%}English
+                        {%- when 'ja' -%}日本語
+                        {%- else -%}{{ language.endonym_name }}
+                      {%- endcase -%}
+                    </span>
+                  </button>
+                </form>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
       </div>
-    </div>
 
-    <!-- Mobile Menu Toggle -->
-    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+      <!-- 手机端菜单按钮 -->
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="打开菜单">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
   </div>
 
-  <!-- Mobile Menu Drawer -->
+  <!-- 手机端菜单遮罩 -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+
+  <!-- 手机端抽屉菜单 -->
   <div class="mobile-menu-drawer" id="mobileMenuDrawer">
-    <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
-    <nav>
+    <div class="mobile-menu-header">
+      <div class="mobile-menu-logo">菜单</div>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="关闭菜单">×</button>
+    </div>
+    
+    <nav class="mobile-nav-content">
       {%- for link in section.settings.menu.links -%}
         <div class="mobile-nav-item">
           {%- if link.links.size > 0 -%}
             <div class="mobile-nav-link">{{ link.title }}</div>
-            <div style="padding-left: 1rem; margin-top: 0.5rem;">
-              {%- for child_link in link.links -%}
-                <div style="padding: 0.5rem 0;">
-                  <a href="{{ child_link.url }}" class="mobile-nav-link">{{ child_link.title }}</a>
+            <div class="mobile-submenu">
+              {%- for childlink in link.links -%}
+                <div class="mobile-submenu-item">
+                  <a href="{{ childlink.url }}" class="mobile-submenu-link">{{ childlink.title }}</a>
                 </div>
               {%- endfor -%}
             </div>
@@ -389,83 +902,176 @@
         </div>
       {%- endfor -%}
     </nav>
+
+    <!-- 手机端语言切换 -->
+    {%- if localization.available_languages.size > 1 -%}
+      <div class="mobile-language-section">
+        <div class="mobile-language-title">选择语言</div>
+        <div class="mobile-language-options">
+          {%- for language in localization.available_languages -%}
+            <form action="{{ routes.root_url }}" method="post" style="margin: 0;">
+              <input type="hidden" name="locale_code" value="{{ language.iso_code }}">
+              <button type="submit" class="language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}">
+                <div class="language-flag {{ language.iso_code }}"></div>
+                <span>
+                  {%- case language.iso_code -%}
+                    {%- when 'zh' -%}中文
+                    {%- when 'en' -%}English
+                    {%- when 'ja' -%}日本語
+                    {%- else -%}{{ language.endonym_name }}
+                  {%- endcase -%}
+                </span>
+              </button>
+            </form>
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
   </div>
 </header>
 
 <script>
-  function toggleMobileMenu() {
-    const drawer = document.getElementById('mobileMenuDrawer');
-    drawer.classList.toggle('open');
-  }
-
-  function switchLanguage(languageCode) {
-    {%- if localization.available_languages.size > 1 -%}
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '{{ routes.root_url }}';
-      
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = 'locale_code';
-      input.value = languageCode;
-      
-      form.appendChild(input);
-      document.body.appendChild(form);
-      form.submit();
-    {%- else -%}
-      // Demo functionality for testing
-      const buttons = document.querySelectorAll('.language-btn');
-      buttons.forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-    {%- endif -%}
-  }
-
-  // Close mobile menu when clicking outside
-  document.addEventListener('click', function(event) {
-    const drawer = document.getElementById('mobileMenuDrawer');
-    const toggle = document.querySelector('.mobile-menu-toggle');
+  // 语言下拉菜单控制
+  function toggleLanguageDropdown() {
+    const selector = document.getElementById('languageSelector');
+    const dropdown = document.getElementById('languageDropdown');
     
-    if (!drawer.contains(event.target) && !toggle.contains(event.target)) {
-      drawer.classList.remove('open');
+    selector.classList.toggle('open');
+    
+    // 点击外部关闭
+    if (selector.classList.contains('open')) {
+      setTimeout(() => {
+        document.addEventListener('click', closeLanguageDropdown);
+      }, 0);
+    } else {
+      document.removeEventListener('click', closeLanguageDropdown);
     }
+  }
+
+  function closeLanguageDropdown(event) {
+    const selector = document.getElementById('languageSelector');
+    if (!selector.contains(event.target)) {
+      selector.classList.remove('open');
+      document.removeEventListener('click', closeLanguageDropdown);
+    }
+  }
+
+  // 手机端菜单控制
+  function toggleMobileMenu() {
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    const drawer = document.getElementById('mobileMenuDrawer');
+    const body = document.body;
+    
+    toggle.classList.toggle('active');
+    overlay.classList.toggle('active');
+    drawer.classList.toggle('active');
+    body.classList.toggle('mobile-menu-open');
+  }
+
+  function closeMobileMenu() {
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    const drawer = document.getElementById('mobileMenuDrawer');
+    const body = document.body;
+    
+    toggle.classList.remove('active');
+    overlay.classList.remove('active');
+    drawer.classList.remove('active');
+    body.classList.remove('mobile-menu-open');
+  }
+
+  // ESC 键关闭菜单
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeMobileMenu();
+      document.getElementById('languageSelector').classList.remove('open');
+    }
+  });
+
+  // 窗口大小改变时关闭手机菜单
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      closeMobileMenu();
+    }
+  });
+
+  // 平滑滚动优化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 为所有内部链接添加平滑滚动
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+      link.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
   });
 </script>
 
 {% schema %}
 {
-  "name": "Custom Navigation Header",
+  "name": "现代导航栏",
   "class": "section-header",
   "settings": [
     {
       "type": "link_list",
       "id": "menu",
       "default": "main-menu",
-      "label": "Navigation Menu"
+      "label": "导航菜单"
     },
     {
       "type": "color_scheme",
       "id": "color_scheme",
-      "label": "Color Scheme",
+      "label": "配色方案",
       "default": "scheme-1"
     },
     {
       "type": "header",
-      "content": "Logo Settings"
+      "content": "Logo 设置"
     },
     {
       "type": "range",
       "id": "logo_height",
-      "min": 40,
-      "max": 100,
+      "min": 45,
+      "max": 120,
       "step": 5,
       "unit": "px",
-      "label": "Logo Height",
-      "default": 60
+      "label": "Logo 高度",
+      "default": 65
+    },
+    {
+      "type": "header",
+      "content": "菜单设置"
+    },
+    { 
+      "type": "checkbox",
+      "id": "show_mega_menu",
+      "label": "显示大型菜单",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_menu_descriptions",
+      "label": "显示菜单描述",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_menu_images",
+      "label": "显示菜单图片",
+      "default": true
     }
   ],
   "presets": [
     {
-      "name": "Custom Navigation Header",
+      "name": "现代导航栏",
       "category": "Header"
     }
   ]
