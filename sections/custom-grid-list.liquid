@@ -146,7 +146,11 @@
 
   .marquee-item {
     position: relative;
-    min-width: calc((100% - ({{ section.settings.gap }}px * 3)) / 4);
+    {% if section.settings.show_full_image %}
+      width: 200px;
+    {% else %}
+      min-width: calc((100% - ({{ section.settings.gap }}px * 3)) / 4);
+    {% endif %}
     flex-shrink: 0;
   }
 
@@ -239,7 +243,7 @@
               height="{{ 400 | divided_by: block.settings.image.aspect_ratio | round }}"
             >
           {%- endif -%}
-          {%- if block.settings.show_title -%}
+          {%- if block.settings.show_title and block.settings.title != blank -%}
             <div class="marquee-title" data-position="{{ block.settings.title_position | default: 'center' }}">
               {{ block.settings.title }}
             </div>
