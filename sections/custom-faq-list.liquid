@@ -19,7 +19,7 @@
             </svg>
           </span>
         </button>
-        <div id="faq-{{ block.id }}" class="faq-answer" hidden>
+        <div id="faq-{{ block.id }}" class="faq-answer" aria-hidden="true">
           <div class="faq-answer-content">
             {{ block.settings.answer }}
           </div>
@@ -49,9 +49,9 @@
   }
   
   .faq-item {
-    border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
+    margin-bottom: 10px;
   }
   
   .faq-question {
@@ -87,6 +87,11 @@
     margin-left: 10px;
   }
   
+  .faq-toggle .icon-plus,
+  .faq-toggle .icon-minus {
+    stroke-width: 3px;
+  }
+  
   .icon-minus {
     display: none;
   }
@@ -120,15 +125,18 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const faqQuestions = document.querySelectorAll('.faq-question');
+  const faqItems = document.querySelectorAll('.faq-item');
   
-  faqQuestions.forEach(question => {
-    question.addEventListener('click', function() {
-      const answer = document.getElementById(this.getAttribute('aria-controls'));
-      const isExpanded = this.getAttribute('aria-expanded') === 'true';
-      
-      this.setAttribute('aria-expanded', !isExpanded);
-      answer.setAttribute('aria-hidden', isExpanded);
+  faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer = document.getElementById(question.getAttribute('aria-controls'));
+    
+    // 处理整个item点击
+    item.addEventListener('click', function() {
+      const isExpanded = question.getAttribute('aria-expanded') === 'true';
+      question.setAttribute('aria-expanded', !isExpanded);
+      answer.setAttribute('aria-hidden', String(isExpanded));
+      answer.hidden = isExpanded;
     });
   });
 });
