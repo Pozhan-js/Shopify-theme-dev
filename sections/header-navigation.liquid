@@ -318,7 +318,7 @@
         <!-- Logo -->
         <div class="logo-container">
           <div class="logo-bg">
-            <span>XS</span>
+            <span>{{ section.settings.logo_text | default: 'XS' }}</span>
           </div>
           <a href="{{ routes.root_url }}" class="site-name">
             {{ section.settings.site_name | default: 'XSPilates' }}
@@ -327,39 +327,27 @@
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          {% assign nav_items = section.settings.nav_items | default: 'Pilates Equipment,OEM Service,Resources,About Us' | split: ',' %}
-          {% assign dropdown_flags = section.settings.dropdown_flags | default: 'true,false,true,true' | split: ',' %}
+          {% assign nav_blocks = section.blocks | where: 'type', 'navigation_item' %}
           
-          {% for item in nav_items %}
-            {% assign index = forloop.index0 %}
-            {% assign has_dropdown = dropdown_flags[index] %}
-            {% assign nav_link_key = 'nav_link_' | append: forloop.index %}
-            
+          {% for nav_block in nav_blocks %}
             <div class="dropdown">
-              <a href="{{ section.settings[nav_link_key] | default: '#' }}" class="nav-item">
-                <span>{{ item }}</span>
-                {% if has_dropdown == 'true' %}
+              <a href="{{ nav_block.settings.link | default: '#' }}" class="nav-item">
+                <span>{{ nav_block.settings.title }}</span>
+                {% if nav_block.settings.has_dropdown %}
                   <span class="dropdown-arrow"></span>
                 {% endif %}
               </a>
               
-              {% if has_dropdown == 'true' %}
+              {% if nav_block.settings.has_dropdown %}
                 <div class="dropdown-menu">
                   <div style="padding: 8px 0;">
-                    {% case item %}
-                      {% when 'Pilates Equipment' %}
-                        {% assign sub_items = section.settings.pilates_subitems | default: 'Reformers,Cadillac,Chair,Barrels,Accessories' | split: ',' %}
-                      {% when 'Resources' %}
-                        {% assign sub_items = section.settings.resources_subitems | default: 'Blog,Videos,Manuals,Support' | split: ',' %}
-                      {% when 'About Us' %}
-                        {% assign sub_items = section.settings.about_subitems | default: 'Our Story,Team,Certifications,Contact' | split: ',' %}
-                    {% endcase %}
-                    
-                    {% for sub_item in sub_items %}
-                      {% assign sub_link_key = 'sub_link_' | append: forloop.index %}
-                      <a href="{{ section.settings[sub_link_key] | default: '#' }}" class="dropdown-item">
-                        {{ sub_item }}
-                      </a>
+                    {% assign dropdown_blocks = section.blocks | where: 'type', 'dropdown_item' %}
+                    {% for dropdown_block in dropdown_blocks %}
+                      {% if dropdown_block.settings.parent_title == nav_block.settings.title %}
+                        <a href="{{ dropdown_block.settings.link | default: '#' }}" class="dropdown-item">
+                          {{ dropdown_block.settings.title }}
+                        </a>
+                      {% endif %}
                     {% endfor %}
                   </div>
                 </div>
@@ -371,7 +359,7 @@
         <!-- Right Side Actions -->
         <div class="right-actions">
           <!-- Contact Us Button -->
-          <a href="{{ section.settings.contact_link | default: '#contact' }}" class="contact-badge">
+          <a href="{{ section.settings.contact_link | default: '#' }}" class="contact-badge">
             <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
             <div class="contact-number">
               <span>{{ section.settings.contact_number | default: '21' }}</span>
@@ -400,37 +388,31 @@
       <!-- Mobile Menu -->
       <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-content">
-          {% for item in nav_items %}
-            {% assign index = forloop.index0 %}
-            {% assign has_dropdown = dropdown_flags[index] %}
-            
+          {% for nav_block in nav_blocks %}
             <div>
-              <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
-                {{ item }}
-              </button>
-              {% if has_dropdown == 'true' %}
+              {% if nav_block.settings.has_dropdown %}
+                <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+                  {{ nav_block.settings.title }}
+                </button>
                 <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
-                  {% case item %}
-                    {% when 'Pilates Equipment' %}
-                      {% assign sub_items = section.settings.pilates_subitems | default: 'Reformers,Cadillac,Chair,Barrels,Accessories' | split: ',' %}
-                    {% when 'Resources' %}
-                      {% assign sub_items = section.settings.resources_subitems | default: 'Blog,Videos,Manuals,Support' | split: ',' %}
-                    {% when 'About Us' %}
-                      {% assign sub_items = section.settings.about_subitems | default: 'Our Story,Team,Certifications,Contact' | split: ',' %}
-                  {% endcase %}
-                  
-                  {% for sub_item in sub_items %}
-                    {% assign sub_link_key = 'sub_link_' | append: forloop.index %}
-                    <a href="{{ section.settings[sub_link_key] | default: '#' }}" class="mobile-submenu-item">
-                      {{ sub_item }}
-                    </a>
+                  {% assign dropdown_blocks = section.blocks | where: 'type', 'dropdown_item' %}
+                  {% for dropdown_block in dropdown_blocks %}
+                    {% if dropdown_block.settings.parent_title == nav_block.settings.title %}
+                      <a href="{{ dropdown_block.settings.link | default: '#' }}" class="mobile-submenu-item">
+                        {{ dropdown_block.settings.title }}
+                      </a>
+                    {% endif %}
                   {% endfor %}
                 </div>
+              {% else %}
+                <a href="{{ nav_block.settings.link | default: '#' }}" class="mobile-menu-item" style="text-decoration: none;">
+                  {{ nav_block.settings.title }}
+                </a>
               {% endif %}
             </div>
           {% endfor %}
           
-          <a href="{{ section.settings.contact_link | default: '#contact' }}" class="mobile-contact-badge">
+          <a href="{{ section.settings.contact_link | default: '#' }}" class="mobile-contact-badge">
             <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
             <div class="contact-number">
               <span>{{ section.settings.contact_number | default: '21' }}</span>
@@ -477,42 +459,30 @@ function toggleSearch() {
 {% schema %}
 {
   "name": "Header Navigation",
+  "tag": "header",
+  "class": "header-navigation",
   "settings": [
+    {
+      "type": "header",
+      "content": "Logo Settings"
+    },
     {
       "type": "text",
       "id": "site_name",
       "label": "Site Name",
-      "default": "XSPilates"
+      "default": "XSPilates",
+      "info": "Display name for your site"
     },
     {
       "type": "text",
-      "id": "nav_items",
-      "label": "Navigation Items (comma separated)",
-      "default": "Pilates Equipment,OEM Service,Resources,About Us"
+      "id": "logo_text",
+      "label": "Logo Text",
+      "default": "XS",
+      "info": "Short text displayed in logo"
     },
     {
-      "type": "text",
-      "id": "dropdown_flags",
-      "label": "Dropdown Flags (true/false, comma separated)",
-      "default": "true,false,true,true"
-    },
-    {
-      "type": "text",
-      "id": "pilates_subitems",
-      "label": "Pilates Equipment Sub-items",
-      "default": "Reformers,Cadillac,Chair,Barrels,Accessories"
-    },
-    {
-      "type": "text",
-      "id": "resources_subitems",
-      "label": "Resources Sub-items",
-      "default": "Blog,Videos,Manuals,Support"
-    },
-    {
-      "type": "text",
-      "id": "about_subitems",
-      "label": "About Us Sub-items",
-      "default": "Our Story,Team,Certifications,Contact"
+      "type": "header",
+      "content": "Navigation Settings"
     },
     {
       "type": "text",
@@ -524,7 +494,8 @@ function toggleSearch() {
       "type": "text",
       "id": "contact_number",
       "label": "Contact Badge Number",
-      "default": "21"
+      "default": "21",
+      "info": "Number displayed in contact badge"
     },
     {
       "type": "url",
@@ -532,49 +503,217 @@ function toggleSearch() {
       "label": "Contact Button Link"
     },
     {
-      "type": "url",
-      "id": "nav_link_1",
-      "label": "Navigation Link 1"
+      "type": "header",
+      "content": "Style Settings"
     },
     {
-      "type": "url",
-      "id": "nav_link_2",
-      "label": "Navigation Link 2"
+      "type": "color",
+      "id": "nav_background_color",
+      "label": "Navigation Background Color",
+      "default": "rgba(255, 255, 255, 0.08)"
     },
     {
-      "type": "url",
-      "id": "nav_link_3",
-      "label": "Navigation Link 3"
+      "type": "color",
+      "id": "nav_text_color",
+      "label": "Navigation Text Color",
+      "default": "#FFFFFF"
     },
     {
-      "type": "url",
-      "id": "nav_link_4",
-      "label": "Navigation Link 4"
+      "type": "color",
+      "id": "contact_button_color",
+      "label": "Contact Button Color",
+      "default": "#DC2626"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "navigation_item",
+      "name": "Navigation Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Navigation Title",
+          "default": "Menu Item"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Navigation Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "has_dropdown",
+          "label": "Enable Dropdown",
+          "default": false
+        }
+      ]
     },
     {
-      "type": "url",
-      "id": "sub_link_1",
-      "label": "Sub Link 1"
-    },
+      "type": "dropdown_item",
+      "name": "Dropdown Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "parent_title",
+          "label": "Parent Navigation Title",
+          "info": "Must match the title of the parent navigation item"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Dropdown Item Title",
+          "default": "Dropdown Item"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Dropdown Item Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
     {
-      "type": "url",
-      "id": "sub_link_2",
-      "label": "Sub Link 2"
-    },
-    {
-      "type": "url",
-      "id": "sub_link_3",
-      "label": "Sub Link 3"
-    },
-    {
-      "type": "url",
-      "id": "sub_link_4",
-      "label": "Sub Link 4"
-    },
-    {
-      "type": "url",
-      "id": "sub_link_5",
-      "label": "Sub Link 5"
+      "name": "Header Navigation",
+      "blocks": [
+        {
+          "type": "navigation_item",
+          "settings": {
+            "title": "Pilates Equipment",
+            "link": "#equipment",
+            "has_dropdown": true
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Pilates Equipment",
+            "title": "Reformers",
+            "link": "#reformers"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Pilates Equipment",
+            "title": "Cadillac",
+            "link": "#cadillac"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Pilates Equipment",
+            "title": "Chair",
+            "link": "#chair"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Pilates Equipment",
+            "title": "Barrels",
+            "link": "#barrels"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Pilates Equipment",
+            "title": "Accessories",
+            "link": "#accessories"
+          }
+        },
+        {
+          "type": "navigation_item",
+          "settings": {
+            "title": "OEM Service",
+            "link": "#oem",
+            "has_dropdown": false
+          }
+        },
+        {
+          "type": "navigation_item",
+          "settings": {
+            "title": "Resources",
+            "link": "#resources",
+            "has_dropdown": true
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Resources",
+            "title": "Blog",
+            "link": "#blog"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Resources",
+            "title": "Videos",
+            "link": "#videos"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Resources",
+            "title": "Manuals",
+            "link": "#manuals"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "Resources",
+            "title": "Support",
+            "link": "#support"
+          }
+        },
+        {
+          "type": "navigation_item",
+          "settings": {
+            "title": "About Us",
+            "link": "#about",
+            "has_dropdown": true
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "About Us",
+            "title": "Our Story",
+            "link": "#story"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "About Us",
+            "title": "Team",
+            "link": "#team"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "About Us",
+            "title": "Certifications",
+            "link": "#certifications"
+          }
+        },
+        {
+          "type": "dropdown_item",
+          "settings": {
+            "parent_title": "About Us",
+            "title": "Contact",
+            "link": "#contact"
+          }
+        }
+      ]
     }
   ]
 }
