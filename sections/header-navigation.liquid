@@ -234,6 +234,7 @@
     font-weight: 500;
     cursor: pointer;
     transition: color 0.2s ease;
+    text-decoration: none;
   }
 
   .mobile-menu-item:hover {
@@ -321,45 +322,50 @@
             <span>{{ section.settings.logo_text | default: 'XS' }}</span>
           </div>
           <a href="{{ routes.root_url }}" class="site-name">
-            {{ section.settings.site_name | default: 'XSPilates' }}
+            {{ section.settings.site_name | default: shop.name }}
           </a>
         </div>
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          {% assign nav_blocks = section.blocks | where: 'type', 'navigation_item' %}
-          
-          {% for nav_block in nav_blocks %}
-            <div class="dropdown">
-              <a href="{{ nav_block.settings.link | default: '#' }}" class="nav-item">
-                <span>{{ nav_block.settings.title }}</span>
-                {% if nav_block.settings.has_dropdown %}
-                  <span class="dropdown-arrow"></span>
-                {% endif %}
-              </a>
-              
-              {% if nav_block.settings.has_dropdown %}
-                <div class="dropdown-menu">
-                  <div style="padding: 8px 0;">
-                    {% assign dropdown_blocks = section.blocks | where: 'type', 'dropdown_item' %}
-                    {% for dropdown_block in dropdown_blocks %}
-                      {% if dropdown_block.settings.parent_title == nav_block.settings.title %}
-                        <a href="{{ dropdown_block.settings.link | default: '#' }}" class="dropdown-item">
-                          {{ dropdown_block.settings.title }}
+          {% assign main_menu_handle = section.settings.main_menu | default: 'main-menu' %}
+          {% assign main_menu = linklists[main_menu_handle] %}
+          {% if main_menu and main_menu.links.size > 0 %}
+            {% for link in main_menu.links %}
+              <div class="dropdown">
+                {% if link.links.size > 0 %}
+                  <span class="nav-item" style="cursor: pointer;">
+                    <span>{{ link.title }}</span>
+                    <span class="dropdown-arrow"></span>
+                  </span>
+                  <div class="dropdown-menu">
+                    <div style="padding: 8px 0;">
+                      {% for child_link in link.links %}
+                        <a href="{{ child_link.url }}" class="dropdown-item">
+                          {{ child_link.title }}
                         </a>
-                      {% endif %}
-                    {% endfor %}
+                      {% endfor %}
+                    </div>
                   </div>
-                </div>
-              {% endif %}
+                {% else %}
+                  <a href="{{ link.url }}" class="nav-item">
+                    <span>{{ link.title }}</span>
+                  </a>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- 调试信息 - 生产环境请删除 -->
+            <div style="color: #fff; font-size: 12px;">
+              Debug: Menu handle = "{{ main_menu_handle }}", Menu exists = {% if main_menu %}true{% else %}false{% endif %}, Links count = {{ main_menu.links.size | default: 0 }}
             </div>
-          {% endfor %}
+          {% endif %}
         </div>
 
         <!-- Right Side Actions -->
         <div class="right-actions">
           <!-- Contact Us Button -->
-          <a href="{{ section.settings.contact_link | default: '#' }}" class="contact-badge">
+          <a href="{{ section.settings.contact_link }}" class="contact-badge">
             <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
             <div class="contact-number">
               <span>{{ section.settings.contact_number | default: '21' }}</span>
@@ -388,31 +394,35 @@
       <!-- Mobile Menu -->
       <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-content">
-          {% for nav_block in nav_blocks %}
-            <div>
-              {% if nav_block.settings.has_dropdown %}
-                <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
-                  {{ nav_block.settings.title }}
-                </button>
-                <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
-                  {% assign dropdown_blocks = section.blocks | where: 'type', 'dropdown_item' %}
-                  {% for dropdown_block in dropdown_blocks %}
-                    {% if dropdown_block.settings.parent_title == nav_block.settings.title %}
-                      <a href="{{ dropdown_block.settings.link | default: '#' }}" class="mobile-submenu-item">
-                        {{ dropdown_block.settings.title }}
+          {% if main_menu and main_menu.links.size > 0 %}
+            {% for link in main_menu.links %}
+              <div>
+                {% if link.links.size > 0 %}
+                  <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+                    {{ link.title }}
+                  </button>
+                  <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
+                    {% for child_link in link.links %}
+                      <a href="{{ child_link.url }}" class="mobile-submenu-item">
+                        {{ child_link.title }}
                       </a>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              {% else %}
-                <a href="{{ nav_block.settings.link | default: '#' }}" class="mobile-menu-item" style="text-decoration: none;">
-                  {{ nav_block.settings.title }}
-                </a>
-              {% endif %}
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <a href="{{ link.url }}" class="mobile-menu-item">
+                    {{ link.title }}
+                  </a>
+                {% endif %}
+              </div>
+            {% endfor %}
+          {% else %}
+            <!-- 调试信息 - 生产环境请删除 -->
+            <div style="color: #fff; font-size: 12px; padding: 8px 0;">
+              Debug: 没有找到菜单项。请检查后台菜单设置。Menu handle = "{{ main_menu_handle }}", Menu exists = {% if main_menu %}true{% else %}false{% endif %}
             </div>
-          {% endfor %}
+          {% endif %}
           
-          <a href="{{ section.settings.contact_link | default: '#' }}" class="mobile-contact-badge">
+          <a href="{{ section.settings.contact_link }}" class="mobile-contact-badge">
             <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
             <div class="contact-number">
               <span>{{ section.settings.contact_number | default: '21' }}</span>
@@ -471,7 +481,7 @@ function toggleSearch() {
       "id": "site_name",
       "label": "Site Name",
       "default": "XSPilates",
-      "info": "Display name for your site"
+      "info": "Display name for your site (leave empty to use shop name)"
     },
     {
       "type": "text",
@@ -483,6 +493,13 @@ function toggleSearch() {
     {
       "type": "header",
       "content": "Navigation Settings"
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "Main Menu",
+      "default": "main-menu",
+      "info": "Select the menu to display in the navigation"
     },
     {
       "type": "text",
@@ -525,195 +542,12 @@ function toggleSearch() {
       "default": "#DC2626"
     }
   ],
-  "blocks": [
-    {
-      "type": "navigation_item",
-      "name": "Navigation Item",
-      "settings": [
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Navigation Title",
-          "default": "Menu Item"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Navigation Link"
-        },
-        {
-          "type": "checkbox",
-          "id": "has_dropdown",
-          "label": "Enable Dropdown",
-          "default": false
-        }
-      ]
-    },
-    {
-      "type": "dropdown_item",
-      "name": "Dropdown Item",
-      "settings": [
-        {
-          "type": "text",
-          "id": "parent_title",
-          "label": "Parent Navigation Title",
-          "info": "Must match the title of the parent navigation item"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "Dropdown Item Title",
-          "default": "Dropdown Item"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Dropdown Item Link"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
       "name": "Header Navigation",
-      "blocks": [
-        {
-          "type": "navigation_item",
-          "settings": {
-            "title": "Pilates Equipment",
-            "link": "#equipment",
-            "has_dropdown": true
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Pilates Equipment",
-            "title": "Reformers",
-            "link": "#reformers"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Pilates Equipment",
-            "title": "Cadillac",
-            "link": "#cadillac"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Pilates Equipment",
-            "title": "Chair",
-            "link": "#chair"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Pilates Equipment",
-            "title": "Barrels",
-            "link": "#barrels"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Pilates Equipment",
-            "title": "Accessories",
-            "link": "#accessories"
-          }
-        },
-        {
-          "type": "navigation_item",
-          "settings": {
-            "title": "OEM Service",
-            "link": "#oem",
-            "has_dropdown": false
-          }
-        },
-        {
-          "type": "navigation_item",
-          "settings": {
-            "title": "Resources",
-            "link": "#resources",
-            "has_dropdown": true
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Resources",
-            "title": "Blog",
-            "link": "#blog"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Resources",
-            "title": "Videos",
-            "link": "#videos"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Resources",
-            "title": "Manuals",
-            "link": "#manuals"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "Resources",
-            "title": "Support",
-            "link": "#support"
-          }
-        },
-        {
-          "type": "navigation_item",
-          "settings": {
-            "title": "About Us",
-            "link": "#about",
-            "has_dropdown": true
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "About Us",
-            "title": "Our Story",
-            "link": "#story"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "About Us",
-            "title": "Team",
-            "link": "#team"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "About Us",
-            "title": "Certifications",
-            "link": "#certifications"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_title": "About Us",
-            "title": "Contact",
-            "link": "#contact"
-          }
-        }
-      ]
+      "settings": {
+        "main_menu": "main-menu"
+      }
     }
   ]
 }
