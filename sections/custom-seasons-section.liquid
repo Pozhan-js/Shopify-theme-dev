@@ -1,0 +1,350 @@
+{%- liquid
+  assign heading = section.settings.heading
+  assign cta_text = section.settings.cta_text
+  assign cta_link = section.settings.cta_link
+  assign featured_entry = section.settings.featured_entry
+-%}
+
+<div class="seasons-section">
+  <h3 class="section-heading">{{ heading }}</h3>
+
+  <div class="seasons-container">
+    <div class="reflections-list">
+      {% for i in (1..5) %}
+        {% assign reflection = 'reflection_' | append: i %}
+        {% assign reflection_link = 'reflection_link_' | append: i %}
+        {% if section.settings[reflection] != blank %}
+          <a href="{{ section.settings[reflection_link] }}" class="reflection-item">
+            {{ section.settings[reflection] }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="featured-image">
+      {% for i in (1..5) %}
+        {% assign image = 'image_' | append: i %}
+        {% if section.settings[image] != blank %}
+          <div class="image-wrapper {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}">
+            {{ section.settings[image] | image_url: width: 800 | image_tag: class: 'featured-img' }}
+            <div class="image-overlay">
+              <h3>
+                <a href="{{ cta_link }}" class="button">{{ cta_text }}</a>
+              </h3>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .seasons-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 10px;
+  }
+
+  h3.section-heading {
+    margin-block-start: 30px;
+  }
+
+  .reflections-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .reflection-item {
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .reflection-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+  }
+
+  .reflection-item.active {
+    background: rgba(255, 255, 255, 0.3);
+    border-left: 3px solid rgba(0, 255, 255, 0.5);
+    font-weight: bold;
+  }
+
+  .featured-image {
+    flex: 1;
+    position: relative;
+    min-height: 300px;
+  }
+
+  .image-wrapper {
+    position: relative;
+    height: 100%;
+  }
+
+  .featured-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .image-overlay h3 {
+    font-size: 2rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .image-overlay a.button {
+    background: transparent !important;
+    border: 1px solid #fff !important;
+    font-weight: bold;
+  }
+
+  .image-overlay a.button:hover {
+    background: rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .seasons-container {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .reflections-list {
+      order: 2;
+      gap: 10px;
+    }
+
+    .reflection-item {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
+
+    .featured-image {
+      order: 1;
+      height: 300px;
+    }
+
+    .image-overlay h3 {
+      font-size: 1.5rem;
+    }
+
+    .image-overlay a.button {
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .featured-image {
+      height: 250px;
+    }
+
+    .reflection-item {
+      padding: 10px;
+      font-size: 0.85rem;
+    }
+
+    .image-overlay h3 {
+      font-size: 1.2rem;
+    }
+  }
+
+  .image-wrapper {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .image-wrapper.active {
+    display: block;
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const reflectionItems = document.querySelectorAll('.reflection-item');
+    const imageWrappers = document.querySelectorAll('.image-wrapper');
+    let currentIndex = 0;
+    let interval;
+
+    // 切换图片函数
+    function showImage(index) {
+      imageWrappers.forEach((wrapper) => wrapper.classList.remove('active'));
+      imageWrappers[index].classList.add('active');
+      reflectionItems.forEach((item) => item.classList.remove('active'));
+      reflectionItems[index].classList.add('active');
+      currentIndex = index;
+    }
+
+    // 定时切换
+    function startCarousel() {
+      interval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % imageWrappers.length;
+        showImage(currentIndex);
+      }, 5000);
+    }
+
+    // 初始化
+    if (imageWrappers.length > 0) {
+      showImage(0);
+      startCarousel();
+
+      // 触摸/鼠标切换
+      reflectionItems.forEach((item, index) => {
+        // 鼠标交互
+        item.addEventListener('mouseenter', () => {
+          clearInterval(interval);
+          showImage(index);
+        });
+        item.addEventListener('mouseleave', () => {
+          startCarousel();
+        });
+
+        // 触摸交互
+        item.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          clearInterval(interval);
+          showImage(index);
+        });
+
+        item.addEventListener('touchend', () => {
+          startCarousel();
+        });
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Seasons Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "区块标题",
+      "default": "Seasons Preview"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "按钮文字",
+      "default": "Read All Reflections"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "按钮链接"
+    },
+    {
+      "type": "textarea",
+      "id": "reflection_1",
+      "label": "每日反思1"
+    },
+    {
+      "type": "textarea",
+      "id": "reflection_2",
+      "label": "每日反思2"
+    },
+    {
+      "type": "textarea",
+      "id": "reflection_3",
+      "label": "每日反思3"
+    },
+    {
+      "type": "textarea",
+      "id": "reflection_4",
+      "label": "每日反思4"
+    },
+    {
+      "type": "textarea",
+      "id": "reflection_5",
+      "label": "每日反思5"
+    },
+    {
+      "type": "url",
+      "id": "reflection_link_1",
+      "label": "每日反思1链接"
+    },
+    {
+      "type": "url",
+      "id": "reflection_link_2",
+      "label": "每日反思2链接"
+    },
+    {
+      "type": "url",
+      "id": "reflection_link_3",
+      "label": "每日反思3链接"
+    },
+    {
+      "type": "url",
+      "id": "reflection_link_4",
+      "label": "每日反思4链接"
+    },
+    {
+      "type": "url",
+      "id": "reflection_link_5",
+      "label": "每日反思5链接"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "反思1对应图片"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "反思2对应图片"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "反思3对应图片"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "反思4对应图片"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "反思5对应图片"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Seasons Preview"
+    }
+  ]
+}
+{% endschema %}

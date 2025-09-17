@@ -1,0 +1,153 @@
+<div class="custom-image-two" style="padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px 0;">
+  <div class="page-width">
+    <div class="image-grid">
+      <div class="image-item">
+        <a href="{{ section.settings.image_link_1 }}" class="image-link">
+          {% if section.settings.image_1 != blank %}
+            <img src="{{ section.settings.image_1 | img_url: '1000x' }}" 
+                 alt="{{ section.settings.image_alt_1 | escape }}"
+                 loading="lazy"
+                 width="1000"
+                 height="{{ section.settings.image_height }}"
+                 style="object-fit: contain; max-height: {{ section.settings.image_height }}px;">
+          {% else %}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {% endif %}
+        </a>
+      </div>
+      
+      <div class="image-item">
+        <a href="{{ section.settings.image_link_2 }}" class="image-link">
+          {% if section.settings.image_2 != blank %}
+            <img src="{{ section.settings.image_2 | img_url: '1000x' }}" 
+                 alt="{{ section.settings.image_alt_2 | escape }}"
+                 loading="lazy"
+                 width="1000"
+                 height="{{ section.settings.image_height }}"
+                 style="object-fit: contain; max-height: {{ section.settings.image_height }}px;">
+          {% else %}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-image-two {
+    margin: 0 auto;
+  }
+  .image-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: 400px;
+  }
+  .image-item {
+    position: relative;
+    overflow: hidden;
+  }
+  .image-link {
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .image-link:hover {
+    transform: scale(1.02);
+  }
+  @media screen and (max-width: 749px) {
+    .image-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "双图排列",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "min": 200,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "图片高度",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "上边距",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "下边距",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "图片1设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "图片1"
+    },
+    {
+      "type": "text",
+      "id": "image_alt_1",
+      "label": "图片1替代文本",
+      "info": "用于SEO和可访问性"
+    },
+    {
+      "type": "url",
+      "id": "image_link_1",
+      "label": "图片1链接"
+    },
+    {
+      "type": "header",
+      "content": "图片2设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "图片2"
+    },
+    {
+      "type": "text",
+      "id": "image_alt_2",
+      "label": "图片2替代文本",
+      "info": "用于SEO和可访问性"
+    },
+    {
+      "type": "url",
+      "id": "image_link_2",
+      "label": "图片2链接"
+    }
+  ],
+  "presets": [
+    {
+      "name": "双图排列",
+      "category": "图片"
+    }
+  ]
+}
+{% endschema %}

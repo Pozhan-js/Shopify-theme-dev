@@ -1,0 +1,91 @@
+{%- style -%}
+  .sitemap {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .sitemap ul {
+    list-style: none;
+    padding-left: 1.5rem;
+  }
+  .sitemap li {
+    margin: 0.5rem 0;
+    position: relative;
+  }
+  .sitemap li:before {
+    content: '→';
+    position: absolute;
+    left: -1.5rem;
+    color: var(--color-text);
+  }
+  .sitemap a {
+    text-decoration: none;
+    color: var(--color-text);
+    transition: color 0.2s;
+  }
+  .sitemap a:hover {
+    color: var(--color-accent);
+  }
+  .sitemap__title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+{%- endstyle -%}
+
+<div class="sitemap">
+  <h2 class="sitemap__title">{{ section.settings.title }}</h2>
+
+  <ul>
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- if link.links.size > 0 -%}
+          <ul>
+            {%- for childlink in link.links -%}
+              <li>
+                <a href="{{ childlink.url }}">{{ childlink.title }}</a>
+                {%- if childlink.links.size > 0 -%}
+                  <ul>
+                    {%- for grandchildlink in childlink.links -%}
+                      <li>
+                        <a href="{{ grandchildlink.url }}">{{ grandchildlink.title }}</a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% schema %}
+{
+  "name": "站点地图",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "网站导航"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "选择菜单",
+      "default": "main-menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "站点地图"
+    }
+  ]
+}
+{% endschema %}

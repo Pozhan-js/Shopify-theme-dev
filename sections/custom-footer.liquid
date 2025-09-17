@@ -1,0 +1,130 @@
+<div class="custom-footer page-width">
+  <!-- Logo -->
+  <div class="footer-logo">
+    {% if section.settings.logo != blank %}
+      <img src="{{ section.settings.logo | image_url: width: 200 }}" alt="{{ shop.name }}" width="200" height="auto" loading="lazy">
+    {% endif %}
+  </div>
+
+  <!-- 主菜单 -->
+  <nav class="footer-main-menu">
+    <ul>
+      {% for link in section.settings.main_menu.links %}
+        <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <div class="footer-divider"></div>
+
+  <!-- 底部链接和版权 -->
+  <div class="footer-bottom">
+    <div class="copyright">
+      © {{ 'now' | date: "%Y" }} {{ section.settings.copyright_text }}
+    </div>
+     <div class="footer-links">
+      <ul>
+        {% for link in section.settings.bottom_menu.links %}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-footer {
+    background-color: #000;
+    color: #fff;
+    padding: 40px 0;
+    text-align: center;
+  }
+
+  .footer-main-menu ul,
+  .footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .footer-main-menu a {
+    color: #ff0;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .footer-divider {
+    height: 1px;
+    background-color: #ff0;
+    margin: 20px auto;
+    width: 80%;
+  }
+
+  .footer-links a {
+    color: #fff;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .copyright {
+    margin-top: 20px;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  .footer-logo {
+    margin-bottom: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+  }
+
+  .footer-logo img {
+    max-width: 200px;
+    height: auto;
+  }
+
+</style>
+
+{% schema %}
+{
+  "name": "自定义页脚",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo图片"
+    },
+    {
+      "type": "link_list",
+      "id": "main_menu",
+      "label": "主菜单",
+      "default": "main-menu"
+    },
+    {
+      "type": "link_list",
+      "id": "bottom_menu",
+      "label": "底部链接",
+      "default": "footer"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "版权文本",
+      "default": "Good Mask Co. All rights reserved."
+    }
+  ],
+  "presets": [
+    {
+      "name": "自定义页脚"
+    }
+  ]
+}
+{% endschema %}
