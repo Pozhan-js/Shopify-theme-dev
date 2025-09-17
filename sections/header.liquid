@@ -12,7 +12,6 @@
 {%- endif -%}
 <link rel="stylesheet" href="{{ 'custom-header-gradient.css' | asset_url }}" media="print" onload="this.media='all'">
 
-
 <style>
   header-drawer {
     justify-self: start;
@@ -74,18 +73,91 @@
 </style>
 
 {%- style -%}
-  .header {
-    padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 3rem;
+  /* 头部容器固定定位且不占位 */
+  .section-header {
+    position: fixed !important; /* 固定定位，不占用文档流空间 */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* 确保在其他内容之上 */
+    margin-bottom: 0 !important; /* 移除下边距 */
+    background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    backdrop-filter: blur({{ section.settings.blur_intensity }}px) !important;
+    -webkit-backdrop-filter: blur({{ section.settings.blur_intensity }}px) !important;
+    box-shadow: 0 2px {{ section.settings.shadow_intensity }}px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }}) !important;
   }
 
-  .section-header {
-    position: sticky; /* This is for fixing a Safari z-index issue. PR #2147 */
-    margin-bottom: {{ section.settings.margin_bottom | times: 0.75 | round: 0 }}px;
+  .header-wrapper {
+    background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    border-bottom: none !important;
+  }
+
+  .header {
+    padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 3rem;
+    background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    border-bottom: none !important;
+  }
+
+  /* 确保所有颜色方案下都使用设定的透明度 */
+  .color-scheme-1,
+  .color-scheme-2,
+  .color-scheme-3,
+  .color-background-1,
+  .color-background-2,
+  .gradient {
+    background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    background-color: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    background-image: none !important;
+  }
+
+  /* 移除所有可能的背景和边框 */
+  .header-wrapper::before,
+  .header-wrapper::after,
+  .header::before,
+  .header::after {
+    display: none !important;
+  }
+
+  /* 文字颜色保持可读性 */
+  .header__heading-link {
+    color: {{ section.settings.text_color }} !important;
+  }
+
+  .header__icon {
+    color: {{ section.settings.text_color }} !important;
+  }
+
+  .list-menu__item--link {
+    color: {{ section.settings.text_color }} !important;
+  }
+
+  /* 滚动时的透明度和效果 */
+  .shopify-section-header-sticky {
+    background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
+    backdrop-filter: blur({{ section.settings.scroll_blur_intensity }}px) !important;
+    -webkit-backdrop-filter: blur({{ section.settings.scroll_blur_intensity }}px) !important;
+    box-shadow: 0 2px {{ section.settings.shadow_intensity }}px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }}) !important;
+  }
+
+  .shopify-section-header-sticky .header__heading-link,
+  .shopify-section-header-sticky .header__icon,
+  .shopify-section-header-sticky .list-menu__item--link {
+    color: {{ section.settings.text_color }} !important;
+  }
+
+  /* 隐藏状态保持设定透明度 */
+  .shopify-section-header-hidden {
+    background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
+  }
+
+  /* 移除边框分隔线 */
+  .header-wrapper--border-bottom {
+    border-bottom: none !important;
   }
 
   @media screen and (min-width: 750px) {
     .section-header {
-      margin-bottom: {{ section.settings.margin_bottom }}px;
+      margin-bottom: 0 !important;
     }
   }
 
@@ -93,7 +165,18 @@
     .header {
       padding-top: {{ section.settings.padding_top }}px;
       padding-bottom: {{ section.settings.padding_bottom }}px;
+      background: transparent !important;
     }
+  }
+
+  /* 确保页面内容从顶部开始，不被头部遮挡 */
+  body {
+    padding-top: 0 !important;
+  }
+
+  /* 如果需要为特定内容添加顶部间距，可以使用这个类 */
+  .content-with-transparent-header {
+    padding-top: 0;
   }
 {%- endstyle -%}
 
@@ -328,7 +411,8 @@
     }
 
     setHeaderHeight() {
-      document.documentElement.style.setProperty('--header-height', `${this.header.offsetHeight}px`);
+      // 由于头部不占位，设置为0
+      document.documentElement.style.setProperty('--header-height', '0px');
     }
 
     disconnectedCallback() {
@@ -628,6 +712,83 @@
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
       "default": 20
+    },
+    {
+      "type": "header",
+      "content": "透明度设置"
+    },
+    {
+      "type": "range",
+      "id": "header_opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "头部背景透明度",
+      "info": "调整头部导航栏的背景透明度，数值越小越透明",
+      "default": 75
+    },
+    {
+      "type": "range",
+      "id": "scroll_opacity",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "滚动时透明度",
+      "info": "页面滚动时头部导航栏的背景透明度",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "blur_intensity",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "模糊强度",
+      "info": "背景模糊效果的强度，0为无模糊",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "scroll_blur_intensity",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "滚动时模糊强度",
+      "info": "页面滚动时背景模糊效果的强度",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "shadow_intensity",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "阴影强度",
+      "info": "头部导航栏阴影的扩散范围",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "%",
+      "label": "阴影透明度",
+      "info": "头部导航栏阴影的透明度",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "info": "头部导航栏中文字和图标的颜色",
+      "default": "#404040"
     }
   ],
   "blocks": [
