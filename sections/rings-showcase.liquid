@@ -16,10 +16,6 @@
         <!-- 右侧商品列表 -->
         <div class="rings-products-section" id="ringsProductsSection">
             <div class="rings-products-container">
-                <h2 class="section-title" style="color: {{ section.settings.titlecolor }}; font-size: {{ section.settings.titlesize }}px;">
-                    {{ section.settings.sectiontitle | default: '戒指系列' }}
-                </h2>
-                
                 <div class="rings-products-grid">
                     {%- assign selected_collection = collections[section.settings.collection_handle] -%}
                     {%- if selected_collection and selected_collection.products.size > 0 -%}
@@ -28,41 +24,49 @@
                         
                         {%- for product in collection_products limit: section.settings.maxproducts -%}
                             <div class="rings-product-card">
-                                <div class="product-image-container">
-                                    <a href="{{ product.url }}" class="product-link">
-                                        {%- if product.featured_image -%}
-                                            <img src="{{ product.featured_image | img_url: '300x300' }}" 
-                                                 alt="{{ product.title }}" 
-                                                 class="product-image"
-                                                 loading="lazy">
-                                        {%- else -%}
-                                            <div class="product-image-placeholder">暂无图片</div>
-                                        {%- endif -%}
-                                    </a>
+                <div class="product-image-container" data-product-id="{{ product.id }}">
+                    <a href="{{ product.url }}" class="product-link">
+                        {%- if product.images.size > 0 -%}
+                            {%- for image in product.images limit: 5 -%}
+                                <img src="{{ image | image_url: width: 300, height: 300, crop: 'center' }}" 
+                                     alt="{{ product.title }} - 图片 {{ forloop.index }}" 
+                                     class="product-image {% if forloop.first %}active{% endif %}"
+                                     data-image-index="{{ forloop.index0 }}"
+                                     loading="lazy">
+                            {%- endfor -%}
+                            {%- if product.images.size > 1 -%}
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar"></div>
                                 </div>
-                                
-                                <div class="product-info">
-                                    <h3 class="product-title">
-                                        <a href="{{ product.url }}">{{ product.title }}</a>
-                                    </h3>
-                                    <div class="product-price">
-                                        {%- if product.compare_at_price > product.price -%}
-                                            <span class="original-price">{{ product.compare_at_price | money }}</span>
-                                        {%- endif -%}
-                                        <span class="current-price">{{ product.price | money }}</span>
-                                    </div>
-                                    
-                                    <form method="post" action="/cart/add" class="add-to-cart-form">
-                                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                                        <input type="hidden" name="quantity" value="1">
-                                        <button type="submit" class="add-to-cart-btn">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                                            </svg>
-                                            加入购物车
-                                        </button>
-                                    </form>
-                                </div>
+                            {%- endif -%}
+                        {%- else -%}
+                            <div class="product-image-placeholder">暂无图片</div>
+                        {%- endif -%}
+                    </a>
+                    
+                    <form method="post" action="/cart/add" class="add-to-cart-form">
+                        <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="add-to-cart-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            カートに追加
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="product-info">
+                    <h3 class="product-title">
+                        <a href="{{ product.url }}">{{ product.title }}</a>
+                    </h3>
+                    <div class="product-price">
+                        {%- if product.compare_at_price > product.price -%}
+                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                        {%- endif -%}
+                        <span class="current-price">{{ product.price | money }}</span>
+                    </div>
+                </div>
                             </div>
                         {%- endfor -%}
                     {%- else -%}
@@ -105,7 +109,7 @@
         height: 100vh;
         overflow: hidden;
         z-index: 10;
-        transition: position 0.3s ease;
+        transition: none;
     }
 
     .rings-model-image-section.sticky {
@@ -113,11 +117,15 @@
         top: 0;
         left: 0;
         width: 50%;
+        height: 100vh;
     }
 
     .rings-model-image-section.sticky-end {
         position: absolute;
         bottom: 0;
+        left: 0;
+        width: 50%;
+        height: 100vh;
         top: auto;
     }
 
@@ -126,6 +134,7 @@
         height: 100%;
         object-fit: cover;
         object-position: center;
+        transition: none;
     }
 
     .rings-model-placeholder {
@@ -145,17 +154,9 @@
     }
 
     .rings-products-container {
-        padding: 60px 40px;
+        padding: 0 40px 60px 40px;
         max-width: 600px;
         margin: 0 auto;
-    }
-
-    .section-title {
-        font-weight: 300;
-        margin-bottom: 40px;
-        text-align: center;
-        letter-spacing: 2px;
-        line-height: 1.2;
     }
 
     /* 桌面端：两列展示 */
@@ -193,13 +194,22 @@
         display: block;
         width: 100%;
         height: 100%;
+        position: relative;
     }
 
     .product-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.3s ease;
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .product-image.active {
+        opacity: 1;
     }
 
     .product-image-placeholder {
@@ -213,8 +223,27 @@
         font-size: 12px;
     }
 
-    .rings-product-card:hover .product-image {
+    .rings-product-card:hover .product-image.active {
         transform: scale(1.05);
+    }
+
+    /* 轮播进度条 */
+    .progress-bar-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        z-index: 2;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        width: 0%;
+        transition: width 0.1s linear;
     }
 
     .rings-product-card .product-info {
@@ -258,29 +287,45 @@
     }
 
     .rings-product-card .add-to-cart-form {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
         margin: 0;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 3;
+    }
+
+    .rings-product-card:hover .add-to-cart-form {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .rings-product-card .add-to-cart-btn {
-        background: {{ section.settings.buttonbgcolor }};
-        color: {{ section.settings.buttontextcolor }};
-        border: 1px solid {{ section.settings.buttonbordercolor }};
+        background: rgba(255, 255, 255, 0.95);
+        color: #333;
+        border: 1px solid rgba(255, 255, 255, 0.8);
         padding: 8px 16px;
         border-radius: {{ section.settings.buttonborderradius }}px;
         font-size: 12px;
-        cursor
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 4px;
         transition: all 0.3s ease;
         width: 100%;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .rings-product-card .add-to-cart-btn:hover {
-        background: {{ section.settings.buttonhovercolor }};
-        border-color: {{ section.settings.buttonhovercolor }};
+        background: rgba(255, 255, 255, 1);
+        border-color: rgba(255, 255, 255, 1);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .rings-no-products-message {
@@ -321,6 +366,7 @@
             height: 50vh;
             flex: none;
             width: 100% !important;
+            overflow: hidden;
         }
 
         .rings-model-image-section.sticky,
@@ -330,9 +376,31 @@
             margin-left: 0 !important;
         }
 
+        /* 移动端模特图片只显示中间部分 - 禁用所有变换和过渡 */
+        .rings-model-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            transform: none !important;
+            transition: none !important;
+        }
+
+        /* 移动端禁用悬停效果 */
+        .rings-product-card:hover .product-image.active {
+            transform: none !important;
+        }
+
+        .rings-model-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: none !important;
+            transition: none !important;
+        }
+
         .rings-products-section {
             flex: none;
             margin-left: 0 !important;
+            width: 100%;
         }
 
         .rings-products-container {
@@ -371,11 +439,18 @@
         }
 
         .rings-product-card .add-to-cart-form {
-            max-width: none;
+            position: static;
+            opacity: 1;
+            transform: none;
+            margin-top: 8px;
         }
 
-        .section-title {
-            font-size: 24px;
+        .rings-product-card .add-to-cart-btn {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .rings-products-grid::-webkit-scrollbar {
@@ -395,86 +470,209 @@
         .rings-products-grid::-webkit-scrollbar-thumb:hover {
             background: #999;
         }
+
+        /* 移动端隐藏进度条 */
+        .progress-bar-container {
+            display: none;
+        }
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 只在桌面端执行滚动固定逻辑
-    if (window.innerWidth <= 749) return;
+    // 检查是否为移动端
+    function isMobile() {
+        return window.innerWidth <= 749;
+    }
     
-    const modelSection = document.getElementById('ringsModelSection');
-    const productsSection = document.getElementById('ringsProductsSection');
-    const container = document.querySelector('.rings-showcase-container');
-    
-    if (!modelSection || !productsSection || !container) return;
-    
-    let isScrolling = false;
-    let scrollTimeout;
-    
-    // 获取初始位置信息
-    const containerRect = container.getBoundingClientRect();
-    const containerTop = containerRect.top + window.pageYOffset;
-    const containerHeight = containerRect.height;
-    const containerBottom = containerTop + containerHeight;
-    
-    function handleScroll() {
-        const scrollTop = window.pageYOffset;
-        const windowHeight = window.innerHeight;
+    // 图片轮播功能
+    function initImageCarousel() {
+        const productCards = document.querySelectorAll('.rings-product-card');
         
-        // 清除之前的超时
-        clearTimeout(scrollTimeout);
-        
-        // 标记正在滚动
-        if (!isScrolling) {
-            isScrolling = true;
-        }
-        
-        // 判断滚动位置
-        if (scrollTop >= containerTop && scrollTop + windowHeight < containerBottom) {
-            // 在容器范围内滚动，固定模特图
-            modelSection.classList.add('sticky');
-            modelSection.classList.remove('sticky-end');
-            productsSection.classList.add('offset');
-        } else if (scrollTop + windowHeight >= containerBottom) {
-            // 滚动到容器底部，模特图固定在底部
-            modelSection.classList.remove('sticky');
-            modelSection.classList.add('sticky-end');
-            productsSection.classList.add('offset');
-        } else {
-            // 在容器外，恢复正常状态
-            modelSection.classList.remove('sticky', 'sticky-end');
-            productsSection.classList.remove('offset');
-        }
-        
-        // 设置滚动结束检测
-        scrollTimeout = setTimeout(function() {
-            isScrolling = false;
+        productCards.forEach(card => {
+            const imageContainer = card.querySelector('.product-image-container');
+            const images = imageContainer.querySelectorAll('.product-image');
+            const progressBar = imageContainer.querySelector('.progress-bar');
             
-            // 滚动结束后的处理
-            const currentScrollTop = window.pageYOffset;
-            if (currentScrollTop < containerTop || currentScrollTop + windowHeight >= containerBottom) {
-                // 如果滚动结束时不在容器范围内，取消固定
+            if (images.length <= 1) return; // 如果只有一张图片，不需要轮播
+            
+            let currentIndex = 0;
+            let hoverInterval;
+            let progressInterval;
+            let isHovering = false;
+            let progress = 0;
+            const intervalDuration = 800; // 每张图片显示时间
+            const progressStep = 100 / (intervalDuration / 10); // 每10ms增加的进度
+            
+            // 显示指定索引的图片
+            function showImage(index) {
+                images.forEach((img, i) => {
+                    img.classList.toggle('active', i === index);
+                });
+                currentIndex = index;
+                // 重置进度条
+                progress = 0;
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                }
+            }
+            
+            // 更新进度条
+            function updateProgress() {
+                if (progressBar && isHovering) {
+                    progress += progressStep;
+                    progressBar.style.width = Math.min(progress, 100) + '%';
+                }
+            }
+            
+            // 自动轮播到下一张
+            function nextImage() {
+                const nextIndex = (currentIndex + 1) % images.length;
+                showImage(nextIndex);
+            }
+            
+            // 鼠标悬停开始轮播
+            imageContainer.addEventListener('mouseenter', function() {
+                if (isMobile()) return; // 移动端不启用轮播
+                
+                isHovering = true;
+                progress = 0;
+                
+                // 立即显示下一张图片
+                if (images.length > 1) {
+                    nextImage();
+                    
+                    // 设置轮播定时器
+                    hoverInterval = setInterval(nextImage, intervalDuration);
+                    
+                    // 设置进度条更新定时器
+                    progressInterval = setInterval(updateProgress, 10);
+                }
+            });
+            
+            // 鼠标离开停止轮播并回到第一张
+            imageContainer.addEventListener('mouseleave', function() {
+                if (isMobile()) return;
+                
+                isHovering = false;
+                clearInterval(hoverInterval);
+                clearInterval(progressInterval);
+                
+                // 回到第一张图片并重置进度条
+                setTimeout(() => {
+                    if (!isHovering) {
+                        showImage(0);
+                    }
+                }, 200);
+            });
+        });
+    }
+    
+    // 滚动固定功能（桌面端）
+    function initScrollSticky() {
+        if (isMobile()) return;
+        
+        const modelSection = document.getElementById('ringsModelSection');
+        const productsSection = document.getElementById('ringsProductsSection');
+        const container = document.querySelector('.rings-showcase-container');
+        
+        if (!modelSection || !productsSection || !container) return;
+        
+        let isScrolling = false;
+        let scrollTimeout;
+        let lastScrollTop = 0;
+        
+        // 获取位置信息的函数
+        function getContainerInfo() {
+            const containerRect = container.getBoundingClientRect();
+            const modelHeight = modelSection.offsetHeight;
+            const productsHeight = productsSection.offsetHeight;
+            
+            return {
+                top: containerRect.top + window.pageYOffset,
+                height: Math.max(modelHeight, productsHeight),
+                bottom: containerRect.top + window.pageYOffset + Math.max(modelHeight, productsHeight),
+                modelHeight: modelHeight,
+                productsHeight: productsHeight
+            };
+        }
+        
+        function handleScroll() {
+            const scrollTop = window.pageYOffset;
+            const windowHeight = window.innerHeight;
+            const containerInfo = getContainerInfo();
+            
+            // 清除之前的超时
+            clearTimeout(scrollTimeout);
+            
+            // 标记正在滚动
+            isScrolling = true;
+            
+            // 计算关键位置
+            const containerTop = containerInfo.top;
+            const containerBottom = containerInfo.top + containerInfo.productsHeight;
+            const scrollBottom = scrollTop + windowHeight;
+            
+            // 判断滚动位置
+            if (scrollTop >= containerTop && scrollBottom < containerBottom) {
+                // 在容器范围内滚动，固定模特图
+                modelSection.classList.add('sticky');
+                modelSection.classList.remove('sticky-end');
+                productsSection.classList.add('offset');
+            } else if (scrollBottom >= containerBottom) {
+                // 滚动到容器底部，模特图固定在底部
+                modelSection.classList.remove('sticky');
+                modelSection.classList.add('sticky-end');
+                productsSection.classList.add('offset');
+            } else {
+                // 在容器外，恢复正常状态
                 modelSection.classList.remove('sticky', 'sticky-end');
                 productsSection.classList.remove('offset');
             }
-        }, 150); // 150ms 后认为滚动结束
+            
+            lastScrollTop = scrollTop;
+            
+            // 设置滚动结束检测
+            scrollTimeout = setTimeout(function() {
+                isScrolling = false;
+            }, 50);
+        }
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // 监听窗口大小变化
+        window.addEventListener('resize', function() {
+            if (isMobile()) {
+                // 移动端时移除所有固定状态
+                modelSection.classList.remove('sticky', 'sticky-end');
+                productsSection.classList.remove('offset');
+            } else {
+                // 桌面端重新计算位置
+                setTimeout(handleScroll, 50);
+            }
+        });
+        
+        // 监听内容变化
+        window.addEventListener('load', function() {
+            setTimeout(handleScroll, 100);
+        });
+        
+        // 初始检查
+        setTimeout(handleScroll, 100);
     }
     
-    // 监听滚动事件
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    // 初始化所有功能
+    initImageCarousel();
+    initScrollSticky();
     
-    // 监听窗口大小变化
+    // 窗口大小变化时重新初始化
     window.addEventListener('resize', function() {
-        if (window.innerWidth <= 749) {
-            // 移动端时移除所有固定状态
-            modelSection.classList.remove('sticky', 'sticky-end');
-            productsSection.classList.remove('offset');
-        }
+        // 重新初始化轮播功能以适应移动端/桌面端切换
+        setTimeout(() => {
+            initImageCarousel();
+        }, 100);
     });
-    
-    // 初始检查
-    handleScroll();
 });
 </script>
 
