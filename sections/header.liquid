@@ -73,9 +73,9 @@
 </style>
 
 {%- style -%}
-  /* 头部容器绝对定位且不占位 */
+  /* 头部容器固定定位且不占位 */
   .section-header {
-    position: absolute !important; /* 绝对定位，不占用文档流空间，滚动时会消失 */
+    position: fixed !important; /* 固定定位，始终固定在顶部 */
     top: 0;
     left: 0;
     right: 0;
@@ -85,6 +85,7 @@
     backdrop-filter: blur({{ section.settings.blur_intensity }}px) !important;
     -webkit-backdrop-filter: blur({{ section.settings.blur_intensity }}px) !important;
     box-shadow: 0 2px {{ section.settings.shadow_intensity }}px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }}) !important;
+    transition: all 0.3s ease-in-out; /* 添加平滑过渡效果 */
   }
 
   .header-wrapper {
@@ -96,6 +97,7 @@
     padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 3rem;
     background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
     border-bottom: none !important;
+    transition: padding 0.3s ease-in-out; /* 添加内边距过渡效果 */
   }
 
   /* 确保所有颜色方案下都使用设定的透明度 */
@@ -121,22 +123,30 @@
   /* 文字颜色保持可读性 */
   .header__heading-link {
     color: {{ section.settings.text_color }} !important;
+    transition: color 0.3s ease-in-out;
   }
 
   .header__icon {
     color: {{ section.settings.text_color }} !important;
+    transition: color 0.3s ease-in-out;
   }
 
   .list-menu__item--link {
     color: {{ section.settings.text_color }} !important;
+    transition: color 0.3s ease-in-out;
   }
 
   /* 滚动时的透明度和效果 */
   .shopify-section-header-sticky {
     background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
-    backdrop-filter: blur({{ section.settings.scroll_blur_intensity }}px) !important;
-    -webkit-backdrop-filter: blur({{ section.settings.scroll_blur_intensity }}px) !important;
+    backdrop-filter: blur({{ section.settings.scroll_blur }}px) !important;
+    -webkit-backdrop-filter: blur({{ section.settings.scroll_blur }}px) !important;
     box-shadow: 0 2px {{ section.settings.shadow_intensity }}px rgba(0, 0, 0, {{ section.settings.shadow_opacity | divided_by: 100.0 }}) !important;
+  }
+
+  .shopify-section-header-sticky .header {
+    padding: {{ section.settings.padding_top | times: 0.3 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.3 | round: 0 }}px 3rem;
+    background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
   }
 
   .shopify-section-header-sticky .header__heading-link,
@@ -147,6 +157,15 @@
 
   /* 隐藏状态保持设定透明度 */
   .shopify-section-header-hidden {
+    background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
+  /* 显示状态 */
+  .shopify-section-header-revealed {
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out;
     background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
   }
 
@@ -165,7 +184,13 @@
     .header {
       padding-top: {{ section.settings.padding_top }}px;
       padding-bottom: {{ section.settings.padding_bottom }}px;
-      background: transparent !important;
+      background: rgba(255, 255, 255, {{ section.settings.header_opacity | divided_by: 100.0 }}) !important;
+    }
+
+    .shopify-section-header-sticky .header {
+      padding-top: {{ section.settings.padding_top | times: 0.7 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.7 | round: 0 }}px;
+      background: rgba(255, 255, 255, {{ section.settings.scroll_opacity | divided_by: 100.0 }}) !important;
     }
   }
 
@@ -174,9 +199,42 @@
     padding-top: 0 !important;
   }
 
-  /* 如果需要为特定内容添加顶部间距，可以使用这个类 */
-  .content-with-transparent-header {
-    padding-top: 0;
+  /* 为页面内容添加顶部间距，避免被固定定位的头部遮挡 */
+  .main-content {
+    margin-top: 0;
+  }
+
+  /* 为页面主体添加顶部内边距，确保内容不被固定头部遮挡 */
+  body {
+    padding-top: 80px; /* 根据头部高度调整 */
+  }
+
+  @media screen and (min-width: 750px) {
+    body {
+      padding-top: 90px; /* 桌面端稍微增加间距 */
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    body {
+      padding-top: 100px; /* 大屏幕端进一步增加间距 */
+    }
+  }
+
+  /* Logo 缩小效果 */
+  {%- if section.settings.sticky_header_type == 'reduce-logo-size' -%}
+    .shopify-section-header-sticky .header__heading-logo-wrapper {
+      transform: scale(0.8);
+      transition: transform 0.3s ease-in-out;
+    }
+  {%- endif -%}
+
+  /* 悬停效果 */
+  .header__heading-link:hover,
+  .list-menu__item--link:hover,
+  .header__icon:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
   }
 {%- endstyle -%}
 
@@ -430,20 +488,39 @@
     }
 
     onScroll() {
-      // 简化滚动逻辑，头部使用绝对定位，自然随页面滚动消失
-      // 不需要复杂的显示/隐藏逻辑
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      if (this.predictiveSearch && this.predictiveSearch.isOpen) return;
+
+      // 添加滚动时的样式类
+      if (scrollTop > 50) {
+        this.header.classList.add('shopify-section-header-sticky');
+      } else {
+        this.header.classList.remove('shopify-section-header-sticky');
+      }
+
+      // 固定定位的头部始终可见，不需要隐藏/显示逻辑
+      this.currentScrollTop = scrollTop;
+      this.preventReveal = false;
     }
 
     hide() {
-      // 不需要隐藏逻辑，因为使用绝对定位会自然消失
+      if (this.headerIsAlwaysSticky) return;
+      this.header.classList.add('shopify-section-header-hidden');
+      this.header.classList.remove('shopify-section-header-revealed');
+      this.closeMenuDisclosure();
+      this.closeSearchModal();
     }
 
     reveal() {
-      // 不需要显示逻辑，因为使用绝对定位会自然显示
+      if (this.headerIsAlwaysSticky) return;
+      this.header.classList.add('shopify-section-header-revealed');
+      this.header.classList.remove('shopify-section-header-hidden');
     }
 
     reset() {
-      // 不需要重置逻辑，因为使用绝对定位会自然重置
+      if (this.headerIsAlwaysSticky) return;
+      this.header.classList.remove('shopify-section-header-hidden', 'shopify-section-header-revealed');
     }
 
     closeMenuDisclosure() {
@@ -620,17 +697,6 @@
       "default": "scheme-1"
     },
     {
-      "type": "header",
-      "content": "t:sections.header.settings.header__utilities.content"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_country_selector",
-      "default": true,
-      "label": "t:sections.header.settings.enable_country_selector.label",
-      "info":"t:sections.header.settings.enable_country_selector.info"
-    },
-    {
       "type": "checkbox",
       "id": "enable_language_selector",
       "default": true,
@@ -689,7 +755,7 @@
     {
       "type": "range",
       "id": "header_opacity",
-      "min": 10,
+      "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
@@ -700,7 +766,7 @@
     {
       "type": "range",
       "id": "scroll_opacity",
-      "min": 10,
+      "min": 0,
       "max": 100,
       "step": 5,
       "unit": "%",
@@ -721,7 +787,7 @@
     },
     {
       "type": "range",
-      "id": "scroll_blur_intensity",
+      "id": "scroll_blur",
       "min": 0,
       "max": 20,
       "step": 2,
