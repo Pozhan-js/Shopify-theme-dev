@@ -73,9 +73,9 @@
 </style>
 
 {%- style -%}
-  /* 头部容器固定定位且不占位 */
+  /* 头部容器绝对定位且不占位 */
   .section-header {
-    position: fixed !important; /* 固定定位，不占用文档流空间 */
+    position: absolute !important; /* 绝对定位，不占用文档流空间，滚动时会消失 */
     top: 0;
     left: 0;
     right: 0;
@@ -430,51 +430,20 @@
     }
 
     onScroll() {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-      if (this.predictiveSearch && this.predictiveSearch.isOpen) return;
-
-      if (scrollTop > this.currentScrollTop && scrollTop > this.headerBounds.bottom) {
-        this.header.classList.add('scrolled-past-header');
-        if (this.preventHide) return;
-        requestAnimationFrame(this.hide.bind(this));
-      } else if (scrollTop < this.currentScrollTop && scrollTop > this.headerBounds.bottom) {
-        this.header.classList.add('scrolled-past-header');
-        if (!this.preventReveal) {
-          requestAnimationFrame(this.reveal.bind(this));
-        } else {
-          window.clearTimeout(this.isScrolling);
-
-          this.isScrolling = setTimeout(() => {
-            this.preventReveal = false;
-          }, 66);
-
-          requestAnimationFrame(this.hide.bind(this));
-        }
-      } else if (scrollTop <= this.headerBounds.top) {
-        this.header.classList.remove('scrolled-past-header');
-        requestAnimationFrame(this.reset.bind(this));
-      }
-
-      this.currentScrollTop = scrollTop;
+      // 简化滚动逻辑，头部使用绝对定位，自然随页面滚动消失
+      // 不需要复杂的显示/隐藏逻辑
     }
 
     hide() {
-      if (this.headerIsAlwaysSticky) return;
-      this.header.classList.add('shopify-section-header-hidden', 'shopify-section-header-sticky');
-      this.closeMenuDisclosure();
-      this.closeSearchModal();
+      // 不需要隐藏逻辑，因为使用绝对定位会自然消失
     }
 
     reveal() {
-      if (this.headerIsAlwaysSticky) return;
-      this.header.classList.add('shopify-section-header-sticky', 'animate');
-      this.header.classList.remove('shopify-section-header-hidden');
+      // 不需要显示逻辑，因为使用绝对定位会自然显示
     }
 
     reset() {
-      if (this.headerIsAlwaysSticky) return;
-      this.header.classList.remove('shopify-section-header-hidden', 'shopify-section-header-sticky', 'animate');
+      // 不需要重置逻辑，因为使用绝对定位会自然重置
     }
 
     closeMenuDisclosure() {

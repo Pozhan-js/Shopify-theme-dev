@@ -1,6 +1,6 @@
 {% comment %}
-  Home Product Info Section - 可后台编辑版
-  支持后台修改所有内容和图片
+  Home Product Info Section - Multi-SKU Support
+  Supports backend configuration for all content, images, and SKU variants
 {% endcomment %}
 
 <style>
@@ -72,6 +72,106 @@
     font-weight: bold;
   }
 
+  .sku-selector {
+    margin: 1.5rem 0;
+  }
+
+  .sku-selector h3 {
+    font-size: {{ section.settings.sku_title_font_size }}px;
+    color: {{ section.settings.sku_title_color }};
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .sku-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .sku-option {
+    position: relative;
+  }
+
+  .sku-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .sku-option label {
+    display: block;
+    padding: 0.75rem 1rem;
+    border: 2px solid {{ section.settings.sku_border_color }};
+    border-radius: {{ section.settings.sku_border_radius }}px;
+    background: {{ section.settings.sku_background_color }};
+    color: {{ section.settings.sku_text_color }};
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: {{ section.settings.sku_font_size }}px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .sku-option input[type="radio"]:checked + label {
+    border-color: #9ABD48;
+    background: #9ABD48;
+    color: white;
+  }
+
+  .sku-option label:hover {
+    border-color: #9ABD48;
+  }
+
+  .quantity-selector {
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .quantity-selector label {
+    font-size: {{ section.settings.quantity_font_size }}px;
+    color: {{ section.settings.quantity_color }};
+    font-weight: 600;
+  }
+
+  .quantity-input {
+    display: flex;
+    align-items: center;
+    border: 2px solid {{ section.settings.quantity_border_color }};
+    border-radius: {{ section.settings.quantity_border_radius }}px;
+    overflow: hidden;
+  }
+
+  .quantity-btn {
+    background: {{ section.settings.quantity_btn_background }};
+    color: {{ section.settings.quantity_btn_color }};
+    border: none;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+
+  .quantity-btn:hover {
+    background: #9ABD48;
+    color: white;
+  }
+
+  .quantity-number {
+    padding: 0.5rem 1rem;
+    border: none;
+    text-align: center;
+    font-size: {{ section.settings.quantity_font_size }}px;
+    font-weight: 600;
+    width: 60px;
+    background: white;
+  }
+
   .benefits-list {
     margin: 1.5rem 0;
     display: flex;
@@ -121,11 +221,15 @@
     color: {{ section.settings.flexible_color }};
   }
 
-  .buy-now-button {
+  .button-group {
     margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-direction: column;
+  }
+
+  .add-to-cart-button, .buy-now-button {
     padding: 1rem 2rem;
-    background: {{ section.settings.button_background_color }};
-    color: {{ section.settings.button_text_color }};
     border: none;
     border-radius: {{ section.settings.button_border_radius }}px;
     font-size: {{ section.settings.button_font_size }}px;
@@ -135,10 +239,28 @@
     display: inline-block;
     text-align: center;
     transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .add-to-cart-button {
+    background: {{ section.settings.add_to_cart_bg_color }};
+    color: {{ section.settings.add_to_cart_text_color }};
+    border: 2px solid #9ABD48;
+  }
+
+  .add-to-cart-button:hover {
+    background: #9ABD48;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .buy-now-button {
+    background: #9ABD48;
+    color: white;
   }
 
   .buy-now-button:hover {
-    opacity: 0.9;
+    background: #8aa63f;
     transform: translateY(-1px);
   }
 
@@ -147,6 +269,10 @@
     height: {{ section.settings.image_height }}px;
     object-fit: cover;
     border-radius: {{ section.settings.image_border_radius }}px;
+  }
+
+  .product-form {
+    width: 100%;
   }
 
   @media (max-width: 768px) {
@@ -161,6 +287,9 @@
 
     .benefit-item, .price-row, .total-row {
       font-size: {{ section.settings.benefit_font_size_mobile }}px;
+    }
+
+    .benefit-item {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.25rem;
@@ -170,51 +299,105 @@
       flex-direction: row;
       justify-content: space-between;
     }
+
+    .button-group {
+      flex-direction: column;
+    }
+
+    .sku-options {
+      justify-content: center;
+    }
+
+    .quantity-selector {
+      justify-content: center;
+    }
   }
 </style>
 
 <section class="product-info-section">
   <div class="product-info-container">
     <div class="product-info-grid">
-      <!-- 左侧文案 -->
+      <!-- Left Content -->
       <div class="product-info-left">
         <span class="product-badge">{{ section.settings.badge_text }}</span>
         <h1 class="product-title">{{ section.settings.product_title }}</h1>
         <p class="product-description">{{ section.settings.product_description }}</p>
 
         <div class="price-row">
-          <span>{{ section.settings.current_price }}</span>
-          <span class="price-old price-discount">{{ section.settings.old_price }}</span>
+          <span id="current-price">{{ section.settings.current_price }}</span>
+          <span class="price-old price-discount" id="old-price">{{ section.settings.old_price }}</span>
         </div>
 
         <p><strong>{{ section.settings.shipping_info }}</strong></p>
 
-        <div class="benefits-list">
-          {% for block in section.blocks %}
-            {% if block.type == 'benefit' %}
-              <div class="benefit-item">
-                <span>{{ block.settings.benefit_name }}</span>
-                <span class="value">{{ block.settings.benefit_value }}</span>
+        <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data">
+          <!-- SKU Selector -->
+          {% if section.blocks.size > 0 %}
+            <div class="sku-selector">
+              <h3>{{ section.settings.sku_selector_title }}</h3>
+              <div class="sku-options">
+                {% for block in section.blocks %}
+                  {% if block.type == 'sku_option' %}
+                    <div class="sku-option">
+                      <input type="radio" 
+                             id="sku-{{ forloop.index }}" 
+                             name="id" 
+                             value="{{ block.settings.variant_id }}"
+                             data-price="{{ block.settings.sku_price }}"
+                             data-old-price="{{ block.settings.sku_old_price }}"
+                             {% if forloop.first %}checked{% endif %}>
+                      <label for="sku-{{ forloop.index }}">{{ block.settings.sku_name }}</label>
+                    </div>
+                  {% endif %}
+                {% endfor %}
               </div>
-            {% endif %}
-          {% endfor %}
-        </div>
+            </div>
+          {% endif %}
 
-        <div class="total-row">
-          <span>{{ section.settings.total_label }}</span>
-          <span>{{ section.settings.total_price }}</span>
-        </div>
-        <p class="disclaimer">{{ section.settings.disclaimer_text }}</p>
+          <!-- Quantity Selector -->
+          <div class="quantity-selector">
+            <label for="quantity">{{ section.settings.quantity_label }}:</label>
+            <div class="quantity-input">
+              <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">−</button>
+              <input type="number" id="quantity" name="quantity" value="1" min="1" class="quantity-number" readonly>
+              <button type="button" class="quantity-btn" onclick="changeQuantity(1)">+</button>
+            </div>
+          </div>
 
-        <p class="guarantee">{{ section.settings.guarantee_text }}</p>
-        <p class="flexible">{{ section.settings.flexible_text }}</p>
-        
-        <a href="{{ section.settings.button_link }}" class="buy-now-button">
-          {{ section.settings.button_text }}
-        </a>
+          <!-- Benefits List -->
+          <div class="benefits-list">
+            {% for block in section.blocks %}
+              {% if block.type == 'benefit' %}
+                <div class="benefit-item">
+                  <span>{{ block.settings.benefit_name }}</span>
+                  <span class="value">{{ block.settings.benefit_value }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <div class="total-row">
+            <span>{{ section.settings.total_label }}</span>
+            <span id="total-price">{{ section.settings.total_price }}</span>
+          </div>
+          <p class="disclaimer">{{ section.settings.disclaimer_text }}</p>
+
+          <p class="guarantee">{{ section.settings.guarantee_text }}</p>
+          <p class="flexible">{{ section.settings.flexible_text }}</p>
+          
+          <!-- Button Group -->
+          <div class="button-group">
+            <button type="submit" name="add" class="add-to-cart-button">
+              {{ section.settings.add_to_cart_text }}
+            </button>
+            <button type="submit" name="add" class="buy-now-button" onclick="this.form.action='/cart/add'; this.form.submit(); window.location.href='/cart';">
+              {{ section.settings.buy_now_text }}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <!-- 右侧主图 -->
+      <!-- Right Image -->
       <div>
         {% if section.settings.main_image != blank %}
           <img src="{{ section.settings.main_image | image_url }}"
@@ -226,7 +409,7 @@
                class="main-image">
         {% else %}
           <div class="main-image placeholder-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
-            <span style="color: #9ca3af;">请上传图片</span>
+            <span style="color: #9ca3af;">Please upload an image</span>
           </div>
         {% endif %}
       </div>
@@ -234,13 +417,68 @@
   </div>
 </section>
 
+<script>
+  // Quantity change function
+  function changeQuantity(change) {
+    const quantityInput = document.getElementById('quantity');
+    let currentQuantity = parseInt(quantityInput.value);
+    let newQuantity = currentQuantity + change;
+    
+    if (newQuantity < 1) newQuantity = 1;
+    
+    quantityInput.value = newQuantity;
+    updateTotalPrice();
+  }
+
+  // Update price when SKU changes
+  document.addEventListener('DOMContentLoaded', function() {
+    const skuOptions = document.querySelectorAll('input[name="id"]');
+    const currentPriceElement = document.getElementById('current-price');
+    const oldPriceElement = document.getElementById('old-price');
+    
+    skuOptions.forEach(function(option) {
+      option.addEventListener('change', function() {
+        if (this.checked) {
+          const newPrice = this.getAttribute('data-price');
+          const newOldPrice = this.getAttribute('data-old-price');
+          
+          if (newPrice) currentPriceElement.textContent = newPrice;
+          if (newOldPrice) oldPriceElement.textContent = newOldPrice;
+          
+          updateTotalPrice();
+        }
+      });
+    });
+
+    // Initialize total price
+    updateTotalPrice();
+  });
+
+  function updateTotalPrice() {
+    const selectedSku = document.querySelector('input[name="id"]:checked');
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const totalPriceElement = document.getElementById('total-price');
+    
+    if (selectedSku && selectedSku.getAttribute('data-price')) {
+      const unitPrice = selectedSku.getAttribute('data-price');
+      // Extract numeric value from price string (assuming format like "$79/mo USD")
+      const priceMatch = unitPrice.match(/\$(\d+)/);
+      if (priceMatch) {
+        const numericPrice = parseInt(priceMatch[1]);
+        const totalPrice = numericPrice * quantity;
+        totalPriceElement.textContent = unitPrice.replace(/\$\d+/, '$' + totalPrice);
+      }
+    }
+  }
+</script>
+
 {% schema %}
 {
-  "name": "Home Product Info Section",
+  "name": "Product Info Section",
   "settings": [
     {
       "type": "header",
-      "content": "布局设置"
+      "content": "Layout Settings"
     },
     {
       "type": "range",
@@ -249,7 +487,7 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "顶部内边距",
+      "label": "Top Padding",
       "default": 64
     },
     {
@@ -259,36 +497,36 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "底部内边距",
+      "label": "Bottom Padding",
       "default": 64
     },
     {
       "type": "color",
       "id": "background_color",
-      "label": "背景颜色",
+      "label": "Background Color",
       "default": "#ffffff"
     },
     {
       "type": "header",
-      "content": "图片设置"
+      "content": "Image Settings"
     },
     {
       "type": "image_picker",
       "id": "main_image",
-      "label": "主图",
-      "info": "上传图片后自动适应"
+      "label": "Main Image",
+      "info": "Automatically adapts after uploading"
     },
     {
       "type": "image_picker",
       "id": "fallback_image",
-      "label": "备用图片",
-      "info": "当主图未设置时显示"
+      "label": "Fallback Image",
+      "info": "Displayed when main image is not set"
     },
     {
       "type": "text",
       "id": "main_image_alt",
-      "label": "图片Alt文本",
-      "default": "产品主图"
+      "label": "Image Alt Text",
+      "default": "Product Main Image"
     },
     {
       "type": "range",
@@ -297,7 +535,7 @@
       "max": 600,
       "step": 10,
       "unit": "px",
-      "label": "图片高度",
+      "label": "Image Height",
       "default": 450
     },
     {
@@ -307,41 +545,41 @@
       "max": 20,
       "step": 1,
       "unit": "px",
-      "label": "图片圆角",
+      "label": "Image Border Radius",
       "default": 12
     },
     {
       "type": "header",
-      "content": "产品信息"
+      "content": "Product Information"
     },
     {
       "type": "text",
       "id": "badge_text",
-      "label": "徽章文字",
+      "label": "Badge Text",
       "default": "Best Seller"
     },
     {
       "type": "color",
       "id": "badge_background_color",
-      "label": "徽章背景色",
-      "default": "#ef4444"
+      "label": "Badge Background Color",
+      "default": "#9ABD48"
     },
     {
       "type": "color",
       "id": "badge_text_color",
-      "label": "徽章文字色",
+      "label": "Badge Text Color",
       "default": "#ffffff"
     },
     {
       "type": "text",
       "id": "product_title",
-      "label": "产品标题",
+      "label": "Product Title",
       "default": "Get started with your AG1 Welcome Kit^"
     },
     {
       "type": "color",
       "id": "title_color",
-      "label": "标题颜色",
+      "label": "Title Color",
       "default": "#1f2937"
     },
     {
@@ -351,7 +589,7 @@
       "max": 48,
       "step": 2,
       "unit": "px",
-      "label": "标题字体大小",
+      "label": "Title Font Size",
       "default": 36
     },
     {
@@ -361,19 +599,19 @@
       "max": 36,
       "step": 2,
       "unit": "px",
-      "label": "移动端标题字体大小",
+      "label": "Mobile Title Font Size",
       "default": 30
     },
     {
       "type": "text",
       "id": "product_description",
-      "label": "产品描述",
+      "label": "Product Description",
       "default": "AG1 Pouch"
     },
     {
       "type": "color",
       "id": "description_color",
-      "label": "描述文字颜色",
+      "label": "Description Text Color",
       "default": "#6b7280"
     },
     {
@@ -383,37 +621,37 @@
       "max": 20,
       "step": 1,
       "unit": "px",
-      "label": "描述字体大小",
+      "label": "Description Font Size",
       "default": 18
     },
     {
       "type": "text",
       "id": "current_price",
-      "label": "当前价格",
+      "label": "Current Price",
       "default": "$79/mo USD"
     },
     {
       "type": "text",
       "id": "old_price",
-      "label": "原价",
+      "label": "Original Price",
       "default": "$99 USD†"
     },
     {
       "type": "color",
       "id": "price_color",
-      "label": "价格颜色",
+      "label": "Price Color",
       "default": "#1f2937"
     },
     {
       "type": "color",
       "id": "old_price_color",
-      "label": "原价颜色",
+      "label": "Original Price Color",
       "default": "#9ca3af"
     },
     {
       "type": "color",
       "id": "discount_color",
-      "label": "折扣颜色",
+      "label": "Discount Color",
       "default": "#ef4444"
     },
     {
@@ -423,31 +661,149 @@
       "max": 24,
       "step": 1,
       "unit": "px",
-      "label": "价格字体大小",
+      "label": "Price Font Size",
       "default": 18
     },
     {
       "type": "text",
       "id": "shipping_info",
-      "label": "配送信息",
+      "label": "Shipping Information",
       "default": "30 day supply per pouch, ships every 30 days"
+    },
+    {
+      "type": "header",
+      "content": "SKU Selector Settings"
+    },
+    {
+      "type": "text",
+      "id": "sku_selector_title",
+      "label": "SKU Selector Title",
+      "default": "Choose Your Plan"
+    },
+    {
+      "type": "color",
+      "id": "sku_title_color",
+      "label": "SKU Title Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "sku_title_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Title Font Size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "sku_background_color",
+      "label": "SKU Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "sku_text_color",
+      "label": "SKU Text Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "sku_border_color",
+      "label": "SKU Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "sku_border_radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "sku_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Font Size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Quantity Selector Settings"
+    },
+    {
+      "type": "text",
+      "id": "quantity_label",
+      "label": "Quantity Label",
+      "default": "Quantity"
+    },
+    {
+      "type": "color",
+      "id": "quantity_color",
+      "label": "Quantity Label Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "quantity_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Quantity Font Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "quantity_border_color",
+      "label": "Quantity Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "quantity_border_radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Quantity Border Radius",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "quantity_btn_background",
+      "label": "Quantity Button Background",
+      "default": "#f9fafb"
+    },
+    {
+      "type": "color",
+      "id": "quantity_btn_color",
+      "label": "Quantity Button Text Color",
+      "default": "#1f2937"
     },
     {
       "type": "text",
       "id": "total_label",
-      "label": "总价标签",
+      "label": "Total Label",
       "default": "Total"
     },
     {
       "type": "text",
       "id": "total_price",
-      "label": "总价",
+      "label": "Total Price",
       "default": "$79/mo USD"
     },
     {
       "type": "color",
       "id": "total_color",
-      "label": "总价颜色",
+      "label": "Total Color",
       "default": "#1f2937"
     },
     {
@@ -457,71 +813,72 @@
       "max": 24,
       "step": 1,
       "unit": "px",
-      "label": "总价字体大小",
+      "label": "Total Font Size",
       "default": 20
     },
     {
       "type": "text",
       "id": "disclaimer_text",
-      "label": "免责声明",
+      "label": "Disclaimer Text",
       "default": "† Value of one-time purchase"
     },
     {
       "type": "color",
       "id": "disclaimer_color",
-      "label": "免责声明颜色",
+      "label": "Disclaimer Color",
       "default": "#6b7280"
     },
     {
       "type": "text",
       "id": "guarantee_text",
-      "label": "保证文字",
+      "label": "Guarantee Text",
       "default": "90-day money back guarantee"
     },
     {
       "type": "color",
       "id": "guarantee_color",
-      "label": "保证文字颜色",
+      "label": "Guarantee Text Color",
       "default": "#1f2937"
     },
     {
       "type": "text",
       "id": "flexible_text",
-      "label": "灵活文字",
+      "label": "Flexible Text",
       "default": "Update or cancel anytime"
     },
     {
       "type": "color",
       "id": "flexible_color",
-      "label": "灵活文字颜色",
+      "label": "Flexible Text Color",
       "default": "#6b7280"
     },
     {
       "type": "header",
-      "content": "按钮设置"
+      "content": "Button Settings"
     },
     {
       "type": "text",
-      "id": "button_text",
-      "label": "按钮文字",
+      "id": "add_to_cart_text",
+      "label": "Add to Cart Button Text",
+      "default": "Add to Cart"
+    },
+    {
+      "type": "text",
+      "id": "buy_now_text",
+      "label": "Buy Now Button Text",
       "default": "Buy Now"
     },
     {
-      "type": "url",
-      "id": "button_link",
-      "label": "按钮链接"
-    },
-    {
       "type": "color",
-      "id": "button_background_color",
-      "label": "按钮背景色",
-      "default": "#ef4444"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "按钮文字色",
+      "id": "add_to_cart_bg_color",
+      "label": "Add to Cart Background Color",
       "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "add_to_cart_text_color",
+      "label": "Add to Cart Text Color",
+      "default": "#9ABD48"
     },
     {
       "type": "range",
@@ -530,7 +887,7 @@
       "max": 20,
       "step": 1,
       "unit": "px",
-      "label": "按钮字体大小",
+      "label": "Button Font Size",
       "default": 16
     },
     {
@@ -540,19 +897,19 @@
       "max": 12,
       "step": 1,
       "unit": "px",
-      "label": "按钮圆角",
+      "label": "Button Border Radius",
       "default": 8
     },
     {
       "type": "color",
       "id": "benefit_color",
-      "label": "福利项颜色",
+      "label": "Benefit Item Color",
       "default": "#1f2937"
     },
     {
       "type": "color",
       "id": "benefit_value_color",
-      "label": "福利值颜色",
+      "label": "Benefit Value Color",
       "default": "#6b7280"
     },
     {
@@ -562,7 +919,7 @@
       "max": 18,
       "step": 1,
       "unit": "px",
-      "label": "福利字体大小",
+      "label": "Benefit Font Size",
       "default": 16
     },
     {
@@ -572,39 +929,94 @@
       "max": 16,
       "step": 1,
       "unit": "px",
-      "label": "移动端福利字体大小",
+      "label": "Mobile Benefit Font Size",
       "default": 14
     }
   ],
   "blocks": [
     {
+      "type": "sku_option",
+      "name": "SKU Option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "sku_name",
+          "label": "SKU Name",
+          "default": "Monthly Plan"
+        },
+        {
+          "type": "text",
+          "id": "variant_id",
+          "label": "Shopify Variant ID",
+          "info": "Enter the Shopify variant ID for this SKU"
+        },
+        {
+          "type": "text",
+          "id": "sku_price",
+          "label": "SKU Price",
+          "default": "$79/mo USD"
+        },
+        {
+          "type": "text",
+          "id": "sku_old_price",
+          "label": "SKU Original Price",
+          "default": "$99 USD"
+        }
+      ]
+    },
+    {
       "type": "benefit",
-      "name": "福利项",
+      "name": "Benefit Item",
       "settings": [
         {
           "type": "text",
           "id": "benefit_name",
-          "label": "福利名称",
-          "default": "福利名称"
+          "label": "Benefit Name",
+          "default": "Benefit Name"
         },
         {
           "type": "text",
           "id": "benefit_value",
-          "label": "福利值",
-          "default": "福利值"
+          "label": "Benefit Value",
+          "default": "Benefit Value"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Home Product Info",
-      "category": "Home Page",
+      "name": "Product Info Section",
+      "category": "Product",
       "settings": {
         "product_title": "Get started with your AG1 Welcome Kit^",
-        "button_text": "Buy Now"
+        "add_to_cart_text": "Add to Cart",
+        "buy_now_text": "Buy Now"
       },
       "blocks": [
+        {
+          "type": "sku_option",
+          "settings": {
+            "sku_name": "Monthly Plan",
+            "sku_price": "$79/mo USD",
+            "sku_old_price": "$99 USD"
+          }
+        },
+        {
+          "type": "sku_option",
+          "settings": {
+            "sku_name": "3-Month Plan",
+            "sku_price": "$69/mo USD",
+            "sku_old_price": "$89 USD"
+          }
+        },
+        {
+          "type": "sku_option",
+          "settings": {
+            "sku_name": "6-Month Plan",
+            "sku_price": "$59/mo USD",
+            "sku_old_price": "$79 USD"
+          }
+        },
         {
           "type": "benefit",
           "settings": {
