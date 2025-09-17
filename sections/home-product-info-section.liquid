@@ -1,6 +1,6 @@
 {% comment %}
-  Home Product Info Section - Multi-SKU Support
-  Supports backend configuration for all content, images, and SKU variants
+  Product Info Section - Multi-SKU Support
+  Displays current product information from Shopify product object
 {% endcomment %}
 
 <style>
@@ -319,39 +319,101 @@
     <div class="product-info-grid">
       <!-- Left Content -->
       <div class="product-info-left">
-        <span class="product-badge">{{ section.settings.badge_text }}</span>
-        <h1 class="product-title">{{ section.settings.product_title }}</h1>
-        <p class="product-description">{{ section.settings.product_description }}</p>
+        {% if section.settings.badge_text != blank %}
+          <span class="product-badge">{{ section.settings.badge_text }}</span>
+        {% endif %}
+        
+        <h1 class="product-title">
+          {% if section.settings.use_product_title %}
+            {{ product.title }}
+          {% else %}
+            {{ section.settings.product_title | default: product.title }}
+          {% endif %}
+        </h1>
+        
+        <div class="product-description">
+          {% if section.settings.use_product_description %}
+            {{ product.description | truncate: 200 }}
+          {% else %}
+            {{ section.settings.product_description | default: product.description }}
+          {% endif %}
+        </div>
 
         <div class="price-row">
-          <span id="current-price">{{ section.settings.current_price }}</span>
-          <span class="price-old price-discount" id="old-price">{{ section.settings.old_price }}</span>
+          <span id="current-price">
+            {% if product.compare_at_price > product.price %}
+              {{ product.price | money }}
+            {% else %}
+              {{ product.price | money }}
+            {% endif %}
+          </span>
+          {% if product.compare_at_price > product.price %}
+            <span class="price-old price-discount" id="old-price">{{ product.compare_at_price | money }}</span>
+          {% endif %}
         </div>
 
         <p><strong>{{ section.settings.shipping_info }}</strong></p>
 
         <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data">
-          <!-- SKU Selector -->
-          {% if section.blocks.size > 0 %}
+          <!-- SKU Selector for Product Variants -->
+          {% if product.variants.size > 1 %}
             <div class="sku-selector">
               <h3>{{ section.settings.sku_selector_title }}</h3>
               <div class="sku-options">
-                {% for block in section.blocks %}
-                  {% if block.type == 'sku_option' %}
-                    <div class="sku-option">
-                      <input type="radio" 
-                             id="sku-{{ forloop.index }}" 
-                             name="id" 
-                             value="{{ block.settings.variant_id }}"
-                             data-price="{{ block.settings.sku_price }}"
-                             data-old-price="{{ block.settings.sku_old_price }}"
-                             {% if forloop.first %}checked{% endif %}>
-                      <label for="sku-{{ forloop.index }}">{{ block.settings.sku_name }}</label>
-                    </div>
-                  {% endif %}
+                {% for variant in product.variants %}
+                  <div class="sku-option">
+                    <input type="radio" 
+                           id="variant-{{ variant.id }}" 
+                           name="id" 
+                           value="{{ variant.id }}"
+                           data-price="{{ variant.price | money }}"
+                           data-old-price="{% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money }}{% endif %}"
+                           data-available="{{ variant.available }}"
+                           {% if forloop.first %}checked{% endif %}
+                           {% unless variant.available %}disabled{% endunless %}>
+                    <label for="variant-{{ variant.id }}">
+                      {{ variant.title }}
+                      {% unless variant.available %} - Sold Out{% endunless %}
+                    </label>
+                  </div>
                 {% endfor %}
               </div>
             </div>
+          {% else %}
+            <!-- Single variant product -->
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {% endif %}
+
+          <!-- Custom SKU Options from Section Blocks (if any) -->
+          {% if section.blocks.size > 0 %}
+            {% assign has_sku_blocks = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'sku_option' %}
+                {% assign has_sku_blocks = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+            
+            {% if has_sku_blocks %}
+              <div class="sku-selector">
+                <h3>{{ section.settings.custom_sku_title | default: "Additional Options" }}</h3>
+                <div class="sku-options">
+                  {% for block in section.blocks %}
+                    {% if block.type == 'sku_option' %}
+                      <div class="sku-option">
+                        <input type="radio" 
+                               id="custom-sku-{{ forloop.index }}" 
+                               name="custom_sku" 
+                               value="{{ block.settings.variant_id }}"
+                               data-price="{{ block.settings.sku_price }}"
+                               data-old-price="{{ block.settings.sku_old_price }}">
+                        <label for="custom-sku-{{ forloop.index }}">{{ block.settings.sku_name }}</label>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
           {% endif %}
 
           <!-- Quantity Selector -->
@@ -365,32 +427,42 @@
           </div>
 
           <!-- Benefits List -->
-          <div class="benefits-list">
-            {% for block in section.blocks %}
-              {% if block.type == 'benefit' %}
-                <div class="benefit-item">
-                  <span>{{ block.settings.benefit_name }}</span>
-                  <span class="value">{{ block.settings.benefit_value }}</span>
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
+          {% if section.blocks.size > 0 %}
+            <div class="benefits-list">
+              {% for block in section.blocks %}
+                {% if block.type == 'benefit' %}
+                  <div class="benefit-item">
+                    <span>{{ block.settings.benefit_name }}</span>
+                    <span class="value">{{ block.settings.benefit_value }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
 
           <div class="total-row">
             <span>{{ section.settings.total_label }}</span>
-            <span id="total-price">{{ section.settings.total_price }}</span>
+            <span id="total-price">{{ product.price | money }}</span>
           </div>
-          <p class="disclaimer">{{ section.settings.disclaimer_text }}</p>
+          
+          {% if section.settings.disclaimer_text != blank %}
+            <p class="disclaimer">{{ section.settings.disclaimer_text }}</p>
+          {% endif %}
 
-          <p class="guarantee">{{ section.settings.guarantee_text }}</p>
-          <p class="flexible">{{ section.settings.flexible_text }}</p>
+          {% if section.settings.guarantee_text != blank %}
+            <p class="guarantee">{{ section.settings.guarantee_text }}</p>
+          {% endif %}
+          
+          {% if section.settings.flexible_text != blank %}
+            <p class="flexible">{{ section.settings.flexible_text }}</p>
+          {% endif %}
           
           <!-- Button Group -->
           <div class="button-group">
-            <button type="submit" name="add" class="add-to-cart-button">
+            <button type="submit" name="add" class="add-to-cart-button" id="add-to-cart-btn">
               {{ section.settings.add_to_cart_text }}
             </button>
-            <button type="submit" name="add" class="buy-now-button" onclick="this.form.action='/cart/add'; this.form.submit(); window.location.href='/cart';">
+            <button type="button" class="buy-now-button" id="buy-now-btn">
               {{ section.settings.buy_now_text }}
             </button>
           </div>
@@ -399,17 +471,21 @@
 
       <!-- Right Image -->
       <div>
-        {% if section.settings.main_image != blank %}
-          <img src="{{ section.settings.main_image | image_url }}"
-               alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
+        {% if section.settings.use_product_image and product.featured_image %}
+          <img src="{{ product.featured_image | image_url: width: 600 }}"
+               alt="{{ product.featured_image.alt | default: product.title }}"
+               class="main-image">
+        {% elsif section.settings.main_image != blank %}
+          <img src="{{ section.settings.main_image | image_url: width: 600 }}"
+               alt="{{ section.settings.main_image_alt | default: product.title }}"
                class="main-image">
         {% elsif section.settings.fallback_image != blank %}
-          <img src="{{ section.settings.fallback_image | image_url }}"
-               alt="{{ section.settings.main_image_alt | default: section.settings.product_title }}"
+          <img src="{{ section.settings.fallback_image | image_url: width: 600 }}"
+               alt="{{ section.settings.main_image_alt | default: product.title }}"
                class="main-image">
         {% else %}
           <div class="main-image placeholder-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center;">
-            <span style="color: #9ca3af;">Please upload an image</span>
+            <span style="color: #9ca3af;">{{ product.title | default: "Product Image" }}</span>
           </div>
         {% endif %}
       </div>
@@ -430,23 +506,68 @@
     updateTotalPrice();
   }
 
-  // Update price when SKU changes
+  // Update price when variant changes
   document.addEventListener('DOMContentLoaded', function() {
-    const skuOptions = document.querySelectorAll('input[name="id"]');
+    const variantOptions = document.querySelectorAll('input[name="id"]');
     const currentPriceElement = document.getElementById('current-price');
     const oldPriceElement = document.getElementById('old-price');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const buyNowBtn = document.getElementById('buy-now-btn');
     
-    skuOptions.forEach(function(option) {
+    variantOptions.forEach(function(option) {
       option.addEventListener('change', function() {
         if (this.checked) {
           const newPrice = this.getAttribute('data-price');
           const newOldPrice = this.getAttribute('data-old-price');
+          const isAvailable = this.getAttribute('data-available') === 'true';
           
           if (newPrice) currentPriceElement.textContent = newPrice;
-          if (newOldPrice) oldPriceElement.textContent = newOldPrice;
+          
+          if (newOldPrice && newOldPrice !== '') {
+            if (!oldPriceElement) {
+              const priceRow = document.querySelector('.price-row');
+              const oldPriceSpan = document.createElement('span');
+              oldPriceSpan.className = 'price-old price-discount';
+              oldPriceSpan.id = 'old-price';
+              priceRow.appendChild(oldPriceSpan);
+            }
+            document.getElementById('old-price').textContent = newOldPrice;
+            document.getElementById('old-price').style.display = 'inline';
+          } else if (oldPriceElement) {
+            oldPriceElement.style.display = 'none';
+          }
+          
+          // Update button states based on availability
+          if (isAvailable) {
+            addToCartBtn.disabled = false;
+            buyNowBtn.disabled = false;
+            addToCartBtn.textContent = '{{ section.settings.add_to_cart_text }}';
+          } else {
+            addToCartBtn.disabled = true;
+            buyNowBtn.disabled = true;
+            addToCartBtn.textContent = 'Sold Out';
+          }
           
           updateTotalPrice();
         }
+      });
+    });
+
+    // Buy now button functionality
+    document.getElementById('buy-now-btn').addEventListener('click', function() {
+      const form = document.querySelector('.product-form');
+      const formData = new FormData(form);
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = '/cart';
+      })
+      .catch(error => {
+        console.error('Error:', error);
       });
     });
 
@@ -455,18 +576,20 @@
   });
 
   function updateTotalPrice() {
-    const selectedSku = document.querySelector('input[name="id"]:checked');
+    const selectedVariant = document.querySelector('input[name="id"]:checked');
     const quantity = parseInt(document.getElementById('quantity').value);
     const totalPriceElement = document.getElementById('total-price');
     
-    if (selectedSku && selectedSku.getAttribute('data-price')) {
-      const unitPrice = selectedSku.getAttribute('data-price');
-      // Extract numeric value from price string (assuming format like "$79/mo USD")
-      const priceMatch = unitPrice.match(/\$(\d+)/);
+    if (selectedVariant && selectedVariant.getAttribute('data-price')) {
+      const unitPrice = selectedVariant.getAttribute('data-price');
+      // Extract numeric value from price string
+      const priceMatch = unitPrice.match(/[\d,]+\.?\d*/);
       if (priceMatch) {
-        const numericPrice = parseInt(priceMatch[1]);
+        const numericPrice = parseFloat(priceMatch[0].replace(',', ''));
         const totalPrice = numericPrice * quantity;
-        totalPriceElement.textContent = unitPrice.replace(/\$\d+/, '$' + totalPrice);
+        const currency = unitPrice.match(/[^\d\s,\.]+/);
+        const currencySymbol = currency ? currency[0] : '$';
+        totalPriceElement.textContent = currencySymbol + totalPrice.toFixed(2);
       }
     }
   }
@@ -476,6 +599,31 @@
 {
   "name": "Product Info Section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Product Data Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_product_title",
+      "label": "Use Product Title",
+      "default": true,
+      "info": "Use the actual product title instead of custom title"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_product_description",
+      "label": "Use Product Description",
+      "default": true,
+      "info": "Use the actual product description instead of custom description"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_product_image",
+      "label": "Use Product Featured Image",
+      "default": true,
+      "info": "Use the product's featured image instead of custom image"
+    },
     {
       "type": "header",
       "content": "Layout Settings"
@@ -513,14 +661,14 @@
     {
       "type": "image_picker",
       "id": "main_image",
-      "label": "Main Image",
-      "info": "Automatically adapts after uploading"
+      "label": "Custom Main Image",
+      "info": "Used when 'Use Product Featured Image' is disabled"
     },
     {
       "type": "image_picker",
       "id": "fallback_image",
       "label": "Fallback Image",
-      "info": "Displayed when main image is not set"
+      "info": "Displayed when no product or custom image is available"
     },
     {
       "type": "text",
@@ -573,8 +721,8 @@
     {
       "type": "text",
       "id": "product_title",
-      "label": "Product Title",
-      "default": "Get started with your AG1 Welcome Kit^"
+      "label": "Custom Product Title",
+      "info": "Used when 'Use Product Title' is disabled"
     },
     {
       "type": "color",
@@ -605,8 +753,8 @@
     {
       "type": "text",
       "id": "product_description",
-      "label": "Product Description",
-      "default": "AG1 Pouch"
+      "label": "Custom Product Description",
+      "info": "Used when 'Use Product Description' is disabled"
     },
     {
       "type": "color",
@@ -623,18 +771,6 @@
       "unit": "px",
       "label": "Description Font Size",
       "default": 18
-    },
-    {
-      "type": "text",
-      "id": "current_price",
-      "label": "Current Price",
-      "default": "$79/mo USD"
-    },
-    {
-      "type": "text",
-      "id": "old_price",
-      "label": "Original Price",
-      "default": "$99 USD†"
     },
     {
       "type": "color",
@@ -668,17 +804,23 @@
       "type": "text",
       "id": "shipping_info",
       "label": "Shipping Information",
-      "default": "30 day supply per pouch, ships every 30 days"
+      "default": "Free shipping on orders over $50"
     },
     {
       "type": "header",
-      "content": "SKU Selector Settings"
+      "content": "Variant Selector Settings"
     },
     {
       "type": "text",
       "id": "sku_selector_title",
-      "label": "SKU Selector Title",
-      "default": "Choose Your Plan"
+      "label": "Variant Selector Title",
+      "default": "Choose Your Option"
+    },
+    {
+      "type": "text",
+      "id": "custom_sku_title",
+      "label": "Custom SKU Selector Title",
+      "default": "Additional Options"
     },
     {
       "type": "color",
@@ -795,12 +937,6 @@
       "default": "Total"
     },
     {
-      "type": "text",
-      "id": "total_price",
-      "label": "Total Price",
-      "default": "$79/mo USD"
-    },
-    {
       "type": "color",
       "id": "total_color",
       "label": "Total Color",
@@ -819,8 +955,7 @@
     {
       "type": "text",
       "id": "disclaimer_text",
-      "label": "Disclaimer Text",
-      "default": "† Value of one-time purchase"
+      "label": "Disclaimer Text"
     },
     {
       "type": "color",
@@ -831,8 +966,7 @@
     {
       "type": "text",
       "id": "guarantee_text",
-      "label": "Guarantee Text",
-      "default": "90-day money back guarantee"
+      "label": "Guarantee Text"
     },
     {
       "type": "color",
@@ -843,8 +977,7 @@
     {
       "type": "text",
       "id": "flexible_text",
-      "label": "Flexible Text",
-      "default": "Update or cancel anytime"
+      "label": "Flexible Text"
     },
     {
       "type": "color",
@@ -936,31 +1069,30 @@
   "blocks": [
     {
       "type": "sku_option",
-      "name": "SKU Option",
+      "name": "Custom SKU Option",
       "settings": [
         {
           "type": "text",
           "id": "sku_name",
           "label": "SKU Name",
-          "default": "Monthly Plan"
+          "default": "Custom Option"
         },
         {
           "type": "text",
           "id": "variant_id",
-          "label": "Shopify Variant ID",
-          "info": "Enter the Shopify variant ID for this SKU"
+          "label": "Variant ID",
+          "info": "Enter the variant ID for this custom option"
         },
         {
           "type": "text",
           "id": "sku_price",
           "label": "SKU Price",
-          "default": "$79/mo USD"
+          "default": "$79.00"
         },
         {
           "type": "text",
           "id": "sku_old_price",
-          "label": "SKU Original Price",
-          "default": "$99 USD"
+          "label": "SKU Original Price"
         }
       ]
     },
@@ -986,59 +1118,7 @@
   "presets": [
     {
       "name": "Product Info Section",
-      "category": "Product",
-      "settings": {
-        "product_title": "Get started with your AG1 Welcome Kit^",
-        "add_to_cart_text": "Add to Cart",
-        "buy_now_text": "Buy Now"
-      },
-      "blocks": [
-        {
-          "type": "sku_option",
-          "settings": {
-            "sku_name": "Monthly Plan",
-            "sku_price": "$79/mo USD",
-            "sku_old_price": "$99 USD"
-          }
-        },
-        {
-          "type": "sku_option",
-          "settings": {
-            "sku_name": "3-Month Plan",
-            "sku_price": "$69/mo USD",
-            "sku_old_price": "$89 USD"
-          }
-        },
-        {
-          "type": "sku_option",
-          "settings": {
-            "sku_name": "6-Month Plan",
-            "sku_price": "$59/mo USD",
-            "sku_old_price": "$79 USD"
-          }
-        },
-        {
-          "type": "benefit",
-          "settings": {
-            "benefit_name": "Welcome Kit",
-            "benefit_value": "Free ($28 USD)"
-          }
-        },
-        {
-          "type": "benefit",
-          "settings": {
-            "benefit_name": "AG1 Shaker, Scoop, and Canister",
-            "benefit_value": "Free"
-          }
-        },
-        {
-          "type": "benefit",
-          "settings": {
-            "benefit_name": "AG1 Travel Packs (5 count)",
-            "benefit_value": "Free ($19 USD)"
-          }
-        }
-      ]
+      "category": "Product"
     }
   ]
 }
