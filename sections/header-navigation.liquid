@@ -1,0 +1,581 @@
+<style>
+  /* Header Navigation Styles */
+  .nav-blur {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 9999px;
+    margin: 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+
+  .nav-container {
+    padding: 16px 24px;
+  }
+
+  .nav-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-bg {
+    background: #FFFFFF;
+    color: #DC2626;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  .site-name {
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.025em;
+    text-decoration: none;
+  }
+
+  .desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .dropdown {
+    position: relative;
+  }
+
+  .nav-item {
+    color: #FFFFFF;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-item:hover {
+    color: #E5E7EB;
+  }
+
+  .dropdown-arrow::after {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 6px;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 3px solid currentColor;
+    transition: transform 0.2s ease;
+  }
+
+  .dropdown:hover .dropdown-arrow::after {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    width: 192px;
+    border-radius: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .dropdown-item {
+    display: block;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #FFFFFF;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
+  }
+
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .contact-badge {
+    background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+    border: none;
+    border-radius: 9999px;
+    padding: 8px 16px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .contact-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .contact-badge:hover::before {
+    left: 100%;
+  }
+
+  .contact-badge:hover {
+    background: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    color: #FFFFFF;
+  }
+
+  .contact-number {
+    background: rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 11px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .search-icon {
+    transition: all 0.3s ease;
+    color: #FFFFFF;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .search-icon:hover {
+    transform: scale(1.1);
+    color: #DC2626;
+  }
+
+  .mobile-menu-toggle {
+    background: none;
+    border: none;
+    color: #FFFFFF;
+    padding: 8px;
+    cursor: pointer;
+    display: block;
+  }
+
+  .mobile-menu {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    display: none;
+  }
+
+  .mobile-menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-menu-item {
+    width: 100%;
+    text-align: left;
+    color: #FFFFFF;
+    background: none;
+    border: none;
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .mobile-menu-item:hover {
+    color: #E5E7EB;
+  }
+
+  .mobile-submenu {
+    margin-left: 16px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-submenu-item {
+    color: #9CA3AF;
+    text-decoration: none;
+    padding: 4px 0;
+    font-size: 14px;
+    transition: color 0.2s ease;
+  }
+
+  .mobile-submenu-item:hover {
+    color: #FFFFFF;
+  }
+
+  .mobile-contact-badge {
+    background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+    border: none;
+    border-radius: 9999px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-contact-badge:hover {
+    background: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
+    color: #FFFFFF;
+  }
+
+  /* Responsive styles */
+  @media (min-width: 1024px) {
+    .nav-blur {
+      margin: 24px 32px;
+    }
+    
+    .nav-container {
+      padding: 16px 32px;
+    }
+    
+    .desktop-nav {
+      display: flex;
+    }
+    
+    .contact-badge {
+      display: flex;
+    }
+    
+    .mobile-menu-toggle {
+      display: none;
+    }
+    
+    .mobile-menu {
+      display: none !important;
+    }
+  }
+</style>
+
+<header>
+  <div class="nav-blur">
+    <nav class="nav-container">
+      <div class="nav-flex">
+        <!-- Logo -->
+        <div class="logo-container">
+          <div class="logo-bg">
+            <span>XS</span>
+          </div>
+          <a href="{{ routes.root_url }}" class="site-name">
+            {{ section.settings.site_name | default: 'XSPilates' }}
+          </a>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <div class="desktop-nav">
+          {% assign nav_items = section.settings.nav_items | default: 'Pilates Equipment,OEM Service,Resources,About Us' | split: ',' %}
+          {% assign dropdown_flags = section.settings.dropdown_flags | default: 'true,false,true,true' | split: ',' %}
+          
+          {% for item in nav_items %}
+            {% assign index = forloop.index0 %}
+            {% assign has_dropdown = dropdown_flags[index] %}
+            {% assign nav_link_key = 'nav_link_' | append: forloop.index %}
+            
+            <div class="dropdown">
+              <a href="{{ section.settings[nav_link_key] | default: '#' }}" class="nav-item">
+                <span>{{ item }}</span>
+                {% if has_dropdown == 'true' %}
+                  <span class="dropdown-arrow"></span>
+                {% endif %}
+              </a>
+              
+              {% if has_dropdown == 'true' %}
+                <div class="dropdown-menu">
+                  <div style="padding: 8px 0;">
+                    {% case item %}
+                      {% when 'Pilates Equipment' %}
+                        {% assign sub_items = section.settings.pilates_subitems | default: 'Reformers,Cadillac,Chair,Barrels,Accessories' | split: ',' %}
+                      {% when 'Resources' %}
+                        {% assign sub_items = section.settings.resources_subitems | default: 'Blog,Videos,Manuals,Support' | split: ',' %}
+                      {% when 'About Us' %}
+                        {% assign sub_items = section.settings.about_subitems | default: 'Our Story,Team,Certifications,Contact' | split: ',' %}
+                    {% endcase %}
+                    
+                    {% for sub_item in sub_items %}
+                      {% assign sub_link_key = 'sub_link_' | append: forloop.index %}
+                      <a href="{{ section.settings[sub_link_key] | default: '#' }}" class="dropdown-item">
+                        {{ sub_item }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Right Side Actions -->
+        <div class="right-actions">
+          <!-- Contact Us Button -->
+          <a href="{{ section.settings.contact_link | default: '#contact' }}" class="contact-badge">
+            <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
+            <div class="contact-number">
+              <span>{{ section.settings.contact_number | default: '21' }}</span>
+            </div>
+          </a>
+
+          <!-- Search Icon -->
+          <button class="search-icon" onclick="toggleSearch()">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+
+          <!-- Mobile Menu Button -->
+          <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <svg class="menu-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg class="close-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+          {% for item in nav_items %}
+            {% assign index = forloop.index0 %}
+            {% assign has_dropdown = dropdown_flags[index] %}
+            
+            <div>
+              <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+                {{ item }}
+              </button>
+              {% if has_dropdown == 'true' %}
+                <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
+                  {% case item %}
+                    {% when 'Pilates Equipment' %}
+                      {% assign sub_items = section.settings.pilates_subitems | default: 'Reformers,Cadillac,Chair,Barrels,Accessories' | split: ',' %}
+                    {% when 'Resources' %}
+                      {% assign sub_items = section.settings.resources_subitems | default: 'Blog,Videos,Manuals,Support' | split: ',' %}
+                    {% when 'About Us' %}
+                      {% assign sub_items = section.settings.about_subitems | default: 'Our Story,Team,Certifications,Contact' | split: ',' %}
+                  {% endcase %}
+                  
+                  {% for sub_item in sub_items %}
+                    {% assign sub_link_key = 'sub_link_' | append: forloop.index %}
+                    <a href="{{ section.settings[sub_link_key] | default: '#' }}" class="mobile-submenu-item">
+                      {{ sub_item }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+          
+          <a href="{{ section.settings.contact_link | default: '#contact' }}" class="mobile-contact-badge">
+            <span>{{ section.settings.contact_text | default: 'Contact Us' }}</span>
+            <div class="contact-number">
+              <span>{{ section.settings.contact_number | default: '21' }}</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+function toggleMobileMenu() {
+  const mobileMenu = document.getElementById('mobileMenu');
+  const menuIcon = document.querySelector('.menu-icon');
+  const closeIcon = document.querySelector('.close-icon');
+  
+  if (mobileMenu.style.display === 'none' || mobileMenu.style.display === '') {
+    mobileMenu.style.display = 'block';
+    menuIcon.style.display = 'none';
+    closeIcon.style.display = 'block';
+  } else {
+    mobileMenu.style.display = 'none';
+    menuIcon.style.display = 'block';
+    closeIcon.style.display = 'none';
+  }
+}
+
+function toggleSubmenu(submenuId) {
+  const submenu = document.getElementById(submenuId);
+  if (submenu.style.display === 'none' || submenu.style.display === '') {
+    submenu.style.display = 'flex';
+  } else {
+    submenu.style.display = 'none';
+  }
+}
+
+function toggleSearch() {
+  // 搜索功能实现
+  console.log('Search clicked');
+}
+</script>
+
+{% schema %}
+{
+  "name": "Header Navigation",
+  "settings": [
+    {
+      "type": "text",
+      "id": "site_name",
+      "label": "Site Name",
+      "default": "XSPilates"
+    },
+    {
+      "type": "text",
+      "id": "nav_items",
+      "label": "Navigation Items (comma separated)",
+      "default": "Pilates Equipment,OEM Service,Resources,About Us"
+    },
+    {
+      "type": "text",
+      "id": "dropdown_flags",
+      "label": "Dropdown Flags (true/false, comma separated)",
+      "default": "true,false,true,true"
+    },
+    {
+      "type": "text",
+      "id": "pilates_subitems",
+      "label": "Pilates Equipment Sub-items",
+      "default": "Reformers,Cadillac,Chair,Barrels,Accessories"
+    },
+    {
+      "type": "text",
+      "id": "resources_subitems",
+      "label": "Resources Sub-items",
+      "default": "Blog,Videos,Manuals,Support"
+    },
+    {
+      "type": "text",
+      "id": "about_subitems",
+      "label": "About Us Sub-items",
+      "default": "Our Story,Team,Certifications,Contact"
+    },
+    {
+      "type": "text",
+      "id": "contact_text",
+      "label": "Contact Button Text",
+      "default": "Contact Us"
+    },
+    {
+      "type": "text",
+      "id": "contact_number",
+      "label": "Contact Badge Number",
+      "default": "21"
+    },
+    {
+      "type": "url",
+      "id": "contact_link",
+      "label": "Contact Button Link"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_1",
+      "label": "Navigation Link 1"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_2",
+      "label": "Navigation Link 2"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_3",
+      "label": "Navigation Link 3"
+    },
+    {
+      "type": "url",
+      "id": "nav_link_4",
+      "label": "Navigation Link 4"
+    },
+    {
+      "type": "url",
+      "id": "sub_link_1",
+      "label": "Sub Link 1"
+    },
+    {
+      "type": "url",
+      "id": "sub_link_2",
+      "label": "Sub Link 2"
+    },
+    {
+      "type": "url",
+      "id": "sub_link_3",
+      "label": "Sub Link 3"
+    },
+    {
+      "type": "url",
+      "id": "sub_link_4",
+      "label": "Sub Link 4"
+    },
+    {
+      "type": "url",
+      "id": "sub_link_5",
+      "label": "Sub Link 5"
+    }
+  ]
+}
+{% endschema %}

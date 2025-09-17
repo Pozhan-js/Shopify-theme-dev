@@ -1,0 +1,259 @@
+<style>
+  /* Hero Banner Styles */
+  .hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)),
+                url('{{ section.settings.hero_background_image | img_url: '2048x' }}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    padding-top: 128px;
+    width: 100%;
+  }
+
+  .hero-content {
+    max-width: 1024px;
+  }
+
+  .hero-title {
+    color: #FFFFFF;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-size: 48px;
+    margin-bottom: 24px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .hero-subtitle {
+    color: #D1D5DB;
+    font-weight: 400;
+    line-height: 1.6;
+    font-size: 18px;
+    margin-bottom: 32px;
+    max-width: 512px;
+  }
+
+  .cta-button {
+    background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+    transition: all 0.3s ease;
+    color: #FFFFFF;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .cta-button:hover::before {
+    left: 100%;
+  }
+
+  .cta-button:hover {
+    background: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    transform: translateY(-2px);
+    color: #FFFFFF;
+  }
+
+  .cta-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .cta-button:hover .cta-icon {
+    transform: translateX(4px);
+  }
+
+  /* Default background if no image is set */
+  .hero-section.default-bg {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), 
+                      url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+  }
+
+  /* Responsive styles */
+  @media (min-width: 1024px) {
+    .hero-container {
+      padding: 0 32px;
+      padding-top: 128px;
+    }
+    
+    .hero-title {
+      font-size: 72px;
+    }
+    
+    .hero-subtitle {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-container {
+      padding-top: 100px;
+    }
+    
+    .hero-title {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+      font-size: 16px;
+      margin-bottom: 28px;
+    }
+    
+    .cta-button {
+      font-size: 16px;
+      padding: 14px 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 32px;
+    }
+    
+    .hero-subtitle {
+      font-size: 15px;
+    }
+    
+    .cta-button {
+      font-size: 15px;
+      padding: 12px 24px;
+    }
+  }
+
+  /* Animation effects */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero-content > * {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .hero-title {
+    animation-delay: 0.2s;
+  }
+
+  .hero-subtitle {
+    animation-delay: 0.4s;
+  }
+
+  .cta-button {
+    animation-delay: 0.6s;
+  }
+</style>
+
+<section class="hero-section {% if section.settings.hero_background_image == blank %}default-bg{% endif %}">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        {% if section.settings.hero_title != blank %}
+          {{ section.settings.hero_title | newline_to_br }}
+        {% else %}
+          The Pilates Equipment<br>
+          Manufacturer Behind Global<br>
+          Pilates Brands
+        {% endif %}
+      </h1>
+      
+      <p class="hero-subtitle">
+        {{ section.settings.hero_subtitle | default: "Supplying 25%+ of the world's total pilates equipment production" }}
+      </p>
+      
+      {% if section.settings.show_cta_button %}
+        <a href="{{ section.settings.cta_link | default: '#quote' }}" class="cta-button">
+          <svg class="cta-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          <span>{{ section.settings.cta_text | default: 'GET A QUOTE' }}</span>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero Banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "hero_background_image",
+      "label": "Background Image",
+      "info": "Recommended size: 2048x1024px or larger"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_title",
+      "label": "Hero Title",
+      "default": "The Pilates Equipment\nManufacturer Behind Global\nPilates Brands",
+      "info": "Use line breaks to control text layout"
+    },
+    {
+      "type": "text",
+      "id": "hero_subtitle",
+      "label": "Hero Subtitle",
+      "default": "Supplying 25%+ of the world's total pilates equipment production"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cta_button",
+      "label": "Show CTA Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "CTA Button Text",
+      "default": "GET A QUOTE"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "CTA Button Link",
+      "info": "Where the button should link to"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Banner"
+    }
+  ]
+}
+{% endschema %}
