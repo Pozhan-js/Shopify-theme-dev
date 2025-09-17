@@ -47,6 +47,18 @@
     content_for 'block', type: '_header-logo', id: 'header-logo'
   endcapture
 
+  capture header_image
+    if section.settings.header_image != blank
+      assign image_url = section.settings.header_image | image_url: width: 1000
+      echo '<!-- Image URL: ' | append: image_url | append: ' -->'
+      echo '<div class="header__image-container" style="margin-right: ' | append: section.settings.image_spacing | append: 'px; max-height: ' | append: section.settings.image_max_height | append: 'px; background-color: red;">'
+      echo image_url | image_tag
+      echo '</div>'
+    else
+      echo '<!-- No header image configured -->'
+    endif
+  endcapture
+
   capture menu
     content_for 'block', type: '_header-menu', id: 'header-menu'
   endcapture
