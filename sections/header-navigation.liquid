@@ -43,6 +43,23 @@
     font-size: 18px;
   }
 
+  .logo-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+
   .site-name {
     color: #FFFFFF;
     font-weight: 600;
@@ -318,9 +335,18 @@
       <div class="nav-flex">
         <!-- Logo -->
         <div class="logo-container">
-          <div class="logo-bg">
-            <span>{{ section.settings.logo_text | default: 'XS' }}</span>
-          </div>
+          {% if section.settings.logo_image %}
+            <div class="logo-image">
+              <img src="{{ section.settings.logo_image | img_url: '64x64' }}" 
+                   alt="{{ section.settings.site_name | default: shop.name }}"
+                   width="32" 
+                   height="32">
+            </div>
+          {% else %}
+            <div class="logo-bg">
+              <span>{{ section.settings.logo_text | default: 'XS' }}</span>
+            </div>
+          {% endif %}
           <a href="{{ routes.root_url }}" class="site-name">
             {{ section.settings.site_name | default: shop.name }}
           </a>
@@ -477,6 +503,12 @@ function toggleSearch() {
       "content": "Logo Settings"
     },
     {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Logo Image",
+      "info": "Upload a logo image (recommended size: 64x64px). If no image is uploaded, logo text will be displayed instead."
+    },
+    {
       "type": "text",
       "id": "site_name",
       "label": "Site Name",
@@ -488,7 +520,7 @@ function toggleSearch() {
       "id": "logo_text",
       "label": "Logo Text",
       "default": "XS",
-      "info": "Short text displayed in logo"
+      "info": "Short text displayed in logo (only shown if no logo image is uploaded)"
     },
     {
       "type": "header",
