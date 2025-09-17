@@ -9,27 +9,39 @@
     </div>
     
     <div class="slider-container">
-      {% for block in section.blocks %}
-        <div class="slide" {{ block.shopify_attributes }}>
-          <div class="slide-content">
-            <div class="slide-image">
-              {% if block.settings.image != blank %}
-                <img src="{{ block.settings.image | img_url: '800x' }}" 
-                     alt="{{ block.settings.image.alt | escape }}"
-                     width="800"
-                     height="600"
-                     loading="lazy"
-                     style="object-fit: cover;">
-              {% else %}
-                <div class="placeholder-image">{{ 'image' | placeholder_svg_tag }}</div>
-              {% endif %}
-            </div>
-            <div class="slide-text">
-              {{ block.settings.text }}
+      <div class="slides-wrapper">
+        {% for block in section.blocks %}
+          <div class="slide" {{ block.shopify_attributes }}>
+            <div class="slide-content">
+              <div class="slide-image">
+                {% if block.settings.image != blank %}
+                  <img src="{{ block.settings.image | img_url: '800x' }}" 
+                       alt="{{ block.settings.image.alt | escape }}"
+                       width="800"
+                       height="600"
+                       loading="lazy"
+                       style="object-fit: cover;">
+                {% else %}
+                  <div class="placeholder-image">{{ 'image' | placeholder_svg_tag }}</div>
+                {% endif %}
+              </div>
+              <div class="slide-text">
+                <div class="text-top-image">
+                  {% if block.settings.top_image != blank %}
+                    <img src="{{ block.settings.top_image | img_url: '100x20' }}" 
+                         alt="{{ block.settings.top_image.alt | escape }}"
+                         width="100"
+                         height="20"
+                         loading="lazy"
+                         style="margin-top: {{ block.settings.image_margin_top }}px; margin-bottom: {{ block.settings.image_margin_bottom }}px;">
+                  {% endif %}
+                </div>
+                {{ block.settings.text }}
+              </div>
             </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      </div>
     </div>
   </div>
 </div>
@@ -46,17 +58,21 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
+    padding: 5px 10px;
   }
   .slider-container {
     position: relative;
     overflow: hidden;
-    white-space: nowrap;
+    width: 100%;
+  }
+  .slides-wrapper {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    will-change: transform;
   }
   .slide {
-    display: inline-block;
-    width: 100%;
-    vertical-align: top;
-    white-space: normal;
+    flex: 0 0 100%;
+    min-width: 0;
   }
   .slide-content {
     display: flex;
@@ -69,6 +85,7 @@
   .slide-image img {
     width: 100%;
     height: auto;
+    max-width: 100%;
   }
   .slide-text {
     flex: 1;
@@ -78,22 +95,29 @@
     background: #f5f5f5;
     padding: 20px;
   }
+  @media (max-width: 749px) {
+    .slide-content {
+      flex-direction: column;
+    }
+  }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const slider = document.querySelector('.slider-container');
+  const sliderWrapper = document.querySelector('.slides-wrapper');
   const slides = document.querySelectorAll('.slide');
   const prevBtn = document.querySelector('.slider-prev');
   const nextBtn = document.querySelector('.slider-next');
   let currentIndex = 0;
   let autoPlayInterval;
+  let isTransitioning = false;
 
   function goToSlide(index) {
-    if (index >= 0 && index < slides.length) {
-      slider.style.transform = `translateX(-${index * 100}%)`;
-      currentIndex = index;
-    }
+    if (isTransitioning || index < 0 || index >= slides.length) return;
+    
+    isTransitioning = true;
+    currentIndex = index;
+    sliderWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
   }
 
   function startAutoPlay() {
@@ -103,17 +127,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
   }
 
+  sliderWrapper.addEventListener('transitionend', () => {
+    isTransitioning = false;
+  });
+
   prevBtn.addEventListener('click', () => {
+    if (isTransitioning) return;
     clearInterval(autoPlayInterval);
-    currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-    goToSlide(currentIndex);
+    goToSlide((currentIndex - 1 + slides.length) % slides.length);
     startAutoPlay();
   });
 
   nextBtn.addEventListener('click', () => {
+    if (isTransitioning) return;
     clearInterval(autoPlayInterval);
-    currentIndex = (currentIndex + 1) % slides.length;
-    goToSlide(currentIndex);
+    goToSlide((currentIndex + 1) % slides.length);
     startAutoPlay();
   });
 
@@ -143,6 +171,31 @@ document.addEventListener('DOMContentLoaded', function() {
           "type": "image_picker",
           "id": "image",
           "label": "图片"
+        },
+        {
+          "type": "image_picker",
+          "id": "top_image",
+          "label": "顶部小图片"
+        },
+        {
+          "type": "range",
+          "id": "image_margin_top",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "图片上边距",
+          "default": 5
+        },
+        {
+          "type": "range",
+          "id": "image_margin_bottom",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "图片下边距",
+          "default": 5
         },
         {
           "type": "richtext",
