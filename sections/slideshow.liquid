@@ -36,6 +36,21 @@
   class="spacing-style section section--{{ section.settings.section_width }} color-{{ section.settings.color_scheme }} disable-section-top-offset"
   style="{% render 'spacing-padding', settings: section.settings %}"
 >
+  <!-- 左侧悬浮文本框 -->
+  <div class="banner-overlay-left" style="font-weight: {{ section.settings.left_text_weight }};">
+    {{ section.settings.left_text }}
+  </div>
+  
+  <!-- 右侧悬浮图片 -->
+  <div class="banner-overlay-right">
+    {% if section.settings.right_image != blank %}
+      <img src="{{ section.settings.right_image | img_url: '400x400' }}" 
+           alt="{{ section.settings.right_image.alt | escape }}"
+           loading="lazy"
+           width="200"
+           height="200">
+    {% endif %}
+  </div>
   {% render 'slideshow',
     class: slideshow_class,
     controls: controls,
@@ -48,6 +63,43 @@
     slide_size: section.settings.slide_height
   %}
 </div>
+
+<style>
+  .banner-overlay-left {
+    position: absolute;
+    left: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    max-width: 40%;
+    padding: 2rem;
+    background-color: transparent;
+    z-index: 2;
+    color: {{ section.settings.left_text_color }};
+    font-size: {{ section.settings.left_text_size }}px;
+  }
+
+  .banner-overlay-right {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%) perspective(1000px) rotateY(15deg);
+    width: 200px;
+    height: 200px;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+
+  .banner-overlay-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+
+  .banner-overlay-right:hover {
+    transform: translateY(-50%) perspective(1000px) rotateY(15deg) scale(1.1);
+  }
+</style>
 
 {% schema %}
 {
@@ -62,6 +114,61 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "header",
+      "content": "悬浮元素设置"
+    },
+    {
+      "type": "richtext",
+      "id": "left_text",
+      "label": "左侧文本内容",
+      "default": "<p>这里是您的文本</p>"
+    },
+    {
+      "type": "color",
+      "id": "left_text_color",
+      "label": "左侧文本颜色",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "left_text_size",
+      "min": 14,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "左侧文本大小",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "left_text_weight",
+      "label": "左侧文本粗细",
+      "options": [
+        {
+          "value": "normal",
+          "label": "普通"
+        },
+        {
+          "value": "bold",
+          "label": "加粗"
+        },
+        {
+          "value": "bolder",
+          "label": "特粗"
+        },
+        {
+          "value": "900",
+          "label": "最粗"
+        }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_image",
+      "label": "右侧图片"
+    },
     {
       "type": "select",
       "id": "icons_style",
