@@ -1,0 +1,244 @@
+{% comment %}
+  工业制造模块 - Liquid 模板
+  支持后台可编辑的完整模块
+{% endcomment %}
+
+{% assign bg_image = section.settings.background_image | default: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' %}
+{% assign main_title = section.settings.main_title | default: 'WHERE TRUST IS MANUFACTURED' %}
+{% assign subtitle = section.settings.subtitle | default: 'XSPilates' %}
+{% assign description = section.settings.description | default: "We don't outsource trust-we produce it, in a 180,000m² facility optimized for precision, scale, and speed." %}
+{% assign icon = section.settings.icon | default: '⚙️' %}
+
+<style>
+  .manufacturing-section-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Arial'
+    , sans-serif;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('{{ bg_image }}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .background-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+    z-index: 1;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    z-index: 2;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    padding-right: 80px;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .text-content {
+    max-width: 500px;
+    color: white;
+    text-align: left;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0 0 60px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .icon {
+    font-size: 2.5rem;
+    margin-top: 5px;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .text-block {
+    flex: 1;
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .subtitle {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 15px;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .manufacturing-section-{{ section.id }}
+  .description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    margin: 0;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .manufacturing-section-{{ section.id }} .content-wrapper {
+      justify-content: center;
+      padding-right: 20px;
+      text-align: center;
+    }
+
+    .manufacturing-section-{{ section.id }}
+    .main-title {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+
+    .manufacturing-section-{{ section.id }}
+    .feature-item {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .manufacturing-section-{{ section.id }} .main-title {
+      font-size: 2rem;
+    }
+
+    .manufacturing-section-{{ section.id }}
+    .subtitle {
+      font-size: 1.2rem;
+    }
+
+    .manufacturing-section-{{ section.id }}
+    .description {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<section class="manufacturing-section-{{ section.id }}">
+  <div class="background-overlay">
+    <div class="container">
+      <div class="content-wrapper">
+        <div class="text-content">
+          {% if main_title != blank %}
+            <h2 class="main-title">{{ main_title }}</h2>
+          {% endif %}
+
+          <div class="feature-item">
+            {% if icon != blank %}
+              <div class="icon">{{ icon }}</div>
+            {% endif %}
+
+            <div class="text-block">
+              {% if subtitle != blank %}
+                <h3 class="subtitle">{{ subtitle }}</h3>
+              {% endif %}
+
+              {% if description != blank %}
+                <p class="description">{{ description }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+  {
+    "name": "工业制造模块",
+    "tag": "section",
+    "class": "manufacturing-section",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "background_image",
+        "label": "背景图片",
+        "info": "推荐尺寸: 1920x1080px"
+      },
+      {
+        "type": "text",
+        "id": "main_title",
+        "label": "主标题",
+        "default": "WHERE TRUST IS MANUFACTURED",
+        "placeholder": "输入主标题文本"
+      },
+      {
+        "type": "text",
+        "id": "subtitle",
+        "label": "副标题",
+        "default": "XSPilates",
+        "placeholder": "输入副标题文本"
+      },
+      {
+        "type": "textarea",
+        "id": "description",
+        "label": "描述文本",
+        "default": "We don't outsource trust-we produce it, in a 180,000m² facility optimized for precision, scale, and speed.",
+        "placeholder": "输入描述文本"
+      },
+      {
+        "type": "text",
+        "id": "icon",
+        "label": "图标",
+        "default": "⚙️",
+        "info": "可以使用 Emoji 或字符"
+      }
+    ],
+    "presets": [
+      {
+        "name": "工业制造模块",
+        "settings": {
+          "main_title": "WHERE TRUST IS MANUFACTURED",
+          "subtitle": "XSPilates",
+          "description": "We don't outsource trust-we produce it, in a 180,000m² facility optimized for precision, scale, and speed.",
+          "icon": "⚙️"
+        }
+      }
+    ]
+  }
+{% endschema %}

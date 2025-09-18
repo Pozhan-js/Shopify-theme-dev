@@ -32,8 +32,8 @@
                       cx="40"
                       cy="40"
                       r="35"
-                      fill="{{ section.settings.icon_bg_color }}"
-                      stroke="{{ section.settings.icon_border_color }}"
+                      fill="{{ section.settings.iconbgcolor }}"
+                      stroke="{{ section.settings.iconbordercolor }}"
                       stroke-width="2" />
                     <path d="M30 40h20v10H30z" fill="#fff" />
                   </svg>
@@ -73,50 +73,49 @@
 
         <div class="carousel-wrapper">
           <div class="carousel-track">
-            {% for block in section.blocks %}
-              {% if block.type == 'statistic' %}
-                <div class="statistic-slide" {{ block.shopify_attributes }}>
-                  <div class="statistic-image">
-                    {% if block.settings.image != blank %}
-                      <img
-                        src="{{ block.settings.image | img_url: '400x300' }}"
-                        alt="{{ block.settings.number }}"
-                        loading="lazy">
-                    {% else %}
-                      <div class="placeholder-image">
-                        <svg
-                          width="100%"
+            {% assign statblocks = section.blocks | where: 'type', 'statistic' %}
+            {% for block in statblocks %}
+              <div class="statistic-item" {{ block.shopify_attributes }}>
+                <div class="statistic-image">
+                  {% if block.settings.image != blank %}
+                    <img
+                      src="{{ block.settings.image | img_url: '400x300' }}"
+                      alt="{{ block.settings.number }}"
+                      loading="lazy">
+                  {% else %}
+                    <div class="placeholder-image">
+                      <svg
+                        width="100%"
+                        height="200"
+                        viewBox="0 0 400 200"
+                        fill="none">
+                        <rect
+                          width="400"
                           height="200"
-                          viewBox="0 0 400 200"
-                          fill="none">
-                          <rect
-                            width="400"
-                            height="200"
-                            fill="#f5f5f5" />
-                          <rect
-                            x="150"
-                            y="75"
-                            width="100"
-                            height="50"
-                            fill="#ddd" />
-                        </svg>
-                      </div>
-                    {% endif %}
-                  </div>
-                  <div class="statistic-content">
-                    {% if block.settings.number != blank %}
-                      <h3 class="statistic-number">{{ block.settings.number }}</h3>
-                    {% endif %}
-                    {% if block.settings.label != blank %}
-                      <p class="statistic-label">{{ block.settings.label }}</p>
-                    {% endif %}
-                    <div class="statistic-divider"></div>
-                    {% if block.settings.description != blank %}
-                      <p class="statistic-description">{{ block.settings.description }}</p>
-                    {% endif %}
-                  </div>
+                          fill="#f5f5f5" />
+                        <rect
+                          x="150"
+                          y="75"
+                          width="100"
+                          height="50"
+                          fill="#ddd" />
+                      </svg>
+                    </div>
+                  {% endif %}
                 </div>
-              {% endif %}
+                <div class="statistic-content">
+                  {% if block.settings.number != blank %}
+                    <h3 class="statistic-number">{{ block.settings.number }}</h3>
+                  {% endif %}
+                  {% if block.settings.label != blank %}
+                    <p class="statistic-label">{{ block.settings.label }}</p>
+                  {% endif %}
+                  <div class="statistic-divider"></div>
+                  {% if block.settings.description != blank %}
+                    <p class="statistic-description">{{ block.settings.description }}</p>
+                  {% endif %}
+                </div>
+              </div>
             {% endfor %}
           </div>
         </div>
@@ -139,13 +138,8 @@
 
       <!-- 轮播指示器 -->
       <div class="carousel-indicators">
-        {% assign stat_count = 0 %}
-        {% for block in section.blocks %}
-          {% if block.type == 'statistic' %}
-            {% assign stat_count = stat_count | plus: 1 %}
-          {% endif %}
-        {% endfor %}
-        {% for i in (1..stat_count) %}
+        {% assign statblocks = section.blocks | where: 'type', 'statistic' %}
+        {% for i in (1..statblocks.size) %}
           <button class="indicator {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.index0 }}"></button>
         {% endfor %}
       </div>
@@ -155,10 +149,9 @@
 
 <style>
   .sustainable-manufacturing-section {
-    margin-top: calc({{ section.settings.margin_top }}px * 100vw / 1920px);
-    padding: {{ section.settings.padding_top }}
-    px 0{{ section.settings.padding_bottom }}px;
-    background-color: {{ section.settings.background_color }};
+    padding-top: calc({{ section.settings.margintop }} * 100vw / 1920 + {{ section.settings.paddingtop }}px);
+    padding-bottom: {{ section.settings.paddingbottom }}px;
+    background-color: {{ section.settings.backgroundcolor }};
   }
 
   .container {
@@ -173,46 +166,52 @@
   }
 
   .section-title {
-    font-size: {{ section.settings.title_size }}px;
-    font-weight: {{ section.settings.title_weight }};
-    color: {{ section.settings.title_color }};
+    font-size: {{ section.settings.titlesize }}px;
+    font-weight: {{ section.settings.titleweight }};
+    color: {{ section.settings.titlecolor }};
     margin: 0 0 20px;
     line-height: 1.2;
   }
 
   .section-description {
-    font-size: {{ section.settings.description_size }}px;
-    color: {{ section.settings.description_color }};
+    font-size: {{ section.settings.descriptionsize }}px;
+    color: {{ section.settings.descriptioncolor }};
     line-height: 1.6;
-    max-width: 800px;
+    max-width: 600px;
     margin: 0 auto;
   }
 
   /* 认证图标样式 */
   .certifications-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: {{ section.settings.cert_gap }}px;
-    margin-bottom: 80px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: {{ section.settings.certgap }}px;
+    margin-bottom: 60px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .certification-item {
     text-align: center;
-    padding: 20px;
+    padding: 15px;
   }
 
   .certification-icon {
-    width: {{ section.settings.icon_size }}px;
-    height: {{ section.settings.icon_size }}px;
-    margin: 0 auto 20px;
+    width: {{ section.settings.iconsize }}px;
+    height: {{ section.settings.iconsize }}px;
+    margin: 0 auto 15px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: {{ section.settings.iconbgcolor }};
+    border-radius: 50%;
+    padding: 15px;
   }
 
   .certification-icon img {
-    width: 100%;
-    height: 100%;
+    width: 70%;
+    height: 70%;
     object-fit: contain;
   }
 
@@ -225,17 +224,17 @@
   }
 
   .certification-title {
-    font-size: {{ section.settings.cert_title_size }}px;
-    font-weight: {{ section.settings.cert_title_weight }};
-    color: {{ section.settings.cert_title_color }};
+    font-size: {{ section.settings.certtitlesize }}px;
+    font-weight: {{ section.settings.certtitleweight }};
+    color: {{ section.settings.certtitlecolor }};
     margin: 0 0 8px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
   .certification-subtitle {
-    font-size: {{ section.settings.cert_subtitle_size }}px;
-    color: {{ section.settings.cert_subtitle_color }};
+    font-size: {{ section.settings.certsubtitlesize }}px;
+    color: {{ section.settings.certsubtitlecolor }};
     margin: 0;
     line-height: 1.4;
   }
@@ -263,12 +262,10 @@
     transition: transform 0.5s ease;
   }
 
-  .statistic-slide {
-    min-width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 40px;
-    padding: 0 20px;
+  .statistic-item {
+    flex-shrink: 0;
+    width: calc(33.333% - 20px);
+    margin-right: 30px;
   }
 
   .statistic-image {
@@ -298,17 +295,17 @@
   }
 
   .statistic-number {
-    font-size: {{ section.settings.stat_number_size }}px;
-    font-weight: {{ section.settings.stat_number_weight }};
-    color: {{ section.settings.stat_number_color }};
+    font-size: {{ section.settings.statnumbersize }}px;
+    font-weight: {{ section.settings.statnumberweight }};
+    color: {{ section.settings.statnumbercolor }};
     margin: 0 0 10px;
     line-height: 1;
   }
 
   .statistic-label {
-    font-size: {{ section.settings.stat_label_size }}px;
-    font-weight: {{ section.settings.stat_label_weight }};
-    color: {{ section.settings.stat_label_color }};
+    font-size: {{ section.settings.statlabelsize }}px;
+    font-weight: {{ section.settings.statlabelweight }};
+    color: {{ section.settings.statlabelcolor }};
     margin: 0 0 20px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -317,13 +314,13 @@
   .statistic-divider {
     width: 40px;
     height: 3px;
-    background: {{ section.settings.divider_color }};
+    background: {{ section.settings.dividercolor }};
     margin: 0 auto 20px;
   }
 
   .statistic-description {
-    font-size: {{ section.settings.stat_desc_size }}px;
-    color: {{ section.settings.stat_desc_color }};
+    font-size: {{ section.settings.statdescsize }}px;
+    color: {{ section.settings.statdesccolor }};
     line-height: 1.5;
     margin: 0;
   }
@@ -332,20 +329,20 @@
   .carousel-btn {
     width: 50px;
     height: 50px;
-    border: 2px solid{{ section.settings.btn_border_color }};
-    background: {{ section.settings.btn_bg_color }};
+    border: 1px solid #000000;
+    background: transparent;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: {{ section.settings.btn_text_color }};
+    color: #000000;
   }
 
   .carousel-btn:hover {
-    background: {{ section.settings.btn_hover_bg }};
-    color: {{ section.settings.btn_hover_text }};
+    background: {{ section.settings.btnhoverbg }};
+    color: {{ section.settings.btnhovertext }};
     transform: scale(1.1);
   }
 
@@ -353,50 +350,50 @@
   .carousel-indicators {
     display: flex;
     justify-content: center;
-    gap: 12px;
+    gap: 8px;
     margin-top: 30px;
   }
 
   .indicator {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
+    min-width: 8px;
+    min-height: 8px;
     border-radius: 50%;
     border: none;
-    background: {{ section.settings.indicator_color }};
+    background: {{ section.settings.indicatorcolor }};
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
   }
 
   .indicator.active {
-    background: {{ section.settings.indicator_active_color }};
-    transform: scale(1.2);
+    background: {{ section.settings.indicatoractivecolor }};
   }
 
   /* 响应式设计 */
   @media (max-width: 1200px) {
     .sustainable-manufacturing-section {
-      margin-top: calc({{ section.settings.margin_top | times: 0.8 | round }}px * 100vw / 1200px);
-      padding: {{ section.settings.padding_top | times: 0.8 | round }}
-      px 0{{ section.settings.padding_bottom | times: 0.8 | round }}px;
+      padding-top: calc({{ section.settings.margintop }} * 100vw / 1200 + {{ section.settings.paddingtop | times: 0.8 | round }}px);
+      padding-bottom: {{ section.settings.paddingbottom | times: 0.8 | round }}px;
     }
   }
 
   @media (max-width: 768px) {
     .sustainable-manufacturing-section {
-      margin-top: calc({{ section.settings.margin_top | times: 0.6 | round }}px * 100vw / 768px);
-      padding: {{ section.settings.padding_top | times: 0.6 | round }}
-      px 0{{ section.settings.padding_bottom | times: 0.6 | round }}px;
+      padding-top: calc({{ section.settings.margintop }} * 100vw / 768 + {{ section.settings.paddingtop | times: 0.6 | round }}px);
+      padding-bottom: {{ section.settings.paddingbottom | times: 0.6 | round }}px;
     }
 
     .certifications-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 30px;
-      margin-bottom: 60px;
+      gap: 20px;
+      margin-bottom: 40px;
     }
 
-    .statistic-slide {
-      grid-template-columns: 1fr;
-      gap: 30px;
+    .statistic-item {
+      min-width: 100%;
+      margin-right: 0;
     }
 
     .carousel-btn {
@@ -405,19 +402,18 @@
     }
 
     .section-title {
-      font-size: {{ section.settings.title_size | minus: 8 }}px;
+      font-size: {{ section.settings.titlesize | minus: 8 }}px;
     }
 
     .section-description {
-      font-size: {{ section.settings.description_size | minus: 2 }}px;
+      font-size: {{ section.settings.descriptionsize | minus: 2 }}px;
     }
   }
 
   @media (max-width: 480px) {
     .sustainable-manufacturing-section {
-      margin-top: calc({{ section.settings.margin_top | times: 0.5 | round }}px * 100vw / 480px);
-      padding: {{ section.settings.padding_top | times: 0.5 | round }}
-      px 0{{ section.settings.padding_bottom | times: 0.5 | round }}px;
+      padding-top: calc({{ section.settings.margintop }} * 100vw / 480 + {{ section.settings.paddingtop | times: 0.5 | round }}px);
+      padding-bottom: {{ section.settings.paddingbottom | times: 0.5 | round }}px;
     }
 
     .container {
@@ -425,8 +421,8 @@
     }
 
     .certifications-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
     }
 
     .carousel-container {
@@ -447,31 +443,50 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const carousel = document.querySelector('.carousel-track');
-    const slides = document.querySelectorAll('.statistic-slide');
+    const carouselWrapper = document.querySelector('.carousel-wrapper');
+    const items = document.querySelectorAll('.statistic-item');
     const indicators = document.querySelectorAll('.indicator');
     const prevBtn = document.querySelector('.prev-btn');
     const nextBtn = document.querySelector('.next-btn');
     
-    if (!carousel || slides.length === 0) return;
+    if (!carousel || items.length === 0) return;
     
-    let currentSlide = 0;
-    const totalSlides = slides.length;
+    let currentIndex = 0;
+    const totalItems = items.length;
+    const itemsPerView = 3;
+    const maxIndex = Math.max(0, totalItems - itemsPerView);
+    
+    function setupCarousel() {
+      const wrapperWidth = carouselWrapper.offsetWidth;
+      const totalGap = 30 * (itemsPerView - 1);
+      const itemWidth = (wrapperWidth - totalGap) / itemsPerView;
+      
+      items.forEach(item => {
+        item.style.width = itemWidth + 'px';
+        item.style.minWidth = itemWidth + 'px';
+      });
+    }
     
     function updateCarousel() {
-      carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+      const wrapperWidth = carouselWrapper.offsetWidth;
+      const totalGap = 30 * (itemsPerView - 1);
+      const itemWidth = (wrapperWidth - totalGap) / itemsPerView;
+      const moveDistance = currentIndex * (itemWidth + 30);
+      
+      carousel.style.transform = `translateX(-${moveDistance}px)`;
       
       indicators.forEach((indicator, index) => {
-        indicator.classList.toggle('active', index === currentSlide);
+        indicator.classList.toggle('active', index === currentIndex);
       });
     }
     
     function nextSlide() {
-      currentSlide = (currentSlide + 1) % totalSlides;
+      currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
       updateCarousel();
     }
     
     function prevSlide() {
-      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
       updateCarousel();
     }
     
@@ -482,502 +497,515 @@
     // 指示器事件
     indicators.forEach((indicator, index) => {
       indicator.addEventListener('click', () => {
-        currentSlide = index;
+        currentIndex = Math.min(index, maxIndex);
         updateCarousel();
       });
     });
     
     // 自动播放
-    {% if section.settings.auto_play %}
-      setInterval(nextSlide, {{ section.settings.auto_play_speed | times: 1000 }});
+    {% if section.settings.autoplay %}
+      setInterval(nextSlide, {{ section.settings.autoplayspeed | times: 1000 }});
     {% endif %}
+    
+    // 窗口大小改变时重新计算
+    window.addEventListener('resize', function() {
+      setupCarousel();
+      updateCarousel();
+    });
+    
+    // 初始化轮播
+    setupCarousel();
+    updateCarousel();
   });
-</script></div>{% schema %}
-{
-  "name": "可持续制造承诺",
-  "tag": "section",
-  "class": "sustainable-manufacturing",
-  "settings": [
-    {
-      "type": "header",
-      "content": "标题设置"
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "标题",
-      "default": "Committed to Sustainable Manufacturing"
-    },
-    {
-      "type": "range",
-      "id": "title_size",
-      "label": "标题字体大小",
-      "min": 24,
-      "max": 48,
-      "step": 2,
-      "default": 36,
-      "unit": "px"
-    },
-    {
-      "type": "select",
-      "id": "title_weight",
-      "label": "标题字体粗细",
-      "options": [
-        {
-          "value": "300",
-          "label": "细体"
-        },
-        {
-          "value": "400",
-          "label": "正常"
-        },
-        {
-          "value": "500",
-          "label": "中等"
-        },
-        {
-          "value": "600",
-          "label": "半粗"
-        },
-        {
-          "value": "700",
-          "label": "粗体"
-        }
-      ],
-      "default": "600"
-    },
-    {
-      "type": "color",
-      "id": "title_color",
-      "label": "标题颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "textarea",
-      "id": "description",
-      "label": "描述文本",
-      "default": "We use FSC-certified wood, RoHS-compliant components, and water-based low-VOC finishes. Our factory is ISO14001 certified and committed to environmentally responsible production."
-    },
-    {
-      "type": "range",
-      "id": "description_size",
-      "label": "描述字体大小",
-      "min": 14,
-      "max": 20,
-      "step": 1,
-      "default": 16,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "description_color",
-      "label": "描述颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "header",
-      "content": "布局设置"
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "背景颜色",
-      "default": "#ffffff"
-    },
-    {
-      "type": "range",
-      "id": "margin_top",
-      "label": "与上个模块距离",
-      "min": 0,
-      "max": 200,
-      "step": 5,
-      "default": 80,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "label": "内容顶部间距",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 60,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "label": "底部间距",
-      "min": 0,
-      "max": 200,
-      "step": 5,
-      "default": 80,
-      "unit": "px"
-    },
-    {
-      "type": "header",
-      "content": "认证图标设置"
-    },
-    {
-      "type": "range",
-      "id": "icon_size",
-      "label": "图标大小",
-      "min": 60,
-      "max": 120,
-      "step": 10,
-      "default": 80,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "icon_bg_color",
-      "label": "图标背景色",
-      "default": "#C22E35"
-    },
-    {
-      "type": "color",
-      "id": "icon_border_color",
-      "label": "图标边框色",
-      "default": "#C22E35"
-    },
-    {
-      "type": "range",
-      "id": "cert_gap",
-      "label": "认证项间距",
-      "min": 20,
-      "max": 60,
-      "step": 5,
-      "default": 40,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "cert_title_size",
-      "label": "认证标题字体大小",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "default": 14,
-      "unit": "px"
-    },
-    {
-      "type": "select",
-      "id": "cert_title_weight",
-      "label": "认证标题字体粗细",
-      "options": [
-        {
-          "value": "400",
-          "label": "正常"
-        },
-        {
-          "value": "500",
-          "label": "中等"
-        },
-        {
-          "value": "600",
-          "label": "半粗"
-        },
-        {
-          "value": "700",
-          "label": "粗体"
-        }
-      ],
-      "default": "600"
-    },
-    {
-      "type": "color",
-      "id": "cert_title_color",
-      "label": "认证标题颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "range",
-      "id": "cert_subtitle_size",
-      "label": "认证副标题字体大小",
-      "min": 10,
-      "max": 16,
-      "step": 1,
-      "default": 12,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "cert_subtitle_color",
-      "label": "认证副标题颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "header",
-      "content": "统计数据设置"
-    },
-    {
-      "type": "range",
-      "id": "stat_number_size",
-      "label": "统计数字字体大小",
-      "min": 32,
-      "max": 64,
-      "step": 2,
-      "default": 48,
-      "unit": "px"
-    },
-    {
-      "type": "select",
-      "id": "stat_number_weight",
-      "label": "统计数字字体粗细",
-      "options": [
-        {
-          "value": "600",
-          "label": "半粗"
-        },
-        {
-          "value": "700",
-          "label": "粗体"
-        },
-        {
-          "value": "800",
-          "label": "特粗"
-        }
-      ],
-      "default": "700"
-    },
-    {
-      "type": "color",
-      "id": "stat_number_color",
-      "label": "统计数字颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "range",
-      "id": "stat_label_size",
-      "label": "统计标签字体大小",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "default": 14,
-      "unit": "px"
-    },
-    {
-      "type": "select",
-      "id": "stat_label_weight",
-      "label": "统计标签字体粗细",
-      "options": [
-        {
-          "value": "400",
-          "label": "正常"
-        },
-        {
-          "value": "500",
-          "label": "中等"
-        },
-        {
-          "value": "600",
-          "label": "半粗"
-        }
-      ],
-      "default": "600"
-    },
-    {
-      "type": "color",
-      "id": "stat_label_color",
-      "label": "统计标签颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "divider_color",
-      "label": "分割线颜色",
-      "default": "#C22E35"
-    },
-    {
-      "type": "range",
-      "id": "stat_desc_size",
-      "label": "统计描述字体大小",
-      "min": 12,
-      "max": 16,
-      "step": 1,
-      "default": 14,
-      "unit": "px"
-    },
-    {
-      "type": "color",
-      "id": "stat_desc_color",
-      "label": "统计描述颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "header",
-      "content": "轮播控制"
-    },
-    {
-      "type": "color",
-      "id": "btn_bg_color",
-      "label": "按钮背景色",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "btn_border_color",
-      "label": "按钮边框色",
-      "default": "#cccccc"
-    },
-    {
-      "type": "color",
-      "id": "btn_text_color",
-      "label": "按钮文字色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "btn_hover_bg",
-      "label": "按钮悬停背景色",
-      "default": "#f5f5f5"
-    },
-    {
-      "type": "color",
-      "id": "btn_hover_text",
-      "label": "按钮悬停文字色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "indicator_color",
-      "label": "指示器颜色",
-      "default": "#cccccc"
-    },
-    {
-      "type": "color",
-      "id": "indicator_active_color",
-      "label": "指示器激活颜色",
-      "default": "#C22E35"
-    },
-    {
-      "type": "checkbox",
-      "id": "auto_play",
-      "label": "自动播放",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "auto_play_speed",
-      "label": "自动播放间隔",
-      "min": 3,
-      "max": 10,
-      "step": 1,
-      "default": 5,
-      "unit": "秒"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "certification",
-      "name": "认证项目",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "icon",
-          "label": "认证图标"
-        },
-        {
-          "type": "text",
-          "id": "title",
-          "label": "认证名称",
-          "default": "FSC"
-        },
-        {
-          "type": "text",
-          "id": "subtitle",
-          "label": "认证描述",
-          "default": "(Sustainable Wood)"
-        }
-      ]
-    },
-    {
-      "type": "statistic",
-      "name": "统计数据",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "统计图片"
-        },
-        {
-          "type": "text",
-          "id": "number",
-          "label": "统计数字",
-          "default": "86,000+"
-        },
-        {
-          "type": "text",
-          "id": "label",
-          "label": "统计标签",
-          "default": "UNITS/YEAR"
-        },
-        {
-          "type": "textarea",
-          "id": "description",
-          "label": "统计描述",
-          "default": "1 in every 4 pilates equipments is made by XS"
-        }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "可持续制造承诺",
-      "blocks": [
-        {
-          "type": "certification",
-          "settings": {
-            "title": "FSC",
-            "subtitle": "(Sustainable Wood)"
+</script>
+
+{% schema %}
+  {
+    "name": "可持续制造承诺",
+    "tag": "section",
+    "class": "sustainable-manufacturing",
+    "settings": [
+      {
+        "type": "header",
+        "content": "标题设置"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "标题",
+        "default": "Committed to Sustainable Manufacturing"
+      },
+      {
+        "type": "range",
+        "id": "titlesize",
+        "label": "标题字体大小",
+        "min": 24,
+        "max": 48,
+        "step": 2,
+        "default": 36,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "titleweight",
+        "label": "标题字体粗细",
+        "options": [
+          {
+            "value": "300",
+            "label": "细体"
+          },
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
           }
-        },
-        {
-          "type": "certification",
-          "settings": {
-            "title": "ISO14001",
-            "subtitle": "(Environmental Management)"
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "titlecolor",
+        "label": "标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "textarea",
+        "id": "description",
+        "label": "描述文本",
+        "default": "We use FSC-certified wood, RoHS-compliant components, and water-based low-VOC finishes. Our factory is ISO14001 certified and committed to environmentally responsible production."
+      },
+      {
+        "type": "range",
+        "id": "descriptionsize",
+        "label": "描述字体大小",
+        "min": 14,
+        "max": 20,
+        "step": 1,
+        "default": 16,
+        "unit": "px"
+      },
+      {
+        "type": "color",
+        "id": "descriptioncolor",
+        "label": "描述颜色",
+        "default": "#666666"
+      },
+      {
+        "type": "header",
+        "content": "布局设置"
+      },
+      {
+        "type": "color",
+        "id": "backgroundcolor",
+        "label": "背景颜色",
+        "default": "#F1F0EE"
+      },
+      {
+        "type": "range",
+        "id": "margintop",
+        "label": "与上个模块距离",
+        "min": 0,
+        "max": 200,
+        "step": 5,
+        "default": 90,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "paddingtop",
+        "label": "内容顶部间距",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "default": 60,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "paddingbottom",
+        "label": "底部间距",
+        "min": 0,
+        "max": 200,
+        "step": 5,
+        "default": 80,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "认证图标设置"
+      },
+      {
+        "type": "range",
+        "id": "iconsize",
+        "label": "图标大小",
+        "min": 40,
+        "max": 80,
+        "step": 5,
+        "default": 50,
+        "unit": "px"
+      },
+      {
+        "type": "color",
+        "id": "iconbgcolor",
+        "label": "图标背景色",
+        "default": "#C22E35"
+      },
+      {
+        "type": "color",
+        "id": "iconbordercolor",
+        "label": "图标边框色",
+        "default": "#C22E35"
+      },
+      {
+        "type": "range",
+        "id": "certgap",
+        "label": "认证项间距",
+        "min": 15,
+        "max": 40,
+        "step": 5,
+        "default": 25,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "certtitlesize",
+        "label": "认证标题字体大小",
+        "min": 10,
+        "max": 16,
+        "step": 1,
+        "default": 12,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "certtitleweight",
+        "label": "认证标题字体粗细",
+        "options": [
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
           }
-        },
-        {
-          "type": "certification",
-          "settings": {
-            "title": "RoHS",
-            "subtitle": "(Non-toxic Components)"
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "certtitlecolor",
+        "label": "认证标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "range",
+        "id": "certsubtitlesize",
+        "label": "认证副标题字体大小",
+        "min": 8,
+        "max": 14,
+        "step": 1,
+        "default": 10,
+        "unit": "px"
+      },
+      {
+        "type": "color",
+        "id": "certsubtitlecolor",
+        "label": "认证副标题颜色",
+        "default": "#666666"
+      },
+      {
+        "type": "header",
+        "content": "统计数据设置"
+      },
+      {
+        "type": "range",
+        "id": "statnumbersize",
+        "label": "统计数字字体大小",
+        "min": 32,
+        "max": 64,
+        "step": 2,
+        "default": 48,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "statnumberweight",
+        "label": "统计数字字体粗细",
+        "options": [
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
+          },
+          {
+            "value": "800",
+            "label": "特粗"
           }
-        },
-        {
-          "type": "certification",
-          "settings": {
-            "title": "Water-Based Coating",
-            "subtitle": "(Low VOC, Safe for users)"
+        ],
+        "default": "700"
+      },
+      {
+        "type": "color",
+        "id": "statnumbercolor",
+        "label": "统计数字颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "range",
+        "id": "statlabelsize",
+        "label": "统计标签字体大小",
+        "min": 12,
+        "max": 18,
+        "step": 1,
+        "default": 14,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "statlabelweight",
+        "label": "统计标签字体粗细",
+        "options": [
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
           }
-        },
-        {
-          "type": "statistic",
-          "settings": {
-            "number": "86,000+",
-            "label": "UNITS/YEAR",
-            "description": "1 in every 4 pilates equipments is made by XS"
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "statlabelcolor",
+        "label": "统计标签颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "dividercolor",
+        "label": "分割线颜色",
+        "default": "#C22E35"
+      },
+      {
+        "type": "range",
+        "id": "statdescsize",
+        "label": "统计描述字体大小",
+        "min": 12,
+        "max": 16,
+        "step": 1,
+        "default": 14,
+        "unit": "px"
+      },
+      {
+        "type": "color",
+        "id": "statdesccolor",
+        "label": "统计描述颜色",
+        "default": "#666666"
+      },
+      {
+        "type": "header",
+        "content": "轮播控制"
+      },
+      {
+        "type": "color",
+        "id": "btnbgcolor",
+        "label": "按钮背景色",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "btnbordercolor",
+        "label": "按钮边框色",
+        "default": "#cccccc"
+      },
+      {
+        "type": "color",
+        "id": "btntextcolor",
+        "label": "按钮文字色",
+        "default": "#666666"
+      },
+      {
+        "type": "color",
+        "id": "btnhoverbg",
+        "label": "按钮悬停背景色",
+        "default": "#f5f5f5"
+      },
+      {
+        "type": "color",
+        "id": "btnhovertext",
+        "label": "按钮悬停文字色",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "indicatorcolor",
+        "label": "指示器颜色",
+        "default": "#cccccc"
+      },
+      {
+        "type": "color",
+        "id": "indicatoractivecolor",
+        "label": "指示器激活颜色",
+        "default": "#C22E35"
+      },
+      {
+        "type": "checkbox",
+        "id": "autoplay",
+        "label": "自动播放",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "autoplayspeed",
+        "label": "自动播放间隔",
+        "min": 3,
+        "max": 10,
+        "step": 1,
+        "default": 5,
+        "unit": "秒"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "certification",
+        "name": "认证项目",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "icon",
+            "label": "认证图标"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "认证名称",
+            "default": "FSC"
+          },
+          {
+            "type": "text",
+            "id": "subtitle",
+            "label": "认证描述",
+            "default": "(Sustainable Wood)"
           }
-        },
-        {
-          "type": "statistic",
-          "settings": {
-            "number": "70+",
-            "label": "COUNTRIES SERVED",
-            "description": "Backed by global partnerships and years of manufacturing expertise"
+        ]
+      },
+      {
+        "type": "statistic",
+        "name": "统计数据",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "统计图片"
+          },
+          {
+            "type": "text",
+            "id": "number",
+            "label": "统计数字",
+            "default": "86,000+"
+          },
+          {
+            "type": "text",
+            "id": "label",
+            "label": "统计标签",
+            "default": "UNITS/YEAR"
+          },
+          {
+            "type": "textarea",
+            "id": "description",
+            "label": "统计描述",
+            "default": "1 in every 4 pilates equipments is made by XS"
           }
-        },
-        {
-          "type": "statistic",
-          "settings": {
-            "number": "100%",
-            "label": "CUSTOMIZABLE PRODUCT LINES",
-            "description": "We don't just manufacture - we stay with you after delivery"
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "可持续制造承诺",
+        "blocks": [
+          {
+            "type": "certification",
+            "settings": {
+              "title": "FSC",
+              "subtitle": "(Sustainable Wood)"
+            }
+          },
+          {
+            "type": "certification",
+            "settings": {
+              "title": "ISO14001",
+              "subtitle": "(Environmental Management)"
+            }
+          },
+          {
+            "type": "certification",
+            "settings": {
+              "title": "RoHS",
+              "subtitle": "(Non-toxic Components)"
+            }
+          },
+          {
+            "type": "certification",
+            "settings": {
+              "title": "Water-Based Coating",
+              "subtitle": "(Low VOC, Safe for users)"
+            }
+          },
+          {
+            "type": "statistic",
+            "settings": {
+              "number": "86,000+",
+              "label": "UNITS/YEAR",
+              "description": "1 in every 4 pilates equipments is made by XS"
+            }
+          },
+          {
+            "type": "statistic",
+            "settings": {
+              "number": "70+",
+              "label": "COUNTRIES SERVED",
+              "description": "Backed by global partnerships and years of manufacturing expertise"
+            }
+          },
+          {
+            "type": "statistic",
+            "settings": {
+              "number": "100%",
+              "label": "CUSTOMIZABLE PRODUCT LINES",
+              "description": "We don't just manufacture - we stay with you after delivery"
+            }
           }
-        }
-      ]
-    }
-  ]
-}{% endschema %}
+        ]
+      }
+    ]
+  }
+{% endschema %}
