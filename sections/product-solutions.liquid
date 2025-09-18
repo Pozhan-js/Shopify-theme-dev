@@ -46,10 +46,46 @@
               <div class="product-action">
                 {% if block.settings.learn_more_url != blank %}
                   <a href="{{ block.settings.learn_more_url }}" class="learn-more-btn">
+                    <svg
+                      class="btn-arrow"
+                      viewBox="0 0 7.10229 10.7302"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      width="7.102295"
+                      height="10.730225"
+                      fill="none"
+                      customFrame="#000000">
+                      <path
+                        id="多边形 11"
+                        d="M-0.384728 5.68065L4.9804 -0.782841L10.3455 5.68065L9.57607 6.31935L4.59567 0.31935L4.9804 0L5.36513 0.31935L0.384728 6.31935L-0.384728 5.68065Z"
+                        fill="currentColor"
+                        fill-opacity="1"
+                        fill-rule="nonzero"
+                        transform="matrix(0,1,-1,0,6.31934,0.384705)" />
+                    </svg>
                     {{ block.settings.learn_more_text }}
                   </a>
                 {% else %}
-                  <span class="learn-more-btn">{{ block.settings.learn_more_text }}</span>
+                  <span class="learn-more-btn">
+                    <svg
+                      class="btn-arrow"
+                      viewBox="0 0 7.10229 10.7302"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlns:xlink="http://www.w3.org/1999/xlink"
+                      width="7.102295"
+                      height="10.730225"
+                      fill="none"
+                      customFrame="#000000">
+                      <path
+                        id="多边形 11"
+                        d="M-0.384728 5.68065L4.9804 -0.782841L10.3455 5.68065L9.57607 6.31935L4.59567 0.31935L4.9804 0L5.36513 0.31935L0.384728 6.31935L-0.384728 5.68065Z"
+                        fill="currentColor"
+                        fill-opacity="1"
+                        fill-rule="nonzero"
+                        transform="matrix(0,1,-1,0,6.31934,0.384705)" />
+                    </svg>
+                    {{ block.settings.learn_more_text }}
+                  </span>
                 {% endif %}
               </div>
             {% endif %}
@@ -62,6 +98,7 @@
 
 <style>
   .product-solutions-section {
+    margin-top: calc({{ section.settings.margin_top }} * 100vw / 1920);
     padding: {{ section.settings.padding_top }}
     px 0{{ section.settings.padding_bottom }}px;
     background-color: {{ section.settings.background_color }};
@@ -102,7 +139,7 @@
   }
 
   .product-card {
-    background: {{ section.settings.card_background }};
+    background: #F1F0ED;
     border-radius: {{ section.settings.card_border_radius }}px;
     padding: {{ section.settings.card_padding }}px;
     text-align: center;
@@ -149,7 +186,9 @@
   }
 
   .learn-more-btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 24px;
     background: transparent;
     border: 2px solid{{ section.settings.button_border_color }};
@@ -159,18 +198,59 @@
     font-weight: {{ section.settings.button_text_weight }};
     text-transform: uppercase;
     letter-spacing: 1px;
-    transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease
+    , transform 0.3s ease;
+  }
+
+  .learn-more-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: #C22E35;
+    transition: left 0.3s ease;
+    z-index: -1;
+  }
+
+  .btn-arrow {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  .learn-more-btn:hover::after {
+    left: 0;
   }
 
   .learn-more-btn:hover {
-    background: {{ section.settings.button_hover_bg }};
     color: {{ section.settings.button_hover_text }};
     transform: translateY(-2px);
   }
 
+  .learn-more-btn:hover .btn-arrow {
+    transform: translateX(3px);
+  }
+
   /* 响应式设计 */
+  @media (max-width: 1200px) {
+    .product-solutions-section {
+      padding: {{ section.settings.padding_top | times: 0.8 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.8 | round }}px;
+    }
+  }
+
   @media (max-width: 768px) {
+    .product-solutions-section {
+      padding: {{ section.settings.padding_top | times: 0.6 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.6 | round }}px;
+    }
+
     .products-grid {
       grid-template-columns: 1fr;
       gap: 30px;
@@ -186,6 +266,11 @@
   }
 
   @media (max-width: 480px) {
+    .product-solutions-section {
+      padding: {{ section.settings.padding_top | times: 0.5 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.5 | round }}px;
+    }
+
     .container {
       padding: 0 15px;
     }
@@ -294,12 +379,22 @@
       },
       {
         "type": "range",
+        "id": "margin_top",
+        "label": "与上个模块距离",
+        "min": 0,
+        "max": 200,
+        "step": 5,
+        "default": 115,
+        "unit": "px"
+      },
+      {
+        "type": "range",
         "id": "padding_top",
-        "label": "顶部间距",
+        "label": "内容顶部间距",
         "min": 0,
         "max": 100,
         "step": 5,
-        "default": 60,
+        "default": 0,
         "unit": "px"
       },
       {
@@ -307,9 +402,9 @@
         "id": "padding_bottom",
         "label": "底部间距",
         "min": 0,
-        "max": 100,
+        "max": 200,
         "step": 5,
-        "default": 60,
+        "default": 80,
         "unit": "px"
       },
       {
@@ -330,7 +425,7 @@
         "type": "color",
         "id": "card_background",
         "label": "卡片背景色",
-        "default": "#f8f8f8"
+        "default": "#F1F0ED"
       },
       {
         "type": "color",
@@ -422,7 +517,7 @@
         "type": "color",
         "id": "button_hover_bg",
         "label": "按钮悬停背景色",
-        "default": "#333333"
+        "default": "#C22E35"
       },
       {
         "type": "color",

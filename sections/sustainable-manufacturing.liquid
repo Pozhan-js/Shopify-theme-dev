@@ -1,0 +1,983 @@
+<div class="sustainable-manufacturing-section">
+  <div class="container">
+    <!-- 标题区域 -->
+    <div class="section-header">
+      {% if section.settings.title != blank %}
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <p class="section-description">{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+
+    <!-- 认证图标区域 -->
+    <div class="certifications-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'certification' %}
+          <div class="certification-item" {{ block.shopify_attributes }}>
+            <div class="certification-icon">
+              {% if block.settings.icon != blank %}
+                <img
+                  src="{{ block.settings.icon | img_url: '120x120' }}"
+                  alt="{{ block.settings.title }}"
+                  loading="lazy">
+              {% else %}
+                <div class="placeholder-icon">
+                  <svg
+                    width="80"
+                    height="80"
+                    viewBox="0 0 80 80"
+                    fill="none">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="35"
+                      fill="{{ section.settings.icon_bg_color }}"
+                      stroke="{{ section.settings.icon_border_color }}"
+                      stroke-width="2" />
+                    <path d="M30 40h20v10H30z" fill="#fff" />
+                  </svg>
+                </div>
+              {% endif %}
+            </div>
+            <div class="certification-content">
+              {% if block.settings.title != blank %}
+                <h3 class="certification-title">{{ block.settings.title }}</h3>
+              {% endif %}
+              {% if block.settings.subtitle != blank %}
+                <p class="certification-subtitle">{{ block.settings.subtitle }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- 统计数据轮播区域 -->
+    <div class="statistics-carousel">
+      <div class="carousel-container">
+        <button class="carousel-btn prev-btn" aria-label="Previous">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none">
+            <path
+              d="M15 18L9 12L15 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <div class="carousel-wrapper">
+          <div class="carousel-track">
+            {% for block in section.blocks %}
+              {% if block.type == 'statistic' %}
+                <div class="statistic-slide" {{ block.shopify_attributes }}>
+                  <div class="statistic-image">
+                    {% if block.settings.image != blank %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x300' }}"
+                        alt="{{ block.settings.number }}"
+                        loading="lazy">
+                    {% else %}
+                      <div class="placeholder-image">
+                        <svg
+                          width="100%"
+                          height="200"
+                          viewBox="0 0 400 200"
+                          fill="none">
+                          <rect
+                            width="400"
+                            height="200"
+                            fill="#f5f5f5" />
+                          <rect
+                            x="150"
+                            y="75"
+                            width="100"
+                            height="50"
+                            fill="#ddd" />
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="statistic-content">
+                    {% if block.settings.number != blank %}
+                      <h3 class="statistic-number">{{ block.settings.number }}</h3>
+                    {% endif %}
+                    {% if block.settings.label != blank %}
+                      <p class="statistic-label">{{ block.settings.label }}</p>
+                    {% endif %}
+                    <div class="statistic-divider"></div>
+                    {% if block.settings.description != blank %}
+                      <p class="statistic-description">{{ block.settings.description }}</p>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <button class="carousel-btn next-btn" aria-label="Next">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none">
+            <path
+              d="M9 18L15 12L9 6"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 轮播指示器 -->
+      <div class="carousel-indicators">
+        {% assign stat_count = 0 %}
+        {% for block in section.blocks %}
+          {% if block.type == 'statistic' %}
+            {% assign stat_count = stat_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+        {% for i in (1..stat_count) %}
+          <button class="indicator {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.index0 }}"></button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .sustainable-manufacturing-section {
+    margin-top: calc({{ section.settings.margin_top }}px * 100vw / 1920px);
+    padding: {{ section.settings.padding_top }}
+    px 0{{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-title {
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+    color: {{ section.settings.title_color }};
+    margin: 0 0 20px;
+    line-height: 1.2;
+  }
+
+  .section-description {
+    font-size: {{ section.settings.description_size }}px;
+    color: {{ section.settings.description_color }};
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* 认证图标样式 */
+  .certifications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: {{ section.settings.cert_gap }}px;
+    margin-bottom: 80px;
+  }
+
+  .certification-item {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .certification-icon {
+    width: {{ section.settings.icon_size }}px;
+    height: {{ section.settings.icon_size }}px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .certification-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .placeholder-icon {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .certification-title {
+    font-size: {{ section.settings.cert_title_size }}px;
+    font-weight: {{ section.settings.cert_title_weight }};
+    color: {{ section.settings.cert_title_color }};
+    margin: 0 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .certification-subtitle {
+    font-size: {{ section.settings.cert_subtitle_size }}px;
+    color: {{ section.settings.cert_subtitle_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* 轮播样式 */
+  .statistics-carousel {
+    position: relative;
+  }
+
+  .carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .carousel-wrapper {
+    flex: 1;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+  }
+
+  .statistic-slide {
+    min-width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    padding: 0 20px;
+  }
+
+  .statistic-image {
+    height: 250px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f8f8f8;
+  }
+
+  .statistic-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .statistic-content {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .statistic-number {
+    font-size: {{ section.settings.stat_number_size }}px;
+    font-weight: {{ section.settings.stat_number_weight }};
+    color: {{ section.settings.stat_number_color }};
+    margin: 0 0 10px;
+    line-height: 1;
+  }
+
+  .statistic-label {
+    font-size: {{ section.settings.stat_label_size }}px;
+    font-weight: {{ section.settings.stat_label_weight }};
+    color: {{ section.settings.stat_label_color }};
+    margin: 0 0 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .statistic-divider {
+    width: 40px;
+    height: 3px;
+    background: {{ section.settings.divider_color }};
+    margin: 0 auto 20px;
+  }
+
+  .statistic-description {
+    font-size: {{ section.settings.stat_desc_size }}px;
+    color: {{ section.settings.stat_desc_color }};
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* 轮播按钮 */
+  .carousel-btn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid{{ section.settings.btn_border_color }};
+    background: {{ section.settings.btn_bg_color }};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: {{ section.settings.btn_text_color }};
+  }
+
+  .carousel-btn:hover {
+    background: {{ section.settings.btn_hover_bg }};
+    color: {{ section.settings.btn_hover_text }};
+    transform: scale(1.1);
+  }
+
+  /* 轮播指示器 */
+  .carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: {{ section.settings.indicator_color }};
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .indicator.active {
+    background: {{ section.settings.indicator_active_color }};
+    transform: scale(1.2);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 1200px) {
+    .sustainable-manufacturing-section {
+      margin-top: calc({{ section.settings.margin_top | times: 0.8 | round }}px * 100vw / 1200px);
+      padding: {{ section.settings.padding_top | times: 0.8 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.8 | round }}px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sustainable-manufacturing-section {
+      margin-top: calc({{ section.settings.margin_top | times: 0.6 | round }}px * 100vw / 768px);
+      padding: {{ section.settings.padding_top | times: 0.6 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.6 | round }}px;
+    }
+
+    .certifications-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .statistic-slide {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .carousel-btn {
+      width: 40px;
+      height: 40px;
+    }
+
+    .section-title {
+      font-size: {{ section.settings.title_size | minus: 8 }}px;
+    }
+
+    .section-description {
+      font-size: {{ section.settings.description_size | minus: 2 }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sustainable-manufacturing-section {
+      margin-top: calc({{ section.settings.margin_top | times: 0.5 | round }}px * 100vw / 480px);
+      padding: {{ section.settings.padding_top | times: 0.5 | round }}
+      px 0{{ section.settings.padding_bottom | times: 0.5 | round }}px;
+    }
+
+    .container {
+      padding: 0 15px;
+    }
+
+    .certifications-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .carousel-container {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .carousel-btn {
+      position: static;
+    }
+
+    .statistic-image {
+      height: 200px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const carousel = document.querySelector('.carousel-track');
+    const slides = document.querySelectorAll('.statistic-slide');
+    const indicators = document.querySelectorAll('.indicator');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    if (!carousel || slides.length === 0) return;
+    
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+    
+    function updateCarousel() {
+      carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+      
+      indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === currentSlide);
+      });
+    }
+    
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      updateCarousel();
+    }
+    
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      updateCarousel();
+    }
+    
+    // 按钮事件
+    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+    
+    // 指示器事件
+    indicators.forEach((indicator, index) => {
+      indicator.addEventListener('click', () => {
+        currentSlide = index;
+        updateCarousel();
+      });
+    });
+    
+    // 自动播放
+    {% if section.settings.auto_play %}
+      setInterval(nextSlide, {{ section.settings.auto_play_speed | times: 1000 }});
+    {% endif %}
+  });
+</script></div>{% schema %}
+{
+  "name": "可持续制造承诺",
+  "tag": "section",
+  "class": "sustainable-manufacturing",
+  "settings": [
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "Committed to Sustainable Manufacturing"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "标题字体大小",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "default": 36,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "标题字体粗细",
+      "options": [
+        {
+          "value": "300",
+          "label": "细体"
+        },
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "描述文本",
+      "default": "We use FSC-certified wood, RoHS-compliant components, and water-based low-VOC finishes. Our factory is ISO14001 certified and committed to environmentally responsible production."
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "描述字体大小",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "描述颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "与上个模块距离",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "内容顶部间距",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "底部间距",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "认证图标设置"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "图标大小",
+      "min": 60,
+      "max": 120,
+      "step": 10,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "icon_bg_color",
+      "label": "图标背景色",
+      "default": "#C22E35"
+    },
+    {
+      "type": "color",
+      "id": "icon_border_color",
+      "label": "图标边框色",
+      "default": "#C22E35"
+    },
+    {
+      "type": "range",
+      "id": "cert_gap",
+      "label": "认证项间距",
+      "min": 20,
+      "max": 60,
+      "step": 5,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "cert_title_size",
+      "label": "认证标题字体大小",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "cert_title_weight",
+      "label": "认证标题字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "cert_title_color",
+      "label": "认证标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "cert_subtitle_size",
+      "label": "认证副标题字体大小",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "cert_subtitle_color",
+      "label": "认证副标题颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "统计数据设置"
+    },
+    {
+      "type": "range",
+      "id": "stat_number_size",
+      "label": "统计数字字体大小",
+      "min": 32,
+      "max": 64,
+      "step": 2,
+      "default": 48,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "stat_number_weight",
+      "label": "统计数字字体粗细",
+      "options": [
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        },
+        {
+          "value": "800",
+          "label": "特粗"
+        }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "color",
+      "id": "stat_number_color",
+      "label": "统计数字颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "stat_label_size",
+      "label": "统计标签字体大小",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "stat_label_weight",
+      "label": "统计标签字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "stat_label_color",
+      "label": "统计标签颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "divider_color",
+      "label": "分割线颜色",
+      "default": "#C22E35"
+    },
+    {
+      "type": "range",
+      "id": "stat_desc_size",
+      "label": "统计描述字体大小",
+      "min": 12,
+      "max": 16,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "stat_desc_color",
+      "label": "统计描述颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "轮播控制"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "按钮背景色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_border_color",
+      "label": "按钮边框色",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "按钮文字色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg",
+      "label": "按钮悬停背景色",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_text",
+      "label": "按钮悬停文字色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "indicator_color",
+      "label": "指示器颜色",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "indicator_active_color",
+      "label": "指示器激活颜色",
+      "default": "#C22E35"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_play",
+      "label": "自动播放",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "auto_play_speed",
+      "label": "自动播放间隔",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "default": 5,
+      "unit": "秒"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "certification",
+      "name": "认证项目",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "认证图标"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "认证名称",
+          "default": "FSC"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "认证描述",
+          "default": "(Sustainable Wood)"
+        }
+      ]
+    },
+    {
+      "type": "statistic",
+      "name": "统计数据",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "统计图片"
+        },
+        {
+          "type": "text",
+          "id": "number",
+          "label": "统计数字",
+          "default": "86,000+"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "统计标签",
+          "default": "UNITS/YEAR"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "统计描述",
+          "default": "1 in every 4 pilates equipments is made by XS"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "可持续制造承诺",
+      "blocks": [
+        {
+          "type": "certification",
+          "settings": {
+            "title": "FSC",
+            "subtitle": "(Sustainable Wood)"
+          }
+        },
+        {
+          "type": "certification",
+          "settings": {
+            "title": "ISO14001",
+            "subtitle": "(Environmental Management)"
+          }
+        },
+        {
+          "type": "certification",
+          "settings": {
+            "title": "RoHS",
+            "subtitle": "(Non-toxic Components)"
+          }
+        },
+        {
+          "type": "certification",
+          "settings": {
+            "title": "Water-Based Coating",
+            "subtitle": "(Low VOC, Safe for users)"
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "86,000+",
+            "label": "UNITS/YEAR",
+            "description": "1 in every 4 pilates equipments is made by XS"
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "70+",
+            "label": "COUNTRIES SERVED",
+            "description": "Backed by global partnerships and years of manufacturing expertise"
+          }
+        },
+        {
+          "type": "statistic",
+          "settings": {
+            "number": "100%",
+            "label": "CUSTOMIZABLE PRODUCT LINES",
+            "description": "We don't just manufacture - we stay with you after delivery"
+          }
+        }
+      ]
+    }
+  ]
+}{% endschema %}
