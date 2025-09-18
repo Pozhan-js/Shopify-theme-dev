@@ -3,19 +3,26 @@
   支持后台可编辑的完整模块
 {% endcomment %}
 
-{% assign bg_image = section.settings.background_image | default: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' %}
+{% assign bg_image = section.settings.background_image %}
+{% unless bg_image %}
+  {% assign bg_image = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80' %}
+{% endunless %}
+
 {% assign main_title = section.settings.main_title | default: 'WHERE TRUST IS MANUFACTURED' %}
 {% assign subtitle = section.settings.subtitle | default: 'XSPilates' %}
 {% assign description = section.settings.description | default: "We don't outsource trust-we produce it, in a 180,000m² facility optimized for precision, scale, and speed." %}
 {% assign icon = section.settings.icon | default: '⚙️' %}
+{% assign description_image = section.settings.description_image %}
 
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700 &display=swap');
+
   .manufacturing-section-{{ section.id }} {
     position: relative;
     width: 100%;
     height: 100vh;
     overflow: hidden;
-    font-family: 'Arial'
+    font-family: 'Poppins'
     , sans-serif;
   }
 
@@ -26,7 +33,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('{{ bg_image }}');
+    {% if bg_image contains 'http' %}
+      background-image: url('{{ bg_image }}');
+    {% else %}
+      background-image: url('{{ bg_image | img_url: '2048x' }}');
+    {% endif %}
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -73,9 +84,12 @@
 
   .manufacturing-section-{{ section.id }}
   .main-title {
-    font-size: 3.5rem;
-    font-weight: 700;
-    line-height: 1.1;
+    font-family: 'Poppins'
+    , sans-serif;
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 60px;
+    color: #FFF;
     margin: 0 0 60px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -97,6 +111,16 @@
   }
 
   .manufacturing-section-{{ section.id }}
+  .description-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .manufacturing-section-{{ section.id }}
   .text-block {
     flex: 1;
   }
@@ -114,7 +138,7 @@
   .description {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
+    color: #ffffff;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     margin: 0;
   }
@@ -129,7 +153,8 @@
 
     .manufacturing-section-{{ section.id }}
     .main-title {
-      font-size: 2.5rem;
+      font-size: 36px;
+      line-height: 45px;
       margin-bottom: 40px;
     }
 
@@ -139,11 +164,18 @@
       align-items: center;
       text-align: center;
     }
+
+    .manufacturing-section-{{ section.id }}
+    .description-image {
+      width: 50px;
+      height: 50px;
+    }
   }
 
   @media (max-width: 480px) {
     .manufacturing-section-{{ section.id }} .main-title {
-      font-size: 2rem;
+      font-size: 28px;
+      line-height: 36px;
     }
 
     .manufacturing-section-{{ section.id }}
@@ -154,6 +186,12 @@
     .manufacturing-section-{{ section.id }}
     .description {
       font-size: 1rem;
+    }
+
+    .manufacturing-section-{{ section.id }}
+    .description-image {
+      width: 40px;
+      height: 40px;
     }
   }
 </style>
@@ -168,7 +206,12 @@
           {% endif %}
 
           <div class="feature-item">
-            {% if icon != blank %}
+            {% if description_image %}
+              <img
+                src="{{ description_image | img_url: '120x120' }}"
+                alt="描述图片"
+                class="description-image">
+            {% elsif icon != blank %}
               <div class="icon">{{ icon }}</div>
             {% endif %}
 
@@ -222,11 +265,17 @@
         "placeholder": "输入描述文本"
       },
       {
+        "type": "image_picker",
+        "id": "description_image",
+        "label": "描述图片",
+        "info": "显示在描述文字左侧的图片，推荐尺寸: 120x120px"
+      },
+      {
         "type": "text",
         "id": "icon",
         "label": "图标",
         "default": "⚙️",
-        "info": "可以使用 Emoji 或字符"
+        "info": "可以使用 Emoji 或字符（当没有上传描述图片时显示）"
       }
     ],
     "presets": [
