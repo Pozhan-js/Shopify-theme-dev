@@ -1,0 +1,520 @@
+{% comment %}
+  Liquid 代码生成模块 - Sections 格式
+  支持后台可视化编辑配置
+{% endcomment %}
+
+<style>
+  .liquid-module-{{ section.id }} {
+    font-family: 'Inter'
+    , -apple-system
+    , BlinkMacSystemFont
+    , 'Segoe UI'
+    , 'Roboto'
+    , sans-serif;
+    background-color: {{ section.settings.background_color | default: '#F1F0EE' }};
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .liquid-module-{{ section.id }}
+  .container {
+    max-width: {{ section.settings.container_width | default: '1200px' }};
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-grid {
+    display: flex;
+    flex-direction: row;
+    gap: {{ section.settings.module_gap | default: '24px' }};
+    padding: {{ section.settings.section_padding | default: '48px 0' }};
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-card {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: slideUp 0.6s ease-out;
+    animation-fill-mode: both;
+  }
+
+  {% for block in section.blocks %}
+    .liquid-module-{{ section.id }}.module-card:nth-child({{ forloop.index }}) {
+      animation-delay: {{ forloop.index0 | times: section.settings.animation_delay | default: 100 }}ms;
+    }
+  {% endfor %}
+
+  .liquid-module-{{ section.id }}.module-card:hover {
+    transform: scale({{ section.settings.hover_scale | default: '1.05' }});
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: {{ section.settings.image_border_radius | default: '16px' }};
+    margin-bottom: 16px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .liquid-module-{{ section.id }}.module-image:hover img {
+    transform: scale({{ section.settings.image_hover_scale | default: '1.1' }});
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-content {
+    padding: 0 8px;
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-title {
+    font-size: {{ section.settings.title_font_size | default: '20px' }};
+    line-height: 1.4;
+    font-weight: {{ section.settings.title_font_weight | default: '700' }};
+    color: {{ section.settings.title_color | default: '#1f2937' }};
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-icon {
+    color: {{ section.settings.icon_color | default: '#4b5563' }};
+    font-size: {{ section.settings.icon_size | default: '18px' }};
+  }
+
+  .liquid-module-{{ section.id }}
+  .module-description {
+    line-height: 1.625;
+    font-size: {{ section.settings.description_font_size | default: '14px' }};
+    color: {{ section.settings.description_color | default: '#16161680' }};
+  }
+
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .liquid-module-{{ section.id }} .module-grid {
+      flex-direction: column;
+      gap: {{ section.settings.mobile_gap | default: '16px' }};
+    }
+
+    .liquid-module-{{ section.id }}
+    .container {
+      padding: 0 16px;
+    }
+  }
+</style>
+
+<div class="liquid-module-{{ section.id }}">
+  {% if section.settings.show_header %}
+    <header style="padding: {{ section.settings.header_padding | default: '32px 0' }};">
+      {% if section.settings.header_title != blank %}
+        <div class="container">
+          <h1 style="text-align: center; font-size: {{ section.settings.header_title_size | default: '32px' }}; color: {{ section.settings.header_title_color | default: '#1f2937' }}; margin: 0;">
+            {{ section.settings.header_title }}
+          </h1>
+          {% if section.settings.header_subtitle != blank %}
+            <p style="text-align: center; font-size: {{ section.settings.header_subtitle_size | default: '16px' }}; color: {{ section.settings.header_subtitle_color | default: '#6b7280' }}; margin: 8px 0 0 0;">
+              {{ section.settings.header_subtitle }}
+            </p>
+          {% endif %}
+        </div>
+      {% endif %}
+    </header>
+  {% endif %}
+
+  <main class="container">
+    <div class="module-grid">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'module_card' %}
+            <div
+              class="module-card"
+              onclick="handleModuleClick('{{ block.settings.title | escape }}', '{{ block.id }}')"
+              data-module-id="{{ block.id }}"
+              data-module-title="{{ block.settings.title | escape }}">
+
+              <!-- 图片容器 -->
+              {% if block.settings.image != blank %}
+                <div class="module-image">
+                  <img
+                    src="{{ block.settings.image | img_url: '400x400' }}"
+                    alt="{{ block.settings.title | escape }}"
+                    loading="lazy" />
+                </div>
+              {% elsif block.settings.placeholder_image != blank %}
+                <div class="module-image">
+                  <img
+                    src="{{ block.settings.placeholder_image }}"
+                    alt="{{ block.settings.title | escape }}"
+                    loading="lazy" />
+                </div>
+              {% endif %}
+
+              <!-- 内容区域 -->
+              <div class="module-content">
+                {% if block.settings.title != blank %}
+                  <h3 class="module-title">
+                    {% if block.settings.icon != blank %}
+                      <i class="{{ block.settings.icon }} module-icon"></i>
+                    {% endif %}
+                    {{ block.settings.title }}
+                  </h3>
+                {% endif %}
+
+                {% if block.settings.description != blank %}
+                  <p class="module-description">
+                    {{ block.settings.description }}
+                  </p>
+                {% endif %}
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </main>
+</div>
+
+<script>
+  function handleModuleClick(title, id) {
+    console.log(`点击了模块: ${title}, ID: ${id}`);
+    
+    // 触发自定义事件
+    const event = new CustomEvent('liquidModuleClick', {
+      detail: { 
+        title: title, 
+        id: id,
+        sectionId: '{{ section.id }}',
+        timestamp: new Date().toISOString()
+      }
+    });
+    window.dispatchEvent(event);
+    
+    // 支持回调函数
+    if (typeof window.onLiquidModuleClick === 'function') {
+      window.onLiquidModuleClick({ title, id, sectionId: '{{ section.id }}' });
+    }
+  }
+  
+  // 页面加载完成后初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('Liquid 代码生成模块已加载 - Section ID: {{ section.id }}');
+    
+    // 触发模块加载事件
+    const loadEvent = new CustomEvent('liquidModuleLoaded', {
+      detail: { 
+        sectionId: '{{ section.id }}',
+        moduleCount: {{ section.blocks.size }},
+        timestamp: new Date().toISOString()
+      }
+    });
+    window.dispatchEvent(loadEvent);
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Liquid 代码生成模块",
+    "tag": "section",
+    "class": "liquid-code-generator-section",
+    "settings": [
+      {
+        "type": "header",
+        "content": "布局设置"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "背景颜色",
+        "default": "#F1F0EE"
+      },
+      {
+        "type": "text",
+        "id": "container_width",
+        "label": "容器最大宽度",
+        "default": "1200px",
+        "info": "支持px、%、rem等单位"
+      },
+      {
+        "type": "text",
+        "id": "section_padding",
+        "label": "区块内边距",
+        "default": "48px 0",
+        "info": "格式：上下 左右"
+      },
+      {
+        "type": "text",
+        "id": "module_gap",
+        "label": "模块间距",
+        "default": "24px"
+      },
+      {
+        "type": "text",
+        "id": "mobile_gap",
+        "label": "移动端模块间距",
+        "default": "16px"
+      },
+      {
+        "type": "header",
+        "content": "头部设置"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_header",
+        "label": "显示头部",
+        "default": false
+      },
+      {
+        "type": "text",
+        "id": "header_title",
+        "label": "头部标题"
+      },
+      {
+        "type": "text",
+        "id": "header_subtitle",
+        "label": "头部副标题"
+      },
+      {
+        "type": "text",
+        "id": "header_title_size",
+        "label": "标题字体大小",
+        "default": "32px"
+      },
+      {
+        "type": "color",
+        "id": "header_title_color",
+        "label": "标题颜色",
+        "default": "#1f2937"
+      },
+      {
+        "type": "text",
+        "id": "header_subtitle_size",
+        "label": "副标题字体大小",
+        "default": "16px"
+      },
+      {
+        "type": "color",
+        "id": "header_subtitle_color",
+        "label": "副标题颜色",
+        "default": "#6b7280"
+      },
+      {
+        "type": "text",
+        "id": "header_padding",
+        "label": "头部内边距",
+        "default": "32px 0"
+      },
+      {
+        "type": "header",
+        "content": "样式设置"
+      },
+      {
+        "type": "text",
+        "id": "title_font_size",
+        "label": "模块标题字体大小",
+        "default": "20px"
+      },
+      {
+        "type": "select",
+        "id": "title_font_weight",
+        "label": "模块标题字体粗细",
+        "options": [
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
+          }
+        ],
+        "default": "700"
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "模块标题颜色",
+        "default": "#1f2937"
+      },
+      {
+        "type": "text",
+        "id": "description_font_size",
+        "label": "描述字体大小",
+        "default": "14px"
+      },
+      {
+        "type": "color",
+        "id": "description_color",
+        "label": "描述文字颜色",
+        "default": "#16161680"
+      },
+      {
+        "type": "color",
+        "id": "icon_color",
+        "label": "图标颜色",
+        "default": "#4b5563"
+      },
+      {
+        "type": "text",
+        "id": "icon_size",
+        "label": "图标大小",
+        "default": "18px"
+      },
+      {
+        "type": "header",
+        "content": "交互效果"
+      },
+      {
+        "type": "text",
+        "id": "hover_scale",
+        "label": "悬停放大比例",
+        "default": "1.05",
+        "info": "1.0为不放大，1.1为放大10%"
+      },
+      {
+        "type": "text",
+        "id": "image_hover_scale",
+        "label": "图片悬停放大比例",
+        "default": "1.1"
+      },
+      {
+        "type": "text",
+        "id": "image_border_radius",
+        "label": "图片圆角大小",
+        "default": "16px"
+      },
+      {
+        "type": "range",
+        "id": "animation_delay",
+        "label": "动画延迟间隔(毫秒)",
+        "min": 0,
+        "max": 300,
+        "step": 50,
+        "default": 100
+      }
+    ],
+    "blocks": [
+      {
+        "type": "module_card",
+        "name": "模块卡片",
+        "settings": [
+          {
+            "type": "text",
+            "id": "title",
+            "label": "模块标题",
+            "default": "模块标题"
+          },
+          {
+            "type": "textarea",
+            "id": "description",
+            "label": "模块描述",
+            "default": "模块描述内容"
+          },
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "模块图片"
+          },
+          {
+            "type": "url",
+            "id": "placeholder_image",
+            "label": "占位图片URL",
+            "info": "当未上传图片时使用"
+          },
+          {
+            "type": "text",
+            "id": "icon",
+            "label": "FontAwesome 图标类名",
+            "placeholder": "fas fa-code",
+            "info": "例如：fas fa-code, fas fa-database"
+          },
+          {
+            "type": "url",
+            "id": "link_url",
+            "label": "点击跳转链接"
+          },
+          {
+            "type": "checkbox",
+            "id": "open_in_new_tab",
+            "label": "新窗口打开",
+            "default": false
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Liquid 代码生成模块",
+        "blocks": [
+          {
+            "type": "module_card",
+            "settings": {
+              "title": "模板解析器",
+              "description": "智能解析Liquid模板语法，支持变量、过滤器、标签等完整语法结构，提供语法高亮和错误检测功能。",
+              "placeholder_image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+              "icon": "fas fa-code"
+            }
+          },
+          {
+            "type": "module_card",
+            "settings": {
+              "title": "数据绑定引擎",
+              "description": "高效的数据绑定机制，支持复杂对象、数组操作，实时数据更新，让模板与数据无缝对接。",
+              "placeholder_image": "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop&crop=center",
+              "icon": "fas fa-database"
+            }
+          },
+          {
+            "type": "module_card",
+            "settings": {
+              "title": "组件生成器",
+              "description": "基于模板快速生成可复用组件，支持自定义属性、事件绑定，大幅提升开发效率和代码质量。",
+              "placeholder_image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center",
+              "icon": "fas fa-puzzle-piece"
+            }
+          },
+          {
+            "type": "module_card",
+            "settings": {
+              "title": "输出优化器",
+              "description": "智能代码优化和压缩，移除冗余代码，优化性能，生成生产就绪的高质量代码输出。",
+              "placeholder_image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=300&fit=crop&crop=center",
+              "icon": "fas fa-rocket"
+            }
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
