@@ -2,42 +2,58 @@
   .contact-info-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    gap: 4rem;
+    padding: {{ section.settings.padding_top }}px 2rem {{ section.settings.padding_bottom }}px;
+    margin: 0 auto;
+    max-width: calc(var(--page-width) + 4rem);
   }
 
   .contact-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    padding: 2rem;
+    background: rgba(0,0,0,0.02);
+    border-radius: 0.5rem;
+  }
+
+  .contact-form-container {
+    padding: 2rem;
   }
 
   .contact-info__heading {
-    margin: 0 0 1rem;
+    margin: 0 0 1.5rem;
+    font-size: 2.2rem;
   }
 
   .contact-info__description {
-    margin: 0 0 2rem;
+    margin: 0 0 2.5rem;
+    line-height: 1.6;
   }
 
   .contact-method {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 2rem;
   }
 
   .contact-method__label {
     font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
   }
 
   @media screen and (max-width: 749px) {
     .contact-info-form {
       grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    
+    .contact-info,
+    .contact-form-container {
+      padding: 1.5rem;
     }
   }
 {%- endstyle -%}
 
-<div class="contact-info-form page-width">
+<div class="contact-info-form">
   <div class="contact-info">
     {%- if section.settings.heading != blank -%}
       <h2 class="contact-info__heading">{{ section.settings.heading }}</h2>
@@ -79,8 +95,111 @@
     {%- endif -%}
   </div>
 
-  <div class="contact-form">
-    {% section 'contact-form' %}
+  <div class="contact-form-container">
+    {{ 'section-contact-form.css' | asset_url | stylesheet_tag }}
+    
+    <div class="color-{{ section.settings.color_scheme }} gradient">
+      <div class="contact page-width--narrow section-{{ section.id }}-padding">
+        {%- form 'contact', id: 'ContactForm', class: 'isolate' -%}
+          {%- if form.posted_successfully? -%}
+            <h2 class="form-status form-status-list form__message" tabindex="-1" autofocus>
+              {{ 'templates.contact.form.post_success' | t }}
+            </h2>
+          {%- elsif form.errors -%}
+            <div class="form__message">
+              <h2 class="form-status caption-large text-body" role="alert" tabindex="-1" autofocus>
+                {{ 'templates.contact.form.error_heading' | t }}
+              </h2>
+            </div>
+            <ul class="form-status-list caption-large" role="list">
+              <li>
+                <a href="#ContactForm-email" class="link">
+                  {{ form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email }}
+                </a>
+              </li>
+            </ul>
+          {%- endif -%}
+          <div class="contact__fields">
+            <div class="field">
+              <input
+                class="field__input"
+                autocomplete="name"
+                type="text"
+                id="ContactForm-name"
+                name="contact[{{ 'templates.contact.form.name' | t }}]"
+                value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}"
+                placeholder="{{ 'templates.contact.form.name' | t }}"
+              >
+              <label class="field__label" for="ContactForm-name">{{ 'templates.contact.form.name' | t }}</label>
+            </div>
+            <div class="field field--with-error">
+              <input
+                autocomplete="email"
+                type="email"
+                id="ContactForm-email"
+                class="field__input"
+                name="contact[email]"
+                spellcheck="false"
+                autocapitalize="off"
+                value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+                aria-required="true"
+                {% if form.errors contains 'email' %}
+                  aria-invalid="true"
+                  aria-describedby="ContactForm-email-error"
+                {% endif %}
+                placeholder="{{ 'templates.contact.form.email' | t }}"
+              >
+              <label class="field__label" for="ContactForm-email">
+                {{- 'templates.contact.form.email' | t }}
+                <span aria-hidden="true">*</span></label
+              >
+              {%- if form.errors contains 'email' -%}
+                <small class="contact__field-error" id="ContactForm-email-error">
+                  <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+                  <span class="form__message">
+                    {{- form.errors.translated_fields.email | capitalize }}
+                    {{ form.errors.messages.email -}}
+                  </span>
+                </small>
+              {%- endif -%}
+            </div>
+          </div>
+          <div class="field">
+            <input
+              type="tel"
+              id="ContactForm-phone"
+              class="field__input"
+              autocomplete="tel"
+              name="contact[{{ 'templates.contact.form.phone' | t }}]"
+              pattern="[0-9\-]*"
+              value="{% if form.phone %}{{ form.phone }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+              placeholder="{{ 'templates.contact.form.phone' | t }}"
+            >
+            <label class="field__label" for="ContactForm-phone">{{ 'templates.contact.form.phone' | t }}</label>
+          </div>
+          <div class="field">
+            <textarea
+              rows="10"
+              id="ContactForm-body"
+              class="text-area field__input"
+              name="contact[{{ 'templates.contact.form.comment' | t }}]"
+              placeholder="{{ 'templates.contact.form.comment' | t }}"
+            >
+              {{- form.body -}}
+            </textarea>
+            <label class="form__label field__label" for="ContactForm-body">
+              {{- 'templates.contact.form.comment' | t -}}
+            </label>
+          </div>
+          <div class="contact__button">
+            <button type="submit" class="button button--primary">
+              {{ 'templates.contact.form.send' | t }}
+            </button>
+          </div>
+        {%- endform -%}
+      </div>
+    </div>
   </div>
 </div>
 
@@ -131,6 +250,12 @@
       "id": "head_office",
       "label": "Head Office Address",
       "default": "FLUNORA LIMITED\nRM 509, 5/F, THE CLOUD, 111 TUNG CHAU STREET, TAI KOK TSUI HONG KONG, HONG KONG"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1"
     },
     {
       "type": "header",
