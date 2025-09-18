@@ -8,8 +8,10 @@
 <div class="senses-section">
   <h3 class="section-heading">{{ heading }}</h3>
   <div class="featured-product-container">
+    <!-- DEBUG: Featured product setting value: {{ section.settings.featured_product }} -->
     {% if section.settings.featured_product != blank %}
       {% assign product = all_products[section.settings.featured_product] %}
+      <!-- DEBUG: Product assigned: {{ product | json }} -->
       <div class="featured-product">
         <div class="featured-product-image">
           {{ product.featured_image | image_url: width: 600 | image_tag }}
@@ -27,11 +29,14 @@
               {% endif %}
             </div>
           </div>
-          <div class="button-container" style="border: 2px solid red; padding: 10px;">
-            <a href="{{ product.url }}" class="button" style="background-color: red !important; color: white !important;">
+          <div class="button-container" style="border: 2px solid red; padding: 10px; position: relative; z-index: 9999;">
+            <a href="{{ product.url }}" class="button" style="background-color: red !important; color: white !important; position: relative; z-index: 9999;">
               {{ shop_button_text | default: 'Shop Senses' }}
             </a>
           </div>
+          <script>
+            console.log('Button container exists:', document.querySelector('.button-container') !== null);
+          </script>
           <!-- DEBUG INFO -->
           <div style="color: red; margin-top: 20px;">
             Product URL: {{ product.url }}<br>
