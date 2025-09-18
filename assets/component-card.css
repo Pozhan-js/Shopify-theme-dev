@@ -380,36 +380,41 @@
   outline: 0;
 }
 
-/* Remove media query to apply to all screen sizes */
-.card .media.media--hover-effect > img:only-child,
-.card-wrapper .media.media--hover-effect > img:only-child {
-  transition: transform var(--duration-long) ease;
+/* Reset all hover effect styles */
+.media.media--hover-effect {
+  position: relative;
 }
 
-.card:hover .media.media--hover-effect > img:first-child:only-child,
-.card-wrapper:hover .media.media--hover-effect > img:first-child:only-child {
-  transform: scale(1.03);
+.media.media--hover-effect > img:first-child {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
-/* Make selector more specific to override potential conflicts */
-.product-card-wrapper .card-wrapper .media.media--hover-effect > img:first-child:not(:only-child) {
-  opacity: 1 !important;
-  transition: opacity 0.3s ease !important;
+.media.media--hover-effect > img + img {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
 }
 
-.product-card-wrapper .card-wrapper .media.media--hover-effect > img + img {
-  opacity: 0 !important;
-  transition: opacity 0.3s ease !important;
+/* Only apply hover effect when show_secondary_image is true */
+.card-product[data-show-secondary="true"] .media.media--hover-effect:hover > img:first-child {
+  opacity: 0;
 }
 
-.product-card-wrapper .card-wrapper:hover .media.media--hover-effect > img:first-child:not(:only-child) {
-  opacity: 0 !important;
+.card-product[data-show-secondary="true"] .media.media--hover-effect:hover > img + img {
+  opacity: 1;
 }
 
-.product-card-wrapper .card-wrapper:hover .media.media--hover-effect > img + img {
-  opacity: 1 !important;
-  transition: opacity 0.3s ease, transform var(--duration-long) ease !important;
-  transform: scale(1.03);
+/* Disable all transitions when show_secondary_image is false */
+.card-product:not([data-show-secondary="true"]) .media.media--hover-effect > img {
+  transition: none !important;
 }
 
   .underline-links-hover:hover a {
