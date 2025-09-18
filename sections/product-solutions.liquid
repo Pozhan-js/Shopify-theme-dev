@@ -1,0 +1,550 @@
+<div class="product-solutions-section">
+  <div class="container">
+    <!-- 标题区域 -->
+    <div class="section-header">
+      {% if section.settings.title != blank %}
+        <h2 class="section-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <p class="section-description">{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+
+    <!-- 产品网格 -->
+    <div class="products-grid">
+      {% for block in section.blocks %}
+        <div class="product-card" {{ block.shopify_attributes }}>
+          <div class="product-image">
+            {% if block.settings.image != blank %}
+              <img
+                src="{{ block.settings.image | img_url: '400x400' }}"
+                alt="{{ block.settings.title }}"
+                loading="lazy">
+            {% else %}
+              <div class="placeholder-image">
+                <svg
+                  width="100"
+                  height="100"
+                  viewBox="0 0 100 100"
+                  fill="none">
+                  <rect
+                    width="100"
+                    height="100"
+                    fill="#f5f5f5" />
+                  <path d="M30 40h40v20H30z" fill="#ddd" />
+                </svg>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="product-content">
+            {% if block.settings.title != blank %}
+              <h3 class="product-title">{{ block.settings.title }}</h3>
+            {% endif %}
+
+            {% if block.settings.show_learn_more and block.settings.learn_more_text != blank %}
+              <div class="product-action">
+                {% if block.settings.learn_more_url != blank %}
+                  <a href="{{ block.settings.learn_more_url }}" class="learn-more-btn">
+                    {{ block.settings.learn_more_text }}
+                  </a>
+                {% else %}
+                  <span class="learn-more-btn">{{ block.settings.learn_more_text }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-solutions-section {
+    padding: {{ section.settings.padding_top }}
+    px 0{{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-title {
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+    color: {{ section.settings.title_color }};
+    margin: 0 0 20px;
+    line-height: 1.2;
+  }
+
+  .section-description {
+    font-size: {{ section.settings.description_size }}px;
+    color: {{ section.settings.description_color }};
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: {{ section.settings.grid_gap }}px;
+    margin-top: 40px;
+  }
+
+  .product-card {
+    background: {{ section.settings.card_background }};
+    border-radius: {{ section.settings.card_border_radius }}px;
+    padding: {{ section.settings.card_padding }}px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid{{ section.settings.card_border_color }};
+  }
+
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .product-image {
+    margin-bottom: 30px;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f8f8;
+    border-radius: 8px;
+  }
+
+  .product-title {
+    font-size: {{ section.settings.product_title_size }}px;
+    font-weight: {{ section.settings.product_title_weight }};
+    color: {{ section.settings.product_title_color }};
+    margin: 0 0 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .learn-more-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: transparent;
+    border: 2px solid{{ section.settings.button_border_color }};
+    color: {{ section.settings.button_text_color }};
+    text-decoration: none;
+    font-size: {{ section.settings.button_text_size }}px;
+    font-weight: {{ section.settings.button_text_weight }};
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .learn-more-btn:hover {
+    background: {{ section.settings.button_hover_bg }};
+    color: {{ section.settings.button_hover_text }};
+    transform: translateY(-2px);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .section-title {
+      font-size: {{ section.settings.title_size | minus: 8 }}px;
+    }
+
+    .section-description {
+      font-size: {{ section.settings.description_size | minus: 2 }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .product-card {
+      padding: {{ section.settings.card_padding | minus: 10 }}px;
+    }
+
+    .product-image {
+      height: 200px;
+    }
+  }
+</style>
+
+{% schema %}
+  {
+    "name": "产品解决方案",
+    "tag": "section",
+    "class": "product-solutions",
+    "settings": [
+      {
+        "type": "header",
+        "content": "标题设置"
+      },
+      {
+        "type": "text",
+        "id": "title",
+        "label": "标题",
+        "default": "Full Range of Product Solutions"
+      },
+      {
+        "type": "range",
+        "id": "title_size",
+        "label": "标题字体大小",
+        "min": 24,
+        "max": 48,
+        "step": 2,
+        "default": 36,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "title_weight",
+        "label": "标题字体粗细",
+        "options": [
+          {
+            "value": "300",
+            "label": "细体"
+          },
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
+          }
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "title_color",
+        "label": "标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "textarea",
+        "id": "description",
+        "label": "描述文本",
+        "default": "Complete vertical integration across 8,000+ components allows us to control every part of the Pilates equipment manufacturing process – delivering fully customizable product lines with maximum production efficiency, consistent quality, and highly competitive pricing."
+      },
+      {
+        "type": "range",
+        "id": "description_size",
+        "label": "描述字体大小",
+        "min": 14,
+        "max": 20,
+        "step": 1,
+        "default": 16,
+        "unit": "px"
+      },
+      {
+        "type": "color",
+        "id": "description_color",
+        "label": "描述颜色",
+        "default": "#666666"
+      },
+      {
+        "type": "header",
+        "content": "布局设置"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "背景颜色",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "label": "顶部间距",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "default": 60,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "label": "底部间距",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "default": 60,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "grid_gap",
+        "label": "网格间距",
+        "min": 20,
+        "max": 60,
+        "step": 5,
+        "default": 30,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "卡片样式"
+      },
+      {
+        "type": "color",
+        "id": "card_background",
+        "label": "卡片背景色",
+        "default": "#f8f8f8"
+      },
+      {
+        "type": "color",
+        "id": "card_border_color",
+        "label": "卡片边框色",
+        "default": "#e0e0e0"
+      },
+      {
+        "type": "range",
+        "id": "card_border_radius",
+        "label": "卡片圆角",
+        "min": 0,
+        "max": 20,
+        "step": 2,
+        "default": 8,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "card_padding",
+        "label": "卡片内边距",
+        "min": 20,
+        "max": 50,
+        "step": 5,
+        "default": 30,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "产品标题"
+      },
+      {
+        "type": "range",
+        "id": "product_title_size",
+        "label": "产品标题字体大小",
+        "min": 16,
+        "max": 24,
+        "step": 1,
+        "default": 18,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "product_title_weight",
+        "label": "产品标题字体粗细",
+        "options": [
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
+          }
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "product_title_color",
+        "label": "产品标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "header",
+        "content": "按钮样式"
+      },
+      {
+        "type": "color",
+        "id": "button_border_color",
+        "label": "按钮边框色",
+        "default": "#cccccc"
+      },
+      {
+        "type": "color",
+        "id": "button_text_color",
+        "label": "按钮文字色",
+        "default": "#666666"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_bg",
+        "label": "按钮悬停背景色",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_text",
+        "label": "按钮悬停文字色",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "button_text_size",
+        "label": "按钮字体大小",
+        "min": 12,
+        "max": 16,
+        "step": 1,
+        "default": 14,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "button_text_weight",
+        "label": "按钮字体粗细",
+        "options": [
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          }
+        ],
+        "default": "500"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "product",
+        "name": "产品项目",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "产品图片"
+          },
+          {
+            "type": "text",
+            "id": "title",
+            "label": "产品标题",
+            "default": "产品名称"
+          },
+          {
+            "type": "checkbox",
+            "id": "show_learn_more",
+            "label": "显示了解更多按钮",
+            "default": true
+          },
+          {
+            "type": "text",
+            "id": "learn_more_text",
+            "label": "按钮文字",
+            "default": "LEARN MORE"
+          },
+          {
+            "type": "url",
+            "id": "learn_more_url",
+            "label": "按钮链接"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "产品解决方案",
+        "blocks": [
+          {
+            "type": "product",
+            "settings": {
+              "title": "REFORMER",
+              "learn_more_text": "LEARN MORE"
+            }
+          },
+          {
+            "type": "product",
+            "settings": {
+              "title": "LADDER BARREL",
+              "learn_more_text": "LEARN MORE"
+            }
+          },
+          {
+            "type": "product",
+            "settings": {
+              "title": "SPINE CORRECTOR",
+              "learn_more_text": "LEARN MORE"
+            }
+          },
+          {
+            "type": "product",
+            "settings": {
+              "title": "CADILLAC",
+              "learn_more_text": "LEARN MORE"
+            }
+          },
+          {
+            "type": "product",
+            "settings": {
+              "title": "PILATES CHAIR",
+              "learn_more_text": "LEARN MORE"
+            }
+          },
+          {
+            "type": "product",
+            "settings": {
+              "title": "PILATES ACCESSORIES",
+              "learn_more_text": "LEARN MORE"
+            }
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
