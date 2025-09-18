@@ -2,21 +2,21 @@
   assign heading = section.settings.heading
   assign cta_text = section.settings.cta_text
   assign cta_link = section.settings.cta_link
-  assign featured_product = section.settings.featured_product
+  assign senses-featured_product = section.settings.senses-featured_product
   assign shop_button_text = section.settings.shop_button_text
 -%}
 <div class="senses-section custom-section">
   <h3 class="section-heading">{{ heading }}</h3>
-  <div class="featured-product-container">
-    <!-- DEBUG: Featured product setting value: {{ section.settings.featured_product }} -->
-    {% if section.settings.featured_product != blank %}
-      {% assign product = all_products[section.settings.featured_product] %}
+  <div class="senses-featured-product-container">
+    <!-- DEBUG: senses-featured product setting value: {{ section.settings.senses-featured_product }} -->
+    {% if section.settings.senses-featured_product != blank %}
+      {% assign product = all_products[section.settings.senses-featured_product] %}
       <!-- DEBUG: Product assigned: {{ product | json }} -->
-      <div class="featured-product">
-        <div class="featured-product-image">
-          {{ product.featured_image | image_url: width: 600 | image_tag }}
+      <div class="senses-featured-product">
+        <div class="senses-featured-product-image">
+          {{ product.senses-featured_image | image_url: width: 600 | image_tag }}
         </div>
-        <div class="featured-product-info">
+        <div class="senses-featured-product-info">
           <div class="senses-product-details">
             <h3 class="senses-product-name">{{ product.title }}</h3>
             {% if product.handle != blank %}
@@ -39,21 +39,21 @@
     {% endif %}
   </div>
 
-  <div class="product-grid-container">
-    <div class="product-grid">
+  <div class="senses-product-grid-container">
+    <div class="senses-product-grid">
       {% for i in (1..4) %}
-        {% assign product_setting = 'featured_product_' | append: i %}
+        {% assign product_setting = 'senses-featured_product_' | append: i %}
         {% if section.settings[product_setting] != blank %}
           {% assign product = all_products[section.settings[product_setting]] %}
-          <a href="{{ product.url }}" class="product-grid-item">
-            <div class="product-grid-image">
-              {{ product.featured_image | image_url: width: 300 | image_tag }}
+          <a href="{{ product.url }}" class="senses-product-grid-item">
+            <div class="senses-product-grid-image">
+              {{ product.senses-featured_image | image_url: width: 300 | image_tag }}
             </div>
-            <h4 class="product-grid-name">{{ product.title }}</h4>
+            <h4 class="senses-product-grid-name">{{ product.title }}</h4>
             {% if product.handle != blank %}
-              <p class="product-grid-series">{{ product.handle }}</p>
+              <p class="senses-product-grid-series">{{ product.handle }}</p>
             {% endif %}
-            <div class="product-grid-price">
+            <div class="senses-product-grid-price">
               {{ product.price | money }}
               {% if product.compare_at_price > product.price %}
                 <span class="compare-price">{{ product.compare_at_price | money }}</span>
@@ -77,12 +77,12 @@
     .custom-section {
     padding: 0 50px;
   }
-  .featured-product-container {
+  .senses-featured-product-container {
     margin-bottom: 50px;
     margin-top: 30px;
   }
 
-  .featured-product {
+  .senses-featured-product {
     display: flex;
     flex-direction: row;
     gap: 60px;
@@ -92,14 +92,14 @@
     width: 100%;
   }
 
-  .featured-product-image {
+  .senses-featured-product-image {
     flex: 1;
     max-height: 400px;
     display: flex;
     align-items: center;
   }
 
-  .featured-product-image img {
+  .senses-featured-product-image img {
     width: 100%;
     height: 100%;
     max-height: 400px;
@@ -107,7 +107,7 @@
     border-radius: 8px;
   }
 
-  .featured-product-info {
+  .senses-featured-product-info {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -187,17 +187,17 @@
     color: #000;
   }
 
-  .product-grid-container {
+  .senses-product-grid-container {
     margin-top: 40px;
   }
 
-  .product-grid {
+  .senses-product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
   }
 
-  .product-grid-item {
+  .senses-product-grid-item {
     display: flex;
     flex-direction: column;
     text-decoration: none;
@@ -205,11 +205,11 @@
     transition: transform 0.3s ease;
   }
 
-  .product-grid-item:hover {
+  .senses-product-grid-item:hover {
     transform: translateY(-5px);
   }
 
-  .product-grid-image {
+  .senses-product-grid-image {
     width: 100%;
     height: 200px;
     overflow: hidden;
@@ -217,24 +217,24 @@
     margin-bottom: 10px;
   }
 
-  .product-grid-image img {
+  .senses-product-grid-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  .product-grid-name {
+  .senses-product-grid-name {
     font-size: 1.1rem;
     margin: 5px 0;
   }
 
-  .product-grid-series {
+  .senses-product-grid-series {
     color: #666;
     font-size: 0.9rem;
     margin: 5px 0;
   }
 
-  .product-grid-price {
+  .senses-product-grid-price {
     font-size: 1.1rem;
     font-weight: bold;
     margin: 5px 0;
@@ -249,17 +249,17 @@
   }
 
   @media (max-width: 768px) {
-    .featured-product {
+    .senses-featured-product {
       flex-direction: column;
       gap: 30px;
       max-height: none;
     }
 
-    .featured-product-image {
+    .senses-featured-product-image {
       max-height: 300px;
     }
 
-    .featured-product-info {
+    .senses-featured-product-info {
       min-height: auto;
       text-align: center;
     }
@@ -276,11 +276,11 @@
       font-size: 1.2rem;
     }
 
-    .product-grid {
+    .senses-product-grid {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    .product-grid-image {
+    .senses-product-grid-image {
       height: 150px;
     }
 
@@ -291,11 +291,11 @@
   }
 
   @media (max-width: 480px) {
-    .featured-product-image {
+    .senses-featured-product-image {
       max-height: 250px;
     }
 
-    .product-grid {
+    .senses-product-grid {
       grid-template-columns: 1fr;
     }
 
@@ -317,8 +317,8 @@
     },
     {
       "type": "product",
-      "id": "featured_product",
-      "label": "Featured herbal pouch"
+      "id": "senses-featured_product",
+      "label": "senses-featured herbal pouch"
     },
     {
       "type": "text",
@@ -329,23 +329,23 @@
     },
     {
       "type": "product",
-      "id": "featured_product_1",
-      "label": "Featured Product 1"
+      "id": "senses-featured_product_1",
+      "label": "senses-featured Product 1"
     },
     {
       "type": "product",
-      "id": "featured_product_2",
-      "label": "Featured Product 2"
+      "id": "senses-featured_product_2",
+      "label": "senses-featured Product 2"
     },
     {
       "type": "product",
-      "id": "featured_product_3",
-      "label": "Featured Product 3"
+      "id": "senses-featured_product_3",
+      "label": "senses-featured Product 3"
     },
     {
       "type": "product",
-      "id": "featured_product_4",
-      "label": "Featured Product 4"
+      "id": "senses-featured_product_4",
+      "label": "senses-featured Product 4"
     },
     {
       "type": "text",
