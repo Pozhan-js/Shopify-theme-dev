@@ -74,6 +74,15 @@
         <div class="grid__item product__media-wrapper">
           {%- unless placeholder -%}
             {% render 'product-media-gallery', product: product, variant_images: variant_images, limit: 1 %}
+            <div class="discount-badge" style="
+              color: {{ section.settings.discount_text_color }};
+              background-color: {{ section.settings.discount_bg_color }};
+              font-size: {{ section.settings.discount_font_size }}px;
+              font-weight: {{ section.settings.discount_font_weight }};
+              font-family: {{ section.settings.discount_font_family }};
+            ">
+              {{ section.settings.discount_text | default: '20% off' }}
+            </div>
           {%- else -%}
             <div class="product__media-item">
               <div
@@ -81,6 +90,9 @@
                 style="--ratio: 1.0; --preview-ratio: 1.0;"
               >
                 {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              </div>
+              <div class="discount-badge">
+                {{ section.settings.discount_text | default: '20% off' }}
               </div>
             </div>
           {%- endunless -%}
@@ -1339,6 +1351,70 @@
       "type": "product",
       "id": "product",
       "label": "t:sections.featured-product.settings.product.label"
+    },
+    {
+      "type": "text",
+      "id": "discount_text",
+      "label": "折扣文本",
+      "default": "20% off"
+    },
+    {
+      "type": "color",
+      "id": "discount_text_color",
+      "label": "折扣文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "discount_bg_color",
+      "label": "折扣背景颜色",
+      "default": "#ff0000"
+    },
+    {
+      "type": "range",
+      "id": "discount_font_size",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "折扣文字大小",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "discount_font_weight",
+      "label": "折扣文字粗细",
+      "options": [
+        {
+          "value": "normal",
+          "label": "正常"
+        },
+        {
+          "value": "bold",
+          "label": "加粗"
+        }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "select",
+      "id": "discount_font_family",
+      "label": "折扣字体",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "继承默认字体"
+        },
+        {
+          "value": "Arial, sans-serif",
+          "label": "Arial"
+        },
+        {
+          "value": "Helvetica, sans-serif",
+          "label": "Helvetica"
+        }
+      ],
+      "default": "inherit"
     },
     {
       "type": "color_scheme",
