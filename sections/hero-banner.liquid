@@ -2,7 +2,7 @@
   /* Hero Banner Styles */
   .hero-section {
     background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)),
-                url('{{ section.settings.hero_background_image | img_url: '2048x' }}');
+                url('{{ section.settings.herobackgroundimage | img_url: '2048x' }}');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -26,8 +26,8 @@
 
   .hero-title {
     color: #FFFFFF;
-    font-weight: 700;
-    line-height: 1.1;
+    font-weight: 500;
+    line-height: 60px;
     letter-spacing: -0.02em;
     font-size: 48px;
     margin-bottom: 24px;
@@ -38,9 +38,9 @@
     color: #D1D5DB;
     font-weight: 400;
     line-height: 1.6;
-    font-size: 18px;
+    font-size: 15px;
     margin-bottom: 32px;
-    max-width: 512px;
+    max-width: 600px;
   }
 
   .cta-button {
@@ -48,18 +48,21 @@
     box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
     transition: all 0.3s ease;
     color: #FFFFFF;
-    padding: 16px 32px;
-    border-radius: 8px;
+    width: 180px;
+    height: 59.76px;
+    border-radius: 4px;
     font-weight: 600;
-    font-size: 18px;
+    font-size: 12px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     text-decoration: none;
     border: none;
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    padding: 0;
   }
 
   .cta-button::before {
@@ -106,11 +109,11 @@
     }
     
     .hero-title {
-      font-size: 72px;
+      font-size: 48px;
     }
     
     .hero-subtitle {
-      font-size: 20px;
+      font-size: 15px;
     }
   }
 
@@ -120,33 +123,49 @@
     }
     
     .hero-title {
-      font-size: 36px;
+      font-size: 28px;
       margin-bottom: 20px;
     }
     
     .hero-subtitle {
-      font-size: 16px;
+      font-size: 14px;
       margin-bottom: 28px;
+      white-space: normal;
     }
     
     .cta-button {
-      font-size: 16px;
-      padding: 14px 28px;
+      width: 144px;
+      height: 48px;
+      font-size: 10px;
     }
+    
+    .cta-button .cta-icon {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  }
   }
 
   @media (max-width: 480px) {
     .hero-title {
-      font-size: 32px;
+      font-size: 24px;
     }
     
     .hero-subtitle {
-      font-size: 15px;
+      font-size: 13px;
+      white-space: normal;
     }
     
     .cta-button {
-      font-size: 15px;
-      padding: 12px 24px;
+      width: 120px;
+      height: 40px;
+      font-size: 9px;
+    }
+    
+    .cta-button .cta-icon {
+      width: 10px;
+      height: 10px;
     }
   }
 
@@ -179,12 +198,12 @@
   }
 </style>
 
-<section class="hero-section {% if section.settings.hero_background_image == blank %}default-bg{% endif %}">
+<section class="hero-section {% if section.settings.herobackgroundimage == blank %}default-bg{% endif %}">
   <div class="hero-container">
     <div class="hero-content">
       <h1 class="hero-title">
-        {% if section.settings.hero_title != blank %}
-          {{ section.settings.hero_title | newline_to_br }}
+        {% if section.settings.herotitle != blank %}
+          {{ section.settings.herotitle | newline_to_br }}
         {% else %}
           The Pilates Equipment<br>
           Manufacturer Behind Global<br>
@@ -193,15 +212,15 @@
       </h1>
       
       <p class="hero-subtitle">
-        {{ section.settings.hero_subtitle | default: "Supplying 25%+ of the world's total pilates equipment production" }}
+        {{ section.settings.herosubtitle | default: "Supplying 25%+ of the world's total pilates equipment production" }}
       </p>
       
-      {% if section.settings.show_cta_button %}
+      {% if section.settings.showctabutton %}
         <a href="{{ section.settings.cta_link | default: '#quote' }}" class="cta-button">
-          <svg class="cta-icon" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="cta-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
-          <span>{{ section.settings.cta_text | default: 'GET A QUOTE' }}</span>
+          <span>{{ section.settings.ctatext | default: 'GET A QUOTE' }}</span>
         </a>
       {% endif %}
     </div>
@@ -214,32 +233,32 @@
   "settings": [
     {
       "type": "image_picker",
-      "id": "hero_background_image",
+      "id": "herobackgroundimage",
       "label": "Background Image",
       "info": "Recommended size: 2048x1024px or larger"
     },
     {
       "type": "textarea",
-      "id": "hero_title",
+      "id": "herotitle",
       "label": "Hero Title",
       "default": "The Pilates Equipment\nManufacturer Behind Global\nPilates Brands",
       "info": "Use line breaks to control text layout"
     },
     {
       "type": "text",
-      "id": "hero_subtitle",
+      "id": "herosubtitle",
       "label": "Hero Subtitle",
       "default": "Supplying 25%+ of the world's total pilates equipment production"
     },
     {
       "type": "checkbox",
-      "id": "show_cta_button",
+      "id": "showctabutton",
       "label": "Show CTA Button",
       "default": true
     },
     {
       "type": "text",
-      "id": "cta_text",
+      "id": "ctatext",
       "label": "CTA Button Text",
       "default": "GET A QUOTE"
     },
