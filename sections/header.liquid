@@ -86,7 +86,7 @@
     right: auto;
     z-index: 100; /* 降低层级 */
     margin-bottom: 0 !important;
-    background: #ffffff !important; /* 纯白色背景 */
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
     backdrop-filter: none !important; /* 移除模糊效果 */
     -webkit-backdrop-filter: none !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* 轻微阴影 */
@@ -94,26 +94,30 @@
   }
 
   .header-wrapper {
-    background: #ffffff !important; /* 纯白色背景 */
-    border-bottom: 1px solid #e5e5e5 !important; /* 添加底部边框 */
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
+    border-bottom: 1px solid {{ section.settings.header_border_color | default: '#e5e7eb' }} !important;
   }
 
   .header {
-    padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 3rem;
-    background: #ffffff !important; /* 纯白色背景 */
+    padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 2rem {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px 2rem;
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
     border-bottom: none !important;
     transition: padding 0.3s ease-in-out;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
   }
 
-  /* 确保所有颜色方案下都使用白色背景 */
+  /* 确保所有颜色方案下都使用设定的背景色 */
   .color-scheme-1,
   .color-scheme-2,
   .color-scheme-3,
   .color-background-1,
   .color-background-2,
   .gradient {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
+
     background-image: none !important;
   }
 
@@ -125,44 +129,44 @@
     display: none !important;
   }
 
-  /* 文字颜色保持可读性 */
+  /* 文字颜色 */
   .header__heading-link {
-    color: {{ section.settings.text_color }} !important;
+    color: {{ section.settings.header_text_color | default: '#1f2937' }} !important;
     transition: color 0.3s ease-in-out;
   }
 
   .header__icon {
-    color: {{ section.settings.text_color }} !important;
+    color: {{ section.settings.header_text_color | default: '#1f2937' }} !important;
     transition: color 0.3s ease-in-out;
   }
 
   .list-menu__item--link {
-    color: {{ section.settings.text_color }} !important;
+    color: {{ section.settings.header_text_color | default: '#1f2937' }} !important;
     transition: color 0.3s ease-in-out;
   }
 
-  /* 滚动时保持白色背景 */
+  /* 滚动时保持设定背景色 */
   .shopify-section-header-sticky {
-    background: #ffffff !important;
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important; /* 滚动时稍微加深阴影 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
   }
 
   .shopify-section-header-sticky .header {
-    padding: {{ section.settings.padding_top | times: 0.3 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.3 | round: 0 }}px 3rem;
-    background: #ffffff !important;
+    padding: {{ section.settings.padding_top | times: 0.3 | round: 0 }}px 2rem {{ section.settings.padding_bottom | times: 0.3 | round: 0 }}px 2rem;
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
   }
 
   .shopify-section-header-sticky .header__heading-link,
   .shopify-section-header-sticky .header__icon,
   .shopify-section-header-sticky .list-menu__item--link {
-    color: {{ section.settings.text_color }} !important;
+    color: {{ section.settings.header_text_color | default: '#1f2937' }} !important;
   }
 
-  /* 隐藏状态保持白色背景 */
+  /* 隐藏状态保持设定背景色 */
   .shopify-section-header-hidden {
-    background: #ffffff !important;
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
     transform: translateY(-100%);
     transition: transform 0.3s ease-in-out;
   }
@@ -171,12 +175,12 @@
   .shopify-section-header-revealed {
     transform: translateY(0);
     transition: transform 0.3s ease-in-out;
-    background: #ffffff !important;
+    background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
   }
 
   /* 保留边框分隔线 */
   .header-wrapper--border-bottom {
-    border-bottom: 1px solid #e5e5e5 !important;
+    border-bottom: 1px solid {{ section.settings.header_border_color | default: '#e5e7eb' }} !important;
   }
 
   @media screen and (min-width: 750px) {
@@ -185,17 +189,76 @@
     }
   }
 
-  @media screen and (min-width: 990px) {
-    .header {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-      background: #ffffff !important;
+    @media screen and (min-width: 990px) {
+      .header {
+        padding: {{ section.settings.padding_top }}px 3rem {{ section.settings.padding_bottom }}px 3rem;
+        background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
+      }
+
+      .shopify-section-header-sticky .header {
+        padding: {{ section.settings.padding_top | times: 0.7 | round: 0 }}px 3rem {{ section.settings.padding_bottom | times: 0.7 | round: 0 }}px 3rem;
+        background: {{ section.settings.header_bg_color | default: '#ffffff' }} !important;
+      }
     }
 
-    .shopify-section-header-sticky .header {
-      padding-top: {{ section.settings.padding_top | times: 0.7 | round: 0 }}px;
-      padding-bottom: {{ section.settings.padding_bottom | times: 0.7 | round: 0 }}px;
-      background: #ffffff !important;
+  /* Logo区域样式优化 */
+  .header__heading {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .header__heading-link {
+    display: flex;
+    align-items: center;
+  }
+
+  /* 右侧图标区域样式优化 */
+  .header__icons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* 中间导航菜单区域 */
+  .header__inline-menu {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 0.5rem;
+  }
+
+  /* 移动端优化 */
+  @media screen and (max-width: 989px) {
+    .header {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      max-width: none;
+      margin: 0;
+      width: 100%;
+    }
+
+    .header__icons {
+      gap: 0.3rem;
+    }
+
+    .header__inline-menu {
+      display: none;
+    }
+
+    /* 移动端隐藏菜单抽屉 */
+    header-drawer {
+      display: none !important;
+    }
+
+    /* 移动端Logo大小调整 */
+    .header__heading-logo-wrapper {
+      transform: scale(0.7);
+      transform-origin: left center;
+    }
+
+    .header__heading .h2 {
+      font-size: {{ section.settings.logo_text_size | times: 0.7 | round: 0 }}px !important;
     }
   }
 
@@ -794,7 +857,7 @@
       "id": "text_color",
       "label": "文字颜色",
       "info": "头部导航栏中文字和图标的颜色",
-      "default": "#404040"
+      "default": "#ffffff"
     },
     {
       "type": "header",
@@ -861,6 +924,28 @@
       "id": "logo_text_color",
       "label": "Logo文字颜色",
       "default": "#1f2937"
+    },
+    {
+      "type": "header",
+      "content": "头部背景设置"
+    },
+    {
+      "type": "color",
+      "id": "header_bg_color",
+      "label": "头部背景颜色",
+      "default": "#39414F"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "头部文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "header_border_color",
+      "label": "头部边框颜色",
+      "default": "#4a5568"
     }
   ],
   "blocks": [
