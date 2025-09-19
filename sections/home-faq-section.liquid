@@ -12,6 +12,7 @@
 
   .faq-container {
     max-width: 1280px;
+     width: 90%;
     margin: 0 auto;
     padding: 0 1rem;
   }
@@ -300,11 +301,11 @@
     .faq-title {
       font-size: {{ section.settings.title_font_size_mobile }}px;
     }
-    
+
     .faq-subtitle {
       font-size: {{ section.settings.subtitle_font_size_mobile }}px;
     }
-    
+
     .faq-categories {
       justify-content: flex-start;
       overflow-x: auto;
@@ -316,7 +317,7 @@
     .faq-categories::-webkit-scrollbar {
       display: none;
     }
-    
+
     .faq-category {
       white-space: nowrap;
       flex-shrink: 0;
@@ -357,10 +358,12 @@
       <svg class="faq-search-icon" viewBox="0 0 24 24" fill="currentColor">
         <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
       </svg>
-      <input type="text" 
-             class="faq-search-input" 
-             placeholder="{{ section.settings.search_placeholder }}" 
-             id="faqSearch">
+      <input
+        type="text"
+        class="faq-search-input"
+        placeholder="{{ section.settings.search_placeholder }}"
+        id="faqSearch"
+      >
     </div>
 
     <!-- Category Filters -->
@@ -371,8 +374,10 @@
           {% unless has_categories %}
             {% assign has_categories = true %}
           {% endunless %}
-          <button class="faq-category {% if forloop.first %}active{% endif %}" 
-                  data-category="{{ block.settings.category_id }}">
+          <button
+            class="faq-category {% if forloop.first %}active{% endif %}"
+            data-category="{{ block.settings.category_id }}"
+          >
             {% if block.settings.icon != blank %}
               <i class="{{ block.settings.icon }}"></i>
             {% endif %}
@@ -433,22 +438,22 @@
   function toggleFAQ(element) {
     const faqItem = element.closest('.faq-item');
     const wasExpanded = faqItem.classList.contains('expanded');
-    
+
     // Optional: Close other FAQs (uncomment if you want accordion behavior)
     // document.querySelectorAll('.faq-item.expanded').forEach(item => {
     //   if (item !== faqItem) {
     //     item.classList.remove('expanded');
     //   }
     // });
-    
+
     faqItem.classList.toggle('expanded');
-    
+
     // Smooth scroll to question if expanding
     if (!wasExpanded) {
       setTimeout(() => {
-        element.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'nearest' 
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
         });
       }, 100);
     }
@@ -463,13 +468,12 @@
       const question = item.querySelector('.faq-question-text').textContent.toLowerCase();
       const answer = item.querySelector('.faq-answer-text').textContent.toLowerCase();
       const category = item.dataset.category || '';
-      
-      const matchesSearch = !searchTerm || 
-                           question.includes(searchTerm.toLowerCase()) || 
-                           answer.includes(searchTerm.toLowerCase());
-      
+
+      const matchesSearch =
+        !searchTerm || question.includes(searchTerm.toLowerCase()) || answer.includes(searchTerm.toLowerCase());
+
       const matchesCategory = currentCategory === 'all' || category === currentCategory;
-      
+
       if (matchesSearch && matchesCategory) {
         item.style.display = 'block';
         // Update numbering for visible items
@@ -487,15 +491,15 @@
   }
 
   // Search functionality
-  document.getElementById('faqSearch').addEventListener('input', function(e) {
+  document.getElementById('faqSearch').addEventListener('input', function (e) {
     searchTerm = e.target.value.trim();
     filterFAQs();
   });
 
   // Category switching
-  document.querySelectorAll('.faq-category').forEach(button => {
-    button.addEventListener('click', function() {
-      document.querySelectorAll('.faq-category').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.faq-category').forEach((button) => {
+    button.addEventListener('click', function () {
+      document.querySelectorAll('.faq-category').forEach((b) => b.classList.remove('active'));
       this.classList.add('active');
       currentCategory = this.dataset.category;
       filterFAQs();
@@ -503,11 +507,11 @@
   });
 
   // Initialize on page load
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     filterFAQs();
-    
+
     // Add keyboard navigation
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         document.getElementById('faqSearch').blur();
       }
