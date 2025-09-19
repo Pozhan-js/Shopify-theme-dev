@@ -278,7 +278,7 @@
         <h1 class="header__heading">
       {%- endif -%}
       <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
-        {%- if settings.logo != blank -%}
+        {%- if section.settings.use_logo_image and settings.logo != blank -%}
           <div class="header__heading-logo-wrapper">
             {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
             {%- assign logo_height = settings.logo_width | divided_by: settings.logo.aspect_ratio -%}
@@ -298,7 +298,12 @@
             }}
           </div>
         {%- else -%}
-          <span class="h2">{{ shop.name }}</span>
+          <span
+            class="h2"
+            style="font-size: {{ section.settings.logo_text_size }}px; font-weight: {{ section.settings.logo_text_weight }}; color: {{ section.settings.logo_text_color }};"
+          >
+            {{ section.settings.logo_text | default: shop.name }}
+          </span>
         {%- endif -%}
       </a>
       {%- if request.page_type == 'index' -%}
@@ -321,7 +326,7 @@
         <h1 class="header__heading">
       {%- endif -%}
       <a href="{{ routes.root_url }}" class="header__heading-link link link--text focus-inset">
-        {%- if settings.logo != blank -%}
+        {%- if section.settings.use_logo_image and settings.logo != blank -%}
           <div class="header__heading-logo-wrapper">
             {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
             {%- assign logo_height = settings.logo_width | divided_by: settings.logo.aspect_ratio -%}
@@ -341,7 +346,12 @@
             }}
           </div>
         {%- else -%}
-          <span class="h2">{{ shop.name }}</span>
+          <span
+            class="h2"
+            style="font-size: {{ section.settings.logo_text_size }}px; font-weight: {{ section.settings.logo_text_weight }}; color: {{ section.settings.logo_text_color }};"
+          >
+            {{ section.settings.logo_text | default: shop.name }}
+          </span>
         {%- endif -%}
       </a>
       {%- if request.page_type == 'index' -%}
@@ -785,6 +795,72 @@
       "label": "文字颜色",
       "info": "头部导航栏中文字和图标的颜色",
       "default": "#404040"
+    },
+    {
+      "type": "header",
+      "content": "Logo设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_logo_image",
+      "label": "使用Logo图片",
+      "default": true,
+      "info": "开启时使用主题设置中的Logo图片，关闭时使用下方的文字Logo"
+    },
+    {
+      "type": "text",
+      "id": "logo_text",
+      "label": "Logo文字",
+      "default": "My Store",
+      "info": "当不使用Logo图片时显示的文字，留空则显示店铺名称"
+    },
+    {
+      "type": "range",
+      "id": "logo_text_size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Logo文字大小",
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "logo_text_weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "细体"
+        },
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗体"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        },
+        {
+          "value": "800",
+          "label": "特粗体"
+        }
+      ],
+      "default": "600",
+      "label": "Logo文字粗细"
+    },
+    {
+      "type": "color",
+      "id": "logo_text_color",
+      "label": "Logo文字颜色",
+      "default": "#1f2937"
     }
   ],
   "blocks": [
