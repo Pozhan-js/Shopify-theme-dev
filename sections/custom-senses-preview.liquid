@@ -1,0 +1,236 @@
+{%- style -%}
+  .senses-preview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    padding: 0 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .sense-item {
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+
+  .sense-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .sense-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 3/4;
+    margin-bottom: 1rem;
+  }
+
+  .sense-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+
+  .sense-image.hidden {
+    opacity: 0;
+  }
+
+  .sense-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .sense-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  .sense-dot.active {
+    background: rgba(0,0,0,0.6);
+  }
+
+  .sense-info {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: #000;
+    background: rgba(255,255,255,0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+
+  .sense-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .sense-price {
+    font-size: 0.9rem;
+    margin: 0.2rem 0 0;
+  }
+
+  @media screen and (max-width: 1200px) {
+    .senses-preview {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 750px) {
+    .senses-preview {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .senses-preview {
+      grid-template-columns: 1fr;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width">
+  {%- if section.settings.heading != blank -%}
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.heading }}</h2>
+    </div>
+  {%- endif -%}
+
+  <div class="senses-preview">
+    {%- for product in collections[section.settings.collection].products limit: section.settings.product_count -%}
+      <a href="{{ product.url }}" class="sense-item">
+        <div class="sense-image-container" data-product-id="{{ product.id }}">
+          {%- for image in product.images -%}
+            <img 
+              class="sense-image {% unless forloop.first %}hidden{% endunless %}" 
+              src="{{ image | img_url: '800x' }}" 
+              alt="{{ image.alt }}" 
+              loading="lazy"
+              width="800"
+              height="1067"
+              data-index="{{ forloop.index0 }}"
+            >
+          {%- endfor -%}
+          <div class="sense-info">
+            <h3 class="sense-title">{{ product.title }}</h3>
+            <p class="sense-price">{{ product.price | money }}</p>
+          </div>
+        </div>
+        <div class="sense-dots">
+          {%- for image in product.images -%}
+            <div 
+              class="sense-dot {% if forloop.first %}active{% endif %}" 
+              data-index="{{ forloop.index0 }}"
+              data-product-id="{{ product.id }}"
+            ></div>
+          {%- endfor -%}
+        </div>
+      </a>
+    {%- endfor -%}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const containers = document.querySelectorAll('.sense-image-container');
+  
+  containers.forEach(container => {
+    const productId = container.dataset.productId;
+    const images = container.querySelectorAll('.sense-image');
+    const dots = document.querySelectorAll(`.sense-dot[data-product-id="${productId}"]`);
+    
+    let currentIndex = 0;
+    let interval;
+    
+    function showImage(index) {
+      images.forEach(img => img.classList.add('hidden'));
+      dots.forEach(dot => dot.classList.remove('active'));
+      
+      images[index].classList.remove('hidden');
+      dots[index].classList.add('active');
+      currentIndex = index;
+    }
+    
+    function startAutoSlide() {
+      interval = setInterval(() => {
+        const nextIndex = (currentIndex + 1) % images.length;
+        showImage(nextIndex);
+      }, 3000);
+    }
+    
+    function stopAutoSlide() {
+      clearInterval(interval);
+    }
+    
+    // Auto slide on hover
+    container.addEventListener('mouseenter', () => {
+      if (images.length > 1) {
+        startAutoSlide();
+      }
+    });
+    
+    container.addEventListener('mouseleave', () => {
+      stopAutoSlide();
+      showImage(0);
+    });
+    
+    // Dot navigation
+    dots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const index = parseInt(dot.dataset.index);
+        showImage(index);
+      });
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Senses Preview",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Products"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "product_count",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "label": "Number of products to show",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Senses Preview"
+    }
+  ]
+}
+{% endschema %}
