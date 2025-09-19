@@ -1,0 +1,535 @@
+<div class="pilates-brands-section">
+  <div class="container">
+    {% if section.settings.heading != blank %}
+      <h2 class="brands-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    {% if section.settings.subheading != blank %}
+      <p class="brands-subheading">{{ section.settings.subheading }}</p>
+    {% endif %}
+
+    <div class="brands-grid">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'brand_logo' %}
+            <div class="brand-item" {{ block.shopify_attributes }}>
+              {% if block.settings.brand_url != blank %}
+                <a
+                  href="{{ block.settings.brand_url }}"
+                  class="brand-link"
+                  {% if block.settings.open_new_tab %}
+                  target="_blank"
+                  {% endif %}>
+              {% endif %}
+
+              {% if block.settings.brand_image != blank %}
+                <img
+                  src="{{ block.settings.brand_image | img_url: '200x' }}"
+                  alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                  class="brand-logo"
+                  loading="lazy">
+              {% else %}
+                <div class="brand-placeholder">
+                  {{ block.settings.brand_name | default: 'Brand Name' }}
+                </div>
+              {% endif %}
+
+              {% if block.settings.brand_url != blank %}
+                </a>
+              {% endif %}
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .pilates-brands-section {
+    padding: {{ section.settings.section_padding_top }}
+    px 0{{ section.settings.section_padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .pilates-brands-section .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: center;
+  }
+
+  .brands-heading {
+    font-size: {{ section.settings.heading_size }}px;
+    font-weight: {{ section.settings.heading_weight }};
+    color: {{ section.settings.heading_color }};
+    margin: 0 0{{ section.settings.heading_margin_bottom }}px;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .brands-subheading {
+    font-size: {{ section.settings.subheading_size }}px;
+    color: {{ section.settings.subheading_color }};
+    margin: 0 0{{ section.settings.subheading_margin_bottom }}px;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .brands-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: {{ section.settings.brand_spacing }}px;
+    margin-top: {{ section.settings.grid_margin_top }}px;
+  }
+
+  .brand-item {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    transition: all 0.3s ease;
+  }
+
+  .brand-item:hover {
+    transform: translateY(-2px);
+    opacity: 0.8;
+  }
+
+  .brand-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .brand-logo {
+    max-height: {{ section.settings.logo_max_height }}px;
+    max-width: {{ section.settings.logo_max_width }}px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter:{{ section.settings.logo_filter }};
+    transition: filter 0.3s ease;
+  }
+
+  .brand-logo:hover {
+    filter: none;
+  }
+
+  .brand-placeholder {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border: 2px dashed #ccc;
+    color: #666;
+    font-size: 14px;
+    min-width: 120px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .pilates-brands-section {
+      padding: {{ section.settings.mobile_padding_top }}
+      px 0{{ section.settings.mobile_padding_bottom }}px;
+    }
+
+    .brands-heading {
+      font-size: {{ section.settings.mobile_heading_size }}px;
+    }
+
+    .brands-subheading {
+      font-size: {{ section.settings.mobile_subheading_size }}px;
+    }
+
+    .brands-grid {
+      gap: {{ section.settings.mobile_brand_spacing }}px;
+      flex-direction: column;
+    }
+
+    .brand-item {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    .brand-logo {
+      max-height: {{ section.settings.mobile_logo_height }}px;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .brands-grid {
+      gap: {{ section.settings.tablet_brand_spacing }}px;
+    }
+  }
+</style>
+
+{% schema %}
+  {
+    "name": "普拉提品牌展示",
+    "tag": "section",
+    "class": "pilates-brands-section",
+    "settings": [
+      {
+        "type": "header",
+        "content": "标题设置"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "主标题",
+        "default": "TRUSTED BY LEADING PILATES"
+      },
+      {
+        "type": "text",
+        "id": "subheading",
+        "label": "副标题",
+        "default": "BRANDS WORLDWIDE"
+      },
+      {
+        "type": "range",
+        "id": "heading_size",
+        "label": "主标题字体大小",
+        "min": 20,
+        "max": 60,
+        "step": 2,
+        "default": 36,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "subheading_size",
+        "label": "副标题字体大小",
+        "min": 14,
+        "max": 40,
+        "step": 2,
+        "default": 36,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "heading_weight",
+        "label": "主标题字体粗细",
+        "options": [
+          {
+            "value": "300",
+            "label": "细体"
+          },
+          {
+            "value": "400",
+            "label": "正常"
+          },
+          {
+            "value": "500",
+            "label": "中等"
+          },
+          {
+            "value": "600",
+            "label": "半粗"
+          },
+          {
+            "value": "700",
+            "label": "粗体"
+          },
+          {
+            "value": "800",
+            "label": "特粗"
+          }
+        ],
+        "default": "600"
+      },
+      {
+        "type": "color",
+        "id": "heading_color",
+        "label": "主标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "color",
+        "id": "subheading_color",
+        "label": "副标题颜色",
+        "default": "#333333"
+      },
+      {
+        "type": "range",
+        "id": "heading_margin_bottom",
+        "label": "主标题下边距",
+        "min": 0,
+        "max": 50,
+        "step": 5,
+        "default": 10,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "subheading_margin_bottom",
+        "label": "副标题下边距",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "default": 50,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "品牌Logo设置"
+      },
+      {
+        "type": "range",
+        "id": "logo_max_height",
+        "label": "Logo最大高度",
+        "min": 40,
+        "max": 150,
+        "step": 5,
+        "default": 80,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "logo_max_width",
+        "label": "Logo最大宽度",
+        "min": 80,
+        "max": 300,
+        "step": 10,
+        "default": 200,
+        "unit": "px"
+      },
+      {
+        "type": "select",
+        "id": "logo_filter",
+        "label": "Logo滤镜效果",
+        "options": [
+          {
+            "value": "none",
+            "label": "无"
+          },
+          {
+            "value": "grayscale(100%)",
+            "label": "灰度"
+          },
+          {
+            "value": "opacity(0.7)",
+            "label": "半透明"
+          },
+          {
+            "value": "grayscale(100%) opacity(0.7)",
+            "label": "灰度+半透明"
+          }
+        ],
+        "default": "grayscale(100%) opacity(0.7)"
+      },
+      {
+        "type": "header",
+        "content": "布局设置"
+      },
+      {
+        "type": "range",
+        "id": "brand_spacing",
+        "label": "品牌间距",
+        "min": 20,
+        "max": 80,
+        "step": 5,
+        "default": 40,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "grid_margin_top",
+        "label": "网格上边距",
+        "min": 20,
+        "max": 100,
+        "step": 5,
+        "default": 40,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "区块设置"
+      },
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "背景颜色",
+        "default": "#ffffff"
+      },
+      {
+        "type": "range",
+        "id": "section_padding_top",
+        "label": "区块上内边距",
+        "min": 0,
+        "max": 150,
+        "step": 5,
+        "default": 80,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "section_padding_bottom",
+        "label": "区块下内边距",
+        "min": 0,
+        "max": 150,
+        "step": 5,
+        "default": 80,
+        "unit": "px"
+      },
+      {
+        "type": "header",
+        "content": "移动端设置"
+      },
+      {
+        "type": "range",
+        "id": "mobile_heading_size",
+        "label": "移动端主标题大小",
+        "min": 16,
+        "max": 40,
+        "step": 2,
+        "default": 24,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "mobile_subheading_size",
+        "label": "移动端副标题大小",
+        "min": 14,
+        "max": 30,
+        "step": 2,
+        "default": 24,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "mobile_logo_height",
+        "label": "移动端Logo高度",
+        "min": 30,
+        "max": 100,
+        "step": 5,
+        "default": 60,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "mobile_brand_spacing",
+        "label": "移动端品牌间距",
+        "min": 10,
+        "max": 40,
+        "step": 5,
+        "default": 20,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "mobile_padding_top",
+        "label": "移动端上内边距",
+        "min": 20,
+        "max": 100,
+        "step": 5,
+        "default": 50,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "mobile_padding_bottom",
+        "label": "移动端下内边距",
+        "min": 20,
+        "max": 100,
+        "step": 5,
+        "default": 50,
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "id": "tablet_brand_spacing",
+        "label": "平板端品牌间距",
+        "min": 15,
+        "max": 60,
+        "step": 5,
+        "default": 30,
+        "unit": "px"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "brand_logo",
+        "name": "品牌Logo",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "brand_image",
+            "label": "品牌Logo图片"
+          },
+          {
+            "type": "text",
+            "id": "brand_name",
+            "label": "品牌名称",
+            "info": "用于图片alt属性和占位符显示"
+          },
+          {
+            "type": "url",
+            "id": "brand_url",
+            "label": "品牌链接"
+          },
+          {
+            "type": "checkbox",
+            "id": "open_new_tab",
+            "label": "在新标签页打开链接",
+            "default": true
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "普拉提品牌展示",
+        "blocks": [
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Vitality4Life"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Align-Pilates"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Club Pilates"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Merrithew"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "BASI"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Balanced Body"
+            }
+          },
+          {
+            "type": "brand_logo",
+            "settings": {
+              "brand_name": "Core Collab"
+            }
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}
