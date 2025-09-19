@@ -8,8 +8,8 @@
   /* Hero Banner Styles */
   .hero-section {
     position: relative;
-    width: 90%;
-    max-width: 1400px;
+    width: 92%;
+    max-width: 1200px;
     margin: 2rem auto;
     height: 50vh;
     overflow: hidden;
@@ -121,7 +121,7 @@
   }
 
   .hero-btn-primary {
-    background-color: #9ABD48;
+    background-color: #9abd48;
     color: white;
     border: none;
   }
@@ -132,37 +132,45 @@
     box-shadow: 0 4px 12px rgba(154, 189, 72, 0.3);
   }
 
+  @media (max-width: 1240px) {
+    .hero-section {
+      width: 92%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+
   @media (max-width: 768px) {
     .hero-section {
-      width: 95%;
+      width: 92%;
       height: 60vh;
       min-height: 400px;
       margin: 1rem auto;
     }
-    
+
     .hero-content {
       margin-left: 5%;
       margin-right: 5%;
       max-width: none;
     }
-    
+
     .hero-title {
       font-size: 2rem;
     }
-    
+
     .hero-subtitle {
       font-size: 1rem;
     }
-    
+
     .hero-nav {
       width: 3.5rem;
       height: 3.5rem;
     }
-    
+
     .hero-nav.prev {
       left: 1rem;
     }
-    
+
     .hero-nav.next {
       right: 1rem;
     }
@@ -172,13 +180,17 @@
 <div class="hero-section">
   {% for block in section.blocks %}
     {% if block.type == 'slide' %}
-      <div class="hero-slide {% if forloop.first %}active{% endif %}"
-           style="background-image: url('{{ block.settings.image | image_url: width: 1920 }}');">
+      <div
+        class="hero-slide {% if forloop.first %}active{% endif %}"
+        style="background-image: url('{{ block.settings.image | image_url: width: 1920 }}');"
+      >
         <div class="hero-content">
           <h1 class="hero-title">{{ block.settings.title }}</h1>
           <p class="hero-subtitle">{{ block.settings.subtitle }}</p>
-          {% if block.settings.button_text != blank and block.settings.button_link != blank %}
-            <a href="{{ block.settings.button_link }}" class="hero-btn hero-btn-primary">{{ block.settings.button_text }}</a>
+          {% if block.settings.buttontext != blank and block.settings.buttonlink != blank %}
+            <a href="{{ block.settings.buttonlink }}" class="hero-btn hero-btn-primary">
+              {{- block.settings.buttontext -}}
+            </a>
           {% endif %}
         </div>
       </div>
@@ -197,19 +209,21 @@
   </button>
 
   <div class="hero-indicators">
-    {% assign slide_index = 0 %}
+    {% assign slideindex = 0 %}
     {% for block in section.blocks %}
       {% if block.type == 'slide' %}
-        <div class="hero-indicator {% if forloop.first %}active{% endif %}" 
-             data-slide="{{ slide_index }}"></div>
-        {% assign slide_index = slide_index | plus: 1 %}
+        <div
+          class="hero-indicator {% if forloop.first %}active{% endif %}"
+          data-slide="{{ slideindex }}"
+        ></div>
+        {% assign slideindex = slideindex | plus: 1 %}
       {% endif %}
     {% endfor %}
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const slides = Array.from(document.querySelectorAll('.hero-slide'));
     const indicators = Array.from(document.querySelectorAll('.hero-indicator'));
     const prevBtn = document.querySelector('.hero-nav.prev');
@@ -218,13 +232,13 @@
     let autoSlideInterval;
 
     // 过滤出有效的幻灯片和指示器
-    const validSlides = slides.filter(s => s.style.backgroundImage);
+    const validSlides = slides.filter((s) => s.style.backgroundImage);
     const validIndicators = indicators.slice(0, validSlides.length);
 
     function showSlide(index) {
-      validSlides.forEach(slide => slide.classList.remove('active'));
-      validIndicators.forEach(indicator => indicator.classList.remove('active'));
-      
+      validSlides.forEach((slide) => slide.classList.remove('active'));
+      validIndicators.forEach((indicator) => indicator.classList.remove('active'));
+
       if (validSlides[index]) validSlides[index].classList.add('active');
       if (validIndicators[index]) validIndicators[index].classList.add('active');
       currentSlide = index;
@@ -321,13 +335,13 @@
         },
         {
           "type": "text",
-          "id": "button_text",
+          "id": "buttontext",
           "label": "按钮文字",
           "default": "Shop Now"
         },
         {
           "type": "url",
-          "id": "button_link",
+          "id": "buttonlink",
           "label": "按钮链接"
         }
       ]
@@ -337,28 +351,28 @@
     {
       "name": "Home Hero",
       "category": "Home Page",
-      "blocks": {
-        "slide-1": {
+      "blocks": [
+        {
           "type": "slide",
           "settings": {
             "image": "",
             "title": "Premium Quality Products",
             "subtitle": "Discover our collection of premium products crafted with excellence",
-            "button_text": "Shop Now",
-            "button_link": "/collections/all"
+            "buttontext": "Shop Now",
+            "buttonlink": "/collections/all"
           }
         },
-        "slide-2": {
+        {
           "type": "slide",
           "settings": {
             "image": "",
             "title": "Exclusive Collection",
             "subtitle": "Limited edition items available now",
-            "button_text": "View Collection",
-            "button_link": "/collections/new-arrivals"
+            "buttontext": "View Collection",
+            "buttonlink": "/collections/new-arrivals"
           }
         }
-      }
+      ]
     }
   ]
 }
