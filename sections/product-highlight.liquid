@@ -28,17 +28,32 @@
 
   .highlight-image-container {
     position: relative;
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
     height: 300px;
+    overflow: hidden;
+    margin-bottom: 2rem;
   }
 
   .highlight-image {
     width: 100%;
-    height: 300px;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+  
+  .highlight-image.hover-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+  
+  .highlight-image-container:hover .highlight-image:first-child {
+    opacity: 0;
+  }
+  
+  .highlight-image-container:hover .hover-image {
+    opacity: 1;
   }
 
   .highlight-info {
@@ -46,7 +61,7 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,{{ section.settings.info_bg_opacity | default: 0.8 }});
     padding: 0.5rem 1rem;
     border-radius: 4px;
   }
@@ -112,39 +127,50 @@
 
 <div class="page-width">
   <div class="product-highlight">
-  <div class="highlight-left">
-    <div class="highlight-image-container">
-      {%- if section.settings.product != blank -%}
-        {% assign product = section.settings.product %}
-        <img 
-          class="highlight-image" 
-          src="{{ product.featured_image | img_url: '800x' }}" 
-          alt="{{ product.featured_image.alt }}" 
-          loading="lazy"
-          width="800"
-          height="800"
-        />
-        <div class="highlight-info">
-          <h3 class="highlight-title">{{ product.title }}</h3>
-          <p class="highlight-price">{{ product.price | money }}</p>
-        </div>
-      {%- else -%}
-        {{ 'product-1' | placeholder_svg_tag: 'highlight-image' }}
-      {%- endif -%}
+    <div class="highlight-left">
+      <div class="highlight-image-container">
+        {%- if section.settings.product != blank -%}
+          {% assign product = section.settings.product %}
+          <img 
+            class="highlight-image" 
+            src="{{ product.featured_image | img_url: '800x' }}" 
+            alt="{{ product.featured_image.alt }}" 
+            loading="lazy"
+            width="800"
+            height="800"
+          />
+          {% if product.images.size > 1 %}
+          <img 
+            class="highlight-image hover-image" 
+            src="{{ product.images[1] | img_url: '800x' }}" 
+            alt="{{ product.images[1].alt }}" 
+            loading="lazy"
+            width="800"
+            height="800"
+          />
+          {% endif %}
+          <div class="highlight-info">
+            <h3 class="highlight-title">{{ product.title }}</h3>
+            <p class="highlight-price">{{ product.price | money }}</p>
+          </div>
+        {%- else -%}
+          {{ 'product-1' | placeholder_svg_tag: 'highlight-image' }}
+        {%- endif -%}
+      </div>
+      
+      <div class="highlight-bottom">
+        <p class="highlight-text">{{ section.settings.bottom_text }}</p>
+        <a href="{{ section.settings.button_link }}" class="highlight-button">
+          {{ section.settings.button_text }}
+        </a>
+      </div>
     </div>
     
-    <div class="highlight-bottom">
-      <p class="highlight-text">{{ section.settings.bottom_text }}</p>
-      <a href="{{ section.settings.button_link }}" class="highlight-button">
-        {{ section.settings.button_text }}
-      </a>
+    <div class="highlight-right" style="background-image: url('{{ section.settings.right_image | img_url: '2000x' }}')">
+      {%- if section.settings.right_image == blank -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
     </div>
-  </div>
-  
-  <div class="highlight-right" style="background-image: url('{{ section.settings.right_image | img_url: '2000x' }}')">
-    {%- if section.settings.right_image == blank -%}
-      {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
-    {%- endif -%}
   </div>
 </div>
 
@@ -186,6 +212,15 @@
       "type": "url",
       "id": "button_link",
       "label": "Button Link"
+    },
+    {
+      "type": "range",
+      "id": "info_bg_opacity",
+      "min": 0.1,
+      "max": 1,
+      "step": 0.1,
+      "label": "Info Background Opacity",
+      "default": 0.3
     }
   ],
   "presets": [
