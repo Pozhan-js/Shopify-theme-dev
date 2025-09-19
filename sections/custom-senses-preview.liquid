@@ -195,7 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
       images.forEach(img => img.classList.add('hidden'));
       dots.forEach(dot => dot.classList.remove('active'));
       
+      // Show current and next image for smooth transition
       images[index].classList.remove('hidden');
+      const nextIndex = (index + 1) % images.length;
+      images[nextIndex].classList.remove('hidden');
+      
       dots[index].classList.add('active');
       currentIndex = index;
     }
@@ -203,6 +207,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function startAutoSlide() {
       interval = setInterval(() => {
         const nextIndex = (currentIndex + 1) % images.length;
+        // First hide all, then show new pair
+        images.forEach(img => img.classList.add('hidden'));
         showImage(nextIndex);
       }, 3000);
     }
