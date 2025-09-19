@@ -1,0 +1,170 @@
+{%- style -%}
+  .product-highlight {
+    display: flex;
+    min-height: 600px;
+  }
+
+  .highlight-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .highlight-image-container {
+    position: relative;
+    max-width: 80%;
+    margin-bottom: 2rem;
+  }
+
+  .highlight-image {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .highlight-info {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: rgba(255,255,255,0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+  }
+
+  .highlight-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+  }
+
+  .highlight-price {
+    font-size: 1rem;
+    margin: 0.2rem 0 0;
+    color: #333;
+  }
+
+  .highlight-bottom {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .highlight-text {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .highlight-button {
+    background: none;
+    border: 1px solid #000;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .highlight-button:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  .highlight-right {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+  }
+
+  @media screen and (max-width: 750px) {
+    .product-highlight {
+      flex-direction: column;
+    }
+    
+    .highlight-right {
+      min-height: 300px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="product-highlight">
+  <div class="highlight-left">
+    <div class="highlight-image-container">
+      {%- if section.settings.product != blank -%}
+        {% assign product = section.settings.product %}
+        <img 
+          class="highlight-image" 
+          src="{{ product.featured_image | img_url: '800x' }}" 
+          alt="{{ product.featured_image.alt }}" 
+          loading="lazy"
+        >
+        <div class="highlight-info">
+          <h3 class="highlight-title">{{ product.title }}</h3>
+          <p class="highlight-price">{{ product.price | money }}</p>
+        </div>
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'highlight-image' }}
+      {%- endif -%}
+    </div>
+    
+    <div class="highlight-bottom">
+      <p class="highlight-text">{{ section.settings.bottom_text }}</p>
+      <a href="{{ section.settings.button_link }}" class="highlight-button">
+        {{ section.settings.button_text }}
+      </a>
+    </div>
+  </div>
+  
+  <div class="highlight-right" style="background-image: url('{{ section.settings.right_image | img_url: '2000x' }}')">
+    {%- if section.settings.right_image == blank -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Product Highlight",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "image_picker",
+      "id": "right_image",
+      "label": "Right Side Image"
+    },
+    {
+      "type": "text",
+      "id": "bottom_text",
+      "label": "Bottom Text",
+      "default": "Discover more about this product"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Highlight"
+    }
+  ]
+}
+{% endschema %}
