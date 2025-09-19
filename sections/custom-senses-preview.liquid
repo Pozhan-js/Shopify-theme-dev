@@ -21,6 +21,7 @@
     border-radius: 4px;
     aspect-ratio: 3/4;
     margin-bottom: 1rem;
+    perspective: 1000px;
   }
 
   .sense-arrow {
@@ -93,7 +94,7 @@
     top: 1rem;
     left: 1rem;
     color: #000;
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,{{ section.settings.info_bg_opacity | divided_by: 100.0 }});
     padding: 0.5rem 1rem;
     border-radius: 4px;
   }
@@ -192,13 +193,27 @@ document.addEventListener('DOMContentLoaded', function() {
     let interval;
     
     function showImage(index) {
-      images.forEach(img => img.classList.add('hidden'));
+      images.forEach(img => {
+        img.classList.add('hidden');
+        img.style.transform = '';
+      });
       dots.forEach(dot => dot.classList.remove('active'));
       
-      // Show current and next image for smooth transition
-      images[index].classList.remove('hidden');
+      const currentImg = images[index];
       const nextIndex = (index + 1) % images.length;
-      images[nextIndex].classList.remove('hidden');
+      const nextImg = images[nextIndex];
+      
+      // Set initial 3D transform
+      currentImg.style.transform = 'rotateY(0deg)';
+      nextImg.style.transform = 'rotateY(90deg)';
+      
+      // Show images
+      currentImg.classList.remove('hidden');
+      nextImg.classList.remove('hidden');
+      
+      // Animate
+      currentImg.style.transform = 'rotateY(-90deg)';
+      nextImg.style.transform = 'rotateY(0deg)';
       
       dots[index].classList.add('active');
       currentIndex = index;
@@ -293,6 +308,16 @@ document.addEventListener('DOMContentLoaded', function() {
       "unit": "px",
       "label": "Bottom Padding",
       "default": 36
+    },
+    {
+      "type": "range",
+      "id": "info_bg_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Info Background Opacity",
+      "default": 30
     }
   ],
   "presets": [
