@@ -23,6 +23,40 @@
     margin-bottom: 1rem;
   }
 
+  .sense-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+  }
+
+  .sense-arrow.prev {
+    left: 1rem;
+  }
+
+  .sense-arrow.next {
+    right: 1rem;
+  }
+
+  .sense-image-container:hover .sense-arrow {
+    opacity: 1;
+  }
+
+  .sense-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
   .sense-image {
     width: 100%;
     height: 100%;
@@ -104,6 +138,16 @@
     {%- for product in collections[section.settings.collection].products limit: section.settings.product_count -%}
       <a href="{{ product.url }}" class="sense-item">
         <div class="sense-image-container" data-product-id="{{ product.id }}">
+          <div class="sense-arrow prev" data-product-id="{{ product.id }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="sense-arrow next" data-product-id="{{ product.id }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           {%- for image in product.images -%}
             <img 
               class="sense-image {% unless forloop.first %}hidden{% endunless %}" 
@@ -178,6 +222,21 @@ document.addEventListener('DOMContentLoaded', function() {
       showImage(0);
     });
     
+    // Arrow navigation
+    const arrows = container.querySelectorAll('.sense-arrow');
+    arrows.forEach(arrow => {
+      arrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        let newIndex;
+        if (arrow.classList.contains('prev')) {
+          newIndex = (currentIndex - 1 + images.length) % images.length;
+        } else {
+          newIndex = (currentIndex + 1) % images.length;
+        }
+        showImage(newIndex);
+      });
+    });
+
     // Dot navigation
     dots.forEach(dot => {
       dot.addEventListener('click', (e) => {
