@@ -49,10 +49,11 @@
           
           {% if block.settings.links != blank %}
             {% assign links = block.settings.links | newline_to_br | split: '<br />' %}
+            {% assign urls = block.settings.urls | newline_to_br | split: '<br />' %}
             {% for link in links %}
               {% if link != blank %}
                 <div class="link-item">
-                  <a href="{{ block.settings.url }}">{{ link }}</a>
+                  <a href="{{ urls[forloop.index0] | default: '#' | strip }}">{{ link }}</a>
                 </div>
               {% endif %}
             {% endfor %}
@@ -217,9 +218,11 @@
           "default": "Link 1\nLink 2\nLink 3"
         },
         {
-          "type": "url",
-          "id": "url",
-          "label": "Link URL"
+          "type": "textarea", 
+          "id": "urls",
+          "label": "Link URLs (one per line)",
+          "default": "#\n#\n#",
+          "info": "Enter one URL per line, matching the order of links above"
         }
       ]
     }
@@ -233,7 +236,7 @@
           "settings": {
             "heading": "Archive",
             "links": "January 2023\nFebruary 2023\nMarch 2023",
-            "url": "/blogs/news"
+            "urls": "/blogs/news/january-2023\n/blogs/news/february-2023\n/blogs/news/march-2023"
           }
         },
         {
@@ -241,7 +244,7 @@
           "settings": {
             "heading": "Glossary",
             "links": "Term 1\nTerm 2\nTerm 3",
-            "url": "/pages/glossary"
+            "urls": "/pages/glossary#term1\n/pages/glossary#term2\n/pages/glossary#term3"
           }
         }
       ]
