@@ -1,0 +1,116 @@
+{%- style -%}
+  .vertical-menu {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    background: #fff;
+    z-index: 100;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    padding: 20px 0;
+    overflow-y: auto;
+  }
+
+  .vertical-menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vertical-menu__item {
+    position: relative;
+  }
+
+  .vertical-menu__link {
+    display: block;
+    padding: 12px 20px;
+    color: #000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .vertical-menu__link:hover {
+    color: #fff;
+    background: #008000; /* 绿色 */
+  }
+
+  .vertical-menu__link.has-children::after {
+    content: "›";
+    position: absolute;
+    right: 20px;
+  }
+
+  .vertical-menu__submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 280px;
+    background: #fff;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .vertical-menu__item:hover > .vertical-menu__submenu {
+    opacity: 1;
+    visibility: visible;
+  }
+{%- endstyle -%}
+
+<div class="vertical-menu">
+  <ul class="vertical-menu__list">
+    {%- for link in section.settings.menu.links -%}
+      <li class="vertical-menu__item">
+        <a href="{{ link.url }}" class="vertical-menu__link {% if link.links.size > 0 %}has-children{% endif %}">
+          {{ link.title }}
+        </a>
+        
+        {%- if link.links.size > 0 -%}
+          <ul class="vertical-menu__submenu">
+            {%- for childlink in link.links -%}
+              <li class="vertical-menu__item">
+                <a href="{{ childlink.url }}" class="vertical-menu__link {% if childlink.links.size > 0 %}has-children{% endif %}">
+                  {{ childlink.title }}
+                </a>
+                
+                {%- if childlink.links.size > 0 -%}
+                  <ul class="vertical-menu__submenu">
+                    {%- for grandchildlink in childlink.links -%}
+                      <li class="vertical-menu__item">
+                        <a href="{{ grandchildlink.url }}" class="vertical-menu__link">
+                          {{ grandchildlink.title }}
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+{% schema %}
+{
+  "name": "Vertical Menu",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Vertical Menu",
+      "category": "Navigation"
+    }
+  ]
+}
+{% endschema %}
