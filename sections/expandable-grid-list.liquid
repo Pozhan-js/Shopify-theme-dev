@@ -1,7 +1,13 @@
 <div class="expandable-grid">
   {% for block in section.blocks %}
     <div class="grid-category" {{ block.shopify_attributes }}>
-      <h3 class="category-title">{{ block.settings.title }}</h3>
+      <div class="category-header">
+        <h3 class="category-title">{{ block.settings.title }}</h3>
+        <button class="toggle-button" aria-expanded="true">
+          <span class="icon-minus">−</span>
+          <span class="icon-plus">+</span>
+        </button>
+      </div>
       <div class="grid-items" style="grid-template-columns: repeat({{ section.settings.columns }}, 1fr); gap: {{ section.settings.gap }}px;">
         {% for i in (1..block.settings.item_count) %}
           {% assign image_key = 'image_' | append: i %}
@@ -24,6 +30,35 @@
 </div>
 
 <style>
+  .category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  .toggle-button {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    padding: 5px 10px;
+  }
+  .icon-plus {
+    display: none;
+  }
+  .collapsed .icon-plus {
+    display: inline;
+  }
+  .collapsed .icon-minus {
+    display: none;
+  }
+  .grid-items {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+  }
+  .collapsed + .grid-items {
+    max-height: 0 !important;
+    opacity: 0;
+  }
   .expandable-grid {
     max-width: 1200px;
     margin: 0 auto;
@@ -65,6 +100,27 @@
     padding: 0 15px 15px;
   }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const headers = document.querySelectorAll('.category-header');
+  
+  headers.forEach(header => {
+    header.addEventListener('click', function() {
+      const category = this.parentElement;
+      const isCollapsed = category.classList.contains('collapsed');
+      
+      if(isCollapsed) {
+        category.classList.remove('collapsed');
+        this.querySelector('button').setAttribute('aria-expanded', 'true');
+      } else {
+        category.classList.add('collapsed');
+        this.querySelector('button').setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+});
+</script>
 
 {% schema %}
 {
