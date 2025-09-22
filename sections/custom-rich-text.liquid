@@ -2,6 +2,11 @@
   <div class="page-width">
     <div class="rich-text-content" style="color: {{ section.settings.text_color }};">
       {{ section.settings.content }}
+      {% if section.settings.link_url != blank %}
+        <a href="{{ section.settings.link_url }}" class="rich-text-link">
+          {{ section.settings.link_text }}
+        </a>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -40,6 +45,16 @@
   .rich-text-content p:last-child {
     margin-bottom: 0;
   }
+  .rich-text-link {
+    color: {{ section.settings.link_color }};
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+  .rich-text-link:hover {
+    color: {{ section.settings.link_color | color_modify: 'alpha', 0.8 }};
+    transform: translateY(-2px);
+  }
 </style>
 
 {% schema %}
@@ -65,6 +80,23 @@
       "id": "text_color",
       "label": "文字颜色",
       "default": "#ffffff"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "链接地址"
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "链接文本",
+      "default": "点击这里"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "链接颜色",
+      "default": "#0066cc"
     },
     {
       "type": "header",
