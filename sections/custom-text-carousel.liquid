@@ -1,4 +1,4 @@
-<div class="text-carousel" style="--font-size: {{ section.settings.font_size }}px;">
+<div class="text-carousel" style="--font-size: {{ section.settings.font_size }}px; --text-color: {{ section.settings.text_color | default: '#ffffff' }};">
   <div class="carousel-container" style="animation-duration: {{ section.settings.speed }}s">
     {% for block in section.blocks %}
       <div class="carousel-item" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
@@ -15,14 +15,20 @@
     height: calc(var(--font-size) * 2.5);
     overflow: hidden;
     position: relative;
+    color: var(--color);
+  }
+  .text-carousel:hover .carousel-container {
+    animation-play-state: paused;
   }
   .carousel-container {
     display: flex;
     flex-direction: column;
     animation: scroll linear infinite;
+    animation-play-state: running;
   }
   .carousel-item {
     font-size: var(--font-size);
+    color: var(--text-color);
     line-height: 1.5;
     padding: 5px 0;
     white-space: nowrap;
@@ -32,6 +38,22 @@
     100% { transform: translateY(-50%); }
   }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const carousels = document.querySelectorAll('.text-carousel');
+  
+  carousels.forEach(carousel => {
+    carousel.addEventListener('mouseenter', () => {
+      carousel.querySelector('.carousel-container').style.animationPlayState = 'paused';
+    });
+    
+    carousel.addEventListener('mouseleave', () => {
+      carousel.querySelector('.carousel-container').style.animationPlayState = 'running';
+    });
+  });
+});
+</script>
 
 {% schema %}
 {
@@ -58,6 +80,12 @@
       "unit": "秒",
       "label": "轮播速度",
       "default": 10
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "default": "#ffffff"
     }
   ],
   "blocks": [
