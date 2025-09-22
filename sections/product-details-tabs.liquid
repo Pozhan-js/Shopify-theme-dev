@@ -2,54 +2,86 @@
   <div class="container">
     <!-- 标签导航 -->
     <div class="tabs-navigation">
-      <button class="tab-button" data-tab="description">
-        {{ section.settings.description_tab_title }}
-      </button>
-      <button class="tab-button active" data-tab="details">
-        {{ section.settings.details_tab_title }}
-      </button>
-      <button class="tab-button" data-tab="warranty">
-        {{ section.settings.warranty_tab_title }}
-      </button>
+      {% if section.settings.show_description_tab %}
+        <button
+          class="tab-button {% if section.settings.default_active_tab == 'description' %}active{% endif %}"
+          data-tab="description"
+        >
+          {{ section.settings.description_tab_title }}
+        </button>
+      {% endif %}
+      {% if section.settings.show_details_tab %}
+        <button
+          class="tab-button {% if section.settings.default_active_tab == 'details' %}active{% endif %}"
+          data-tab="details"
+        >
+          {{ section.settings.details_tab_title }}
+        </button>
+      {% endif %}
+      {% if section.settings.show_warranty_tab %}
+        <button
+          class="tab-button {% if section.settings.default_active_tab == 'warranty' %}active{% endif %}"
+          data-tab="warranty"
+        >
+          {{ section.settings.warranty_tab_title }}
+        </button>
+      {% endif %}
     </div>
 
     <!-- 标签内容 -->
     <div class="tabs-content">
       <!-- Description Tab -->
-      <div class="tab-content" id="description-content">
-        <div class="description-content">
-          {{ section.settings.description_content }}
+      {% if section.settings.show_description_tab %}
+        <div
+          class="tab-content {% if section.settings.default_active_tab == 'description' %}active{% endif %}"
+          id="description-content"
+        >
+          <div class="description-content">
+            {{ section.settings.description_content }}
+          </div>
         </div>
-      </div>
+      {% endif %}
 
       <!-- Product Details Tab -->
-      <div class="tab-content active" id="details-content">
-        <div class="product-details">
-          <!-- 产品型号 -->
-          <div class="model-section">
-            <h3 class="model-title">{{ section.settings.model_title }}</h3>
-          </div>
+      {% if section.settings.show_details_tab %}
+        <div
+          class="tab-content {% if section.settings.default_active_tab == 'details' %}active{% endif %}"
+          id="details-content"
+        >
+          <div class="product-details">
+            <!-- 产品型号 -->
+            {% if section.settings.show_model_section %}
+              <div class="model-section">
+                <h3 class="model-title">{{ section.settings.model_title }}</h3>
+              </div>
+            {% endif %}
 
-          <!-- 产品规格表格 -->
-          <div class="specifications-table">
-            {% for block in section.blocks %}
-              {% if block.type == 'specification' %}
-                <div class="spec-row" {{ block.shopify_attributes }}>
-                  <div class="spec-label">{{ block.settings.spec_label }}</div>
-                  <div class="spec-value">{{ block.settings.spec_value }}</div>
-                </div>
-              {% endif %}
-            {% endfor %}
+            <!-- 产品规格表格 -->
+            <div class="specifications-table">
+              {% for block in section.blocks %}
+                {% if block.type == 'specification' %}
+                  <div class="spec-row" {{ block.shopify_attributes }}>
+                    <div class="spec-label">{{ block.settings.spec_label }}</div>
+                    <div class="spec-value">{{ block.settings.spec_value }}</div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
 
       <!-- Warranty Tab -->
-      <div class="tab-content" id="warranty-content">
-        <div class="warranty-content">
-          {{ section.settings.warranty_content }}
+      {% if section.settings.show_warranty_tab %}
+        <div
+          class="tab-content {% if section.settings.default_active_tab == 'warranty' %}active{% endif %}"
+          id="warranty-content"
+        >
+          <div class="warranty-content">
+            {{ section.settings.warranty_content }}
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 </div>
@@ -61,7 +93,7 @@
   }
 
   .container {
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
   }
@@ -70,7 +102,7 @@
   .tabs-navigation {
     display: flex;
     justify-content: center;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid {{ section.settings.tab_border_color }};
     margin-bottom: {{ section.settings.content_margin_top }}px;
     gap: 0;
   }
@@ -79,23 +111,23 @@
     background: none;
     border: none;
     padding: 20px 0;
-    font-size: 16px;
-    color: #999999;
+    font-size: {{ section.settings.tab_font_size }}px;
+    color: {{ section.settings.tab_text_color }};
     cursor: pointer;
     position: relative;
     transition: color 0.3s ease;
     border-bottom: 2px solid transparent;
-    margin-right: 60px;
+    margin-right: {{ section.settings.tab_spacing }}px;
     font-weight: 400;
   }
 
   .tab-button:hover {
-    color: #666666;
+    color: {{ section.settings.tab_active_color }};
   }
 
   .tab-button.active {
-    color: #333333;
-    border-bottom-color: #d32f2f;
+    color: {{ section.settings.tab_active_color }};
+    border-bottom-color: {{ section.settings.tab_active_border_color }};
     font-weight: 500;
   }
 
@@ -135,9 +167,9 @@
   }
 
   .model-title {
-    font-size: 18px;
+    font-size: {{ section.settings.model_title_size }}px;
     font-weight: 600;
-    color: #333333;
+    color: {{ section.settings.model_title_color }};
     margin: 0;
   }
 
@@ -150,10 +182,10 @@
 
   .spec-row {
     display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 40px;
-    padding: 16px 0;
-    border-bottom: 1px solid #f0f0f0;
+    grid-template-columns: {{ section.settings.spec_label_width }}px 1fr;
+    gap: {{ section.settings.spec_gap }}px;
+    padding: {{ section.settings.spec_row_padding }}px 0;
+    border-bottom: 1px solid {{ section.settings.spec_border_color }};
     align-items: flex-start;
   }
 
@@ -162,24 +194,30 @@
   }
 
   .spec-label {
-    font-size: 14px;
-    color: #333333;
+    font-size: {{ section.settings.spec_font_size }}px;
+    color: {{ section.settings.spec_label_color }};
     font-weight: 400;
     line-height: 1.5;
   }
 
   .spec-value {
-    font-size: 14px;
-    color: #999999;
+    font-size: {{ section.settings.spec_font_size }}px;
+    color: {{ section.settings.spec_value_color }};
     line-height: 1.5;
   }
 
   /* Description 和 Warranty 内容 */
-  .description-content,
+  .description-content {
+    font-size: {{ section.settings.description_font_size }}px;
+    color: {{ section.settings.description_text_color }};
+    line-height: {{ section.settings.description_line_height }};
+    max-width: 800px;
+  }
+
   .warranty-content {
-    font-size: 14px;
-    color: #666666;
-    line-height: 1.6;
+    font-size: {{ section.settings.warranty_font_size }}px;
+    color: {{ section.settings.warranty_text_color }};
+    line-height: {{ section.settings.warranty_line_height }};
     max-width: 800px;
   }
 
@@ -322,10 +360,22 @@
       "content": "Tab Navigation"
     },
     {
+      "type": "checkbox",
+      "id": "show_description_tab",
+      "label": "Show Description Tab",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "description_tab_title",
       "label": "Description Tab Title",
       "default": "Description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_details_tab",
+      "label": "Show Details Tab",
+      "default": true
     },
     {
       "type": "text",
@@ -334,20 +384,178 @@
       "default": "Product Details"
     },
     {
+      "type": "checkbox",
+      "id": "show_warranty_tab",
+      "label": "Show Warranty Tab",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "warranty_tab_title",
       "label": "Warranty Tab Title",
       "default": "Warranty"
     },
     {
+      "type": "select",
+      "id": "default_active_tab",
+      "label": "Default Active Tab",
+      "options": [
+        {
+          "value": "description",
+          "label": "Description"
+        },
+        {
+          "value": "details",
+          "label": "Product Details"
+        },
+        {
+          "value": "warranty",
+          "label": "Warranty"
+        }
+      ],
+      "default": "details"
+    },
+    {
+      "type": "header",
+      "content": "Tab Styling"
+    },
+    {
+      "type": "color",
+      "id": "tab_text_color",
+      "label": "Tab Text Color",
+      "default": "#999999"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_color",
+      "label": "Tab Active Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "tab_border_color",
+      "label": "Tab Border Color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "color",
+      "id": "tab_active_border_color",
+      "label": "Tab Active Border Color",
+      "default": "#d32f2f"
+    },
+    {
+      "type": "range",
+      "id": "tab_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Tab Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "tab_spacing",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Tab Spacing",
+      "default": 60
+    },
+    {
       "type": "header",
       "content": "Model Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_model_section",
+      "label": "Show Model Section",
+      "default": true
     },
     {
       "type": "text",
       "id": "model_title",
       "label": "Model Title",
       "default": "Model No. XSRF100"
+    },
+    {
+      "type": "color",
+      "id": "model_title_color",
+      "label": "Model Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "model_title_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Model Title Font Size",
+      "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Specifications Table"
+    },
+    {
+      "type": "color",
+      "id": "spec_label_color",
+      "label": "Specification Label Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "spec_value_color",
+      "label": "Specification Value Color",
+      "default": "#999999"
+    },
+    {
+      "type": "range",
+      "id": "spec_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Specification Font Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "spec_border_color",
+      "label": "Specification Border Color",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "range",
+      "id": "spec_row_padding",
+      "min": 10,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Specification Row Padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "spec_label_width",
+      "min": 150,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Specification Label Width",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "spec_gap",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Specification Gap",
+      "default": 40
     },
     {
       "type": "header",
@@ -360,10 +568,60 @@
       "default": "<p>This is the product description content. You can add detailed information about the product here.</p>"
     },
     {
+      "type": "color",
+      "id": "description_text_color",
+      "label": "Description Text Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "description_line_height",
+      "min": 1.2,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Description Line Height",
+      "default": 1.6
+    },
+    {
       "type": "richtext",
       "id": "warranty_content",
       "label": "Warranty Content",
       "default": "<p>This is the warranty information. You can add warranty terms and conditions here.</p>"
+    },
+    {
+      "type": "color",
+      "id": "warranty_text_color",
+      "label": "Warranty Text Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "warranty_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Warranty Font Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "warranty_line_height",
+      "min": 1.2,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Warranty Line Height",
+      "default": 1.6
     }
   ],
   "blocks": [
