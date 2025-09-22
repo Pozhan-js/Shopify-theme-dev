@@ -39,8 +39,16 @@
   .toggle-button {
     background: none;
     border: none;
-    font-size: 1.2em;
-    padding: 5px 10px;
+    font-size: inherit;
+    padding: 0 15px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .toggle-button span {
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+    line-height: 1;
   }
   .icon-minus {
     display: none;
@@ -102,24 +110,38 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const headers = document.querySelectorAll('.category-header');
-  
-  headers.forEach(header => {
-    header.addEventListener('click', function() {
-      const category = this.parentElement;
-      const isCollapsed = category.classList.contains('collapsed');
-      
-      if(isCollapsed) {
-        category.classList.remove('collapsed');
-        this.querySelector('button').setAttribute('aria-expanded', 'true');
-      } else {
-        category.classList.add('collapsed');
-        this.querySelector('button').setAttribute('aria-expanded', 'false');
-      }
+(function() {
+  function initAccordions() {
+    const headers = document.querySelectorAll('.category-header');
+    
+    headers.forEach(header => {
+      // 确保只绑定一次事件
+      header.removeEventListener('click', toggleAccordion);
+      header.addEventListener('click', toggleAccordion);
     });
-  });
-});
+  }
+
+  function toggleAccordion() {
+    const category = this.parentElement;
+    const isCollapsed = category.classList.contains('collapsed');
+    
+    if(isCollapsed) {
+      category.classList.remove('collapsed');
+      this.querySelector('button').setAttribute('aria-expanded', 'true');
+    } else {
+      category.classList.add('collapsed');
+      this.querySelector('button').setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  // 页面加载时初始化
+  document.addEventListener('DOMContentLoaded', initAccordions);
+  
+  // Shopify主题编辑器可能需要这个
+  if (typeof Shopify === 'object') {
+    document.addEventListener('shopify:section:load', initAccordions);
+  }
+})();
 </script>
 
 {% schema %}
