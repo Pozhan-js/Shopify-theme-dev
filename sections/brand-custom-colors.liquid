@@ -1,0 +1,472 @@
+<div class="brand-colors-section" {{ section.shopify_attributes }}>
+  <div class="container">
+    <div class="content-layout">
+      <!-- 左侧文字内容 -->
+      <div class="text-content">
+        <h2 class="main-title">{{ section.settings.main_title }}</h2>
+
+        <div class="description">
+          {{ section.settings.description }}
+        </div>
+
+        <div class="cta-section">
+          <p class="cta-text">{{ section.settings.cta_text }}</p>
+          {% if section.settings.show_underline %}
+            <div class="underline"></div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- 右侧颜色材料图片 -->
+      <div class="colors-visual">
+        {% if section.settings.colors_image %}
+          <img
+            src="{{ section.settings.colors_image | img_url: '800x' }}"
+            alt="{{ section.settings.colors_image_alt }}"
+            class="colors-image"
+          >
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .brand-colors-section {
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+    background-color: {{ section.settings.section_background_color }};
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .content-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: {{ section.settings.content_gap }}px;
+    align-items: center;
+    min-height: 500px;
+  }
+
+  /* 左侧文字内容 */
+  .text-content {
+    padding-right: 40px;
+  }
+
+  .main-title {
+    font-size: {{ section.settings.title_font_size }}px;
+    font-weight: {{ section.settings.title_font_weight }};
+    color: {{ section.settings.title_color }};
+    line-height: {{ section.settings.title_line_height }};
+    margin: 0 0 {{ section.settings.title_margin_bottom }}px 0;
+    max-width: 500px;
+  }
+
+  .description {
+    font-size: {{ section.settings.description_font_size }}px;
+    color: {{ section.settings.description_color }};
+    line-height: {{ section.settings.description_line_height }};
+    margin: 0 0 {{ section.settings.description_margin_bottom }}px 0;
+    max-width: 520px;
+  }
+
+  .cta-section {
+    margin-top: {{ section.settings.cta_margin_top }}px;
+  }
+
+  .cta-text {
+    font-size: {{ section.settings.cta_font_size }}px;
+    color: {{ section.settings.cta_color }};
+    font-weight: {{ section.settings.cta_font_weight }};
+    line-height: {{ section.settings.cta_line_height }};
+    margin: 0 0 {{ section.settings.cta_margin_bottom }}px 0;
+    max-width: 480px;
+  }
+
+  .underline {
+    width: {{ section.settings.underline_width }}px;
+    height: {{ section.settings.underline_height }}px;
+    background-color: {{ section.settings.underline_color }};
+    margin-top: {{ section.settings.underline_margin_top }}px;
+  }
+
+  /* 右侧颜色图片 */
+  .colors-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 40px;
+  }
+
+  .colors-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 1024px) {
+    .content-layout {
+      gap: 40px;
+    }
+
+    .text-content {
+      padding-right: 20px;
+    }
+
+    .colors-visual {
+      padding-left: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .content-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      text-align: center;
+    }
+
+    .text-content {
+      padding-right: 0;
+      order: 1;
+    }
+
+    .colors-visual {
+      padding-left: 0;
+      order: 2;
+    }
+
+    .main-title {
+      font-size: {{ section.settings.title_font_size | minus: 8 }}px;
+    }
+
+    .description {
+      font-size: {{ section.settings.description_font_size | minus: 2 }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .brand-colors-section {
+      padding: {{ section.settings.section_padding_top | divided_by: 2 }}px 0;
+    }
+
+    .main-title {
+      font-size: {{ section.settings.title_font_size | minus: 12 }}px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Brand Custom Colors",
+  "tag": "section",
+  "class": "brand-colors-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 80
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 40,
+      "max": 120,
+      "step": 10,
+      "unit": "px",
+      "label": "Content Gap",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Main Title"
+    },
+    {
+      "type": "text",
+      "id": "main_title",
+      "label": "Main Title",
+      "default": "Match Your Brand with 14 Custom Colors"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 24,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Font Size",
+      "default": 48
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Title Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "min": 1.0,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Title Line Height",
+      "default": 1.2
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Title Bottom Margin",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Description"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description Text",
+      "default": "We offer over 14 standard upholstery color options — all customizable at scale to match your brand's unique identity. Whether you require matte or glossy textures, minimal tones or bold accents, we ensure visual consistency across your entire product line. For bulk OEM orders, we support custom color matching, sampling, and full material documentation. Our team can also assist with building a branded aesthetic system tailored to your market."
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "description_line_height",
+      "min": 1.2,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "Description Line Height",
+      "default": 1.6
+    },
+    {
+      "type": "range",
+      "id": "description_margin_bottom",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Description Bottom Margin",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Call to Action"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_text",
+      "label": "CTA Text",
+      "default": "Ready to create your own collection? Get in touch for custom options and full color charts."
+    },
+    {
+      "type": "range",
+      "id": "cta_font_size",
+      "min": 14,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "label": "CTA Font Size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "cta_color",
+      "label": "CTA Text Color",
+      "default": "#333333"
+    },
+    {
+      "type": "select",
+      "id": "cta_font_weight",
+      "label": "CTA Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "cta_line_height",
+      "min": 1.2,
+      "max": 2.0,
+      "step": 0.1,
+      "label": "CTA Line Height",
+      "default": 1.5
+    },
+    {
+      "type": "range",
+      "id": "cta_margin_top",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "CTA Top Margin",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "cta_margin_bottom",
+      "min": 5,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "CTA Bottom Margin",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Underline"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_underline",
+      "label": "Show Underline",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "underline_width",
+      "min": 30,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Underline Width",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "underline_height",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "unit": "px",
+      "label": "Underline Height",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "underline_color",
+      "label": "Underline Color",
+      "default": "#d32f2f"
+    },
+    {
+      "type": "range",
+      "id": "underline_margin_top",
+      "min": 5,
+      "max": 25,
+      "step": 2,
+      "unit": "px",
+      "label": "Underline Top Margin",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Colors Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "colors_image",
+      "label": "Colors Material Image",
+      "info": "Upload an image showing the color materials/swatches"
+    },
+    {
+      "type": "text",
+      "id": "colors_image_alt",
+      "label": "Colors Image Alt Text",
+      "default": "Custom color options for brand matching",
+      "info": "Describe the image for accessibility"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Custom Colors"
+    }
+  ]
+}
+{% endschema %}
