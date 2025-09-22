@@ -1,34 +1,66 @@
-<div class="pilates-reformer-section">
+<div class="pilates-reformer-section" {{ section.shopify_attributes }}>
   <div class="container">
     <div class="product-layout">
       <!-- 左侧产品图片区域 -->
       <div class="product-images">
         <!-- 主图 -->
         <div class="main-image">
-          {% if section.settings.main_image %}
+          {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品，最后是回退图片 {% endcomment %}
+          {% assign current_product = product %}
+          {% assign selected_product = all_products[section.settings.product_handle] %}
+          {% assign display_product = current_product | default: selected_product %}
+
+          {% if display_product and display_product.images.size > 0 %}
             <img
-              src="{{ section.settings.main_image | img_url: '1200x' }}"
+              src="{{ display_product.images.first | img_url: '1200x' }}"
+              alt="{{ display_product.title }}"
+              class="main-product-image"
+              id="main-product-image"
+            >
+          {% elsif section.settings.fallback_image %}
+            <img
+              src="{{ section.settings.fallback_image | img_url: '1200x' }}"
               alt="{{ section.settings.product_title }}"
               class="main-product-image"
+              id="main-product-image"
             >
           {% endif %}
         </div>
 
         <!-- 缩略图 -->
         <div class="thumbnail-images">
-          {% for block in section.blocks %}
-            {% if block.type == 'thumbnail' %}
-              <div class="thumbnail-item" {{ block.shopify_attributes }}>
-                {% if block.settings.thumbnail_image %}
-                  <img
-                    src="{{ block.settings.thumbnail_image | img_url: '150x' }}"
-                    alt="Product thumbnail"
-                    class="thumbnail-image"
-                  >
-                {% endif %}
+          {% if display_product and display_product.images.size > 0 %}
+            {% for image in display_product.images %}
+              <div
+                class="thumbnail-item {% if forloop.first %}active{% endif %}"
+                data-image-url="{{ image | img_url: '1200x' }}"
+              >
+                <img
+                  src="{{ image | img_url: '150x' }}"
+                  alt="Product image {{ forloop.index }}"
+                  class="thumbnail-image"
+                >
               </div>
-            {% endif %}
-          {% endfor %}
+            {% endfor %}
+          {% else %}
+            {% for block in section.blocks %}
+              {% if block.type == 'thumbnail' %}
+                <div
+                  class="thumbnail-item"
+                  {{ block.shopify_attributes }}
+                  data-image-url="{{ block.settings.thumbnail_image | img_url: '1200x' }}"
+                >
+                  {% if block.settings.thumbnail_image %}
+                    <img
+                      src="{{ block.settings.thumbnail_image | img_url: '150x' }}"
+                      alt="Product thumbnail"
+                      class="thumbnail-image"
+                    >
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
 
@@ -36,11 +68,19 @@
       <div class="product-info">
         <!-- 产品标题和型号 -->
         <div class="product-header">
-          <h1 class="product-title">{{ section.settings.product_title }}</h1>
-          <div class="model-info">
-            <span class="model-label">Model No:</span>
-            <span class="model-number">{{ section.settings.model_number }}</span>
-          </div>
+          {% if display_product %}
+            <h1 class="product-title">{{ display_product.title }}</h1>
+            <div class="model-info">
+              <span class="model-number">
+                {{- display_product.variants.first.sku | default: display_product.handle | upcase -}}
+              </span>
+            </div>
+          {% else %}
+            <h1 class="product-title">{{ section.settings.product_title }}</h1>
+            <div class="model-info">
+              <span class="model-number">{{ section.settings.model_number }}</span>
+            </div>
+          {% endif %}
         </div>
 
         <!-- 定制询问区域 -->
@@ -49,35 +89,43 @@
           <p class="customization-description">{{ section.settings.customization_description }}</p>
 
           {% if section.settings.quote_button_text %}
-            <a href="{{ section.settings.quote_button_link }}" class="quote-button">
+            {% assign quote_link = section.settings.quote_button_link %}
+            {% if quote_link == blank and display_product %}
+              {% assign quote_link = '/pages/contact?product=' | append: display_product.handle %}
+            {% endif %}
+            <a href="{{ quote_link }}" class="quote-button">
               {{ section.settings.quote_button_text }}
             </a>
           {% endif %}
         </div>
 
         <!-- 颜色选择区域 -->
-        <div class="color-selection">
-          <h3 class="color-title">{{ section.settings.color_section_title }}</h3>
-          <div class="color-options">
-            {% for block in section.blocks %}
-              {% if block.type == 'color_option' %}
-                <div class="color-option" {{ block.shopify_attributes }}>
+        {% if section.settings.show_color_selection %}
+          <div class="color-selection">
+            <h3 class="color-title">{{ section.settings.color_section_title }}</h3>
+            <div class="color-options">
+              {% for block in section.blocks %}
+                {% if block.type == 'color_option' %}
                   <div
-                    class="color-swatch"
-                    style="background-color: {{ block.settings.color_value }};"
+                    class="color-option {% if block.settings.is_selected %}selected{% endif %}"
+                    {{ block.shopify_attributes }}
+                    data-color="{{ block.settings.color_value }}"
                   >
-                    {% if block.settings.is_selected %}
+                    <div
+                      class="color-swatch"
+                      style="background-color: {{ block.settings.color_value }};"
+                    >
                       <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <polyline points="20,6 9,17 4,12"></polyline>
                       </svg>
-                    {% endif %}
+                    </div>
+                    <span class="color-name">{{ block.settings.color_name }}</span>
                   </div>
-                  <span class="color-name">{{ block.settings.color_name }}</span>
-                </div>
-              {% endif %}
-            {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
-        </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -85,8 +133,9 @@
 
 <style>
   .pilates-reformer-section {
-    padding: 40px 0;
-    background-color: #f8f8f8;
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+    margin-top: {{ section.settings.section_margin_top }}px;
+    background-color: {{ section.settings.section_background_color }};
   }
 
   .container {
@@ -110,22 +159,30 @@
   }
 
   .main-image {
-    border: 3px solid #4a90e2;
     border-radius: 8px;
     overflow: hidden;
-    background: white;
+    background: {{ section.settings.main_image_background }};
     padding: 20px;
+    width: 100%;
+    height: {{ section.settings.main_image_height }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .main-product-image {
-    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
     height: auto;
     display: block;
+    object-fit: contain;
   }
 
   .thumbnail-images {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat({{ section.settings.thumbnail_columns }}, 1fr);
     gap: 15px;
   }
 
@@ -136,17 +193,27 @@
     background: white;
     padding: 10px;
     cursor: pointer;
-    transition: border-color 0.3s ease;
+    transition: transform 0.3s ease;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .thumbnail-item:hover {
-    border-color: #4a90e2;
+    transform: scale(1.05);
+  }
+
+  .thumbnail-item.active {
+    border: none;
+    box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
   }
 
   .thumbnail-image {
     width: 100%;
-    height: auto;
+    height: 80px;
     display: block;
+    object-fit: contain;
   }
 
   /* 产品信息区域 */
@@ -157,35 +224,31 @@
   }
 
   .product-header {
-    text-align: right;
+    text-align: left;
   }
 
   .product-title {
-    font-size: 24px;
+    font-size: {{ section.settings.product_title_size }}px;
     font-weight: bold;
-    color: #333;
+    color: {{ section.settings.product_title_color }};
     margin: 0 0 10px 0;
     line-height: 1.2;
   }
 
   .model-info {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
     gap: 10px;
   }
 
-  .model-label {
-    color: #666;
-    font-size: 14px;
-  }
-
   .model-number {
-    background: #f0f0f0;
+    border: 1px solid {{ section.settings.model_number_color }};
     padding: 4px 12px;
     border-radius: 4px;
     font-size: 14px;
-    color: #333;
+    color: {{ section.settings.model_number_color }};
+    background: transparent;
   }
 
   /* 定制区域 */
@@ -194,22 +257,22 @@
   }
 
   .customization-title {
-    font-size: 20px;
+    font-size: {{ section.settings.customization_title_size }}px;
     font-weight: bold;
-    color: #333;
+    color: {{ section.settings.customization_title_color }};
     margin: 0 0 15px 0;
   }
 
   .customization-description {
-    color: #666;
+    color: {{ section.settings.description_color }};
     line-height: 1.6;
     margin: 0 0 20px 0;
-    font-size: 14px;
+    font-size: {{ section.settings.description_font_size }}px;
   }
 
   .quote-button {
     display: inline-block;
-    background: #d32f2f;
+    background: {{ section.settings.quote_button_color }};
     color: white;
     padding: 12px 24px;
     text-decoration: none;
@@ -220,11 +283,11 @@
   }
 
   .quote-button:hover {
-    background: #b71c1c;
+    background: {{ section.settings.quote_button_hover_color }};
   }
 
   .quote-button::before {
-    content: '>';
+    content: ">";
     margin-right: 8px;
   }
 
@@ -239,13 +302,13 @@
     color: #333;
     margin: 0 0 20px 0;
     padding-bottom: 10px;
-    border-bottom: 2px solid #d32f2f;
+    border-bottom: 2px solid {{ section.settings.quote_button_color }};
     display: inline-block;
   }
 
   .color-options {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat({{ section.settings.color_columns }}, 1fr);
     gap: 15px;
   }
 
@@ -255,21 +318,27 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    transition: all 0.3s ease;
   }
 
   .color-swatch {
     width: 60px;
     height: 60px;
     border-radius: 8px;
-    border: 2px solid #e0e0e0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
   }
 
-  .color-swatch:hover {
-    transform: scale(1.05);
+  .color-option:hover .color-swatch {
+    transform: scale(1.1);
+  }
+
+  .color-option.selected .color-swatch {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 
   .check-icon {
@@ -277,11 +346,17 @@
     height: 24px;
     color: white;
     stroke-width: 3;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .color-option.selected .check-icon {
+    opacity: 1;
   }
 
   .color-name {
     font-size: 12px;
-    color: #666;
+    color: {{ section.settings.description_color }};
     text-align: center;
     line-height: 1.2;
   }
@@ -293,12 +368,8 @@
       gap: 40px;
     }
 
-    .product-header {
-      text-align: left;
-    }
-
-    .model-info {
-      justify-content: flex-start;
+    .main-image {
+      height: {{ section.settings.main_image_height | minus: 100 }}px;
     }
   }
 
@@ -310,6 +381,10 @@
     .color-options {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .main-image {
+      height: {{ section.settings.main_image_height | minus: 200 }}px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -318,35 +393,181 @@
     }
 
     .pilates-reformer-section {
-      padding: 20px 0;
+      padding: {{ section.settings.section_padding_top | divided_by: 2 }}px 0;
     }
 
     .thumbnail-images {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    .main-image {
+      height: {{ section.settings.main_image_height | minus: 250 }}px;
+    }
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 缩略图切换功能
+    const thumbnailItems = document.querySelectorAll('.thumbnail-item');
+    const mainImage = document.getElementById('main-product-image');
+
+    thumbnailItems.forEach(function (item) {
+      item.addEventListener('click', function () {
+        const imageUrl = this.getAttribute('data-image-url');
+
+        if (imageUrl && mainImage) {
+          // 移除所有active类
+          thumbnailItems.forEach(function (thumb) {
+            thumb.classList.remove('active');
+          });
+
+          // 添加active类到当前点击的缩略图
+          this.classList.add('active');
+
+          // 更换主图
+          mainImage.src = imageUrl;
+        }
+      });
+    });
+
+    // 颜色选择功能
+    const colorOptions = document.querySelectorAll('.color-option');
+
+    colorOptions.forEach(function (option) {
+      option.addEventListener('click', function () {
+        // 移除所有选中状态
+        colorOptions.forEach(function (opt) {
+          opt.classList.remove('selected');
+        });
+
+        // 添加选中状态到当前点击的颜色
+        this.classList.add('selected');
+
+        // 可以在这里添加颜色选择的回调函数
+        const selectedColor = this.getAttribute('data-color');
+        console.log('Selected color:', selectedColor);
+      });
+    });
+  });
+</script>
 
 {% schema %}
 {
   "name": "Pilates Reformer Product",
+  "tag": "section",
+  "class": "product-section",
   "settings": [
     {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_margin_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Margin",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "header",
+      "content": "Product Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "This section will automatically use the current product when placed on a product page. You can also manually select a product for other pages."
+    },
+    {
+      "type": "product",
+      "id": "product_handle",
+      "label": "Manual Product Selection (optional)",
+      "info": "Leave empty to use current product on product pages"
+    },
+    {
       "type": "image_picker",
-      "id": "main_image",
-      "label": "Main Product Image"
+      "id": "fallback_image",
+      "label": "Fallback Image",
+      "info": "Used when no product is available"
     },
     {
       "type": "text",
       "id": "product_title",
-      "label": "Product Title",
+      "label": "Fallback Product Title",
       "default": "PILATES REFORMER XSRF100"
     },
     {
       "type": "text",
       "id": "model_number",
-      "label": "Model Number",
+      "label": "Fallback Model Number",
       "default": "XSRF100"
+    },
+    {
+      "type": "header",
+      "content": "Product Images"
+    },
+    {
+      "type": "range",
+      "id": "main_image_height",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Main Image Height",
+      "default": 600
+    },
+    {
+      "type": "color",
+      "id": "main_image_background",
+      "label": "Main Image Background Color",
+      "default": "#F1EFEE"
+    },
+    {
+      "type": "range",
+      "id": "thumbnail_columns",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "label": "Thumbnail Columns",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Customization Section"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_customization_section",
+      "label": "Show Customization Section",
+      "default": true
     },
     {
       "type": "text",
@@ -369,13 +590,103 @@
     {
       "type": "url",
       "id": "quote_button_link",
-      "label": "Quote Button Link"
+      "label": "Quote Button Link",
+      "info": "Leave empty to auto-generate contact link with product info"
+    },
+    {
+      "type": "color",
+      "id": "quote_button_color",
+      "label": "Quote Button Color",
+      "default": "#d32f2f"
+    },
+    {
+      "type": "color",
+      "id": "quote_button_hover_color",
+      "label": "Quote Button Hover Color",
+      "default": "#b71c1c"
+    },
+    {
+      "type": "header",
+      "content": "Color Options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_color_selection",
+      "label": "Show Color Selection",
+      "default": true
     },
     {
       "type": "text",
       "id": "color_section_title",
       "label": "Color Section Title",
       "default": "Upholstery Colors"
+    },
+    {
+      "type": "range",
+      "id": "color_columns",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Color Options Columns",
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "product_title_size",
+      "min": 18,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "label": "Product Title Font Size",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "product_title_color",
+      "label": "Product Title Color",
+      "default": "#333"
+    },
+    {
+      "type": "range",
+      "id": "customization_title_size",
+      "min": 16,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Customization Title Font Size",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "customization_title_color",
+      "label": "Customization Title Color",
+      "default": "#333"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Description Text Color",
+      "default": "#16161680"
+    },
+    {
+      "type": "color",
+      "id": "model_number_color",
+      "label": "Model Number Color",
+      "default": "#16161680"
     }
   ],
   "blocks": [
@@ -387,6 +698,12 @@
           "type": "image_picker",
           "id": "thumbnail_image",
           "label": "Thumbnail Image"
+        },
+        {
+          "type": "text",
+          "id": "thumbnail_alt",
+          "label": "Thumbnail Alt Text",
+          "info": "Describe the image for accessibility"
         }
       ]
     },
@@ -409,6 +726,12 @@
           "id": "is_selected",
           "label": "Selected by Default",
           "default": false
+        },
+        {
+          "type": "text",
+          "id": "color_description",
+          "label": "Color Description (optional)",
+          "info": "Additional description for this color option"
         }
       ]
     }
