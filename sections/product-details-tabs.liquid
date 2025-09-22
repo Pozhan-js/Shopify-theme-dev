@@ -1,0 +1,438 @@
+<div class="product-details-tabs-section" {{ section.shopify_attributes }}>
+  <div class="container">
+    <!-- 标签导航 -->
+    <div class="tabs-navigation">
+      <button class="tab-button" data-tab="description">
+        {{ section.settings.description_tab_title }}
+      </button>
+      <button class="tab-button active" data-tab="details">
+        {{ section.settings.details_tab_title }}
+      </button>
+      <button class="tab-button" data-tab="warranty">
+        {{ section.settings.warranty_tab_title }}
+      </button>
+    </div>
+
+    <!-- 标签内容 -->
+    <div class="tabs-content">
+      <!-- Description Tab -->
+      <div class="tab-content" id="description-content">
+        <div class="description-content">
+          {{ section.settings.description_content }}
+        </div>
+      </div>
+
+      <!-- Product Details Tab -->
+      <div class="tab-content active" id="details-content">
+        <div class="product-details">
+          <!-- 产品型号 -->
+          <div class="model-section">
+            <h3 class="model-title">{{ section.settings.model_title }}</h3>
+          </div>
+
+          <!-- 产品规格表格 -->
+          <div class="specifications-table">
+            {% for block in section.blocks %}
+              {% if block.type == 'specification' %}
+                <div class="spec-row" {{ block.shopify_attributes }}>
+                  <div class="spec-label">{{ block.settings.spec_label }}</div>
+                  <div class="spec-value">{{ block.settings.spec_value }}</div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Warranty Tab -->
+      <div class="tab-content" id="warranty-content">
+        <div class="warranty-content">
+          {{ section.settings.warranty_content }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .product-details-tabs-section {
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+    background-color: {{ section.settings.section_background_color }};
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* 标签导航 */
+  .tabs-navigation {
+    display: flex;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: {{ section.settings.content_margin_top }}px;
+    gap: 0;
+  }
+
+  .tab-button {
+    background: none;
+    border: none;
+    padding: 20px 0;
+    font-size: 16px;
+    color: #999999;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+    border-bottom: 2px solid transparent;
+    margin-right: 60px;
+    font-weight: 400;
+  }
+
+  .tab-button:hover {
+    color: #666666;
+  }
+
+  .tab-button.active {
+    color: #333333;
+    border-bottom-color: #d32f2f;
+    font-weight: 500;
+  }
+
+  /* 标签内容 */
+  .tabs-content {
+    min-height: 400px;
+    padding-top: 40px;
+  }
+
+  .tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 产品详情内容 */
+  .product-details {
+    max-width: 800px;
+  }
+
+  .model-section {
+    margin-bottom: 40px;
+  }
+
+  .model-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333333;
+    margin: 0;
+  }
+
+  /* 规格表格 */
+  .specifications-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 40px;
+    padding: 16px 0;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: flex-start;
+  }
+
+  .spec-row:last-child {
+    border-bottom: none;
+  }
+
+  .spec-label {
+    font-size: 14px;
+    color: #333333;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .spec-value {
+    font-size: 14px;
+    color: #999999;
+    line-height: 1.5;
+  }
+
+  /* Description 和 Warranty 内容 */
+  .description-content,
+  .warranty-content {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.6;
+    max-width: 800px;
+  }
+
+  .description-content p,
+  .warranty-content p {
+    margin: 0 0 16px 0;
+  }
+
+  .description-content p:last-child,
+  .warranty-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .tabs-navigation {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tab-button {
+      margin-right: 30px;
+      padding: 16px 0;
+      font-size: 14px;
+    }
+
+    .spec-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .spec-label {
+      font-weight: 600;
+    }
+
+    .model-title {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .product-details-tabs-section {
+      padding: 30px 0;
+    }
+
+    .tab-button {
+      font-size: 14px;
+      margin-right: 20px;
+    }
+
+    .tabs-content {
+      padding-top: 30px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        const targetTab = this.getAttribute('data-tab');
+
+        // 移除所有活动状态
+        tabButtons.forEach(function (btn) {
+          btn.classList.remove('active');
+        });
+
+        tabContents.forEach(function (content) {
+          content.classList.remove('active');
+        });
+
+        // 添加活动状态到当前标签
+        this.classList.add('active');
+
+        // 显示对应内容
+        const targetContent = document.getElementById(targetTab + '-content');
+        if (targetContent) {
+          targetContent.classList.add('active');
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product Details Tabs",
+  "tag": "section",
+  "class": "product-details-tabs-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "content_margin_top",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Content Top Margin",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Tab Navigation"
+    },
+    {
+      "type": "text",
+      "id": "description_tab_title",
+      "label": "Description Tab Title",
+      "default": "Description"
+    },
+    {
+      "type": "text",
+      "id": "details_tab_title",
+      "label": "Details Tab Title",
+      "default": "Product Details"
+    },
+    {
+      "type": "text",
+      "id": "warranty_tab_title",
+      "label": "Warranty Tab Title",
+      "default": "Warranty"
+    },
+    {
+      "type": "header",
+      "content": "Model Section"
+    },
+    {
+      "type": "text",
+      "id": "model_title",
+      "label": "Model Title",
+      "default": "Model No. XSRF100"
+    },
+    {
+      "type": "header",
+      "content": "Content Areas"
+    },
+    {
+      "type": "richtext",
+      "id": "description_content",
+      "label": "Description Content",
+      "default": "<p>This is the product description content. You can add detailed information about the product here.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "warranty_content",
+      "label": "Warranty Content",
+      "default": "<p>This is the warranty information. You can add warranty terms and conditions here.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "specification",
+      "name": "Specification Row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "spec_label",
+          "label": "Specification Label",
+          "default": "Size"
+        },
+        {
+          "type": "text",
+          "id": "spec_value",
+          "label": "Specification Value",
+          "default": "228cm × 69cm × 39cm (width × depth × height)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Details Tabs",
+      "blocks": [
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Size",
+            "spec_value": "228cm × 69cm × 39cm (width × depth × height)"
+          }
+        },
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Weight",
+            "spec_value": "Net weight (85 kg), Gross weight (130 kg)"
+          }
+        },
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Material",
+            "spec_value": "White maple & fiber leather"
+          }
+        },
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Load-bearing",
+            "spec_value": "120kg"
+          }
+        },
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Drag (N)",
+            "spec_value": "6 Korean Springs"
+          }
+        },
+        {
+          "type": "specification",
+          "settings": {
+            "spec_label": "Standard Accessories",
+            "spec_value": "with box, jump board, soft platform, double straps, rope, D-type straps, foot strap, toolkit"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

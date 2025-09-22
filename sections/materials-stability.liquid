@@ -12,7 +12,7 @@
         {% if section.settings.brand_logo_image %}
           <div class="brand-logo-container">
             <img
-              src="{{ section.settings.brand_logo_image | img_url: '600x' }}"
+              src="{{ section.settings.brand_logo_image | img_url: '800x' }}"
               alt="{{ section.settings.brand_logo_alt }}"
               class="brand-logo-image"
             >
@@ -26,7 +26,7 @@
         {% if section.settings.top_product_image %}
           <div class="product-image-container top-image">
             <img
-              src="{{ section.settings.top_product_image | img_url: '500x' }}"
+              src="{{ section.settings.top_product_image | img_url: '600x' }}"
               alt="{{ section.settings.top_product_alt }}"
               class="product-image"
             >
@@ -37,7 +37,7 @@
         {% if section.settings.bottom_product_image %}
           <div class="product-image-container bottom-image">
             <img
-              src="{{ section.settings.bottom_product_image | img_url: '500x' }}"
+              src="{{ section.settings.bottom_product_image | img_url: '600x' }}"
               alt="{{ section.settings.bottom_product_alt }}"
               class="product-image"
             >
@@ -93,10 +93,12 @@
   /* 主要布局 */
   .materials-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: {{ section.settings.layout_gap }}px;
+    grid-template-columns: 400px 400px 1fr;
+    gap: 18px;
     align-items: start;
-    min-height: 500px;
+    justify-content: start;
+    max-width: 1200px;
+    margin: 0 auto;
   }
 
   /* 左侧品牌logo区域 */
@@ -104,28 +106,25 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 40px;
   }
 
   .brand-logo-container {
     width: 100%;
-    max-width: 400px;
+    height: 400px;
     border-radius: {{ section.settings.brand_logo_border_radius }}px;
     overflow: hidden;
-    background-color: {{ section.settings.brand_logo_background }};
-    padding: {{ section.settings.brand_logo_padding }}px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    aspect-ratio: 1;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .brand-logo-image {
-    width: 100%;
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
     display: block;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   /* 中间产品图片区域 */
@@ -138,36 +137,36 @@
 
   .product-image-container {
     width: 100%;
-    max-width: 350px;
     border-radius: {{ section.settings.product_image_border_radius }}px;
     overflow: hidden;
     background-color: {{ section.settings.product_image_background }};
-    padding: {{ section.settings.product_image_padding }}px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    aspect-ratio: 4/3;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .product-image {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
+  .product-image-container.top-image {
+    height: 190px;
   }
 
-  .top-image {
-    margin-bottom: {{ section.settings.top_image_margin_bottom }}px;
+  .product-image-container.bottom-image {
+    height: 190px;
+  }
+
+  .product-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
   }
 
   /* 右侧内容区域 */
   .content-area {
-    padding-left: {{ section.settings.content_padding_left }}px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 40px;
   }
 
   .main-description {
@@ -205,21 +204,39 @@
   }
 
   /* 响应式设计 */
+  @media (max-width: 1200px) {
+    .materials-layout {
+      grid-template-columns: 350px 350px 1fr;
+      gap: 18px;
+    }
+
+    .brand-logo-container {
+      height: 350px;
+    }
+
+    .product-image-container.top-image {
+      height: 165px;
+    }
+
+    .product-image-container.bottom-image {
+      height: 165px;
+    }
+  }
+
   @media (max-width: 1024px) {
     .materials-layout {
       grid-template-columns: 1fr;
-      gap: 40px;
+      gap: 18px;
       text-align: center;
+      max-width: 100%;
     }
 
     .content-area {
       padding-left: 0;
-      padding-top: 0;
     }
 
     .brand-logo-area {
       order: 1;
-      padding-top: 0;
     }
 
     .product-images-area {
@@ -233,8 +250,22 @@
       order: 3;
     }
 
+    .brand-logo-container {
+      height: 300px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
     .product-image-container {
       max-width: 280px;
+    }
+
+    .product-image-container.top-image {
+      height: 150px;
+    }
+
+    .product-image-container.bottom-image {
+      height: 150px;
     }
   }
 
@@ -259,6 +290,11 @@
     .cta-text::after {
       background: linear-gradient(to right, {{ section.settings.cta_underline_color }} 0%, {{ section.settings.cta_underline_color }} 75%, transparent 75%);
     }
+
+    .brand-logo-container {
+      height: 250px;
+      max-width: 350px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -277,6 +313,19 @@
     .brand-logo-container,
     .product-image-container {
       padding: 15px;
+    }
+
+    .brand-logo-container {
+      height: 200px;
+      max-width: 300px;
+    }
+
+    .product-image-container.top-image {
+      height: 125px;
+    }
+
+    .product-image-container.bottom-image {
+      height: 125px;
     }
 
     .cta-text::after {
@@ -318,12 +367,12 @@
     {
       "type": "range",
       "id": "layout_gap",
-      "min": 20,
-      "max": 100,
-      "step": 10,
+      "min": 10,
+      "max": 80,
+      "step": 5,
       "unit": "px",
       "label": "Layout Gap",
-      "default": 60
+      "default": 30
     },
     {
       "type": "header",
@@ -410,22 +459,6 @@
       "default": "XSPilates brand logo on wood surface"
     },
     {
-      "type": "color",
-      "id": "brand_logo_background",
-      "label": "Brand Logo Background",
-      "default": "#F5F1E8"
-    },
-    {
-      "type": "range",
-      "id": "brand_logo_padding",
-      "min": 10,
-      "max": 50,
-      "step": 5,
-      "unit": "px",
-      "label": "Brand Logo Padding",
-      "default": 30
-    },
-    {
       "type": "range",
       "id": "brand_logo_border_radius",
       "min": 0,
@@ -479,16 +512,6 @@
     },
     {
       "type": "range",
-      "id": "product_image_padding",
-      "min": 10,
-      "max": 40,
-      "step": 5,
-      "unit": "px",
-      "label": "Product Image Padding",
-      "default": 20
-    },
-    {
-      "type": "range",
       "id": "product_image_border_radius",
       "min": 0,
       "max": 20,
@@ -510,16 +533,6 @@
     {
       "type": "header",
       "content": "Content Area"
-    },
-    {
-      "type": "range",
-      "id": "content_padding_left",
-      "min": 0,
-      "max": 60,
-      "step": 5,
-      "unit": "px",
-      "label": "Content Left Padding",
-      "default": 20
     },
     {
       "type": "textarea",
