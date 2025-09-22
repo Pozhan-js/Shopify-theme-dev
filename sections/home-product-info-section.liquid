@@ -1,0 +1,1235 @@
+{% comment %}
+  Product Info Section - Multi-SKU Support
+  Displays current product information from Shopify product object
+  Auto-fetches first product from collections if no specific product is set
+  Supports backend editing through section settings
+{% endcomment %}
+
+{% liquid
+  assign display_product = product
+  if section.settings.selected_product != blank
+    assign display_product = all_products[section.settings.selected_product]
+  elsif display_product == blank and collections.all.products.size > 0
+    assign display_product = collections.all.products.first
+  endif
+%}
+
+<style>
+  .product-info-section {
+    padding: {{ section.settings.paddingtop | times: 0.5 | round: 0 }}px 0 {{ section.settings.paddingbottom | times: 0.5 | round: 0 }}px 0;
+    background: {{ section.settings.backgroundcolor }};
+  }
+
+  .product-info-container {
+    max-width: 1280px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .product-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .product-info-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .product-title {
+    font-size: {{ section.settings.titlefontsize }}px;
+    font-weight: bold;
+    color: {{ section.settings.titlecolor }};
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .product-description {
+    font-size: {{ section.settings.descriptionfontsize }}px;
+    color: {{ section.settings.descriptioncolor }};
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+  }
+
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: {{ section.settings.pricefontsize }}px;
+    font-weight: 600;
+    color: {{ section.settings.pricecolor }};
+    align-items: center;
+  }
+
+  .price-old {
+    color: {{ section.settings.oldpricecolor }};
+    text-decoration: line-through;
+  }
+
+  .price-discount {
+    color: {{ section.settings.discountcolor }};
+    font-weight: bold;
+  }
+
+  .sku-selector {
+    margin: 1rem 0;
+  }
+
+  .sku-selector h3 {
+    font-size: {{ section.settings.skutitlefontsize }}px;
+    color: {{ section.settings.skutitlecolor }};
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .sku-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .sku-option {
+    position: relative;
+  }
+
+  .sku-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .sku-option label {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid {{ section.settings.skubordercolor }};
+    border-radius: {{ section.settings.skuborderradius }}px;
+    background: {{ section.settings.skubackgroundcolor }};
+    color: {{ section.settings.skutextcolor }};
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: {{ section.settings.skufontsize }}px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 70px;
+  }
+
+  .sku-option input[type="radio"]:checked + label {
+    border-color: #9ABD48;
+    background: #9ABD48;
+    color: white;
+  }
+
+  .sku-option label:hover {
+    border-color: #9ABD48;
+  }
+
+  .quantity-selector {
+    margin: 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .quantity-selector label {
+    font-size: {{ section.settings.quantityfontsize }}px;
+    color: {{ section.settings.quantitycolor }};
+    font-weight: 600;
+  }
+
+  .quantity-input {
+    display: flex;
+    align-items: center;
+    border: 2px solid {{ section.settings.quantitybordercolor }};
+    border-radius: {{ section.settings.quantityborderradius }}px;
+    overflow: hidden;
+  }
+
+  .quantity-btn {
+    background: {{ section.settings.quantitybtnbackground }};
+    color: {{ section.settings.quantitybtncolor }};
+    border: none;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+
+  .quantity-btn:hover {
+    background: #9ABD48;
+    color: white;
+  }
+
+  .quantity-number {
+    padding: 0.4rem 0.75rem;
+    border: none;
+    text-align: center;
+    font-size: {{ section.settings.quantityfontsize }}px;
+    font-weight: 600;
+    width: 50px;
+    background: white;
+  }
+
+  .benefits-list {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .benefit-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: {{ section.settings.benefitfontsize }}px;
+    color: {{ section.settings.benefitcolor }};
+  }
+
+  .benefit-item .value {
+    color: {{ section.settings.benefitvaluecolor }};
+    font-weight: normal;
+  }
+
+  .total-row {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    font-size: {{ section.settings.totalfontsize }}px;
+    font-weight: bold;
+    color: {{ section.settings.totalcolor }};
+  }
+
+  .shipping-info {
+    margin-bottom: 0.5rem;
+    font-size: {{ section.settings.descriptionfontsize }}px;
+    color: {{ section.settings.descriptioncolor }};
+  }
+
+  .disclaimer {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: {{ section.settings.disclaimercolor }};
+    line-height: 1.4;
+  }
+
+  .disclaimer p {
+    margin: 0.25rem 0;
+  }
+
+  .guarantee {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: {{ section.settings.guaranteecolor }};
+    font-size: 0.9rem;
+  }
+
+  .guarantee p {
+    margin: 0.25rem 0;
+  }
+
+  .flexible {
+    font-size: 0.8rem;
+    color: {{ section.settings.flexiblecolor }};
+  }
+
+  .flexible p {
+    margin: 0.25rem 0;
+  }
+
+  .button-group {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-direction: column;
+  }
+
+  .add-to-cart-button, .buy-now-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: {{ section.settings.buttonborderradius }}px;
+    font-size: {{ section.settings.buttonfontsize }}px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .add-to-cart-button {
+    background: {{ section.settings.addtocartbgcolor }};
+    color: {{ section.settings.addtocarttextcolor }};
+    border: 2px solid #9ABD48;
+  }
+
+  .add-to-cart-button:hover {
+    background: #9ABD48;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .buy-now-button {
+    background: #9ABD48;
+    color: white;
+  }
+
+  .buy-now-button:hover {
+    background: #8aa63f;
+    transform: translateY(-1px);
+  }
+
+  .main-image {
+    width: 100%;
+    height: {{ section.settings.imageheight }}px;
+    object-fit: cover;
+    border-radius: {{ section.settings.imageborderradius }}px;
+    transition: opacity 0.3s ease;
+  }
+
+  .main-image.changing {
+    opacity: 0.7;
+  }
+
+  .product-form {
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .product-info-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .product-info-left {
+      gap: 0.5rem;
+    }
+
+    .product-title {
+      font-size: {{ section.settings.titlefontsizemobile }}px;
+    }
+
+    .benefit-item, .price-row, .total-row {
+      font-size: {{ section.settings.benefitfontsizemobile }}px;
+    }
+
+    .benefit-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+    }
+
+    .total-row {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    .button-group {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sku-options {
+      justify-content: center;
+    }
+
+    .quantity-selector {
+      justify-content: center;
+    }
+  }
+</style>
+
+<section class="product-info-section">
+  <div class="product-info-container">
+    <div class="product-info-grid">
+      <!-- Left Content -->
+      <div class="product-info-left">
+        <h1 class="product-title">
+          {% if section.settings.useproducttitle %}
+            {{ display_product.title }}
+          {% else %}
+            {{ section.settings.producttitle | default: display_product.title }}
+          {% endif %}
+        </h1>
+
+        <div class="product-description">
+          {% if section.settings.useproductdescription %}
+            {{ display_product.description | truncate: 200 }}
+          {% else %}
+            {{ section.settings.productdescription | default: display_product.description }}
+          {% endif %}
+        </div>
+
+        <div class="price-row">
+          <span id="current-price">
+            {% if display_product.compare_at_price > display_product.price %}
+              {{ display_product.price | money }}
+            {% else %}
+              {{ display_product.price | money }}
+            {% endif %}
+          </span>
+          {% if display_product.compare_at_price > display_product.price %}
+            <span class="price-old price-discount" id="old-price">{{ display_product.compare_at_price | money }}</span>
+          {% endif %}
+        </div>
+
+        {% if section.settings.shippinginfo != blank %}
+          <div class="shipping-info">{{ section.settings.shippinginfo }}</div>
+        {% endif %}
+
+        <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data">
+          <!-- SKU Selector for Product Variants -->
+          {% if display_product.variants.size > 1 %}
+            <div class="sku-selector">
+              <h3>{{ section.settings.skuselectortitle }}</h3>
+              <div class="sku-options">
+                {% for variant in display_product.variants %}
+                  <div class="sku-option">
+                    <input
+                      type="radio"
+                      id="variant-{{ variant.id }}"
+                      name="id"
+                      value="{{ variant.id }}"
+                      data-price="{{ variant.price | money }}"
+                      data-old-price="{% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money }}{% endif %}"
+                      data-available="{{ variant.available }}"
+                      data-image="{% if variant.image %}{{ variant.image | image_url: width: 600 }}{% elsif display_product.featured_image %}{{ display_product.featured_image | image_url: width: 600 }}{% endif %}"
+                      data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ display_product.featured_image.alt | default: display_product.title }}{% endif %}"
+                      {% if forloop.first %}
+                        checked
+                      {% endif %}
+                      {% unless variant.available %}
+                        disabled
+                      {% endunless %}
+                    >
+                    <label for="variant-{{ variant.id }}">
+                      {{ variant.title }}
+                      {% unless variant.available %} - Sold Out{% endunless %}
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% else %}
+            <!-- Single variant product -->
+            <input type="hidden" name="id" value="{{ display_product.selected_or_first_available_variant.id }}">
+          {% endif %}
+
+          <!-- Custom SKU Options from Section Blocks (if any) -->
+          {% if section.blocks.size > 0 %}
+            {% assign has_sku_blocks = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'skuoption' %}
+                {% assign has_sku_blocks = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            {% if has_sku_blocks %}
+              <div class="sku-selector">
+                <h3>{{ section.settings.customskutitle | default: 'Additional Options' }}</h3>
+                <div class="sku-options">
+                  {% for block in section.blocks %}
+                    {% if block.type == 'skuoption' %}
+                      <div class="sku-option">
+                        <input
+                          type="radio"
+                          id="custom-sku-{{ forloop.index }}"
+                          name="customsku"
+                          value="{{ block.settings.variantid }}"
+                          data-price="{{ block.settings.skuprice }}"
+                          data-old-price="{{ block.settings.skuoldprice }}"
+                        >
+                        <label for="custom-sku-{{ forloop.index }}">{{ block.settings.skuname }}</label>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+
+          <!-- Quantity Selector -->
+          <div class="quantity-selector">
+            <label for="quantity">{{ section.settings.quantitylabel }}:</label>
+            <div class="quantity-input">
+              <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">−</button>
+              <input type="number" id="quantity" name="quantity" value="1" min="1" class="quantity-number" readonly>
+              <button type="button" class="quantity-btn" onclick="changeQuantity(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Benefits List -->
+          {% if section.blocks.size > 0 %}
+            <div class="benefits-list">
+              {% for block in section.blocks %}
+                {% if block.type == 'benefit' %}
+                  <div class="benefit-item">
+                    <span>{{ block.settings.benefitname }}</span>
+                    <span class="value">{{ block.settings.benefitvalue }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="total-row">
+            <span>{{ section.settings.totallabel }}</span>
+            <span id="total-price">{{ display_product.price | money }}</span>
+          </div>
+
+          {% if section.settings.disclaimertext != blank %}
+            <div class="disclaimer">{{ section.settings.disclaimertext }}</div>
+          {% endif %}
+
+          {% if section.settings.guaranteetext != blank %}
+            <div class="guarantee">{{ section.settings.guaranteetext }}</div>
+          {% endif %}
+
+          {% if section.settings.flexibletext != blank %}
+            <div class="flexible">{{ section.settings.flexibletext }}</div>
+          {% endif %}
+
+          <!-- Button Group -->
+          <div class="button-group">
+            <button type="submit" name="add" class="add-to-cart-button" id="add-to-cart-btn">
+              {{ section.settings.addtocarttext }}
+            </button>
+            <button type="button" class="buy-now-button" id="buy-now-btn">
+              {{ section.settings.buynowtext }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right Image -->
+      <div>
+        {% if section.settings.useproductimage and display_product.featured_image %}
+          <img
+            id="main-product-image"
+            src="{{ display_product.featured_image | image_url: width: 600 }}"
+            alt="{{ display_product.featured_image.alt | default: display_product.title }}"
+            class="main-image"
+            loading="lazy"
+          >
+        {% elsif section.settings.mainimage != blank %}
+          <img
+            id="main-product-image"
+            src="{{ section.settings.mainimage | image_url: width: 600 }}"
+            alt="{{ section.settings.mainimagealt | default: display_product.title }}"
+            class="main-image"
+            loading="lazy"
+          >
+        {% elsif section.settings.fallbackimage != blank %}
+          <img
+            id="main-product-image"
+            src="{{ section.settings.fallbackimage | image_url: width: 600 }}"
+            alt="{{ section.settings.mainimagealt | default: display_product.title }}"
+            class="main-image"
+            loading="lazy"
+          >
+        {% elsif display_product.featured_image %}
+          <img
+            id="main-product-image"
+            src="{{ display_product.featured_image | image_url: width: 600 }}"
+            alt="{{ display_product.featured_image.alt | default: display_product.title }}"
+            class="main-image"
+            loading="lazy"
+          >
+        {% else %}
+          <div
+            id="main-product-image"
+            class="main-image placeholder-image"
+            style="background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px;"
+          >
+            <span>{{ display_product.title | default: 'Product Image' }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Quantity change function
+  function changeQuantity(change) {
+    const quantityInput = document.getElementById('quantity');
+    let currentQuantity = parseInt(quantityInput.value);
+    let newQuantity = currentQuantity + change;
+
+    if (newQuantity < 1) newQuantity = 1;
+
+    quantityInput.value = newQuantity;
+    updateTotalPrice();
+  }
+
+  // Update price when variant changes
+  document.addEventListener('DOMContentLoaded', function () {
+    const variantOptions = document.querySelectorAll('input[name="id"]');
+    const currentPriceElement = document.getElementById('current-price');
+    const oldPriceElement = document.getElementById('old-price');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const buyNowBtn = document.getElementById('buy-now-btn');
+
+    variantOptions.forEach(function (option) {
+      option.addEventListener('change', function () {
+        if (this.checked) {
+          const newPrice = this.getAttribute('data-price');
+          const newOldPrice = this.getAttribute('data-old-price');
+          const isAvailable = this.getAttribute('data-available') === 'true';
+          const newImage = this.getAttribute('data-image');
+          const newImageAlt = this.getAttribute('data-image-alt');
+
+          if (newPrice) currentPriceElement.textContent = newPrice;
+
+          if (newOldPrice && newOldPrice !== '') {
+            if (!oldPriceElement) {
+              const priceRow = document.querySelector('.price-row');
+              const oldPriceSpan = document.createElement('span');
+              oldPriceSpan.className = 'price-old price-discount';
+              oldPriceSpan.id = 'old-price';
+              priceRow.appendChild(oldPriceSpan);
+            }
+            document.getElementById('old-price').textContent = newOldPrice;
+            document.getElementById('old-price').style.display = 'inline';
+          } else if (oldPriceElement) {
+            oldPriceElement.style.display = 'none';
+          }
+
+          // Update product image
+          const mainImage = document.getElementById('main-product-image');
+          if (newImage && mainImage) {
+            mainImage.classList.add('changing');
+            setTimeout(function () {
+              if (mainImage.tagName === 'IMG') {
+                mainImage.src = newImage;
+                mainImage.alt = newImageAlt || '';
+              } else {
+                // Convert placeholder div to img if needed
+                const newImg = document.createElement('img');
+                newImg.id = 'main-product-image';
+                newImg.src = newImage;
+                newImg.alt = newImageAlt || '';
+                newImg.className = 'main-image';
+                newImg.loading = 'lazy';
+                mainImage.parentNode.replaceChild(newImg, mainImage);
+              }
+              setTimeout(function () {
+                document.getElementById('main-product-image').classList.remove('changing');
+              }, 50);
+            }, 150);
+          }
+
+          // Update button states based on availability
+          if (isAvailable) {
+            addToCartBtn.disabled = false;
+            buyNowBtn.disabled = false;
+            addToCartBtn.textContent = '{{ section.settings.addtocarttext }}';
+          } else {
+            addToCartBtn.disabled = true;
+            buyNowBtn.disabled = true;
+            addToCartBtn.textContent = 'Sold Out';
+          }
+
+          updateTotalPrice();
+        }
+      });
+    });
+
+    // Buy now button functionality
+    document.getElementById('buy-now-btn').addEventListener('click', function () {
+      const form = document.querySelector('.product-form');
+      const formData = new FormData(form);
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          window.location.href = '/cart';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+    });
+
+    // Initialize total price
+    updateTotalPrice();
+  });
+
+  function updateTotalPrice() {
+    const selectedVariant = document.querySelector('input[name="id"]:checked');
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const totalPriceElement = document.getElementById('total-price');
+
+    if (selectedVariant && selectedVariant.getAttribute('data-price')) {
+      const unitPrice = selectedVariant.getAttribute('data-price');
+      // Extract numeric value from price string
+      const priceMatch = unitPrice.match(/[\d,]+\.?\d*/);
+      if (priceMatch) {
+        const numericPrice = parseFloat(priceMatch[0].replace(',', ''));
+        const totalPrice = numericPrice * quantity;
+        const currency = unitPrice.match(/[^\d\s,\.]+/);
+        const currencySymbol = currency ? currency[0] : '$';
+        totalPriceElement.textContent = currencySymbol + totalPrice.toFixed(2);
+      }
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Product Info Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Selection"
+    },
+    {
+      "type": "product",
+      "id": "selected_product",
+      "label": "Select Product",
+      "info": "Choose a specific product to display. Leave empty to use current page product or first available product."
+    },
+    {
+      "type": "header",
+      "content": "Product Data Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "useproducttitle",
+      "label": "Use Product Title",
+      "default": true,
+      "info": "Use the actual product title instead of custom title"
+    },
+    {
+      "type": "checkbox",
+      "id": "useproductdescription",
+      "label": "Use Product Description",
+      "default": true,
+      "info": "Use the actual product description instead of custom description"
+    },
+    {
+      "type": "checkbox",
+      "id": "useproductimage",
+      "label": "Use Product Featured Image",
+      "default": true,
+      "info": "Use the product's featured image instead of custom image"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "paddingtop",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "paddingbottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 64
+    },
+    {
+      "type": "color",
+      "id": "backgroundcolor",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "mainimage",
+      "label": "Custom Main Image",
+      "info": "Used when 'Use Product Featured Image' is disabled"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallbackimage",
+      "label": "Fallback Image",
+      "info": "Displayed when no product or custom image is available"
+    },
+    {
+      "type": "text",
+      "id": "mainimagealt",
+      "label": "Image Alt Text",
+      "default": "Product Main Image"
+    },
+    {
+      "type": "range",
+      "id": "imageheight",
+      "min": 200,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Height",
+      "default": 450
+    },
+    {
+      "type": "range",
+      "id": "imageborderradius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Product Information"
+    },
+    {
+      "type": "text",
+      "id": "producttitle",
+      "label": "Custom Product Title",
+      "info": "Used when 'Use Product Title' is disabled"
+    },
+    {
+      "type": "richtext",
+      "id": "productdescription",
+      "label": "Custom Product Description",
+      "info": "Used when 'Use Product Description' is disabled"
+    },
+    {
+      "type": "color",
+      "id": "titlecolor",
+      "label": "Title Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "titlefontsize",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title Font Size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "titlefontsizemobile",
+      "min": 20,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "label": "Mobile Title Font Size",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "descriptioncolor",
+      "label": "Description Text Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "range",
+      "id": "descriptionfontsize",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description Font Size",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "pricecolor",
+      "label": "Price Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "oldpricecolor",
+      "label": "Original Price Color",
+      "default": "#9ca3af"
+    },
+    {
+      "type": "color",
+      "id": "discountcolor",
+      "label": "Discount Color",
+      "default": "#9ABD48"
+    },
+    {
+      "type": "range",
+      "id": "pricefontsize",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Price Font Size",
+      "default": 18
+    },
+    {
+      "type": "richtext",
+      "id": "shippinginfo",
+      "label": "Shipping Information",
+      "default": "<p><strong>Free shipping on orders over $50</strong></p>"
+    },
+    {
+      "type": "header",
+      "content": "Variant Selector Settings"
+    },
+    {
+      "type": "text",
+      "id": "skuselectortitle",
+      "label": "SKU Selector Title",
+      "default": "Select Option"
+    },
+    {
+      "type": "text",
+      "id": "customskutitle",
+      "label": "Custom SKU Selector Title",
+      "default": "Additional Options"
+    },
+    {
+      "type": "color",
+      "id": "skutitlecolor",
+      "label": "SKU Title Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "skutitlefontsize",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Title Font Size",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "skubackgroundcolor",
+      "label": "SKU Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "skutextcolor",
+      "label": "SKU Text Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "skubordercolor",
+      "label": "SKU Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "skuborderradius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "skufontsize",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "SKU Font Size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Quantity Selector Settings"
+    },
+    {
+      "type": "text",
+      "id": "quantitylabel",
+      "label": "Quantity Label",
+      "default": "Quantity"
+    },
+    {
+      "type": "color",
+      "id": "quantitycolor",
+      "label": "Quantity Label Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "quantityfontsize",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Quantity Font Size",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "quantitybordercolor",
+      "label": "Quantity Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "quantityborderradius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Quantity Border Radius",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "quantitybtnbackground",
+      "label": "Quantity Button Background",
+      "default": "#f9fafb"
+    },
+    {
+      "type": "color",
+      "id": "quantitybtncolor",
+      "label": "Quantity Button Text Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "text",
+      "id": "totallabel",
+      "label": "Total Label",
+      "default": "Total"
+    },
+    {
+      "type": "color",
+      "id": "totalcolor",
+      "label": "Total Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "totalfontsize",
+      "min": 16,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Total Font Size",
+      "default": 20
+    },
+    {
+      "type": "richtext",
+      "id": "disclaimertext",
+      "label": "Disclaimer Text",
+      "info": "Add any disclaimers or additional information",
+      "default": "<p>* Terms and conditions apply. See website for details.</p>"
+    },
+    {
+      "type": "color",
+      "id": "disclaimercolor",
+      "label": "Disclaimer Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "richtext",
+      "id": "guaranteetext",
+      "label": "Guarantee Text",
+      "info": "Add guarantee or warranty information",
+      "default": "<p><strong>30-Day Money Back Guarantee</strong></p>"
+    },
+    {
+      "type": "color",
+      "id": "guaranteecolor",
+      "label": "Guarantee Text Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "richtext",
+      "id": "flexibletext",
+      "label": "Additional Information",
+      "info": "Add any additional product information",
+      "default": "<p>Contact us for bulk orders or custom requirements.</p>"
+    },
+    {
+      "type": "color",
+      "id": "flexiblecolor",
+      "label": "Flexible Text Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "text",
+      "id": "addtocarttext",
+      "label": "Add to Cart Button Text",
+      "default": "Add to Cart"
+    },
+    {
+      "type": "text",
+      "id": "buynowtext",
+      "label": "Buy Now Button Text",
+      "default": "Buy Now"
+    },
+    {
+      "type": "color",
+      "id": "addtocartbgcolor",
+      "label": "Add to Cart Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "addtocarttextcolor",
+      "label": "Add to Cart Text Color",
+      "default": "#9ABD48"
+    },
+    {
+      "type": "range",
+      "id": "buttonfontsize",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "buttonborderradius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "Button Border Radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "benefitcolor",
+      "label": "Benefit Item Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "benefitvaluecolor",
+      "label": "Benefit Value Color",
+      "default": "#6b7280"
+    },
+    {
+      "type": "range",
+      "id": "benefitfontsize",
+      "min": 14,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Benefit Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "benefitfontsizemobile",
+      "min": 12,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile Benefit Font Size",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "skuoption",
+      "name": "Custom SKU Option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "skuname",
+          "label": "SKU Name",
+          "default": "Custom Option"
+        },
+        {
+          "type": "text",
+          "id": "variantid",
+          "label": "Variant ID",
+          "info": "Enter the variant ID for this custom option"
+        },
+        {
+          "type": "text",
+          "id": "skuprice",
+          "label": "SKU Price",
+          "default": "$79.00"
+        },
+        {
+          "type": "text",
+          "id": "skuoldprice",
+          "label": "SKU Original Price"
+        }
+      ]
+    },
+    {
+      "type": "benefit",
+      "name": "Benefit Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "benefitname",
+          "label": "Benefit Name",
+          "default": "Benefit Name"
+        },
+        {
+          "type": "text",
+          "id": "benefitvalue",
+          "label": "Benefit Value",
+          "default": "Benefit Value"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Info Section",
+      "category": "Product",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "benefitname": "Free Shipping",
+            "benefitvalue": "On orders over $50"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefitname": "Money Back Guarantee",
+            "benefitvalue": "30 days"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "benefitname": "Customer Support",
+            "benefitvalue": "24/7 available"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
