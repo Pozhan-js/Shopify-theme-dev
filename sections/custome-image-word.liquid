@@ -1,0 +1,133 @@
+{%- liquid
+  assign image_position = section.settings.image_position
+-%}
+
+{% schema %}
+{
+  "name": "图文区块",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "标题",
+      "default": "区块标题"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "内容",
+      "default": "<p>在这里输入您的富文本内容</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "图片"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "图片位置",
+      "options": [
+        {
+          "value": "left",
+          "label": "左侧"
+        },
+        {
+          "value": "right",
+          "label": "右侧"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "text_width",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "label": "文本区域宽度",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "图文区块"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .image-text-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 0;
+  }
+
+  .text-content {
+    flex: 1;
+    max-width: {{ section.settings.text_width }}%;
+  }
+
+  .image-content {
+    flex: 1;
+  }
+
+  .image-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .section-heading {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .image-text-container {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .text-content,
+    .image-content {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    {% if section.settings.image_position == 'left' %}
+      .image-text-container {
+        flex-direction: column-reverse;
+      }
+    {% endif %}
+  }
+</style>
+
+<div
+  class="image-text-container"
+  style="flex-direction: {% if section.settings.image_position == 'left' %}row-reverse{% else %}row{% endif %}"
+>
+  <div class="text-content">
+    <h2 class="section-heading">{{ section.settings.heading }}</h2>
+    <div class="rte">
+      {{ section.settings.text }}
+    </div>
+  </div>
+
+  <div class="image-content">
+    {%- if section.settings.image != blank -%}
+      <img
+        src="{{ section.settings.image | img_url: '800x' }}"
+        alt="{{ section.settings.heading | escape }}"
+        loading="lazy"
+        width="800"
+        height="{{ 800 | divided_by: section.settings.image.aspect_ratio | round }}"
+      >
+    {%- endif -%}
+  </div>
+</div>

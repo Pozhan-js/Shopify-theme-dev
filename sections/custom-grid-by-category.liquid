@@ -1,0 +1,188 @@
+{%- liquid
+  assign grid_columns = 4
+  assign grid_gap = section.settings.grid_gap
+-%}
+
+{% schema %}
+{
+  "name": "grid-by-category",
+  "tag": "section",
+  "class": "section custom-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "区块标题",
+      "default": "category"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "网格间距",
+      "default": 16
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "分类",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "分类名称",
+          "default": "分类名称"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "链接"
+        },
+        {
+          "type": "textarea",
+          "id": "description_text",
+          "label": "描述文本",
+          "default": "暂无描述",
+          "info": "可选，输入后将在分类名称下方显示"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "grid-by-category",
+      "blocks": [
+        {
+          "type": "category"
+        },
+        {
+          "type": "category"
+        },
+        {
+          "type": "category"
+        },
+        {
+          "type": "category"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4
+}
+{% endschema %}
+
+<style>
+  .custom-section {
+    padding: 0 50px;
+  }
+  .shopify-section.section {
+    background-color: #fff;
+  }
+  .section-header {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .section-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat({{ grid_columns }}, 1fr);
+    gap: {{ grid_gap }}px;
+    padding: 20px 0;
+  }
+
+  .category-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+
+  .category-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .category-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: all 0.3s ease;
+  }
+
+  .category-title {
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 16px;
+    transition: color 0.3s ease;
+    margin-block-start: 15px!important;
+  }
+
+  .category-link:hover .category-image {
+    transform: scale(1.05);
+  }
+
+  .category-link:hover .category-title {
+    color: var(--color-button);
+  }
+
+  .category-description {
+    padding: 10px 15px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .category-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+<div class="section-header">
+  <h2 class="">{{ section.settings.heading }}</h2>
+</div>
+
+<div class="category-grid">
+  {%- for block in section.blocks -%}
+    <div class="category-item" {{ block.shopify_attributes }}>
+      <a href="{{ block.settings.link }}" class="category-link">
+        {%- if block.settings.image != blank -%}
+          <img
+            src="{{ block.settings.image | img_url: '600x' }}"
+            alt="{{ block.settings.title | escape }}"
+            class="category-image"
+            loading="lazy"
+            width="600"
+            height="{{ 600 | divided_by: block.settings.image.aspect_ratio | round }}"
+          >
+        {%- endif -%}
+        <p class="category-title">{{ block.settings.title }}</p>
+      </a>
+      {%- if block.settings.description_text != blank -%}
+        <div class="category-description">
+          {{ block.settings.description_text }}
+        </div>
+      {%- endif -%}
+    </div>
+  {%- endfor -%}
+</div>

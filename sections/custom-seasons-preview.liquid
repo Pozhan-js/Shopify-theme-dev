@@ -1,0 +1,271 @@
+{%- style -%}
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    margin-top: {{ section.settings.padding_top }}px;
+  }
+  
+  .section-title {
+    font-size: 2.2rem;
+    margin: 0;
+    color: {{ section.settings.heading_color }};
+  }
+
+  .seasons-preview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    padding: 0 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .season-item {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+  }
+
+  .season-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .season-image {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 3/4;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background: #f8f8f8;
+  }
+
+  .season-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+    mix-blend-mode: multiply;
+  }
+
+  .season-image:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .season-item:hover .season-image img {
+    transform: scale(1.05);
+  }
+
+  .season-meta {
+    padding: 1rem 0;
+    font-size: 0.85rem;
+    color: {{ section.settings.meta_color }};
+  }
+
+  .season-content {
+    padding: 0.5rem 0;
+  }
+
+  .season-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: {{ section.settings.title_color }};
+  }
+
+  .season-subtitle {
+    font-size: 0.9rem;
+    color: {{ section.settings.subtitle_color }};
+  }
+
+  @media screen and (max-width: 1200px) {
+    .seasons-preview {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 750px) {
+    .seasons-preview {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .seasons-preview {
+      grid-template-columns: 1fr;
+    }
+  }
+{%- endstyle -%}
+
+<div class="page-width">
+  {%- if section.settings.heading != blank -%}
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.heading }}</h2>
+    </div>
+  {%- endif -%}
+  <div class="seasons-preview">
+  {%- for block in section.blocks -%}
+    <a href="{{ block.settings.link }}" class="season-item" {{ block.shopify_attributes }}>
+      <div class="season-image">
+        {%- if block.settings.image != blank -%}
+          {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy' }}
+        {%- else -%}
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
+      <div class="season-meta">
+        {{ block.settings.meta | default: "within, without" }}
+      </div>
+      <div class="season-content">
+        <h3 class="season-title">{{ block.settings.title | default: "Season Title" }}</h3>
+        <p class="season-subtitle">{{ block.settings.subtitle | default: "Season subtitle description" }}</p>
+      </div>
+    </a>
+  {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Seasons Preview V2",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured Seasons"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "meta_color",
+      "label": "Meta Text Color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle Color",
+      "default": "#333333"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "season",
+      "name": "Season Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "richtext",
+          "id": "meta",
+          "label": "Meta Information",
+          "default": "<p>Fashion, within, without</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "title",
+          "label": "Title",
+          "default": "<p>COMMON THREADS</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "<p>Some friendships develop their own dress codes.</p>"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Seasons Preview V2",
+      "blocks": [
+        {
+          "type": "season",
+          "settings": {
+            "meta": "<p>Fashion, within, without</p>",
+            "title": "<p>COMMON THREADS</p>",
+            "subtitle": "<p>Some friendships develop their own dress codes.</p>"
+          }
+        },
+        {
+          "type": "season",
+          "settings": {
+            "meta": "<p>Arts & Culture, within, without</p>",
+            "title": "<p>OTTESSA MOSHFEQH</p>",
+            "subtitle": "<p>The prolific writer's state of grace.</p>"
+          }
+        },
+        {
+          "type": "season",
+          "settings": {
+            "meta": "<p>Interiors, within, without</p>",
+            "title": "<p>HOME TOUR: A HIDEAWAY IN HAWAII</p>",
+            "subtitle": "<p>A house in the trees, shared by three generations.</p>"
+          }
+        },
+        {
+          "type": "season",
+          "settings": {
+            "meta": "<p>Arts & Culture, within, without</p>",
+            "title": "<p>GROWING CLOSER</p>",
+            "subtitle": "<p>Expert advice on tending to your friends.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

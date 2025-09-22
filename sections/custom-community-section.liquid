@@ -1,0 +1,140 @@
+{%- liquid
+  assign heading = section.settings.heading
+  assign slogan = section.settings.slogan
+  assign cta_text = section.settings.cta_text
+  assign cta_link = section.settings.cta_link
+  assign background = section.settings.background
+-%}
+
+<div class="community-section custom-section">
+  <h3 class="section-heading">{{ heading }}</h3>
+
+  {% if background != blank %}
+    <div class="community-bg-container">
+      {{ background | image_url: width: 2000 | image_tag: class: 'community-bg' }}
+      <div class="slogan-container">
+        <p class="slogan">{{ slogan }}</p>
+      </div>
+      <div class="button-container">
+        <a href="{{ cta_link }}" class="button">{{ cta_text }}</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  .custom-section {
+    padding: 0 50px;
+  }
+  .community-section {
+    position: relative;
+    text-align: center;
+  }
+
+  .community-bg-container {
+    position: relative;
+    margin: 20px 0;
+    max-height: 400px;
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .slogan-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .slogan {
+    color: white;
+    font-size: 2rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .button-container {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .button-container .button {
+    background: transparent;
+    color: white;
+    border: 1px solid white;
+    padding: 10px 20px;
+    text-decoration: none;
+  }
+  .button-container .button:hover {
+    background: white;
+    color: black;
+  }
+
+  @media screen and (max-width: 768px) {
+    .slogan {
+      font-size: 1.5rem;
+    }
+    .button-container .button {
+      font-size: 0.9rem;
+      padding: 8px 16px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .slogan {
+      font-size: 1.2rem;
+    }
+    .button-container .button {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+    .community-bg-container {
+      max-height: 300px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Community Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "区块标题",
+      "default": "Community Preview"
+    },
+    {
+      "type": "text",
+      "id": "slogan",
+      "label": "标语",
+      "default": "Built on what we share."
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "按钮文字",
+      "default": "Gather Community"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "按钮链接"
+    },
+    {
+      "type": "image_picker",
+      "id": "background",
+      "label": "背景图片"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Community Preview"
+    }
+  ]
+}
+{% endschema %}

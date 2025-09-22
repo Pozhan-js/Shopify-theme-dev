@@ -1,0 +1,368 @@
+{%- liquid
+  assign heading = section.settings.heading
+  assign cta_text = section.settings.cta_text
+  assign cta_link = section.settings.cta_link
+  assign featured_product = section.settings.featured_product
+  assign shop_button_text = section.settings.shop_button_text
+-%}
+<div class="senses-section custom-section">
+  <h3 class="section-heading">{{ heading }}</h3>
+  <div class="senses-featured-product-container">
+    <!-- DEBUG: senses-featured product setting value: {{ section.settings.featured_product }} -->
+    {% if section.settings.featured_product != blank %}
+      {% assign product = all_products[section.settings.featured_product] %}
+      <!-- DEBUG: Product assigned: {{ product | json }} -->
+      <div class="senses-featured-product">
+        <div class="senses-featured-product-image">
+          {{ product.featured_image | image_url: width: 600 | image_tag }}
+        </div>
+        <div class="senses-featured-product-info" style="text-align: center;">
+          <div class="senses-product-details" style="text-align: center;">
+            <h3 class="senses-product-name">{{ product.title }}</h3>
+            {% if product.handle != blank %}
+              <p class="senses-product-series">{{ product.handle }}</p>
+            {% endif %}
+            <div class="senses-product-price">
+              {{ product.price | money }}
+              {% if product.compare_at_price > product.price %}
+                <span class="senses-compare-price">{{ product.compare_at_price | money }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="senses-button-container">
+            <a href="{{ product.url }}" class="senses-main-button">
+              {{ shop_button_text | default: 'Shop Senses' }}
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="senses-product-grid-container">
+    <div class="senses-product-grid">
+      {% for i in (1..4) %}
+        {% assign product_setting = 'featured_product_' | append: i %}
+        {% if section.settings[product_setting] != blank %}
+          {% assign product = all_products[section.settings[product_setting]] %}
+          <a href="{{ product.url }}" class="senses-product-grid-item">
+            <div class="senses-product-grid-image">
+              {{ product.featured_image | image_url: width: 300 | image_tag }}
+            </div>
+            <h4 class="senses-product-grid-name">{{ product.title }}</h4>
+            {% if product.handle != blank %}
+              <p class="senses-product-grid-series">{{ product.handle }}</p>
+            {% endif %}
+            <div class="senses-product-grid-price">
+              {{ product.price | money }}
+              {% if product.compare_at_price > product.price %}
+                <span class="compare-price">{{ product.compare_at_price | money }}</span>
+              {% endif %}
+            </div>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% if section.settings.shop_all_text != blank %}
+      <div class="shop-all-senses-button-container">
+        <a href="{{ section.settings.shop_all_link }}" class="senses-shop-all-button">
+          {{ section.settings.shop_all_text }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+    .custom-section {
+    padding: 0 50px;
+  }
+  .senses-featured-product-container {
+    margin-bottom: 50px;
+    margin-top: 30px;
+  }
+
+  .senses-featured-product {
+    display: flex;
+    flex-direction: row;
+    gap: 60px;
+    align-items: flex-start;
+    max-height: none;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .senses-featured-product-image {
+    flex: 1;
+    max-height: 400px;
+    display: flex;
+    align-items: center;
+  }
+
+  .senses-featured-product-image img {
+    width: 100%;
+    height: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .senses-featured-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .product-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    order:0;
+  }
+
+  .senses-product-name {
+    width: 100%;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  .senses-product-series {
+    width: 100%;
+    color: #666;
+    font-size: 1.2rem;
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .senses-product-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px 15px;
+    color: #666;
+    display: inline-block;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .senses-compare-price {
+    text-decoration: line-through;
+    color: #ccc;
+    font-size: 1rem;
+    margin-left: 10px;
+  }
+
+  .senses-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  .senses-main-button,
+  .senses-shop-all-button {
+    background-color: #f8f8f8;
+    color: #333;
+    padding: 12px 24px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: inline-block !important;
+  }
+
+  .senses-main-button:hover,
+  .senses-shop-all-button:hover {
+    background-color: #e0e0e0;
+    color: #000;
+  }
+
+  .senses-product-grid-container {
+    margin-top: 40px;
+  }
+
+  .senses-product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .senses-product-grid-item {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease;
+  }
+
+  .senses-product-grid-item:hover {
+    transform: translateY(-5px);
+  }
+
+  .senses-product-grid-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .senses-product-grid-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .senses-product-grid-name {
+    font-size: 1.1rem;
+    margin: 5px 0;
+  }
+
+  .senses-product-grid-series {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 5px 0;
+  }
+
+  .senses-product-grid-price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 5px 0;
+  }
+
+  .shop-all-senses-button-container {
+    display: flex !important;
+    justify-content: center;
+    margin-top: 30px;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  @media (max-width: 768px) {
+    .senses-featured-product {
+      flex-direction: column;
+      gap: 30px;
+      max-height: none;
+    }
+
+    .senses-featured-product-image {
+      max-height: 300px;
+    }
+
+    .senses-featured-product-info {
+      min-height: auto;
+      text-align: center;
+    }
+
+    .product-name {
+      font-size: 1.5rem;
+    }
+
+    .product-series {
+      font-size: 1rem;
+    }
+
+    .product-price {
+      font-size: 1.2rem;
+    }
+
+    .senses-product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .senses-product-grid-image {
+      height: 150px;
+    }
+
+    .senses-section .button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .senses-featured-product-image {
+      max-height: 250px;
+    }
+
+    .senses-product-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .product-name {
+      font-size: 1.3rem;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Senses Preview",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "区块标题",
+      "default": "Senses Preview"
+    },
+    {
+      "type": "product",
+      "id": "featured_product",
+      "label": "senses-featured herbal pouch"
+    },
+    {
+      "type": "text",
+      "id": "shop_button_text",
+      "label": "商品按钮文本",
+      "default": "Shop Senses",
+      "info": "设置主要商品的购买按钮文本"
+    },
+    {
+      "type": "product",
+      "id": "featured_product_1",
+      "label": "senses-featured Product 1"
+    },
+    {
+      "type": "product",
+      "id": "featured_product_2",
+      "label": "senses-featured Product 2"
+    },
+    {
+      "type": "product",
+      "id": "featured_product_3",
+      "label": "senses-featured Product 3"
+    },
+    {
+      "type": "product",
+      "id": "featured_product_4",
+      "label": "senses-featured Product 4"
+    },
+    {
+      "type": "text",
+      "id": "shop_all_text",
+      "label": "Shop All Button Text",
+      "default": "Shop All Senses"
+    },
+    {
+      "type": "url",
+      "id": "shop_all_link",
+      "label": "Shop All Button Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Senses Preview"
+    }
+  ]
+}
+{% endschema %}
