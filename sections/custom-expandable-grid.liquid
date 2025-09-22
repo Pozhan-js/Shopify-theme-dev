@@ -1,0 +1,195 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const gridItems = document.querySelectorAll('.grid-item-header');
+  
+  gridItems.forEach(header => {
+    const content = header.nextElementSibling;
+    header.addEventListener('click', function() {
+      this.classList.toggle('active');
+      content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
+    });
+  });
+});
+</script>
+
+{%- style -%}
+.expandable-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat({{ section.settings.columns }}, 1fr);
+  gap: {{ section.settings.gap }}px;
+}
+
+.grid-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.grid-item-header {
+  padding: 16px;
+  background: #f8f8f8;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  color: {{ section.settings.title_color }};
+  font-size: {{ section.settings.title_size }}px;
+}
+
+.grid-item-header:hover {
+  background: #f0f0f0;
+}
+
+.grid-item-header:after {
+  content: '+';
+  font-size: 20px;
+}
+
+.grid-item-header.active:after {
+  content: '-';
+}
+
+.grid-item-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: white;
+}
+
+.grid-item-content-inner {
+  padding: 16px;
+  color: {{ section.settings.content_color }};
+  font-size: {{ section.settings.content_size }}px;
+}
+
+@media (max-width: 768px) {
+  .expandable-grid {
+    grid-template-columns: 1fr;
+  }
+}
+{%- endstyle -%}
+
+<div class="expandable-grid">
+  {% for block in section.blocks %}
+    <div class="grid-item">
+      <div class="grid-item-header">
+        {{ block.settings.title }}
+      </div>
+      <div class="grid-item-content">
+        <div class="grid-item-content-inner">
+          {{ block.settings.content }}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "可展开网格",
+  "settings": [
+    {
+      "type": "range",
+      "id": "columns",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "label": "列数",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "间距",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "标题样式"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "标题字号",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "内容样式"
+    },
+    {
+      "type": "color",
+      "id": "content_color",
+      "label": "内容颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "content_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "内容字号",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "网格项",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "网格项标题"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "内容"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "可展开网格",
+      "blocks": [
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
