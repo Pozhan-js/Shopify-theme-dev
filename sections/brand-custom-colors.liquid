@@ -34,7 +34,7 @@
 <style>
   .brand-colors-section {
     padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
-    background-color: {{ section.settings.section_background_color }};
+    background-color: #fff;
   }
 
   .container {
@@ -91,6 +91,34 @@
     height: {{ section.settings.underline_height }}px;
     background-color: {{ section.settings.underline_color }};
     margin-top: {{ section.settings.underline_margin_top }}px;
+  }
+
+  /* 自适应下划线 - 根据最后一行文字长度 */
+  .cta-text {
+    position: relative;
+  }
+
+  .cta-text::after {
+    content: '';
+    position: absolute;
+    bottom: -{{ section.settings.underline_margin_top }}px;
+    left: 0;
+    width: 100%;
+    height: {{ section.settings.underline_height }}px;
+    background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 85%, transparent 85%);
+    display: {% if section.settings.show_underline %}block{% else %}none{% endif %};
+  }
+
+  @media (max-width: 768px) {
+    .cta-text::after {
+      background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 75%, transparent 75%);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cta-text::after {
+      background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 70%, transparent 70%);
+    }
   }
 
   /* 右侧颜色图片 */
@@ -198,7 +226,7 @@
       "type": "color",
       "id": "section_background_color",
       "label": "Section Background Color",
-      "default": "#ffffff"
+      "default": "#fff"
     },
     {
       "type": "range",
@@ -433,7 +461,7 @@
       "type": "color",
       "id": "underline_color",
       "label": "Underline Color",
-      "default": "#d32f2f"
+      "default": "#B33C3B"
     },
     {
       "type": "range",
