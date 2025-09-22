@@ -1,149 +1,3 @@
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const headers = document.querySelectorAll('.expandable-header');
-  
-  headers.forEach(header => {
-    const content = header.nextElementSibling;
-    header.addEventListener('click', function() {
-      this.classList.toggle('active');
-      content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
-    });
-  });
-});
-</script>
-
-{%- style -%}
-.expandable-list {
-  padding: 20px;
-}
-
-.expandable-item {
-  margin-bottom: 15px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.expandable-header {
-  padding: 16px;
-  background: #f8f8f8;
-  cursor: pointer;
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.2s ease;
-}
-
-.expandable-header:after {
-  content: '+';
-  font-size: 20px;
-}
-
-.expandable-header.active:after {
-  content: '-';
-}
-
-.expandable-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat({{ section.settings.columns }}, 1fr);
-  gap: {{ section.settings.gap }}px;
-  padding: 20px;
-}
-
-.grid-item {
-  position: relative;
-  text-align: center;
-}
-
-.image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 200px;
-}
-
-.grid-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.image-title {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255,255,255,0.7);
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: {{ section.settings.title_weight }};
-  font-size: {{ section.settings.title_size }}px;
-}
-
-.grid-text {
-  margin-top: 10px;
-  padding: 0 10px;
-}
-
-@media (max-width: 768px) {
-  .grid-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .grid-container {
-    grid-template-columns: 1fr;
-  }
-}
-{%- endstyle -%}
-
-<div class="expandable-list">
-  {% for block in section.blocks %}
-    <div class="expandable-item">
-      <div class="expandable-header">
-        {{ block.settings.title }}
-      </div>
-      <div class="expandable-content">
-        <div class="grid-container">
-          {% for i in (1..block.settings.item_count) %}
-            {% assign image_key = 'image_' | append: i %}
-            {% assign text_key = 'text_' | append: i %}
-            {% assign title_key = 'title_' | append: i %}
-            {% if block.settings[image_key] or block.settings[text_key] %}
-              <div class="grid-item">
-                {% if block.settings[image_key] %}
-                  <div class="image-wrapper">
-                    <img src="{{ block.settings[image_key] | img_url: '400x' }}" 
-                         class="grid-image"
-                         width="400"
-                         height="200"
-                         alt="{{ block.settings[title_key] | default: 'Image' }}"
-                         loading="lazy">
-                    {% if block.settings[title_key] %}
-                      <div class="image-title">{{ block.settings[title_key] }}</div>
-                    {% endif %}
-                  </div>
-                {% endif %}
-                {% if block.settings[text_key] %}
-                  <div class="grid-text">{{ block.settings[text_key] }}</div>
-                {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-  {% endfor %}
-</div>
-
 {% schema %}
 {
   "name": "可折叠网格列表",
@@ -218,7 +72,33 @@ document.addEventListener('DOMContentLoaded', function() {
           "label": "网格项数量",
           "default": 4,
           "info": "最多可添加12个网格项"
+        },
+        {
+          "type": "header",
+          "content": "网格项配置"
         }
+        {% for i in (1..12) %}
+        ,{
+          "type": "header",
+          "content": "网格项{{ i }}"
+        }
+        ,{
+          "type": "image_picker",
+          "id": "image_{{ i }}",
+          "label": "图片{{ i }}"
+        }
+        ,{
+          "type": "text",
+          "id": "title_{{ i }}",
+          "label": "标题{{ i }}",
+          "default": "项目{{ i }}"
+        }
+        ,{
+          "type": "richtext",
+          "id": "text_{{ i }}",
+          "label": "文本{{ i }}"
+        }
+        {% endfor %}
       ]
     }
   ],
@@ -227,7 +107,11 @@ document.addEventListener('DOMContentLoaded', function() {
       "name": "可折叠网格列表",
       "blocks": [
         {
-          "type": "category"
+          "type": "category",
+          "settings": {
+            "title": "示例分类",
+            "item_count": 4
+          }
         }
       ]
     }
