@@ -1,0 +1,163 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const accordions = document.querySelectorAll('.accordion-header');
+  
+  accordions.forEach(header => {
+    const content = header.nextElementSibling;
+    header.addEventListener('click', function() {
+      this.classList.toggle('active');
+      content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + 'px';
+    });
+  });
+});
+</script>
+
+{%- style -%}
+.accordion-list {
+  padding: 20px;
+}
+
+.accordion-item {
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.accordion-header {
+  padding: 16px;
+  background: #f8f8f8;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+  color: {{ section.settings.title_color }};
+  font-size: {{ section.settings.title_size }}px;
+}
+
+.accordion-header:hover {
+  background: #f0f0f0;
+}
+
+.accordion-header:after {
+  content: '+';
+  font-size: 20px;
+}
+
+.accordion-header.active:after {
+  content: '-';
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background: white;
+}
+
+.accordion-content-inner {
+  padding: 16px;
+  color: {{ section.settings.content_color }};
+  font-size: {{ section.settings.content_size }}px;
+}
+{%- endstyle -%}
+
+<div class="accordion-list">
+  {% for block in section.blocks %}
+    <div class="accordion-item">
+      <div class="accordion-header">
+        {{ block.settings.title }}
+      </div>
+      <div class="accordion-content">
+        <div class="accordion-content-inner">
+          {{ block.settings.content }}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "可折叠列表",
+  "settings": [
+    {
+      "type": "header",
+      "content": "标题样式"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "label": "标题字号",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "内容样式"
+    },
+    {
+      "type": "color",
+      "id": "content_color",
+      "label": "内容颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "content_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "内容字号",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "折叠项",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "折叠项标题"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "内容"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "可折叠列表",
+      "blocks": [
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
