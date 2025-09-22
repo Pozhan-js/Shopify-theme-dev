@@ -1,3 +1,71 @@
+<div class="expandable-grid">
+  {% for block in section.blocks %}
+    <div class="grid-category" {{ block.shopify_attributes }}>
+      <h3 class="category-title">{{ block.settings.title }}</h3>
+      <div class="grid-items" style="grid-template-columns: repeat({{ section.settings.columns }}, 1fr); gap: {{ section.settings.gap }}px;">
+        {% for i in (1..block.settings.item_count) %}
+          {% assign image_key = 'image_' | append: i %}
+          {% assign title_key = 'title_' | append: i %}
+          {% assign text_key = 'text_' | append: i %}
+          
+          <div class="grid-item">
+            {% if block.settings[image_key] != blank %}
+              <div class="grid-image">
+                {{ block.settings[image_key] | image_url: width: 300 | image_tag }}
+              </div>
+            {% endif %}
+            <h4 class="item-title">{{ block.settings[title_key] }}</h4>
+            <div class="item-text">{{ block.settings[text_key] }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<style>
+  .expandable-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .grid-category {
+    margin-bottom: 30px;
+  }
+  .grid-items {
+    display: grid;
+    margin-top: 15px;
+  }
+  .grid-item {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .grid-image {
+    position: relative;
+    padding-top: 100%;
+    overflow: hidden;
+  }
+  .grid-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .item-title {
+    padding: 10px 15px;
+    margin: 0;
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: {{ section.settings.title_weight }};
+  }
+  .item-text {
+    padding: 0 15px 15px;
+  }
+</style>
+
 {% schema %}
 {
   "name": "可折叠网格列表",
