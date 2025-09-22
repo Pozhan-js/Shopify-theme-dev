@@ -1,0 +1,488 @@
+<div class="pilates-reformer-section">
+  <div class="container">
+    <div class="product-layout">
+      <!-- 左侧产品图片区域 -->
+      <div class="product-images">
+        <!-- 主图 -->
+        <div class="main-image">
+          {% if section.settings.main_image %}
+            <img
+              src="{{ section.settings.main_image | img_url: '1200x' }}"
+              alt="{{ section.settings.product_title }}"
+              class="main-product-image"
+            >
+          {% endif %}
+        </div>
+
+        <!-- 缩略图 -->
+        <div class="thumbnail-images">
+          {% for block in section.blocks %}
+            {% if block.type == 'thumbnail' %}
+              <div class="thumbnail-item" {{ block.shopify_attributes }}>
+                {% if block.settings.thumbnail_image %}
+                  <img
+                    src="{{ block.settings.thumbnail_image | img_url: '150x' }}"
+                    alt="Product thumbnail"
+                    class="thumbnail-image"
+                  >
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 右侧产品信息区域 -->
+      <div class="product-info">
+        <!-- 产品标题和型号 -->
+        <div class="product-header">
+          <h1 class="product-title">{{ section.settings.product_title }}</h1>
+          <div class="model-info">
+            <span class="model-label">Model No:</span>
+            <span class="model-number">{{ section.settings.model_number }}</span>
+          </div>
+        </div>
+
+        <!-- 定制询问区域 -->
+        <div class="customization-section">
+          <h2 class="customization-title">{{ section.settings.customization_title }}</h2>
+          <p class="customization-description">{{ section.settings.customization_description }}</p>
+
+          {% if section.settings.quote_button_text %}
+            <a href="{{ section.settings.quote_button_link }}" class="quote-button">
+              {{ section.settings.quote_button_text }}
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- 颜色选择区域 -->
+        <div class="color-selection">
+          <h3 class="color-title">{{ section.settings.color_section_title }}</h3>
+          <div class="color-options">
+            {% for block in section.blocks %}
+              {% if block.type == 'color_option' %}
+                <div class="color-option" {{ block.shopify_attributes }}>
+                  <div
+                    class="color-swatch"
+                    style="background-color: {{ block.settings.color_value }};"
+                  >
+                    {% if block.settings.is_selected %}
+                      <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    {% endif %}
+                  </div>
+                  <span class="color-name">{{ block.settings.color_name }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .pilates-reformer-section {
+    padding: 40px 0;
+    background-color: #f8f8f8;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .product-layout {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 60px;
+    align-items: start;
+  }
+
+  /* 产品图片区域 */
+  .product-images {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .main-image {
+    border: 3px solid #4a90e2;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    padding: 20px;
+  }
+
+  .main-product-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .thumbnail-images {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+  }
+
+  .thumbnail-item {
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+  }
+
+  .thumbnail-item:hover {
+    border-color: #4a90e2;
+  }
+
+  .thumbnail-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  /* 产品信息区域 */
+  .product-info {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .product-header {
+    text-align: right;
+  }
+
+  .product-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+  }
+
+  .model-info {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .model-label {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .model-number {
+    background: #f0f0f0;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #333;
+  }
+
+  /* 定制区域 */
+  .customization-section {
+    text-align: left;
+  }
+
+  .customization-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 15px 0;
+  }
+
+  .customization-description {
+    color: #666;
+    line-height: 1.6;
+    margin: 0 0 20px 0;
+    font-size: 14px;
+  }
+
+  .quote-button {
+    display: inline-block;
+    background: #d32f2f;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+  }
+
+  .quote-button:hover {
+    background: #b71c1c;
+  }
+
+  .quote-button::before {
+    content: '>';
+    margin-right: 8px;
+  }
+
+  /* 颜色选择区域 */
+  .color-selection {
+    text-align: left;
+  }
+
+  .color-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d32f2f;
+    display: inline-block;
+  }
+
+  .color-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+
+  .color-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .color-swatch {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+
+  .color-swatch:hover {
+    transform: scale(1.05);
+  }
+
+  .check-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+    stroke-width: 3;
+  }
+
+  .color-name {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 1024px) {
+    .product-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .product-header {
+      text-align: left;
+    }
+
+    .model-info {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .thumbnail-images {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .color-options {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 0 15px;
+    }
+
+    .pilates-reformer-section {
+      padding: 20px 0;
+    }
+
+    .thumbnail-images {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Pilates Reformer Product",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "main_image",
+      "label": "Main Product Image"
+    },
+    {
+      "type": "text",
+      "id": "product_title",
+      "label": "Product Title",
+      "default": "PILATES REFORMER XSRF100"
+    },
+    {
+      "type": "text",
+      "id": "model_number",
+      "label": "Model Number",
+      "default": "XSRF100"
+    },
+    {
+      "type": "text",
+      "id": "customization_title",
+      "label": "Customization Section Title",
+      "default": "Ready to Customize This Product?"
+    },
+    {
+      "type": "textarea",
+      "id": "customization_description",
+      "label": "Customization Description",
+      "default": "Send us your requirements — from size to surface finish, we'll help tailor the product to your needs. Fast response. Flexible MOQ. Global shipping available."
+    },
+    {
+      "type": "text",
+      "id": "quote_button_text",
+      "label": "Quote Button Text",
+      "default": "GET A QUOTE"
+    },
+    {
+      "type": "url",
+      "id": "quote_button_link",
+      "label": "Quote Button Link"
+    },
+    {
+      "type": "text",
+      "id": "color_section_title",
+      "label": "Color Section Title",
+      "default": "Upholstery Colors"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "thumbnail",
+      "name": "Thumbnail Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "thumbnail_image",
+          "label": "Thumbnail Image"
+        }
+      ]
+    },
+    {
+      "type": "color_option",
+      "name": "Color Option",
+      "settings": [
+        {
+          "type": "text",
+          "id": "color_name",
+          "label": "Color Name"
+        },
+        {
+          "type": "color",
+          "id": "color_value",
+          "label": "Color Value"
+        },
+        {
+          "type": "checkbox",
+          "id": "is_selected",
+          "label": "Selected by Default",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pilates Reformer Product",
+      "blocks": [
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Black",
+            "color_value": "#2c2c2c",
+            "is_selected": true
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Steel Gray",
+            "color_value": "#6b7280"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Mocha Brown",
+            "color_value": "#8b7355"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Espresso Brown",
+            "color_value": "#4a3728"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Pearl Pink",
+            "color_value": "#f8c8c8"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Ivory",
+            "color_value": "#f5f5dc"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Vivid Red",
+            "color_value": "#dc2626"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Magenta Pink",
+            "color_value": "#db2777"
+          }
+        },
+        {
+          "type": "color_option",
+          "settings": {
+            "color_name": "Soft Pink",
+            "color_value": "#f3a8b6"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
