@@ -6,11 +6,11 @@
 {% endcomment %}
 
 {% liquid
-  assign display_product = product
-  if section.settings.selected_product != blank
-    assign display_product = all_products[section.settings.selected_product]
-  elsif display_product == blank and collections.all.products.size > 0
-    assign display_product = collections.all.products.first
+  assign displayproduct = product
+  if section.settings.selectedproduct != blank
+    assign displayproduct = allproducts[section.settings.selectedproduct]
+  elsif displayproduct == blank and collections.all.products.size > 0
+    assign displayproduct = collections.all.products.first
   endif
 %}
 
@@ -285,10 +285,22 @@
     transform: translateY(-1px);
   }
 
-  .main-image {
+  .image-container {
     width: 100%;
     height: {{ section.settings.imageheight }}px;
-    object-fit: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ section.settings.imageborderradius }}px;
+    overflow: hidden;
+  }
+
+  .main-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
     border-radius: {{ section.settings.imageborderradius }}px;
     transition: opacity 0.3s ease;
   }
@@ -352,30 +364,30 @@
       <div class="product-info-left">
         <h1 class="product-title">
           {% if section.settings.useproducttitle %}
-            {{ display_product.title }}
+            {{ displayproduct.title }}
           {% else %}
-            {{ section.settings.producttitle | default: display_product.title }}
+            {{ section.settings.producttitle | default: displayproduct.title }}
           {% endif %}
         </h1>
 
         <div class="product-description">
           {% if section.settings.useproductdescription %}
-            {{ display_product.description | truncate: 200 }}
+            {{ displayproduct.description }}
           {% else %}
-            {{ section.settings.productdescription | default: display_product.description }}
+            {{ section.settings.productdescription | default: displayproduct.description }}
           {% endif %}
         </div>
 
         <div class="price-row">
           <span id="current-price">
-            {% if display_product.compare_at_price > display_product.price %}
-              {{ display_product.price | money }}
+            {% if displayproduct.compareatprice > displayproduct.price %}
+              {{ displayproduct.price | money }}
             {% else %}
-              {{ display_product.price | money }}
+              {{ displayproduct.price | money }}
             {% endif %}
           </span>
-          {% if display_product.compare_at_price > display_product.price %}
-            <span class="price-old price-discount" id="old-price">{{ display_product.compare_at_price | money }}</span>
+          {% if displayproduct.compareatprice > displayproduct.price %}
+            <span class="price-old price-discount" id="old-price">{{ displayproduct.compareatprice | money }}</span>
           {% endif %}
         </div>
 
@@ -385,11 +397,11 @@
 
         <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data">
           <!-- SKU Selector for Product Variants -->
-          {% if display_product.variants.size > 1 %}
+          {% if displayproduct.variants.size > 1 %}
             <div class="sku-selector">
               <h3>{{ section.settings.skuselectortitle }}</h3>
               <div class="sku-options">
-                {% for variant in display_product.variants %}
+                {% for variant in displayproduct.variants %}
                   <div class="sku-option">
                     <input
                       type="radio"
@@ -397,10 +409,10 @@
                       name="id"
                       value="{{ variant.id }}"
                       data-price="{{ variant.price | money }}"
-                      data-old-price="{% if variant.compare_at_price > variant.price %}{{ variant.compare_at_price | money }}{% endif %}"
+                      data-old-price="{% if variant.compareatprice > variant.price %}{{ variant.compareatprice | money }}{% endif %}"
                       data-available="{{ variant.available }}"
-                      data-image="{% if variant.image %}{{ variant.image | image_url: width: 600 }}{% elsif display_product.featured_image %}{{ display_product.featured_image | image_url: width: 600 }}{% endif %}"
-                      data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ display_product.featured_image.alt | default: display_product.title }}{% endif %}"
+                      data-image="{% if variant.image %}{{ variant.image | img_url: '600x600' }}{% elsif displayproduct.featuredimage %}{{ displayproduct.featuredimage | img_url: '600x600' }}{% endif %}"
+                      data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ displayproduct.featuredimage.alt | default: displayproduct.title }}{% endif %}"
                       {% if forloop.first %}
                         checked
                       {% endif %}
@@ -418,20 +430,20 @@
             </div>
           {% else %}
             <!-- Single variant product -->
-            <input type="hidden" name="id" value="{{ display_product.selected_or_first_available_variant.id }}">
+            <input type="hidden" name="id" value="{{ displayproduct.selectedorfirstavailablevariant.id }}">
           {% endif %}
 
           <!-- Custom SKU Options from Section Blocks (if any) -->
           {% if section.blocks.size > 0 %}
-            {% assign has_sku_blocks = false %}
+            {% assign hasskublocks = false %}
             {% for block in section.blocks %}
               {% if block.type == 'skuoption' %}
-                {% assign has_sku_blocks = true %}
+                {% assign hasskublocks = true %}
                 {% break %}
               {% endif %}
             {% endfor %}
 
-            {% if has_sku_blocks %}
+            {% if hasskublocks %}
               <div class="sku-selector">
                 <h3>{{ section.settings.customskutitle | default: 'Additional Options' }}</h3>
                 <div class="sku-options">
@@ -481,7 +493,7 @@
 
           <div class="total-row">
             <span>{{ section.settings.totallabel }}</span>
-            <span id="total-price">{{ display_product.price | money }}</span>
+            <span id="total-price">{{ displayproduct.price | money }}</span>
           </div>
 
           {% if section.settings.disclaimertext != blank %}
@@ -509,46 +521,46 @@
       </div>
 
       <!-- Right Image -->
-      <div>
-        {% if section.settings.useproductimage and display_product.featured_image %}
-          <img
-            id="main-product-image"
-            src="{{ display_product.featured_image | image_url: width: 600 }}"
-            alt="{{ display_product.featured_image.alt | default: display_product.title }}"
-            class="main-image"
-            loading="lazy"
-          >
+      <div class="image-container">
+        {% assign image_url = '' %}
+        {% assign image_alt = '' %}
+
+        {% if section.settings.useproductimage and displayproduct.featuredimage %}
+          {% assign image_url = displayproduct.featuredimage | img_url: '600x600' %}
+          {% assign image_alt = displayproduct.featuredimage.alt | default: displayproduct.title %}
         {% elsif section.settings.mainimage != blank %}
-          <img
-            id="main-product-image"
-            src="{{ section.settings.mainimage | image_url: width: 600 }}"
-            alt="{{ section.settings.mainimagealt | default: display_product.title }}"
-            class="main-image"
-            loading="lazy"
-          >
+          {% assign image_url = section.settings.mainimage | img_url: '600x600' %}
+          {% assign image_alt = section.settings.mainimagealt | default: displayproduct.title %}
         {% elsif section.settings.fallbackimage != blank %}
+          {% assign image_url = section.settings.fallbackimage | img_url: '600x600' %}
+          {% assign image_alt = section.settings.mainimagealt | default: displayproduct.title %}
+        {% elsif displayproduct.featuredimage %}
+          {% assign image_url = displayproduct.featuredimage | img_url: '600x600' %}
+          {% assign image_alt = displayproduct.featuredimage.alt | default: displayproduct.title %}
+        {% endif %}
+
+        {% if image_url != blank %}
           <img
             id="main-product-image"
-            src="{{ section.settings.fallbackimage | image_url: width: 600 }}"
-            alt="{{ section.settings.mainimagealt | default: display_product.title }}"
+            src="{{ image_url }}"
+            alt="{{ image_alt }}"
             class="main-image"
             loading="lazy"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
           >
-        {% elsif display_product.featured_image %}
-          <img
-            id="main-product-image"
-            src="{{ display_product.featured_image | image_url: width: 600 }}"
-            alt="{{ display_product.featured_image.alt | default: display_product.title }}"
-            class="main-image"
-            loading="lazy"
+          <div
+            class="main-image placeholder-image"
+            style="display: none; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;"
           >
+            <span>{{ displayproduct.title | default: 'Product Image' }}</span>
+          </div>
         {% else %}
           <div
             id="main-product-image"
             class="main-image placeholder-image"
-            style="background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px;"
+            style="display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;"
           >
-            <span>{{ display_product.title | default: 'Product Image' }}</span>
+            <span>{{ displayproduct.title | default: 'Product Image' }}</span>
           </div>
         {% endif %}
       </div>
@@ -610,18 +622,44 @@
               if (mainImage.tagName === 'IMG') {
                 mainImage.src = newImage;
                 mainImage.alt = newImageAlt || '';
+                mainImage.onerror = function () {
+                  this.style.display = 'none';
+                  if (this.nextElementSibling) {
+                    this.nextElementSibling.style.display = 'flex';
+                  }
+                };
               } else {
                 // Convert placeholder div to img if needed
+                const imageContainer = mainImage.parentNode;
                 const newImg = document.createElement('img');
                 newImg.id = 'main-product-image';
                 newImg.src = newImage;
                 newImg.alt = newImageAlt || '';
                 newImg.className = 'main-image';
                 newImg.loading = 'lazy';
-                mainImage.parentNode.replaceChild(newImg, mainImage);
+                newImg.onerror = function () {
+                  this.style.display = 'none';
+                  if (this.nextElementSibling) {
+                    this.nextElementSibling.style.display = 'flex';
+                  }
+                };
+
+                // Create fallback placeholder
+                const placeholder = document.createElement('div');
+                placeholder.className = 'main-image placeholder-image';
+                placeholder.style.cssText =
+                  'display: none; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;';
+                placeholder.innerHTML = '<span>' + (newImageAlt || 'Product Image') + '</span>';
+
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(newImg);
+                imageContainer.appendChild(placeholder);
               }
               setTimeout(function () {
-                document.getElementById('main-product-image').classList.remove('changing');
+                const currentImage = document.getElementById('main-product-image');
+                if (currentImage) {
+                  currentImage.classList.remove('changing');
+                }
               }, 50);
             }, 150);
           }
@@ -672,7 +710,7 @@
     if (selectedVariant && selectedVariant.getAttribute('data-price')) {
       const unitPrice = selectedVariant.getAttribute('data-price');
       // Extract numeric value from price string
-      const priceMatch = unitPrice.match(/[\d,]+\.?\d*/);
+      const priceMatch = unitPrice.match(/[\d,]+\.?\d/);
       if (priceMatch) {
         const numericPrice = parseFloat(priceMatch[0].replace(',', ''));
         const totalPrice = numericPrice * quantity;
@@ -694,7 +732,7 @@
     },
     {
       "type": "product",
-      "id": "selected_product",
+      "id": "selectedproduct",
       "label": "Select Product",
       "info": "Choose a specific product to display. Leave empty to use current page product or first available product."
     },

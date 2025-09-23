@@ -1,0 +1,652 @@
+{% comment %}
+  Feature Cards Section - 4 Cards Layout
+  Displays 4 feature cards with images, titles, hover effects and external links
+  Supports backend editing through section settings
+{% endcomment %}
+
+<style>
+  .feature-cards-section {
+    padding: {{ section.settings.paddingtop | times: 0.5 | round: 0 }}px 0 {{ section.settings.paddingbottom | times: 0.5 | round: 0 }}px 0;
+    background: {{ section.settings.backgroundcolor }};
+  }
+
+  .feature-cards-container {
+    max-width: 1280px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: {{ section.settings.sectiontitlefontsize }}px;
+    font-weight: bold;
+    color: {{ section.settings.sectiontitlecolor }};
+    margin-bottom: {{ section.settings.titlemarginbottom }}px;
+    line-height: 1.2;
+  }
+
+  .feature-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: {{ section.settings.cardgap }}px;
+    align-items: start;
+  }
+
+  .feature-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: {{ section.settings.cardborderradius }}px;
+    padding: {{ section.settings.cardpadding }}px;
+    background: {{ section.settings.cardbackgroundcolor }};
+    border: {{ section.settings.cardborderwidth }}px solid {{ section.settings.cardbordercolor }};
+  }
+
+  .feature-card:hover {
+    transform: scale({{ section.settings.hoverscale | divided_by: 100.0 }});
+    box-shadow: {{ section.settings.hovershadow }};
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card-image-container {
+    width: 100%;
+    height: {{ section.settings.imageheight }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ section.settings.imageborderradius }}px;
+    overflow: hidden;
+    margin-bottom: {{ section.settings.imagemarginbottom }}px;
+  }
+
+  .card-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: {{ section.settings.imageborderradius }}px;
+    transition: transform 0.3s ease;
+  }
+
+  .feature-card:hover .card-image {
+    transform: scale({{ section.settings.imagehoverscale | divided_by: 100.0 }});
+  }
+
+  .card-title {
+    font-size: {{ section.settings.cardtitlefontsize }}px;
+    font-weight: {{ section.settings.cardtitlefontweight }};
+    color: {{ section.settings.cardtitlecolor }};
+    text-align: center;
+    line-height: 1.3;
+    margin: 0;
+    transition: color 0.3s ease;
+  }
+
+  .feature-card:hover .card-title {
+    color: {{ section.settings.cardtitlehovercolor }};
+  }
+
+  .placeholder-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ section.settings.placeholdercolor }};
+    font-size: 14px;
+    height: 100%;
+    width: 100%;
+    border: 2px dashed {{ section.settings.placeholderbordercolor }};
+    border-radius: {{ section.settings.imageborderradius }}px;
+  }
+
+  @media (max-width: 1024px) {
+    .feature-cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: {{ section.settings.cardgaptablet }}px;
+    }
+
+    .section-title {
+      font-size: {{ section.settings.sectiontitlefontsizetablet }}px;
+    }
+
+    .card-title {
+      font-size: {{ section.settings.cardtitlefontsizetablet }}px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .feature-cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: {{ section.settings.cardgapmobile }}px;
+    }
+
+    .section-title {
+      font-size: {{ section.settings.sectiontitlefontsizemobile }}px;
+      margin-bottom: {{ section.settings.titlemarginbottommobile }}px;
+    }
+
+    .card-title {
+      font-size: {{ section.settings.cardtitlefontsizemobile }}px;
+    }
+
+    .card-image-container {
+      height: {{ section.settings.imageheightmobile }}px;
+      margin-bottom: {{ section.settings.imagemarginbottommobile }}px;
+    }
+
+    .feature-card {
+      padding: {{ section.settings.cardpaddingmobile }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .feature-cards-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="feature-cards-section">
+  <div class="feature-cards-container">
+    {% if section.settings.sectiontitle != blank %}
+      <h2 class="section-title">{{ section.settings.sectiontitle }}</h2>
+    {% endif %}
+
+    <div class="feature-cards-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'feature_card' %}
+          <a
+            href="{{ block.settings.cardlink }}"
+            class="feature-card"
+            {% if block.settings.opennewtab %}
+              target="_blank" rel="noopener noreferrer"
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
+            <div class="card-image-container">
+              {% if block.settings.cardimage != blank %}
+                <img
+                  src="{{ block.settings.cardimage | img_url: '400x400' }}"
+                  alt="{{ block.settings.cardimagealt | default: block.settings.cardtitle }}"
+                  class="card-image"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                >
+                <div class="placeholder-image" style="display: none;">
+                  <span>{{ block.settings.cardtitle | default: 'Image' }}</span>
+                </div>
+              {% else %}
+                <div class="placeholder-image">
+                  <span>{{ block.settings.cardtitle | default: 'Add Image' }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            {% if block.settings.cardtitle != blank %}
+              <h3 class="card-title">{{ block.settings.cardtitle }}</h3>
+            {% endif %}
+          </a>
+        {% endif %}
+      {% endfor %}
+
+      {% comment %} Fill empty slots if less than 4 cards {% endcomment %}
+      {% assign cards_count = 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'feature_card' %}
+          {% assign cards_count = cards_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+
+      {% if cards_count < 4 %}
+        {% for i in (1..4) %}
+          {% assign current_index = forloop.index %}
+          {% if current_index > cards_count %}
+            <div class="feature-card" style="opacity: 0.3; pointer-events: none;">
+              <div class="card-image-container">
+                <div class="placeholder-image">
+                  <span>Add Card {{ current_index }}</span>
+                </div>
+              </div>
+              <h3 class="card-title">Feature {{ current_index }}</h3>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Feature Cards Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "sectiontitle",
+      "label": "Section Title",
+      "default": "Our Features"
+    },
+    {
+      "type": "color",
+      "id": "sectiontitlecolor",
+      "label": "Section Title Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "range",
+      "id": "sectiontitlefontsize",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Title Font Size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "sectiontitlefontsizetablet",
+      "min": 20,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Title Font Size (Tablet)",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "sectiontitlefontsizemobile",
+      "min": 18,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Section Title Font Size (Mobile)",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "titlemarginbottom",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Title Bottom Margin",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "titlemarginbottommobile",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Title Bottom Margin (Mobile)",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "paddingtop",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "paddingbottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 64
+    },
+    {
+      "type": "color",
+      "id": "backgroundcolor",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "cardgap",
+      "min": 16,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Gap",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "cardgaptablet",
+      "min": 12,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Gap (Tablet)",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "cardgapmobile",
+      "min": 8,
+      "max": 24,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Gap (Mobile)",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Card Settings"
+    },
+    {
+      "type": "color",
+      "id": "cardbackgroundcolor",
+      "label": "Card Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "cardbordercolor",
+      "label": "Card Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "cardborderwidth",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Border Width",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "cardborderradius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Card Border Radius",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "cardpadding",
+      "min": 12,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "cardpaddingmobile",
+      "min": 8,
+      "max": 24,
+      "step": 4,
+      "unit": "px",
+      "label": "Card Padding (Mobile)",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Hover Effects"
+    },
+    {
+      "type": "range",
+      "id": "hoverscale",
+      "min": 100,
+      "max": 110,
+      "step": 1,
+      "unit": "%",
+      "label": "Card Hover Scale",
+      "default": 105
+    },
+    {
+      "type": "text",
+      "id": "hovershadow",
+      "label": "Card Hover Shadow",
+      "default": "0 10px 25px rgba(0, 0, 0, 0.15)",
+      "info": "CSS box-shadow value"
+    },
+    {
+      "type": "range",
+      "id": "imagehoverscale",
+      "min": 100,
+      "max": 120,
+      "step": 2,
+      "unit": "%",
+      "label": "Image Hover Scale",
+      "default": 110
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "range",
+      "id": "imageheight",
+      "min": 120,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Height",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "imageheightmobile",
+      "min": 100,
+      "max": 240,
+      "step": 10,
+      "unit": "px",
+      "label": "Image Height (Mobile)",
+      "default": 160
+    },
+    {
+      "type": "range",
+      "id": "imageborderradius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "imagemarginbottom",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Bottom Margin",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "imagemarginbottommobile",
+      "min": 6,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Image Bottom Margin (Mobile)",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "placeholdercolor",
+      "label": "Placeholder Text Color",
+      "default": "#9ca3af"
+    },
+    {
+      "type": "color",
+      "id": "placeholderbordercolor",
+      "label": "Placeholder Border Color",
+      "default": "#d1d5db"
+    },
+    {
+      "type": "header",
+      "content": "Title Settings"
+    },
+    {
+      "type": "color",
+      "id": "cardtitlecolor",
+      "label": "Card Title Color",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "cardtitlehovercolor",
+      "label": "Card Title Hover Color",
+      "default": "#9ABD48"
+    },
+    {
+      "type": "range",
+      "id": "cardtitlefontsize",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Title Font Size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "cardtitlefontsizetablet",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Title Font Size (Tablet)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "cardtitlefontsizemobile",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Card Title Font Size (Mobile)",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "cardtitlefontweight",
+      "label": "Card Title Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "600"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature_card",
+      "name": "Feature Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "cardimage",
+          "label": "Card Image"
+        },
+        {
+          "type": "text",
+          "id": "cardimagealt",
+          "label": "Image Alt Text",
+          "info": "Describe the image for accessibility"
+        },
+        {
+          "type": "text",
+          "id": "cardtitle",
+          "label": "Card Title",
+          "default": "Feature Title"
+        },
+        {
+          "type": "url",
+          "id": "cardlink",
+          "label": "Card Link",
+          "info": "External URL to redirect when card is clicked"
+        },
+        {
+          "type": "checkbox",
+          "id": "opennewtab",
+          "label": "Open in New Tab",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Feature Cards Section",
+      "category": "Content",
+      "blocks": [
+        {
+          "type": "feature_card",
+          "settings": {
+            "cardtitle": "Free Shipping",
+            "cardlink": "https://example.com/shipping"
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "cardtitle": "24/7 Support",
+            "cardlink": "https://example.com/support"
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "cardtitle": "Easy Returns",
+            "cardlink": "https://example.com/returns"
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "cardtitle": "Secure Payment",
+            "cardlink": "https://example.com/payment"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
