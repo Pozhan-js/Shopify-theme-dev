@@ -4,9 +4,18 @@
 {% endcomment %}
 
 {%- liquid
-  assign dropdown_menu = section.settings.dropdown_menu
-  assign mega_menu = section.settings.mega_menu
+  assign dropdown_menu = section.settings.dropdown_menu | default: nil
+  assign mega_menu = section.settings.mega_menu | default: nil
+  
+  if dropdown_menu == blank and mega_menu == blank
+    assign show_default = true
+  endif
 -%}
+
+{% if show_default %}
+  {% comment %} Default menu fallback {% endcomment %}
+  {% assign dropdown_menu = linklists['main-menu'] %}
+{% endif %}
 
 <style>
   .custom-sidebar {
@@ -31,16 +40,27 @@
 </style>
 
 <div class="custom-sidebar">
-  section.settings: {{ section.settings | json }}
-  dropdown_menu: {{ dropdown_menu | json }}
-  mega_menu: {{ mega_menu | json }}
-  {% comment %} {%- if dropdown_menu != blank -%}
+  {% comment %} Debug info {% endcomment %}
+  <div style="display:none">
+    section.settings: {{ section.settings | json }}<br>
+    dropdown_menu: {{ dropdown_menu | json }}<br>
+    mega_menu: {{ mega_menu | json }}<br>
+    linklists: {{ linklists | json }}
+  </div>
+
+  {%- if dropdown_menu != blank -%}
     {% render 'vertical-dropdown-menu' %}
   {%- endif -%}
 
   {%- if mega_menu != blank -%}
     {% render 'vertical-mega-menu' %}
-  {%- endif -%} {% endcomment %}
+  {%- endif -%}
+
+  {%- if dropdown_menu == blank and mega_menu == blank -%}
+    <div class="sidebar-warning">
+      Please select menus in theme editor
+    </div>
+  {%- endif -%}
 </div>
 
 {% schema %}
