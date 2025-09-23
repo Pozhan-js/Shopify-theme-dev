@@ -1,0 +1,817 @@
+{% comment %}
+  Contact Us Section - 联系我们页面
+  简洁专业的联系表单页面设计，支持后台编辑
+{% endcomment %}
+
+<style>
+  .contact-us-section {
+    background: #ffffff;
+    color: #333333;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contact-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Header Section */
+  .contact-header {
+    text-align: center;
+    padding: 4rem 0 2rem;
+  }
+
+  .contact-title {
+    font-size: 4rem;
+    font-weight: 400;
+    color: #333333;
+    margin: 0 0 1.5rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .contact-breadcrumb {
+    font-size: 1rem;
+    color: #666666;
+    margin: 0 0 3rem 0;
+  }
+
+  .contact-breadcrumb a {
+    color: #666666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .contact-breadcrumb a:hover {
+    color: #4a90a4;
+  }
+
+  .contact-breadcrumb span {
+    margin: 0 0.5rem;
+  }
+
+  /* Content Section */
+  .contact-content {
+    text-align: center;
+    padding-bottom: 3rem;
+  }
+
+  .contact-section-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 1rem;
+  }
+
+  .contact-description {
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Form Section */
+  .contact-form {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #333333;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #333333;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: #4a90a4;
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #999999;
+  }
+
+  .form-textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* Phone Input Group */
+  .phone-input-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .country-select {
+    flex: 0 0 120px;
+    padding: 1rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: #333333;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .country-select:focus {
+    outline: none;
+    border-color: #4a90a4;
+    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+  }
+
+  .phone-input {
+    flex: 1;
+  }
+
+  /* Submit Button */
+  .submit-button {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: #4a90a4;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+  }
+
+  .submit-button:hover {
+    background: #3d7a8c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 164, 0.3);
+  }
+
+  .submit-button:active {
+    transform: translateY(0);
+  }
+
+  .submit-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Success Message */
+  .success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    display: none;
+    border: 1px solid #c3e6cb;
+  }
+
+  .success-message.show {
+    display: block;
+  }
+
+  /* Error Message */
+  .error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    display: none;
+    border: 1px solid #f5c6cb;
+  }
+
+  .error-message.show {
+    display: block;
+  }
+
+  /* Loading State */
+  .loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .loading .submit-button {
+    background: #cccccc;
+    cursor: not-allowed;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .contact-container {
+      padding: 0 1rem;
+    }
+
+    .contact-header {
+      padding: 2.5rem 0 1.5rem;
+    }
+
+    .contact-title {
+      font-size: 2.5rem;
+    }
+
+    .contact-section-title {
+      font-size: 1.5rem;
+    }
+
+    .phone-input-group {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .country-select {
+      flex: none;
+    }
+
+    .contact-description {
+      margin-bottom: 2rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .contact-title {
+      font-size: 2rem;
+    }
+
+    .contact-section-title {
+      font-size: 1.3rem;
+    }
+
+    .contact-breadcrumb {
+      font-size: 0.9rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea,
+    .country-select {
+      padding: 0.875rem;
+    }
+  }
+
+  /* Custom Select Styling */
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  .country-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.2em 1.2em;
+    padding-right: 2rem;
+  }
+</style>
+
+<section class="contact-us-section">
+  <div class="contact-container">
+    <!-- Header -->
+    <header class="contact-header">
+      <h1 class="contact-title">{{ section.settings.page_title }}</h1>
+      <nav class="contact-breadcrumb">
+        <a href="{{ routes.root_url }}">{{ section.settings.breadcrumb_home }}</a>
+        <span>/</span>
+        <span>{{ section.settings.breadcrumb_current }}</span>
+      </nav>
+    </header>
+
+    <!-- Content -->
+    <div class="contact-content">
+      <h2 class="contact-section-title">{{ section.settings.section_title }}</h2>
+      <p class="contact-description">{{ section.settings.description }}</p>
+
+      <!-- Success Message -->
+      <div class="success-message" id="successMessage">
+        {{ section.settings.success_message }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="error-message" id="errorMessage">
+        {{ section.settings.error_message }}
+      </div>
+
+      <!-- Contact Form -->
+      <form class="contact-form" id="contactForm" onsubmit="handleFormSubmit(event)">
+        <!-- Name Field -->
+        <div class="form-group">
+          <label class="form-label" for="contact-name">{{ section.settings.name_label }}</label>
+          <input
+            type="text"
+            id="contact-name"
+            name="contact[name]"
+            class="form-input"
+            placeholder="{{ section.settings.name_placeholder }}"
+            required
+          >
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group">
+          <label class="form-label" for="contact-email">{{ section.settings.email_label }}</label>
+          <input
+            type="email"
+            id="contact-email"
+            name="contact[email]"
+            class="form-input"
+            placeholder="{{ section.settings.email_placeholder }}"
+            required
+          >
+        </div>
+
+        <!-- Phone Field -->
+        <div class="form-group">
+          <label class="form-label" for="contact-phone">{{ section.settings.phone_label }}</label>
+          <div class="phone-input-group">
+            <select class="country-select" name="contact[country_code]">
+              {% for block in section.blocks %}
+                {% if block.type == 'country_code' %}
+                  <option
+                    value="{{ block.settings.code }}"
+                    {% if block.settings.default %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ block.settings.flag }}
+                    {{ block.settings.code }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+            <input
+              type="tel"
+              id="contact-phone"
+              name="contact[phone]"
+              class="form-input phone-input"
+              placeholder="{{ section.settings.phone_placeholder }}"
+            >
+          </div>
+        </div>
+
+        <!-- Help Topic Field -->
+        <div class="form-group">
+          <label class="form-label" for="contact-topic">{{ section.settings.topic_label }}</label>
+          <select id="contact-topic" name="contact[topic]" class="form-select" required>
+            <option value="">{{ section.settings.topic_placeholder }}</option>
+            {% for block in section.blocks %}
+              {% if block.type == 'help_topic' %}
+                <option value="{{ block.settings.topic_value }}">{{ block.settings.topic_label }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Message Field -->
+        <div class="form-group">
+          <label class="form-label" for="contact-message">{{ section.settings.message_label }}</label>
+          <textarea
+            id="contact-message"
+            name="contact[body]"
+            class="form-textarea"
+            placeholder="{{ section.settings.message_placeholder }}"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-button">
+          {{ section.settings.submit_button_text }}
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  function handleFormSubmit(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('.submit-button');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
+
+    // Hide previous messages
+    successMessage.classList.remove('show');
+    errorMessage.classList.remove('show');
+
+    // Show loading state
+    form.classList.add('loading');
+    submitButton.textContent = '{{ section.settings.sending_button_text }}';
+
+    // Simulate form submission (replace with actual Shopify contact form handling)
+    fetch('/contact', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          // Show success message
+          successMessage.classList.add('show');
+          form.reset();
+
+          // Scroll to success message
+          successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          throw new Error('Form submission failed');
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        errorMessage.classList.add('show');
+
+        // Scroll to error message
+        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      })
+      .finally(() => {
+        // Remove loading state
+        form.classList.remove('loading');
+        submitButton.textContent = '{{ section.settings.submit_button_text }}';
+      });
+  }
+
+  // Auto-hide messages after 5 seconds
+  function autoHideMessage(element) {
+    if (element.classList.contains('show')) {
+      setTimeout(() => {
+        element.classList.remove('show');
+      }, 5000);
+    }
+  }
+
+  // Watch for message visibility changes
+  const observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const target = mutation.target;
+        if (target.classList.contains('success-message') || target.classList.contains('error-message')) {
+          autoHideMessage(target);
+        }
+      }
+    });
+  });
+
+  observer.observe(document.getElementById('successMessage'), { attributes: true });
+  observer.observe(document.getElementById('errorMessage'), { attributes: true });
+</script>
+
+{% schema %}
+{
+  "name": "Contact Us",
+  "settings": [
+    {
+      "type": "header",
+      "content": "页面设置"
+    },
+    {
+      "type": "text",
+      "id": "page_title",
+      "label": "页面标题",
+      "default": "Contact Us"
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_home",
+      "label": "面包屑导航 - 首页",
+      "default": "Home"
+    },
+    {
+      "type": "text",
+      "id": "breadcrumb_current",
+      "label": "面包屑导航 - 当前页",
+      "default": "Contact Us"
+    },
+    {
+      "type": "header",
+      "content": "内容设置"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "章节标题",
+      "default": "Contact Us"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "描述文本",
+      "default": "If you would like more detail about any items in our shop, please reach out and let us know. We're happy to help!"
+    },
+    {
+      "type": "header",
+      "content": "表单字段设置"
+    },
+    {
+      "type": "text",
+      "id": "name_label",
+      "label": "姓名字段标签",
+      "default": "Name"
+    },
+    {
+      "type": "text",
+      "id": "name_placeholder",
+      "label": "姓名字段占位符",
+      "default": "Name"
+    },
+    {
+      "type": "text",
+      "id": "email_label",
+      "label": "邮箱字段标签",
+      "default": "Email"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "邮箱字段占位符",
+      "default": "Email"
+    },
+    {
+      "type": "text",
+      "id": "phone_label",
+      "label": "电话字段标签",
+      "default": "Phone Number"
+    },
+    {
+      "type": "text",
+      "id": "phone_placeholder",
+      "label": "电话字段占位符",
+      "default": "Phone number"
+    },
+    {
+      "type": "text",
+      "id": "topic_label",
+      "label": "主题字段标签",
+      "default": "I need help with"
+    },
+    {
+      "type": "text",
+      "id": "topic_placeholder",
+      "label": "主题字段占位符",
+      "default": "Select a topic"
+    },
+    {
+      "type": "text",
+      "id": "message_label",
+      "label": "消息字段标签",
+      "default": "Comment"
+    },
+    {
+      "type": "text",
+      "id": "message_placeholder",
+      "label": "消息字段占位符",
+      "default": "Comment"
+    },
+    {
+      "type": "header",
+      "content": "按钮设置"
+    },
+    {
+      "type": "text",
+      "id": "submit_button_text",
+      "label": "提交按钮文本",
+      "default": "Send"
+    },
+    {
+      "type": "text",
+      "id": "sending_button_text",
+      "label": "发送中按钮文本",
+      "default": "Sending..."
+    },
+    {
+      "type": "header",
+      "content": "消息设置"
+    },
+    {
+      "type": "text",
+      "id": "success_message",
+      "label": "成功消息",
+      "default": "Thank you for your message! We'll get back to you soon."
+    },
+    {
+      "type": "text",
+      "id": "error_message",
+      "label": "错误消息",
+      "default": "Sorry, there was an error sending your message. Please try again."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "country_code",
+      "name": "国家代码",
+      "settings": [
+        {
+          "type": "text",
+          "id": "flag",
+          "label": "国旗表情符号",
+          "default": "🇺🇸"
+        },
+        {
+          "type": "text",
+          "id": "code",
+          "label": "国家代码",
+          "default": "+1"
+        },
+        {
+          "type": "checkbox",
+          "id": "default",
+          "label": "设为默认",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "help_topic",
+      "name": "帮助主题",
+      "settings": [
+        {
+          "type": "text",
+          "id": "topic_label",
+          "label": "主题标签",
+          "default": "General Inquiry"
+        },
+        {
+          "type": "text",
+          "id": "topic_value",
+          "label": "主题值",
+          "default": "general"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact Us",
+      "blocks": [
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇺🇸",
+            "code": "+1",
+            "default": true
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇨🇦",
+            "code": "+1",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇬🇧",
+            "code": "+44",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇦🇺",
+            "code": "+61",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇩🇪",
+            "code": "+49",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇫🇷",
+            "code": "+33",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇯🇵",
+            "code": "+81",
+            "default": false
+          }
+        },
+        {
+          "type": "country_code",
+          "settings": {
+            "flag": "🇨🇳",
+            "code": "+86",
+            "default": false
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "General Inquiry",
+            "topic_value": "general"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Product Information",
+            "topic_value": "product"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Order Status",
+            "topic_value": "order"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Shipping & Returns",
+            "topic_value": "shipping"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Technical Support",
+            "topic_value": "technical"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Billing & Payment",
+            "topic_value": "billing"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Partnership & Collaboration",
+            "topic_value": "partnership"
+          }
+        },
+        {
+          "type": "help_topic",
+          "settings": {
+            "topic_label": "Other",
+            "topic_value": "other"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
