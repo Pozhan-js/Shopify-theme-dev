@@ -51,7 +51,7 @@
   }
 
   .contact-breadcrumb a:hover {
-    color: #4a90a4;
+    color: #98aa5d;
   }
 
   .contact-breadcrumb span {
@@ -118,8 +118,8 @@
   .form-select:focus,
   .form-textarea:focus {
     outline: none;
-    border-color: #4a90a4;
-    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+    border-color: #98aa5d;
+    box-shadow: 0 0 0 3px rgba(152, 170, 93, 0.1);
   }
 
   .form-input::placeholder,
@@ -152,8 +152,8 @@
 
   .country-select:focus {
     outline: none;
-    border-color: #4a90a4;
-    box-shadow: 0 0 0 3px rgba(74, 144, 164, 0.1);
+    border-color: #98aa5d;
+    box-shadow: 0 0 0 3px rgba(152, 170, 93, 0.1);
   }
 
   .phone-input {
@@ -164,7 +164,7 @@
   .submit-button {
     width: 100%;
     padding: 1rem 2rem;
-    background: #4a90a4;
+    background: #98aa5d;
     color: white;
     border: none;
     border-radius: 0.5rem;
@@ -176,9 +176,9 @@
   }
 
   .submit-button:hover {
-    background: #3d7a8c;
+    background: #849654;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 144, 164, 0.3);
+    box-shadow: 0 4px 12px rgba(152, 170, 93, 0.3);
   }
 
   .submit-button:active {
@@ -336,7 +336,15 @@
       </div>
 
       <!-- Contact Form -->
-      <form class="contact-form" id="contactForm" onsubmit="handleFormSubmit(event)">
+      <form
+        class="contact-form"
+        id="contactForm"
+        action="{{ routes.root_url }}contact"
+        method="post"
+        accept-charset="UTF-8"
+      >
+        <input type="hidden" name="form_type" value="contact">
+        <input type="hidden" name="utf8" value="✓">
         <!-- Name Field -->
         <div class="form-group">
           <label class="form-label" for="contact-name">{{ section.settings.name_label }}</label>
@@ -427,80 +435,54 @@
 </section>
 
 <script>
-  function handleFormSubmit(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const formData = new FormData(form);
-    const submitButton = form.querySelector('.submit-button');
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('contactForm');
     const successMessage = document.getElementById('successMessage');
     const errorMessage = document.getElementById('errorMessage');
 
-    // Hide previous messages
-    successMessage.classList.remove('show');
-    errorMessage.classList.remove('show');
+    // Check for form submission status from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const formSubmitted = urlParams.get('contact[form_posted]');
 
-    // Show loading state
-    form.classList.add('loading');
-    submitButton.textContent = '{{ section.settings.sending_button_text }}';
+    if (formSubmitted) {
+      // Show success message
+      successMessage.classList.add('show');
+      successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Simulate form submission (replace with actual Shopify contact form handling)
-    fetch('/contact', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        Accept: 'application/json',
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          // Show success message
-          successMessage.classList.add('show');
-          form.reset();
-
-          // Scroll to success message
-          successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-          throw new Error('Form submission failed');
-        }
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-        errorMessage.classList.add('show');
-
-        // Scroll to error message
-        errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      })
-      .finally(() => {
-        // Remove loading state
-        form.classList.remove('loading');
-        submitButton.textContent = '{{ section.settings.submit_button_text }}';
-      });
-  }
-
-  // Auto-hide messages after 5 seconds
-  function autoHideMessage(element) {
-    if (element.classList.contains('show')) {
+      // Auto-hide after 5 seconds
       setTimeout(() => {
-        element.classList.remove('show');
+        successMessage.classList.remove('show');
       }, 5000);
+
+      // Clean URL
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
     }
-  }
 
-  // Watch for message visibility changes
-  const observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        const target = mutation.target;
-        if (target.classList.contains('success-message') || target.classList.contains('error-message')) {
-          autoHideMessage(target);
-        }
-      }
+    // Handle form submission
+    form.addEventListener('submit', function(event) {
+      const submitButton = form.querySelector('.submit-button');
+
+      // Show loading state
+      form.classList.add('loading');
+      submitButton.textContent = '{{ section.settings.sending_button_text }}';
+
+      // Hide previous messages
+      successMessage.classList.remove('show');
+      errorMessage.classList.remove('show');
     });
-  });
 
-  observer.observe(document.getElementById('successMessage'), { attributes: true });
-  observer.observe(document.getElementById('errorMessage'), { attributes: true });
+    // Handle form errors (if any)
+    {% if form.errors %}
+      errorMessage.classList.add('show');
+      errorMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        errorMessage.classList.remove('show');
+      }, 5000);
+    {% endif %}
+  });
 </script>
 
 {% schema %}
