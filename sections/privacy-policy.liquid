@@ -1,247 +1,133 @@
-<div class="privacy-policy-section">
-  <div class="container">
+<div
+  class="privacy-policy-section"
+  style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};"
+>
+  <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
     {% if section.settings.show_title %}
-      <div class="privacy-policy-header">
-        <h1 class="privacy-policy-title">
+      <div class="privacy-header" style="text-align: center; margin-bottom: 40px;">
+        <h1 style="color: {{ section.settings.title_color }}; font-size: 2.5rem; margin-bottom: 10px;">
           {{ section.settings.page_title | default: '隐私政策' }}
         </h1>
-        {% if section.settings.subtitle %}
-          <p class="privacy-policy-subtitle">
+        {% if section.settings.subtitle != blank %}
+          <p style="color: {{ section.settings.subtitle_color }}; font-size: 1.2rem; margin-bottom: 20px;">
             {{ section.settings.subtitle }}
+          </p>
+        {% endif %}
+        {% if section.settings.last_updated != blank %}
+          <p style="color: {{ section.settings.subtitle_color }}; font-size: 0.9rem;">
+            最后更新：{{ section.settings.last_updated }}
           </p>
         {% endif %}
       </div>
     {% endif %}
 
-    <div class="privacy-policy-content">
-      {% if section.settings.content %}
-        <div class="privacy-policy-text">
-          {{ section.settings.content }}
+    {% if section.settings.content != blank %}
+      <div class="privacy-content" style="margin-bottom: 40px;">
+        {{ section.settings.content }}
+      </div>
+    {% endif %}
+
+    <div class="privacy-blocks">
+      {% for block in section.blocks %}
+        <div
+          class="privacy-block"
+          style="background-color: {{ section.settings.block_background }}; padding: 30px; margin-bottom: 30px; border-radius: 8px; border-left: 4px solid {{ section.settings.accent_color }};"
+          {{ block.shopify_attributes }}
+        >
+          {% case block.type %}
+            {% when 'text_block' %}
+              <h3 style="color: {{ section.settings.block_title_color }}; font-size: 1.5rem; margin-bottom: 15px;">
+                {{ block.settings.block_title }}
+              </h3>
+              <div style="line-height: 1.6;">
+                {{ block.settings.block_content }}
+              </div>
+
+            {% when 'list_block' %}
+              <h3 style="color: {{ section.settings.block_title_color }}; font-size: 1.5rem; margin-bottom: 15px;">
+                {{ block.settings.list_title }}
+              </h3>
+              {% if block.settings.list_items != blank %}
+                <ul style="line-height: 1.8; padding-left: 20px;">
+                  {% assign items = block.settings.list_items | split: '|' %}
+                  {% for item in items %}
+                    <li style="margin-bottom: 8px;">{{ item | strip }}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
+
+            {% when 'contact_block' %}
+              <h3 style="color: {{ section.settings.block_title_color }}; font-size: 1.5rem; margin-bottom: 15px;">
+                {{ block.settings.contact_title }}
+              </h3>
+              <div class="contact-info" style="line-height: 1.8;">
+                {% if block.settings.contact_email != blank %}
+                  <p>
+                    <strong>邮箱：</strong>
+                    <a
+                      href="mailto:{{ block.settings.contact_email }}"
+                      style="color: {{ section.settings.link_color }}; text-decoration: none;"
+                    >
+                      {{ block.settings.contact_email }}
+                    </a>
+                  </p>
+                {% endif %}
+                {% if block.settings.contact_phone != blank %}
+                  <p>
+                    <strong>电话：</strong>
+                    <a
+                      href="tel:{{ block.settings.contact_phone }}"
+                      style="color: {{ section.settings.link_color }}; text-decoration: none;"
+                    >
+                      {{ block.settings.contact_phone }}
+                    </a>
+                  </p>
+                {% endif %}
+                {% if block.settings.contact_address != blank %}
+                  <p><strong>地址：</strong>{{ block.settings.contact_address }}</p>
+                {% endif %}
+              </div>
+          {% endcase %}
         </div>
-      {% endif %}
-
-      {% if section.blocks.size > 0 %}
-        <div class="privacy-policy-blocks">
-          {% for block in section.blocks %}
-            {% case block.type %}
-              {% when 'text_block' %}
-                <div class="privacy-block privacy-text-block" {{ block.shopify_attributes }}>
-                  {% if block.settings.block_title %}
-                    <h2 class="block-title">{{ block.settings.block_title }}</h2>
-                  {% endif %}
-                  {% if block.settings.block_content %}
-                    <div class="block-content">
-                      {{ block.settings.block_content }}
-                    </div>
-                  {% endif %}
-                </div>
-
-              {% when 'list_block' %}
-                <div class="privacy-block privacy-list-block" {{ block.shopify_attributes }}>
-                  {% if block.settings.list_title %}
-                    <h2 class="block-title">{{ block.settings.list_title }}</h2>
-                  {% endif %}
-                  {% if block.settings.list_items %}
-                    <ul class="privacy-list">
-                      {% assign list_items = block.settings.list_items | split: '|' %}
-                      {% for item in list_items %}
-                        {% unless item == blank %}
-                          <li>{{ item | strip }}</li>
-                        {% endunless %}
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                </div>
-
-              {% when 'contact_block' %}
-                <div class="privacy-block privacy-contact-block" {{ block.shopify_attributes }}>
-                  {% if block.settings.contact_title %}
-                    <h2 class="block-title">{{ block.settings.contact_title }}</h2>
-                  {% endif %}
-                  <div class="contact-info">
-                    {% if block.settings.contact_email %}
-                      <p class="contact-item">
-                        <strong>邮箱：</strong>
-                        <a href="mailto:{{ block.settings.contact_email }}">
-                          {{ block.settings.contact_email }}
-                        </a>
-                      </p>
-                    {% endif %}
-                    {% if block.settings.contact_phone %}
-                      <p class="contact-item">
-                        <strong>电话：</strong>
-                        <a href="tel:{{ block.settings.contact_phone }}">
-                          {{ block.settings.contact_phone }}
-                        </a>
-                      </p>
-                    {% endif %}
-                    {% if block.settings.contact_address %}
-                      <p class="contact-item">
-                        <strong>地址：</strong>
-                        {{ block.settings.contact_address }}
-                      </p>
-                    {% endif %}
-                  </div>
-                </div>
-
-              {% when 'divider' %}
-                <div class="privacy-block privacy-divider" {{ block.shopify_attributes }}>
-                  <hr class="section-divider">
-                </div>
-            {% endcase %}
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      {% if section.settings.last_updated %}
-        <div class="privacy-policy-footer">
-          <p class="last-updated">最后更新时间：{{ section.settings.last_updated }}</p>
-        </div>
-      {% endif %}
+      {% endfor %}
     </div>
+
+    {% if section.blocks.size > 1 %}
+      <hr style="border: none; height: 1px; background-color: {{ section.settings.divider_color }}; margin: 40px 0;">
+    {% endif %}
   </div>
 </div>
 
 <style>
-  .privacy-policy-section {
-    padding: 60px 0;
-    background-color: {{ section.settings.background_color | default: '#ffffff' }};
-    color: {{ section.settings.text_color | default: '#333333' }};
+  .privacy-policy-section a {
+    color: {{ section.settings.link_color }};
+    transition: opacity 0.3s ease;
   }
 
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  .privacy-policy-header {
-    text-align: center;
-    margin-bottom: 50px;
-  }
-
-  .privacy-policy-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: {{ section.settings.title_color | default: '#2c3e50' }};
-    line-height: 1.2;
-  }
-
-  .privacy-policy-subtitle {
-    font-size: 1.2rem;
-    color: {{ section.settings.subtitle_color | default: '#7f8c8d' }};
-    margin-bottom: 0;
-    line-height: 1.5;
-  }
-
-  .privacy-policy-content {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  .privacy-policy-text {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    margin-bottom: 40px;
-  }
-
-  .privacy-policy-blocks {
-    margin-top: 40px;
+  .privacy-policy-section a:hover {
+    opacity: 0.8;
   }
 
   .privacy-block {
-    margin-bottom: 40px;
-    padding: 30px;
-    background-color: {{ section.settings.block_background | default: '#f8f9fa' }};
-    border-radius: 8px;
-    border-left: 4px solid {{ section.settings.accent_color | default: '#3498db' }};
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .block-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: {{ section.settings.block_title_color | default: '#2c3e50' }};
-  }
-
-  .block-content {
-    font-size: 1rem;
-    line-height: 1.7;
-  }
-
-  .privacy-list {
-    padding-left: 20px;
-    margin: 0;
-  }
-
-  .privacy-list li {
-    margin-bottom: 10px;
-    line-height: 1.6;
-  }
-
-  .contact-info {
-    margin-top: 20px;
-  }
-
-  .contact-item {
-    margin-bottom: 15px;
-    font-size: 1rem;
-  }
-
-  .contact-item a {
-    color: {{ section.settings.link_color | default: '#3498db' }};
-    text-decoration: none;
-  }
-
-  .contact-item a:hover {
-    text-decoration: underline;
-  }
-
-  .section-divider {
-    border: none;
-    height: 2px;
-    background-color: {{ section.settings.divider_color | default: '#e9ecef' }};
-    margin: 30px 0;
-  }
-
-  .privacy-policy-footer {
-    margin-top: 60px;
-    padding-top: 30px;
-    border-top: 1px solid {{ section.settings.divider_color | default: '#e9ecef' }};
-    text-align: center;
-  }
-
-  .last-updated {
-    font-size: 0.9rem;
-    color: {{ section.settings.subtitle_color | default: '#7f8c8d' }};
-    font-style: italic;
+  .privacy-block:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   @media (max-width: 768px) {
-    .privacy-policy-section {
-      padding: 40px 0;
+    .privacy-policy-section .container {
+      padding: 20px 15px;
     }
 
-    .container {
-      padding: 0 15px;
-    }
-
-    .privacy-policy-title {
-      font-size: 2rem;
-    }
-
-    .privacy-policy-subtitle {
-      font-size: 1.1rem;
+    .privacy-policy-section h1 {
+      font-size: 2rem !important;
     }
 
     .privacy-block {
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-
-    .block-title {
-      font-size: 1.3rem;
+      padding: 20px !important;
     }
   }
 </style>
@@ -252,10 +138,6 @@
   "tag": "section",
   "class": "privacy-policy-section",
   "settings": [
-    {
-      "type": "header",
-      "content": "页面设置"
-    },
     {
       "type": "checkbox",
       "id": "show_title",
@@ -269,26 +151,23 @@
       "default": "隐私政策"
     },
     {
-      "type": "textarea",
+      "type": "text",
       "id": "subtitle",
-      "label": "副标题",
-      "info": "可选的页面副标题"
+      "label": "副标题"
     },
     {
       "type": "richtext",
       "id": "content",
-      "label": "主要内容",
-      "info": "隐私政策的主要内容"
+      "label": "页面内容"
     },
     {
       "type": "text",
       "id": "last_updated",
-      "label": "最后更新时间",
-      "info": "例如：2024年1月1日"
+      "label": "最后更新日期"
     },
     {
       "type": "header",
-      "content": "样式设置"
+      "content": "颜色设置"
     },
     {
       "type": "color",
@@ -317,13 +196,13 @@
     {
       "type": "color",
       "id": "block_background",
-      "label": "内容块背景色",
+      "label": "块背景颜色",
       "default": "#f8f9fa"
     },
     {
       "type": "color",
       "id": "block_title_color",
-      "label": "内容块标题颜色",
+      "label": "块标题颜色",
       "default": "#2c3e50"
     },
     {
@@ -353,12 +232,12 @@
         {
           "type": "text",
           "id": "block_title",
-          "label": "标题"
+          "label": "块标题"
         },
         {
           "type": "richtext",
           "id": "block_content",
-          "label": "内容"
+          "label": "块内容"
         }
       ]
     },
@@ -374,8 +253,8 @@
         {
           "type": "textarea",
           "id": "list_items",
-          "label": "列表项",
-          "info": "每行一个项目，或使用 | 分隔"
+          "label": "列表项目",
+          "info": "用 | 符号分隔每个列表项"
         }
       ]
     },
@@ -386,29 +265,24 @@
         {
           "type": "text",
           "id": "contact_title",
-          "label": "联系信息标题",
-          "default": "联系我们"
+          "label": "联系标题"
         },
         {
           "type": "text",
           "id": "contact_email",
-          "label": "邮箱地址"
+          "label": "联系邮箱"
         },
         {
           "type": "text",
           "id": "contact_phone",
-          "label": "电话号码"
+          "label": "联系电话"
         },
         {
           "type": "textarea",
           "id": "contact_address",
-          "label": "地址"
+          "label": "联系地址"
         }
       ]
-    },
-    {
-      "type": "divider",
-      "name": "分割线"
     }
   ],
   "presets": [
