@@ -1,0 +1,194 @@
+<style>
+  .our-story-banner {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .our-story-banner__background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .our-story-banner__background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .our-story-banner__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 2;
+  }
+
+  .our-story-banner__content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    color: white;
+    max-width: 800px;
+    padding: 0 20px;
+  }
+
+  .our-story-banner__title {
+    font-size: 4rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    line-height: 1.2;
+  }
+
+  .our-story-banner__description {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    font-weight: 400;
+    opacity: 0.95;
+  }
+
+  @media (max-width: 768px) {
+    .our-story-banner {
+      min-height: 70vh;
+    }
+
+    .our-story-banner__title {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .our-story-banner__description {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .our-story-banner__content {
+      padding: 0 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .our-story-banner__title {
+      font-size: 2rem;
+    }
+
+    .our-story-banner__description {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<section class="our-story-banner">
+  <div class="our-story-banner__background">
+    {% if section.settings.background_image %}
+      <img
+        src="{{ section.settings.background_image | img_url: '1920x1080' }}"
+        alt="{{ section.settings.background_image.alt | default: section.settings.title }}"
+        loading="lazy"
+      >
+    {% else %}
+      <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%;"></div>
+    {% endif %}
+  </div>
+
+  {% if section.settings.show_overlay %}
+    <div class="our-story-banner__overlay"></div>
+  {% endif %}
+
+  <div class="our-story-banner__content">
+    {% if section.settings.title != blank %}
+      <h1 class="our-story-banner__title">
+        {{ section.settings.title }}
+      </h1>
+    {% endif %}
+
+    {% if section.settings.description != blank %}
+      <div class="our-story-banner__description">
+        {{ section.settings.description }}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Our Story Banner",
+  "tag": "section",
+  "class": "section-our-story-banner",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner Content"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Our Story"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Since 2005, we've been crafting studio-grade Pilates equipment that blends precision woodworking, smart engineering, and eco-minded finishes. XS Pilates helps studios, instructors, and rehab pros achieve better outcomes - with premium quality and flexible customization at every step."
+    },
+    {
+      "type": "header",
+      "content": "Background Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_overlay",
+      "label": "Show Dark Overlay",
+      "default": true,
+      "info": "Adds a dark overlay to improve text readability"
+    },
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 400,
+      "max": 1000,
+      "step": 50,
+      "unit": "px",
+      "label": "Section Height (Desktop)",
+      "default": 600
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Story Banner"
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+  // 动态设置section高度
+  document.addEventListener('DOMContentLoaded', function() {
+    const banner = document.querySelector('.our-story-banner');
+    const sectionHeight = {{ section.settings.section_height | default: 600 }};
+
+    if (banner && window.innerWidth > 768) {
+      banner.style.minHeight = sectionHeight + 'px';
+    }
+  });
+</script>
