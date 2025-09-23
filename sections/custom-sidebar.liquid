@@ -1,0 +1,64 @@
+{% comment %}
+  Custom sidebar menu - fixed on left side
+  Usage: {% section 'custom-sidebar' %}
+{% endcomment %}
+
+{%- liquid
+  assign dropdown_menu = section.settings.dropdown_menu
+  assign mega_menu = section.settings.mega_menu
+-%}
+
+<style>
+  .custom-sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--header-height, 80px);
+    width: 280px;
+    height: calc(100vh - var(--header-height, 80px));
+    background: #fff;
+    z-index: 99;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+
+  @media screen and (max-width: 749px) {
+    .custom-sidebar {
+      width: 100%;
+      position: static;
+      height: auto;
+    }
+  }
+</style>
+
+<div class="custom-sidebar">
+  {%- if dropdown_menu != blank -%}
+    {% render 'vertical-dropdown-menu' %}
+  {%- endif -%}
+
+  {%- if mega_menu != blank -%}
+    {% render 'vertical-mega-menu' %}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Custom Sidebar",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "dropdown_menu",
+      "label": "Dropdown Menu"
+    },
+    {
+      "type": "link_list",
+      "id": "mega_menu",
+      "label": "Mega Menu"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Sidebar"
+    }
+  ]
+}
+{% endschema %}
