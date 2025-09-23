@@ -4,45 +4,18 @@
 {% endcomment %}
 
 {%- liquid
-  # GraphQL query to fetch menus
-  assign query = '
-    query {
-      menus(first: 5) {
-        edges {
-          node {
-            title
-            handle
-            items {
-              title
-              url
-              items {
-                title
-                url
-              }
-            }
-          }
-        }
-      }
-    }
-  '
+  assign dropdown_menu = section.settings.dropdown_menu | default: nil
+  assign mega_menu = section.settings.mega_menu | default: nil
   
-  # Execute query using Shopify's graphql global object
-  assign result = shopify.graphql.execute(query)
-  assign menus = result.data.menus.edges | map: 'node'
-  
-  # Get menu handles from section settings
-  assign dropdown_menu_handle = section.settings.dropdown_menu
-  assign mega_menu_handle = section.settings.mega_menu
-  
-  # Find matching menus
-  assign dropdown_menu = menus | where: "handle", dropdown_menu_handle | first
-  assign mega_menu = menus | where: "handle", mega_menu_handle | first
-  
-  # Fallback to first menu if none selected
   if dropdown_menu == blank and mega_menu == blank
-    assign dropdown_menu = menus.first
+    assign show_default = true
   endif
 -%}
+
+{% if show_default %}
+  {% comment %} Default menu fallback {% endcomment %}
+  {% assign dropdown_menu = linklists['main-menu'] %}
+{% endif %}
 
 <style>
   .custom-sidebar {
