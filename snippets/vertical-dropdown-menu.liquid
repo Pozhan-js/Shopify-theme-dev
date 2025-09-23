@@ -1,0 +1,138 @@
+{% comment %}
+  Vertical dropdown menu - fixed on left side
+  Usage: {% render 'vertical-dropdown-menu' %}
+{% endcomment %}
+
+<style>
+  .vertical-dropdown-menu {
+    position: fixed;
+    left: 0;
+    top: var(--header-height, 80px);
+    width: 280px;
+    height: calc(100vh - var(--header-height, 80px));
+    background: #fff;
+    z-index: 100;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+
+  .vertical-dropdown-menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vertical-dropdown-menu__item {
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .vertical-dropdown-menu__link {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .vertical-dropdown-menu__item:hover > .vertical-dropdown-menu__link {
+    background: #008000;
+    color: #fff;
+  }
+
+  .vertical-dropdown-menu__submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 280px;
+    background: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  }
+
+  @media screen and (max-width: 749px) {
+    .vertical-dropdown-menu {
+      width: 100%;
+      position: static;
+      height: auto;
+    }
+    
+    .vertical-dropdown-menu__submenu {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+    }
+  }
+</style>
+
+<nav class="vertical-dropdown-menu">
+  <ul class="vertical-dropdown-menu__list" role="list">
+    {%- for link in section.settings.menu.links -%}
+      <li class="vertical-dropdown-menu__item">
+        {%- if link.links != blank -%}
+          <details>
+            <summary class="vertical-dropdown-menu__link">
+              {{ link.title | escape }}
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" class="icon icon-caret" viewBox="0 0 10 6">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 10-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill="currentColor"/>
+              </svg>
+            </summary>
+            <ul
+              class="vertical-dropdown-menu__submenu"
+              role="list"
+            >
+              {%- for childlink in link.links -%}
+                <li class="vertical-dropdown-menu__item">
+                  {%- if childlink.links == blank -%}
+                    <a
+                      href="{{ childlink.url }}"
+                      class="vertical-dropdown-menu__link"
+                      {% if childlink.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{ childlink.title | escape }}
+                    </a>
+                  {%- else -%}
+                    <details>
+                      <summary class="vertical-dropdown-menu__link">
+                        {{ childlink.title | escape }}
+                        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" role="presentation" class="icon icon-caret" viewBox="0 0 10 6">
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.354.646a.5.5 0 00-.708 0L5 4.293 1.354.646a.5.5 0 10-.708.708l4 4a.5.5 0 00.708 0l4-4a.5.5 0 000-.708z" fill="currentColor"/>
+                        </svg>
+                      </summary>
+                      <ul class="vertical-dropdown-menu__submenu" role="list">
+                        {%- for grandchildlink in childlink.links -%}
+                          <li class="vertical-dropdown-menu__item">
+                            <a
+                              href="{{ grandchildlink.url }}"
+                              class="vertical-dropdown-menu__link"
+                              {% if grandchildlink.current %}
+                                aria-current="page"
+                              {% endif %}
+                            >
+                              {{ grandchildlink.title | escape }}
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </details>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </details>
+        {%- else -%}
+          <a
+            href="{{ link.url }}"
+            class="vertical-dropdown-menu__link"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            {{ link.title | escape }}
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>

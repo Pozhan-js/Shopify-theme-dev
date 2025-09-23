@@ -1,0 +1,106 @@
+{% comment %}
+  Vertical mega menu - fixed on left side
+  Usage: {% render 'vertical-mega-menu' %}
+{% endcomment %}
+
+<style>
+  .vertical-mega-menu {
+    position: fixed;
+    left: 0;
+    top: var(--header-height, 80px);
+    width: 280px;
+    height: calc(100vh - var(--header-height, 80px));
+    background: #fff;
+    z-index: 100;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+  }
+
+  .vertical-mega-menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .vertical-mega-menu__item {
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .vertical-mega-menu__link {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .vertical-mega-menu__item:hover > .vertical-mega-menu__link {
+    background: #008000;
+    color: #fff;
+  }
+
+  .vertical-mega-menu__submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 280px;
+    background: #fff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    display: none;
+  }
+
+  .vertical-mega-menu__item:hover > .vertical-mega-menu__submenu {
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .vertical-mega-menu {
+      width: 100%;
+      position: static;
+      height: auto;
+    }
+    
+    .vertical-mega-menu__submenu {
+      position: static;
+      width: 100%;
+      box-shadow: none;
+    }
+  }
+</style>
+
+<nav class="vertical-mega-menu">
+  <ul class="vertical-mega-menu__list">
+    {%- for link in section.settings.menu.links -%}
+      <li class="vertical-mega-menu__item">
+        <a href="{{ link.url }}" class="vertical-mega-menu__link">
+          {{ link.title | escape }}
+        </a>
+        
+        {%- if link.links != blank -%}
+          <ul class="vertical-mega-menu__submenu">
+            {%- for childlink in link.links -%}
+              <li class="vertical-mega-menu__item">
+                <a href="{{ childlink.url }}" class="vertical-mega-menu__link">
+                  {{ childlink.title | escape }}
+                </a>
+                
+                {%- if childlink.links != blank -%}
+                  <ul class="vertical-mega-menu__submenu">
+                    {%- for grandchildlink in childlink.links -%}
+                      <li class="vertical-mega-menu__item">
+                        <a href="{{ grandchildlink.url }}" class="vertical-mega-menu__link">
+                          {{ grandchildlink.title | escape }}
+                        </a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>
