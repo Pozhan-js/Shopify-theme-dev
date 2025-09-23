@@ -89,9 +89,19 @@
 
 <div class="vertical-menu-debug"></div>
 <div class="vertical-menu" data-force-display="true">
-  对方方法
+  <!-- 菜单数据调试 -->
+  <div style="position:absolute; top:0; left:0; background:yellow; padding:5px; z-index:99999;">
+    {% if section.settings.menu %}
+      Menu Handle: {{ section.settings.menu.handle }} | 
+      Links: {{ section.settings.menu.links.size }}
+    {% else %}
+      WARNING: No menu assigned
+    {% endif %}
+  </div>
+  
   <ul class="vertical-menu__list">
-    {%- for link in section.settings.menu.links -%}
+    {%- if section.settings.menu -%}
+      {%- for link in section.settings.menu.links -%}
       <li class="vertical-menu__item">
         <a href="{{ link.url }}" class="vertical-menu__link {% if link.links.size > 0 %}has-children{% endif %}">
           {{ link.title }}
