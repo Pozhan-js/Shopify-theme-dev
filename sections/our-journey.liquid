@@ -1,0 +1,327 @@
+<style>
+  .our-journey {
+    background-color: #f5f5f5;
+    padding: 80px 0;
+    position: relative;
+  }
+
+  .our-journey__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .our-journey__title {
+    text-align: center;
+    font-size: 3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 60px;
+  }
+
+  .our-journey__timeline {
+    position: relative;
+    padding: 0;
+  }
+
+  .our-journey__timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #ddd;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+
+  .our-journey__item {
+    position: relative;
+    margin-bottom: 80px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .our-journey__item:nth-child(odd) {
+    flex-direction: row;
+  }
+
+  .our-journey__item:nth-child(even) {
+    flex-direction: row-reverse;
+  }
+
+  .our-journey__content {
+    width: 45%;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .our-journey__item:nth-child(odd) .our-journey__content {
+    margin-right: 10%;
+  }
+
+  .our-journey__item:nth-child(even) .our-journey__content {
+    margin-left: 10%;
+  }
+
+  .our-journey__image {
+    width: 280px;
+    height: 200px;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .our-journey__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .our-journey__year {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #c41e3a;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .our-journey__subtitle {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.2;
+  }
+
+  .our-journey__description {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  .our-journey__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background-color: #c41e3a;
+    border-radius: 50%;
+    z-index: 2;
+    border: 4px solid white;
+    box-shadow: 0 0 0 2px #c41e3a;
+  }
+
+  @media (max-width: 768px) {
+    .our-journey {
+      padding: 60px 0;
+    }
+
+    .our-journey__title {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+    }
+
+    .our-journey__timeline::before {
+      left: 30px;
+    }
+
+    .our-journey__item {
+      flex-direction: column !important;
+      align-items: flex-start;
+      margin-bottom: 60px;
+      padding-left: 60px;
+    }
+
+    .our-journey__content {
+      width: 100%;
+      margin: 0 !important;
+    }
+
+    .our-journey__dot {
+      left: 30px;
+      top: 30px;
+    }
+
+    .our-journey__image {
+      width: 100%;
+      height: 180px;
+    }
+
+    .our-journey__year {
+      font-size: 2.5rem;
+    }
+
+    .our-journey__subtitle {
+      font-size: 1.3rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .our-journey__container {
+      padding: 0 15px;
+    }
+
+    .our-journey__title {
+      font-size: 2rem;
+    }
+
+    .our-journey__item {
+      padding-left: 50px;
+    }
+
+    .our-journey__dot {
+      left: 25px;
+    }
+
+    .our-journey__timeline::before {
+      left: 25px;
+    }
+
+    .our-journey__year {
+      font-size: 2rem;
+    }
+
+    .our-journey__subtitle {
+      font-size: 1.2rem;
+    }
+
+    .our-journey__description {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<section class="our-journey">
+  <div class="our-journey__container">
+    {% if section.settings.title != blank %}
+      <h2 class="our-journey__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="our-journey__timeline">
+      {% for block in section.blocks %}
+        <div class="our-journey__item" {{ block.shopify_attributes }}>
+          <div class="our-journey__content">
+            {% if block.settings.image %}
+              <div class="our-journey__image">
+                <img
+                  src="{{ block.settings.image | img_url: '560x400' }}"
+                  alt="{{ block.settings.image.alt | default: block.settings.subtitle }}"
+                  loading="lazy"
+                >
+              </div>
+            {% endif %}
+
+            {% if block.settings.year != blank %}
+              <div class="our-journey__year">{{ block.settings.year }}</div>
+            {% endif %}
+
+            {% if block.settings.subtitle != blank %}
+              <h3 class="our-journey__subtitle">{{ block.settings.subtitle }}</h3>
+            {% endif %}
+
+            {% if block.settings.description != blank %}
+              <div class="our-journey__description">
+                {{ block.settings.description }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="our-journey__dot"></div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Our Journey",
+  "tag": "section",
+  "class": "section-our-journey",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Our Journey"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "timeline_item",
+      "name": "Timeline Item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Timeline Content"
+        },
+        {
+          "type": "text",
+          "id": "year",
+          "label": "Year",
+          "default": "2005"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Title",
+          "default": "The Beginning"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Mr. Hu founded XS Pilates with a clear vision: build premium Pilates equipment that lasts. From a small workshop, our obsession with craftsmanship, innovation, and service laid the foundation for a brand trusted worldwide."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Journey",
+      "blocks": [
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2005",
+            "subtitle": "The Beginning",
+            "description": "Mr. Hu founded XS Pilates with a clear vision: build premium Pilates equipment that lasts. From a small workshop, our obsession with craftsmanship, innovation, and service laid the foundation for a brand trusted worldwide."
+          }
+        },
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2020",
+            "subtitle": "New Manufacturing Facility",
+            "description": "We opened a state-of-the-art 18,000m² manufacturing facility, integrating solid wood, metal, and upholstery under one roof. With water-borne finishes and lean processes, we scaled responsibly while elevating the quality our customers expect."
+          }
+        },
+        {
+          "type": "timeline_item",
+          "settings": {
+            "year": "2022",
+            "subtitle": "XS Training Academy",
+            "description": "We launched the XS Training Academy to offer professional courses and certifications. Beyond making equipment, we invest in the Pilates community - advancing safe practice, maintenance know-how, and instructor development."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
