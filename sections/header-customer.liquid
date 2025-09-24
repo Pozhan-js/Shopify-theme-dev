@@ -8,13 +8,15 @@
   }
 
   .header__container {
-    max-width: 1400px;
+    width: 100vw;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 45px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 80px;
+    box-sizing: border-box;
   }
 
   .header__logo {
@@ -26,12 +28,16 @@
     width: auto;
   }
 
+  .header__right {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+
   .header__nav {
     display: flex;
     align-items: center;
     gap: 40px;
-    flex: 1;
-    justify-content: center;
   }
 
   .header__nav-item {
@@ -140,6 +146,10 @@
   }
 
   @media (max-width: 1024px) {
+    .header__right {
+      gap: 25px;
+    }
+
     .header__nav {
       gap: 25px;
     }
@@ -155,17 +165,21 @@
       padding: 0 15px;
     }
 
+    .header__right {
+      position: relative;
+    }
+
     .header__nav {
       display: none;
       position: absolute;
       top: 100%;
-      left: 0;
       right: 0;
       background: white;
       flex-direction: column;
       gap: 0;
       border-top: 1px solid #e9ecef;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 250px;
     }
 
     .header__nav.active {
@@ -200,6 +214,10 @@
     .header__actions {
       gap: 15px;
     }
+
+    .header__action-btn {
+      display: none;
+    }
   }
 </style>
 
@@ -221,82 +239,75 @@
       {% endif %}
     </div>
 
-    <!-- Navigation -->
-    <nav class="header__nav" id="headerNav">
-      {% for block in section.blocks %}
-        {% case block.type %}
-          {% when 'nav_item' %}
-            <div class="header__nav-item">
-              <a href="{{ block.settings.link }}" class="header__nav-link">
-                {{ block.settings.label }}
+    <!-- Right side content -->
+    <div class="header__right">
+      <!-- Navigation -->
+      <nav class="header__nav" id="headerNav">
+        {% if section.settings.menu != blank %}
+          {% for link in linklists[section.settings.menu].links %}
+            <div class="header__nav-item {% if link.links != blank %}header__nav-item--has-dropdown{% endif %}">
+              <a href="{{ link.url }}" class="header__nav-link">
+                {{ link.title }}
               </a>
-            </div>
-          {% when 'nav_dropdown' %}
-            <div class="header__nav-item header__nav-item--has-dropdown">
-              <a href="{{ block.settings.link }}" class="header__nav-link">
-                {{ block.settings.label }}
-              </a>
-              {% if block.settings.dropdown_items != blank %}
+              {% if link.links != blank %}
                 <div class="header__dropdown">
-                  {% assign dropdown_items = block.settings.dropdown_items | split: ',' %}
-                  {% assign dropdown_links = block.settings.dropdown_links | split: ',' %}
-                  {% for item in dropdown_items %}
-                    {% assign index = forloop.index0 %}
-                    <a href="{{ dropdown_links[index] | default: '#' }}" class="header__dropdown-item">
-                      {{ item | strip }}
+                  {% for child_link in link.links %}
+                    <a href="{{ child_link.url }}" class="header__dropdown-item">
+                      {{ child_link.title }}
                     </a>
                   {% endfor %}
                 </div>
               {% endif %}
             </div>
-        {% endcase %}
-      {% endfor %}
-    </nav>
+          {% endfor %}
+        {% endif %}
+      </nav>
 
-    <!-- Actions -->
-    <div class="header__actions">
-      <!-- Search -->
-      {% if section.settings.show_search %}
-        <button class="header__action-btn" onclick="openSearch()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
+      <!-- Actions -->
+      <div class="header__actions">
+        <!-- Search -->
+        {% if section.settings.show_search %}
+          <button class="header__action-btn" onclick="openSearch()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+          </button>
+        {% endif %}
+
+        <!-- Account -->
+        {% if section.settings.show_account %}
+          <a href="{{ routes.account_url }}" class="header__action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </a>
+        {% endif %}
+
+        <!-- Cart -->
+        {% if section.settings.show_cart %}
+          <a href="{{ routes.cart_url }}" class="header__action-btn" style="position: relative;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z"></path>
+              <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z"></path>
+              <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6"></path>
+            </svg>
+            {% if cart.item_count > 0 %}
+              <span class="header__cart-count">{{ cart.item_count }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
+
+        <!-- Mobile Menu Toggle -->
+        <button class="header__mobile-toggle" onclick="toggleMobileMenu()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
         </button>
-      {% endif %}
-
-      <!-- Account -->
-      {% if section.settings.show_account %}
-        <a href="{{ routes.account_url }}" class="header__action-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-        </a>
-      {% endif %}
-
-      <!-- Cart -->
-      {% if section.settings.show_cart %}
-        <a href="{{ routes.cart_url }}" class="header__action-btn" style="position: relative;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z"></path>
-            <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z"></path>
-            <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6"></path>
-          </svg>
-          {% if cart.item_count > 0 %}
-            <span class="header__cart-count">{{ cart.item_count }}</span>
-          {% endif %}
-        </a>
-      {% endif %}
-
-      <!-- Mobile Menu Toggle -->
-      <button class="header__mobile-toggle" onclick="toggleMobileMenu()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-      </button>
+      </div>
     </div>
   </div>
 </header>
@@ -316,8 +327,9 @@
   document.addEventListener('click', function (event) {
     const nav = document.getElementById('headerNav');
     const toggle = document.querySelector('.header__mobile-toggle');
+    const rightSection = document.querySelector('.header__right');
 
-    if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+    if (!rightSection.contains(event.target)) {
       nav.classList.remove('active');
     }
   });
@@ -331,6 +343,12 @@
       "type": "image_picker",
       "id": "logo",
       "label": "Logo"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu",
+      "default": "main-menu"
     },
     {
       "type": "checkbox",
@@ -351,102 +369,9 @@
       "default": true
     }
   ],
-  "blocks": [
-    {
-      "type": "nav_item",
-      "name": "Navigation Item",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Menu Item"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Link"
-        }
-      ]
-    },
-    {
-      "type": "nav_dropdown",
-      "name": "Dropdown Menu",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label",
-          "default": "Dropdown"
-        },
-        {
-          "type": "url",
-          "id": "link",
-          "label": "Link"
-        },
-        {
-          "type": "textarea",
-          "id": "dropdown_items",
-          "label": "Dropdown Items",
-          "info": "Enter each item on a new line or separate with commas"
-        },
-        {
-          "type": "textarea",
-          "id": "dropdown_links",
-          "label": "Dropdown Links",
-          "info": "Enter each link on a new line or separate with commas (must match the order of items)"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
-      "name": "Header",
-      "blocks": [
-        {
-          "type": "nav_dropdown",
-          "settings": {
-            "label": "Air filters",
-            "dropdown_items": "Freightliner,Kenworth,Peterbilt,International,Cummins,Thomas,Volvo,Western Star,Workhorse"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Fuel filters"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Oil filters"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Cabin filters"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Filter Kit"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Other Products"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "label": "Contact"
-          }
-        }
-      ]
+      "name": "Header"
     }
   ]
 }
