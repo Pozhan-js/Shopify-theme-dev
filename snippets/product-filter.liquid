@@ -183,7 +183,30 @@ function applyFilters() {
   let queryParams = [];
   
   // 添加排序参数
-  queryParams.push(`sort_by=${selectedSort}`);
+  let sortParam = '';
+  switch(selectedSort) {
+    case 'featured':
+      sortParam = 'manual';
+      break;
+    case 'best-selling':
+      sortParam = 'best-selling';
+      break;
+    case 'a-z':
+      sortParam = 'title-ascending';
+      break;
+    case 'z-a':
+      sortParam = 'title-descending';
+      break;
+    case 'price-low-high':
+      sortParam = 'price-ascending';
+      break;
+    case 'price-high-low':
+      sortParam = 'price-descending';
+      break;
+    default:
+      sortParam = 'manual';
+  }
+  queryParams.push(`sort_by=${sortParam}`);
 
   // 添加筛选参数
   if (selectedBrands.length) queryParams.push(`filter.v.brand=${selectedBrands.join('+')}`);
