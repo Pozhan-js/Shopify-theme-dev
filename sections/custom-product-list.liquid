@@ -1,0 +1,100 @@
+{%- style -%}
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    padding: 2rem;
+  }
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .product-image-container {
+    position: relative;
+  }
+  .product-image {
+    width: 100%;
+    height: auto;
+  }
+  .image-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  .prev {
+    left: 0;
+  }
+  .next {
+    right: 0;
+  }
+  .product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+  }
+  .filter-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+  }
+{%- endstyle -%}
+
+<div class="product-header">
+  <div class="product-count">{{ collection.products_count }} Products</div>
+  <button class="filter-btn" onclick="toggleFilter()">Filter</button>
+</div>
+
+<div class="product-grid">
+  {% for product in collection.products %}
+    <div class="product-card">
+      <div class="product-image-container">
+        {% for image in product.images %}
+          <img class="product-image" src="{{ image | img_url: '400x' }}" alt="{{ product.title }}" width="400" height="400" loading="lazy" {% unless forloop.first %}style="display:none"{% endunless %}>
+        {% endfor %}
+        <button class="image-nav prev" onclick="prevImage(this)">❮</button>
+        <button class="image-nav next" onclick="nextImage(this)">❯</button>
+      </div>
+      <h3>{{ product.title }}</h3>
+      <div>{{ product.price | money }}</div>
+    </div>
+  {% endfor %}
+</div>
+
+<div id="filter-sidebar" class="filter-sidebar">
+  {% render 'product-filter' %}
+</div>
+
+<script>
+  function toggleFilter() {
+    const sidebar = document.getElementById('filter-sidebar');
+    sidebar.classList.toggle('active');
+  }
+
+  function prevImage(button) {
+    const container = button.parentNode;
+    const images = container.querySelectorAll('img');
+    const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+    const prevIndex = (currentIndex - 1 + images.length) % images.length;
+    
+    images[currentIndex].style.display = 'none';
+    images[prevIndex].style.display = 'block';
+  }
+
+  function nextImage(button) {
+    const container = button.parentNode;
+    const images = container.querySelectorAll('img');
+    const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+    const nextIndex = (currentIndex + 1) % images.length;
+    
+    images[currentIndex].style.display = 'none';
+    images[nextIndex].style.display = 'block';
+  }
+</script>

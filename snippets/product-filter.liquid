@@ -1,0 +1,102 @@
+{%- style -%}
+.filter-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  transition: right 0.3s ease;
+  padding: 2rem;
+  overflow-y: auto;
+  z-index: 1000;
+}
+.filter-sidebar.active {
+  right: 0;
+}
+.filter-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+.filter-content ul {
+  list-style: none;
+  padding-left: 0;
+}
+.filter-content li {
+  margin-bottom: 0.5rem;
+}
+.apply-btn {
+  background: black;
+  color: white;
+  border: none;
+  padding: 1rem;
+  width: 100%;
+  margin-top: 2rem;
+  cursor: pointer;
+}
+{%- endstyle -%}
+
+<div class="filter-content">
+  <h3>SORT BY</h3>
+  <ul>
+    <li><input type="radio" name="sort" value="featured" checked> Featured</li>
+    <li><input type="radio" name="sort" value="best-selling"> Best selling</li>
+    <li><input type="radio" name="sort" value="a-z"> Alphabetically, A-Z</li>
+    <li><input type="radio" name="sort" value="z-a"> Alphabetically, Z-A</li>
+    <li><input type="radio" name="sort" value="price-low-high"> Price, low to high</li>
+    <li><input type="radio" name="sort" value="price-high-low"> Price, high to low</li>
+  </ul>
+
+  <h3>BRAND</h3>
+  <ul>
+    {% for vendor in collection.all_vendors %}
+      <li><input type="checkbox" name="brand" value="{{ vendor }}"> {{ vendor }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>SIZE</h3>
+  <ul>
+    {% for option in collection.all_types.first.options_with_values %}
+      {% if option.name == 'Size' %}
+        {% for value in option.values %}
+          <li><input type="checkbox" name="size" value="{{ value }}"> {{ value }}</li>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  <h3>PRODUCT TYPE</h3>
+  <ul>
+    {% for type in collection.all_types %}
+      <li><input type="checkbox" name="type" value="{{ type }}"> {{ type }}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>COLOR</h3>
+  <ul>
+    {% for option in collection.all_types.first.options_with_values %}
+      {% if option.name == 'Color' %}
+        {% for value in option.values %}
+          <li><input type="checkbox" name="color" value="{{ value }}"> {{ value }}</li>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+
+  <button class="apply-btn" onclick="applyFilters()">SHOW RESULTS</button>
+</div>
+
+<script>
+function applyFilters() {
+  // 实现过滤逻辑
+  const selectedSort = document.querySelector('input[name="sort"]:checked').value;
+  const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(el => el.value);
+  const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map(el => el.value);
+  const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(el => el.value);
+  const selectedColors = Array.from(document.querySelectorAll('input[name="color"]:checked')).map(el => el.value);
+  
+  // 这里应该实现过滤逻辑并重新加载产品列表
+  toggleFilter(); // 关闭过滤侧边栏
+}
+</script>
