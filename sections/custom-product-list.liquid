@@ -5,6 +5,11 @@
   "class": "section",
   "settings": [
     {
+      "type": "collection",
+      "id": "collection",
+      "label": "选择产品系列"
+    },
+    {
       "type": "header",
       "content": "文字样式"
     },
@@ -143,14 +148,15 @@
 {%- endstyle -%}
 
 <div class="product-header">
-  <div class="product-count">{{ collection.products_count }} Products</div>
+  <div class="product-count">{{ selected_collection.products_count }} Products</div>
   <button class="filter-btn" onclick="toggleFilter()">Filter</button>
 </div>
 
-{%- if collection -%}
-  {% paginate collection.products by 24 %}
+{%- assign selected_collection = collections[section.settings.collection] | default: collection -%}
+{%- if selected_collection -%}
+  {% paginate selected_collection.products by 24 %}
 <div class="product-grid">
-  {% for product in collection.products %}
+  {% for product in selected_collection.products %}
     <div class="product-card">
       <div class="product-image-container">
         {% for image in product.images %}
