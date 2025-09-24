@@ -83,8 +83,8 @@
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
     padding: 20px;
     box-sizing: border-box;
     z-index: 3;
@@ -100,15 +100,17 @@
     font-weight: 600;
     color: #333;
     margin: 0 0 15px 0;
-    text-align: center;
+    text-align: left;
+    width: 100%;
   }
 
   .hot-products__compatibility-list {
     list-style: none;
     padding: 0;
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
     text-align: left;
     width: 100%;
+    flex-grow: 1;
   }
 
   .hot-products__compatibility-item {
@@ -120,10 +122,11 @@
 
   .hot-products__hover-image {
     width: 100%;
-    max-width: 200px;
+    max-width: 100%;
     height: auto;
-    margin-bottom: 15px;
+    margin-top: auto;
     border-radius: 4px;
+    object-fit: contain;
   }
 
   .hot-products__content {
@@ -207,24 +210,6 @@
     transform: translateY(-1px);
   }
 
-  .hot-products__hover-add-to-cart {
-    background-color: #871d16;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border-radius: 4px;
-    width: 100%;
-  }
-
-  .hot-products__hover-add-to-cart:hover {
-    background-color: #6b1611;
-  }
-
   @media (max-width: 1024px) {
     .hot-products {
       padding: 50px 0;
@@ -287,6 +272,10 @@
     .hot-products__compatibility-item {
       font-size: 13px;
     }
+
+    .hot-products__hover-overlay {
+      padding: 15px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -326,6 +315,7 @@
 
     .hot-products__compatibility-title {
       font-size: 15px;
+      margin-bottom: 10px;
     }
 
     .hot-products__compatibility-item {
@@ -362,15 +352,6 @@
               <div class="hot-products__hover-overlay">
                 <h3 class="hot-products__compatibility-title">Compatible with</h3>
 
-                {% if block.settings.hover_image %}
-                  <img
-                    src="{{ block.settings.hover_image | img_url: '200x' }}"
-                    alt="{{ block.settings.product_name }}"
-                    class="hot-products__hover-image"
-                    loading="lazy"
-                  >
-                {% endif %}
-
                 {% if block.settings.compatibility_list != blank %}
                   <ul class="hot-products__compatibility-list">
                     {% assign compatibility_items = block.settings.compatibility_list | split: '|' %}
@@ -382,35 +363,14 @@
                   </ul>
                 {% endif %}
 
-                <div style="margin-top: auto; width: 100%; text-align: center;">
-                  <h4 style="font-size: 16px; font-weight: 500; color: #333; margin: 0 0 10px 0;">
-                    {{ block.settings.product_name }}
-                  </h4>
-
-                  <div class="hot-products__rating">
-                    <div class="hot-products__stars">
-                      {% for i in (1..5) %}
-                        <svg class="hot-products__star" viewBox="0 0 24 24">
-                          <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
-                        </svg>
-                      {% endfor %}
-                    </div>
-                    {% if block.settings.review_count != blank %}
-                      <span class="hot-products__review-count">{{ block.settings.review_count }} reviews</span>
-                    {% endif %}
-                  </div>
-
-                  <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 15px;">
-                    {{ block.settings.current_price }}
-                  </div>
-
-                  <button
-                    class="hot-products__hover-add-to-cart"
-                    onclick="addToCart('{{ block.settings.product_handle }}')"
+                {% if block.settings.hover_image %}
+                  <img
+                    src="{{ block.settings.hover_image | img_url: '400x' }}"
+                    alt="{{ block.settings.product_name }}"
+                    class="hot-products__hover-image"
+                    loading="lazy"
                   >
-                    ADD TO CART
-                  </button>
-                </div>
+                {% endif %}
               </div>
             </div>
 
