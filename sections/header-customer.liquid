@@ -1,0 +1,453 @@
+<style>
+  .header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .header__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+  }
+
+  .header__logo {
+    flex-shrink: 0;
+  }
+
+  .header__logo img {
+    height: 40px;
+    width: auto;
+  }
+
+  .header__nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .header__nav-item {
+    position: relative;
+  }
+
+  .header__nav-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 10px 0;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .header__nav-link:hover {
+    color: #495057;
+  }
+
+  .header__nav-item--has-dropdown:hover .header__dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .header__dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+  }
+
+  .header__dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    color: #495057;
+    text-decoration: none;
+    font-size: 14px;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.2s ease;
+  }
+
+  .header__dropdown-item:last-child {
+    border-bottom: none;
+  }
+
+  .header__dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #212529;
+  }
+
+  .header__actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+
+  .header__action-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s ease;
+  }
+
+  .header__action-btn:hover {
+    color: #495057;
+  }
+
+  .header__cart-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+
+  .header__mobile-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #6c757d;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1024px) {
+    .header__nav {
+      gap: 25px;
+    }
+
+    .header__nav-link {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .header__container {
+      height: 70px;
+      padding: 0 15px;
+    }
+
+    .header__nav {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      flex-direction: column;
+      gap: 0;
+      border-top: 1px solid #e9ecef;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .header__nav.active {
+      display: flex;
+    }
+
+    .header__nav-item {
+      width: 100%;
+      border-bottom: 1px solid #f8f9fa;
+    }
+
+    .header__nav-link {
+      display: block;
+      padding: 15px 20px;
+      width: 100%;
+    }
+
+    .header__dropdown {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      border: none;
+      box-shadow: none;
+      background: #f8f9fa;
+    }
+
+    .header__mobile-toggle {
+      display: block;
+    }
+
+    .header__actions {
+      gap: 15px;
+    }
+  }
+</style>
+
+<header class="header">
+  <div class="header__container">
+    <!-- Logo -->
+    <div class="header__logo">
+      {% if section.settings.logo %}
+        <a href="{{ routes.root_url }}">
+          <img src="{{ section.settings.logo | img_url: '200x' }}" alt="{{ shop.name }}" loading="lazy">
+        </a>
+      {% else %}
+        <a
+          href="{{ routes.root_url }}"
+          style="font-size: 24px; font-weight: bold; color: #212529; text-decoration: none;"
+        >
+          {{ shop.name }}
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <nav class="header__nav" id="headerNav">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'nav_item' %}
+            <div class="header__nav-item">
+              <a href="{{ block.settings.link }}" class="header__nav-link">
+                {{ block.settings.label }}
+              </a>
+            </div>
+          {% when 'nav_dropdown' %}
+            <div class="header__nav-item header__nav-item--has-dropdown">
+              <a href="{{ block.settings.link }}" class="header__nav-link">
+                {{ block.settings.label }}
+              </a>
+              {% if block.settings.dropdown_items != blank %}
+                <div class="header__dropdown">
+                  {% assign dropdown_items = block.settings.dropdown_items | split: ',' %}
+                  {% assign dropdown_links = block.settings.dropdown_links | split: ',' %}
+                  {% for item in dropdown_items %}
+                    {% assign index = forloop.index0 %}
+                    <a href="{{ dropdown_links[index] | default: '#' }}" class="header__dropdown-item">
+                      {{ item | strip }}
+                    </a>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </nav>
+
+    <!-- Actions -->
+    <div class="header__actions">
+      <!-- Search -->
+      {% if section.settings.show_search %}
+        <button class="header__action-btn" onclick="openSearch()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+        </button>
+      {% endif %}
+
+      <!-- Account -->
+      {% if section.settings.show_account %}
+        <a href="{{ routes.account_url }}" class="header__action-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+      {% endif %}
+
+      <!-- Cart -->
+      {% if section.settings.show_cart %}
+        <a href="{{ routes.cart_url }}" class="header__action-btn" style="position: relative;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 22C9.55228 22 10 21.5523 10 21C10 20.4477 9.55228 20 9 20C8.44772 20 8 20.4477 8 21C8 21.5523 8.44772 22 9 22Z"></path>
+            <path d="M20 22C20.5523 22 21 21.5523 21 21C21 20.4477 20.5523 20 20 20C19.4477 20 19 20.4477 19 21C19 21.5523 19.4477 22 20 22Z"></path>
+            <path d="M1 1H5L7.68 14.39C7.77144 14.8504 8.02191 15.264 8.38755 15.5583C8.75318 15.8526 9.2107 16.009 9.68 16H19.4C19.8693 16.009 20.3268 15.8526 20.6925 15.5583C21.0581 15.264 21.3086 14.8504 21.4 14.39L23 6H6"></path>
+          </svg>
+          {% if cart.item_count > 0 %}
+            <span class="header__cart-count">{{ cart.item_count }}</span>
+          {% endif %}
+        </a>
+      {% endif %}
+
+      <!-- Mobile Menu Toggle -->
+      <button class="header__mobile-toggle" onclick="toggleMobileMenu()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  function toggleMobileMenu() {
+    const nav = document.getElementById('headerNav');
+    nav.classList.toggle('active');
+  }
+
+  function openSearch() {
+    // 这里可以添加搜索功能的实现
+    console.log('Open search');
+  }
+
+  // 点击外部关闭移动菜单
+  document.addEventListener('click', function (event) {
+    const nav = document.getElementById('headerNav');
+    const toggle = document.querySelector('.header__mobile-toggle');
+
+    if (!nav.contains(event.target) && !toggle.contains(event.target)) {
+      nav.classList.remove('active');
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "label": "Show search icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_account",
+      "label": "Show account icon",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart icon",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "nav_item",
+      "name": "Navigation Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Menu Item"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "nav_dropdown",
+      "name": "Dropdown Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Dropdown"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "textarea",
+          "id": "dropdown_items",
+          "label": "Dropdown Items",
+          "info": "Enter each item on a new line or separate with commas"
+        },
+        {
+          "type": "textarea",
+          "id": "dropdown_links",
+          "label": "Dropdown Links",
+          "info": "Enter each link on a new line or separate with commas (must match the order of items)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Header",
+      "blocks": [
+        {
+          "type": "nav_dropdown",
+          "settings": {
+            "label": "Air filters",
+            "dropdown_items": "Freightliner,Kenworth,Peterbilt,International,Cummins,Thomas,Volvo,Western Star,Workhorse"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Fuel filters"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Oil filters"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Cabin filters"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Filter Kit"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Other Products"
+          }
+        },
+        {
+          "type": "nav_item",
+          "settings": {
+            "label": "Contact"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
