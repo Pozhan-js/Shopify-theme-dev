@@ -12,12 +12,45 @@
   overflow-y: auto;
   z-index: 1000;
 }
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.filter-group {
+  margin-bottom: 1rem;
+}
+.filter-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+.filter-group-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.filter-group.active .filter-group-content {
+  max-height: 500px;
+}
 .filter-sidebar.active {
   right: 0;
 }
+.filter-content h2, 
 .filter-content h3 {
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
+  font-weight: 700;
+  font-size: 1.2rem;
 }
 .filter-content ul {
   list-style: none;
@@ -25,6 +58,8 @@
 }
 .filter-content li {
   margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
 }
 .apply-btn {
   background: black;
@@ -38,56 +73,97 @@
 {%- endstyle -%}
 
 <div class="filter-content">
-  <h3>SORT BY</h3>
-  <ul>
-    <li><input type="radio" name="sort" value="featured" checked> Featured</li>
-    <li><input type="radio" name="sort" value="best-selling"> Best selling</li>
-    <li><input type="radio" name="sort" value="a-z"> Alphabetically, A-Z</li>
-    <li><input type="radio" name="sort" value="z-a"> Alphabetically, Z-A</li>
-    <li><input type="radio" name="sort" value="price-low-high"> Price, low to high</li>
-    <li><input type="radio" name="sort" value="price-high-low"> Price, high to low</li>
-  </ul>
+  <div class="filter-header">
+    <h2>筛选</h2>
+    <button class="close-btn" onclick="toggleFilter()">×</button>
+  </div>
 
-  <h3>BRAND</h3>
-  <ul>
-    {% for vendor in collection.all_vendors %}
-      <li><input type="checkbox" name="brand" value="{{ vendor }}"> {{ vendor }}</li>
-    {% endfor %}
-  </ul>
+  <div class="filter-group">
+    <div class="filter-group-header" onclick="toggleFilterGroup(this)">
+      <h3>SORT BY</h3>
+      <span>+</span>
+    </div>
+    <div class="filter-group-content">
+      <ul>
+        <li><input type="radio" name="sort" value="featured" checked> Featured</li>
+        <li><input type="radio" name="sort" value="best-selling"> Best selling</li>
+        <li><input type="radio" name="sort" value="a-z"> Alphabetically, A-Z</li>
+        <li><input type="radio" name="sort" value="z-a"> Alphabetically, Z-A</li>
+        <li><input type="radio" name="sort" value="price-low-high"> Price, low to high</li>
+        <li><input type="radio" name="sort" value="price-high-low"> Price, high to low</li>
+      </ul>
+    </div>
+  </div>
 
-  <h3>SIZE</h3>
-  <ul>
-    {% for option in collection.all_types.first.options_with_values %}
-      {% if option.name == 'Size' %}
-        {% for value in option.values %}
-          <li><input type="checkbox" name="size" value="{{ value }}"> {{ value }}</li>
+  <div class="filter-group">
+    <div class="filter-group-header" onclick="toggleFilterGroup(this)">
+      <h3>BRAND</h3>
+      <span>+</span>
+    </div>
+    <div class="filter-group-content">
+      <ul>
+        {% for link in linklists.brands.links %}
+          <li><input type="checkbox" name="brand" value="{{ link.title }}"> {{ link.title }}</li>
         {% endfor %}
-      {% endif %}
-    {% endfor %}
-  </ul>
+      </ul>
+    </div>
+  </div>
 
-  <h3>PRODUCT TYPE</h3>
-  <ul>
-    {% for type in collection.all_types %}
-      <li><input type="checkbox" name="type" value="{{ type }}"> {{ type }}</li>
-    {% endfor %}
-  </ul>
-
-  <h3>COLOR</h3>
-  <ul>
-    {% for option in collection.all_types.first.options_with_values %}
-      {% if option.name == 'Color' %}
-        {% for value in option.values %}
-          <li><input type="checkbox" name="color" value="{{ value }}"> {{ value }}</li>
+  <div class="filter-group">
+    <div class="filter-group-header" onclick="toggleFilterGroup(this)">
+      <h3>SIZE</h3>
+      <span>+</span>
+    </div>
+    <div class="filter-group-content">
+      <ul>
+        {% assign size_options = shop.metaobjects.size.values %}
+        {% for size in size_options %}
+          <li><input type="checkbox" name="size" value="{{ size.system.name }}"> {{ size.system.name }}</li>
         {% endfor %}
-      {% endif %}
-    {% endfor %}
-  </ul>
+      </ul>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-group-header" onclick="toggleFilterGroup(this)">
+      <h3>PRODUCT TYPE</h3>
+      <span>+</span>
+    </div>
+    <div class="filter-group-content">
+      <ul>
+        {% for link in linklists.product-types.links %}
+          <li><input type="checkbox" name="type" value="{{ link.title }}"> {{ link.title }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-group-header" onclick="toggleFilterGroup(this)">
+      <h3>COLOR</h3>
+      <span>+</span>
+    </div>
+    <div class="filter-group-content">
+      <ul>
+        {% assign color_options = shop.metaobjects.color.values %}
+        {% for color in color_options %}
+          <li><input type="checkbox" name="color" value="{{ color.system.name }}"> {{ color.system.name }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
 
   <button class="apply-btn" onclick="applyFilters()">SHOW RESULTS</button>
 </div>
 
 <script>
+function toggleFilterGroup(header) {
+  const group = header.parentElement;
+  group.classList.toggle('active');
+  const icon = header.querySelector('span');
+  icon.textContent = group.classList.contains('active') ? '-' : '+';
+}
+
 function applyFilters() {
   // 实现过滤逻辑
   const selectedSort = document.querySelector('input[name="sort"]:checked').value;
