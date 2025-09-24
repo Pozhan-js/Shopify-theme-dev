@@ -24,9 +24,9 @@
   .product-categories__button {
     display: inline-block;
     padding: 12px 24px;
-    border: 1px solid #871d16;
+    border: 1px solid #930a0a;
     background-color: transparent;
-    color: #871d16;
+    color: #930a0a;
     text-decoration: none;
     font-size: 14px;
     font-weight: 400;
@@ -35,26 +35,41 @@
     transition: all 0.3s ease;
     cursor: pointer;
     white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-categories__button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background-color: #871d16;
+    transition: left 0.3s ease;
+    z-index: 1;
+  }
+
+  .product-categories__button:hover::before {
+    left: 0;
   }
 
   .product-categories__button:hover {
-    background-color: #871d16;
     color: white;
+    position: relative;
+    z-index: 2;
+  }
+
+  .product-categories__button span {
+    position: relative;
+    z-index: 2;
   }
 
   .product-categories__wholesale-btn {
     display: flex;
     justify-content: center;
     margin-bottom: 60px;
-  }
-
-  .product-categories__wholesale-btn .product-categories__button {
-    background-color: #871d16;
-    color: white;
-  }
-
-  .product-categories__wholesale-btn .product-categories__button:hover {
-    background-color: #6b1611;
   }
 
   .product-categories__features {
@@ -86,8 +101,9 @@
   .product-categories__feature-icon svg {
     width: 60px;
     height: 60px;
-    fill: white;
+    fill: none;
     stroke: white;
+    stroke-width: 1.5;
   }
 
   .product-categories__feature-title {
@@ -143,6 +159,7 @@
     .product-categories__feature-icon svg {
       width: 50px;
       height: 50px;
+      stroke-width: 1.5;
     }
 
     .product-categories__feature-title {
@@ -192,6 +209,7 @@
     .product-categories__feature-icon svg {
       width: 45px;
       height: 45px;
+      stroke-width: 1.5;
     }
 
     .product-categories__feature-title {
@@ -241,6 +259,7 @@
     .product-categories__feature-icon svg {
       width: 40px;
       height: 40px;
+      stroke-width: 1.5;
     }
 
     .product-categories__feature-title {
@@ -263,9 +282,8 @@
           <a
             href="{{ block.settings.button_url | default: '#' }}"
             class="product-categories__button"
-            style="border-color: {{ block.settings.button_border_color }}; color: {{ block.settings.button_text_color }};"
           >
-            {{ block.settings.button_text }}
+            <span>{{ block.settings.button_text }}</span>
           </a>
         {% endif %}
       {% endfor %}
@@ -277,9 +295,8 @@
         <a
           href="{{ section.settings.wholesale_url | default: '#' }}"
           class="product-categories__button"
-          style="background-color: {{ section.settings.wholesale_bg_color }}; color: {{ section.settings.wholesale_text_color }}; border-color: {{ section.settings.wholesale_bg_color }};"
         >
-          {{ section.settings.wholesale_text }}
+          <span>{{ section.settings.wholesale_text }}</span>
         </a>
       </div>
     {% endif %}
@@ -289,40 +306,39 @@
       {% for block in section.blocks %}
         {% if block.type == 'feature' %}
           <div class="product-categories__feature">
-            <div
-              class="product-categories__feature-icon"
-              style="background-color: {{ block.settings.icon_bg_color }};"
-            >
+            <div class="product-categories__feature-icon">
               {% if block.settings.icon_type == 'shopping_bag' %}
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 7H16V6C16 4.34315 14.6569 3 13 3H11C9.34315 3 8 4.34315 8 6V7H5C4.44772 7 4 7.44772 4 8V19C4 20.1046 4.89543 21 6 21H18C19.1046 21 20 20.1046 20 19V8C20 7.44772 19.5523 7 19 7ZM10 6C10 5.44772 10.4477 5 11 5H13C13.5523 5 14 5.44772 14 6V7H10V6ZM6 9H8V11C8 11.5523 8.44772 12 9 12C9.55228 12 10 11.5523 10 11V9H14V11C14 11.5523 14.4477 12 15 12C15.5523 12 16 11.5523 16 11V9H18V19H6V9Z" fill="white"/>
+                  <path d="M6 2L3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6L18 2H6Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M3 6H21" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 10C16 12.2091 14.2091 14 12 14C9.79086 14 8 12.2091 8 10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {% elsif block.settings.icon_type == 'warehouse' %}
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7V22H22V7L12 2ZM4 8.236L12 4.236L20 8.236V20H16V12H8V20H4V8.236ZM10 14H14V20H10V14Z" fill="white"/>
-                  <path d="M6 10H8V11H6V10ZM10 10H12V11H10V10ZM14 10H16V11H14V10ZM18 10H20V11H18V10Z" fill="white"/>
+                  <path d="M3 21H21" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 21V7L12 3L19 7V21" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9 21V15H15V21" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9 9H10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 9H15" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {% elsif block.settings.icon_type == 'shipping' %}
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 6V15H2C2 16.1046 2.89543 17 4 17C5.10457 17 6 16.1046 6 15H14C14 16.1046 14.8954 17 16 17C17.1046 17 18 16.1046 18 15H23V12L20 8H15V6H1ZM3 8H13V13H3V8ZM15 10H18.5L20.5 12H15V10ZM4 14C4.55228 14 5 14.4477 5 15C5 15.5523 4.55228 16 4 16C3.44772 16 3 15.5523 3 15C3 14.4477 3.44772 14 4 14ZM16 14C16.5523 14 17 14.4477 17 15C17 15.5523 16.5523 16 16 16C15.4477 16 15 15.5523 15 15C15 14.4477 15.4477 14 16 14Z" fill="white"/>
+                  <path d="M16 3H1V16H16V3Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 8H20L23 11V16H16V8Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="5.5" cy="18.5" r="2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="18.5" cy="18.5" r="2.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {% elsif block.settings.icon_type == 'quality' %}
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 7H16V5C16 3.89543 15.1046 3 14 3H10C8.89543 3 8 3.89543 8 5V7H4C3.44772 7 3 7.44772 3 8V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V8C21 7.44772 20.5523 7 20 7ZM10 5H14V7H10V5ZM19 19H5V9H7V11C7 11.5523 7.44772 12 8 12C8.55228 12 9 11.5523 9 11V9H15V11C15 11.5523 15.4477 12 16 12C16.5523 12 16 11.5523 16 11V9H19V19Z" fill="white"/>
-                  <path d="M10 13L12 15L16 11" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9 12L11 14L15 10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {% endif %}
             </div>
-            <h3
-              class="product-categories__feature-title"
-              style="color: {{ block.settings.title_color }};"
-            >
+            <h3 class="product-categories__feature-title">
               {{ block.settings.feature_title }}
             </h3>
-            <p
-              class="product-categories__feature-description"
-              style="color: {{ block.settings.description_color }};"
-            >
+            <p class="product-categories__feature-description">
               {{ block.settings.feature_description }}
             </p>
           </div>
@@ -363,7 +379,7 @@
       "type": "color",
       "id": "wholesale_bg_color",
       "label": "Wholesale button background",
-      "default": "#871d16"
+      "default": "#871D16"
     },
     {
       "type": "color",
@@ -391,13 +407,13 @@
           "type": "color",
           "id": "button_border_color",
           "label": "Button Border Color",
-          "default": "#871d16"
+          "default": "#930a0a"
         },
         {
           "type": "color",
           "id": "button_text_color",
           "label": "Button Text Color",
-          "default": "#871d16"
+          "default": "#930a0a"
         }
       ]
     },
@@ -433,7 +449,7 @@
           "type": "color",
           "id": "icon_bg_color",
           "label": "Icon Background Color",
-          "default": "#871d16"
+          "default": "#871D16"
         },
         {
           "type": "text",

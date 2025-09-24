@@ -1,0 +1,577 @@
+<style>
+  .hot-products {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 60px 0;
+  }
+
+  .hot-products__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 45px;
+    box-sizing: border-box;
+  }
+
+  .hot-products__title {
+    text-align: center;
+    font-size: 36px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 50px 0;
+  }
+
+  .hot-products__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+  }
+
+  .hot-products__item {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hot-products__item:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .hot-products__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    background: #f8f9fa;
+  }
+
+  .hot-products__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .hot-products__sale-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #dc3545;
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    z-index: 2;
+  }
+
+  .hot-products__hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 3;
+  }
+
+  .hot-products__item:hover .hot-products__hover-overlay {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .hot-products__compatibility-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+    text-align: center;
+  }
+
+  .hot-products__compatibility-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    text-align: left;
+    width: 100%;
+  }
+
+  .hot-products__compatibility-item {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+
+  .hot-products__hover-image {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 4px;
+  }
+
+  .hot-products__content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hot-products__name {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.3;
+    text-align: center;
+  }
+
+  .hot-products__rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .hot-products__stars {
+    display: flex;
+    gap: 2px;
+  }
+
+  .hot-products__star {
+    width: 16px;
+    height: 16px;
+    fill: #ffc107;
+  }
+
+  .hot-products__review-count {
+    font-size: 14px;
+    color: #666;
+    margin-left: 5px;
+  }
+
+  .hot-products__price-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .hot-products__original-price {
+    font-size: 14px;
+    color: #999;
+    text-decoration: line-through;
+  }
+
+  .hot-products__current-price {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .hot-products__add-to-cart {
+    width: 100%;
+    background-color: #871d16;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    margin-top: auto;
+  }
+
+  .hot-products__add-to-cart:hover {
+    background-color: #6b1611;
+    transform: translateY(-1px);
+  }
+
+  .hot-products__hover-add-to-cart {
+    background-color: #871d16;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    width: 100%;
+  }
+
+  .hot-products__hover-add-to-cart:hover {
+    background-color: #6b1611;
+  }
+
+  @media (max-width: 1024px) {
+    .hot-products {
+      padding: 50px 0;
+    }
+
+    .hot-products__container {
+      padding: 0 30px;
+    }
+
+    .hot-products__title {
+      font-size: 32px;
+      margin-bottom: 40px;
+    }
+
+    .hot-products__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 25px;
+    }
+
+    .hot-products__image-wrapper {
+      height: 220px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hot-products {
+      padding: 40px 0;
+    }
+
+    .hot-products__container {
+      padding: 0 20px;
+    }
+
+    .hot-products__title {
+      font-size: 28px;
+      margin-bottom: 35px;
+    }
+
+    .hot-products__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .hot-products__image-wrapper {
+      height: 200px;
+    }
+
+    .hot-products__content {
+      padding: 15px;
+    }
+
+    .hot-products__name {
+      font-size: 15px;
+    }
+
+    .hot-products__compatibility-title {
+      font-size: 16px;
+    }
+
+    .hot-products__compatibility-item {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hot-products {
+      padding: 35px 0;
+    }
+
+    .hot-products__container {
+      padding: 0 15px;
+    }
+
+    .hot-products__title {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+
+    .hot-products__grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .hot-products__image-wrapper {
+      height: 250px;
+    }
+
+    .hot-products__content {
+      padding: 15px;
+    }
+
+    .hot-products__name {
+      font-size: 14px;
+    }
+
+    .hot-products__hover-overlay {
+      padding: 15px;
+    }
+
+    .hot-products__compatibility-title {
+      font-size: 15px;
+    }
+
+    .hot-products__compatibility-item {
+      font-size: 12px;
+    }
+  }
+</style>
+
+<section class="hot-products">
+  <div class="hot-products__container">
+    {% if section.settings.title != blank %}
+      <h2 class="hot-products__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="hot-products__grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'product' %}
+          <div class="hot-products__item">
+            <div class="hot-products__image-wrapper">
+              {% if block.settings.product_image %}
+                <img
+                  src="{{ block.settings.product_image | img_url: '400x' }}"
+                  alt="{{ block.settings.product_name }}"
+                  class="hot-products__image"
+                  loading="lazy"
+                >
+              {% endif %}
+
+              {% if block.settings.sale_percentage != blank %}
+                <div class="hot-products__sale-badge">-{{ block.settings.sale_percentage }}%</div>
+              {% endif %}
+
+              <!-- Hover Overlay -->
+              <div class="hot-products__hover-overlay">
+                <h3 class="hot-products__compatibility-title">Compatible with</h3>
+
+                {% if block.settings.hover_image %}
+                  <img
+                    src="{{ block.settings.hover_image | img_url: '200x' }}"
+                    alt="{{ block.settings.product_name }}"
+                    class="hot-products__hover-image"
+                    loading="lazy"
+                  >
+                {% endif %}
+
+                {% if block.settings.compatibility_list != blank %}
+                  <ul class="hot-products__compatibility-list">
+                    {% assign compatibility_items = block.settings.compatibility_list | split: '|' %}
+                    {% for item in compatibility_items %}
+                      {% if item != blank %}
+                        <li class="hot-products__compatibility-item">{{ item | strip }}</li>
+                      {% endif %}
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+
+                <div style="margin-top: auto; width: 100%; text-align: center;">
+                  <h4 style="font-size: 16px; font-weight: 500; color: #333; margin: 0 0 10px 0;">
+                    {{ block.settings.product_name }}
+                  </h4>
+
+                  <div class="hot-products__rating">
+                    <div class="hot-products__stars">
+                      {% for i in (1..5) %}
+                        <svg class="hot-products__star" viewBox="0 0 24 24">
+                          <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
+                        </svg>
+                      {% endfor %}
+                    </div>
+                    {% if block.settings.review_count != blank %}
+                      <span class="hot-products__review-count">{{ block.settings.review_count }} reviews</span>
+                    {% endif %}
+                  </div>
+
+                  <div style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 15px;">
+                    {{ block.settings.current_price }}
+                  </div>
+
+                  <button
+                    class="hot-products__hover-add-to-cart"
+                    onclick="addToCart('{{ block.settings.product_handle }}')"
+                  >
+                    ADD TO CART
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="hot-products__content">
+              <h3 class="hot-products__name">{{ block.settings.product_name }}</h3>
+
+              <div class="hot-products__rating">
+                <div class="hot-products__stars">
+                  {% for i in (1..5) %}
+                    <svg class="hot-products__star" viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9L17 14L18.18 21L12 17.77L5.82 21L7 14L2 9L8.91 8.26L12 2Z"/>
+                    </svg>
+                  {% endfor %}
+                </div>
+                {% if block.settings.review_count != blank %}
+                  <span class="hot-products__review-count">{{ block.settings.review_count }} reviews</span>
+                {% endif %}
+              </div>
+
+              <div class="hot-products__price-wrapper">
+                {% if block.settings.original_price != blank %}
+                  <span class="hot-products__original-price">{{ block.settings.original_price }}</span>
+                {% endif %}
+                <span class="hot-products__current-price">{{ block.settings.current_price }}</span>
+              </div>
+
+              <button class="hot-products__add-to-cart" onclick="addToCart('{{ block.settings.product_handle }}')">
+                ADD TO CART
+              </button>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  function addToCart(productHandle) {
+    // 这里可以添加加入购物车的逻辑
+    console.log('Add to cart:', productHandle);
+    // 示例：可以触发 Shopify 的加入购物车 API
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Hot Products",
+  "tag": "section",
+  "class": "hot-products-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Hot Products"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        {
+          "type": "text",
+          "id": "product_name",
+          "label": "Product Name"
+        },
+        {
+          "type": "text",
+          "id": "product_handle",
+          "label": "Product Handle (for cart functionality)"
+        },
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Product Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "hover_image",
+          "label": "Hover Image (compatibility image)"
+        },
+        {
+          "type": "text",
+          "id": "sale_percentage",
+          "label": "Sale Percentage (without % sign)"
+        },
+        {
+          "type": "text",
+          "id": "review_count",
+          "label": "Review Count",
+          "default": "20"
+        },
+        {
+          "type": "text",
+          "id": "original_price",
+          "label": "Original Price (optional)"
+        },
+        {
+          "type": "text",
+          "id": "current_price",
+          "label": "Current Price",
+          "default": "$59.99 USD"
+        },
+        {
+          "type": "textarea",
+          "id": "compatibility_list",
+          "label": "Compatibility List (separate each item with |)",
+          "info": "Example: 2008-2017 Freightliner Cascadia|2014-2016 Freightliner 122SD|2010-2016 Freightliner Coronado"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hot Products",
+      "blocks": [
+        {
+          "type": "product",
+          "settings": {
+            "product_name": "Getopauto AF27879 Air Filter",
+            "product_handle": "af27879-air-filter",
+            "review_count": "20",
+            "current_price": "$59.99 USD",
+            "compatibility_list": "2008-2017 Freightliner Cascadia|2014-2016 Freightliner 122SD|2010-2016 Freightliner Coronado"
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "product_name": "Getopauto 03-42776-010 Air Filter",
+            "product_handle": "03-42776-010-air-filter",
+            "review_count": "20",
+            "current_price": "$59.99 USD"
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "product_name": "Getopauto P611696 Air Filter",
+            "product_handle": "p611696-air-filter",
+            "sale_percentage": "36",
+            "review_count": "20",
+            "original_price": "$69.99 USD",
+            "current_price": "$59.99 USD"
+          }
+        },
+        {
+          "type": "product",
+          "settings": {
+            "product_name": "Getopauto P621725 Air Filter",
+            "product_handle": "p621725-air-filter",
+            "sale_percentage": "33",
+            "review_count": "20",
+            "original_price": "$89.99 USD",
+            "current_price": "$59.99 USD"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
