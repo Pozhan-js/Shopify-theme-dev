@@ -167,20 +167,21 @@ h3.product-title {
 }
 {%- endstyle -%}
 
+{%- assign selected_collection = collections[section.settings.collection] | default: collection -%}
+{%- if selected_collection -%}
+  {% paginate selected_collection.products by 24 %}
+
 <div class="product-header">
   <div class="product-count">
     {% if selected_collection %}
-      {{ selected_collection.products_count }} 件商品
+      {{ selected_collection.products_count }} products
     {% else %}
-      0 件商品
+      0 products
     {% endif %}
   </div>
   <button class="filter-btn" onclick="toggleFilter()">Filter</button>
 </div>
 
-{%- assign selected_collection = collections[section.settings.collection] | default: collection -%}
-{%- if selected_collection -%}
-  {% paginate selected_collection.products by 24 %}
 <div class="product-grid">
   {% for product in selected_collection.products %}
     <div class="product-card">
