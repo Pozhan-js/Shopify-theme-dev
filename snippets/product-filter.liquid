@@ -173,14 +173,25 @@ function toggleFilterGroup(header) {
 }
 
 function applyFilters() {
-  // 实现过滤逻辑
   const selectedSort = document.querySelector('input[name="sort"]:checked').value;
   const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(el => el.value);
   const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map(el => el.value);
   const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(el => el.value);
   const selectedColors = Array.from(document.querySelectorAll('input[name="color"]:checked')).map(el => el.value);
+
+  // 构建查询参数
+  let queryParams = [];
   
-  // 这里应该实现过滤逻辑并重新加载产品列表
-  toggleFilter(); // 关闭过滤侧边栏
+  // 添加排序参数
+  queryParams.push(`sort_by=${selectedSort}`);
+
+  // 添加筛选参数
+  if (selectedBrands.length) queryParams.push(`filter.v.brand=${selectedBrands.join('+')}`);
+  if (selectedSizes.length) queryParams.push(`filter.v.size=${selectedSizes.join('+')}`);
+  if (selectedTypes.length) queryParams.push(`filter.v.product_type=${selectedTypes.join('+')}`);
+  if (selectedColors.length) queryParams.push(`filter.v.color=${selectedColors.join('+')}`);
+
+  // 重新加载页面应用筛选
+  window.location.search = queryParams.join('&');
 }
 </script>
