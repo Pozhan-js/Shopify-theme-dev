@@ -78,6 +78,22 @@
 {% endschema %}
 
 {%- style -%}
+.pagination {
+  margin-top: 3rem;
+  text-align: center;
+}
+.pagination a,
+.pagination .current {
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border: 1px solid #ddd;
+  text-decoration: none;
+}
+.pagination .current {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
   .product-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -131,6 +147,7 @@
   <button class="filter-btn" onclick="toggleFilter()">Filter</button>
 </div>
 
+{% paginate collection.products by 24 %}
 <div class="product-grid">
   {% for product in collection.products %}
     <div class="product-card">
@@ -141,11 +158,20 @@
         <button class="image-nav prev" onclick="prevImage(this)">❮</button>
         <button class="image-nav next" onclick="nextImage(this)">❯</button>
       </div>
+
       <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
       <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
     </div>
   {% endfor %}
+
 </div>
+
+<div class="pagination">
+  {% if paginate.pages > 1 %}
+    {{ paginate | default_pagination }}
+  {% endif %}
+</div>
+{% endpaginate %}
 
 <div id="filter-sidebar" class="filter-sidebar">
   {% render 'product-filter' %}
