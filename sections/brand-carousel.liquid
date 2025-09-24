@@ -1,0 +1,295 @@
+<style>
+  .brand-carousel {
+    width: 100%;
+    background-color: #ffffff;
+    padding: 40px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .brand-carousel__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 45px;
+    box-sizing: border-box;
+  }
+
+  .brand-carousel__title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+  }
+
+  .brand-carousel__wrapper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .brand-carousel__track {
+    display: flex;
+    align-items: center;
+    animation: scroll 30s linear infinite;
+    width: calc(200% + 40px);
+  }
+
+  .brand-carousel__track:hover {
+    animation-play-state: paused;
+  }
+
+  .brand-carousel__slide {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    height: 80px;
+    min-width: 200px;
+  }
+
+  .brand-carousel__slide img {
+    max-height: 60px;
+    max-width: 180px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: grayscale(100%) opacity(0.7);
+    transition: all 0.3s ease;
+  }
+
+  .brand-carousel__slide:hover img {
+    filter: grayscale(0%) opacity(1);
+    transform: scale(1.05);
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .brand-carousel__container {
+      padding: 0 30px;
+    }
+
+    .brand-carousel__title {
+      font-size: 28px;
+    }
+
+    .brand-carousel__slide {
+      min-width: 180px;
+      padding: 0 15px;
+    }
+
+    .brand-carousel__slide img {
+      max-height: 50px;
+      max-width: 160px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .brand-carousel {
+      padding: 30px 0;
+    }
+
+    .brand-carousel__container {
+      padding: 0 20px;
+    }
+
+    .brand-carousel__title {
+      font-size: 24px;
+      margin-bottom: 25px;
+    }
+
+    .brand-carousel__slide {
+      min-width: 150px;
+      padding: 0 10px;
+      height: 70px;
+    }
+
+    .brand-carousel__slide img {
+      max-height: 45px;
+      max-width: 130px;
+    }
+
+    .brand-carousel__track {
+      animation-duration: 25s;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .brand-carousel {
+      padding: 25px 0;
+    }
+
+    .brand-carousel__container {
+      padding: 0 15px;
+    }
+
+    .brand-carousel__title {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .brand-carousel__slide {
+      min-width: 120px;
+      padding: 0 8px;
+      height: 60px;
+    }
+
+    .brand-carousel__slide img {
+      max-height: 40px;
+      max-width: 100px;
+    }
+
+    .brand-carousel__track {
+      animation-duration: 20s;
+    }
+  }
+</style>
+
+<section class="brand-carousel">
+  <div class="brand-carousel__container">
+    {% if section.settings.title != blank %}
+      <h2 class="brand-carousel__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="brand-carousel__wrapper">
+      <div class="brand-carousel__track">
+        {% comment %} 第一组品牌 {% endcomment %}
+        {% for block in section.blocks %}
+          {% if block.settings.brand_image != blank %}
+            <div class="brand-carousel__slide">
+              {% if block.settings.brand_url != blank %}
+                <a href="{{ block.settings.brand_url }}" target="_blank" rel="noopener">
+                  <img
+                    src="{{ block.settings.brand_image | img_url: '300x' }}"
+                    alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                    loading="lazy"
+                  >
+                </a>
+              {% else %}
+                <img
+                  src="{{ block.settings.brand_image | img_url: '300x' }}"
+                  alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        {% comment %} 重复第一组品牌以实现无缝循环 {% endcomment %}
+        {% for block in section.blocks %}
+          {% if block.settings.brand_image != blank %}
+            <div class="brand-carousel__slide">
+              {% if block.settings.brand_url != blank %}
+                <a href="{{ block.settings.brand_url }}" target="_blank" rel="noopener">
+                  <img
+                    src="{{ block.settings.brand_image | img_url: '300x' }}"
+                    alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                    loading="lazy"
+                  >
+                </a>
+              {% else %}
+                <img
+                  src="{{ block.settings.brand_image | img_url: '300x' }}"
+                  alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Brand Carousel",
+  "tag": "section",
+  "class": "brand-carousel-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Our Trusted Brands"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "brand_image",
+          "label": "Brand Logo"
+        },
+        {
+          "type": "text",
+          "id": "brand_name",
+          "label": "Brand Name"
+        },
+        {
+          "type": "url",
+          "id": "brand_url",
+          "label": "Brand URL (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Carousel",
+      "blocks": [
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Kenworth"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Western Star"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Peterbilt"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Volvo"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "International"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Freightliner"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
