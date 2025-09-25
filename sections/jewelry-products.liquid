@@ -1,46 +1,57 @@
-<!-- 珠宝产品展示section - 带TAB切换功能 -->
+<!-- 珠宝产品展示section - 自动获取全部系列 -->
 <div class="jewelry-products-container">
   <div class="jewelry-products-wrapper">
     <div class="section-title-wrapper">
       <h2 class="section-title">{{ section.settings.section_title | default: 'Featured Collections' }}</h2>
       <div class="title-underline"></div>
     </div>
-    
-    <!-- TAB导航栏 -->
+
+    <!-- TAB导航栏 - 自动获取系列 -->
     <div class="tab-navigation-wrapper">
       <div class="tab-navigation">
-        {%- for block in section.blocks -%}
-          <button type="button" class="tab-btn {% if forloop.first %}active{% endif %}" data-tab="{{ block.id }}">
-            {{ block.settings.tab_title }}
-          </button>
+        {%- assign collections_to_show = collections | where: 'published', true -%}
+        {%- if section.settings.exclude_all_collection -%}
+          {%- assign collections_to_show = collections_to_show | where: 'handle', '!=', 'all' -%}
+        {%- endif -%}
+        {%- assign sorted_collections = collections_to_show | sort: section.settings.sort_by -%}
+        {%- assign limited_collections = sorted_collections | limit: section.settings.max_collections -%}
+
+        {%- for collection in limited_collections -%}
+          {%- if collection.products.size > 0 -%}
+            <button
+              type="button"
+              class="tab-btn {% if forloop.first %}active{% endif %}"
+              data-tab="{{ collection.handle }}"
+            >
+              {{ collection.title }}
+            </button>
+          {%- endif -%}
         {%- endfor -%}
       </div>
     </div>
-    
+
     <!-- 商品列表容器 -->
     <div class="tab-content">
-      {%- for block in section.blocks -%}
-        <div class="tab-pane {% if forloop.first %}active{% endif %}" id="tab-{{ block.id }}">
-          
-          <div class="products-grid-container">
-            <!-- 滑动控制箭头 -->
-            <div class="products-navigation">
-              <button class="nav-arrow nav-arrow-left" onclick="slideProducts('left')" aria-label="向左滑动">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button class="nav-arrow nav-arrow-right" onclick="slideProducts('right')" aria-label="向右滑动">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="products-grid">
-              {%- assign selected_collection = collections[block.settings.collection] -%}
-              {%- if selected_collection and selected_collection.products.size > 0 -%}
-                {%- assign display_products = selected_collection.products | limit: block.settings.products_limit -%}
+      {%- for collection in limited_collections -%}
+        {%- if collection.products.size > 0 -%}
+          <div class="tab-pane {% if forloop.first %}active{% endif %}" id="tab-{{ collection.handle }}">
+            <div class="products-grid-container">
+              <!-- 滑动控制箭头 -->
+              <div class="products-navigation">
+                <button class="nav-arrow nav-arrow-left" onclick="slideProducts('left')" aria-label="向左滑动">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="nav-arrow nav-arrow-right" onclick="slideProducts('right')" aria-label="向右滑动">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="products-grid">
+                {%- assign display_products = collection.products | limit: section.settings.products_per_collection -%}
                 {%- for product in display_products -%}
                   <div class="product-card">
                     <div class="product-image-container">
@@ -53,17 +64,19 @@
                           {%- endfor -%}
                         {%- endif -%}
                       </div>
-                      
+
                       <a href="{{ product.url }}" class="product-link">
                         <div class="product-images-wrapper">
                           {%- if product.images.size > 0 -%}
                             {%- for image in product.images -%}
-                              <img src="{{ image | image_url: width: 380, height: 380, crop: 'center' }}" 
-                                   alt="{{ product.title }}" 
-                                   class="product-image {% if forloop.first %}active{% endif %}"
-                                   data-index="{{ forloop.index0 }}"
-                                   loading="lazy"
-                                   draggable="false">
+                              <img
+                                src="{{ image | image_url: width: 380, height: 380, crop: 'center' }}"
+                                alt="{{ product.title }}"
+                                class="product-image {% if forloop.first %}active{% endif %}"
+                                data-index="{{ forloop.index0 }}"
+                                loading="lazy"
+                                draggable="false"
+                              >
                             {%- endfor -%}
                           {%- else -%}
                             <div class="product-placeholder">
@@ -72,9 +85,9 @@
                           {%- endif -%}
                         </div>
                       </a>
-                      
+
                       <!-- 悬停购物车按钮 -->
-                      {%- if block.settings.show_add_to_cart -%}
+                      {%- if section.settings.show_add_to_cart -%}
                         <div class="hover-add-to-cart">
                           <form method="post" action="/cart/add" class="hover-cart-form">
                             <input type="hidden" name="id" value="{{ product.variants.first.id }}">
@@ -83,13 +96,13 @@
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                               </svg>
-                              {{ block.settings.add_to_cart_text | default: 'カートに追加' }}
+                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
                             </button>
                           </form>
                         </div>
                       {%- endif -%}
                     </div>
-                    
+
                     <div class="product-info">
                       <h3 class="product-title">
                         <a href="{{ product.url }}">{{ product.title }}</a>
@@ -103,20 +116,16 @@
                     </div>
                   </div>
                 {%- endfor -%}
-              {%- else -%}
-                <div class="no-products-message">
-                  <p>{{ block.settings.empty_message | default: '商品がありません。管理画面で商品を追加してください。' }}</p>
-                </div>
-              {%- endif -%}
+              </div>
             </div>
           </div>
-        </div>
+        {%- endif -%}
       {%- endfor -%}
     </div>
-    
+
     {%- if section.settings.show_view_more -%}
       <div class="view-more-container">
-        <a href="{{ section.settings.view_more_url | default: '/collections/all' }}" class="view-more-btn">
+        <a href="{{ section.settings.view_more_url | default: '/collections' }}" class="view-more-btn">
           {{ section.settings.view_more_text | default: 'もっと見る' }}
         </a>
       </div>
@@ -1044,6 +1053,58 @@
     },
     {
       "type": "header",
+      "content": "系列设置"
+    },
+    {
+      "type": "range",
+      "id": "max_collections",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "label": "最多显示系列数量",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "products_per_collection",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "label": "每个系列显示产品数量",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "sort_by",
+      "label": "系列排序方式",
+      "options": [
+        { "value": "title", "label": "按标题排序" },
+        { "value": "created_at", "label": "按创建时间排序" },
+        { "value": "updated_at", "label": "按更新时间排序" },
+        { "value": "products_count", "label": "按产品数量排序" }
+      ],
+      "default": "title"
+    },
+    {
+      "type": "checkbox",
+      "id": "exclude_all_collection",
+      "label": "排除'全部产品'系列",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_add_to_cart",
+      "label": "显示添加到购物车按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "添加到购物车按钮文字",
+      "default": "カートに追加"
+    },
+    {
+      "type": "header",
       "content": "标题样式"
     },
     {
@@ -1356,7 +1417,7 @@
       "type": "url",
       "id": "view_more_url",
       "label": "查看更多链接",
-      "default": "/collections/all"
+      "default": "/collections"
     },
     {
       "type": "range",
@@ -1439,88 +1500,10 @@
       "default": "#ffffff"
     }
   ],
-  "blocks": [
-    {
-      "type": "product_tab",
-      "name": "产品标签",
-      "settings": [
-        {
-          "type": "text",
-          "id": "tab_title",
-          "label": "标签标题",
-          "default": "ルビー"
-        },
-        {
-          "type": "collection",
-          "id": "collection",
-          "label": "选择产品系列"
-        },
-        {
-          "type": "range",
-          "id": "products_limit",
-          "min": 3,
-          "max": 12,
-          "step": 1,
-          "label": "显示产品数量",
-          "default": 6
-        },
-        {
-          "type": "checkbox",
-          "id": "show_add_to_cart",
-          "label": "显示添加到购物车按钮",
-          "default": true
-        },
-        {
-          "type": "text",
-          "id": "add_to_cart_text",
-          "label": "添加到购物车按钮文字",
-          "default": "カートに追加"
-        },
-        {
-          "type": "text",
-          "id": "empty_message",
-          "label": "无产品时显示的消息",
-          "default": "商品がありません。管理画面で商品を追加してください。"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
       "name": "珠宝产品展示",
-      "category": "Product",
-      "blocks": [
-        {
-          "type": "product_tab",
-          "settings": {
-            "tab_title": "ルビー"
-          }
-        },
-        {
-          "type": "product_tab",
-          "settings": {
-            "tab_title": "サファイア"
-          }
-        },
-        {
-          "type": "product_tab",
-          "settings": {
-            "tab_title": "エメラルド"
-          }
-        },
-        {
-          "type": "product_tab",
-          "settings": {
-            "tab_title": "SATAKE 誕生石"
-          }
-        },
-        {
-          "type": "product_tab",
-          "settings": {
-            "tab_title": "satakeペアリング"
-          }
-        }
-      ]
+      "category": "Product"
     }
   ]
 }
