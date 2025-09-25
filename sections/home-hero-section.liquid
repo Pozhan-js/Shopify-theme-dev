@@ -2,17 +2,18 @@
   Home Hero Section - 英雄轮播区域
   使用 blocks 实现轮播图，兼容所有 Shopify 主题
   支持后台上传图片、修改标题、按钮等
+  优化支持1920*700图片完全展示
 {% endcomment %}
 
 <style>
   /* Hero Banner Styles */
   .hero-section {
     position: relative;
-    width: 75%;
-    max-width: 1280px;
     width: 90%;
+    max-width: 1280px;
     margin: 2rem auto;
-    height: 40vh;
+    height: calc(1280px * 700 / 1920);
+    min-height: 400px;
     overflow: hidden;
     border-radius: 1rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -24,8 +25,8 @@
     height: 100%;
     opacity: 0;
     transition: opacity 0.7s ease;
-    background-size: 100% auto;
-    background-position: center;
+    background-size: cover;
+    background-position: center center;
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
@@ -35,11 +36,27 @@
     opacity: 1;
   }
 
+  /* 确保图片完全展示的样式 */
+  .hero-slide-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+  }
+
   .hero-content {
+    position: relative;
+    z-index: 2;
     color: white;
     padding: 2rem;
     max-width: 600px;
     margin-left: 10%;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(4px);
   }
 
   .hero-title {
@@ -48,7 +65,7 @@
     margin-bottom: 1rem;
     line-height: 1.2;
     color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
   }
 
   .hero-subtitle {
@@ -56,13 +73,14 @@
     margin-bottom: 1.5rem;
     line-height: 1.5;
     color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
   }
 
   .hero-nav {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 3;
     background: rgba(255, 255, 255, 0.3);
     color: white;
     width: 4.5rem;
@@ -96,6 +114,7 @@
     transform: translateX(-50%);
     display: flex;
     gap: 0.5rem;
+    z-index: 3;
   }
 
   .hero-indicator {
@@ -134,19 +153,34 @@
     box-shadow: 0 4px 12px rgba(154, 189, 72, 0.3);
   }
 
-  @media (max-width: 1240px) {
+  /* 针对1280px最大宽度的优化 */
+  @media (min-width: 1280px) {
     .hero-section {
-      /* width: 100%; */
-      margin-left: auto;
-      margin-right: auto;
+      width: 1280px;
+      height: calc(1280px * 700 / 1920);
     }
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 1024px) and (max-width: 1279px) {
     .hero-section {
       width: 90%;
-      height: 45vh;
-      min-height: 320px;
+      height: calc(90vw * 700 / 1920);
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .hero-section {
+      width: 95%;
+      height: calc(95vw * 700 / 1920);
+      min-height: 350px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero-section {
+      width: 95%;
+      height: calc(95vw * 700 / 1920);
+      min-height: 280px;
       margin: 1rem auto;
     }
 
@@ -154,6 +188,7 @@
       margin-left: 5%;
       margin-right: 5%;
       max-width: none;
+      padding: 1.5rem;
     }
 
     .hero-title {
@@ -177,15 +212,43 @@
       right: 1rem;
     }
   }
+
+  @media (max-width: 480px) {
+    .hero-section {
+      width: 98%;
+      height: 40vh;
+      min-height: 280px;
+      border-radius: 0.5rem;
+    }
+
+    .hero-content {
+      padding: 1rem;
+      margin-left: 2%;
+      margin-right: 2%;
+    }
+
+    .hero-title {
+      font-size: 1.5rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.9rem;
+    }
+  }
 </style>
 
 <div class="hero-section">
   {% for block in section.blocks %}
     {% if block.type == 'slide' %}
-      <div
-        class="hero-slide {% if forloop.first %}active{% endif %}"
-        style="background-image: url('{{ block.settings.image | image_url: width: 1920 }}');"
-      >
+      <div class="hero-slide {% if forloop.first %}active{% endif %}">
+        {% if block.settings.image %}
+          <img
+            src="{{ block.settings.image | image_url: width: 1920 }}"
+            alt="{{ block.settings.title | escape }}"
+            class="hero-slide-image"
+            loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+          >
+        {% endif %}
         <div class="hero-content">
           <h1 class="hero-title">{{ block.settings.title }}</h1>
           <p class="hero-subtitle">{{ block.settings.subtitle }}</p>
@@ -234,7 +297,10 @@
     let autoSlideInterval;
 
     // 过滤出有效的幻灯片和指示器
-    const validSlides = slides.filter((s) => s.style.backgroundImage);
+    const validSlides = slides.filter((slide) => {
+      const img = slide.querySelector('.hero-slide-image');
+      return img && img.src;
+    });
     const validIndicators = indicators.slice(0, validSlides.length);
 
     function showSlide(index) {
@@ -257,42 +323,66 @@
     }
 
     function startAutoSlide() {
-      autoSlideInterval = setInterval(nextSlide, 5000);
+      if (validSlides.length > 1) {
+        autoSlideInterval = setInterval(nextSlide, 5000);
+      }
     }
 
     function stopAutoSlide() {
       clearInterval(autoSlideInterval);
     }
 
-    // 导航按钮
-    prevBtn.addEventListener('click', () => {
-      prevSlide();
-      stopAutoSlide();
-      startAutoSlide();
-    });
-
-    nextBtn.addEventListener('click', () => {
-      nextSlide();
-      stopAutoSlide();
-      startAutoSlide();
-    });
-
-    // 指示器点击
-    validIndicators.forEach((indicator, index) => {
-      indicator.addEventListener('click', () => {
-        showSlide(index);
+    // 只有多张图片时才显示导航
+    if (validSlides.length <= 1) {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      document.querySelector('.hero-indicators').style.display = 'none';
+    } else {
+      // 导航按钮
+      prevBtn?.addEventListener('click', () => {
+        prevSlide();
         stopAutoSlide();
         startAutoSlide();
       });
+
+      nextBtn?.addEventListener('click', () => {
+        nextSlide();
+        stopAutoSlide();
+        startAutoSlide();
+      });
+
+      // 指示器点击
+      validIndicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+          showSlide(index);
+          stopAutoSlide();
+          startAutoSlide();
+        });
+      });
+
+      // 悬停暂停
+      const heroSection = document.querySelector('.hero-section');
+      heroSection?.addEventListener('mouseenter', stopAutoSlide);
+      heroSection?.addEventListener('mouseleave', startAutoSlide);
+
+      // 启动自动轮播
+      startAutoSlide();
+    }
+
+    // 键盘导航
+    document.addEventListener('keydown', (e) => {
+      if (validSlides.length > 1) {
+        if (e.key === 'ArrowLeft') {
+          prevSlide();
+          stopAutoSlide();
+          startAutoSlide();
+        } else if (e.key === 'ArrowRight') {
+          nextSlide();
+          stopAutoSlide();
+          startAutoSlide();
+        }
+      }
     });
-
-    // 悬停暂停
-    const heroSection = document.querySelector('.hero-section');
-    heroSection?.addEventListener('mouseenter', stopAutoSlide);
-    heroSection?.addEventListener('mouseleave', startAutoSlide);
-
-    // 启动自动轮播
-    startAutoSlide();
   });
 </script>
 
@@ -321,7 +411,7 @@
           "type": "image_picker",
           "id": "image",
           "label": "背景图片",
-          "info": "建议尺寸：1920x1080px"
+          "info": "建议尺寸：1920x700px，将等比例缩放至1280px宽度完全展示"
         },
         {
           "type": "text",
