@@ -149,6 +149,14 @@
       endif
     -%}
 
+    {%- if section.settings.menu != blank -%}
+      <div class="header__icon header__icon--custom-menu small-hide medium-hide">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    {%- endif -%}
+
     {%- if section.settings.logo_position != 'middle-center' -%}
       {%- if request.page_type == 'index' -%}
         <h1 class="header__heading">
@@ -321,6 +329,20 @@
 {%- if settings.cart_type == "notification" -%}
   {%- render 'cart-notification', color_scheme: section.settings.color_scheme, desktop_menu_type: section.settings.menu_type_desktop -%}
 {%- endif -%}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const customMenuIcon = document.querySelector('.header__icon--custom-menu');
+    const menuDrawer = document.querySelector('header-drawer details');
+    
+    if (customMenuIcon && menuDrawer) {
+      customMenuIcon.addEventListener('click', function() {
+        menuDrawer.setAttribute('open', '');
+        menuDrawer.querySelector('summary').focus();
+      });
+    }
+  });
+</script>
 
 {% javascript %}
   class StickyHeader extends HTMLElement {
