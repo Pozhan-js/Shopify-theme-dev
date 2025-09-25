@@ -22,9 +22,8 @@
 
   .product-info-container {
     max-width: 1280px;
-    width: 90%;
+    width: 100%;
     margin: 0 auto;
-    padding: 0 1rem;
   }
 
   .product-info-grid {
@@ -211,6 +210,10 @@
     color: {{ section.settings.descriptioncolor }};
   }
 
+  .shipping-info p {
+    margin: 0px;
+  }
+
   .disclaimer {
     margin-top: 0.75rem;
     font-size: 0.8rem;
@@ -290,9 +293,10 @@
     height: {{ section.settings.imageheight }}px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     border-radius: {{ section.settings.imageborderradius }}px;
     overflow: hidden;
+    position: relative;
   }
 
   .main-image {
@@ -307,6 +311,19 @@
 
   .main-image.changing {
     opacity: 0.7;
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 16px;
+    background: #f9fafb;
+    border-radius: {{ section.settings.imageborderradius }}px;
+    border: 2px dashed #d1d5db;
   }
 
   .product-form {
@@ -352,6 +369,10 @@
     }
 
     .quantity-selector {
+      justify-content: center;
+    }
+
+    .image-container {
       justify-content: center;
     }
   }
@@ -411,8 +432,8 @@
                       data-price="{{ variant.price | money }}"
                       data-old-price="{% if variant.compareatprice > variant.price %}{{ variant.compareatprice | money }}{% endif %}"
                       data-available="{{ variant.available }}"
-                      data-image="{% if variant.image %}{{ variant.image | img_url: '600x600' }}{% elsif displayproduct.featuredimage %}{{ displayproduct.featuredimage | img_url: '600x600' }}{% endif %}"
-                      data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ displayproduct.featuredimage.alt | default: displayproduct.title }}{% endif %}"
+                      data-image="{% if variant.image %}{{ variant.image | img_url: '800x800' }}{% elsif displayproduct.featured_image %}{{ displayproduct.featured_image | img_url: '800x800' }}{% else %}{% endif %}"
+                      data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ displayproduct.featured_image.alt | default: displayproduct.title }}{% endif %}"
                       {% if forloop.first %}
                         checked
                       {% endif %}
@@ -522,45 +543,46 @@
 
       <!-- Right Image -->
       <div class="image-container">
-        {% assign image_url = '' %}
-        {% assign image_alt = '' %}
+        {% comment %} Try to get image from different sources {% endcomment %}
+        {% assign imageurl = '' %}
+        {% assign imagealt = '' %}
 
-        {% if section.settings.useproductimage and displayproduct.featuredimage %}
-          {% assign image_url = displayproduct.featuredimage | img_url: '600x600' %}
-          {% assign image_alt = displayproduct.featuredimage.alt | default: displayproduct.title %}
+        {% comment %} First priority: Use product image if enabled {% endcomment %}
+        {% if section.settings.useproductimage and displayproduct.featured_image %}
+          {% assign imageurl = displayproduct.featured_image | img_url: '800x800' %}
+          {% assign imagealt = displayproduct.featured_image.alt | default: displayproduct.title %}
+          {% comment %} Second priority: Custom main image {% endcomment %}
         {% elsif section.settings.mainimage != blank %}
-          {% assign image_url = section.settings.mainimage | img_url: '600x600' %}
-          {% assign image_alt = section.settings.mainimagealt | default: displayproduct.title %}
+          {% assign imageurl = section.settings.mainimage | img_url: '800x800' %}
+          {% assign imagealt = section.settings.mainimagealt | default: displayproduct.title %}
+          {% comment %} Third priority: Fallback image {% endcomment %}
         {% elsif section.settings.fallbackimage != blank %}
-          {% assign image_url = section.settings.fallbackimage | img_url: '600x600' %}
-          {% assign image_alt = section.settings.mainimagealt | default: displayproduct.title %}
-        {% elsif displayproduct.featuredimage %}
-          {% assign image_url = displayproduct.featuredimage | img_url: '600x600' %}
-          {% assign image_alt = displayproduct.featuredimage.alt | default: displayproduct.title %}
+          {% assign imageurl = section.settings.fallbackimage | img_url: '800x800' %}
+          {% assign imagealt = section.settings.mainimagealt | default: displayproduct.title %}
+          {% comment %} Fourth priority: Product featured image as fallback {% endcomment %}
+        {% elsif displayproduct.featured_image %}
+          {% assign imageurl = displayproduct.featured_image | img_url: '800x800' %}
+          {% assign imagealt = displayproduct.featured_image.alt | default: displayproduct.title %}
         {% endif %}
 
-        {% if image_url != blank %}
+        {% comment %} Display image or placeholder {% endcomment %}
+        {% if imageurl != blank and imageurl != '' %}
           <img
             id="main-product-image"
-            src="{{ image_url }}"
-            alt="{{ image_alt }}"
+            src="{{ imageurl }}"
+            alt="{{ imagealt }}"
             class="main-image"
             loading="lazy"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            onload="console.log('Image loaded successfully');"
+            onerror="console.log('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';"
           >
-          <div
-            class="main-image placeholder-image"
-            style="display: none; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;"
-          >
+          <div class="placeholder-image" style="display: none;">
             <span>{{ displayproduct.title | default: 'Product Image' }}</span>
           </div>
         {% else %}
-          <div
-            id="main-product-image"
-            class="main-image placeholder-image"
-            style="display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;"
-          >
-            <span>{{ displayproduct.title | default: 'Product Image' }}</span>
+          {% comment %} Show placeholder when no image is available {% endcomment %}
+          <div id="main-product-image" class="placeholder-image">
+            <span>{{ displayproduct.title | default: 'No Image Available' }}</span>
           </div>
         {% endif %}
       </div>
@@ -646,9 +668,7 @@
 
                 // Create fallback placeholder
                 const placeholder = document.createElement('div');
-                placeholder.className = 'main-image placeholder-image';
-                placeholder.style.cssText =
-                  'display: none; align-items: center; justify-content: center; color: #9ca3af; font-size: 16px; height: 100%; width: 100%;';
+                placeholder.className = 'placeholder-image';
                 placeholder.innerHTML = '<span>' + (newImageAlt || 'Product Image') + '</span>';
 
                 imageContainer.innerHTML = '';
@@ -710,7 +730,7 @@
     if (selectedVariant && selectedVariant.getAttribute('data-price')) {
       const unitPrice = selectedVariant.getAttribute('data-price');
       // Extract numeric value from price string
-      const priceMatch = unitPrice.match(/[\d,]+\.?\d/);
+      const priceMatch = unitPrice.match(/[\d,]+\.?\d*/);
       if (priceMatch) {
         const numericPrice = parseFloat(priceMatch[0].replace(',', ''));
         const totalPrice = numericPrice * quantity;
@@ -1076,7 +1096,7 @@
       "id": "disclaimertext",
       "label": "Disclaimer Text",
       "info": "Add any disclaimers or additional information",
-      "default": "<p>* Terms and conditions apply. See website for details.</p>"
+      "default": "<p> Terms and conditions apply. See website for details.</p>"
     },
     {
       "type": "color",
