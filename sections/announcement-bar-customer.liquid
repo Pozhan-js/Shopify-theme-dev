@@ -1,0 +1,676 @@
+<!-- 公告栏模块 -->
+<style>
+  .announcement-bar {
+    position: relative;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    z-index: 999997;
+    overflow: hidden;
+  }
+
+  .announcement-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: 48px;
+  }
+
+  /* 公告内容 */
+  .announcement-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    flex: 1;
+    text-align: center;
+  }
+
+  .announcement-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;
+  }
+
+  .announcement-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+
+  .announcement-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #2d3748;
+    line-height: 1.4;
+    letter-spacing: 0.2px;
+    margin: 0;
+  }
+
+  .announcement-link {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid transparent;
+  }
+
+  .announcement-link:hover {
+    border-bottom-color: #ff6b35;
+    color: #2d3748;
+  }
+
+  /* 详细信息按钮 */
+  .announcement-details {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .announcement-details:hover {
+    color: #ff6b35;
+  }
+
+  /* 关闭按钮 */
+  .announcement-close {
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .announcement-close:hover {
+    background: rgba(100, 116, 139, 0.1);
+    color: #2d3748;
+  }
+
+  .announcement-close svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* 滚动动画效果 */
+  .announcement-scroll {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .announcement-scroll .announcement-text {
+    display: inline-block;
+    animation: scroll-text 20s linear infinite;
+  }
+
+  @keyframes scroll-text {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  /* 多条公告轮播 */
+  .announcement-carousel {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .announcement-slides {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+  }
+
+  .announcement-slide {
+    min-width: 100%;
+    flex-shrink: 0;
+  }
+
+  .announcement-indicators {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.3rem;
+  }
+
+  .announcement-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(100, 116, 139, 0.3);
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .announcement-indicator.active {
+    background: #ff6b35;
+  }
+
+  /* 隐藏状态 */
+  .announcement-bar.hidden {
+    display: none;
+  }
+
+  /* 响应式设计 */
+  @media screen and (max-width: 768px) {
+    .announcement-container {
+      padding: 0.6rem 1rem;
+      min-height: 44px;
+    }
+
+    .announcement-text {
+      font-size: 0.85rem;
+    }
+
+    .announcement-close {
+      right: 1rem;
+      padding: 0.3rem;
+    }
+
+    .announcement-close svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .announcement-details {
+      font-size: 0.75rem;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .announcement-container {
+      padding: 0.5rem 0.8rem;
+      min-height: 40px;
+    }
+
+    .announcement-content {
+      gap: 0.5rem;
+    }
+
+    .announcement-text {
+      font-size: 0.8rem;
+    }
+
+    .announcement-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 移动端长文本滚动 */
+    .announcement-text {
+      max-width: calc(100vw - 120px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  /* 主题颜色变体 */
+  .announcement-bar.theme-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .announcement-bar.theme-primary .announcement-text,
+  .announcement-bar.theme-primary .announcement-close {
+    color: white;
+  }
+
+  .announcement-bar.theme-primary .announcement-details {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .announcement-bar.theme-primary .announcement-details:hover {
+    color: #ffd700;
+  }
+
+  .announcement-bar.theme-primary .announcement-link:hover {
+    border-bottom-color: #ffd700;
+  }
+
+  .announcement-bar.theme-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+  }
+
+  .announcement-bar.theme-success .announcement-text,
+  .announcement-bar.theme-success .announcement-close {
+    color: white;
+  }
+
+  .announcement-bar.theme-success .announcement-details {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .announcement-bar.theme-warning {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+  }
+
+  .announcement-bar.theme-warning .announcement-text,
+  .announcement-bar.theme-warning .announcement-close {
+    color: white;
+  }
+
+  .announcement-bar.theme-warning .announcement-details {
+    color: rgba(255, 255, 255, 0.8);
+  }
+</style>
+
+{%- if section.settings.show_announcement -%}
+  <div
+    class="announcement-bar {% if section.settings.theme_style %}theme-{{ section.settings.theme_style }}{% endif %}"
+    id="announcementBar"
+  >
+    <div class="announcement-container">
+      {%- if section.blocks.size > 1 -%}
+        <!-- 多条公告轮播 -->
+        <div class="announcement-carousel" id="announcementCarousel">
+          <div class="announcement-slides" id="announcementSlides">
+            {%- for block in section.blocks -%}
+              <div class="announcement-slide" {{ block.shopify_attributes }}>
+                <div class="announcement-content">
+                  {%- if block.settings.show_icon -%}
+                    <div class="announcement-icon">
+                      {%- case block.settings.icon_type -%}
+                        {%- when 'info' -%}
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 16v-4"/>
+                            <path d="M12 8h.01"/>
+                          </svg>
+                        {%- when 'gift' -%}
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <polyline points="20,12 20,22 4,22 4,12"/>
+                            <rect x="2" y="7" width="20" height="5"/>
+                            <line x1="12" y1="22" x2="12" y2="7"/>
+                            <path d="M12,7 C12,7 9.5,4 6,7 C6,7 6,10 12,10"/>
+                            <path d="M12,7 C12,7 14.5,4 18,7 C18,7 18,10 12,10"/>
+                          </svg>
+                        {%- when 'truck' -%}
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="1" y="3" width="15" height="13"/>
+                            <polygon points="16,8 20,8 23,11 23,16 16,16 16,8"/>
+                            <circle cx="5.5" cy="18.5" r="2.5"/>
+                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                          </svg>
+                        {%- when 'star' -%}
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
+                          </svg>
+                        {%- else -%}
+                          <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                          </svg>
+                      {%- endcase -%}
+                    </div>
+                  {%- endif -%}
+
+                  <div class="announcement-text">
+                    {%- if block.settings.link != blank -%}
+                      <a href="{{ block.settings.link }}" class="announcement-link">
+                        {{ block.settings.text | escape }}
+                      </a>
+                    {%- else -%}
+                      {{ block.settings.text | escape }}
+                    {%- endif -%}
+
+                    {%- if block.settings.show_details and block.settings.details_text != blank -%}
+                      <span
+                        class="announcement-details"
+                        onclick="showAnnouncementDetails('{{ block.settings.details_text | escape }}')"
+                      >
+                        {{ block.settings.details_text | default: '详细を表示する' }}
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+
+          {%- if section.blocks.size > 1 -%}
+            <div class="announcement-indicators">
+              {%- for block in section.blocks -%}
+                <div
+                  class="announcement-indicator {% if forloop.first %}active{% endif %}"
+                  onclick="goToSlide({{ forloop.index0 }})"
+                ></div>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- else -%}
+        <!-- 单条公告 -->
+        {%- for block in section.blocks limit: 1 -%}
+          <div class="announcement-content" {{ block.shopify_attributes }}>
+            {%- if block.settings.show_icon -%}
+              <div class="announcement-icon">
+                {%- case block.settings.icon_type -%}
+                  {%- when 'info' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M12 16v-4"/>
+                      <path d="M12 8h.01"/>
+                    </svg>
+                  {%- when 'gift' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <polyline points="20,12 20,22 4,22 4,12"/>
+                      <rect x="2" y="7" width="20" height="5"/>
+                      <line x1="12" y1="22" x2="12" y2="7"/>
+                      <path d="M12,7 C12,7 9.5,4 6,7 C6,7 6,10 12,10"/>
+                      <path d="M12,7 C12,7 14.5,4 18,7 C18,7 18,10 12,10"/>
+                    </svg>
+                  {%- when 'truck' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <rect x="1" y="3" width="15" height="13"/>
+                      <polygon points="16,8 20,8 23,11 23,16 16,16 16,8"/>
+                      <circle cx="5.5" cy="18.5" r="2.5"/>
+                      <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                  {%- when 'star' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
+                    </svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                {%- endcase -%}
+              </div>
+            {%- endif -%}
+
+            <div class="announcement-text">
+              {%- if block.settings.link != blank -%}
+                <a href="{{ block.settings.link }}" class="announcement-link">
+                  {{ block.settings.text | escape }}
+                </a>
+              {%- else -%}
+                {{ block.settings.text | escape }}
+              {%- endif -%}
+
+              {%- if block.settings.show_details and block.settings.details_text != blank -%}
+                <span
+                  class="announcement-details"
+                  onclick="showAnnouncementDetails('{{ block.settings.details_text | escape }}')"
+                >
+                  {{ block.settings.details_text | default: '详细を表示する' }}
+                </span>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+
+      {%- if section.settings.show_close_button -%}
+        <button class="announcement-close" onclick="closeAnnouncement()" aria-label="关闭公告">
+          <svg viewBox="0 0 24 24" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+
+<script>
+  // 公告栏功能
+  let currentSlide = 0;
+  let slideInterval;
+  
+  // 关闭公告栏
+  function closeAnnouncement() {
+    const announcementBar = document.getElementById('announcementBar');
+    if (announcementBar) {
+      announcementBar.classList.add('hidden');
+      // 保存关闭状态到本地存储
+      localStorage.setItem('announcementClosed', 'true');
+    }
+  }
+
+  // 显示公告详情
+  function showAnnouncementDetails(details) {
+    alert(details);
+  }
+
+  // 轮播功能
+  function goToSlide(index) {
+    const slides = document.getElementById('announcementSlides');
+    const indicators = document.querySelectorAll('.announcement-indicator');
+    
+    if (slides && indicators.length > 0) {
+      currentSlide = index;
+      slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+      
+      indicators.forEach((indicator, i) => {
+        indicator.classList.toggle('active', i === currentSlide);
+      });
+    }
+  }
+
+  function nextSlide() {
+    const totalSlides = document.querySelectorAll('.announcement-slide').length;
+    currentSlide = (currentSlide + 1) % totalSlides;
+    goToSlide(currentSlide);
+  }
+
+  // 自动轮播
+  function startAutoSlide() {
+    const totalSlides = document.querySelectorAll('.announcement-slide').length;
+    if (totalSlides > 1) {
+      slideInterval = setInterval(nextSlide, {{ section.settings.auto_rotate_speed | default: 5000 }});
+    }
+  }
+
+  function stopAutoSlide() {
+    if (slideInterval) {
+      clearInterval(slideInterval);
+    }
+  }
+
+  // 页面加载完成后初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    // 检查是否已关闭公告
+    const announcementClosed = localStorage.getItem('announcementClosed');
+    const announcementBar = document.getElementById('announcementBar');
+    
+    if (announcementClosed === 'true' && announcementBar) {
+      announcementBar.classList.add('hidden');
+      return;
+    }
+
+    // 启动自动轮播
+    {% if section.settings.auto_rotate %}
+      startAutoSlide();
+      
+      // 鼠标悬停时暂停轮播
+      const carousel = document.getElementById('announcementCarousel');
+      if (carousel) {
+        carousel.addEventListener('mouseenter', stopAutoSlide);
+        carousel.addEventListener('mouseleave', startAutoSlide);
+      }
+    {% endif %}
+  });
+
+  // 页面卸载时清理定时器
+  window.addEventListener('beforeunload', function() {
+    stopAutoSlide();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "公告栏",
+  "class": "section-announcement-bar",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_announcement",
+      "label": "显示公告栏",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "theme_style",
+      "label": "主题样式",
+      "options": [
+        {
+          "value": "",
+          "label": "默认"
+        },
+        {
+          "value": "primary",
+          "label": "主色调"
+        },
+        {
+          "value": "success",
+          "label": "成功绿色"
+        },
+        {
+          "value": "warning",
+          "label": "警告橙色"
+        }
+      ],
+      "default": ""
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close_button",
+      "label": "显示关闭按钮",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "轮播设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_rotate",
+      "label": "自动轮播",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "auto_rotate_speed",
+      "min": 3000,
+      "max": 9500,
+      "step": 500,
+      "unit": "ms",
+      "label": "轮播速度",
+      "default": 5000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "公告内容",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "公告文本",
+          "default": "新作Apple Watch Hermèsはこちら 9月28日（日）のご注文まで送料無料でお届け..."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "链接地址"
+        },
+        {
+          "type": "header",
+          "content": "图标设置"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_icon",
+          "label": "显示图标",
+          "default": false
+        },
+        {
+          "type": "select",
+          "id": "icon_type",
+          "label": "图标类型",
+          "options": [
+            {
+              "value": "info",
+              "label": "信息"
+            },
+            {
+              "value": "gift",
+              "label": "礼品"
+            },
+            {
+              "value": "truck",
+              "label": "配送"
+            },
+            {
+              "value": "star",
+              "label": "星标"
+            },
+            {
+              "value": "message",
+              "label": "消息"
+            }
+          ],
+          "default": "info"
+        },
+        {
+          "type": "header",
+          "content": "详情设置"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_details",
+          "label": "显示详情按钮",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "details_text",
+          "label": "详情按钮文本",
+          "default": "详细を表示する"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "公告栏",
+      "category": "Header",
+      "blocks": [
+        {
+          "type": "announcement",
+          "settings": {
+            "text": "新作Apple Watch Hermèsはこちら 9月28日（日）のご注文まで送料無料でお届け...",
+            "show_details": true,
+            "details_text": "详细を表示する"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

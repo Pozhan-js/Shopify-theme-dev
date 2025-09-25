@@ -90,12 +90,12 @@
     border-bottom: 2px solid transparent;
   }
 
-  /* 鼠标悬停时只改变边框颜色，不改变尺寸 */
+  /* 鼠标悬停时移除所有颜色变化效果 */
   .modern-nav-link:hover {
-    border-bottom-color: #E5E5E5;
     background: none;
     transform: none;
     box-shadow: none;
+    border-bottom-color: transparent;
   }
 
   /* 功能图标区域 */
@@ -511,12 +511,12 @@
       max-width: none;
       border-radius: 12px;
     }
-    
+
     .search-modal__form .field__input {
       font-size: 1.4rem;
       padding: 1.8rem 5rem 1.8rem 2rem;
     }
-    
+
     .search-modal__close-button {
       right: 1.5rem;
       padding: 0.6rem;
@@ -567,7 +567,7 @@
     }
   }
 
-  /* 优化的产品系列下拉菜单 - 100%全屏 */
+  /* 下拉菜单样式 */
   .modern-mega-menu {
     position: fixed;
     top: 100%;
@@ -584,6 +584,7 @@
     z-index: 999;
     border-top: 1px solid #ede8e0;
     transform: translateY(-10px);
+    min-height: 200px;
   }
 
   .modern-nav-item:hover .modern-mega-menu {
@@ -601,181 +602,127 @@
     transition: opacity 0.3s ease-in, visibility 0.3s ease-in, transform 0.3s ease-in;
   }
 
-  /* 产品系列网格 - 靠左对齐布局 */
-  .collections-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 2rem;
-    justify-content: flex-start;
-    align-items: flex-start;
+  /* 下拉菜单内容容器 */
+  .mega-menu-content {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 3rem;
   }
 
+  /* 菜单网格布局 */
   .mega-menu-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 2rem;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 3rem;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2.5rem;
+    align-items: start;
   }
 
-  /* 动态计算每个系列的宽度 */
-  .collections-grid .collection-item {
-    flex: 0 0 calc(30% - 1.33rem);
-    max-width: calc(30% - 1.33rem);
+  /* 菜单分类列 */
+  .mega-menu-category {
+    display: flex;
+    flex-direction: column;
   }
 
-  .mega-menu-grid .collection-item {
-    flex: 0 0 calc(30% - 1.33rem);
-    max-width: calc(30% - 1.33rem);
-  }
-
-  /* 当系列数量超过3个时，调整宽度 */
-  .collections-grid[data-count="4"] .collection-item,
-  .mega-menu-grid[data-count="4"] .collection-item {
-    flex: 0 0 calc(22.5% - 1.5rem);
-    max-width: calc(22.5% - 1.5rem);
-  }
-
-  .collections-grid[data-count="5"] .collection-item,
-  .mega-menu-grid[data-count="5"] .collection-item {
-    flex: 0 0 calc(18% - 1.6rem);
-    max-width: calc(18% - 1.6rem);
-  }
-
-  .collections-grid[data-count="6"] .collection-item,
-  .mega-menu-grid[data-count="6"] .collection-item {
-    flex: 0 0 calc(15% - 1.67rem);
-    max-width: calc(15% - 1.67rem);
-  }
-
-  .collections-grid[data-count="7"] .collection-item,
-  .mega-menu-grid[data-count="7"] .collection-item,
-  .collections-grid[data-count="8"] .collection-item,
-  .mega-menu-grid[data-count="8"] .collection-item,
-  .collections-grid[data-count="9"] .collection-item,
-  .mega-menu-grid[data-count="9"] .collection-item,
-  .collections-grid[data-count="10"] .collection-item,
-  .mega-menu-grid[data-count="10"] .collection-item,
-  .collections-grid[data-count="11"] .collection-item,
-  .mega-menu-grid[data-count="11"] .collection-item,
-  .collections-grid[data-count="12"] .collection-item,
-  .mega-menu-grid[data-count="12"] .collection-item {
-    flex: 0 0 calc(12.5% - 1.75rem);
-    max-width: calc(12.5% - 1.75rem);
-  }
-
-  .collection-item {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start;
-    text-decoration: none;
-    color: inherit;
-    background: transparent;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    position: relative;
-    cursor: pointer;
-    box-shadow: none;
-    border: none;
-  }
-
-  .collection-item:hover {
-    transform: translateY(-8px);
-    box-shadow: none;
-  }
-
-  .collection-image-container {
-    position: relative;
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-    background: #f5f2ed;
-  }
-
-  .collection-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .collection-item:hover .collection-image {
-    transform: scale(1.05);
-  }
-
-  .collection-content {
-    padding: 1.2rem;
-    width: 100%;
-  }
-
-  .collection-title {
+  /* 主分类标题 */
+  .mega-menu-category-title {
     font-size: 1.1rem;
+    font-weight: 700;
     color: #2d3748;
-    font-weight: 600;
-    line-height: 1.4;
-    margin: 0;
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #e2e8f0;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  /* 子分类列表 */
+  .mega-menu-subcategories {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    gap: 0.6rem;
   }
 
-  .collection-arrow {
-    font-size: 1rem;
-    transition: transform 0.3s ease;
-    opacity: 0.6;
-    color: #64748b;
+  /* 子分类项目 */
+  .mega-menu-subcategory {
+    position: relative;
+    padding-left: 1rem;
   }
 
-  .collection-item:hover .collection-arrow {
-    transform: translateX(4px);
-    opacity: 1;
-    color: #ff6b35;
-  }
-
-  .collection-placeholder {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #f5f2ed 0%, #ede8e0 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .collection-placeholder::before {
+  .mega-menu-subcategory::before {
     content: '';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
-    animation: shimmer 2s infinite;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+    transition: height 0.3s ease;
+    border-radius: 2px;
   }
 
-  @keyframes shimmer {
-    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  .mega-menu-subcategory:hover::before {
+    height: 100%;
   }
 
-  .placeholder-icon {
-    font-size: 2.5rem;
-    color: #d4c4a8;
-    z-index: 1;
+  .mega-menu-subcategory-link {
+    display: block;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 0.4rem 0;
+    transition: all 0.3s ease;
     position: relative;
+  }
+
+  .mega-menu-subcategory-link:hover {
+    color: #64748b;
+    transform: translateX(8px);
+  }
+
+  /* 空状态提示 */
+  .mega-menu-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 2rem;
+  }
+
+  /* 响应式设计 */
+  @media screen and (max-width: 1200px) {
+    .mega-menu-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+
+    .mega-menu-content {
+      padding: 0 2.5rem;
+    }
+  }
+
+  @media screen and (max-width: 1024px) {
+    .mega-menu-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.8rem;
+    }
+
+    .modern-mega-menu {
+      padding: 2.5rem 0;
+    }
+
+    .mega-menu-content {
+      padding: 0 2rem;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .modern-mega-menu {
+      display: none;
+    }
   }
 
   /* 现代语言切换器 */
@@ -1196,13 +1143,8 @@
       padding: 2.5rem;
     }
 
-    .collections-grid {
+    .mega-menu-content {
       padding: 0 2.5rem;
-    }
-
-    .collections-grid .collection-item {
-      flex: 0 0 calc(45% - 1rem);
-      max-width: calc(45% - 1rem);
     }
   }
 
@@ -1219,13 +1161,8 @@
       padding: 2rem;
     }
 
-    .collections-grid {
+    .mega-menu-content {
       padding: 0 2rem;
-    }
-
-    .collections-grid .collection-item {
-      flex: 0 0 calc(45% - 1rem);
-      max-width: calc(45% - 1rem);
     }
   }
 
@@ -1250,14 +1187,9 @@
     .nav-icons-section .nav-icon-button:not(.compact-language-toggle) {
       display: none;
     }
-    
+
     .nav-icons-section {
       gap: 1rem;
-    }
-
-    .collections-grid .collection-item {
-      flex: 0 0 calc(100% - 0rem);
-      max-width: calc(100% - 0rem);
     }
 
     .mobile-menu-drawer {
@@ -1295,7 +1227,7 @@
     .nav-icons-section .nav-icon-button:not(.compact-language-toggle) {
       display: none;
     }
-    
+
     .nav-icons-section {
       gap: 1rem;
     }
@@ -1309,10 +1241,10 @@
       {%- if settings.logo != blank -%}
         <a href="{{ routes.root_url }}" class="modern-logo-link">
           {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-          {{ settings.logo | image_url: width: 440 | image_tag:
-            class: 'modern-logo-image',
-            alt: logo_alt,
-            loading: 'eager'
+          {{
+            settings.logo
+            | image_url: width: 440
+            | image_tag: class: 'modern-logo-image', alt: logo_alt, loading: 'eager'
           }}
         </a>
       {%- else -%}
@@ -1331,89 +1263,68 @@
             <a href="{{ link.url }}" class="modern-nav-link">
               {{ link.title }}
             </a>
-            
-            {%- comment -%} 如果有子链接，显示子链接对应的产品系列 {%- endcomment -%}
-            {%- if link.links.size > 0 -%}
+
+            {%- comment -%} 下拉菜单内容 {%- endcomment -%}
+            {%- if link.links.size > 0
+              or link.title contains 'Category'
+              or link.title contains '分类'
+              or link.title contains '产品'
+              or link.title contains 'Products'
+              or link.title contains 'Collections'
+              or link.title contains '系列'
+            -%}
               <div class="modern-mega-menu">
-                <div class="collections-grid" data-count="{{ link.links.size }}">
-                  {%- for childlink in link.links -%}
-                    {%- assign collection = collections[childlink.handle] -%}
-                    {%- if collection -%}
-                      <a href="{{ collection.url }}" class="collection-item">
-                        <div class="collection-image-container">
-                          {%- if collection.image -%}
-                            <img src="{{ collection.image | image_url: width: 400, height: 240, crop: 'center' }}" 
-                                 alt="{{ collection.title }}" 
-                                 class="collection-image"
-                                 loading="lazy">
-                          {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                            <img src="{{ collection.products.first.featured_image | image_url: width: 400, height: 240, crop: 'center' }}" 
-                                 alt="{{ collection.title }}" 
-                                 class="collection-image"
-                                 loading="lazy">
-                          {%- else -%}
-                            <div class="collection-placeholder">
-                              <span class="placeholder-icon">🛍️</span>
+                <div class="mega-menu-content">
+                  {%- comment -%} 优先显示当前导航项的子菜单 {%- endcomment -%}
+                  {%- if link.links.size > 0 -%}
+                    <div class="mega-menu-grid">
+                      {%- for childlink in link.links -%}
+                        <div class="mega-menu-category">
+                          <a href="{{ childlink.url }}" class="mega-menu-category-title">
+                            {{ childlink.title }}
+                          </a>
+                          {%- if childlink.links.size > 0 -%}
+                            <div class="mega-menu-subcategories">
+                              {%- for grandchildlink in childlink.links -%}
+                                <div class="mega-menu-subcategory">
+                                  <a href="{{ grandchildlink.url }}" class="mega-menu-subcategory-link">
+                                    {{ grandchildlink.title }}
+                                  </a>
+                                </div>
+                              {%- endfor -%}
                             </div>
                           {%- endif -%}
                         </div>
-                        <div class="collection-content">
-                          <div class="collection-title">
-                            {{ collection.title }}
-                            <span class="collection-arrow">→</span>
+                      {%- endfor -%}
+                    </div>
+                  {%- else -%}
+                    {%- comment -%} 如果没有直接子菜单，显示 main-series-menu 的内容 {%- endcomment -%}
+                    {%- assign series_menu = linklists['main-series-menu'] -%}
+                    {%- if series_menu and series_menu.links.size > 0 -%}
+                      <div class="mega-menu-grid">
+                        {%- for series_link in series_menu.links -%}
+                          <div class="mega-menu-category">
+                            <a href="{{ series_link.url }}" class="mega-menu-category-title">
+                              {{ series_link.title }}
+                            </a>
+                            {%- if series_link.links.size > 0 -%}
+                              <div class="mega-menu-subcategories">
+                                {%- for series_childlink in series_link.links -%}
+                                  <div class="mega-menu-subcategory">
+                                    <a href="{{ series_childlink.url }}" class="mega-menu-subcategory-link">
+                                      {{ series_childlink.title }}
+                                    </a>
+                                  </div>
+                                {%- endfor -%}
+                              </div>
+                            {%- endif -%}
                           </div>
-                        </div>
-                      </a>
-                    {%- else -%}
-                      <a href="{{ childlink.url }}" class="collection-item">
-                        <div class="collection-image-container">
-                          <div class="collection-placeholder">
-                            <span class="placeholder-icon">🛍️</span>
-                          </div>
-                        </div>
-                        <div class="collection-content">
-                          <div class="collection-title">
-                            {{ childlink.title }}
-                            <span class="collection-arrow">→</span>
-                          </div>
-                        </div>
-                      </a>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </div>
-              </div>
-            
-            {%- comment -%} 如果是产品相关链接但没有子链接，显示所有产品系列 {%- endcomment -%}
-            {%- elsif link.title contains 'Category' or link.title contains '分类' or link.title contains '产品' or link.title contains 'Products' or link.title contains 'Collections' or link.title contains '系列' -%}
-              <div class="modern-mega-menu">
-                <div class="collections-grid" data-count="{{ collections.size }}">
-                  {%- for collection in collections -%}
-                    <a href="{{ collection.url }}" class="collection-item">
-                      <div class="collection-image-container">
-                        {%- if collection.image -%}
-                          <img src="{{ collection.image | image_url: width: 400, height: 240, crop: 'center' }}" 
-                               alt="{{ collection.title }}" 
-                               class="collection-image"
-                               loading="lazy">
-                        {%- elsif collection.products.first and collection.products.first.featured_image -%}
-                          <img src="{{ collection.products.first.featured_image | image_url: width: 400, height: 240, crop: 'center' }}" 
-                               alt="{{ collection.title }}" 
-                               class="collection-image"
-                               loading="lazy">
-                        {%- else -%}
-                          <div class="collection-placeholder">
-                            <span class="placeholder-icon">🛍️</span>
-                          </div>
-                        {%- endif -%}
+                        {%- endfor -%}
                       </div>
-                        <div class="collection-content">
-                          <div class="collection-title">
-                            {{ collection.title }}
-                            <span class="collection-arrow">→</span>
-                          </div>
-                        </div>
-                    </a>
-                  {%- endfor -%}
+                    {%- else -%}
+                      <div class="mega-menu-placeholder">请在后台创建名为 "main-series-menu" 的菜单来显示分类内容</div>
+                    {%- endif -%}
+                  {%- endif -%}
                 </div>
               </div>
             {%- endif -%}
@@ -1449,7 +1360,11 @@
 
         <!-- Shopify 语言切换器 - 紧凑版 -->
         <div class="compact-language-selector" id="compactLanguageSelector">
-          <button class="nav-icon-button compact-language-toggle" onclick="toggleCompactLanguageDropdown()" aria-label="切换语言">
+          <button
+            class="nav-icon-button compact-language-toggle"
+            onclick="toggleCompactLanguageDropdown()"
+            aria-label="切换语言"
+          >
             <svg viewBox="0 0 24 24">
               <path d="M5 8l6 6"/>
               <path d="m4 14 6-6 2-3"/>
@@ -1464,14 +1379,23 @@
             {%- form 'localization', id: 'HeaderLanguageFormDesktop', class: 'localization-form' -%}
               {%- if localization.available_languages.size > 1 -%}
                 {%- for language in localization.available_languages -%}
-                  <button type="submit" name="language_code" value="{{ language.iso_code }}" class="compact-language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}">
+                  <button
+                    type="submit"
+                    name="language_code"
+                    value="{{ language.iso_code }}"
+                    class="compact-language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}"
+                  >
                     <div class="compact-language-flag {{ language.iso_code }}"></div>
                     <span>
                       {%- case language.iso_code -%}
-                        {%- when 'zh' or 'zh-CN' or 'zh-TW' -%}中文
-                        {%- when 'en' or 'en-US' or 'en-GB' -%}English
-                        {%- when 'ja' or 'ja-JP' -%}日本語
-                        {%- else -%}{{ language.endonym_name }}
+                        {%- when 'zh', 'zh-CN', 'zh-TW' -%}
+                          中文
+                        {%- when 'en', 'en-US', 'en-GB' -%}
+                          English
+                        {%- when 'ja', 'ja-JP' -%}
+                          日本語
+                        {%- else -%}
+                          {{ language.endonym_name }}
                       {%- endcase -%}
                     </span>
                   </button>
@@ -1482,10 +1406,14 @@
                   <div class="compact-language-flag {{ localization.language.iso_code }}"></div>
                   <span>
                     {%- case localization.language.iso_code -%}
-                      {%- when 'zh' or 'zh-CN' or 'zh-TW' -%}中文
-                      {%- when 'en' or 'en-US' or 'en-GB' -%}English
-                      {%- when 'ja' or 'ja-JP' -%}日本語
-                      {%- else -%}{{ localization.language.endonym_name }}
+                      {%- when 'zh', 'zh-CN', 'zh-TW' -%}
+                        中文
+                      {%- when 'en', 'en-US', 'en-GB' -%}
+                        English
+                      {%- when 'ja', 'ja-JP' -%}
+                        日本語
+                      {%- else -%}
+                        {{ localization.language.endonym_name }}
                     {%- endcase -%}
                   </span>
                 </div>
@@ -1506,8 +1434,12 @@
 
   <!-- Dawn主题搜索模态框 -->
   <details class="search-modal" id="Details-search-1">
-    <summary class="search-modal__toggle" aria-haspopup="dialog" aria-label="{{ 'general.search.search' | t }}" style="display: none;">
-    </summary>
+    <summary
+      class="search-modal__toggle"
+      aria-haspopup="dialog"
+      aria-label="{{ 'general.search.search' | t }}"
+      style="display: none;"
+    ></summary>
     <div class="search-modal__content" role="dialog" aria-modal="true" aria-label="{{ 'general.search.search' | t }}">
       <div class="search-modal__form">
         {%- if settings.predictive_search_enabled -%}
@@ -1552,7 +1484,13 @@
           {%- if settings.predictive_search_enabled -%}
             <div class="predictive-search predictive-search--header" tabindex="-1" data-predictive-search>
               <div class="predictive-search__loading-state">
-                <svg aria-hidden="true" focusable="false" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  aria-hidden="true"
+                  focusable="false"
+                  class="spinner"
+                  viewBox="0 0 66 66"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
                 </svg>
               </div>
@@ -1564,7 +1502,11 @@
         {%- if settings.predictive_search_enabled -%}
           </predictive-search>
         {%- endif -%}
-        <button type="button" class="search-modal__close-button modal__close-button link link--text focus-inset" aria-label="{{ 'accessibility.close' | t }}">
+        <button
+          type="button"
+          class="search-modal__close-button modal__close-button link link--text focus-inset"
+          aria-label="{{ 'accessibility.close' | t }}"
+        >
           <svg class="icon icon-close" aria-hidden="true" focusable="false">
             <use xlink:href="#icon-close">
           </svg>
@@ -1582,7 +1524,7 @@
       <div class="mobile-menu-logo">菜单</div>
       <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="关闭菜单">×</button>
     </div>
-    
+
     <nav class="mobile-nav-content">
       {%- for link in section.settings.menu.links -%}
         <div class="mobile-nav-item">
@@ -1591,12 +1533,7 @@
             <div class="mobile-submenu">
               {%- for childlink in link.links -%}
                 <div class="mobile-submenu-item">
-                  {%- assign collection = collections[childlink.handle] -%}
-                  {%- if collection -%}
-                    <a href="{{ collection.url }}" class="mobile-submenu-link">{{ collection.title }}</a>
-                  {%- else -%}
-                    <a href="{{ childlink.url }}" class="mobile-submenu-link">{{ childlink.title }}</a>
-                  {%- endif -%}
+                  <a href="{{ childlink.url }}" class="mobile-submenu-link">{{ childlink.title }}</a>
                 </div>
               {%- endfor -%}
             </div>
@@ -1614,14 +1551,23 @@
         {%- form 'localization', id: 'HeaderLanguageFormMobile', class: 'localization-form' -%}
           {%- if localization.available_languages.size > 1 -%}
             {%- for language in localization.available_languages -%}
-              <button type="submit" name="language_code" value="{{ language.iso_code }}" class="language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}">
+              <button
+                type="submit"
+                name="language_code"
+                value="{{ language.iso_code }}"
+                class="language-option {% if language.iso_code == localization.language.iso_code %}active{% endif %}"
+              >
                 <div class="language-flag {{ language.iso_code }}"></div>
                 <span>
                   {%- case language.iso_code -%}
-                    {%- when 'zh' or 'zh-CN' or 'zh-TW' -%}中文
-                    {%- when 'en' or 'en-US' or 'en-GB' -%}English
-                    {%- when 'ja' or 'ja-JP' -%}日本語
-                    {%- else -%}{{ language.endonym_name }}
+                    {%- when 'zh', 'zh-CN', 'zh-TW' -%}
+                      中文
+                    {%- when 'en', 'en-US', 'en-GB' -%}
+                      English
+                    {%- when 'ja', 'ja-JP' -%}
+                      日本語
+                    {%- else -%}
+                      {{ language.endonym_name }}
                   {%- endcase -%}
                 </span>
               </button>
@@ -1632,10 +1578,14 @@
               <div class="language-flag {{ localization.language.iso_code }}"></div>
               <span>
                 {%- case localization.language.iso_code -%}
-                  {%- when 'zh' or 'zh-CN' or 'zh-TW' -%}中文
-                  {%- when 'en' or 'en-US' or 'en-GB' -%}English
-                  {%- when 'ja' or 'ja-JP' -%}日本語
-                  {%- else -%}{{ localization.language.endonym_name }}
+                  {%- when 'zh', 'zh-CN', 'zh-TW' -%}
+                    中文
+                  {%- when 'en', 'en-US', 'en-GB' -%}
+                    English
+                  {%- when 'ja', 'ja-JP' -%}
+                    日本語
+                  {%- else -%}
+                    {{ localization.language.endonym_name }}
                 {%- endcase -%}
               </span>
             </div>
@@ -1644,7 +1594,6 @@
       </div>
     </div>
   </div>
-
 </header>
 
 <!-- 回到顶部按钮 - 移到header外部，确保基于屏幕定位 -->
@@ -1682,9 +1631,9 @@
   function toggleCompactLanguageDropdown() {
     const selector = document.getElementById('compactLanguageSelector');
     const dropdown = document.getElementById('compactLanguageDropdown');
-    
+
     selector.classList.toggle('open');
-    
+
     // 点击外部关闭
     if (selector.classList.contains('open')) {
       setTimeout(() => {
@@ -1706,8 +1655,8 @@
   // 购物车数量更新
   function updateCartBadge() {
     fetch('/cart.js')
-      .then(response => response.json())
-      .then(cart => {
+      .then((response) => response.json())
+      .then((cart) => {
         const badge = document.getElementById('cartBadge');
         if (cart.item_count > 0) {
           badge.textContent = cart.item_count;
@@ -1716,7 +1665,7 @@
           badge.classList.remove('show');
         }
       })
-      .catch(error => console.error('Error updating cart:', error));
+      .catch((error) => console.error('Error updating cart:', error));
   }
 
   // 手机端菜单控制
@@ -1725,7 +1674,7 @@
     const overlay = document.getElementById('mobileMenuOverlay');
     const drawer = document.getElementById('mobileMenuDrawer');
     const body = document.body;
-    
+
     toggle.classList.toggle('active');
     overlay.classList.toggle('active');
     drawer.classList.toggle('active');
@@ -1737,7 +1686,7 @@
     const overlay = document.getElementById('mobileMenuOverlay');
     const drawer = document.getElementById('mobileMenuDrawer');
     const body = document.body;
-    
+
     toggle.classList.remove('active');
     overlay.classList.remove('active');
     drawer.classList.remove('active');
@@ -1748,7 +1697,7 @@
   function scrollToTop() {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   }
 
@@ -1773,7 +1722,7 @@
   }
 
   // ESC 键关闭菜单和弹窗
-  document.addEventListener('keydown', function(event) {
+  document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       closeMobileMenu();
       const compactSelector = document.getElementById('compactLanguageSelector');
@@ -1784,14 +1733,14 @@
   });
 
   // 窗口大小改变时关闭手机菜单
-  window.addEventListener('resize', function() {
+  window.addEventListener('resize', function () {
     if (window.innerWidth > 768) {
       closeMobileMenu();
     }
   });
 
   // 页面加载完成后初始化
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // 初始化购物车徽章
     const cartBadge = document.getElementById('cartBadge');
     if (cartBadge && parseInt(cartBadge.textContent) > 0) {
@@ -1800,7 +1749,7 @@
 
     // 监听购物车变化（如果有相关事件）
     document.addEventListener('cart:updated', updateCartBadge);
-    
+
     // 初始化Dawn搜索功能
     const searchModal = document.getElementById('Details-search-1');
     if (searchModal) {
@@ -1811,37 +1760,41 @@
       }
 
       // 点击背景关闭
-      searchModal.addEventListener('click', function(e) {
+      searchModal.addEventListener('click', function (e) {
         if (e.target === searchModal) {
           closeSearchModal();
         }
       });
 
       // 点击搜索模态框内容外部关闭
-      document.addEventListener('click', function(e) {
-        if (searchModal.hasAttribute('open') && !searchModal.querySelector('.search-modal__content').contains(e.target) && !e.target.closest('.nav-icon-button')) {
+      document.addEventListener('click', function (e) {
+        if (
+          searchModal.hasAttribute('open') &&
+          !searchModal.querySelector('.search-modal__content').contains(e.target) &&
+          !e.target.closest('.nav-icon-button')
+        ) {
           closeSearchModal();
         }
       });
 
       // ESC键关闭
-      document.addEventListener('keydown', function(e) {
+      document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && searchModal.hasAttribute('open')) {
           closeSearchModal();
         }
       });
     }
-    
+
     // 为所有内部链接添加平滑滚动
     const links = document.querySelectorAll('a[href^="#"]');
-    links.forEach(link => {
-      link.addEventListener('click', function(e) {
+    links.forEach((link) => {
+      link.addEventListener('click', function (e) {
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
           e.preventDefault();
           target.scrollIntoView({
             behavior: 'smooth',
-            block: 'start'
+            block: 'start',
           });
         }
       });
@@ -1857,11 +1810,11 @@
         backToTopBtn.style.bottom = '30px';
         backToTopBtn.style.right = '30px';
         backToTopBtn.style.zIndex = '9999999';
-        
+
         // 初始检查滚动位置
         handleScroll();
       }, 100);
-      
+
       // 监听滚动事件
       window.addEventListener('scroll', handleScroll);
     }
@@ -1903,7 +1856,7 @@
       "type": "header",
       "content": "菜单设置"
     },
-    { 
+    {
       "type": "checkbox",
       "id": "showmegamenu",
       "label": "显示大型菜单",
@@ -1920,6 +1873,14 @@
       "id": "showmenu_images",
       "label": "显示菜单图片",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "系列菜单设置"
+    },
+    {
+      "type": "paragraph",
+      "content": "请在后台创建名为 'main-series-menu' 的菜单来配置产品分类下拉内容。该菜单将用于显示产品分类相关的导航项下拉菜单。"
     }
   ],
   "presets": [
