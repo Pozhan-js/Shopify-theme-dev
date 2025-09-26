@@ -113,6 +113,22 @@
                         {%- endif -%}
                         <span class="current-price">{{ product.price | money }}</span>
                       </div>
+
+                      <!-- 手机端购物车按钮 -->
+                      {%- if section.settings.show_add_to_cart -%}
+                        <div class="mobile-add-to-cart">
+                          <form method="post" action="/cart/add" class="mobile-cart-form">
+                            <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="mobile-cart-btn">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                              </svg>
+                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
+                            </button>
+                          </form>
+                        </div>
+                      {%- endif -%}
                     </div>
                   </div>
                 {%- endfor -%}
@@ -505,6 +521,46 @@
     height: 14px;
   }
 
+  /* 手机端购物车按钮 */
+  .mobile-add-to-cart {
+    display: none;
+    margin-top: 12px;
+  }
+
+  .mobile-cart-form {
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile-cart-btn {
+    background: #333333;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobile-cart-btn:hover {
+    background: #555555;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .mobile-cart-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
   /* 商品信息 */
   .product-info {
     padding: {{ section.settings.card_padding }}px;
@@ -624,8 +680,11 @@
     }
 
     .hover-add-to-cart {
-      transform: translateY(0);
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.2));
+      display: none !important;
+    }
+
+    .mobile-add-to-cart {
+      display: block;
     }
 
     .image-progress-bar {
@@ -667,6 +726,11 @@
     .hover-cart-btn {
       font-size: 11px;
       padding: 6px 12px;
+    }
+
+    .mobile-cart-btn {
+      font-size: 11px;
+      padding: 8px 14px;
     }
   }
 
@@ -741,6 +805,40 @@
         
         const formData = new FormData(this);
         const button = this.querySelector('.hover-cart-btn');
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '追加中...';
+        
+        fetch('/cart/add.js', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          button.innerHTML = '追加完了！';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 2000);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          button.innerHTML = 'エラー';
+          setTimeout(() => {
+            button.innerHTML = originalText;
+          }, 2000);
+        });
+      });
+    });
+
+    // 添加到购物车功能 - 手机端按钮
+    const mobileCartForms = document.querySelectorAll('.mobile-cart-form');
+    mobileCartForms.forEach(form => {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const formData = new FormData(this);
+        const button = this.querySelector('.mobile-cart-btn');
         const originalText = button.innerHTML;
         
         button.innerHTML = '追加中...';
