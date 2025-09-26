@@ -1,13 +1,42 @@
-<!-- 现代化导航栏 - 全新设计 -->
+<!-- 现代化导航栏 - 固定顶部版本 -->
 <style>
-  /* 主导航容器 */
+  /* 主导航容器 - 固定在顶部 */
   .modern-nav-header {
-    position: relative;
+    position: fixed !important;
+    top: 48px !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
-    z-index: 1000;
+    z-index: 1000 !important;
     backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* 当公告栏关闭时，导航栏移到顶部 */
+  .modern-nav-header.announcement-closed {
+    top: 0 !important;
+  }
+
+  /* 滚动时的样式变化 */
+  .modern-nav-header.scrolled {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  /* 为页面内容添加顶部间距，避免被固定导航栏遮挡 */
+  body {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* 动态计算页面顶部间距 */
+  .page-content-wrapper {
+    padding-top: calc(var(--header-height, 90px) + var(--announcement-height, 48px));
+    transition: padding-top 0.3s ease;
   }
 
   .modern-nav-container {
@@ -290,7 +319,7 @@
 
   .search-modal__content {
     position: absolute;
-    top: 8rem;
+    top: calc(var(--header-height, 90px) + var(--announcement-height, 48px) + 2rem);
     left: 50%;
     transform: translateX(-50%);
     width: calc(100% - 4rem);
@@ -503,71 +532,7 @@
     font-size: 0.95rem;
   }
 
-  /* 响应式优化 */
-  @media screen and (max-width: 768px) {
-    .search-modal__content {
-      top: 4rem;
-      width: calc(100% - 2rem);
-      max-width: none;
-      border-radius: 12px;
-    }
-
-    .search-modal__form .field__input {
-      font-size: 1.4rem;
-      padding: 1.8rem 5rem 1.8rem 2rem;
-    }
-
-    .search-modal__close-button {
-      right: 1.5rem;
-      padding: 0.6rem;
-    }
-
-    .search-modal__close-button svg {
-      width: 1.2rem;
-      height: 1.2rem;
-    }
-
-    .search-modal__form .search__button {
-      right: 4rem;
-      padding: 0.6rem;
-    }
-
-    .search-modal__form .search__button svg {
-      width: 1.2rem;
-      height: 1.2rem;
-    }
-
-    .predictive-search {
-      max-height: 35rem;
-    }
-
-    .predictive-search__loading-state {
-      padding: 2rem 1.5rem;
-    }
-
-    .predictive-search__item {
-      padding: 1rem 1.5rem;
-    }
-  }
-
-  @media screen and (max-width: 480px) {
-    .search-modal__content {
-      top: 2rem;
-      width: calc(100% - 1rem);
-      border-radius: 8px;
-    }
-
-    .search-modal__form .field__input {
-      font-size: 1.3rem;
-      padding: 1.5rem 4.5rem 1.5rem 1.5rem;
-    }
-
-    .predictive-search {
-      max-height: 30rem;
-    }
-  }
-
-  /* 下拉菜单样式 */
+  /* 下拉菜单样式 - 调整位置以适应固定导航栏 */
   .modern-mega-menu {
     position: fixed;
     top: 100%;
@@ -690,39 +655,6 @@
     font-size: 1.1rem;
     font-weight: 500;
     padding: 2rem;
-  }
-
-  /* 响应式设计 */
-  @media screen and (max-width: 1200px) {
-    .mega-menu-grid {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-    }
-
-    .mega-menu-content {
-      padding: 0 2.5rem;
-    }
-  }
-
-  @media screen and (max-width: 1024px) {
-    .mega-menu-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.8rem;
-    }
-
-    .modern-mega-menu {
-      padding: 2.5rem 0;
-    }
-
-    .mega-menu-content {
-      padding: 0 2rem;
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    .modern-mega-menu {
-      display: none;
-    }
   }
 
   /* 现代语言切换器 */
@@ -1146,6 +1078,11 @@
     .mega-menu-content {
       padding: 0 2.5rem;
     }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
   }
 
   @media screen and (max-width: 1024px) {
@@ -1164,15 +1101,24 @@
     .mega-menu-content {
       padding: 0 2rem;
     }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.8rem;
+    }
   }
 
   @media screen and (max-width: 768px) {
+    .modern-nav-header {
+      top: 43px !important;
+    }
+
     .modern-nav-container {
-      padding: 1rem 1.5rem;
+      padding: 0.8rem 1.2rem;
     }
 
     .nav-right-section {
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
     .modern-nav-menu {
@@ -1183,13 +1129,48 @@
       display: block;
     }
 
+    .modern-mega-menu {
+      display: none;
+    }
+
+    /* 移动端Logo尺寸调整 */
+    .modern-logo-image {
+      height: 45px;
+      max-width: 180px;
+    }
+
+    /* 移动端功能图标尺寸调整 */
+    .nav-icon-button {
+      width: 20px;
+      height: 20px;
+    }
+
+    .nav-icon-button svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* 移动端购物车徽章调整 */
+    .cart-badge {
+      width: 14px;
+      height: 14px;
+      font-size: 0.6rem;
+    }
+
+    /* 移动端汉堡菜单调整 */
+    .hamburger-line {
+      width: 24px;
+      height: 2.5px;
+      margin: 5px 0;
+    }
+
     /* 移动端隐藏功能图标，但保留翻译图标 */
     .nav-icons-section .nav-icon-button:not(.compact-language-toggle) {
       display: none;
     }
 
     .nav-icons-section {
-      gap: 1rem;
+      gap: 0.8rem;
     }
 
     .mobile-menu-drawer {
@@ -1208,15 +1189,91 @@
       width: 20px !important;
       height: 20px !important;
     }
+
+    /* 搜索模态框移动端调整 */
+    .search-modal__content {
+      top: calc(var(--header-height, 80px) + var(--announcement-height, 43px) + 1rem);
+      width: calc(100% - 2rem);
+      max-width: none;
+      border-radius: 12px;
+    }
+
+    .search-modal__form .field__input {
+      font-size: 1.4rem;
+      padding: 1.8rem 5rem 1.8rem 2rem;
+    }
+
+    .search-modal__close-button {
+      right: 1.5rem;
+      padding: 0.6rem;
+    }
+
+    .search-modal__close-button svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .search-modal__form .search__button {
+      right: 4rem;
+      padding: 0.6rem;
+    }
+
+    .search-modal__form .search__button svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .predictive-search {
+      max-height: 35rem;
+    }
+
+    .predictive-search__loading-state {
+      padding: 2rem 1.5rem;
+    }
+
+    .predictive-search__item {
+      padding: 1rem 1.5rem;
+    }
   }
 
   @media screen and (max-width: 480px) {
-    .modern-nav-container {
-      padding: 1rem;
+    .modern-nav-header {
+      top: 43px !important;
     }
 
+    .modern-nav-container {
+      padding: 0.6rem 1rem;
+    }
+
+    /* 小屏幕Logo进一步缩小 */
     .modern-logo-image {
-      height: 50px;
+      height: 40px;
+      max-width: 160px;
+    }
+
+    /* 小屏幕功能图标进一步缩小 */
+    .nav-icon-button {
+      width: 18px;
+      height: 18px;
+    }
+
+    .nav-icon-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 小屏幕购物车徽章调整 */
+    .cart-badge {
+      width: 12px;
+      height: 12px;
+      font-size: 0.55rem;
+    }
+
+    /* 小屏幕汉堡菜单调整 */
+    .hamburger-line {
+      width: 22px;
+      height: 2px;
+      margin: 4px 0;
     }
 
     .mobile-menu-drawer {
@@ -1229,12 +1286,28 @@
     }
 
     .nav-icons-section {
-      gap: 1rem;
+      gap: 0.6rem;
+    }
+
+    /* 搜索模态框小屏幕调整 */
+    .search-modal__content {
+      top: calc(var(--header-height, 70px) + var(--announcement-height, 43px) + 0.5rem);
+      width: calc(100% - 1rem);
+      border-radius: 8px;
+    }
+
+    .search-modal__form .field__input {
+      font-size: 1.3rem;
+      padding: 1.5rem 4.5rem 1.5rem 1.5rem;
+    }
+
+    .predictive-search {
+      max-height: 30rem;
     }
   }
 </style>
 
-<header class="modern-nav-header color-{{ section.settings.colorscheme }} gradient">
+<header class="modern-nav-header color-{{ section.settings.colorscheme }} gradient" id="mainHeader">
   <div class="modern-nav-container">
     <!-- Logo - 左对齐 -->
     <div class="modern-logo">
@@ -1588,7 +1661,109 @@
   </svg>
 </button>
 
+<!-- 页面内容包装器，用于添加顶部间距 -->
+<div class="page-content-wrapper" id="pageContentWrapper">
+  <!-- 页面内容将在这里 -->
+</div>
+
 <script>
+  // 动态计算并设置导航栏高度
+  function updateHeaderHeight() {
+    const header = document.getElementById('mainHeader');
+    const pageContent = document.getElementById('pageContentWrapper');
+    
+    if (header && pageContent) {
+      const headerHeight = header.offsetHeight;
+      const announcementClosed = localStorage.getItem('announcementClosed') === 'true';
+      const isMobile = window.innerWidth <= 768;
+      const isSmallMobile = window.innerWidth <= 480;
+      const announcementHeight = announcementClosed ? 0 : (isMobile ? 43 : 48);
+      const totalTopOffset = headerHeight + announcementHeight;
+      
+      // 设置CSS变量，供下拉菜单等元素使用
+      document.documentElement.style.setProperty('--header-height', headerHeight + 'px');
+      document.documentElement.style.setProperty('--announcement-height', announcementHeight + 'px');
+      document.documentElement.style.setProperty('--total-header-offset', totalTopOffset + 'px');
+      
+      // 设置页面内容顶部间距
+      pageContent.style.paddingTop = totalTopOffset + 'px';
+      
+      // 延迟更新下拉菜单位置，确保导航栏位置已稳定
+      setTimeout(() => {
+        updateMegaMenuPosition();
+      }, 50);
+    }
+  }
+
+  // 更新下拉菜单位置 - 确保紧挨着导航栏
+  function updateMegaMenuPosition() {
+    const header = document.getElementById('mainHeader');
+    const megaMenus = document.querySelectorAll('.modern-mega-menu');
+    
+    if (header && megaMenus.length > 0) {
+      const headerRect = header.getBoundingClientRect();
+      const headerBottom = headerRect.bottom;
+      
+      megaMenus.forEach(menu => {
+        // 使用导航栏的实际底部位置
+        menu.style.top = headerBottom + 'px';
+      });
+    }
+  }
+
+  // 检查公告栏状态并更新导航栏位置
+  function updateHeaderPosition() {
+    const header = document.getElementById('mainHeader');
+    if (header) {
+      const announcementClosed = localStorage.getItem('announcementClosed') === 'true';
+      const isMobile = window.innerWidth <= 768;
+      
+      if (announcementClosed) {
+        header.classList.add('announcement-closed');
+        if (isMobile) {
+          header.style.top = '0px';
+        }
+      } else {
+        header.classList.remove('announcement-closed');
+        if (isMobile) {
+          header.style.top = '43px';
+        }
+      }
+      // 更新页面内容的顶部间距
+      updateHeaderHeight();
+    }
+  }
+
+  // 监听 localStorage 变化
+  function watchAnnouncementStatus() {
+    // 初始检查
+    updateHeaderPosition();
+    
+    // 监听 storage 事件（跨标签页同步）
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'announcementClosed') {
+        updateHeaderPosition();
+      }
+    });
+    
+    // 定期检查（防止同页面内的变化）
+    setInterval(function() {
+      updateHeaderPosition();
+    }, 500);
+  }
+
+  // 滚动时的导航栏样式变化
+  function handleHeaderScroll() {
+    const header = document.getElementById('mainHeader');
+    if (header) {
+      if (window.pageYOffset > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    }
+  }
+
   // Dawn主题搜索控制
   function openSearchModal() {
     const searchModal = document.getElementById('Details-search-1');
@@ -1704,12 +1879,16 @@
         }, 300);
       }
     }
+    
+    // 同时处理导航栏滚动效果
+    handleHeaderScroll();
   }
 
   // ESC 键关闭菜单和弹窗
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
       closeMobileMenu();
+      closeSearchModal();
       const compactSelector = document.getElementById('compactLanguageSelector');
       if (compactSelector) {
         compactSelector.classList.remove('open');
@@ -1717,15 +1896,39 @@
     }
   });
 
-  // 窗口大小改变时关闭手机菜单
+  // 窗口大小改变时关闭手机菜单并重新计算高度
   window.addEventListener('resize', function () {
     if (window.innerWidth > 768) {
       closeMobileMenu();
     }
+    updateHeaderPosition();
+    updateHeaderHeight();
   });
 
   // 页面加载完成后初始化
   document.addEventListener('DOMContentLoaded', function () {
+    // 初始化公告栏状态监听
+    watchAnnouncementStatus();
+    
+    // 初始化导航栏高度和下拉菜单位置
+    updateHeaderHeight();
+    
+    // 监听窗口大小变化，重新计算下拉菜单位置
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function() {
+        updateHeaderHeight();
+        // 额外确保下拉菜单位置正确
+        setTimeout(updateMegaMenuPosition, 100);
+      }, 100);
+    });
+    
+    // 监听滚动事件，实时更新下拉菜单位置（针对固定定位）
+    window.addEventListener('scroll', function() {
+      updateMegaMenuPosition();
+    });
+    
     // 初始化购物车徽章
     const cartBadge = document.getElementById('cartBadge');
     if (cartBadge && parseInt(cartBadge.textContent) > 0) {
@@ -1777,9 +1980,11 @@
         const target = document.querySelector(this.getAttribute('href'));
         if (target) {
           e.preventDefault();
-          target.scrollIntoView({
+          const headerHeight = document.getElementById('mainHeader').offsetHeight;
+          const targetPosition = target.offsetTop - headerHeight - 20;
+          window.scrollTo({
+            top: targetPosition,
             behavior: 'smooth',
-            block: 'start',
           });
         }
       });
@@ -1803,12 +2008,24 @@
       // 监听滚动事件
       window.addEventListener('scroll', handleScroll);
     }
+
+    // 监听字体加载完成后重新计算高度
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        setTimeout(updateHeaderHeight, 100);
+      });
+    }
+  });
+
+  // 页面完全加载后再次检查高度
+  window.addEventListener('load', function() {
+    setTimeout(updateHeaderHeight, 200);
   });
 </script>
 
 {% schema %}
 {
-  "name": "现代导航栏",
+  "name": "固定顶部导航栏",
   "class": "section-header",
   "settings": [
     {
@@ -1866,11 +2083,19 @@
     {
       "type": "paragraph",
       "content": "请在后台创建名为 'main-series-menu' 的菜单来配置产品分类下拉内容。该菜单将用于显示产品分类相关的导航项下拉菜单。"
+    },
+    {
+      "type": "header",
+      "content": "固定导航栏设置"
+    },
+    {
+      "type": "paragraph",
+      "content": "导航栏将固定在页面顶部，滚动时保持可见。页面内容会自动添加顶部间距以避免被导航栏遮挡。"
     }
   ],
   "presets": [
     {
-      "name": "现代导航栏",
+      "name": "固定顶部导航栏",
       "category": "Header"
     }
   ]
