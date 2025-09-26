@@ -301,13 +301,36 @@
 </header-drawer>
 
 {% style %}
-  .menu-drawer-container[open] .custom-drawer-icon,
-  .menu-drawer-container:not([open]) .custom-close-icon {
+  .custom-drawer-icon,
+  .custom-close-icon {
     display: none;
   }
-  
-  .menu-drawer-container[open] .custom-close-icon,
-  .menu-drawer-container:not([open]) .custom-drawer-icon {
-    display: block;
-  }
 {% endstyle %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const drawer = document.querySelector('#Details-menu-drawer-container');
+  
+  if (drawer) {
+    drawer.addEventListener('toggle', function() {
+      const isOpen = this.open;
+      const drawerIcon = this.querySelector('.custom-drawer-icon');
+      const closeIcon = this.querySelector('.custom-close-icon');
+      
+      if (isOpen) {
+        drawerIcon.style.display = 'none';
+        closeIcon.style.display = 'block';
+      } else {
+        drawerIcon.style.display = 'block';
+        closeIcon.style.display = 'none';
+      }
+    });
+    
+    // 初始化状态
+    const drawerIcon = drawer.querySelector('.custom-drawer-icon');
+    const closeIcon = drawer.querySelector('.custom-close-icon');
+    drawerIcon.style.display = 'block';
+    closeIcon.style.display = 'none';
+  }
+});
+</script>
