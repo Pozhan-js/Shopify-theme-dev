@@ -1,7 +1,7 @@
 {% comment %}
   Home Hero Section - 英雄轮播区域
   使用 blocks 实现轮播图，兼容所有 Shopify 主题
-  支持后台上传图片、修改标题、按钮等
+  支持后台上传图片等
   支持后台编辑轮播图宽高，保持自适应效果
 {% endcomment %}
 
@@ -45,35 +45,6 @@
     height: 100%;
     object-fit: {{ section.settings.image_fit }};
     object-position: center center;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    color: white;
-    padding: 2rem;
-    max-width: 600px;
-    margin-left: 10%;
-    background: rgba(0, 0, 0, {{ section.settings.overlay_opacity | divided_by: 100.0 }});
-    border-radius: 0.5rem;
-    backdrop-filter: blur(4px);
-  }
-
-  .hero-title {
-    font-size: 3rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-  }
-
-  .hero-subtitle {
-    font-size: 1.25rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
   }
 
   .hero-nav {
@@ -130,29 +101,6 @@
     background: white;
   }
 
-  .hero-btn {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-  }
-
-  .hero-btn-primary {
-    background-color: {{ section.settings.button_color }};
-    color: {{ section.settings.button_text_color }};
-    border: none;
-  }
-
-  .hero-btn-primary:hover {
-    background-color: {{ section.settings.button_hover_color }};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(154, 189, 72, 0.3);
-  }
-
   /* 自适应响应式设计 */
   @media (min-width: 1280px) {
     .hero-section {
@@ -176,14 +124,6 @@
       height: calc({{ section.settings.tablet_width }}vw * {{ section.settings.tablet_height }} / 100);
       min-height: {{ section.settings.min_height | times: 0.7 | round }}px;
     }
-
-    .hero-title {
-      font-size: 2.5rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1.1rem;
-    }
   }
 
   @media (max-width: 767px) {
@@ -192,21 +132,6 @@
       height: calc({{ section.settings.mobile_width }}vw * {{ section.settings.mobile_height }} / 100);
       min-height: {{ section.settings.min_height | times: 0.6 | round }}px;
       margin: 1rem auto;
-    }
-
-    .hero-content {
-      margin-left: 5%;
-      margin-right: 5%;
-      max-width: none;
-      padding: 1.5rem;
-    }
-
-    .hero-title {
-      font-size: 2rem;
-    }
-
-    .hero-subtitle {
-      font-size: 1rem;
     }
 
     .hero-nav {
@@ -229,20 +154,6 @@
       height: calc({{ section.settings.mobile_width | plus: 3 }}vw * {{ section.settings.mobile_height | plus: 10 }} / 100);
       min-height: {{ section.settings.min_height | times: 0.5 | round }}px;
       border-radius: 0.5rem;
-    }
-
-    .hero-content {
-      padding: 1rem;
-      margin-left: 2%;
-      margin-right: 2%;
-    }
-
-    .hero-title {
-      font-size: 1.5rem;
-    }
-
-    .hero-subtitle {
-      font-size: 0.9rem;
     }
   }
 
@@ -268,20 +179,11 @@
         {% if block.settings.image %}
           <img
             src="{{ block.settings.image | image_url: width: section.settings.image_width }}"
-            alt="{{ block.settings.title | escape }}"
+            alt="{{ block.settings.alt_text | default: 'Hero slide image' | escape }}"
             class="hero-slide-image"
             loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
           >
         {% endif %}
-        <div class="hero-content">
-          <h1 class="hero-title">{{ block.settings.title }}</h1>
-          <p class="hero-subtitle">{{ block.settings.subtitle }}</p>
-          {% if block.settings.buttontext != blank and block.settings.buttonlink != blank %}
-            <a href="{{ block.settings.buttonlink }}" class="hero-btn hero-btn-primary">
-              {{- block.settings.buttontext -}}
-            </a>
-          {% endif %}
-        </div>
       </div>
     {% endif %}
   {% endfor %}
@@ -579,34 +481,6 @@
       "unit": "rem"
     },
     {
-      "type": "range",
-      "id": "overlay_opacity",
-      "label": "内容背景透明度",
-      "min": 0,
-      "max": 80,
-      "step": 10,
-      "default": 30,
-      "unit": "%"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "按钮颜色",
-      "default": "#9abd48"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "按钮文字颜色",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "button_hover_color",
-      "label": "按钮悬停颜色",
-      "default": "#8aa63f"
-    },
-    {
       "type": "header",
       "content": "功能设置"
     },
@@ -664,26 +538,10 @@
         },
         {
           "type": "text",
-          "id": "title",
-          "label": "标题",
-          "default": "Premium Quality Products"
-        },
-        {
-          "type": "text",
-          "id": "subtitle",
-          "label": "副标题",
-          "default": "Discover our collection of premium products crafted with excellence"
-        },
-        {
-          "type": "text",
-          "id": "buttontext",
-          "label": "按钮文字",
-          "default": "Shop Now"
-        },
-        {
-          "type": "url",
-          "id": "buttonlink",
-          "label": "按钮链接"
+          "id": "alt_text",
+          "label": "图片描述文字",
+          "default": "Hero slide image",
+          "info": "用于无障碍访问和SEO优化"
         }
       ]
     }
@@ -697,20 +555,14 @@
           "type": "slide",
           "settings": {
             "image": "",
-            "title": "Premium Quality Products",
-            "subtitle": "Discover our collection of premium products crafted with excellence",
-            "buttontext": "Shop Now",
-            "buttonlink": "/collections/all"
+            "alt_text": "Hero slide image 1"
           }
         },
         {
           "type": "slide",
           "settings": {
             "image": "",
-            "title": "Exclusive Collection",
-            "subtitle": "Limited edition items available now",
-            "buttontext": "View Collection",
-            "buttonlink": "/collections/new-arrivals"
+            "alt_text": "Hero slide image 2"
           }
         }
       ]
