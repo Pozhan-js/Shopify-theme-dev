@@ -1,23 +1,27 @@
+{%- assign collection_handle = request.path | split: '/' | last -%}
+{%- assign collection_handle = collection_handle | split: '?'| last -%}
+{%- assign current_collection = collections[collection_handle] | default: collections['all'] -%}
+
 <div class="product-grid page-width">
   <div class="grid grid--3-col">
-    {% for block in section.blocks %}
+    {% for product in current_collection.products %}
       <div class="grid__item">
-        <a href="{{ block.settings.product.url }}" class="product-card">
-          <div class="product-card__image" data-product='{{ block.settings.product | json }}'>
-            {% if block.settings.product.featured_image != blank %}
-              {{ block.settings.product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy' }}
+        <a href="{{ product.url }}" class="product-card">
+          <div class="product-card__image" data-product='{{ product | json }}'>
+            {% if product.featured_image != blank %}
+              {{ product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy' }}
             {% else %}
               {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
             {% endif %}
           </div>
           <div class="product-card__content">
-            <h3 class="product-card__title">{{ block.settings.product.title }}</h3>
-            <p class="product-card__description">{{ block.settings.product.description | strip_html }}</p>
+            <h3 class="product-card__title">{{ product.title }}</h3>
+            <p class="product-card__description">{{ product.description | strip_html }}</p>
             <div class="product-card__footer">
               <button class="button product-card__button" 
-                      data-product-id="{{ block.settings.product.variants.first.id }}">
+                      data-product-id="{{ product.variants.first.id }}">
                 <span>{{ section.settings.button_text }}</span>
-                <span class="button-price">{{ block.settings.product.price | money }}</span>
+                <span class="button-price">{{ product.price | money }}</span>
               </button>
             </div>
           </div>
@@ -210,7 +214,7 @@ document.addEventListener('turbo:load', initProductGrid);
 
 {% schema %}
 {
-  "name": "自定义产品网格列表",
+  "name": "分类产品网格",
   "tag": "section",
   "class": "section",
   "settings": [
@@ -221,45 +225,10 @@ document.addEventListener('turbo:load', initProductGrid);
       "default": "ADD TO CART"
     }
   ],
-  "blocks": [
-    {
-      "type": "product",
-      "name": "产品",
-      "settings": [
-        {
-          "type": "product",
-          "id": "product",
-          "label": "选择产品"
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "产品图片"
-        },
-        {
-          "type": "text",
-          "id": "description",
-          "label": "产品描述",
-          "default": "请输入产品描述"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
-      "name": "自定义产品网格列表",
-      "category": "自定义",
-      "blocks": [
-        {
-          "type": "product"
-        },
-        {
-          "type": "product"
-        },
-        {
-          "type": "product"
-        }
-      ]
+      "name": "分类产品网格",
+      "category": "产品展示"
     }
   ]
 }
