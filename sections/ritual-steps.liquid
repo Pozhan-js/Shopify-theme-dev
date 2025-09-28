@@ -19,37 +19,41 @@
   <div class="ritual-steps__container">
     {%- for block in blocks -%}
       <div class="ritual-step" {{ block.shopify_attributes }}>
-        <div class="ritual-step__number">Step {{ forloop.index }}</div>
+        <div class="ritual-step__content">
+          <div class="ritual-step__number">Step {{ forloop.index }}</div>
+          
+          {%- if block.settings.title != blank -%}
+            <h3 class="ritual-step__title">{{ block.settings.title }}</h3>
+          {%- endif -%}
+          
+          {%- if block.settings.description != blank -%}
+            <div class="ritual-step__description">{{ block.settings.description }}</div>
+          {%- endif -%}
+        </div>
         
-        {%- if block.settings.title != blank -%}
-          <h3 class="ritual-step__title">{{ block.settings.title }}</h3>
-        {%- endif -%}
-        
-        {%- if block.settings.description != blank -%}
-          <div class="ritual-step__description">{{ block.settings.description }}</div>
-        {%- endif -%}
-        
-        {%- if block.settings.image != blank -%}
-          <div class="ritual-step__image">
-            {%- liquid
-              assign image = block.settings.image
-              assign image_width = block.settings.image_width
-            -%}
-            {{
-              image
-              | image_url: width: image_width
-              | image_tag: loading: 'lazy', class: 'ritual-step__image-element'
-            }}
-          </div>
-        {%- endif -%}
-        
-        {%- if block.settings.product != blank -%}
-          <div class="ritual-step__product">
-            <a href="{{ block.settings.product.url }}" class="ritual-step__product-link">
-              {{ block.settings.product.title }}
-            </a>
-          </div>
-        {%- endif -%}
+        <div class="ritual-step__media">
+          {%- if block.settings.image != blank -%}
+            <div class="ritual-step__image">
+              {%- liquid
+                assign image = block.settings.image
+                assign image_width = block.settings.image_width
+              -%}
+              {{
+                image
+                | image_url: width: image_width
+                | image_tag: loading: 'lazy', class: 'ritual-step__image-element'
+              }}
+            </div>
+          {%- endif -%}
+          
+          {%- if block.settings.product != blank -%}
+            <div class="ritual-step__product">
+              <a href="{{ block.settings.product.url }}" class="ritual-step__product-link">
+                {{ block.settings.product.title }}
+              </a>
+            </div>
+          {%- endif -%}
+        </div>
       </div>
     {%- endfor -%}
   </div>
@@ -155,21 +159,18 @@
   
   .ritual-steps__container {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 2rem;
-    justify-content: center;
   }
   
   .ritual-step {
     display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 2.5rem;
+    flex-direction: row;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
     border-radius: 0.8rem;
     background-color: rgba(var(--color-background), 0.05);
-    width: calc(33.33% - 2rem);
-    min-width: 280px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -281,8 +282,27 @@
     transform: translateX(3px);
   }
 
+  .ritual-step__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ritual-step__media {
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
   @media (max-width: 750px) {
     .ritual-step {
+      flex-direction: column;
+    }
+    .ritual-step__media {
+      flex: 1;
       width: 100%;
     }
   }
