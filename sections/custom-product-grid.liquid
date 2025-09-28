@@ -1,16 +1,33 @@
-{%- assign category_param = request.query_parameters.category | default: nil -%}
-{%- if category_param and collections[category_param] -%}
-  {%- assign current_collection = collections[category_param] -%}
+{%- comment %} 完整调试request对象 {% endcomment %}
+<!-- DEBUG REQUEST: {{ request | json }} -->
+
+{%- comment %} 尝试所有可能的参数获取方式 {% endcomment %}
+{%- assign category_param = nil -%}
+{%- if request.query_parameters.category -%}
+  {%- assign category_param = request.query_parameters.category -%}
+{%- elsif request.query_parameters.Category -%}
+  {%- assign category_param = request.query_parameters.Category -%}
+{%- elsif request.path contains 'category=' -%}
+  {%- assign category_param = request.path | split: 'category=' | last | split: '&' | first -%}
+{%- endif -%}
+
+<!-- DEBUG CATEGORY: {{ category_param | json }} -->
+
+{%- if category_param -%}
+  {%- assign current_collection = collections[category_param] | default: collections['all'] -%}
 {%- else -%}
   {%- assign current_collection = collections['all'] -%}
 {%- endif -%}
+
 <!-- 
-DEBUG INFO:
-URL query params: {{ request.query_parameters | json }}
+FULL DEBUG INFO:
+Request URL: {{ request.url }}
+Request Path: {{ request.path }}
+Request Query: {{ request.query_string }}
 category_param = {{ category_param | json }}
-current_collection = {{ current_collection.handle | json }} 
+current_collection = {{ current_collection.handle | json }}
 products count = {{ current_collection.products.size }}
-collection exists: {{ collections[category_param] != nil }}
+all_collections: {{ collections | map: 'handle' | json }}
 -->
 
 <div class="product-grid page-width">
