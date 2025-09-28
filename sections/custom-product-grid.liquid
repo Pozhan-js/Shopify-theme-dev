@@ -2,7 +2,7 @@
 {%- assign current_collection = collections[category_param] | default: collections['all'] -%}
 
 <div class="product-grid page-width">
-  <div class="grid grid--3-col">
+  <div class="grid grid--custom-col">
     {% for product in current_collection.products %}
       <div class="grid__item">
         <a href="{{ product.url }}" class="product-card">
@@ -40,8 +40,8 @@
     gap: 30px;
   }
   
-  .grid--3-col {
-    grid-template-columns: repeat(3, 1fr);
+  .grid--custom-col {
+    grid-template-columns: repeat({{ section.settings.grid_columns }}, 1fr);
   }
   
   .product-card {
@@ -132,7 +132,7 @@
   }
   
   @media (max-width: 749px) {
-    .grid--3-col {
+    .grid--custom-col {
       grid-template-columns: 1fr;
     }
   }
@@ -222,6 +222,15 @@ document.addEventListener('turbo:load', initProductGrid);
       "id": "button_text",
       "label": "按钮文案",
       "default": "ADD TO CART"
+    },
+    {
+      "type": "range",
+      "id": "grid_columns",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "每行显示数量",
+      "default": 4
     }
   ],
   "presets": [
