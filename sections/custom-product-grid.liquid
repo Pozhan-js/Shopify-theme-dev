@@ -1,11 +1,16 @@
 {%- assign category_param = request.query_parameters.category | default: nil -%}
-{%- assign current_collection = collections[category_param] | default: collections['all'] -%}
+{%- if category_param and collections[category_param] -%}
+  {%- assign current_collection = collections[category_param] -%}
+{%- else -%}
+  {%- assign current_collection = collections['all'] -%}
+{%- endif -%}
 <!-- 
 DEBUG INFO:
 URL query params: {{ request.query_parameters | json }}
 category_param = {{ category_param | json }}
 current_collection = {{ current_collection.handle | json }} 
 products count = {{ current_collection.products.size }}
+collection exists: {{ collections[category_param] != nil }}
 -->
 
 <div class="product-grid page-width">
