@@ -139,13 +139,15 @@
 // 图片hover切换效果
 function setupImageHover() {
   document.querySelectorAll('.product-card').forEach(card => {
-    const product = JSON.parse(card.dataset.product);
-    if (product.images && product.images.length > 1) {
+    try {
+      const product = JSON.parse(card.dataset.product);
+      if (product && product.images && product.images.length > 1 && product.images[1].src) {
       const imgContainer = card.querySelector('.product-card__image');
       const primaryImg = imgContainer.querySelector('img');
       const secondaryImg = primaryImg.cloneNode();
-      secondaryImg.src = product.images[1] | image_url: width: 500;
+      secondaryImg.src = product.images[1].src.replace('_small', '') + '&width=500';
       secondaryImg.style.display = 'none';
+      secondaryImg.loading = 'lazy';
       imgContainer.appendChild(secondaryImg);
 
       card.addEventListener('mouseenter', () => {
