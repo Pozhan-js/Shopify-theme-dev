@@ -3,15 +3,19 @@
   <div class="backpack-showcase-wrapper">
     <!-- 移动端模特图 - 在顶部 -->
     <div class="backpack-model-image-section mobile-top" id="backpackModelSectionMobile">
-      {% if section.settings.model_image %}
+      {% if section.settings.modelimage %}
         <img
-          src="{{ section.settings.model_image | image_url: width: 800, height: 1200, crop: 'center' }}"
-          alt="{{ section.settings.model_image_alt | default: '背包模特展示' }}"
+          src="{{ section.settings.modelimage | img_url: 'master' }}"
+          alt="{{ section.settings.modelimagealt | default: '背包模特展示' }}"
           class="backpack-model-image"
           loading="lazy"
+          onload="console.log('Mobile model image loaded successfully')"
+          onerror="console.error('Mobile model image failed to load:', this.src)"
         >
       {% else %}
-        <div class="backpack-model-placeholder" style="background: {{ section.settings.placeholder_color }};"></div>
+        <div class="backpack-model-placeholder" style="background: {{ section.settings.placeholdercolor | default: '#f0f0f0' }};">
+          <span>请上传模特图片</span>
+        </div>
       {% endif %}
     </div>
 
@@ -24,58 +28,58 @@
           优先级：指定系列 > 产品类型 > 所有商品
           {%- endcomment -%}
           
-          {%- assign target_products = blank -%}
+          {%- assign targetproducts = blank -%}
           
-          {%- if section.settings.collection_handle != blank -%}
+          {%- if section.settings.collectionhandle != blank -%}
             {%- comment -%} 如果指定了系列，获取该系列的商品 {%- endcomment -%}
-            {%- assign target_collection = collections[section.settings.collection_handle] -%}
-            {%- if target_collection -%}
-              {%- assign target_products = target_collection.products -%}
+            {%- assign targetcollection = collections[section.settings.collectionhandle] -%}
+            {%- if targetcollection -%}
+              {%- assign targetproducts = targetcollection.products -%}
             {%- endif -%}
-          {%- elsif section.settings.product_type != blank -%}
+          {%- elsif section.settings.producttype != blank -%}
             {%- comment -%} 如果没有指定系列但指定了产品类型，按类型筛选 {%- endcomment -%}
-            {%- assign target_products = collections.all.products | where: 'type', section.settings.product_type -%}
+            {%- assign targetproducts = collections.all.products | where: 'type', section.settings.producttype -%}
           {%- else -%}
             {%- comment -%} 都没有指定则显示所有商品 {%- endcomment -%}
-            {%- assign target_products = collections.all.products -%}
+            {%- assign targetproducts = collections.all.products -%}
           {%- endif -%}
           
           {%- comment -%} 如果启用了产品类型过滤，在系列基础上再次过滤 {%- endcomment -%}
-          {%- if section.settings.enable_type_filter and section.settings.product_type != blank and section.settings.collection_handle != blank -%}
-            {%- assign target_products = target_products | where: 'type', section.settings.product_type -%}
+          {%- if section.settings.enabletypefilter and section.settings.producttype != blank and section.settings.collectionhandle != blank -%}
+            {%- assign targetproducts = targetproducts | where: 'type', section.settings.producttype -%}
           {%- endif -%}
           
           {%- comment -%} 按照设置的排序方式排序 {%- endcomment -%}
-          {%- case section.settings.sort_by -%}
-            {%- when 'price_ascending' -%}
-              {%- assign target_products = target_products | sort: 'price' -%}
-            {%- when 'price_descending' -%}
-              {%- assign target_products = target_products | sort: 'price' | reverse -%}
-            {%- when 'title_ascending' -%}
-              {%- assign target_products = target_products | sort: 'title' -%}
-            {%- when 'title_descending' -%}
-              {%- assign target_products = target_products | sort: 'title' | reverse -%}
-            {%- when 'created_ascending' -%}
-              {%- assign target_products = target_products | sort: 'created_at' -%}
-            {%- when 'created_descending' -%}
-              {%- assign target_products = target_products | sort: 'created_at' | reverse -%}
-            {%- when 'best_selling' -%}
+          {%- case section.settings.sortby -%}
+            {%- when 'priceascending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'price' -%}
+            {%- when 'pricedescending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'price' | reverse -%}
+            {%- when 'titleascending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'title' -%}
+            {%- when 'titledescending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'title' | reverse -%}
+            {%- when 'createdascending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'created_at' -%}
+            {%- when 'createddescending' -%}
+              {%- assign targetproducts = targetproducts | sort: 'created_at' | reverse -%}
+            {%- when 'bestselling' -%}
               {%- comment -%} 保持原有顺序，通常系列已按销量排序 {%- endcomment -%}
             {%- else -%}
               {%- comment -%} 默认保持原有顺序 {%- endcomment -%}
           {%- endcase -%}
           
-          {%- assign product_count = target_products.size -%}
+          {%- assign productcount = targetproducts.size -%}
           
-          {%- if product_count > 0 -%}
-            {%- for product in target_products limit: section.settings.max_products -%}
+          {%- if productcount > 0 -%}
+            {%- for product in targetproducts limit: section.settings.maxproducts -%}
               <div class="backpack-product-card">
                 <div class="backpack-product-image-container" data-product-id="{{ product.id }}">
                   <a href="{{ product.url }}" class="backpack-product-link">
                     {%- if product.images.size > 0 -%}
                       {%- for image in product.images limit: 5 -%}
                         <img
-                          src="{{ image | image_url: width: 300, height: 300, crop: 'center' }}"
+                          src="{{ image | img_url: '300x300', crop: 'center' }}"
                           alt="{{ product.title }} - 图片 {{ forloop.index }}"
                           class="backpack-product-image {% if forloop.first %}active{% endif %}"
                           data-image-index="{{ forloop.index0 }}"
@@ -92,7 +96,7 @@
                     {%- endif -%}
                   </a>
 
-                  {%- if section.settings.show_add_to_cart -%}
+                  {%- if section.settings.showaddtocart -%}
                     <form method="post" action="/cart/add" class="backpack-add-to-cart-form">
                       <input type="hidden" name="id" value="{{ product.variants.first.id }}">
                       <input type="hidden" name="quantity" value="1">
@@ -110,32 +114,41 @@
                   <h3 class="backpack-product-title">
                     <a href="{{ product.url }}">{{ product.title }}</a>
                   </h3>
-                  <div class="backpack-product-price">
-                    {%- if product.compare_at_price > product.price -%}
-                      <span class="backpack-original-price">{{ product.compare_at_price | money }}</span>
+                  <div class="backpack-product-price-tags-container">
+                    <div class="backpack-product-price">
+                      {%- if product.compare_at_price > product.price -%}
+                        <span class="backpack-original-price">{{ product.compare_at_price | money }}</span>
+                      {%- endif -%}
+                      <span class="backpack-current-price">{{ product.price | money }}</span>
+                    </div>
+                    {%- if section.settings.showtags and product.tags.size > 0 -%}
+                      <div class="backpack-product-tags">
+                        {%- for tag in product.tags limit: section.settings.maxtagscount -%}
+                          <span class="backpack-product-tag">{{ tag }}</span>
+                        {%- endfor -%}
+                      </div>
                     {%- endif -%}
-                    <span class="backpack-current-price">{{ product.price | money }}</span>
                   </div>
                 </div>
               </div>
             {%- endfor -%}
           {%- else -%}
             <div class="backpack-no-products-message">
-              <p>{{ section.settings.empty_message | default: '暂无商品，请在后台添加产品或选择正确的系列' }}</p>
+              <p>{{ section.settings.emptymessage | default: '暂无商品，请在后台添加产品或选择正确的系列' }}</p>
             </div>
           {%- endif -%}
         </div>
 
-        {%- if target_products.size > section.settings.max_products -%}
+        {%- if targetproducts.size > section.settings.maxproducts -%}
           <div class="backpack-view-more-container">
-            {%- if section.settings.collection_handle != blank -%}
-              <a href="/collections/{{ section.settings.collection_handle }}" class="backpack-view-more-btn">
-            {%- elsif section.settings.product_type != blank -%}
-              <a href="/collections/all?filter.p.product.type={{ section.settings.product_type | url_encode }}" class="backpack-view-more-btn">
+            {%- if section.settings.collectionhandle != blank -%}
+              <a href="/collections/{{ section.settings.collectionhandle }}" class="backpack-view-more-btn">
+            {%- elsif section.settings.producttype != blank -%}
+              <a href="/collections/all?filter.p.product.type={{ section.settings.producttype | url_encode }}" class="backpack-view-more-btn">
             {%- else -%}
               <a href="/collections/all" class="backpack-view-more-btn">
             {%- endif -%}
-              {{ section.settings.view_more_text | default: '查看更多商品' }}
+              {{ section.settings.viewmoretext | default: '查看更多商品' }}
             </a>
           </div>
         {%- endif -%}
@@ -144,15 +157,19 @@
 
     <!-- 右侧模特图 - 桌面端 -->
     <div class="backpack-model-image-section desktop-only" id="backpackModelSection">
-      {% if section.settings.model_image %}
+      {% if section.settings.modelimage %}
         <img
-          src="{{ section.settings.model_image | image_url: width: 800, height: 1200, crop: 'center' }}"
-          alt="{{ section.settings.model_image_alt | default: '背包模特展示' }}"
+          src="{{ section.settings.modelimage | img_url: 'master' }}"
+          alt="{{ section.settings.modelimagealt | default: '背包模特展示' }}"
           class="backpack-model-image"
           loading="lazy"
+          onload="console.log('Model image loaded successfully')"
+          onerror="console.error('Model image failed to load:', this.src)"
         >
       {% else %}
-        <div class="backpack-model-placeholder" style="background: {{ section.settings.placeholder_color }};"></div>
+        <div class="backpack-model-placeholder" style="background: {{ section.settings.placeholdercolor | default: '#f0f0f0' }};">
+          <span>请上传模特图片</span>
+        </div>
       {% endif %}
     </div>
   </div>
@@ -161,10 +178,10 @@
 <style>
   .backpack-showcase-container {
     width: 100%;
-    margin: {{ section.settings.top_margin }}px 0 {{ section.settings.bottom_margin }}px 0;
+    margin: {{ section.settings.topmargin }}px 0 {{ section.settings.bottommargin }}px 0;
     padding: 0;
     position: relative;
-    background: {{ section.settings.background_color }};
+    background: {{ section.settings.backgroundcolor }};
   }
 
   .backpack-showcase-wrapper {
@@ -190,11 +207,12 @@
     flex: 1;
     position: relative;
     height: 600px;
-    overflow: hidden;
+    overflow: visible;
     z-index: 2;
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
+    background: transparent;
   }
 
   /* 左侧商品列表 */
@@ -333,12 +351,21 @@
     color: {{ section.settings.producttitlehovercolor | default: '#666' }};
   }
 
+  /* 价格和标签容器 */
+  .backpack-product-price-tags-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
   .backpack-product-card .backpack-product-price {
     font-size: {{ section.settings.productpricesize | default: 16 }}px;
     font-weight: 600;
     color: {{ section.settings.productpricecolor | default: '#333' }};
-    margin-bottom: 12px;
     text-align: left;
+    flex-shrink: 0;
   }
 
   .backpack-product-card .backpack-original-price {
@@ -350,6 +377,29 @@
 
   .backpack-product-card .backpack-current-price {
     color: {{ section.settings.productpricecolor | default: '#333' }};
+  }
+
+  /* 产品标签样式 */
+  .backpack-product-tags {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .backpack-product-tag {
+    background: {{ section.settings.tagbgcolor | default: '#f0f0f0' }};
+    color: {{ section.settings.tagtextcolor | default: '#666' }};
+    border: 1px solid {{ section.settings.tagbordercolor | default: '#e0e0e0' }};
+    padding: 2px 6px;
+    border-radius: {{ section.settings.tagborderradius | default: 3 }}px;
+    font-size: {{ section.settings.tagfontsize | default: 10 }}px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
   }
 
   .backpack-product-card .backpack-add-to-cart-form {
@@ -446,19 +496,25 @@
     transform: none;
   }
 
-  .backpack-model-image, .backpack-model-placeholder {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    object-fit: cover;
+  .backpack-model-image {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     object-position: center;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 0 auto;
   }
 
   .backpack-model-placeholder {
-    background: {{ section.settings.placeholder_color }};
+    width: 100%;
+    height: 100%;
+    max-width: 500px;
+    max-height: 600px;
+    background: {{ section.settings.placeholdercolor | default: '#f0f0f0' }};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -466,6 +522,13 @@
     font-size: 18px;
     aspect-ratio: 3/4;
     min-height: 400px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .backpack-model-placeholder span {
+    text-align: center;
+    padding: 20px;
   }
 
   /* 响应式设计 */
@@ -547,6 +610,24 @@
 
     .backpack-product-card .backpack-product-title {
       font-size: 12px;
+    }
+
+    /* 移动端价格和标签布局调整 */
+    .backpack-product-price-tags-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .backpack-product-tags {
+      flex-direction: row;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .backpack-product-tag {
+      max-width: none;
     }
 
     .backpack-product-card .backpack-add-to-cart-form {
@@ -867,13 +948,13 @@
     },
     {
       "type": "collection",
-      "id": "collection_handle",
+      "id": "collectionhandle",
       "label": "选择商品系列",
       "info": "选择要展示的商品系列"
     },
     {
       "type": "range",
-      "id": "max_products",
+      "id": "maxproducts",
       "min": 1,
       "max": 20,
       "step": 1,
@@ -886,18 +967,18 @@
     },
     {
       "type": "image_picker",
-      "id": "model_image",
+      "id": "modelimage",
       "label": "模特图片"
     },
     {
       "type": "text",
-      "id": "model_image_alt",
+      "id": "modelimagealt",
       "label": "模特图片alt文本",
       "default": "背包模特展示"
     },
     {
       "type": "color",
-      "id": "placeholder_color",
+      "id": "placeholdercolor",
       "label": "占位背景颜色",
       "default": "#f0f0f0"
     },
@@ -907,13 +988,13 @@
     },
     {
       "type": "color",
-      "id": "background_color",
+      "id": "backgroundcolor",
       "label": "背景颜色",
       "default": "#ffffff"
     },
     {
       "type": "range",
-      "id": "top_margin",
+      "id": "topmargin",
       "min": 0,
       "max": 100,
       "step": 10,
@@ -923,7 +1004,7 @@
     },
     {
       "type": "range",
-      "id": "bottom_margin",
+      "id": "bottommargin",
       "min": 0,
       "max": 100,
       "step": 10,
@@ -985,7 +1066,70 @@
     },
     {
       "type": "header",
+      "content": "产品标签设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "showtags",
+      "label": "显示产品标签",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "maxtagscount",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "最大显示标签数量",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "tagfontsize",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "label": "标签字体大小",
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "tagbgcolor",
+      "label": "标签背景颜色",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "tagtextcolor",
+      "label": "标签文字颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tagbordercolor",
+      "label": "标签边框颜色",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "range",
+      "id": "tagborderradius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "标签圆角",
+      "default": 3
+    },
+    {
+      "type": "header",
       "content": "按钮样式"
+    },
+    {
+      "type": "checkbox",
+      "id": "showaddtocart",
+      "label": "显示添加到购物车按钮",
+      "default": true
     },
     {
       "type": "text",
@@ -1033,7 +1177,7 @@
     },
     {
       "type": "text",
-      "id": "view_more_text",
+      "id": "viewmoretext",
       "label": "查看更多按钮文字",
       "default": "查看更多商品"
     },
@@ -1093,7 +1237,7 @@
     },
     {
       "type": "text",
-      "id": "empty_message",
+      "id": "emptymessage",
       "label": "空集合提示文字",
       "default": "暂无商品，请在后台添加产品或选择正确的系列"
     }
@@ -1103,7 +1247,7 @@
       "name": "背包展示模块",
       "settings": {
         "sectiontitle": "背包系列",
-        "max_products": 8
+        "maxproducts": 8
       }
     }
   ]

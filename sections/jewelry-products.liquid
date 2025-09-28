@@ -2,21 +2,21 @@
 <div class="jewelry-products-container">
   <div class="jewelry-products-wrapper">
     <div class="section-title-wrapper">
-      <h2 class="section-title">{{ section.settings.section_title | default: 'Featured Collections' }}</h2>
+      <h2 class="section-title">{{ section.settings.sectiontitle | default: 'Featured Collections' }}</h2>
       <div class="title-underline"></div>
     </div>
 
     <!-- TAB导航栏 - 自动获取系列 -->
     <div class="tab-navigation-wrapper">
       <div class="tab-navigation">
-        {%- assign collections_to_show = collections | where: 'published', true -%}
-        {%- if section.settings.exclude_all_collection -%}
-          {%- assign collections_to_show = collections_to_show | where: 'handle', '!=', 'all' -%}
+        {%- assign collectionstoshow = collections | where: 'published', true -%}
+        {%- if section.settings.excludeallcollection -%}
+          {%- assign collectionstoshow = collectionstoshow | where: 'handle', '!=', 'all' -%}
         {%- endif -%}
-        {%- assign sorted_collections = collections_to_show | sort: section.settings.sort_by -%}
-        {%- assign limited_collections = sorted_collections | limit: section.settings.max_collections -%}
+        {%- assign sortedcollections = collectionstoshow | sort: section.settings.sortby -%}
+        {%- assign limitedcollections = sortedcollections | limit: section.settings.maxcollections -%}
 
-        {%- for collection in limited_collections -%}
+        {%- for collection in limitedcollections -%}
           {%- if collection.products.size > 0 -%}
             <button
               type="button"
@@ -32,7 +32,7 @@
 
     <!-- 商品列表容器 -->
     <div class="tab-content">
-      {%- for collection in limited_collections -%}
+      {%- for collection in limitedcollections -%}
         {%- if collection.products.size > 0 -%}
           <div class="tab-pane {% if forloop.first %}active{% endif %}" id="tab-{{ collection.handle }}">
             <div class="products-grid-container">
@@ -51,15 +51,15 @@
               </div>
 
               <div class="products-grid">
-                {%- assign display_products = collection.products | limit: section.settings.products_per_collection -%}
-                {%- for product in display_products -%}
+                {%- assign displayproducts = collection.products | limit: section.settings.productspercollection -%}
+                {%- for product in displayproducts -%}
                   <div class="product-card">
                     <div class="product-image-container">
                       <!-- 图片轮播进度条 -->
                       <div class="image-progress-bar">
-                        {%- assign image_count = product.images.size -%}
-                        {%- if image_count > 1 -%}
-                          {%- for i in (1..image_count) -%}
+                        {%- assign imagecount = product.images.size -%}
+                        {%- if imagecount > 1 -%}
+                          {%- for i in (1..imagecount) -%}
                             <div class="progress-dot" data-index="{{ forloop.index0 }}"></div>
                           {%- endfor -%}
                         {%- endif -%}
@@ -87,7 +87,7 @@
                       </a>
 
                       <!-- 悬停购物车按钮 -->
-                      {%- if section.settings.show_add_to_cart -%}
+                      {%- if section.settings.showaddtocart -%}
                         <div class="hover-add-to-cart">
                           <form method="post" action="/cart/add" class="hover-cart-form">
                             <input type="hidden" name="id" value="{{ product.variants.first.id }}">
@@ -96,7 +96,7 @@
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                               </svg>
-                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
+                              {{ section.settings.addtocarttext | default: 'カートに追加' }}
                             </button>
                           </form>
                         </div>
@@ -107,15 +107,31 @@
                       <h3 class="product-title">
                         <a href="{{ product.url }}">{{ product.title }}</a>
                       </h3>
-                      <div class="product-price">
-                        {%- if product.compare_at_price > product.price -%}
-                          <span class="original-price">{{ product.compare_at_price | money }}</span>
+
+                      <!-- 价格和标签容器 -->
+                      <div class="product-price-tags-container">
+                        <div class="product-price">
+                          {%- if product.compare_at_price > product.price -%}
+                            <span class="original-price">{{ product.compare_at_price | money }}</span>
+                          {%- endif -%}
+                          <span class="current-price">{{ product.price | money }}</span>
+                        </div>
+
+                        <!-- 产品标签 -->
+                        {%- if section.settings.showtags and product.tags.size > 0 -%}
+                          <div class="product-tags">
+                            {%- assign displaytags = product.tags | limit: section.settings.maxtagsperproduct -%}
+                            {%- for tag in displaytags -%}
+                              {%- unless section.settings.excludetags contains tag -%}
+                                <span class="product-tag">{{ tag }}</span>
+                              {%- endunless -%}
+                            {%- endfor -%}
+                          </div>
                         {%- endif -%}
-                        <span class="current-price">{{ product.price | money }}</span>
                       </div>
 
                       <!-- 手机端购物车按钮 -->
-                      {%- if section.settings.show_add_to_cart -%}
+                      {%- if section.settings.showaddtocart -%}
                         <div class="mobile-add-to-cart">
                           <form method="post" action="/cart/add" class="mobile-cart-form">
                             <input type="hidden" name="id" value="{{ product.variants.first.id }}">
@@ -124,7 +140,7 @@
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                                 <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                               </svg>
-                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
+                              {{ section.settings.addtocarttext | default: 'カートに追加' }}
                             </button>
                           </form>
                         </div>
@@ -139,10 +155,10 @@
       {%- endfor -%}
     </div>
 
-    {%- if section.settings.show_view_more -%}
+    {%- if section.settings.showviewmore -%}
       <div class="view-more-container">
-        <a href="{{ section.settings.view_more_url | default: '/collections' }}" class="view-more-btn">
-          {{ section.settings.view_more_text | default: 'もっと見る' }}
+        <a href="{{ section.settings.viewmoreurl | default: '/collections' }}" class="view-more-btn">
+          {{ section.settings.viewmoretext | default: 'もっと見る' }}
         </a>
       </div>
     {%- endif -%}
@@ -153,10 +169,10 @@
   /* 日文无衬线字体设置 */
   .jewelry-products-container {
     font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
-    padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px;
-    max-width: {{ section.settings.container_width }}px;
+    padding: {{ section.settings.sectionpaddingtop }}px 20px {{ section.settings.sectionpaddingbottom }}px;
+    max-width: {{ section.settings.containerwidth }}px;
     margin: 0 auto;
-    background: {{ section.settings.background_color }};
+    background: {{ section.settings.backgroundcolor }};
   }
 
   .jewelry-products-wrapper {
@@ -172,18 +188,18 @@
   }
 
   .section-title {
-    font-size: {{ section.settings.title_size }}px;
-    font-weight: {{ section.settings.title_weight }};
-    color: {{ section.settings.title_color }};
+    font-size: {{ section.settings.titlesize }}px;
+    font-weight: {{ section.settings.titleweight }};
+    color: {{ section.settings.titlecolor }};
     margin-bottom: 10px;
     letter-spacing: 1px;
     font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
   }
 
   .title-underline {
-    width: {{ section.settings.underline_width }}px;
-    height: {{ section.settings.underline_height }}px;
-    background-color: {{ section.settings.underline_color }};
+    width: {{ section.settings.underlinewidth }}px;
+    height: {{ section.settings.underlineheight }}px;
+    background-color: {{ section.settings.underlinecolor }};
     margin: 0 auto;
   }
 
@@ -209,14 +225,14 @@
   }
 
   .tab-btn {
-    background: {{ section.settings.tab_bg_color }};
-    color: {{ section.settings.tab_text_color }};
-    border: {{ section.settings.tab_border_width }}px solid {{ section.settings.tab_border_color }};
+    background: {{ section.settings.tabbgcolor }};
+    color: {{ section.settings.tabtextcolor }};
+    border: {{ section.settings.tabborderwidth }}px solid {{ section.settings.tabbordercolor }};
     padding: 8px 16px;
-    font-size: {{ section.settings.tab_font_size | minus: 2 }}px;
+    font-size: {{ section.settings.tabfontsize | minus: 2 }}px;
     cursor: pointer;
     transition: all 0.3s ease;
-    border-radius: {{ section.settings.tab_border_radius }}px;
+    border-radius: {{ section.settings.tabborderradius }}px;
     font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
     white-space: nowrap;
     flex-shrink: 0;
@@ -224,13 +240,13 @@
   }
 
   .tab-btn:hover {
-    background: {{ section.settings.tab_hover_bg_color }};
-    color: {{ section.settings.tab_hover_text_color }};
+    background: {{ section.settings.tabhoverbgcolor }};
+    color: {{ section.settings.tabhovertextcolor }};
   }
 
   .tab-btn.active {
-    background: {{ section.settings.tab_active_bg_color }};
-    color: {{ section.settings.tab_active_text_color }};
+    background: {{ section.settings.tabactivebgcolor }};
+    color: {{ section.settings.tabactivetextcolor }};
   }
 
   /* TAB内容样式 */
@@ -338,7 +354,7 @@
     flex-wrap: nowrap !important;
     overflow-x: auto;
     overflow-y: visible;
-    gap: {{ section.settings.product_gap }}px;
+    gap: {{ section.settings.productgap }}px;
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -370,18 +386,18 @@
 
   /* 确保商品卡片严格单行排列，关键修复 */
   .product-card {
-    background: {{ section.settings.card_bg_color }};
-    border-radius: {{ section.settings.card_border_radius }}px;
+    background: {{ section.settings.cardbgcolor }};
+    border-radius: {{ section.settings.cardborderradius }}px;
     overflow: hidden;
-    box-shadow: {{ section.settings.card_shadow }};
+    box-shadow: {{ section.settings.cardshadow }};
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    width: {{ section.settings.card_width }}px;
-    min-width: {{ section.settings.card_width }}px;
-    max-width: {{ section.settings.card_width }}px;
-    flex: 0 0 {{ section.settings.card_width }}px !important;
+    width: {{ section.settings.cardwidth }}px;
+    min-width: {{ section.settings.cardwidth }}px;
+    max-width: {{ section.settings.cardwidth }}px;
+    flex: 0 0 {{ section.settings.cardwidth }}px !important;
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
-    border: {{ section.settings.card_border_width }}px solid {{ section.settings.card_border_color }};
+    border: {{ section.settings.cardborderwidth }}px solid {{ section.settings.cardbordercolor }};
     display: flex;
     flex-direction: column;
     height: auto;
@@ -389,15 +405,15 @@
   }
 
   .product-card:hover {
-    transform: translateY(-{{ section.settings.card_hover_lift }}px);
-    box-shadow: {{ section.settings.card_hover_shadow }};
+    transform: translateY(-{{ section.settings.cardhoverlift }}px);
+    box-shadow: {{ section.settings.cardhovershadow }};
   }
 
   /* 图片容器 - 正方形显示 */
   .product-image-container {
     position: relative;
-    width: {{ section.settings.card_width }}px;
-    height: {{ section.settings.card_width }}px;
+    width: {{ section.settings.cardwidth }}px;
+    height: {{ section.settings.cardwidth }}px;
     overflow: hidden;
     flex-shrink: 0;
   }
@@ -563,7 +579,7 @@
 
   /* 商品信息 */
   .product-info {
-    padding: {{ section.settings.card_padding }}px;
+    padding: {{ section.settings.cardpadding }}px;
     text-align: center;
     width: 100%;
     box-sizing: border-box;
@@ -573,8 +589,8 @@
   }
 
   .product-title {
-    font-size: {{ section.settings.product_title_size }}px;
-    font-weight: {{ section.settings.product_title_weight }};
+    font-size: {{ section.settings.producttitlesize }}px;
+    font-weight: {{ section.settings.producttitleweight }};
     margin-bottom: 8px;
     line-height: 1.3;
     height: auto;
@@ -589,31 +605,76 @@
   }
 
   .product-title a {
-    color: {{ section.settings.product_title_color }};
+    color: {{ section.settings.producttitlecolor }};
     text-decoration: none;
     transition: color 0.3s ease;
   }
 
   .product-title a:hover {
-    color: {{ section.settings.product_title_hover_color }};
+    color: {{ section.settings.producttitlehovercolor }};
+  }
+
+  /* 价格和标签容器 */
+  .product-price-tags-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .product-price {
-    font-size: {{ section.settings.product_price_size }}px;
-    font-weight: {{ section.settings.product_price_weight }};
-    color: {{ section.settings.product_price_color }};
-    margin-top: auto;
+    font-size: {{ section.settings.productpricesize }}px;
+    font-weight: {{ section.settings.productpriceweight }};
+    color: {{ section.settings.productpricecolor }};
+    flex-shrink: 0;
   }
 
   .original-price {
     text-decoration: line-through;
-    color: {{ section.settings.original_price_color }};
+    color: {{ section.settings.originalpricecolor }};
     margin-right: 6px;
-    font-size: {{ section.settings.product_price_size | minus: 2 }}px;
+    font-size: {{ section.settings.productpricesize | minus: 2 }}px;
   }
 
   .current-price {
-    color: {{ section.settings.product_price_color }};
+    color: {{ section.settings.productpricecolor }};
+  }
+
+  /* 产品标签样式 */
+  .product-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ section.settings.taggap }}px;
+    justify-content: flex-end;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .product-tag {
+    background: {{ section.settings.tagbgcolor }};
+    color: {{ section.settings.tagtextcolor }};
+    font-size: {{ section.settings.tagfontsize }}px;
+    font-weight: {{ section.settings.tagfontweight }};
+    padding: {{ section.settings.tagpaddingy }}px {{ section.settings.tagpaddingx }}px;
+    border-radius: {{ section.settings.tagborderradius }}px;
+    border: {{ section.settings.tagborderwidth }}px solid {{ section.settings.tagbordercolor }};
+    white-space: nowrap;
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+    transition: all 0.3s ease;
+    line-height: 1;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-tag:hover {
+    background: {{ section.settings.taghoverbgcolor }};
+    color: {{ section.settings.taghovertextcolor }};
+    transform: translateY(-1px);
   }
 
   .view-more-container {
@@ -622,20 +683,20 @@
 
   .view-more-btn {
     display: inline-block;
-    background: {{ section.settings.view_more_bg_color }};
-    color: {{ section.settings.view_more_text_color }};
-    padding: {{ section.settings.view_more_padding_y }}px {{ section.settings.view_more_padding_x }}px;
-    border-radius: {{ section.settings.view_more_border_radius }}px;
+    background: {{ section.settings.viewmorebgcolor }};
+    color: {{ section.settings.viewmoretextcolor }};
+    padding: {{ section.settings.viewmorepaddingy }}px {{ section.settings.viewmorepaddingx }}px;
+    border-radius: {{ section.settings.viewmoreborderradius }}px;
     text-decoration: none;
-    font-size: {{ section.settings.view_more_font_size }}px;
+    font-size: {{ section.settings.viewmorefontsize }}px;
     transition: background 0.3s ease;
     font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
-    border: {{ section.settings.view_more_border_width }}px solid {{ section.settings.view_more_border_color }};
+    border: {{ section.settings.viewmoreborderwidth }}px solid {{ section.settings.viewmorebordercolor }};
   }
 
   .view-more-btn:hover {
-    background: {{ section.settings.view_more_hover_bg_color }};
-    color: {{ section.settings.view_more_hover_text_color }};
+    background: {{ section.settings.viewmorehoverbgcolor }};
+    color: {{ section.settings.viewmorehovertextcolor }};
   }
 
   /* 响应式设计 */
@@ -645,7 +706,7 @@
     }
 
     .section-title {
-      font-size: {{ section.settings.title_size | minus: 4 }}px;
+      font-size: {{ section.settings.titlesize | minus: 4 }}px;
     }
 
     .section-title-wrapper {
@@ -664,7 +725,7 @@
 
     .tab-btn {
       padding: 6px 12px;
-      font-size: {{ section.settings.tab_font_size | minus: 3 }}px;
+      font-size: {{ section.settings.tabfontsize | minus: 3 }}px;
     }
 
     .products-grid-container {
@@ -676,7 +737,7 @@
     }
 
     .products-grid {
-      gap: {{ section.settings.product_gap | minus: 5 }}px;
+      gap: {{ section.settings.productgap | minus: 5 }}px;
     }
 
     .hover-add-to-cart {
@@ -690,6 +751,22 @@
     .image-progress-bar {
       opacity: 1;
     }
+
+    /* 移动端价格标签布局调整 */
+    .product-price-tags-container {
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .product-tags {
+      justify-content: center;
+    }
+
+    .product-tag {
+      font-size: {{ section.settings.tagfontsize | minus: 1 }}px;
+      padding: {{ section.settings.tagpaddingy | minus: 1 }}px {{ section.settings.tagpaddingx | minus: 1 }}px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -700,7 +777,7 @@
 
     .tab-btn {
       padding: 5px 10px;
-      font-size: {{ section.settings.tab_font_size | minus: 4 }}px;
+      font-size: {{ section.settings.tabfontsize | minus: 4 }}px;
     }
 
     .products-grid-container {
@@ -716,11 +793,11 @@
     }
 
     .product-title {
-      font-size: {{ section.settings.product_title_size | minus: 2 }}px;
+      font-size: {{ section.settings.producttitlesize | minus: 2 }}px;
     }
 
     .product-price {
-      font-size: {{ section.settings.product_price_size | minus: 2 }}px;
+      font-size: {{ section.settings.productpricesize | minus: 2 }}px;
     }
 
     .hover-cart-btn {
@@ -731,6 +808,11 @@
     .mobile-cart-btn {
       font-size: 11px;
       padding: 8px 14px;
+    }
+
+    .product-tag {
+      font-size: {{ section.settings.tagfontsize | minus: 2 }}px;
+      padding: {{ section.settings.tagpaddingy | minus: 2 }}px {{ section.settings.tagpaddingx | minus: 2 }}px;
     }
   }
 
@@ -1071,8 +1153,8 @@
     const activeGrid = document.querySelector('.tab-pane.active .products-grid');
     if (!activeGrid) return;
     
-    const cardWidth = {{ section.settings.card_width }}; // 卡片宽度
-    const gap = {{ section.settings.product_gap }}; // 间距
+    const cardWidth = {{ section.settings.cardwidth }}; // 卡片宽度
+    const gap = {{ section.settings.productgap }}; // 间距
     const scrollAmount = (cardWidth + gap) * 2; // 每次滑动2个产品的距离
     
     if (direction === 'left') {
@@ -1120,13 +1202,13 @@
     },
     {
       "type": "text",
-      "id": "section_title",
+      "id": "sectiontitle",
       "label": "标题",
       "default": "Featured Collections"
     },
     {
       "type": "range",
-      "id": "container_width",
+      "id": "containerwidth",
       "min": 800,
       "max": 1600,
       "step": 50,
@@ -1136,7 +1218,7 @@
     },
     {
       "type": "range",
-      "id": "section_padding_top",
+      "id": "sectionpaddingtop",
       "min": 0,
       "max": 100,
       "step": 5,
@@ -1146,7 +1228,7 @@
     },
     {
       "type": "range",
-      "id": "section_padding_bottom",
+      "id": "sectionpaddingbottom",
       "min": 0,
       "max": 100,
       "step": 5,
@@ -1156,7 +1238,7 @@
     },
     {
       "type": "color",
-      "id": "background_color",
+      "id": "backgroundcolor",
       "label": "背景颜色",
       "default": "#ffffff"
     },
@@ -1166,7 +1248,7 @@
     },
     {
       "type": "range",
-      "id": "max_collections",
+      "id": "maxcollections",
       "min": 3,
       "max": 15,
       "step": 1,
@@ -1175,7 +1257,7 @@
     },
     {
       "type": "range",
-      "id": "products_per_collection",
+      "id": "productspercollection",
       "min": 4,
       "max": 20,
       "step": 1,
@@ -1184,7 +1266,7 @@
     },
     {
       "type": "select",
-      "id": "sort_by",
+      "id": "sortby",
       "label": "系列排序方式",
       "options": [
         { "value": "title", "label": "按标题排序" },
@@ -1196,21 +1278,147 @@
     },
     {
       "type": "checkbox",
-      "id": "exclude_all_collection",
+      "id": "excludeallcollection",
       "label": "排除'全部产品'系列",
       "default": true
     },
     {
       "type": "checkbox",
-      "id": "show_add_to_cart",
+      "id": "showaddtocart",
       "label": "显示添加到购物车按钮",
       "default": true
     },
     {
       "type": "text",
-      "id": "add_to_cart_text",
+      "id": "addtocarttext",
       "label": "添加到购物车按钮文字",
       "default": "カートに追加"
+    },
+    {
+      "type": "header",
+      "content": "产品标签设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "showtags",
+      "label": "显示产品标签",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "maxtagsperproduct",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "每个产品最多显示标签数量",
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "excludetags",
+      "label": "排除的标签（用逗号分隔）",
+      "info": "输入不想显示的标签名称，用逗号分隔，如：sale,featured,new"
+    },
+    {
+      "type": "range",
+      "id": "tagfontsize",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "label": "标签字体大小",
+      "default": 10
+    },
+    {
+      "type": "select",
+      "id": "tagfontweight",
+      "label": "标签字体粗细",
+      "options": [
+        { "value": "400", "label": "正常" },
+        { "value": "500", "label": "中等" },
+        { "value": "600", "label": "半粗" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "tagpaddingx",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "label": "标签水平内边距",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "tagpaddingy",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "标签垂直内边距",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "tagborderradius",
+      "min": 0,
+      "max": 15,
+      "step": 1,
+      "unit": "px",
+      "label": "标签圆角",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "tagborderwidth",
+      "min": 0,
+      "max": 2,
+      "step": 1,
+      "unit": "px",
+      "label": "标签边框宽度",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "taggap",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "标签间距",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "tagbgcolor",
+      "label": "标签背景色",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "tagtextcolor",
+      "label": "标签文字颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "tagbordercolor",
+      "label": "标签边框颜色",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "taghoverbgcolor",
+      "label": "标签悬停背景色",
+      "default": "#e0e0e0"
+    },
+    {
+      "type": "color",
+      "id": "taghovertextcolor",
+      "label": "标签悬停文字颜色",
+      "default": "#333333"
     },
     {
       "type": "header",
@@ -1218,7 +1426,7 @@
     },
     {
       "type": "range",
-      "id": "title_size",
+      "id": "titlesize",
       "min": 16,
       "max": 48,
       "step": 2,
@@ -1228,7 +1436,7 @@
     },
     {
       "type": "select",
-      "id": "title_weight",
+      "id": "titleweight",
       "label": "标题字体粗细",
       "options": [
         { "value": "300", "label": "细体" },
@@ -1241,13 +1449,13 @@
     },
     {
       "type": "color",
-      "id": "title_color",
+      "id": "titlecolor",
       "label": "标题颜色",
       "default": "#333333"
     },
     {
       "type": "range",
-      "id": "underline_width",
+      "id": "underlinewidth",
       "min": 30,
       "max": 120,
       "step": 5,
@@ -1257,7 +1465,7 @@
     },
     {
       "type": "range",
-      "id": "underline_height",
+      "id": "underlineheight",
       "min": 1,
       "max": 5,
       "step": 1,
@@ -1267,7 +1475,7 @@
     },
     {
       "type": "color",
-      "id": "underline_color",
+      "id": "underlinecolor",
       "label": "下划线颜色",
       "default": "#D9D9D9"
     },
@@ -1277,7 +1485,7 @@
     },
     {
       "type": "range",
-      "id": "tab_font_size",
+      "id": "tabfontsize",
       "min": 12,
       "max": 20,
       "step": 1,
@@ -1287,7 +1495,7 @@
     },
     {
       "type": "range",
-      "id": "tab_border_radius",
+      "id": "tabborderradius",
       "min": 0,
       "max": 50,
       "step": 5,
@@ -1297,7 +1505,7 @@
     },
     {
       "type": "range",
-      "id": "tab_border_width",
+      "id": "tabborderwidth",
       "min": 0,
       "max": 3,
       "step": 1,
@@ -1307,43 +1515,43 @@
     },
     {
       "type": "color",
-      "id": "tab_bg_color",
+      "id": "tabbgcolor",
       "label": "TAB背景色",
       "default": "transparent"
     },
     {
       "type": "color",
-      "id": "tab_text_color",
+      "id": "tabtextcolor",
       "label": "TAB文字颜色",
       "default": "#666666"
     },
     {
       "type": "color",
-      "id": "tab_border_color",
+      "id": "tabbordercolor",
       "label": "TAB边框颜色",
       "default": "#dddddd"
     },
     {
       "type": "color",
-      "id": "tab_hover_bg_color",
+      "id": "tabhoverbgcolor",
       "label": "TAB悬停背景色",
       "default": "#F5F5F5"
     },
     {
       "type": "color",
-      "id": "tab_hover_text_color",
+      "id": "tabhovertextcolor",
       "label": "TAB悬停文字颜色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "tab_active_bg_color",
+      "id": "tabactivebgcolor",
       "label": "TAB激活背景色",
       "default": "#F5F5F5"
     },
     {
       "type": "color",
-      "id": "tab_active_text_color",
+      "id": "tabactivetextcolor",
       "label": "TAB激活文字颜色",
       "default": "#333333"
     },
@@ -1353,7 +1561,7 @@
     },
     {
       "type": "range",
-      "id": "card_width",
+      "id": "cardwidth",
       "min": 150,
       "max": 300,
       "step": 10,
@@ -1363,7 +1571,7 @@
     },
     {
       "type": "range",
-      "id": "product_gap",
+      "id": "productgap",
       "min": 10,
       "max": 40,
       "step": 5,
@@ -1373,7 +1581,7 @@
     },
     {
       "type": "range",
-      "id": "card_border_radius",
+      "id": "cardborderradius",
       "min": 0,
       "max": 20,
       "step": 2,
@@ -1383,7 +1591,7 @@
     },
     {
       "type": "range",
-      "id": "card_border_width",
+      "id": "cardborderwidth",
       "min": 0,
       "max": 3,
       "step": 1,
@@ -1393,31 +1601,31 @@
     },
     {
       "type": "color",
-      "id": "card_bg_color",
+      "id": "cardbgcolor",
       "label": "卡片背景色",
       "default": "#ffffff"
     },
     {
       "type": "color",
-      "id": "card_border_color",
+      "id": "cardbordercolor",
       "label": "卡片边框颜色",
       "default": "#dddddd"
     },
     {
       "type": "text",
-      "id": "card_shadow",
+      "id": "cardshadow",
       "label": "卡片阴影",
       "default": "0 2px 6px rgba(0,0,0,0.1)"
     },
     {
       "type": "text",
-      "id": "card_hover_shadow",
+      "id": "cardhovershadow",
       "label": "卡片悬停阴影",
       "default": "0 4px 12px rgba(0,0,0,0.15)"
     },
     {
       "type": "range",
-      "id": "card_hover_lift",
+      "id": "cardhoverlift",
       "min": 0,
       "max": 10,
       "step": 1,
@@ -1427,7 +1635,7 @@
     },
     {
       "type": "range",
-      "id": "card_padding",
+      "id": "cardpadding",
       "min": 8,
       "max": 24,
       "step": 2,
@@ -1441,7 +1649,7 @@
     },
     {
       "type": "range",
-      "id": "product_title_size",
+      "id": "producttitlesize",
       "min": 12,
       "max": 18,
       "step": 1,
@@ -1451,7 +1659,7 @@
     },
     {
       "type": "select",
-      "id": "product_title_weight",
+      "id": "producttitleweight",
       "label": "产品标题字体粗细",
       "options": [
         { "value": "400", "label": "正常" },
@@ -1462,19 +1670,19 @@
     },
     {
       "type": "color",
-      "id": "product_title_color",
+      "id": "producttitlecolor",
       "label": "产品标题颜色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "product_title_hover_color",
+      "id": "producttitlehovercolor",
       "label": "产品标题悬停颜色",
       "default": "#333333"
     },
     {
       "type": "range",
-      "id": "product_price_size",
+      "id": "productpricesize",
       "min": 12,
       "max": 20,
       "step": 1,
@@ -1484,7 +1692,7 @@
     },
     {
       "type": "select",
-      "id": "product_price_weight",
+      "id": "productpriceweight",
       "label": "价格字体粗细",
       "options": [
         { "value": "400", "label": "正常" },
@@ -1496,13 +1704,13 @@
     },
     {
       "type": "color",
-      "id": "product_price_color",
+      "id": "productpricecolor",
       "label": "价格颜色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "original_price_color",
+      "id": "originalpricecolor",
       "label": "原价颜色",
       "default": "#999999"
     },
@@ -1512,25 +1720,25 @@
     },
     {
       "type": "checkbox",
-      "id": "show_view_more",
+      "id": "showviewmore",
       "label": "显示查看更多按钮",
       "default": true
     },
     {
       "type": "text",
-      "id": "view_more_text",
+      "id": "viewmoretext",
       "label": "查看更多按钮文字",
       "default": "もっと見る"
     },
     {
       "type": "url",
-      "id": "view_more_url",
+      "id": "viewmoreurl",
       "label": "查看更多链接",
       "default": "/collections"
     },
     {
       "type": "range",
-      "id": "view_more_font_size",
+      "id": "viewmorefontsize",
       "min": 12,
       "max": 18,
       "step": 1,
@@ -1540,7 +1748,7 @@
     },
     {
       "type": "range",
-      "id": "view_more_padding_x",
+      "id": "viewmorepaddingx",
       "min": 20,
       "max": 40,
       "step": 5,
@@ -1550,7 +1758,7 @@
     },
     {
       "type": "range",
-      "id": "view_more_padding_y",
+      "id": "viewmorepaddingy",
       "min": 8,
       "max": 20,
       "step": 2,
@@ -1560,7 +1768,7 @@
     },
     {
       "type": "range",
-      "id": "view_more_border_radius",
+      "id": "viewmoreborderradius",
       "min": 0,
       "max": 20,
       "step": 2,
@@ -1570,7 +1778,7 @@
     },
     {
       "type": "range",
-      "id": "view_more_border_width",
+      "id": "viewmoreborderwidth",
       "min": 0,
       "max": 3,
       "step": 1,
@@ -1580,31 +1788,31 @@
     },
     {
       "type": "color",
-      "id": "view_more_bg_color",
+      "id": "viewmorebgcolor",
       "label": "查看更多背景色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "view_more_text_color",
+      "id": "viewmoretextcolor",
       "label": "查看更多文字颜色",
       "default": "#ffffff"
     },
     {
       "type": "color",
-      "id": "view_more_border_color",
+      "id": "viewmorebordercolor",
       "label": "查看更多边框颜色",
       "default": "#333333"
     },
     {
       "type": "color",
-      "id": "view_more_hover_bg_color",
+      "id": "viewmorehoverbgcolor",
       "label": "查看更多悬停背景色",
       "default": "#555555"
     },
     {
       "type": "color",
-      "id": "view_more_hover_text_color",
+      "id": "viewmorehovertextcolor",
       "label": "查看更多悬停文字颜色",
       "default": "#ffffff"
     }

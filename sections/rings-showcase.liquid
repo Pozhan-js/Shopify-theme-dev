@@ -64,11 +64,40 @@
                   <h3 class="product-title">
                     <a href="{{ product.url }}">{{ product.title }}</a>
                   </h3>
-                  <div class="product-price">
-                    {%- if product.compare_at_price > product.price -%}
-                      <span class="original-price">{{ product.compare_at_price | money }}</span>
+                  <div class="product-price-container">
+                    <div class="product-price">
+                      {%- if product.compare_at_price > product.price -%}
+                        <span class="original-price">{{ product.compare_at_price | money }}</span>
+                      {%- endif -%}
+                      <span class="current-price">{{ product.price | money }}</span>
+                    </div>
+                    {%- if section.settings.show_product_tags and product.tags.size > 0 -%}
+                      <div class="product-tags">
+                        {%- for tag in product.tags limit: section.settings.max_tags_display -%}
+                          {%- assign tag_lower = tag | downcase -%}
+                          {%- assign show_tag = false -%}
+
+                          {%- comment -%} 检查是否在允许显示的标签列表中 {%- endcomment -%}
+                          {%- if section.settings.allowed_tags != blank -%}
+                            {%- assign allowed_tags_array = section.settings.allowed_tags | split: ',' -%}
+                            {%- for allowed_tag in allowed_tags_array -%}
+                              {%- assign allowed_tag_clean = allowed_tag | strip | downcase -%}
+                              {%- if tag_lower == allowed_tag_clean -%}
+                                {%- assign show_tag = true -%}
+                                {%- break -%}
+                              {%- endif -%}
+                            {%- endfor -%}
+                          {%- else -%}
+                            {%- comment -%} 如果没有设置允许的标签，显示所有标签 {%- endcomment -%}
+                            {%- assign show_tag = true -%}
+                          {%- endif -%}
+
+                          {%- if show_tag -%}
+                            <span class="product-tag">{{ tag }}</span>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </div>
                     {%- endif -%}
-                    <span class="current-price">{{ product.price | money }}</span>
                   </div>
                 </div>
               </div>
@@ -288,12 +317,21 @@
     color: {{ section.settings.producttitlehovercolor | default: '#666' }};
   }
 
+  /* 价格容器 - 使用 flexbox 布局 */
+  .rings-product-card .product-price-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
   .rings-product-card .product-price {
     font-size: {{ section.settings.productpricesize | default: 16 }}px;
     font-weight: 600;
     color: {{ section.settings.productpricecolor | default: '#333' }};
-    margin-bottom: 12px;
     text-align: left;
+    flex: 1;
   }
 
   .rings-product-card .original-price {
@@ -305,6 +343,43 @@
 
   .rings-product-card .current-price {
     color: {{ section.settings.productpricecolor | default: '#333' }};
+  }
+
+  /* 产品标签容器样式 */
+  .rings-product-card .product-tags {
+      display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* 产品标签样式 */
+  .rings-product-card .product-tag {
+    background: #f0f0f0;
+    color: #666666;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 6px;
+    border-radius: 8px;
+    border: 0px solid #dddddd;
+    white-space: nowrap;
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
+    transition: all 0.3s ease;
+    line-height: 1;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+
+  .rings-product-card .product-tag :hover {
+    background: #e0e0e0;
+    color: #333333;
+    transform: translateY(-1px);
   }
 
   .rings-product-card .add-to-cart-form {
@@ -450,6 +525,19 @@
 
     .rings-product-card .product-title {
       font-size: 12px;
+    }
+
+    /* 移动端价格容器调整 */
+    .rings-product-card .product-price-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    .rings-product-card .product-tags {
+      align-items: flex-start;
+      flex-direction: row;
+      flex-wrap: wrap;
     }
 
     .rings-product-card .add-to-cart-form {
@@ -885,6 +973,64 @@
       "id": "originalpricecolor",
       "label": "原价颜色",
       "default": "#999999"
+    },
+    {
+      "type": "header",
+      "content": "产品标签设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_tags",
+      "label": "显示产品标签",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "allowed_tags",
+      "label": "允许显示的标签",
+      "info": "用逗号分隔多个标签，例如：NEW,HOT,SALE。留空则显示所有标签",
+      "placeholder": "NEW,HOT,SALE"
+    },
+    {
+      "type": "range",
+      "id": "max_tags_display",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "最大显示标签数量",
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "product_tag_bg_color",
+      "label": "标签背景颜色",
+      "default": "#ff4444"
+    },
+    {
+      "type": "color",
+      "id": "product_tag_text_color",
+      "label": "标签文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "product_tag_font_size",
+      "min": 8,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "label": "标签字体大小",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "product_tag_border_radius",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "标签圆角",
+      "default": 3
     },
     {
       "type": "header",
