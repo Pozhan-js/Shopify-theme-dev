@@ -1,0 +1,368 @@
+<style>
+  .manufacturing-accordion {
+    background-color: #f5f5f5;
+    padding: 80px 0;
+  }
+
+  .manufacturing-accordion__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .manufacturing-accordion__title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 60px;
+  }
+
+  .manufacturing-accordion__grid {
+    display: flex;
+    gap: 20px;
+    height: 500px;
+  }
+
+  .manufacturing-accordion__item {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .manufacturing-accordion__item:hover {
+    flex: 2.5;
+  }
+
+  .manufacturing-accordion__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%);
+    transition: all 0.6s ease;
+  }
+
+  .manufacturing-accordion__content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 40px 30px;
+    color: white;
+    transition: all 0.6s ease;
+  }
+
+  .manufacturing-accordion__vertical-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+    transition: all 0.6s ease;
+    opacity: 1;
+    letter-spacing: 2px;
+  }
+
+  .manufacturing-accordion__horizontal-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease 0.2s;
+  }
+
+  .manufacturing-accordion__description {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease 0.3s;
+  }
+
+  .manufacturing-accordion__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .manufacturing-accordion__list-item {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .manufacturing-accordion__list-item::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #ff4444;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+
+  .manufacturing-accordion__item:hover .manufacturing-accordion__vertical-title {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(0.8);
+  }
+
+  .manufacturing-accordion__item:hover .manufacturing-accordion__horizontal-title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .manufacturing-accordion__item:hover .manufacturing-accordion__description {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .manufacturing-accordion__item:hover .manufacturing-accordion__overlay {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+  }
+
+  @media (max-width: 1024px) {
+    .manufacturing-accordion__grid {
+      height: 400px;
+      gap: 15px;
+    }
+
+    .manufacturing-accordion__vertical-title {
+      font-size: 1.5rem;
+    }
+
+    .manufacturing-accordion__horizontal-title {
+      font-size: 1.8rem;
+    }
+
+    .manufacturing-accordion__content {
+      padding: 30px 25px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .manufacturing-accordion {
+      padding: 60px 0;
+    }
+
+    .manufacturing-accordion__title {
+      font-size: 2rem;
+      margin-bottom: 40px;
+    }
+
+    .manufacturing-accordion__grid {
+      flex-direction: column;
+      height: auto;
+      gap: 20px;
+    }
+
+    .manufacturing-accordion__item {
+      height: 300px;
+      flex: none;
+    }
+
+    .manufacturing-accordion__item:hover {
+      flex: none;
+      height: 400px;
+    }
+
+    .manufacturing-accordion__vertical-title {
+      position: static;
+      transform: none;
+      font-size: 1.8rem;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .manufacturing-accordion__content {
+      position: static;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .manufacturing-accordion__horizontal-title {
+      opacity: 1;
+      transform: none;
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+    }
+
+    .manufacturing-accordion__description {
+      opacity: 1;
+      transform: none;
+    }
+
+    .manufacturing-accordion__vertical-title {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .manufacturing-accordion__container {
+      padding: 0 15px;
+    }
+
+    .manufacturing-accordion__title {
+      font-size: 1.8rem;
+    }
+
+    .manufacturing-accordion__item {
+      height: 250px;
+    }
+
+    .manufacturing-accordion__item:hover {
+      height: 350px;
+    }
+
+    .manufacturing-accordion__horizontal-title {
+      font-size: 1.4rem;
+    }
+
+    .manufacturing-accordion__list-item {
+      font-size: 0.9rem;
+    }
+  }
+</style>
+
+<section class="manufacturing-accordion">
+  <div class="manufacturing-accordion__container">
+    {% if section.settings.title != blank %}
+      <h2 class="manufacturing-accordion__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="manufacturing-accordion__grid">
+      {% for block in section.blocks %}
+        <div
+          class="manufacturing-accordion__item"
+          style="background-image: url('{{ block.settings.image | img_url: '800x600' }}');"
+          {{ block.shopify_attributes }}
+        >
+          <div class="manufacturing-accordion__overlay"></div>
+
+          {% if block.settings.title != blank %}
+            <div class="manufacturing-accordion__vertical-title">
+              {{ block.settings.title }}
+            </div>
+          {% endif %}
+
+          <div class="manufacturing-accordion__content">
+            {% if block.settings.title != blank %}
+              <h3 class="manufacturing-accordion__horizontal-title">
+                {{ block.settings.title }}
+              </h3>
+            {% endif %}
+
+            <div class="manufacturing-accordion__description">
+              {% if block.settings.description != blank %}
+                <ul class="manufacturing-accordion__list">
+                  {% assign items = block.settings.description | split: '|' %}
+                  {% for item in items %}
+                    {% if item != blank %}
+                      <li class="manufacturing-accordion__list-item">{{ item | strip }}</li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Manufacturing Accordion",
+  "tag": "section",
+  "class": "section-manufacturing-accordion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Manufacturing Excellence"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "accordion_item",
+      "name": "Accordion Item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Content Settings"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Manufacturing Excellence"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description (separate items with |)",
+          "default": "Integrated production: in-house wood, metal, and upholstery.|Smart tooling & tight tolerances for repeatable precision.|4-stage QC (incoming, in-process, final, pre-ship).|Export-ready packaging and reliable global delivery.",
+          "info": "Use | to separate list items"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Manufacturing Accordion",
+      "blocks": [
+        {
+          "type": "accordion_item",
+          "settings": {
+            "title": "Manufacturing Excellence",
+            "description": "Integrated production: in-house wood, metal, and upholstery.|Smart tooling & tight tolerances for repeatable precision.|4-stage QC (incoming, in-process, final, pre-ship).|Export-ready packaging and reliable global delivery."
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "title": "Craftsmanship & Quality",
+            "description": "Skilled artisans with decades of experience.|Premium materials sourced globally.|Precision engineering meets traditional craftsmanship.|Every detail inspected before shipping."
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "title": "Innovation-Driven Production",
+            "description": "Advanced manufacturing technologies.|Continuous process improvement.|Research & development integration.|Future-ready production capabilities."
+          }
+        },
+        {
+          "type": "accordion_item",
+          "settings": {
+            "title": "Sustainable Manufacturing",
+            "description": "Eco-friendly production processes.|Waste reduction initiatives.|Energy-efficient operations.|Sustainable material sourcing."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
