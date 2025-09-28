@@ -1,31 +1,29 @@
 <div class="product-grid page-width">
-  {{ this }}
   <div class="grid grid--custom-col" id="product-grid-container">
-    {% for product in collection.products %}
-      <div class="grid__item">
-        <a href="{{ product.url }}" class="product-card">
-          <div class="product-card__image" data-product='{{ product | json }}'>
-            {% if product.featured_image != blank %}
-              {{ product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy', width: 500, height: 500 }}
-            {% else %}
-              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-            {% endif %}
-          </div>
-          <div class="product-card__content">
-            <h3 class="product-card__title">{{ product.title }}</h3>
-            <p class="product-card__description">{{ product.description | strip_html }}</p>
-            <div class="product-card__footer">
-              <button class="button product-card__button" 
-                      data-product-id="{{ product.variants.first.id }}">
-                <span>{{ section.settings.button_text }}</span>
-                <span class="button-price">{{ product.price | money }}</span>
-              </button>
-            </div>
-          </div>
-        </a>
-      </div>
-    {% endfor %}
+    <!-- 产品将由JavaScript动态加载 -->
+    <div class="loading-indicator">加载中...</div>
   </div>
+
+  <!-- 产品卡片模板 (隐藏) -->
+  <template id="product-card-template">
+    <div class="grid__item">
+      <a href="" class="product-card">
+        <div class="product-card__image">
+          <img src="" loading="lazy" class="product-image" width="500" height="500"/>
+        </div>
+        <div class="product-card__content">
+          <h3 class="product-card__title"></h3>
+          <p class="product-card__description"></p>
+          <div class="product-card__footer">
+            <button class="button product-card__button">
+              <span class="button-text"></span>
+              <span class="button-price"></span>
+            </button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </template>
 </div>
 
 <style>
@@ -207,23 +205,18 @@ function getQueryParams() {
   return Object.fromEntries(params.entries());
 }
 
-// 初始化功能
-function initProductGrid() {
-  // 获取并存储查询参数
+// 加载产品数据
+async function loadProducts() {
   const params = getQueryParams();
-  window.__queryParams = params;
-
-  // 设置容器元素属性
-  const gridContainer = document.querySelector('.product-grid');
-  const grid = document.querySelector('.grid');
-  if (gridContainer && grid) {
-    gridContainer.dataset.queryParams = JSON.stringify(params);
-    grid.dataset.queryParams = JSON.stringify(params);
-  }
+  const category = params.category || params.Category;
+  const container = document.getElementById('product-grid-container');
   
-  setupCartButtons();
-  setupImageHover();
-}
+  try {
+    // 显示加载状态
+    container.innerHTML = '<div class="loading-indicator">加载中...</div>';
+    
+    // 获取产品数据
+    const response = await fetch(`/collections/${category || 'all'}/products.json`);
     const data = await response.json();
     
     // 清空容器
@@ -245,6 +238,45 @@ function initProductGrid() {
       clone.querySelector('.product-card__description').textContent = product.description;
       clone.querySelector('.button-text').textContent = 'ADD TO CART';
       clone.querySelector('.button-price').textContent = new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY'
+      }).format(product.price / 100);
+      card.dataset.product = JSON.stringify(product);
+      card.querySelector('.product-card__button').dataset.productId = product.variants[0]?.id;
+      
+      container.appendChild(clone);
+    });
+    
+    // 初始化交互功能
+    setupCartButtons();
+    setupImageHover();
+    
+  } catch (error) {
+    console.error('加载产品失败:', error);
+    container.innerHTML = '<div class="error-message">加载产品失败，请刷新重试</div>';
+  }
+}
+
+// 初始化功能
+function initProductGrid() {
+  loadProducts();
+}
+
+document.addEventListener('DOMContentLoaded', initProductGrid);
+document.addEventListener('turbo:load', initProductGrid);
+</script>
+
+{% schema %}
+{
+  "name": "分类产品网格",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "按钮文案",
+      "default": "ADD TO CART"
     },
     {
       "type": "range",
