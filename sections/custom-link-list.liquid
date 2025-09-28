@@ -103,13 +103,12 @@
   {% elsif section.settings.layout == 'four' %}four-columns
   {% endif %}">
   {% for block in section.blocks %}
-    <div class="custom-link-item 
-        {% if block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid) %}grid-item{% endif %}" 
-        {% if (block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid)) and block.settings.bg_image != blank %}
+    <div class="custom-link-item {% if section.settings.enable_grid %}grid-item{% endif %}" 
+        {% if section.settings.enable_grid and block.settings.bg_image != blank %}
           style="background-image: url({{ block.settings.bg_image | img_url: '800x' }})"
         {% endif %}>
       <a href="{{ block.settings.link_url }}" 
-         style="font-size: {% if block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid) %}{{ section.settings.grid_title_size }}px{% else %}{{ section.settings.title_size }}px{% endif %}">
+         style="font-size: {% if section.settings.enable_grid %}{{ section.settings.grid_title_size }}px{% else %}{{ section.settings.title_size }}px{% endif %}">
         {{ block.settings.link_title }}
       </a>
     </div>
@@ -234,26 +233,6 @@
           "type": "url",
           "id": "link_url",
           "label": "链接地址"
-        },
-        {
-          "type": "select",
-          "id": "style",
-          "label": "显示样式",
-          "options": [
-            {
-              "value": "inherit",
-              "label": "继承全局设置"
-            },
-            {
-              "value": "text",
-              "label": "文本标题"
-            },
-            {
-              "value": "grid",
-              "label": "正方形网格"
-            }
-          ],
-          "default": "inherit"
         },
         {
           "type": "image_picker",
