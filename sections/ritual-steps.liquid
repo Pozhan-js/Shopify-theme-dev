@@ -1,0 +1,204 @@
+{%- liquid
+  assign blocks = section.blocks
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+-%}
+
+<div class="ritual-steps page-width">
+  {%- if heading != blank or description != blank -%}
+    <div class="ritual-steps__header">
+      {%- if heading != blank -%}
+        <h2 class="ritual-steps__heading">{{ heading }}</h2>
+      {%- endif -%}
+      {%- if description != blank -%}
+        <div class="ritual-steps__description">{{ description }}</div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="ritual-steps__container">
+    {%- for block in blocks -%}
+      <div class="ritual-step" {{ block.shopify_attributes }}>
+        <div class="ritual-step__number">Step {{ forloop.index }}</div>
+        
+        {%- if block.settings.title != blank -%}
+          <h3 class="ritual-step__title">{{ block.settings.title }}</h3>
+        {%- endif -%}
+        
+        {%- if block.settings.description != blank -%}
+          <div class="ritual-step__description">{{ block.settings.description }}</div>
+        {%- endif -%}
+        
+        {%- if block.settings.image != blank -%}
+          <div class="ritual-step__image">
+            {%- liquid
+              assign image = block.settings.image
+              assign image_width = block.settings.image_width
+            -%}
+            {{
+              image
+              | image_url: width: image_width
+              | image_tag: loading: 'lazy', class: 'ritual-step__image-element'
+            }}
+          </div>
+        {%- endif -%}
+        
+        {%- if block.settings.product != blank -%}
+          <div class="ritual-step__product">
+            <a href="{{ block.settings.product.url }}" class="ritual-step__product-link">
+              {{ block.settings.product.title }}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "仪式步骤",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "标题",
+      "default": "仪式步骤"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "描述",
+      "default": "<p>按照以下步骤完成您的仪式</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "步骤",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "步骤标题",
+          "default": "步骤标题"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "步骤描述",
+          "default": "<p>步骤描述内容</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "步骤图片"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "min": 100,
+          "max": 500,
+          "step": 10,
+          "unit": "px",
+          "label": "图片宽度",
+          "default": 200
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "推荐产品"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "仪式步骤",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "title": "第一步",
+            "description": "<p>准备仪式所需物品</p>"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "title": "第二步",
+            "description": "<p>按照说明进行操作</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .ritual-steps {
+    padding: 4rem 0;
+  }
+  
+  .ritual-steps__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .ritual-steps__heading {
+    font-size: 2.4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .ritual-steps__container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .ritual-step {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    background-color: rgba(var(--color-background), 0.05);
+  }
+  
+  .ritual-step__number {
+    font-weight: bold;
+    color: rgba(var(--color-foreground), 0.6);
+  }
+  
+  .ritual-step__title {
+    font-size: 1.8rem;
+    margin: 0;
+  }
+  
+  .ritual-step__image {
+    margin: 1rem 0;
+  }
+  
+  .ritual-step__image-element {
+    border-radius: 0.5rem;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .ritual-step__product-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(var(--color-button), 1);
+    color: rgba(var(--color-button-text), 1);
+    border-radius: 0.3rem;
+    text-decoration: none;
+  }
+  
+  .ritual-step__product-link:hover {
+    opacity: 0.9;
+  }
+</style>
