@@ -103,9 +103,13 @@
   {% elsif section.settings.layout == 'four' %}four-columns
   {% endif %}">
   {% for block in section.blocks %}
-    <div class="custom-link-item {% if block.settings.style == 'grid' %}grid-item{% endif %}" 
-         {% if block.settings.style == 'grid' and block.settings.bg_image != blank %}style="background-image: url({{ block.settings.bg_image | img_url: '800x' }})"{% endif %}>
-      <a href="{{ block.settings.link_url }}">
+    <div class="custom-link-item 
+        {% if block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid) %}grid-item{% endif %}" 
+        {% if (block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid)) and block.settings.bg_image != blank %}
+          style="background-image: url({{ block.settings.bg_image | img_url: '800x' }})"
+        {% endif %}>
+      <a href="{{ block.settings.link_url }}" 
+         style="font-size: {% if block.settings.style == 'grid' or (block.settings.style == 'inherit' and section.settings.enable_grid) %}{{ section.settings.grid_title_size }}px{% else %}{{ section.settings.title_size }}px{% endif %}">
         {{ block.settings.link_title }}
       </a>
     </div>
@@ -183,6 +187,36 @@
       "unit": "px",
       "label": "边框宽度",
       "default": 0
+    },
+    {
+      "type": "header",
+      "content": "网格样式设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_grid",
+      "label": "启用网格布局",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "标题文字大小",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "grid_title_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "网格标题大小",
+      "default": 20
     }
   ],
   "blocks": [
@@ -207,6 +241,10 @@
           "label": "显示样式",
           "options": [
             {
+              "value": "inherit",
+              "label": "继承全局设置"
+            },
+            {
               "value": "text",
               "label": "文本标题"
             },
@@ -215,7 +253,7 @@
               "label": "正方形网格"
             }
           ],
-          "default": "text"
+          "default": "inherit"
         },
         {
           "type": "image_picker",
