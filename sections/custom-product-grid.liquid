@@ -1,35 +1,14 @@
-{%- comment %} 完整调试request对象 {% endcomment %}
-<!-- DEBUG REQUEST: {{ request | json }} -->
+{%- comment %} 从路径中提取分类信息 {% endcomment %}
+{%- assign path_parts = request.path | split: '/' -%}
+{%- assign category_param = path_parts[2] | default: nil -%}
 
-{%- comment %} 尝试所有可能的参数获取方式 {% endcomment %}
-{%- assign category_param = nil -%}
-{%- if request.query_parameters.category -%}
-  {%- assign category_param = request.query_parameters.category -%}
-{%- elsif request.query_parameters.Category -%}
-  {%- assign category_param = request.query_parameters.Category -%}
-{%- elsif request.path contains 'category=' -%}
-  {%- assign category_param = request.path | split: 'category=' | last | split: '&' | first -%}
-{%- endif -%}
-
-<!-- DEBUG CATEGORY: {{ category_param | json }} -->
-
-{%- if category_param -%}
-  {%- assign current_collection = collections[category_param] | default: collections['all'] -%}
+{%- comment %} 确保集合存在 {% endcomment %}
+{%- if collections[category_param] -%}
+  {%- assign current_collection = collections[category_param] -%}
 {%- else -%}
   {%- assign current_collection = collections['all'] -%}
 {%- endif -%}
-
-<!-- 
-FULL DEBUG INFO:
-Request URL: {{ request.url }}
-Request Path: {{ request.path }}
-Request Query: {{ request.query_string }}
-category_param = {{ category_param | json }}
-current_collection = {{ current_collection.handle | json }}
-products count = {{ current_collection.products.size }}
-all_collections: {{ collections | map: 'handle' | json }}
--->
-
+<!-- debug path_parts={{ path_parts }} category_param={{ category_param }} current_collection={{ current_collection }} -->
 <div class="product-grid page-width">
   <div class="grid grid--custom-col">
     {% for product in current_collection.products %}
