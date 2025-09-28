@@ -1,0 +1,265 @@
+<style>
+  .dual-content {
+    background-color: #ffffff;
+    padding: 80px 0;
+  }
+
+  .dual-content__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .dual-content__row {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    margin-bottom: 80px;
+  }
+
+  .dual-content__row:last-child {
+    margin-bottom: 0;
+  }
+
+  .dual-content__row--reverse {
+    flex-direction: row-reverse;
+  }
+
+  .dual-content__content {
+    flex: 1;
+    max-width: 500px;
+  }
+
+  .dual-content__image {
+    flex: 1;
+    max-width: 600px;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .dual-content__image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .dual-content__title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333333;
+    line-height: 1.2;
+    margin-bottom: 30px;
+  }
+
+  .dual-content__description {
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .dual-content__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #d32f2f;
+    color: #ffffff;
+    padding: 15px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+  }
+
+  .dual-content__button:hover {
+    background-color: #b71c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
+  }
+
+  .dual-content__button::before {
+    content: '>';
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 1024px) {
+    .dual-content__row {
+      gap: 40px;
+    }
+
+    .dual-content__title {
+      font-size: 2.2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dual-content {
+      padding: 60px 0;
+    }
+
+    .dual-content__row {
+      flex-direction: column !important;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .dual-content__content {
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .dual-content__image {
+      max-width: 100%;
+    }
+
+    .dual-content__title {
+      font-size: 2rem;
+      margin-bottom: 25px;
+    }
+
+    .dual-content__description {
+      margin-bottom: 30px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dual-content__container {
+      padding: 0 15px;
+    }
+
+    .dual-content__title {
+      font-size: 1.8rem;
+    }
+
+    .dual-content__description {
+      font-size: 0.95rem;
+    }
+
+    .dual-content__button {
+      padding: 12px 25px;
+      font-size: 0.85rem;
+    }
+  }
+</style>
+
+<section class="dual-content">
+  <div class="dual-content__container">
+    {% for block in section.blocks %}
+      <div
+        class="dual-content__row {% if block.settings.reverse_layout %}dual-content__row--reverse{% endif %}"
+        {{ block.shopify_attributes }}
+      >
+        <div class="dual-content__content">
+          {% if block.settings.title != blank %}
+            <h2 class="dual-content__title">{{ block.settings.title }}</h2>
+          {% endif %}
+
+          {% if block.settings.description != blank %}
+            <div class="dual-content__description">
+              {{ block.settings.description }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.button_text != blank and block.settings.button_url != blank %}
+            <a href="{{ block.settings.button_url }}" class="dual-content__button">
+              {{ block.settings.button_text }}
+            </a>
+          {% endif %}
+        </div>
+
+        {% if block.settings.image %}
+          <div class="dual-content__image">
+            <img
+              src="{{ block.settings.image | img_url: '800x600' }}"
+              alt="{{ block.settings.image.alt | default: block.settings.title }}"
+              loading="lazy"
+            >
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Dual Content Section",
+  "tag": "section",
+  "class": "section-dual-content",
+  "blocks": [
+    {
+      "type": "content_block",
+      "name": "Content Block",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Content Settings"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Skilled Hands, Reliable Quality"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Every XS Pilates machine is brought to life by experienced craftspeople - from precision metalwork to upholstery - working in sync to deliver premium performance with consistent, repeatable quality."
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "EXPLORE OUR MANUFACTURING"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button URL"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "checkbox",
+          "id": "reverse_layout",
+          "label": "Reverse Layout",
+          "default": false,
+          "info": "Check to display image on the left and content on the right"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dual Content Section",
+      "blocks": [
+        {
+          "type": "content_block",
+          "settings": {
+            "title": "Skilled Hands, Reliable Quality",
+            "description": "Every XS Pilates machine is brought to life by experienced craftspeople - from precision metalwork to upholstery - working in sync to deliver premium performance with consistent, repeatable quality.",
+            "button_text": "EXPLORE OUR MANUFACTURING",
+            "reverse_layout": false
+          }
+        },
+        {
+          "type": "content_block",
+          "settings": {
+            "title": "Environmental Responsibility",
+            "description": "XS Pilates is committed to responsible manufacturing. We prioritize sustainable materials and water-borne finishes, engineer efficiency into every process, and minimize waste across our operations. Our durable, low-emission finishes support both long service life and environmental stewardship.",
+            "reverse_layout": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
