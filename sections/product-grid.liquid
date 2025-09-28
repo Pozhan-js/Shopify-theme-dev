@@ -1,0 +1,224 @@
+<div class="product-grid page-width">
+  <div class="grid grid--3-col">
+    {% for block in section.blocks %}
+      <div class="grid__item">
+        <a href="{{ block.settings.product.url }}" class="product-card">
+          <div class="product-card__image">
+            {% if block.settings.image != blank %}
+              {{ block.settings.image | image_url: width: 500 | image_tag: loading: 'lazy' }}
+            {% else %}
+              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          </div>
+          <div class="product-card__content">
+            <h3 class="product-card__title">{{ block.settings.product.title }}</h3>
+            <p class="product-card__description">{{ block.settings.description }}</p>
+            <div class="product-card__footer">
+              <span class="product-card__price">{{ block.settings.product.price | money }}</span>
+              <button class="button product-card__button" 
+                      data-product-id="{{ block.settings.product.variants.first.id }}">
+                <span>{{ section.settings.button_text }}</span>
+                <span class="button-price">{{ block.settings.product.price | money }}</span>
+              </button>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .product-grid {
+    padding: 40px 0;
+  }
+  
+  .grid {
+    display: grid;
+    gap: 30px;
+  }
+  
+  .grid--3-col {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .product-card__image {
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+  }
+  
+  .product-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .product-card__content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .product-card__title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .product-card__description {
+    color: #666;
+    margin-bottom: 15px;
+    flex-grow: 1;
+  }
+  
+  .product-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+  }
+  
+  .product-card__price {
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .product-card__button {
+    width: 100%;
+    margin-top: 10px;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .button-price {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  
+  .product-card__button:hover {
+    background: #333;
+  }
+  
+  @media (max-width: 749px) {
+    .grid--3-col {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 处理加入购物车按钮点击
+  document.querySelectorAll('.product-card__button').forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const productId = this.dataset.productId;
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          items: [{
+            id: productId,
+            quantity: 1
+          }]
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // 可以在这里添加购物车更新通知
+        console.log('产品已加入购物车', data);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "产品网格列表",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "按钮文案",
+      "default": "ADD TO CART"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "产品",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "选择产品"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "产品图片"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "产品描述",
+          "default": "请输入产品描述"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品网格列表",
+      "category": "自定义",
+      "blocks": [
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        },
+        {
+          "type": "product"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
