@@ -155,31 +155,95 @@
   
   .ritual-steps__container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     gap: 2rem;
+    justify-content: center;
   }
   
   .ritual-step {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 2rem;
-    border-radius: 0.5rem;
+    gap: 1.5rem;
+    padding: 2.5rem;
+    border-radius: 0.8rem;
     background-color: rgba(var(--color-background), 0.05);
+    width: calc(33.33% - 2rem);
+    min-width: 280px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ritual-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  .ritual-step::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--color-button), var(--color-button-light));
   }
   
   .ritual-step__number {
     font-weight: bold;
-    color: rgba(var(--color-foreground), 0.6);
+    color: rgba(var(--color-button), 1);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ritual-step__number::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(var(--color-button), 0.1);
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .ritual-step__number::after {
+    content: counter(step);
+    counter-increment: step;
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(var(--color-button), 1);
+    font-weight: bold;
   }
   
   .ritual-step__title {
     font-size: 1.8rem;
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .ritual-step__title::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+    background-size: contain;
+    opacity: 0.7;
   }
   
   .ritual-step__image {
     margin: 1rem 0;
+    position: relative;
+    border-radius: 0.8rem;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   }
   
   .ritual-step__image-element {
@@ -189,16 +253,37 @@
   }
   
   .ritual-step__product-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 1rem;
-    padding: 0.5rem 1rem;
+    padding: 0.8rem 1.5rem;
     background-color: rgba(var(--color-button), 1);
     color: rgba(var(--color-button-text), 1);
-    border-radius: 0.3rem;
+    border-radius: 0.5rem;
     text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
   }
   
   .ritual-step__product-link:hover {
-    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+
+  .ritual-step__product-link::after {
+    content: "→";
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .ritual-step__product-link:hover::after {
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 750px) {
+    .ritual-step {
+      width: 100%;
+    }
   }
 </style>
