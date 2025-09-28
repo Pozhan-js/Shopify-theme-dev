@@ -1,6 +1,6 @@
 <style>
   .manufacturing-accordion {
-    background-color: #f5f5f5;
+    background-color: #f1f0ee;
     padding: 80px 0;
   }
 
@@ -8,14 +8,6 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-  }
-
-  .manufacturing-accordion__title {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 60px;
   }
 
   .manufacturing-accordion__grid {
@@ -36,7 +28,8 @@
     background-repeat: no-repeat;
   }
 
-  .manufacturing-accordion__item:hover {
+  .manufacturing-accordion__item:hover,
+  .manufacturing-accordion__item.active {
     flex: 2.5;
   }
 
@@ -62,10 +55,11 @@
 
   .manufacturing-accordion__vertical-title {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    font-size: 1.8rem;
+    bottom: 30px;
+    left: 46px;
+    transform: rotate(-90deg);
+    transform-origin: left bottom;
+    font-size: 2rem;
     font-weight: 600;
     color: white;
     white-space: nowrap;
@@ -77,6 +71,7 @@
   .manufacturing-accordion__horizontal-title {
     font-size: 2.2rem;
     font-weight: 600;
+    color: white;
     margin-bottom: 25px;
     opacity: 0;
     transform: translateY(20px);
@@ -87,6 +82,29 @@
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.6s ease 0.3s;
+  }
+
+  .manufacturing-accordion__item.active .manufacturing-accordion__vertical-title {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-90deg) scale(0.8);
+  }
+
+  .manufacturing-accordion__item.active .manufacturing-accordion__horizontal-title {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .manufacturing-accordion__item.active .manufacturing-accordion__description {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .manufacturing-accordion__item.active .manufacturing-accordion__overlay {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
+  }
+
+  .manufacturing-accordion__item.active {
+    flex: 2.5;
   }
 
   .manufacturing-accordion__list {
@@ -113,22 +131,26 @@
     font-size: 1.2rem;
   }
 
-  .manufacturing-accordion__item:hover .manufacturing-accordion__vertical-title {
+  .manufacturing-accordion__item:hover .manufacturing-accordion__vertical-title,
+  .manufacturing-accordion__item.active .manufacturing-accordion__vertical-title {
     opacity: 0;
     transform: translate(-50%, -50%) rotate(-90deg) scale(0.8);
   }
 
-  .manufacturing-accordion__item:hover .manufacturing-accordion__horizontal-title {
+  .manufacturing-accordion__item:hover .manufacturing-accordion__horizontal-title,
+  .manufacturing-accordion__item.active .manufacturing-accordion__horizontal-title {
     opacity: 1;
     transform: translateY(0);
   }
 
-  .manufacturing-accordion__item:hover .manufacturing-accordion__description {
+  .manufacturing-accordion__item:hover .manufacturing-accordion__description,
+  .manufacturing-accordion__item.active .manufacturing-accordion__description {
     opacity: 1;
     transform: translateY(0);
   }
 
-  .manufacturing-accordion__item:hover .manufacturing-accordion__overlay {
+  .manufacturing-accordion__item:hover .manufacturing-accordion__overlay,
+  .manufacturing-accordion__item.active .manufacturing-accordion__overlay {
     background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
   }
 
@@ -156,11 +178,6 @@
       padding: 60px 0;
     }
 
-    .manufacturing-accordion__title {
-      font-size: 2rem;
-      margin-bottom: 40px;
-    }
-
     .manufacturing-accordion__grid {
       flex-direction: column;
       height: auto;
@@ -178,17 +195,16 @@
     }
 
     .manufacturing-accordion__vertical-title {
-      position: static;
-      transform: none;
-      font-size: 1.8rem;
-      text-align: center;
-      padding: 20px;
+      display: none;
     }
 
     .manufacturing-accordion__content {
-      position: static;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
       padding: 20px;
-      background: rgba(0, 0, 0, 0.8);
+      background: transparent;
     }
 
     .manufacturing-accordion__horizontal-title {
@@ -202,19 +218,11 @@
       opacity: 1;
       transform: none;
     }
-
-    .manufacturing-accordion__vertical-title {
-      display: none;
-    }
   }
 
   @media (max-width: 480px) {
     .manufacturing-accordion__container {
       padding: 0 15px;
-    }
-
-    .manufacturing-accordion__title {
-      font-size: 1.8rem;
     }
 
     .manufacturing-accordion__item {
@@ -223,6 +231,10 @@
 
     .manufacturing-accordion__item:hover {
       height: 350px;
+    }
+
+    .manufacturing-accordion__content {
+      padding: 15px;
     }
 
     .manufacturing-accordion__horizontal-title {
@@ -237,14 +249,10 @@
 
 <section class="manufacturing-accordion">
   <div class="manufacturing-accordion__container">
-    {% if section.settings.title != blank %}
-      <h2 class="manufacturing-accordion__title">{{ section.settings.title }}</h2>
-    {% endif %}
-
     <div class="manufacturing-accordion__grid">
       {% for block in section.blocks %}
         <div
-          class="manufacturing-accordion__item"
+          class="manufacturing-accordion__item {% if forloop.first %}active{% endif %}"
           style="background-image: url('{{ block.settings.image | img_url: '800x600' }}');"
           {{ block.shopify_attributes }}
         >
@@ -282,23 +290,42 @@
   </div>
 </section>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const accordionItems = document.querySelectorAll('.manufacturing-accordion__item');
+
+    accordionItems.forEach((item) => {
+      item.addEventListener('mouseenter', function () {
+        // 移除所有active类
+        accordionItems.forEach((otherItem) => {
+          otherItem.classList.remove('active');
+        });
+        // 给当前项添加active类
+        this.classList.add('active');
+      });
+    });
+
+    // 鼠标离开整个手风琴区域时，恢复第一个为active
+    const accordionGrid = document.querySelector('.manufacturing-accordion__grid');
+    if (accordionGrid) {
+      accordionGrid.addEventListener('mouseleave', function () {
+        accordionItems.forEach((item) => {
+          item.classList.remove('active');
+        });
+        if (accordionItems[0]) {
+          accordionItems[0].classList.add('active');
+        }
+      });
+    }
+  });
+</script>
+
 {% schema %}
 {
   "name": "Manufacturing Accordion",
   "tag": "section",
   "class": "section-manufacturing-accordion",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Section Settings"
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "Section Title",
-      "default": "Manufacturing Excellence"
-    }
-  ],
+  "settings": [],
   "blocks": [
     {
       "type": "accordion_item",
