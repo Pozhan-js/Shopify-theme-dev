@@ -1,4 +1,4 @@
-<!-- 珠宝产品展示section - 自动获取全部系列 -->
+<!-- 珠宝产品展示section - 自动获取全部系列 + 心愿单功能 -->
 <div class="jewelry-products-container">
   <div class="jewelry-products-wrapper">
     <div class="section-title-wrapper">
@@ -55,6 +55,32 @@
                 {%- for product in display_products -%}
                   <div class="product-card">
                     <div class="product-image-container">
+                      <!-- 心愿单按钮 -->
+                      {%- if section.settings.show_wishlist -%}
+                        <div class="wishlist-button-container">
+                          <button
+                            type="button"
+                            class="wishlist-btn"
+                            data-product-id="{{ product.id }}"
+                            data-product-handle="{{ product.handle }}"
+                            aria-label="お気に入りに追加"
+                          >
+                            <svg class="wishlist-icon-empty" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <svg
+                              class="wishlist-icon-filled"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                          </button>
+                        </div>
+                      {%- endif -%}
+
                       <!-- 图片轮播进度条 -->
                       <div class="image-progress-bar">
                         {%- assign image_count = product.images.size -%}
@@ -114,21 +140,48 @@
                         <span class="current-price">{{ product.price | money }}</span>
                       </div>
 
-                      <!-- 手机端购物车按钮 -->
-                      {%- if section.settings.show_add_to_cart -%}
-                        <div class="mobile-add-to-cart">
-                          <form method="post" action="/cart/add" class="mobile-cart-form">
-                            <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                            <input type="hidden" name="quantity" value="1">
-                            <button type="submit" class="mobile-cart-btn">
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                              </svg>
-                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
-                            </button>
-                          </form>
-                        </div>
-                      {%- endif -%}
+                      <!-- 手机端按钮组 -->
+                      <div class="mobile-buttons-group">
+                        <!-- 手机端心愿单按钮 -->
+                        {%- if section.settings.show_wishlist -%}
+                          <button
+                            type="button"
+                            class="mobile-wishlist-btn"
+                            data-product-id="{{ product.id }}"
+                            data-product-handle="{{ product.handle }}"
+                            aria-label="お気に入りに追加"
+                          >
+                            <svg class="wishlist-icon-empty" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <svg
+                              class="wishlist-icon-filled"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                            >
+                              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                          </button>
+                        {%- endif -%}
+
+                        <!-- 手机端购物车按钮 -->
+                        {%- if section.settings.show_add_to_cart -%}
+                          <div class="mobile-add-to-cart">
+                            <form method="post" action="/cart/add" class="mobile-cart-form">
+                              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                              <input type="hidden" name="quantity" value="1">
+                              <button type="submit" class="mobile-cart-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                  <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
+                              </button>
+                            </form>
+                          </div>
+                        {%- endif -%}
+                      </div>
                     </div>
                   </div>
                 {%- endfor -%}
@@ -148,6 +201,20 @@
     {%- endif -%}
   </div>
 </div>
+
+<!-- 心愿单应用集成区域 -->
+{%- if section.settings.show_wishlist -%}
+  <div id="wishlist-app-container">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'wishlist_app' -%}
+          <div class="wishlist-app-block" {{ block.shopify_attributes }}>
+            {{ block.settings.app_embed | default: '' }}
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+{%- endif -%}
 
 <style>
   /* 日文无衬线字体设置 */
@@ -402,6 +469,106 @@
     flex-shrink: 0;
   }
 
+  /* 心愿单按钮样式 */
+  .wishlist-button-container {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 15;
+  }
+
+  .wishlist-btn {
+    background: {{ section.settings.wishlist_bg_color }};
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: {{ section.settings.wishlist_icon_color }};
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    opacity: {{ section.settings.wishlist_opacity | divided_by: 100.0 }};
+  }
+
+  .wishlist-btn:hover {
+    background: {{ section.settings.wishlist_hover_bg_color }};
+    color: {{ section.settings.wishlist_hover_icon_color }};
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .wishlist-btn.active {
+    background: {{ section.settings.wishlist_active_bg_color }};
+    color: {{ section.settings.wishlist_active_icon_color }};
+  }
+
+  .wishlist-btn .wishlist-icon-filled {
+    display: none;
+  }
+
+  .wishlist-btn.active .wishlist-icon-empty {
+    display: none;
+  }
+
+  .wishlist-btn.active .wishlist-icon-filled {
+    display: block;
+  }
+
+  /* 手机端心愿单按钮 */
+  .mobile-wishlist-btn {
+    background: {{ section.settings.wishlist_bg_color }};
+    border: 1px solid {{ section.settings.wishlist_border_color }};
+    border-radius: 4px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: {{ section.settings.wishlist_icon_color }};
+    flex-shrink: 0;
+  }
+
+  .mobile-wishlist-btn:hover {
+    background: {{ section.settings.wishlist_hover_bg_color }};
+    color: {{ section.settings.wishlist_hover_icon_color }};
+    border-color: {{ section.settings.wishlist_hover_border_color }};
+  }
+
+  .mobile-wishlist-btn.active {
+    background: {{ section.settings.wishlist_active_bg_color }};
+    color: {{ section.settings.wishlist_active_icon_color }};
+    border-color: {{ section.settings.wishlist_active_border_color }};
+  }
+
+  .mobile-wishlist-btn .wishlist-icon-filled {
+    display: none;
+  }
+
+  .mobile-wishlist-btn.active .wishlist-icon-empty {
+    display: none;
+  }
+
+  .mobile-wishlist-btn.active .wishlist-icon-filled {
+    display: block;
+  }
+
+  /* 手机端按钮组 */
+  .mobile-buttons-group {
+    display: none;
+    margin-top: 12px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .mobile-add-to-cart {
+    flex: 1;
+  }
+
   /* 图片轮播进度条 */
   .image-progress-bar {
     position: absolute;
@@ -521,12 +688,6 @@
     height: 14px;
   }
 
-  /* 手机端购物车按钮 */
-  .mobile-add-to-cart {
-    display: none;
-    margin-top: 12px;
-  }
-
   .mobile-cart-form {
     margin: 0;
     padding: 0;
@@ -638,6 +799,15 @@
     color: {{ section.settings.view_more_hover_text_color }};
   }
 
+  /* 心愿单应用容器 */
+  #wishlist-app-container {
+    display: none;
+  }
+
+  .wishlist-app-block {
+    width: 100%;
+  }
+
   /* 响应式设计 */
   @media (max-width: 768px) {
     .jewelry-products-container {
@@ -683,8 +853,12 @@
       display: none !important;
     }
 
-    .mobile-add-to-cart {
-      display: block;
+    .mobile-buttons-group {
+      display: flex;
+    }
+
+    .wishlist-button-container {
+      display: none;
     }
 
     .image-progress-bar {
@@ -731,6 +905,11 @@
     .mobile-cart-btn {
       font-size: 11px;
       padding: 8px 14px;
+    }
+
+    .mobile-wishlist-btn {
+      width: 36px;
+      height: 36px;
     }
   }
 
@@ -795,6 +974,9 @@
 
     // 图片轮播功能
     initializeImageCarousel();
+
+    // 心愿单功能
+    initializeWishlist();
 
     // 添加到购物车功能 - 悬停按钮
     const hoverCartForms = document.querySelectorAll('.hover-cart-form');
@@ -883,6 +1065,172 @@
       });
     }, 100);
   });
+
+  // 心愿单功能
+  function initializeWishlist() {
+    // 获取本地存储的心愿单数据
+    function getWishlist() {
+      try {
+        return JSON.parse(localStorage.getItem('jewelry_wishlist') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // 保存心愿单数据到本地存储
+    function saveWishlist(wishlist) {
+      try {
+        localStorage.setItem('jewelry_wishlist', JSON.stringify(wishlist));
+        // 触发自定义事件，通知其他组件心愿单已更新
+        window.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: wishlist }));
+      } catch (e) {
+        console.error('Failed to save wishlist:', e);
+      }
+    }
+
+    // 检查产品是否在心愿单中
+    function isInWishlist(productId) {
+      const wishlist = getWishlist();
+      return wishlist.some(item => item.id == productId);
+    }
+
+    // 添加到心愿单
+    function addToWishlist(productId, productHandle, productTitle, productImage, productPrice) {
+      const wishlist = getWishlist();
+      const existingIndex = wishlist.findIndex(item => item.id == productId);
+      
+      if (existingIndex === -1) {
+        wishlist.push({
+          id: productId,
+          handle: productHandle,
+          title: productTitle,
+          image: productImage,
+          price: productPrice,
+          addedAt: new Date().toISOString()
+        });
+        saveWishlist(wishlist);
+        return true;
+      }
+      return false;
+    }
+
+    // 从心愿单移除
+    function removeFromWishlist(productId) {
+      const wishlist = getWishlist();
+      const filteredWishlist = wishlist.filter(item => item.id != productId);
+      saveWishlist(filteredWishlist);
+      return filteredWishlist.length !== wishlist.length;
+    }
+
+    // 更新按钮状态
+    function updateWishlistButton(button, isActive) {
+      if (isActive) {
+        button.classList.add('active');
+        button.setAttribute('aria-label', 'お気に入りから削除');
+      } else {
+        button.classList.remove('active');
+        button.setAttribute('aria-label', 'お気に入りに追加');
+      }
+    }
+
+    // 初始化所有心愿单按钮
+    const wishlistButtons = document.querySelectorAll('.wishlist-btn, .mobile-wishlist-btn');
+    wishlistButtons.forEach(button => {
+      const productId = button.dataset.productId;
+      const isActive = isInWishlist(productId);
+      updateWishlistButton(button, isActive);
+
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const productId = this.dataset.productId;
+        const productHandle = this.dataset.productHandle;
+        const productCard = this.closest('.product-card');
+        const productTitle = productCard.querySelector('.product-title a').textContent.trim();
+        const productImage = productCard.querySelector('.product-image.active')?.src || '';
+        const productPrice = productCard.querySelector('.current-price')?.textContent.trim() || '';
+
+        const isCurrentlyActive = this.classList.contains('active');
+
+        if (isCurrentlyActive) {
+          // 从心愿单移除
+          if (removeFromWishlist(productId)) {
+            // 更新所有相同产品的按钮状态
+            const allButtons = document.querySelectorAll(`[data-product-id="${productId}"]`);
+            allButtons.forEach(btn => updateWishlistButton(btn, false));
+            
+            // 显示移除提示
+            showWishlistNotification('お気に入りから削除しました', 'remove');
+          }
+        } else {
+          // 添加到心愿单
+          if (addToWishlist(productId, productHandle, productTitle, productImage, productPrice)) {
+            // 更新所有相同产品的按钮状态
+            const allButtons = document.querySelectorAll(`[data-product-id="${productId}"]`);
+            allButtons.forEach(btn => updateWishlistButton(btn, true));
+            
+            // 显示添加提示
+            showWishlistNotification('お気に入りに追加しました', 'add');
+          }
+        }
+      });
+    });
+
+    // 显示心愿单操作提示
+    function showWishlistNotification(message, type) {
+      // 移除现有的通知
+      const existingNotification = document.querySelector('.wishlist-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+
+      // 创建新的通知
+      const notification = document.createElement('div');
+      notification.className = `wishlist-notification wishlist-notification-${type}`;
+      notification.textContent = message;
+      
+      // 添加样式
+      Object.assign(notification.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        background: type === 'add' ? '#4CAF50' : '#f44336',
+        color: 'white',
+        padding: '12px 20px',
+        borderRadius: '4px',
+        fontSize: '14px',
+        fontFamily: "'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif",
+        zIndex: '10000',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        transform: 'translateX(100%)',
+        transition: 'transform 0.3s ease'
+      });
+
+      document.body.appendChild(notification);
+
+      // 显示动画
+      setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+      }, 10);
+
+      // 自动隐藏
+      setTimeout(() => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // 监听心愿单更新事件（用于与第三方心愿单应用集成）
+    window.addEventListener('wishlistUpdated', function(e) {
+      // 这里可以添加与第三方心愿单应用的集成逻辑
+      console.log('Wishlist updated:', e.detail);
+    });
+  }
 
   // 图片轮播功能
   function initializeImageCarousel() {
@@ -1111,8 +1459,8 @@
 
 {% schema %}
 {
-  "name": "珠宝产品展示",
-  "class": "section-jewelry-products",
+  "name": "珠宝产品展示（含心愿单）",
+  "class": "section-jewelry-products-wishlist",
   "settings": [
     {
       "type": "header",
@@ -1211,6 +1559,80 @@
       "id": "add_to_cart_text",
       "label": "添加到购物车按钮文字",
       "default": "カートに追加"
+    },
+    {
+      "type": "header",
+      "content": "心愿单设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_wishlist",
+      "label": "显示心愿单按钮",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "wishlist_opacity",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "心愿单按钮透明度",
+      "default": 90
+    },
+    {
+      "type": "color",
+      "id": "wishlist_bg_color",
+      "label": "心愿单按钮背景色",
+      "default": "rgba(255, 255, 255, 0.9)"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_icon_color",
+      "label": "心愿单图标颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_border_color",
+      "label": "心愿单按钮边框颜色",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_hover_bg_color",
+      "label": "心愿单按钮悬停背景色",
+      "default": "rgba(255, 255, 255, 1)"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_hover_icon_color",
+      "label": "心愿单图标悬停颜色",
+      "default": "#ff6b6b"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_hover_border_color",
+      "label": "心愿单按钮悬停边框颜色",
+      "default": "#ff6b6b"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_active_bg_color",
+      "label": "心愿单按钮激活背景色",
+      "default": "#ff6b6b"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_active_icon_color",
+      "label": "心愿单图标激活颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "wishlist_active_border_color",
+      "label": "心愿单按钮激活边框颜色",
+      "default": "#ff6b6b"
     },
     {
       "type": "header",
@@ -1609,10 +2031,33 @@
       "default": "#ffffff"
     }
   ],
+  "blocks": [
+    {
+      "type": "wishlist_app",
+      "name": "心愿单应用",
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "在此处添加心愿单应用的嵌入代码或配置"
+        },
+        {
+          "type": "liquid",
+          "id": "app_embed",
+          "label": "应用嵌入代码",
+          "info": "粘贴心愿单应用提供的嵌入代码"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "珠宝产品展示",
-      "category": "Product"
+      "name": "珠宝产品展示（含心愿单）",
+      "category": "Product",
+      "blocks": [
+        {
+          "type": "wishlist_app"
+        }
+      ]
     }
   ]
 }
