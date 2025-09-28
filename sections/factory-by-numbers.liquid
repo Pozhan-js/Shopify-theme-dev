@@ -1,0 +1,286 @@
+<style>
+  .factory-numbers {
+    background-color: #2c2c2c;
+    padding: 80px 0;
+    position: relative;
+  }
+
+  .factory-numbers__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .factory-numbers__title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin-bottom: 80px;
+    letter-spacing: 0.5px;
+  }
+
+  .factory-numbers__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 60px;
+    align-items: center;
+  }
+
+  .factory-numbers__item {
+    text-align: center;
+    position: relative;
+  }
+
+  .factory-numbers__number {
+    font-size: 4.5rem;
+    font-weight: 300;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .factory-numbers__number .counter {
+    display: inline;
+  }
+
+  .factory-numbers__unit {
+    font-size: 2rem;
+    color: #ff4444;
+    font-weight: 300;
+    vertical-align: top;
+    line-height: 1;
+  }
+
+  .factory-numbers__label {
+    font-size: 1rem;
+    color: #cccccc;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 1024px) {
+    .factory-numbers__grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 50px;
+    }
+
+    .factory-numbers__number {
+      font-size: 4rem;
+    }
+
+    .factory-numbers__unit {
+      font-size: 1.8rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .factory-numbers {
+      padding: 60px 0;
+    }
+
+    .factory-numbers__title {
+      font-size: 2rem;
+      margin-bottom: 60px;
+    }
+
+    .factory-numbers__grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .factory-numbers__number {
+      font-size: 3.5rem;
+    }
+
+    .factory-numbers__unit {
+      font-size: 1.5rem;
+    }
+
+    .factory-numbers__label {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .factory-numbers__container {
+      padding: 0 15px;
+    }
+
+    .factory-numbers__title {
+      font-size: 1.8rem;
+    }
+
+    .factory-numbers__number {
+      font-size: 3rem;
+    }
+
+    .factory-numbers__unit {
+      font-size: 1.3rem;
+    }
+  }
+</style>
+
+<section class="factory-numbers">
+  <div class="factory-numbers__container">
+    {% if section.settings.title != blank %}
+      <h2 class="factory-numbers__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="factory-numbers__grid">
+      {% for block in section.blocks %}
+        <div class="factory-numbers__item" {{ block.shopify_attributes }}>
+          <div class="factory-numbers__number">
+            <span class="counter" data-target="{{ block.settings.number }}">0</span>
+            {% if block.settings.unit != blank %}
+              <span class="factory-numbers__unit">{{ block.settings.unit }}</span>
+            {% endif %}
+          </div>
+          {% if block.settings.label != blank %}
+            <div class="factory-numbers__label">{{ block.settings.label }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const counters = document.querySelectorAll('.counter');
+    const animationDuration = 2000; // 2秒动画时间
+
+    function animateCounter(counter) {
+      const target = parseInt(counter.getAttribute('data-target'));
+      const increment = target / (animationDuration / 16); // 60fps
+      let current = 0;
+
+      function updateCounter() {
+        current += increment;
+        if (current < target) {
+          counter.textContent = Math.floor(current).toLocaleString();
+          requestAnimationFrame(updateCounter);
+        } else {
+          counter.textContent = target.toLocaleString();
+        }
+      }
+
+      updateCounter();
+    }
+
+    // 创建 Intersection Observer 来检测元素是否进入视口
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const counter = entry.target.querySelector('.counter');
+            if (counter && !counter.classList.contains('animated')) {
+              counter.classList.add('animated');
+              animateCounter(counter);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      }
+    );
+
+    // 观察每个统计项
+    document.querySelectorAll('.factory-numbers__item').forEach((item) => {
+      observer.observe(item);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Factory by Numbers",
+  "tag": "section",
+  "class": "section-factory-numbers",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Factory by the Numbers"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "number_item",
+      "name": "Number Item",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Number Content"
+        },
+        {
+          "type": "number",
+          "id": "number",
+          "label": "Number",
+          "default": 180000
+        },
+        {
+          "type": "text",
+          "id": "unit",
+          "label": "Unit (e.g., m², +)",
+          "default": "m²"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "facility size"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Factory by Numbers",
+      "blocks": [
+        {
+          "type": "number_item",
+          "settings": {
+            "number": 180000,
+            "unit": "m²",
+            "label": "facility size"
+          }
+        },
+        {
+          "type": "number_item",
+          "settings": {
+            "number": 350,
+            "unit": "+",
+            "label": "skilled employees"
+          }
+        },
+        {
+          "type": "number_item",
+          "settings": {
+            "number": 86000,
+            "unit": "+",
+            "label": "units per year"
+          }
+        },
+        {
+          "type": "number_item",
+          "settings": {
+            "number": 20,
+            "unit": "+",
+            "label": "patented technologies"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
