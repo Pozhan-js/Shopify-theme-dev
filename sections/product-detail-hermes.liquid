@@ -1,0 +1,508 @@
+<style>
+  .product-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .product-images {
+    position: relative;
+  }
+
+  .main-image {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumbnail-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+  }
+
+  .thumbnail {
+    aspect-ratio: 1;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .thumbnail:hover,
+  .thumbnail.active {
+    border-color: #333;
+  }
+
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .product-info {
+    padding-left: 20px;
+  }
+
+  .product-title {
+    font-size: 24px;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 20px;
+    line-height: 1.4;
+  }
+
+  .product-price {
+    font-size: 20px;
+    color: #666;
+    margin-bottom: 40px;
+  }
+
+  .quantity-selector {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .quantity-label {
+    font-size: 14px;
+    color: #666;
+    margin-right: 20px;
+  }
+
+  .quantity-controls {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .quantity-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #666;
+  }
+
+  .quantity-btn:hover {
+    background-color: #f5f5f5;
+  }
+
+  .quantity-input {
+    width: 60px;
+    height: 40px;
+    border: none;
+    text-align: center;
+    font-size: 16px;
+  }
+
+  .stock-info {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 30px;
+  }
+
+  .add-to-cart-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.2s;
+  }
+
+  .add-to-cart-btn:hover {
+    background-color: #f5f5f5;
+  }
+
+  .line-consultation {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: #00c300;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .line-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    background-color: white;
+    border-radius: 50%;
+  }
+
+  .product-details {
+    border: 2px solid #ff4444;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+
+  .details-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .details-toggle {
+    font-size: 18px;
+    color: #666;
+  }
+
+  .details-content {
+    display: block;
+  }
+
+  .detail-row {
+    display: flex;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+
+  .detail-label {
+    width: 80px;
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  .detail-value {
+    color: #333;
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    .product-detail-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .product-info {
+      padding-left: 0;
+    }
+
+    .thumbnail-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
+
+<div class="product-detail-container">
+  <div class="product-images">
+    <div class="main-image">
+      {% if product.featured_media %}
+        <img src="{{ product.featured_media | image_url: width: 800 }}" alt="{{ product.title }}">
+      {% else %}
+        <img src="{{ 'placeholder.svg' | asset_url }}" alt="Product placeholder">
+      {% endif %}
+    </div>
+
+    <div class="thumbnail-grid">
+      {% for media in product.media limit: 8 %}
+        <div
+          class="thumbnail {% if forloop.first %}active{% endif %}"
+          onclick="changeMainImage('{{ media | image_url: width: 800 }}')"
+        >
+          <img src="{{ media | image_url: width: 100 }}" alt="{{ product.title }}">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="product-info">
+    <h1 class="product-title">{{ product.title | default: section.settings.product_title }}</h1>
+
+    <div class="product-price">
+      {% if product.price %}
+        {{ product.price | money }}
+      {% else %}
+        {{ section.settings.product_price }}
+      {% endif %}
+    </div>
+
+    <form action="/cart/add" method="post" enctype="multipart/form-data">
+      <div class="quantity-selector">
+        <span class="quantity-label">{{ section.settings.quantity_label }}</span>
+        <div class="quantity-controls">
+          <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+          <input type="number" name="quantity" value="1" min="1" class="quantity-input" id="quantity">
+          <button type="button" class="quantity-btn" onclick="changeQuantity(1)">+</button>
+        </div>
+      </div>
+
+      <div class="stock-info">{{ section.settings.stock_info }}</div>
+
+      {% if product.available %}
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <button type="submit" class="add-to-cart-btn">
+          {{ section.settings.add_to_cart_text }}
+          {{ product.price | money }}
+        </button>
+      {% else %}
+        <button type="button" class="add-to-cart-btn" disabled>
+          {{ section.settings.sold_out_text }}
+        </button>
+      {% endif %}
+    </form>
+
+    {% if section.settings.show_line_consultation %}
+      <a href="{{ section.settings.line_url }}" class="line-consultation">
+        <div class="line-icon"></div>
+        {{ section.settings.line_text }}
+      </a>
+    {% endif %}
+
+    <div class="product-details">
+      <div class="details-header" onclick="toggleDetails()">
+        <span class="details-title">{{ section.settings.details_title }}</span>
+        <span class="details-toggle" id="details-toggle">^</span>
+      </div>
+
+      <div class="details-content" id="details-content">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'detail_item' %}
+              <div class="detail-row">
+                <span class="detail-label">{{ block.settings.label }}</span>
+                <span class="detail-value">{{ block.settings.value }}</span>
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function changeMainImage(src) {
+    document.querySelector('.main-image img').src = src;
+
+    // Update active thumbnail
+    document.querySelectorAll('.thumbnail').forEach((thumb) => thumb.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+
+  function changeQuantity(delta) {
+    const input = document.getElementById('quantity');
+    const currentValue = parseInt(input.value);
+    const newValue = Math.max(1, currentValue + delta);
+    input.value = newValue;
+  }
+
+  function toggleDetails() {
+    const content = document.getElementById('details-content');
+    const toggle = document.getElementById('details-toggle');
+
+    if (content.style.display === 'none') {
+      content.style.display = 'block';
+      toggle.textContent = '^';
+    } else {
+      content.style.display = 'none';
+      toggle.textContent = 'v';
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Product Detail Hermes",
+  "settings": [
+    {
+      "type": "text",
+      "id": "product_title",
+      "label": "Product Title",
+      "default": "HERMES ミニケリー2 テディ シャモア/エクリュ/アルザン"
+    },
+    {
+      "type": "text",
+      "id": "product_price",
+      "label": "Product Price",
+      "default": "¥9,405,000"
+    },
+    {
+      "type": "text",
+      "id": "quantity_label",
+      "label": "Quantity Label",
+      "default": "在庫は1個のみ"
+    },
+    {
+      "type": "text",
+      "id": "stock_info",
+      "label": "Stock Information",
+      "default": "在庫は1個のみ"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "Add to Cart Text",
+      "default": "カートに追加"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_text",
+      "label": "Sold Out Text",
+      "default": "売り切れ"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_line_consultation",
+      "label": "Show LINE Consultation",
+      "default": true
+    },
+    {
+      "type": "url",
+      "id": "line_url",
+      "label": "LINE URL"
+    },
+    {
+      "type": "text",
+      "id": "line_text",
+      "label": "LINE Text",
+      "default": "公式LINEで来店予約"
+    },
+    {
+      "type": "text",
+      "id": "details_title",
+      "label": "Details Section Title",
+      "default": "説明"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "detail_item",
+      "name": "Detail Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Detail Hermes",
+      "blocks": [
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "ランク",
+            "value": "N新品"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "ブランド",
+            "value": "エルメス（Hermès）"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "モデル",
+            "value": "ミニケリー2テディ"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "カラー",
+            "value": "シャモア/エクリュ/アルザン"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "素材",
+            "value": "グリズリ/ムートン/スイフト"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "金具",
+            "value": "シルバー金具"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "刻印",
+            "value": "W刻印（2024年）"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "表サイズ",
+            "value": "約W19×H12×D5.5cm ストラップ：約97.5cm"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "仕様",
+            "value": "内ポケット オープンポケット×1"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "付属品",
+            "value": "全て付属（箱・保存袋・冊子・ショップカード・ストラップ）"
+          }
+        },
+        {
+          "type": "detail_item",
+          "settings": {
+            "label": "品番",
+            "value": "Y250403"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
