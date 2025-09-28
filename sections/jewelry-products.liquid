@@ -1,4 +1,4 @@
-<!-- 珠宝产品展示section - 自动获取全部系列 + 心愿单功能 -->
+<!-- 珠宝产品展示section - 自动获取全部系列 -->
 <div class="jewelry-products-container">
   <div class="jewelry-products-wrapper">
     <div class="section-title-wrapper">
@@ -55,42 +55,6 @@
                 {%- for product in display_products -%}
                   <div class="product-card">
                     <div class="product-image-container">
-                      <!-- XB Wishlist 心愿单按钮 -->
-                      {%- if section.settings.show_wishlist -%}
-                        <div class="wishlist-button-container">
-                          <div
-                            class="xb-wishlist-btn-wrapper"
-                            data-product-id="{{ product.id }}"
-                            data-product-handle="{{ product.handle }}"
-                            data-product-title="{{ product.title | escape }}"
-                            data-product-price="{{ product.price | money_without_currency }}"
-                            data-product-image="{{ product.featured_image | image_url: width: 300 }}"
-                            data-product-url="{{ product.url }}"
-                          >
-                            <!-- XB Wishlist 按钮将在这里渲染 -->
-                            <button
-                              type="button"
-                              class="xb-wishlist-btn fallback-wishlist-btn"
-                              data-product-id="{{ product.id }}"
-                              aria-label="お気に入りに追加"
-                            >
-                              <svg class="wishlist-icon-empty" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                              </svg>
-                              <svg
-                                class="wishlist-icon-filled"
-                                width="20"
-                                height="20"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      {%- endif -%}
-
                       <!-- 图片轮播进度条 -->
                       <div class="image-progress-bar">
                         {%- assign image_count = product.images.size -%}
@@ -150,58 +114,21 @@
                         <span class="current-price">{{ product.price | money }}</span>
                       </div>
 
-                      <!-- 手机端按钮组 -->
-                      <div class="mobile-buttons-group">
-                        <!-- XB Wishlist 手机端心愿单按钮 -->
-                        {%- if section.settings.show_wishlist -%}
-                          <div
-                            class="xb-wishlist-mobile-wrapper"
-                            data-product-id="{{ product.id }}"
-                            data-product-handle="{{ product.handle }}"
-                            data-product-title="{{ product.title | escape }}"
-                            data-product-price="{{ product.price | money_without_currency }}"
-                            data-product-image="{{ product.featured_image | image_url: width: 300 }}"
-                            data-product-url="{{ product.url }}"
-                          >
-                            <!-- XB Wishlist 移动端按钮将在这里渲染 -->
-                            <button
-                              type="button"
-                              class="xb-wishlist-btn mobile-wishlist-btn fallback-wishlist-btn"
-                              data-product-id="{{ product.id }}"
-                              aria-label="お気に入りに追加"
-                            >
-                              <svg class="wishlist-icon-empty" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <!-- 手机端购物车按钮 -->
+                      {%- if section.settings.show_add_to_cart -%}
+                        <div class="mobile-add-to-cart">
+                          <form method="post" action="/cart/add" class="mobile-cart-form">
+                            <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="mobile-cart-btn">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
                               </svg>
-                              <svg
-                                class="wishlist-icon-filled"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                              </svg>
+                              {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
                             </button>
-                          </div>
-                        {%- endif -%}
-
-                        <!-- 手机端购物车按钮 -->
-                        {%- if section.settings.show_add_to_cart -%}
-                          <div class="mobile-add-to-cart">
-                            <form method="post" action="/cart/add" class="mobile-cart-form">
-                              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
-                              <input type="hidden" name="quantity" value="1">
-                              <button type="submit" class="mobile-cart-btn">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                  <path d="M9 2L6 6H3L5 20H19L21 6H18L15 2H9Z" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                                {{ section.settings.add_to_cart_text | default: 'カートに追加' }}
-                              </button>
-                            </form>
-                          </div>
-                        {%- endif -%}
-                      </div>
+                          </form>
+                        </div>
+                      {%- endif -%}
                     </div>
                   </div>
                 {%- endfor -%}
@@ -221,41 +148,6 @@
     {%- endif -%}
   </div>
 </div>
-
-<!-- XB Wishlist 应用集成区域 -->
-{%- if section.settings.show_wishlist -%}
-  <div id="xb-wishlist-app-container">
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when 'xb_wishlist_app' -%}
-          <div class="xb-wishlist-app-block" {{ block.shopify_attributes }}>
-            {%- if block.settings.xb_wishlist_embed -%}
-              {{ block.settings.xb_wishlist_embed }}
-            {%- endif -%}
-
-            <!-- XB Wishlist 默认集成代码 -->
-            <script>
-              // XB Wishlist 初始化配置
-              window.XBWishlistConfig = {
-                enabled: {{ section.settings.show_wishlist | json }},
-                buttonSelector: '.xb-wishlist-btn-wrapper, .xb-wishlist-mobile-wrapper',
-                iconStyle: '{{ block.settings.icon_style | default: "heart" }}',
-                position: '{{ block.settings.button_position | default: "top-right" }}',
-                showCount: {{ block.settings.show_count | default: false | json }},
-                customCSS: {{ block.settings.custom_css | json }},
-                translations: {
-                  addToWishlist: '{{ block.settings.add_text | default: "お気に入りに追加" }}',
-                  removeFromWishlist: '{{ block.settings.remove_text | default: "お気に入りから削除" }}',
-                  addedToWishlist: '{{ block.settings.added_text | default: "お気に入りに追加しました" }}',
-                  removedFromWishlist: '{{ block.settings.removed_text | default: "お気に入りから削除しました" }}'
-                }
-              };
-            </script>
-          </div>
-      {%- endcase -%}
-    {%- endfor -%}
-  </div>
-{%- endif -%}
 
 <style>
   /* 日文无衬线字体设置 */
@@ -510,155 +402,6 @@
     flex-shrink: 0;
   }
 
-  /* XB Wishlist 心愿单按钮样式 */
-  .wishlist-button-container {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 15;
-  }
-
-  .xb-wishlist-btn-wrapper,
-  .xb-wishlist-mobile-wrapper {
-    position: relative;
-    display: inline-block;
-  }
-
-  /* XB Wishlist 按钮基础样式 */
-  .xb-wishlist-btn,
-  .fallback-wishlist-btn {
-    background: {{ section.settings.wishlist_bg_color }};
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: {{ section.settings.wishlist_icon_color }};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    opacity: {{ section.settings.wishlist_opacity | divided_by: 100.0 }};
-  }
-
-  .xb-wishlist-btn:hover,
-  .fallback-wishlist-btn:hover {
-    background: {{ section.settings.wishlist_hover_bg_color }};
-    color: {{ section.settings.wishlist_hover_icon_color }};
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .xb-wishlist-btn.active,
-  .xb-wishlist-btn.in-wishlist,
-  .fallback-wishlist-btn.active {
-    background: {{ section.settings.wishlist_active_bg_color }};
-    color: {{ section.settings.wishlist_active_icon_color }};
-  }
-
-  .xb-wishlist-btn .wishlist-icon-filled,
-  .fallback-wishlist-btn .wishlist-icon-filled {
-    display: none;
-  }
-
-  .xb-wishlist-btn.active .wishlist-icon-empty,
-  .xb-wishlist-btn.in-wishlist .wishlist-icon-empty,
-  .fallback-wishlist-btn.active .wishlist-icon-empty {
-    display: none;
-  }
-
-  .xb-wishlist-btn.active .wishlist-icon-filled,
-  .xb-wishlist-btn.in-wishlist .wishlist-icon-filled,
-  .fallback-wishlist-btn.active .wishlist-icon-filled {
-    display: block;
-  }
-
-  /* 手机端 XB Wishlist 按钮 */
-  .mobile-wishlist-btn {
-    background: {{ section.settings.wishlist_bg_color }};
-    border: 1px solid {{ section.settings.wishlist_border_color }};
-    border-radius: 4px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: {{ section.settings.wishlist_icon_color }};
-    flex-shrink: 0;
-  }
-
-  .mobile-wishlist-btn:hover {
-    background: {{ section.settings.wishlist_hover_bg_color }};
-    color: {{ section.settings.wishlist_hover_icon_color }};
-    border-color: {{ section.settings.wishlist_hover_border_color }};
-  }
-
-  .mobile-wishlist-btn.active,
-  .mobile-wishlist-btn.in-wishlist {
-    background: {{ section.settings.wishlist_active_bg_color }};
-    color: {{ section.settings.wishlist_active_icon_color }};
-    border-color: {{ section.settings.wishlist_active_border_color }};
-  }
-
-  .mobile-wishlist-btn .wishlist-icon-filled {
-    display: none;
-  }
-
-  .mobile-wishlist-btn.active .wishlist-icon-empty,
-  .mobile-wishlist-btn.in-wishlist .wishlist-icon-empty {
-    display: none;
-  }
-
-  .mobile-wishlist-btn.active .wishlist-icon-filled,
-  .mobile-wishlist-btn.in-wishlist .wishlist-icon-filled {
-    display: block;
-  }
-
-  /* XB Wishlist 应用特定样式 */
-  .xb-wishlist-app-block {
-    display: none; /* 隐藏应用容器，但保留功能 */
-  }
-
-  /* XB Wishlist 通知样式 */
-  .xb-wishlist-notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #4CAF50;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
-    z-index: 10000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-  }
-
-  .xb-wishlist-notification.show {
-    transform: translateX(0);
-  }
-
-  .xb-wishlist-notification.remove {
-    background: #f44336;
-  }
-
-  /* 手机端按钮组 */
-  .mobile-buttons-group {
-    display: none;
-    margin-top: 12px;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .mobile-add-to-cart {
-    flex: 1;
-  }
-
   /* 图片轮播进度条 */
   .image-progress-bar {
     position: absolute;
@@ -778,6 +521,12 @@
     height: 14px;
   }
 
+  /* 手机端购物车按钮 */
+  .mobile-add-to-cart {
+    display: none;
+    margin-top: 12px;
+  }
+
   .mobile-cart-form {
     margin: 0;
     padding: 0;
@@ -889,20 +638,6 @@
     color: {{ section.settings.view_more_hover_text_color }};
   }
 
-  /* XB Wishlist 应用容器 */
-  #xb-wishlist-app-container {
-    position: relative;
-  }
-
-  .xb-wishlist-app-block {
-    width: 100%;
-  }
-
-  /* XB Wishlist 自定义样式覆盖 */
-  .xb-wishlist-custom-styles {
-    /* 这里可以添加 XB Wishlist 的自定义样式 */
-  }
-
   /* 响应式设计 */
   @media (max-width: 768px) {
     .jewelry-products-container {
@@ -948,12 +683,8 @@
       display: none !important;
     }
 
-    .mobile-buttons-group {
-      display: flex;
-    }
-
-    .wishlist-button-container {
-      display: none;
+    .mobile-add-to-cart {
+      display: block;
     }
 
     .image-progress-bar {
@@ -1000,11 +731,6 @@
     .mobile-cart-btn {
       font-size: 11px;
       padding: 8px 14px;
-    }
-
-    .mobile-wishlist-btn {
-      width: 36px;
-      height: 36px;
     }
   }
 
@@ -1069,9 +795,6 @@
 
     // 图片轮播功能
     initializeImageCarousel();
-
-    // XB Wishlist 集成
-    initializeXBWishlist();
 
     // 添加到购物车功能 - 悬停按钮
     const hoverCartForms = document.querySelectorAll('.hover-cart-form');
@@ -1160,200 +883,6 @@
       });
     }, 100);
   });
-
-  // XB Wishlist 集成功能
-  function initializeXBWishlist() {
-    // 等待 XB Wishlist 应用加载
-    function waitForXBWishlist(callback) {
-      if (window.XBWishlist || window.xbWishlist) {
-        callback();
-      } else {
-        setTimeout(() => waitForXBWishlist(callback), 100);
-      }
-    }
-
-    // 初始化 XB Wishlist
-    function initXBWishlistButtons() {
-      const wishlistWrappers = document.querySelectorAll('.xb-wishlist-btn-wrapper, .xb-wishlist-mobile-wrapper');
-      
-      wishlistWrappers.forEach(wrapper => {
-        const productId = wrapper.dataset.productId;
-        const productData = {
-          id: productId,
-          handle: wrapper.dataset.productHandle,
-          title: wrapper.dataset.productTitle,
-          price: wrapper.dataset.productPrice,
-          image: wrapper.dataset.productImage,
-          url: wrapper.dataset.productUrl
-        };
-
-        // 如果 XB Wishlist 应用可用，使用应用的功能
-        if (window.XBWishlist) {
-          try {
-            // 初始化 XB Wishlist 按钮
-            window.XBWishlist.init(wrapper, productData);
-          } catch (error) {
-            console.warn('XB Wishlist initialization failed, using fallback:', error);
-            initFallbackWishlist(wrapper, productData);
-          }
-        } else {
-          // 使用备用心愿单功能
-          initFallbackWishlist(wrapper, productData);
-        }
-      });
-    }
-
-    // 备用心愿单功能（当 XB Wishlist 不可用时）
-    function initFallbackWishlist(wrapper, productData) {
-      const button = wrapper.querySelector('.fallback-wishlist-btn');
-      if (!button) return;
-
-      // 检查产品是否在心愿单中
-      const isInWishlist = checkWishlistStatus(productData.id);
-      updateButtonState(button, isInWishlist);
-
-      // 添加点击事件
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const currentState = this.classList.contains('active');
-        
-        if (currentState) {
-          // 从心愿单移除
-          removeFromWishlist(productData.id);
-          updateButtonState(this, false);
-          showXBWishlistNotification(window.XBWishlistConfig?.translations?.removedFromWishlist || 'お気に入りから削除しました', 'remove');
-        } else {
-          // 添加到心愿单
-          addToWishlist(productData);
-          updateButtonState(this, true);
-          showXBWishlistNotification(window.XBWishlistConfig?.translations?.addedToWishlist || 'お気に入りに追加しました', 'add');
-        }
-
-        // 更新所有相同产品的按钮状态
-        updateAllProductButtons(productData.id, !currentState);
-      });
-    }
-
-    // 检查心愿单状态
-    function checkWishlistStatus(productId) {
-      try {
-        const wishlist = JSON.parse(localStorage.getItem('xb_wishlist') || '[]');
-        return wishlist.some(item => item.id == productId);
-      } catch (e) {
-        return false;
-      }
-    }
-
-    // 添加到心愿单
-    function addToWishlist(productData) {
-      try {
-        const wishlist = JSON.parse(localStorage.getItem('xb_wishlist') || '[]');
-        const existingIndex = wishlist.findIndex(item => item.id == productData.id);
-        
-        if (existingIndex === -1) {
-          wishlist.push({
-            ...productData,
-            addedAt: new Date().toISOString()
-          });
-          localStorage.setItem('xb_wishlist', JSON.stringify(wishlist));
-          
-          // 触发 XB Wishlist 事件
-          window.dispatchEvent(new CustomEvent('xbWishlistUpdated', { 
-            detail: { action: 'add', product: productData, wishlist } 
-          }));
-        }
-      } catch (e) {
-        console.error('Failed to add to wishlist:', e);
-      }
-    }
-
-    // 从心愿单移除
-    function removeFromWishlist(productId) {
-      try {
-        const wishlist = JSON.parse(localStorage.getItem('xb_wishlist') || '[]');
-        const filteredWishlist = wishlist.filter(item => item.id != productId);
-        localStorage.setItem('xb_wishlist', JSON.stringify(filteredWishlist));
-        
-        // 触发 XB Wishlist 事件
-        window.dispatchEvent(new CustomEvent('xbWishlistUpdated', { 
-          detail: { action: 'remove', productId, wishlist: filteredWishlist } 
-        }));
-      } catch (e) {
-        console.error('Failed to remove from wishlist:', e);
-      }
-    }
-
-    // 更新按钮状态
-    function updateButtonState(button, isActive) {
-      if (isActive) {
-        button.classList.add('active', 'in-wishlist');
-        button.setAttribute('aria-label', window.XBWishlistConfig?.translations?.removeFromWishlist || 'お気に入りから削除');
-      } else {
-        button.classList.remove('active', 'in-wishlist');
-        button.setAttribute('aria-label', window.XBWishlistConfig?.translations?.addToWishlist || 'お気に入りに追加');
-      }
-    }
-
-    // 更新所有相同产品的按钮状态
-    function updateAllProductButtons(productId, isActive) {
-      const allButtons = document.querySelectorAll(`[data-product-id="${productId}"] .fallback-wishlist-btn, [data-product-id="${productId}"] .xb-wishlist-btn`);
-      allButtons.forEach(btn => updateButtonState(btn, isActive));
-    }
-
-    // 显示 XB Wishlist 通知
-    function showXBWishlistNotification(message, type) {
-      // 移除现有通知
-      const existingNotification = document.querySelector('.xb-wishlist-notification');
-      if (existingNotification) {
-        existingNotification.remove();
-      }
-
-      // 创建新通知
-      const notification = document.createElement('div');
-      notification.className = `xb-wishlist-notification ${type}`;
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-
-      // 显示动画
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 10);
-
-      // 自动隐藏
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-          }
-        }, 300);
-      }, 3000);
-    }
-
-    // 监听 XB Wishlist 应用事件
-    window.addEventListener('xbWishlistReady', function() {
-      console.log('XB Wishlist is ready');
-      initXBWishlistButtons();
-    });
-
-    // 监听心愿单更新事件
-    window.addEventListener('xbWishlistUpdated', function(e) {
-      console.log('XB Wishlist updated:', e.detail);
-      // 这里可以添加额外的处理逻辑
-    });
-
-    // 初始化
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        waitForXBWishlist(initXBWishlistButtons);
-      });
-    } else {
-      waitForXBWishlist(initXBWishlistButtons);
-    }
-  }
 
   // 图片轮播功能
   function initializeImageCarousel() {
@@ -1582,8 +1111,8 @@
 
 {% schema %}
 {
-  "name": "珠宝产品展示（含心愿单）",
-  "class": "section-jewelry-products-wishlist",
+  "name": "珠宝产品展示",
+  "class": "section-jewelry-products",
   "settings": [
     {
       "type": "header",
@@ -1682,80 +1211,6 @@
       "id": "add_to_cart_text",
       "label": "添加到购物车按钮文字",
       "default": "カートに追加"
-    },
-    {
-      "type": "header",
-      "content": "心愿单设置"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_wishlist",
-      "label": "显示心愿单按钮",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "wishlist_opacity",
-      "min": 60,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "label": "心愿单按钮透明度",
-      "default": 90
-    },
-    {
-      "type": "color",
-      "id": "wishlist_bg_color",
-      "label": "心愿单按钮背景色",
-      "default": "rgba(255, 255, 255, 0.9)"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_icon_color",
-      "label": "心愿单图标颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_border_color",
-      "label": "心愿单按钮边框颜色",
-      "default": "#dddddd"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_hover_bg_color",
-      "label": "心愿单按钮悬停背景色",
-      "default": "rgba(255, 255, 255, 1)"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_hover_icon_color",
-      "label": "心愿单图标悬停颜色",
-      "default": "#ff6b6b"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_hover_border_color",
-      "label": "心愿单按钮悬停边框颜色",
-      "default": "#ff6b6b"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_active_bg_color",
-      "label": "心愿单按钮激活背景色",
-      "default": "#ff6b6b"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_active_icon_color",
-      "label": "心愿单图标激活颜色",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "wishlist_active_border_color",
-      "label": "心愿单按钮激活边框颜色",
-      "default": "#ff6b6b"
     },
     {
       "type": "header",
@@ -2154,92 +1609,10 @@
       "default": "#ffffff"
     }
   ],
-  "blocks": [
-    {
-      "type": "xb_wishlist_app",
-      "name": "XB Wishlist 应用",
-      "settings": [
-        {
-          "type": "paragraph",
-          "content": "XB Wishlist 应用配置和自定义设置"
-        },
-        {
-          "type": "liquid",
-          "id": "xb_wishlist_embed",
-          "label": "XB Wishlist 嵌入代码",
-          "info": "粘贴 XB Wishlist 应用提供的嵌入代码（可选）"
-        },
-        {
-          "type": "select",
-          "id": "icon_style",
-          "label": "图标样式",
-          "options": [
-            { "value": "heart", "label": "心形图标" },
-            { "value": "star", "label": "星形图标" },
-            { "value": "bookmark", "label": "书签图标" }
-          ],
-          "default": "heart"
-        },
-        {
-          "type": "select",
-          "id": "button_position",
-          "label": "按钮位置",
-          "options": [
-            { "value": "top-right", "label": "右上角" },
-            { "value": "top-left", "label": "左上角" },
-            { "value": "bottom-right", "label": "右下角" },
-            { "value": "bottom-left", "label": "左下角" }
-          ],
-          "default": "top-right"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_count",
-          "label": "显示心愿单数量",
-          "default": false
-        },
-        {
-          "type": "text",
-          "id": "add_text",
-          "label": "添加到心愿单文字",
-          "default": "お気に入りに追加"
-        },
-        {
-          "type": "text",
-          "id": "remove_text",
-          "label": "从心愿单移除文字",
-          "default": "お気に入りから削除"
-        },
-        {
-          "type": "text",
-          "id": "added_text",
-          "label": "已添加提示文字",
-          "default": "お気に入りに追加しました"
-        },
-        {
-          "type": "text",
-          "id": "removed_text",
-          "label": "已移除提示文字",
-          "default": "お気に入りから削除しました"
-        },
-        {
-          "type": "textarea",
-          "id": "custom_css",
-          "label": "自定义 CSS",
-          "info": "添加自定义 CSS 来覆盖 XB Wishlist 的默认样式"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
-      "name": "珠宝产品展示（含心愿单）",
-      "category": "Product",
-      "blocks": [
-        {
-          "type": "xb_wishlist_app"
-        }
-      ]
+      "name": "珠宝产品展示",
+      "category": "Product"
     }
   ]
 }
