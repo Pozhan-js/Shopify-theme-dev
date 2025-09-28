@@ -1,14 +1,17 @@
 {%- comment %} 从路径中提取分类信息 {% endcomment %}
-{%- assign path_parts = request.path | split: '/' -%}
-{%- assign category_param = path_parts[2] | default: nil -%}
+{%- assign path_segments = request.path | remove_first: '/' | split: '/' -%}
+{%- assign category_param = path_segments[1] | default: nil -%}
 
 {%- comment %} 确保集合存在 {% endcomment %}
-{%- if collections[category_param] -%}
+{%- if category_param and collections[category_param] -%}
   {%- assign current_collection = collections[category_param] -%}
 {%- else -%}
   {%- assign current_collection = collections['all'] -%}
+  {%- comment %} 调试信息 {% endcomment %}
+  <!-- DEBUG: category_param={{ category_param }} -->
+  <!-- Available collections: {{ collections | map: 'handle' | join: ', ' }} -->
 {%- endif -%}
-<!-- debug path_parts={{ path_parts }} category_param={{ category_param }} current_collection={{ current_collection }} -->
+<!-- debug path={{request.path}}path_parts={{ path_parts }} category_param={{ category_param }} current_collection={{ current_collection }} -->
 <div class="product-grid page-width">
   <div class="grid grid--custom-col">
     {% for product in current_collection.products %}
