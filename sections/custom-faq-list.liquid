@@ -1,0 +1,240 @@
+<div class="faq-section page-width">
+  {% if section.settings.title != blank %}
+    <h2 class="faq-title" style="font-size: {{ section.settings.title_size }}px; font-weight: {{ section.settings.title_weight }};">
+      {{ section.settings.title }}
+    </h2>
+  {% endif %}
+
+  <div class="faq-list">
+    {% for block in section.blocks %}
+      <div class="faq-item" {{ block.shopify_attributes }}>
+        <button class="faq-question" aria-expanded="false" aria-controls="faq-{{ block.id }}">
+          <span class="faq-question-text">{{ block.settings.question }}</span>
+          <span class="faq-toggle">
+            <svg class="icon-plus" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg class="icon-minus" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+        </button>
+        <div id="faq-{{ block.id }}" class="faq-answer" aria-hidden="true">
+          <div class="faq-answer-content">
+            {{ block.settings.answer }}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+  .faq-section {
+    padding: 40px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .faq-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .faq-item {
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  
+  .faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    transition: background-color 0.2s ease;
+  }
+  
+  .faq-question:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .faq-question-text {
+    flex: 1;
+  }
+  
+  .faq-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-left: 10px;
+  }
+  
+  .faq-toggle .icon-plus,
+  .faq-toggle .icon-minus {
+    stroke-width: 3px;
+  }
+  
+  .icon-minus {
+    display: none;
+  }
+  
+  .faq-answer {
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+  }
+  
+  .faq-answer[aria-hidden="false"] {
+    padding: 0 20px 20px;
+    max-height: 1000px;
+  }
+  
+  .faq-answer-content {
+    padding-top: 10px;
+    color: #666;
+    line-height: 1.6;
+  }
+  
+  [aria-expanded="true"] .icon-plus {
+    display: none;
+  }
+  
+  [aria-expanded="true"] .icon-minus {
+    display: block;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  
+  faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    const answer = document.getElementById(question.getAttribute('aria-controls'));
+    
+    // 处理整个item点击
+    item.addEventListener('click', function() {
+      const isExpanded = question.getAttribute('aria-expanded') === 'true';
+      question.setAttribute('aria-expanded', !isExpanded);
+      answer.setAttribute('aria-hidden', String(isExpanded));
+      answer.hidden = isExpanded;
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "FAQ列表",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "区块标题",
+      "default": "常见问题"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 16,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "标题大小",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "标题字重",
+      "options": [
+        {
+          "value": "700",
+          "label": "常规"
+        },
+        {
+          "value": "1000",
+          "label": "半粗"
+        },
+        {
+          "value": "2000",
+          "label": "加粗"
+        }
+      ],
+      "default": "700"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq",
+      "name": "FAQ项",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "问题",
+          "default": "这是一个常见问题？"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "回答",
+          "default": "<p>这是问题的详细解答内容。</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ列表",
+      "blocks": [
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        },
+        {
+          "type": "faq"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
