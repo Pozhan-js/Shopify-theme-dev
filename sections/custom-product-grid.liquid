@@ -1,9 +1,13 @@
-{%- comment %} 从查询参数中获取分类信息 {% endcomment %}
-{%- if request.query_parameters.category -%}
-  {%- assign category_param = request.query_parameters.category -%}
-{%- elsif request.query_parameters.Category -%}
-  {%- assign category_param = request.query_parameters.Category -%}
-{%- else -%}
+{%- comment %} 完整URL参数调试 {% endcomment %}
+<!-- DEBUG: Full URL - {{ request.url }} -->
+<!-- DEBUG: Query String - {{ request.query_string }} -->
+<!-- DEBUG: All Query Params - {{ request.query_parameters | json }} -->
+
+{%- comment %} 获取分类参数 {% endcomment %}
+{%- assign category_param = request.query_parameters.category | default: request.query_parameters.Category | default: nil -%}
+
+{%- if category_param == blank -%}
+  <!-- DEBUG: No category parameter found in URL -->
   {%- assign category_param = nil -%}
 {%- endif -%}
 
@@ -18,8 +22,8 @@
 Request Path: {{ request.path }}
 Query Params: {{ request.query_parameters | json }}
 Category Param: {{ category_param | json }}
-Current Collection: {{ current_collection.handle | json }}
-Available Collections: {{ collections | map: 'handle' | join: ', ' }}
+Current Collection: {{ current_collection | json }}
+Available Collections: {{ collections | join: ', ' }}
 -->
 <div class="product-grid page-width">
   <div class="grid grid--custom-col">
