@@ -73,6 +73,17 @@
     margin-bottom: 40px;
   }
 
+  .original-price {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 10px;
+  }
+
+  .sale-price {
+    color: #e74c3c;
+    font-weight: 500;
+  }
+
   .quantity-selector {
     display: flex;
     align-items: center;
@@ -161,7 +172,7 @@
   }
 
   .product-details {
-    border: 2px solid #ff4444;
+    border: 1px solid #ddd;
     border-radius: 8px;
     padding: 20px;
   }
@@ -189,21 +200,31 @@
     display: block;
   }
 
-  .detail-row {
-    display: flex;
-    margin-bottom: 12px;
+  .product-description {
     font-size: 14px;
-  }
-
-  .detail-label {
-    width: 80px;
-    color: #666;
-    flex-shrink: 0;
-  }
-
-  .detail-value {
+    line-height: 1.6;
     color: #333;
-    flex: 1;
+  }
+
+  .product-description p {
+    margin-bottom: 12px;
+  }
+
+  .product-description ul,
+  .product-description ol {
+    margin-bottom: 12px;
+    padding-left: 20px;
+  }
+
+  .product-description li {
+    margin-bottom: 4px;
+  }
+
+  .product-description h3,
+  .product-description h4 {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #333;
   }
 
   @media (max-width: 768px) {
@@ -245,38 +266,48 @@
   </div>
 
   <div class="product-info">
-    <h1 class="product-title">{{ product.title | default: section.settings.product_title }}</h1>
+    <h1 class="product-title">{{ product.title }}</h1>
 
     <div class="product-price">
-      {% if product.price %}
-        {{ product.price | money }}
+      {% if product.compare_at_price and product.compare_at_price > product.price %}
+        <span class="original-price">{{ product.compare_at_price | money }}</span>
+        <span class="sale-price">{{ product.price | money }}</span>
       {% else %}
-        {{ section.settings.product_price }}
+        {{ product.price | money }}
       {% endif %}
     </div>
 
     <form action="/cart/add" method="post" enctype="multipart/form-data">
       <div class="quantity-selector">
-        <span class="quantity-label">{{ section.settings.quantity_label }}</span>
+        <span class="quantity-label">数量</span>
         <div class="quantity-controls">
           <button type="button" class="quantity-btn" onclick="changeQuantity(-1)">-</button>
-          <input type="number" name="quantity" value="1" min="1" class="quantity-input" id="quantity">
+          <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            max="{{ product.selected_or_first_available_variant.inventory_quantity }}"
+            class="quantity-input"
+            id="quantity"
+          >
           <button type="button" class="quantity-btn" onclick="changeQuantity(1)">+</button>
         </div>
       </div>
 
-      <div class="stock-info">{{ section.settings.stock_info }}</div>
+      <div class="stock-info">
+        {% if product.selected_or_first_available_variant.inventory_quantity > 0 %}
+          在庫は{{ product.selected_or_first_available_variant.inventory_quantity }}個
+        {% else %}
+          在庫切れ
+        {% endif %}
+      </div>
 
       {% if product.available %}
         <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-        <button type="submit" class="add-to-cart-btn">
-          {{ section.settings.add_to_cart_text }}
-          {{ product.price | money }}
-        </button>
+        <button type="submit" class="add-to-cart-btn">カートに追加 {{ product.price | money }}</button>
       {% else %}
-        <button type="button" class="add-to-cart-btn" disabled>
-          {{ section.settings.sold_out_text }}
-        </button>
+        <button type="button" class="add-to-cart-btn" disabled>売り切れ</button>
       {% endif %}
     </form>
 
@@ -287,24 +318,20 @@
       </a>
     {% endif %}
 
-    <div class="product-details">
-      <div class="details-header" onclick="toggleDetails()">
-        <span class="details-title">{{ section.settings.details_title }}</span>
-        <span class="details-toggle" id="details-toggle">^</span>
-      </div>
+    {% if product.description != blank %}
+      <div class="product-details">
+        <div class="details-header" onclick="toggleDetails()">
+          <span class="details-title">{{ section.settings.details_title }}</span>
+          <span class="details-toggle" id="details-toggle">^</span>
+        </div>
 
-      <div class="details-content" id="details-content">
-        {% for block in section.blocks %}
-          {% case block.type %}
-            {% when 'detail_item' %}
-              <div class="detail-row">
-                <span class="detail-label">{{ block.settings.label }}</span>
-                <span class="detail-value">{{ block.settings.value }}</span>
-              </div>
-          {% endcase %}
-        {% endfor %}
+        <div class="details-content" id="details-content">
+          <div class="product-description">
+            {{ product.description }}
+          </div>
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 </div>
 
@@ -343,42 +370,6 @@
   "name": "Product Detail Hermes",
   "settings": [
     {
-      "type": "text",
-      "id": "product_title",
-      "label": "Product Title",
-      "default": "HERMES ミニケリー2 テディ シャモア/エクリュ/アルザン"
-    },
-    {
-      "type": "text",
-      "id": "product_price",
-      "label": "Product Price",
-      "default": "¥9,405,000"
-    },
-    {
-      "type": "text",
-      "id": "quantity_label",
-      "label": "Quantity Label",
-      "default": "在庫は1個のみ"
-    },
-    {
-      "type": "text",
-      "id": "stock_info",
-      "label": "Stock Information",
-      "default": "在庫は1個のみ"
-    },
-    {
-      "type": "text",
-      "id": "add_to_cart_text",
-      "label": "Add to Cart Text",
-      "default": "カートに追加"
-    },
-    {
-      "type": "text",
-      "id": "sold_out_text",
-      "label": "Sold Out Text",
-      "default": "売り切れ"
-    },
-    {
       "type": "checkbox",
       "id": "show_line_consultation",
       "label": "Show LINE Consultation",
@@ -402,106 +393,9 @@
       "default": "説明"
     }
   ],
-  "blocks": [
-    {
-      "type": "detail_item",
-      "name": "Detail Item",
-      "settings": [
-        {
-          "type": "text",
-          "id": "label",
-          "label": "Label"
-        },
-        {
-          "type": "text",
-          "id": "value",
-          "label": "Value"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
-      "name": "Product Detail Hermes",
-      "blocks": [
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "ランク",
-            "value": "N新品"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "ブランド",
-            "value": "エルメス（Hermès）"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "モデル",
-            "value": "ミニケリー2テディ"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "カラー",
-            "value": "シャモア/エクリュ/アルザン"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "素材",
-            "value": "グリズリ/ムートン/スイフト"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "金具",
-            "value": "シルバー金具"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "刻印",
-            "value": "W刻印（2024年）"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "表サイズ",
-            "value": "約W19×H12×D5.5cm ストラップ：約97.5cm"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "仕様",
-            "value": "内ポケット オープンポケット×1"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "付属品",
-            "value": "全て付属（箱・保存袋・冊子・ショップカード・ストラップ）"
-          }
-        },
-        {
-          "type": "detail_item",
-          "settings": {
-            "label": "品番",
-            "value": "Y250403"
-          }
-        }
-      ]
+      "name": "Product Detail Hermes"
     }
   ]
 }
