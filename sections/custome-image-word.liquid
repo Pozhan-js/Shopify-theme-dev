@@ -73,6 +73,26 @@
           "id": "button_text_color",
           "label": "文字颜色",
           "default": "#000000"
+        },
+        {
+          "type": "select",
+          "id": "button_position",
+          "label": "按钮位置",
+          "options": [
+            {
+              "value": "left",
+              "label": "靠左"
+            },
+            {
+              "value": "center",
+              "label": "居中"
+            },
+            {
+              "value": "right",
+              "label": "靠右"
+            }
+          ],
+          "default": "left"
         }
       ]
     }
@@ -113,20 +133,34 @@
     margin-bottom: 20px;
   }
 
-  .custom-button {
-    display: inline-block;
-    padding: 8px 16px;
-    margin-top: 20px;
-    background: transparent;
-    border: 1px solid currentColor;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: opacity 0.3s ease;
-  }
+    .button-container {
+      margin-top: 20px;
+      text-align: left;
+    }
 
-  .custom-button:hover {
-    opacity: 0.8;
-  }
+    .custom-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid currentColor;
+      border-radius: 4px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .custom-button:hover {
+      background: #000;
+      color: #fff !important;
+      border-color: #000;
+    }
+
+    [data-button-position="center"] .button-container {
+      text-align: center;
+    }
+
+    [data-button-position="right"] .button-container {
+      text-align: right;
+    }
 
   @media screen and (max-width: 749px) {
     .image-text-container {
@@ -160,14 +194,16 @@
     
     {% for block in section.blocks %}
       {% if block.type == 'button' %}
-        <a 
-          href="{{ block.settings.button_link }}" 
-          class="custom-button" 
-          style="color: {{ block.settings.button_text_color }};"
-          {{ block.shopify_attributes }}
-        >
-          {{ block.settings.button_text }}
-        </a>
+        <div class="button-container" data-button-position="{{ block.settings.button_position }}">
+          <a 
+            href="{{ block.settings.button_link }}" 
+            class="custom-button" 
+            style="color: {{ block.settings.button_text_color }};"
+            {{ block.shopify_attributes }}
+          >
+            {{ block.settings.button_text }}
+          </a>
+        </div>
       {% endif %}
     {% endfor %}
   </div>
