@@ -1,0 +1,280 @@
+<div class="three-level-accordion page-width">
+  <div class="accordion-grid">
+    <!-- 草药分类 -->
+    <div class="accordion-category">
+      <h2 class="category-title">{{ section.settings.herb_title }}</h2>
+      <div class="accordion-items">
+        {% for block in section.blocks %}
+          {% if block.type == 'herb' %}
+            <div class="accordion-item">
+              <button class="accordion-header" aria-expanded="false">
+                {{ block.settings.title }}
+                <span class="accordion-icon">+</span>
+              </button>
+              <div class="accordion-content">
+                <div class="accordion-description">
+                  {{ block.settings.description }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 二十四节气分类 -->
+    <div class="accordion-category">
+      <h2 class="category-title">{{ section.settings.solar_term_title }}</h2>
+      <div class="accordion-items">
+        {% for block in section.blocks %}
+          {% if block.type == 'solar_term' %}
+            <div class="accordion-item">
+              <button class="accordion-header" aria-expanded="false">
+                {{ block.settings.title }}
+                <span class="accordion-icon">+</span>
+              </button>
+              <div class="accordion-content">
+                <div class="accordion-description">
+                  {{ block.settings.description }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 健康术语分类 -->
+    <div class="accordion-category">
+      <h2 class="category-title">{{ section.settings.health_term_title }}</h2>
+      <div class="accordion-items">
+        {% for block in section.blocks %}
+          {% if block.type == 'health_term' %}
+            <div class="accordion-item">
+              <button class="accordion-header" aria-expanded="false">
+                {{ block.settings.title }}
+                <span class="accordion-icon">+</span>
+              </button>
+              <div class="accordion-content">
+                <div class="accordion-description">
+                  {{ block.settings.description }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .three-level-accordion {
+    padding: 40px 0;
+  }
+  
+  .accordion-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+  
+  .accordion-category {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  
+  .category-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+  }
+  
+  .accordion-item {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .accordion-header {
+    width: 100%;
+    padding: 15px;
+    text-align: left;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+  }
+  
+  .accordion-header:hover {
+    background: #f0f0f0;
+  }
+  
+  .accordion-icon {
+    font-size: 1.2rem;
+  }
+  
+  .accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: #fff;
+  }
+  
+  .accordion-description {
+    padding: 15px;
+  }
+  
+  .accordion-header[aria-expanded="true"] + .accordion-content {
+    max-height: 500px;
+  }
+  
+  .accordion-header[aria-expanded="true"] .accordion-icon {
+    transform: rotate(45deg);
+  }
+  
+  @media (max-width: 749px) {
+    .accordion-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const accordionHeaders = document.querySelectorAll('.accordion-header');
+  
+  accordionHeaders.forEach(header => {
+    header.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', !isExpanded);
+      
+      const icon = this.querySelector('.accordion-icon');
+      if (isExpanded) {
+        icon.textContent = '+';
+      } else {
+        icon.textContent = '×';
+      }
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "三层折叠展开区块",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "herb_title",
+      "label": "草药分类标题",
+      "default": "草药"
+    },
+    {
+      "type": "text",
+      "id": "solar_term_title",
+      "label": "二十四节气分类标题", 
+      "default": "二十四节气"
+    },
+    {
+      "type": "text",
+      "id": "health_term_title",
+      "label": "健康术语分类标题",
+      "default": "健康术语"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "herb",
+      "name": "草药",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "草药名称",
+          "default": "草药名称"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "草药描述",
+          "default": "<p>这里输入草药的详细描述</p>"
+        }
+      ]
+    },
+    {
+      "type": "solar_term",
+      "name": "二十四节气",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "节气名称",
+          "default": "节气名称"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "节气描述",
+          "default": "<p>这里输入节气的详细描述</p>"
+        }
+      ]
+    },
+    {
+      "type": "health_term",
+      "name": "健康术语",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "术语名称",
+          "default": "术语名称"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "术语描述",
+          "default": "<p>这里输入术语的详细描述</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "三层折叠展开区块",
+      "category": "自定义",
+      "blocks": [
+        {
+          "type": "herb",
+          "settings": {
+            "title": "人参",
+            "description": "<p>人参是大补元气的中药，具有补气固脱、健脾益肺等功效。</p>"
+          }
+        },
+        {
+          "type": "solar_term",
+          "settings": {
+            "title": "立春",
+            "description": "<p>立春是二十四节气之首，标志着春季的开始。</p>"
+          }
+        },
+        {
+          "type": "health_term",
+          "settings": {
+            "title": "气血不足",
+            "description": "<p>气血不足是中医常见证候，表现为乏力、面色苍白等症状。</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
