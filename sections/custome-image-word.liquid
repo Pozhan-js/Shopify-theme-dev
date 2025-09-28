@@ -52,6 +52,31 @@
       "default": 50
     }
   ],
+  "blocks": [
+    {
+      "type": "button",
+      "name": "按钮",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文字",
+          "default": "点击这里"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "按钮链接"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "文字颜色",
+          "default": "#000000"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
       "name": "图文区块"
@@ -88,6 +113,21 @@
     margin-bottom: 20px;
   }
 
+  .custom-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-top: 20px;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .custom-button:hover {
+    opacity: 0.8;
+  }
+
   @media screen and (max-width: 749px) {
     .image-text-container {
       flex-direction: column;
@@ -117,6 +157,19 @@
     <div class="rte">
       {{ section.settings.text }}
     </div>
+    
+    {% for block in section.blocks %}
+      {% if block.type == 'button' %}
+        <a 
+          href="{{ block.settings.button_link }}" 
+          class="custom-button" 
+          style="color: {{ block.settings.button_text_color }};"
+          {{ block.shopify_attributes }}
+        >
+          {{ block.settings.button_text }}
+        </a>
+      {% endif %}
+    {% endfor %}
   </div>
 
   <div class="image-content">
