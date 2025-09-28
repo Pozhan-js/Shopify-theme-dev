@@ -4,12 +4,29 @@
 <!-- DEBUG: All Query Params - {{ request.query_parameters | json }} -->
 
 {%- comment %} 获取分类参数 {% endcomment %}
-{%- assign category_param = request.query_parameters.category | default: request.query_parameters.Category | default: nil -%}
+{%- assign category_param = nil -%}
 
-{%- if category_param == blank -%}
-  <!-- DEBUG: No category parameter found in URL -->
-  {%- assign category_param = nil -%}
+{%- if request.design_mode == false -%}
+  <script>
+  // 将查询参数直接写入Liquid可访问的全局变量
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    window.__shopifyQueryParams = Object.fromEntries(params.entries());
+  })();
+  </script>
 {%- endif -%}
+
+{%- comment %} 从全局变量获取参数 {% endcomment %}
+{%- if request.query_parameters.category -%}
+  {%- assign category_param = request.query_parameters.category -%}
+{%- elsif request.query_parameters.Category -%}
+  {%- assign category_param = request.query_parameters.Category -%}
+{%- endif -%}
+
+<!-- DEBUG: 
+Query Params: {{ request.query_parameters | json }}
+Category Param: {{ category_param | json }}
+-->
 
 {%- comment %} 确保集合存在 {% endcomment %}
 {%- if category_param and collections[category_param] -%}
@@ -235,10 +252,14 @@ function getQueryParams() {
 
 // 初始化功能
 function initProductGrid() {
-  // 将查询参数存入容器元素
+  // 获取并存储查询参数
+  const params = getQueryParams();
+  window.__queryParams = params;
+
+  // 设置容器元素属性
   const gridContainer = document.querySelector('.product-grid');
   if (gridContainer) {
-    gridContainer.dataset.queryParams = JSON.stringify(getQueryParams());
+    gridContainer.dataset.queryParams = JSON.stringify(params);
   }
   
   setupCartButtons();
