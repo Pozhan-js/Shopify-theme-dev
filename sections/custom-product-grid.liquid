@@ -1,75 +1,29 @@
-{%- comment %} 完整URL参数调试 {% endcomment %}
-<!-- DEBUG: Full URL - {{ request.url }} -->
-<!-- DEBUG: Query String - {{ request.query_string }} -->
-<!-- DEBUG: All Query Params - {{ request.query_parameters | json }} -->
-
-{%- comment %} 获取分类参数 {% endcomment %}
-{%- assign category_param = nil -%}
-
-{%- if request.design_mode == false -%}
-  <script>
-  // 将查询参数直接写入Liquid可访问的全局变量
-  (function() {
-    const params = new URLSearchParams(window.location.search);
-    window.__shopifyQueryParams = Object.fromEntries(params.entries());
-  })();
-  </script>
-{%- endif -%}
-
-{%- comment %} 从全局变量获取参数 {% endcomment %}
-{%- if request.query_parameters.category -%}
-  {%- assign category_param = request.query_parameters.category -%}
-{%- elsif request.query_parameters.Category -%}
-  {%- assign category_param = request.query_parameters.Category -%}
-{%- endif -%}
-
-<!-- DEBUG: 
-Query Params: {{ request.query_parameters | json }}
-Category Param: {{ category_param | json }}
--->
-
-{%- comment %} 确保集合存在 {% endcomment %}
-{%- if category_param and collections[category_param] -%}
-  {%- assign current_collection = collections[category_param] -%}
-{%- else -%}
-  {%- assign current_collection = collections['all'] -%}
-{%- endif -%}
-
-<!-- DEBUG INFO:
-Request Path: {{ request.path }}
-Query Params: {{ request.query_parameters | json }}
-Category Param: {{ category_param | json }}
-Current Collection: {{ current_collection | json }}
-Available Collections: {{ collections | join: ', ' }}
--->
 <div class="product-grid page-width">
-  
-  <div class="grid grid--custom-col">
-    {% for product in current_collection.products %}
-      <div class="grid__item">
-        <a href="{{ product.url }}" class="product-card">
-          <div class="product-card__image" data-product='{{ product | json }}'>
-            {% if product.featured_image != blank %}
-              {{ product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy' }}
-            {% else %}
-              {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
-            {% endif %}
-          </div>
-          <div class="product-card__content">
-            <h3 class="product-card__title">{{ product.title }}</h3>
-            <p class="product-card__description">{{ product.description | strip_html }}</p>
-            <div class="product-card__footer">
-              <button class="button product-card__button" 
-                      data-product-id="{{ product.variants.first.id }}">
-                <span>{{ section.settings.button_text }}</span>
-                <span class="button-price">{{ product.price | money }}</span>
-              </button>
-            </div>
-          </div>
-        </a>
-      </div>
-    {% endfor %}
+  <div class="grid grid--custom-col" id="product-grid-container">
+    <!-- 产品将由JavaScript动态加载 -->
+    <div class="loading-indicator">加载中...</div>
   </div>
+
+  <!-- 产品卡片模板 (隐藏) -->
+  <template id="product-card-template">
+    <div class="grid__item">
+      <a href="" class="product-card">
+        <div class="product-card__image">
+          <img src="" loading="lazy" class="product-image" width="500" height="500"/>
+        </div>
+        <div class="product-card__content">
+          <h3 class="product-card__title"></h3>
+          <p class="product-card__description"></p>
+          <div class="product-card__footer">
+            <button class="button product-card__button">
+              <span class="button-text"></span>
+              <span class="button-price"></span>
+            </button>
+          </div>
+        </div>
+      </a>
+    </div>
+  </template>
 </div>
 
 <style>
@@ -251,22 +205,61 @@ function getQueryParams() {
   return Object.fromEntries(params.entries());
 }
 
+// 加载产品数据
+async function loadProducts() {
+  const params = getQueryParams();
+  const category = params.category || params.Category;
+  const container = document.getElementById('product-grid-container');
+  
+  try {
+    // 显示加载状态
+    container.innerHTML = '<div class="loading-indicator">加载中...</div>';
+    
+    // 获取产品数据
+    const response = await fetch(`/collections/${category || 'all'}/products.json`);
+    const data = await response.json();
+    
+    // 清空容器
+    container.innerHTML = '';
+    
+    // 使用模板创建产品卡片
+    const template = document.getElementById('product-card-template');
+    
+    data.products.forEach(product => {
+      const clone = template.content.cloneNode(true);
+      const card = clone.querySelector('.product-card');
+      
+      // 填充产品数据
+      card.href = `/products/${product.handle}`;
+      const img = clone.querySelector('.product-image');
+      img.src = product.images[0]?.src || '';
+      img.alt = product.title;
+      clone.querySelector('.product-card__title').textContent = product.title;
+      clone.querySelector('.product-card__description').textContent = product.description;
+      clone.querySelector('.button-text').textContent = 'ADD TO CART';
+      clone.querySelector('.button-price').textContent = new Intl.NumberFormat('zh-CN', {
+        style: 'currency',
+        currency: 'CNY'
+      }).format(product.price / 100);
+      card.dataset.product = JSON.stringify(product);
+      card.querySelector('.product-card__button').dataset.productId = product.variants[0]?.id;
+      
+      container.appendChild(clone);
+    });
+    
+    // 初始化交互功能
+    setupCartButtons();
+    setupImageHover();
+    
+  } catch (error) {
+    console.error('加载产品失败:', error);
+    container.innerHTML = '<div class="error-message">加载产品失败，请刷新重试</div>';
+  }
+}
+
 // 初始化功能
 function initProductGrid() {
-  // 获取并存储查询参数
-  const params = getQueryParams();
-  window.__queryParams = params;
-
-  // 设置容器元素属性
-  const gridContainer = document.querySelector('.product-grid');
-  const grid = document.querySelector('.grid');
-  if (gridContainer && grid) {
-    gridContainer.dataset.queryParams = JSON.stringify(params);
-    grid.dataset.queryParams = JSON.stringify(params);
-  }
-  
-  setupCartButtons();
-  setupImageHover();
+  loadProducts();
 }
 
 document.addEventListener('DOMContentLoaded', initProductGrid);
