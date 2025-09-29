@@ -663,9 +663,12 @@
       dot.classList.toggle('active', index === realIndex);
     });
     
-    // Handle infinite scroll jump only for scroll events, not clicks
-    if (cloneOffset > 0 && !isScrolling && !fromClick) {
-      handleInfiniteScroll(centerIndex);
+    // Handle infinite scroll jump for scroll events
+    if (cloneOffset > 0 && !fromClick) {
+      // Force jump when at the edges, even if isScrolling is true
+      if (centerIndex <= 1 || centerIndex >= slides.length - 2) {
+        handleInfiniteScroll(centerIndex);
+      }
     }
   }
   
