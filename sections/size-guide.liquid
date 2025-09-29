@@ -1,0 +1,465 @@
+<div
+  class="size-guide-section"
+  style="background-color: {{ section.settings.background_color }}; padding: {{ section.settings.section_padding }}px 0;"
+>
+  <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <!-- 页面标题 -->
+    {% if section.settings.show_title %}
+      <div class="section-header" style="text-align: center; margin-bottom: 60px;">
+        <h1 style="font-size: 2.5rem; font-weight: 300; color: {{ section.settings.title_color }}; margin-bottom: 16px; letter-spacing: 1px;">
+          {{ section.settings.title | default: 'サイズガイド' }}
+        </h1>
+        {% if section.settings.subtitle %}
+          <p style="font-size: 1.1rem; color: {{ section.settings.subtitle_color }}; font-weight: 300; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+            {{ section.settings.subtitle }}
+          </p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- 靴サイズセクション -->
+    {% if section.settings.show_shoes_section %}
+      <div class="size-section" style="margin-bottom: 80px;">
+        <div class="section-title" style="text-align: center; margin-bottom: 40px;">
+          <h2 style="font-size: 2rem; font-weight: 300; color: {{ section.settings.heading_color }}; margin-bottom: 12px;">
+            {{ section.settings.shoes_title | default: '靴サイズ換算表' }}
+          </h2>
+          <div
+            style="width: 60px; height: 2px; background-color: {{ section.settings.accent_color }}; margin: 0 auto;"
+          ></div>
+        </div>
+
+        <!-- 靴サイズ表 -->
+        <div
+          class="table-container"
+          style="overflow-x: auto; margin-bottom: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
+        >
+          <table style="width: 100%; border-collapse: collapse; background: white; min-width: 600px;">
+            <thead>
+              <tr style="background-color: {{ section.settings.table_header_bg }};">
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  日本 (JP/cm)
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  US 男性
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  US 女性
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  UK
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  EU
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% assign shoes_data = '22.0,4,5.5,3.5,35|22.5,4.5,6,4,35.5|23.0,5,6.5,4.5,36|23.5,5.5,7,5,37|24.0,6,7.5,5.5,38|24.5,6.5,8,6,38.5|25.0,7,8.5,6.5,39|25.5,7.5,9,7,40|26.0,8,9.5,7.5,41|26.5,8.5,10,8,41.5|27.0,9,10.5,8.5,42|27.5,9.5,11,9,43|28.0,10,11.5,9.5,44|28.5,10.5,12,10,44.5|29.0,11,12.5,10.5,45|29.5,11.5,13,11,46|30.0,12,13.5,11.5,47'
+                | split: '|'
+              %}
+              {% for row in shoes_data %}
+                {% assign cells = row | split: ',' %}
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                  {% for cell in cells %}
+                    <td style="padding: 14px 16px; text-align: center; color: {{ section.settings.table_text_color }}; font-size: 0.95rem;">
+                      {{ cell }}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 靴サイズ測り方 -->
+        <div
+          class="measurement-guide"
+          style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
+        >
+          <h3 style="font-size: 1.4rem; font-weight: 400; color: {{ section.settings.heading_color }}; margin-bottom: 24px; text-align: center;">
+            {{ section.settings.shoes_guide_title | default: '靴サイズの測り方' }}
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >1</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    足長（足の長さ）を測る
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    紙の上にかかとをつけて立ち、つま先までの一番長い部分を鉛筆で印をつけます。左右両方の足を測り、大きい方を基準にしてください。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >2</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    足幅を測る
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    足の一番広い部分（親指の付け根と小指の付け根の間）を測ります。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >3</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    サイズ換算表を参考にする
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    測ったサイズをもとに「靴サイズ換算表」を確認し、普段のサイズより小さい/大きい靴を避けてください。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >4</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    フィット感の目安
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    つま先に約0.5cm～1cmのゆとりがあるのが理想です。靴下の厚さや使用シーン（普段履き、ブーツ、サンダル等）も考慮してください。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- 指輪サイズセクション -->
+    {% if section.settings.show_ring_section %}
+      <div class="size-section">
+        <div class="section-title" style="text-align: center; margin-bottom: 40px;">
+          <h2 style="font-size: 2rem; font-weight: 300; color: {{ section.settings.heading_color }}; margin-bottom: 12px;">
+            {{ section.settings.ring_title | default: '指輪サイズ表' }}
+          </h2>
+          <div
+            style="width: 60px; height: 2px; background-color: {{ section.settings.accent_color }}; margin: 0 auto;"
+          ></div>
+        </div>
+
+        <!-- 指輪サイズ表 -->
+        <div
+          class="table-container"
+          style="overflow-x: auto; margin-bottom: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
+        >
+          <table style="width: 100%; border-collapse: collapse; background: white; min-width: 600px;">
+            <thead>
+              <tr style="background-color: {{ section.settings.table_header_bg }};">
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  日本号数 (JP)
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  内径 (mm)
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  内周 (mm)
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  USサイズ
+                </th>
+                <th style="padding: 16px; text-align: center; font-weight: 500; color: {{ section.settings.table_header_text }}; border-bottom: 2px solid {{ section.settings.accent_color }};">
+                  UKサイズ
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% assign ring_data = '5,14.4,45.0,3,F 1/2|7,15.0,47.1,4,H 1/2|9,15.7,49.2,5,J 1/2|11,16.4,51.3,6,M|13,17.0,53.4,6.5–7,N–O|15,17.7,55.5,7.5,P|17,18.4,57.6,8,Q|19,19.0,59.7,9,R 1/2|21,19.7,61.8,10,T 1/2|23,20.4,63.9,11,V 1/2|25,21.0,66.0,12,Y'
+                | split: '|'
+              %}
+              {% for row in ring_data %}
+                {% assign cells = row | split: ',' %}
+                <tr style="border-bottom: 1px solid #f0f0f0;">
+                  {% for cell in cells %}
+                    <td style="padding: 14px 16px; text-align: center; color: {{ section.settings.table_text_color }}; font-size: 0.95rem;">
+                      {{ cell }}
+                    </td>
+                  {% endfor %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 指輪サイズ測り方 -->
+        <div
+          class="measurement-guide"
+          style="background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
+        >
+          <h3 style="font-size: 1.4rem; font-weight: 400; color: {{ section.settings.heading_color }}; margin-bottom: 24px; text-align: center;">
+            {{ section.settings.ring_guide_title | default: '指輪サイズの測り方' }}
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >1</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    紙または糸を使用
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    細長い紙や糸を指の根元に巻きつけ、重なる部分に印をつけます。その長さを定規で測ります（mm単位）。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >2</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    指輪サイズ表を参照
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    測った指回りの長さを「指輪サイズ表（Japan Standard）」と照らし合わせてください。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: {{ section.settings.accent_color }}; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 500; flex-shrink: 0; margin-top: 2px;"
+                  >3</span
+                >
+                <div>
+                  <h4 style="font-weight: 500; color: {{ section.settings.text_color }}; margin-bottom: 8px;">
+                    測定のコツ
+                  </h4>
+                  <p style="color: {{ section.settings.text_color }}; font-size: 0.9rem; line-height: 1.5; opacity: 0.8;">
+                    指は朝と夜でむくみによりサイズが変わる場合があります。1日のうち数回測り、平均的なサイズを選ぶと安心です。関節が太い方は、関節を通るサイズを基準にしてください。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .size-guide-section * {
+    box-sizing: border-box;
+  }
+
+  .size-guide-section table {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .size-guide-section .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .size-guide-section .table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  .size-guide-section .table-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  .size-guide-section .table-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  @media (max-width: 768px) {
+    .size-guide-section .container {
+      padding: 0 16px;
+    }
+
+    .size-guide-section h1 {
+      font-size: 2rem !important;
+    }
+
+    .size-guide-section h2 {
+      font-size: 1.6rem !important;
+    }
+
+    .size-guide-section .measurement-guide {
+      padding: 24px 20px !important;
+    }
+
+    .size-guide-section .step {
+      margin-bottom: 20px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "サイズガイド",
+  "settings": [
+    {
+      "type": "header",
+      "content": "基本設定"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "タイトルを表示",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "メインタイトル",
+      "default": "サイズガイド"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "サブタイトル",
+      "default": "正確なサイズ選びのための詳細ガイド"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "セクション余白",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "default": 60,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "カラー設定"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景色",
+      "default": "#faf9f7"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "メインタイトル色",
+      "default": "#2c2c2c"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "サブタイトル色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "見出し色",
+      "default": "#2c2c2c"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "テキスト色",
+      "default": "#4a4a4a"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "アクセント色",
+      "default": "#d4af37"
+    },
+    {
+      "type": "header",
+      "content": "テーブル設定"
+    },
+    {
+      "type": "color",
+      "id": "table_header_bg",
+      "label": "テーブルヘッダー背景色",
+      "default": "#f8f7f5"
+    },
+    {
+      "type": "color",
+      "id": "table_header_text",
+      "label": "テーブルヘッダーテキスト色",
+      "default": "#2c2c2c"
+    },
+    {
+      "type": "color",
+      "id": "table_text_color",
+      "label": "テーブルテキスト色",
+      "default": "#4a4a4a"
+    },
+    {
+      "type": "header",
+      "content": "靴サイズセクション"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shoes_section",
+      "label": "靴サイズセクションを表示",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "shoes_title",
+      "label": "靴サイズセクションタイトル",
+      "default": "靴サイズ換算表"
+    },
+    {
+      "type": "text",
+      "id": "shoes_guide_title",
+      "label": "靴サイズ測り方タイトル",
+      "default": "靴サイズの測り方"
+    },
+    {
+      "type": "header",
+      "content": "指輪サイズセクション"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ring_section",
+      "label": "指輪サイズセクションを表示",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ring_title",
+      "label": "指輪サイズセクションタイトル",
+      "default": "指輪サイズ表"
+    },
+    {
+      "type": "text",
+      "id": "ring_guide_title",
+      "label": "指輪サイズ測り方タイトル",
+      "default": "指輪サイズの測り方"
+    }
+  ],
+  "presets": [
+    {
+      "name": "サイズガイド",
+      "category": "カスタム"
+    }
+  ]
+}
+{% endschema %}
