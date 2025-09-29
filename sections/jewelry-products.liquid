@@ -747,19 +747,19 @@
 
     .products-grid {
       gap: {{ section.settings.productgap | minus: 5 }}px;
-      /* 移动端优化 */
+      /* 移动端优化 - 完全自由滑动 */
       cursor: default;
       user-select: auto;
       scroll-behavior: auto;
       -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
+      scroll-snap-type: none;
       overscroll-behavior: contain;
     }
 
     .product-card {
       /* 移动端禁用悬停效果 */
       transition: none;
-      scroll-snap-align: start;
+      scroll-snap-align: none;
     }
 
     .product-card:hover {
@@ -1072,28 +1072,26 @@
     });
   }
 
-  // 初始化拖拽滑动功能 - 移动端优化
+  // 初始化拖拽滑动功能 - 移动端完全自由滑动
   function initializeDragScroll() {
     const grids = document.querySelectorAll('.products-grid');
     const isMobile = window.innerWidth <= 768;
     
     grids.forEach(grid => {
       if (isMobile) {
-        // 移动端使用原生滚动，优化性能
-        let scrollTimeout;
-        grid.addEventListener('scroll', () => {
-          clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            updateArrowStates(grid);
-          }, 50); // 减少更新频率
-        }, { passive: true });
-        
-        // 移动端禁用拖拽相关事件
+        // 移动端完全自由滑动，不做任何距离计算和限制
         grid.style.cursor = 'default';
         grid.style.userSelect = 'auto';
+        
+        // 移动端只需要简单的滚动监听用于更新箭头状态（虽然移动端不显示箭头）
+        grid.addEventListener('scroll', () => {
+          // 移动端不需要频繁更新箭头状态，因为箭头是隐藏的
+        }, { passive: true });
+        
         return;
       }
 
+      // PC端保持原有的拖拽功能
       let isDown = false;
       let startX;
       let scrollLeft;
@@ -1179,7 +1177,7 @@
         }
       }, true);
 
-      // 滚动事件监听 - 使用防抖
+      // PC端滚动事件监听 - 使用防抖
       const debouncedUpdateArrows = debounce(() => {
         updateArrowStates(grid);
       }, 16);
@@ -1188,14 +1186,18 @@
     });
   }
 
-  // 滑动产品功能 - 优化后的滑动逻辑
+  // 滑动产品功能 - 仅PC端箭头点击时计算产品宽度
   function slideProducts(direction) {
+    // 检查是否为移动端，移动端不使用此函数
+    if (window.innerWidth <= 768) return;
+    
     const activeGrid = document.querySelector('.tab-pane.active .products-grid');
     if (!activeGrid) return;
     
+    // 只有PC端箭头点击时才计算产品宽度和距离
     const cardWidth = {{ section.settings.cardwidth }};
     const gap = {{ section.settings.productgap }};
-    const scrollAmount = (cardWidth + gap) * 2;
+    const scrollAmount = (cardWidth + gap) * 2; // 每次滑动2个产品的距离
     
     if (direction === 'left') {
       activeGrid.scrollLeft = Math.max(0, activeGrid.scrollLeft - scrollAmount);
@@ -1204,6 +1206,7 @@
       activeGrid.scrollLeft = Math.min(maxScroll, activeGrid.scrollLeft + scrollAmount);
     }
     
+    // PC端延迟更新箭头状态，等待滚动完成
     setTimeout(() => {
       updateArrowStates(activeGrid);
     }, 300);
