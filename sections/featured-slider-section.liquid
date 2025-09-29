@@ -757,7 +757,7 @@
       console.log('Clicked index:', clickedIndex);
       console.log('Original index:', originalIndex);
       
-      // Calculate target position based on original index
+      // Calculate target scroll position
       let targetPos;
       if (clickedIndex < cloneOffset) {
         // Beginning clone - map to end original
@@ -770,9 +770,13 @@
         targetPos = clickedIndex * 280;
       }
       
-      // Apply scroll adjustment for center positioning
+      // Adjust for center positioning
       const containerWidth = slider.offsetWidth;
       targetPos = targetPos - (containerWidth / 2) + 140; // 140 = 280/2
+      
+      // Ensure target position is within bounds
+      const maxScroll = slider.scrollWidth - containerWidth;
+      targetPos = Math.max(0, Math.min(maxScroll, targetPos));
       
       if (!isScrolling) {
         isScrolling = true;
