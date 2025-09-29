@@ -752,11 +752,21 @@
       
       const slides = Array.from(slider.querySelectorAll('.slide-item'));
       const clickedIndex = slides.indexOf(slideItem);
+      let targetIndex = clickedIndex;
       
-      // Scroll directly to clicked item (including clones)
-      if (slides[clickedIndex]) {
+      // Handle clone items mapping to original items
+      if (clickedIndex < cloneOffset) {
+        // Beginning clones - map to end originals
+        targetIndex = totalBlocks - cloneOffset + clickedIndex;
+      } else if (clickedIndex >= cloneOffset + totalBlocks) {
+        // End clones - map to beginning originals
+        targetIndex = clickedIndex - cloneOffset - totalBlocks;
+      }
+      
+      // Scroll to target item (original or mapped clone)
+      if (slides[targetIndex]) {
         isScrolling = true;
-        slides[clickedIndex].scrollIntoView({
+        slides[targetIndex].scrollIntoView({
           behavior: 'smooth',
           block: 'nearest',
           inline: 'center'
@@ -764,7 +774,7 @@
         
         // Update center item immediately for better UX
         setTimeout(() => {
-          updateCenterItem();
+          updateCenterItem(true);
         }, 500);
       }
     }
