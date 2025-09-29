@@ -195,37 +195,54 @@
   </thead>
   <tbody>
     {% for product in selected_collection.products %}
+      {%- assign color_value = product.options_with_values | where: 'name', 'Color' | first -%}
       <tr class="{% if product.description != blank %}has-description{% endif %}">
         <td class="col-date text-cell">
-          {% if product.metafields.custom.release_date %}
+          {%- if product.metafields.custom.release_date -%}
             {{ product.metafields.custom.release_date | date: "%d/%m/%y" }}
-          {% else %}
+          {%- else -%}
             Coming Soon
-          {% endif %}
+          {%- endif -%}
         </td>
-        <td class="col-brand text-cell">{{ product.vendor }}</td>
+        <td class="col-brand text-cell">
+          {%- if product.vendor != blank -%}
+            {{ product.vendor }}
+          {%- else -%}
+            &nbsp;
+          {%- endif -%}
+        </td>
         <td class="col-product text-cell">
-          {{ product.title }}
-          <svg class="icon-arrow" viewBox="0 0 24 24">
-            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-          </svg>
+          {%- if product.title != blank -%}
+            {{ product.title }}
+            <svg class="icon-arrow" viewBox="0 0 24 24">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          {%- else -%}
+            &nbsp;
+          {%- endif -%}
         </td>
         <td class="col-color text-cell">
-          {% if product.metafields.custom.color_description %}
+          {%- if product.metafields.custom.color_description != blank -%}
             {{ product.metafields.custom.color_description }}
-          {% else %}
-            {{ product.options_with_values | where: 'name', 'Color' | first | join: ', ' }}
-          {% endif %}
+          {%- elsif color_value != blank -%}
+            {{ color_value | join: ', ' }}
+          {%- else -%}
+            &nbsp;
+          {%- endif -%}
         </td>
         <td class="col-artno text-cell">
-          {{ product.metafields.custom.art_no | default: product.sku }}
+          {%- if product.metafields.custom.art_no != blank -%}
+            {{ product.metafields.custom.art_no }}
+          {%- elsif product.sku != blank -%}
+            {{ product.sku }}
+          {%- else -%}
+            &nbsp;
+          {%- endif -%}
         </td>
       </tr>
       {% if product.description != blank %}
         <tr>
-          <td class="col-date text-cell"></td>
-          <td class="col-brand text-cell"></td>
-          <td colspan="3" class="product-description text-cell">
+          <td colspan="5" class="product-description text-cell">
             {{ product.description | strip_html | truncate: 150 }}
           </td>
         </tr>
