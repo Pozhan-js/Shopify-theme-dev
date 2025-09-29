@@ -648,10 +648,13 @@
         // Calculate real index for dots
         if (cloneOffset > 0) {
           if (index < cloneOffset) {
-            realIndex = totalBlocks - (cloneOffset - index);
+            // Beginning clone - map to end original
+            realIndex = parseInt(slide.dataset.originalIndex);
           } else if (index >= cloneOffset + totalBlocks) {
-            realIndex = index - cloneOffset - totalBlocks;
+            // End clone - map to beginning original
+            realIndex = parseInt(slide.dataset.originalIndex);
           } else {
+            // Original item
             realIndex = index - cloneOffset;
           }
         } else {
@@ -757,7 +760,7 @@
       console.log('Clicked index:', clickedIndex);
       console.log('Original index:', originalIndex);
       
-      // Calculate target position based on original index
+      // Calculate target index based on original position
       let targetIndex;
       if (clickedIndex < cloneOffset) {
         // Beginning clone - map to end original
