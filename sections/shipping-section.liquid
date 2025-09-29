@@ -1,228 +1,99 @@
-<div
-  class="shipping-info-section"
-  style="background-color: {{ section.settings.background_color }}; padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;"
->
-  <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-    {% if section.settings.show_title %}
-      <div class="section-header" style="text-align: center; margin-bottom: 40px;">
-        <h2 style="font-size: 32px; font-weight: bold; color: {{ section.settings.title_color }}; margin-bottom: 10px;">
-          {{ section.settings.title | default: '配送について' }}
-        </h2>
-        {% if section.settings.subtitle %}
-          <p style="font-size: 16px; color: {{ section.settings.subtitle_color }}; line-height: 1.6;">
-            {{ section.settings.subtitle }}
-          </p>
-        {% endif %}
-      </div>
-    {% endif %}
+<div class="store-info-section">
+  <!-- 顶部标题区域 -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">{{ section.settings.hero_title }}</h1>
+    </div>
+  </div>
 
-    <div class="shipping-content" style="display: grid; gap: 30px;">
-      <!-- 配送業者セクション -->
-      {% if section.settings.show_carriers %}
-        <div
-          class="shipping-carriers"
-          style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-        >
-          <h3 style="font-size: 24px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; border-bottom: 2px solid {{ section.settings.accent_color }}; padding-bottom: 10px;">
-            配送業者
-          </h3>
-          <div style="display: grid; gap: 15px;">
-            <div style="display: flex; align-items: center; padding: 15px; background: {{ section.settings.carrier_bg_color }}; border-radius: 8px;">
-              <div
-                style="width: 8px; height: 8px; background: {{ section.settings.accent_color }}; border-radius: 50%; margin-right: 15px;"
-              ></div>
-              <span style="font-size: 16px; color: {{ section.settings.text_color }};">佐川急便（宅配便）</span>
-            </div>
-            <div style="display: flex; align-items: center; padding: 15px; background: {{ section.settings.carrier_bg_color }}; border-radius: 8px;">
-              <div
-                style="width: 8px; height: 8px; background: {{ section.settings.accent_color }}; border-radius: 50%; margin-right: 15px;"
-              ></div>
-              <span style="font-size: 16px; color: {{ section.settings.text_color }};">日本郵便（クリックポスト）</span>
-            </div>
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- 発送スケジュールセクション -->
-      {% if section.settings.show_schedule %}
-        <div
-          class="shipping-schedule"
-          style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-        >
-          <h3 style="font-size: 24px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; border-bottom: 2px solid {{ section.settings.accent_color }}; padding-bottom: 10px;">
-            発送スケジュール
-          </h3>
-          <div style="background: {{ section.settings.highlight_bg_color }}; padding: 20px; border-radius: 8px; border-left: 4px solid {{ section.settings.accent_color }};">
-            <p style="font-size: 18px; font-weight: bold; color: {{ section.settings.text_color }}; margin-bottom: 10px;">
-              平日15時までのご注文は当日発送
-            </p>
-            <p style="font-size: 14px; color: {{ section.settings.text_color }}; line-height: 1.6;">
-              決済完了後、佐川急便（宅配便） または クリックポスト（日本郵便） にて発送いたします。
-            </p>
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- 配送方法詳細 -->
-      <div
-        class="shipping-methods"
-        style="display: grid; gap: 30px; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));"
-      >
-        <!-- 佐川急便 -->
-        {% if section.settings.show_sagawa %}
-          <div
-            class="method-card"
-            style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-          >
-            <h4 style="font-size: 20px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; display: flex; align-items: center;">
-              <span
-                style="width: 12px; height: 12px; background: #4CAF50; border-radius: 50%; margin-right: 10px;"
-              ></span>
-              佐川急便（宅配便）
-            </h4>
-
-            <div style="margin-bottom: 20px;">
-              <p style="font-size: 16px; color: {{ section.settings.text_color }}; margin-bottom: 15px;">
-                <strong>最短で翌日お届けが可能です。</strong>
-              </p>
-
-              <div style="margin-bottom: 15px;">
-                <p style="font-size: 14px; font-weight: bold; color: {{ section.settings.text_color }}; margin-bottom: 10px;">
-                  時間帯指定が可能です：
-                </p>
-                <div style="display: grid; gap: 8px;">
-                  {% assign time_slots = '午前中（9:00～12:00）,14:00～16:00,16:00～18:00,18:00～20:00,19:00～21:00'
-                    | split: ','
-                  %}
-                  {% for slot in time_slots %}
-                    <div style="padding: 8px 12px; background: {{ section.settings.time_slot_bg }}; border-radius: 6px; font-size: 13px; color: {{ section.settings.text_color }};">
-                      {{ slot }}
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-
-            <div style="padding: 15px; background: {{ section.settings.note_bg_color }}; border-radius: 8px; border-left: 3px solid #FF9800;">
-              <p style="font-size: 13px; color: {{ section.settings.text_color }}; line-height: 1.5; margin: 0;">
-                指定日配達をご希望の場合は、ご注文時にお申し付けください。<br>
-                （※商品のお受取は決済完了後1週間以内とさせていただきます）<br>
-                一部地域では日時指定ができない場合がございます。
-              </p>
-            </div>
-          </div>
-        {% endif %}
-
-        <!-- クリックポスト -->
-        {% if section.settings.show_clickpost %}
-          <div
-            class="method-card"
-            style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-          >
-            <h4 style="font-size: 20px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; display: flex; align-items: center;">
-              <span
-                style="width: 12px; height: 12px; background: #2196F3; border-radius: 50%; margin-right: 10px;"
-              ></span>
-              クリックポスト（日本郵便）
-            </h4>
-
-            <div style="margin-bottom: 20px;">
-              <div style="display: grid; gap: 12px;">
-                <p style="font-size: 14px; color: {{ section.settings.text_color }}; margin: 0;">
-                  • 日時指定はできません。
-                </p>
-                <p style="font-size: 14px; color: {{ section.settings.text_color }}; margin: 0;">
-                  • 配送希望日を入力いただいても、ご希望に沿えない場合がございます。
-                </p>
-                <p style="font-size: 14px; color: {{ section.settings.text_color }}; margin: 0;">
-                  • 概ね発送日の翌日～翌々日でのお届け予定です。
-                </p>
-              </div>
-            </div>
-
-            <div style="padding: 15px; background: {{ section.settings.warning_bg_color }}; border-radius: 8px; border-left: 3px solid #F44336;">
-              <p style="font-size: 13px; color: {{ section.settings.text_color }}; line-height: 1.5; margin: 0;">
-                発送後のお荷物に関するお問い合わせは、お客様ご自身でお願いいたします。<br>
-                ご希望日に配達がなされなくても、当店では責任を負いかねます。
-              </p>
-            </div>
-          </div>
-        {% endif %}
+  <!-- 主要内容区域 -->
+  <div class="main-content">
+    <div class="container">
+      <!-- 店铺信息标题 -->
+      <div class="section-header">
+        <p class="section-subtitle">{{ section.settings.section_subtitle }}</p>
+        <h2 class="section-title">{{ section.settings.section_title }}</h2>
       </div>
 
-      <!-- 発送タイミング -->
-      {% if section.settings.show_timing %}
-        <div
-          class="shipping-timing"
-          style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-        >
-          <h3 style="font-size: 24px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; border-bottom: 2px solid {{ section.settings.accent_color }}; padding-bottom: 10px;">
-            発送のタイミング
-          </h3>
-          <div style="display: grid; gap: 15px;">
-            <div style="display: flex; align-items: center; padding: 15px; background: {{ section.settings.timing_bg_color }}; border-radius: 8px;">
-              <div
-                style="width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; margin-right: 15px;"
-              ></div>
-              <div>
-                <strong style="color: {{ section.settings.text_color }};">クレジットカード・各種決済</strong>
-                <span style="color: {{ section.settings.text_color }}; margin-left: 10px;"
-                  >⇒ ご注文確認後、1～2営業日以内に発送</span
-                >
-              </div>
+      <div class="info-content">
+        <!-- 店铺基础信息 -->
+        <div class="basic-info-section">
+          <!-- 营业时间 -->
+          <div class="info-block">
+            <h3 class="info-label">{{ section.settings.hours_label }}</h3>
+            <p class="info-value">{{ section.settings.hours_value }}</p>
+          </div>
+
+          <!-- 定休日 -->
+          <div class="info-block">
+            <h3 class="info-label">{{ section.settings.holiday_label }}</h3>
+            <p class="info-value">{{ section.settings.holiday_value }}</p>
+          </div>
+
+          <!-- 住所 -->
+          <div class="info-block">
+            <h3 class="info-label">{{ section.settings.address_label }}</h3>
+            <p class="info-value">{{ section.settings.address_value }}</p>
+          </div>
+
+          <!-- 电话 -->
+          <div class="info-block">
+            <h3 class="info-label">{{ section.settings.tel_label }}</h3>
+            <p class="info-value">{{ section.settings.tel_value }}</p>
+          </div>
+
+          <!-- 传真 -->
+          <div class="info-block">
+            <h3 class="info-label">{{ section.settings.fax_label }}</h3>
+            <p class="info-value">{{ section.settings.fax_value }}</p>
+          </div>
+        </div>
+
+        <!-- 交通信息 -->
+        <div class="access-info-section">
+          <!-- 最寄り駅からのアクセス -->
+          <div class="access-section">
+            <h3 class="access-title">{{ section.settings.station_access_title }}</h3>
+
+            <div class="access-group">
+              <h4 class="access-subtitle">{{ section.settings.metro_title }}</h4>
+              {% for access in section.blocks %}
+                {% if access.type == 'metro_access' %}
+                  <p class="access-item">{{ access.settings.description }}</p>
+                {% endif %}
+              {% endfor %}
             </div>
-            <div style="display: flex; align-items: center; padding: 15px; background: {{ section.settings.timing_bg_color }}; border-radius: 8px;">
-              <div
-                style="width: 10px; height: 10px; background: #FF9800; border-radius: 50%; margin-right: 15px;"
-              ></div>
-              <div>
-                <strong style="color: {{ section.settings.text_color }};">銀行振込・コンビニ決済</strong>
-                <span style="color: {{ section.settings.text_color }}; margin-left: 10px;"
-                  >⇒ ご入金確認後、1～2営業日以内に発送</span
-                >
-              </div>
+
+            <div class="access-group">
+              <h4 class="access-subtitle">{{ section.settings.jr_title }}</h4>
+              {% for access in section.blocks %}
+                {% if access.type == 'jr_access' %}
+                  <p class="access-item">{{ access.settings.description }}</p>
+                {% endif %}
+              {% endfor %}
             </div>
           </div>
-          <p style="font-size: 13px; color: {{ section.settings.text_color }}; margin-top: 15px; padding: 10px; background: {{ section.settings.note_bg_color }}; border-radius: 6px;">
-            ※営業日15時までのご注文は当日発送可能です。（土日祝は翌営業日に発送）
-          </p>
-        </div>
-      {% endif %}
 
-      <!-- 配送料金 -->
-      {% if section.settings.show_pricing %}
-        <div
-          class="shipping-pricing"
-          style="background: linear-gradient(135deg, {{ section.settings.accent_color }}, {{ section.settings.accent_color }}dd); border-radius: 12px; padding: 30px; color: white; text-align: center;"
-        >
-          <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 15px;">配送料金</h3>
-          <p style="font-size: 32px; font-weight: bold; margin-bottom: 10px;">全国一律：無料</p>
-          <p style="font-size: 14px; opacity: 0.9;">※離島・一部地域は追加送料が発生する場合があります。</p>
-        </div>
-      {% endif %}
-
-      <!-- 海外配送 -->
-      {% if section.settings.show_international %}
-        <div
-          class="international-shipping"
-          style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-        >
-          <h3 style="font-size: 24px; font-weight: bold; color: {{ section.settings.heading_color }}; margin-bottom: 20px; border-bottom: 2px solid {{ section.settings.accent_color }}; padding-bottom: 10px;">
-            海外配送について
-          </h3>
-          <div style="display: grid; gap: 15px;">
-            <div style="display: flex; align-items: center; padding: 15px; background: {{ section.settings.international_bg_color }}; border-radius: 8px;">
-              <div style="width: 8px; height: 8px; background: #4CAF50; border-radius: 50%; margin-right: 15px;"></div>
-              <span style="font-size: 16px; color: {{ section.settings.text_color }};"
-                >海外への商品発送可（対象外商品あり）</span
-              >
-            </div>
-            <div style="padding: 15px; background: {{ section.settings.highlight_bg_color }}; border-radius: 8px; border-left: 4px solid {{ section.settings.accent_color }};">
-              <p style="font-size: 14px; color: {{ section.settings.text_color }}; margin: 0; font-weight: bold;">
-                海外配送をご希望の場合は、必ず事前に当店までご連絡ください。
-              </p>
-            </div>
+          <!-- 车からのアクセス -->
+          <div class="access-section">
+            <h3 class="access-title">{{ section.settings.car_access_title }}</h3>
+            <p class="access-description">{{ section.settings.car_access_description }}</p>
+            <p class="access-note">{{ section.settings.parking_note }}</p>
           </div>
+
+          <!-- Google Map 按钮 -->
+          <div class="map-section">
+            <a href="{{ section.settings.map_url }}" class="map-button" target="_blank">
+              {{ section.settings.map_button_text }}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地图图片 -->
+      {% if section.settings.map_image %}
+        <div class="map-image-section">
+          <img src="{{ section.settings.map_image | img_url: 'master' }}" alt="店舗地図" class="map-image">
         </div>
       {% endif %}
     </div>
@@ -230,209 +101,386 @@
 </div>
 
 <style>
+  .store-info-section {
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  }
+
+  .hero-section {
+    background: linear-gradient(135deg, #2d5a4a 0%, #1a3d32 100%);
+    padding: 80px 0;
+    text-align: center;
+    color: white;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+
+  .main-content {
+    background-color: #f8f8f8;
+    padding: 80px 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    letter-spacing: 0.2em;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #333;
+    margin: 0;
+    letter-spacing: 0.05em;
+  }
+
+  .info-content {
+    margin: 0 auto 60px auto;
+    width: 50%;
+    text-align: left;
+  }
+
+  .basic-info-section {
+    margin-bottom: 60px;
+  }
+
+  .access-info-section {
+    margin-bottom: 40px;
+  }
+
+  .info-block {
+    margin-bottom: 30px;
+  }
+
+  .info-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 8px 0;
+    font-weight: normal;
+  }
+
+  .info-value {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .access-section {
+    margin-bottom: 40px;
+  }
+
+  .access-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0 0 20px 0;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .access-group {
+    margin-bottom: 25px;
+  }
+
+  .access-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 10px 0;
+    font-weight: normal;
+    text-align: left;
+  }
+
+  .access-item {
+    font-size: 0.9rem;
+    color: #333;
+    margin: 0 0 5px 0;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .access-description {
+    font-size: 0.9rem;
+    color: #333;
+    margin: 0 0 10px 0;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .access-note {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .map-section {
+    margin-top: 30px;
+    text-align: left;
+  }
+
+  .map-button {
+    display: inline-block;
+    border: 1px solid #333;
+    padding: 12px 30px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+  }
+
+  .map-button:hover {
+    background-color: #333;
+    color: white;
+  }
+
+  .map-image-section {
+    margin: 40px auto 0 auto;
+    width: 50%;
+    text-align: left;
+  }
+
+  .map-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
   @media (max-width: 768px) {
-    .shipping-methods {
-      grid-template-columns: 1fr !important;
+    .hero-title {
+      font-size: 2rem;
     }
 
-    .method-card {
-      padding: 20px !important;
+    .basic-info-section {
+      margin-bottom: 40px;
     }
 
-    .section-header h2 {
-      font-size: 24px !important;
+    .main-content {
+      padding: 40px 0;
     }
 
-    .shipping-content h3 {
-      font-size: 20px !important;
+    .hero-section {
+      padding: 60px 0;
     }
 
-    .method-card h4 {
-      font-size: 18px !important;
+    .info-content {
+      width: 90%;
+    }
+
+    .map-image-section {
+      width: 90%;
     }
   }
 </style>
 
 {% schema %}
 {
-  "name": "配送情報",
+  "name": "关于配送",
   "settings": [
     {
-      "type": "header",
-      "content": "基本設定"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_title",
-      "label": "タイトルを表示",
-      "default": true
+      "type": "text",
+      "id": "hero_title",
+      "label": "顶部标题",
+      "default": "店舗情報"
     },
     {
       "type": "text",
-      "id": "title",
-      "label": "タイトル",
-      "default": "配送について"
+      "id": "section_subtitle",
+      "label": "副标题",
+      "default": "SHOP INFORMATION & ACCESS"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "主标题",
+      "default": "店舗情報"
+    },
+    {
+      "type": "text",
+      "id": "hours_label",
+      "label": "营业时间标签",
+      "default": "営業時間"
+    },
+    {
+      "type": "text",
+      "id": "hours_value",
+      "label": "营业时间",
+      "default": "11:00 ～ 20:00"
+    },
+    {
+      "type": "text",
+      "id": "holiday_label",
+      "label": "定休日标签",
+      "default": "定休日"
+    },
+    {
+      "type": "text",
+      "id": "holiday_value",
+      "label": "定休日",
+      "default": "年中無休（年末年始のぞく）"
+    },
+    {
+      "type": "text",
+      "id": "address_label",
+      "label": "地址标签",
+      "default": "住所"
     },
     {
       "type": "textarea",
-      "id": "subtitle",
-      "label": "サブタイトル"
+      "id": "address_value",
+      "label": "地址",
+      "default": "〒104-0061東京都中央区銀座7-3-6 銀座高木ビル2F"
     },
     {
-      "type": "header",
-      "content": "表示設定"
+      "type": "text",
+      "id": "tel_label",
+      "label": "电话标签",
+      "default": "TEL"
     },
     {
-      "type": "checkbox",
-      "id": "show_carriers",
-      "label": "配送業者セクションを表示",
-      "default": true
+      "type": "text",
+      "id": "tel_value",
+      "label": "电话号码",
+      "default": "03-6263-8316"
     },
     {
-      "type": "checkbox",
-      "id": "show_schedule",
-      "label": "発送スケジュールを表示",
-      "default": true
+      "type": "text",
+      "id": "fax_label",
+      "label": "传真标签",
+      "default": "FAX"
     },
     {
-      "type": "checkbox",
-      "id": "show_sagawa",
-      "label": "佐川急便詳細を表示",
-      "default": true
+      "type": "text",
+      "id": "fax_value",
+      "label": "传真号码",
+      "default": "03-6263-8317"
     },
     {
-      "type": "checkbox",
-      "id": "show_clickpost",
-      "label": "クリックポスト詳細を表示",
-      "default": true
+      "type": "text",
+      "id": "station_access_title",
+      "label": "车站交通标题",
+      "default": "最寄り駅からのアクセス"
     },
     {
-      "type": "checkbox",
-      "id": "show_timing",
-      "label": "発送タイミングを表示",
-      "default": true
+      "type": "text",
+      "id": "metro_title",
+      "label": "地铁标题",
+      "default": "＜東京メトロ・都営地下鉄＞"
     },
     {
-      "type": "checkbox",
-      "id": "show_pricing",
-      "label": "配送料金を表示",
-      "default": true
+      "type": "text",
+      "id": "jr_title",
+      "label": "JR标题",
+      "default": "＜JR・その他＞"
     },
     {
-      "type": "checkbox",
-      "id": "show_international",
-      "label": "海外配送情報を表示",
-      "default": true
+      "type": "text",
+      "id": "car_access_title",
+      "label": "开车交通标题",
+      "default": "車からのアクセス"
     },
     {
-      "type": "header",
-      "content": "カラー設定"
+      "type": "textarea",
+      "id": "car_access_description",
+      "label": "开车交通描述",
+      "default": "西銀座駐車場（提携）をご利用いただけます。"
     },
     {
-      "type": "color",
-      "id": "background_color",
-      "label": "背景色",
-      "default": "#FAF9F6"
+      "type": "textarea",
+      "id": "parking_note",
+      "label": "停车说明",
+      "default": "当店をご利用のお客様には、最大2時間分の無料駐車券をお渡しいたしますので、駐車券をスタッフまでご提示ください。"
     },
     {
-      "type": "color",
-      "id": "title_color",
-      "label": "タイトル色",
-      "default": "#333333"
+      "type": "url",
+      "id": "map_url",
+      "label": "Google地图链接"
     },
     {
-      "type": "color",
-      "id": "subtitle_color",
-      "label": "サブタイトル色",
-      "default": "#666666"
+      "type": "text",
+      "id": "map_button_text",
+      "label": "地图按钮文字",
+      "default": "GOOGLE MAPで検索"
     },
     {
-      "type": "color",
-      "id": "heading_color",
-      "label": "見出し色",
-      "default": "#333333"
+      "type": "image_picker",
+      "id": "map_image",
+      "label": "地图图片"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "metro_access",
+      "name": "地铁交通",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "交通描述"
+        }
+      ]
     },
     {
-      "type": "color",
-      "id": "text_color",
-      "label": "テキスト色",
-      "default": "#555555"
-    },
-    {
-      "type": "color",
-      "id": "accent_color",
-      "label": "アクセント色",
-      "default": "#D4B896"
-    },
-    {
-      "type": "color",
-      "id": "carrier_bg_color",
-      "label": "配送業者背景色",
-      "default": "#F8F6F0"
-    },
-    {
-      "type": "color",
-      "id": "highlight_bg_color",
-      "label": "ハイライト背景色",
-      "default": "#FFF8E1"
-    },
-    {
-      "type": "color",
-      "id": "time_slot_bg",
-      "label": "時間帯背景色",
-      "default": "#F0F0F0"
-    },
-    {
-      "type": "color",
-      "id": "note_bg_color",
-      "label": "注意事項背景色",
-      "default": "#F5F5F5"
-    },
-    {
-      "type": "color",
-      "id": "warning_bg_color",
-      "label": "警告背景色",
-      "default": "#FFEBEE"
-    },
-    {
-      "type": "color",
-      "id": "timing_bg_color",
-      "label": "タイミング背景色",
-      "default": "#F8F6F0"
-    },
-    {
-      "type": "color",
-      "id": "international_bg_color",
-      "label": "海外配送背景色",
-      "default": "#E8F5E8"
-    },
-    {
-      "type": "header",
-      "content": "スペース設定"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "label": "上部余白",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 60
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "label": "下部余白",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 60
+      "type": "jr_access",
+      "name": "JR交通",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "交通描述"
+        }
+      ]
     }
   ],
   "presets": [
     {
-      "name": "配送情報",
-      "category": "情報"
+      "name": "店铺信息",
+      "blocks": [
+        {
+          "type": "metro_access",
+          "settings": {
+            "description": "銀座駅（東京メトロ 銀座線・丸ノ内線・日比谷線）C3出口より徒歩5分"
+          }
+        },
+        {
+          "type": "metro_access",
+          "settings": {
+            "description": "東銀座駅（東京メトロ 日比谷線・都営浅草線）A1出口より徒歩7分"
+          }
+        },
+        {
+          "type": "jr_access",
+          "settings": {
+            "description": "新橋駅（JR・東京メトロ銀座線・都営浅草線・ゆりかもめ）銀座口より徒歩8分"
+          }
+        },
+        {
+          "type": "jr_access",
+          "settings": {
+            "description": "有楽町駅（JR・東京メトロ有楽町線）中央口より徒歩8分"
+          }
+        }
+      ]
     }
   ]
 }
