@@ -750,31 +750,27 @@
     if (slideItem && !slideItem.classList.contains('center')) {
       e.preventDefault();
       
-      const slides = Array.from(slider.querySelectorAll('.slide-item'));
-      const clickedIndex = slides.indexOf(slideItem);
-      let targetIndex = clickedIndex;
+      const slides = slider.querySelectorAll('.slide-item');
+      const clickedIndex = Array.from(slides).indexOf(slideItem);
       
-      // Handle clone items mapping to original items
-      if (clickedIndex < cloneOffset) {
-        // Beginning clones - map to end originals
-        targetIndex = totalBlocks - cloneOffset + clickedIndex;
-      } else if (clickedIndex >= cloneOffset + totalBlocks) {
-        // End clones - map to beginning originals
-        targetIndex = clickedIndex - cloneOffset - totalBlocks;
-      }
+      // Debug logging
+      console.log('Clicked index:', clickedIndex);
+      console.log('Original index:', slideItem.dataset.originalIndex);
       
-      // Scroll to target item (original or mapped clone)
-      if (slides[targetIndex]) {
+      // Scroll directly to clicked item (including clones)
+      if (slides[clickedIndex] && !isScrolling) {
         isScrolling = true;
-        slides[targetIndex].scrollIntoView({
+        // Force update center item for clones
+        updateCenterItem(true);
+        
+        slides[clickedIndex].scrollIntoView({
           behavior: 'smooth',
           block: 'nearest',
           inline: 'center'
         });
         
-        // Update center item immediately for better UX
         setTimeout(() => {
-          updateCenterItem(true);
+          isScrolling = false;
         }, 500);
       }
     }
