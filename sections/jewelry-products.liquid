@@ -370,6 +370,9 @@
     overscroll-behavior-x: contain;
     scroll-snap-type: x proximity;
     will-change: transform;
+    /* 移动端性能优化 */
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .products-grid:active {
@@ -747,11 +750,16 @@
       /* 移动端优化 */
       cursor: default;
       user-select: auto;
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior: contain;
     }
 
     .product-card {
       /* 移动端禁用悬停效果 */
       transition: none;
+      scroll-snap-align: start;
     }
 
     .product-card:hover {
@@ -1071,10 +1079,18 @@
     
     grids.forEach(grid => {
       if (isMobile) {
-        // 移动端使用原生滚动，不添加复杂的拖拽逻辑
+        // 移动端使用原生滚动，优化性能
+        let scrollTimeout;
         grid.addEventListener('scroll', () => {
-          updateArrowStates(grid);
-        });
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            updateArrowStates(grid);
+          }, 50); // 减少更新频率
+        }, { passive: true });
+        
+        // 移动端禁用拖拽相关事件
+        grid.style.cursor = 'default';
+        grid.style.userSelect = 'auto';
         return;
       }
 
