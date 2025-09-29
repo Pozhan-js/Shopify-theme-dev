@@ -752,24 +752,33 @@
       
       const slides = slider.querySelectorAll('.slide-item');
       const clickedIndex = Array.from(slides).indexOf(slideItem);
+      const originalIndex = parseInt(slideItem.dataset.originalIndex);
       
       // Debug logging
       console.log('Clicked index:', clickedIndex);
-      console.log('Original index:', slideItem.dataset.originalIndex);
+      console.log('Original index:', originalIndex);
       
-      // Scroll directly to clicked item (including clones)
-      if (slides[clickedIndex] && !isScrolling) {
+      // Calculate target index based on original position
+      let targetIndex = originalIndex + cloneOffset;
+      
+      // Ensure target is within bounds
+      if (targetIndex >= slides.length) {
+        targetIndex = targetIndex % totalBlocks;
+      }
+      
+      if (slides[targetIndex] && !isScrolling) {
         isScrolling = true;
-        // Force update center item for clones
-        updateCenterItem(true);
         
-        slides[clickedIndex].scrollIntoView({
+        // Scroll to the original item position
+        slides[targetIndex].scrollIntoView({
           behavior: 'smooth',
           block: 'nearest',
           inline: 'center'
         });
         
+        // Force update center item
         setTimeout(() => {
+          updateCenterItem(true);
           isScrolling = false;
         }, 500);
       }
