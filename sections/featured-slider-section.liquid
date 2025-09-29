@@ -398,54 +398,20 @@
     display: none;
   }
 
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item {
-    flex: 0 0 320px !important;
+  .slide-item {
+    flex: 0 0 280px;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    transition: all 0.3s ease !important;
-    opacity: 0.7 !important;
-    transform: scale(0.9) !important;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0.7;
+    transform: scale(0.9);
     cursor: pointer;
   }
 
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center {
-    opacity: 1 !important;
-    transform: scale(1.1) !important;
+  .slide-item.center {
+    opacity: 1;
+    transform: scale(1.1);
     cursor: default;
-    margin: -20px 0; /* 通过负边距补偿缩放带来的空间变化 */
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .product-title,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .card-title {
-    font-size: 1.2rem !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .product-description,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .card-description {
-    display: none !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .product-title,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .card-title {
-    font-size: 1.8rem !important;
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .product-description,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .card-description {
-    display: block !important;
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .product-image img,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item .card-image img {
-    transform: scale(0.9) !important;
-    transition: all 0.3s ease !important;
-  }
-
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .product-image img,
-  .featured-slider-section .slider-container#slider-{{ section.id }} .slide-item.center .card-image img {
-    transform: scale(1.1) !important;
   }
 
   .slide-item:not(.center):hover {
@@ -661,9 +627,15 @@
     let centerIndex = 0;
     let realIndex = 0;
     
+    // Adjusted for 280px width and 1.15 scale
+    const slideWidth = 280;
+    const scaleFactor = 1.15;
+    const scaledWidth = slideWidth * scaleFactor;
+    
     slides.forEach((slide, index) => {
       const slideRect = slide.getBoundingClientRect();
-      const slideCenter = slideRect.left + slideRect.width / 2;
+      // Calculate center point considering scaled width
+      const slideCenter = slideRect.left + (slide.classList.contains('center') ? scaledWidth/2 : slideWidth/2);
       const distance = Math.abs(slideCenter - containerCenter);
       
       slide.classList.remove('center');
