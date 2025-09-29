@@ -617,7 +617,7 @@
     };
   }
   
-  function updateCenterItem() {
+  function updateCenterItem(fromClick = false) {
     const slides = slider.querySelectorAll('.slide-item');
     const containerRect = slider.getBoundingClientRect();
     const containerCenter = containerRect.left + containerRect.width / 2;
@@ -663,14 +663,26 @@
       dot.classList.toggle('active', index === realIndex);
     });
     
-    // Handle infinite scroll jump
-    if (cloneOffset > 0 && !isScrolling) {
+    // Handle infinite scroll jump only for scroll events, not clicks
+    if (cloneOffset > 0 && !isScrolling && !fromClick) {
       handleInfiniteScroll(centerIndex);
     }
   }
   
   function handleInfiniteScroll(centerIndex) {
-    // Do nothing - allow clicking on clone items without jumping to originals
+    const slides = slider.querySelectorAll('.slide-item');
+    const totalSlides = slides.length;
+    
+    // If we're in the clone area at the beginning
+    if (centerIndex < cloneOffset) {
+      const targetIndex = totalSlides - cloneOffset - (cloneOffset - centerIndex);
+      jumpToSlide(targetIndex);
+    }
+    // If we're in the clone area at the end
+    else if (centerIndex >= cloneOffset + totalBlocks) {
+      const targetIndex = cloneOffset + (centerIndex - cloneOffset - totalBlocks);
+      jumpToSlide(targetIndex);
+    }
   }
   
   function jumpToSlide(index) {
