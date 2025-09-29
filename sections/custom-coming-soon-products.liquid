@@ -235,7 +235,7 @@
             <td class="col-product">
               <span class="text-cell">
                 {%- if product.title != blank -%}
-                  {{ product.title }}
+                  <a href="{{ product.url }}" style="color:inherit;text-decoration:none">{{ product.title }}</a>
                 {%- else -%}
                   &nbsp;
                 {%- endif -%}
@@ -289,12 +289,24 @@
     const rows = document.querySelectorAll('.coming-soon-table tbody tr');
     
     rows.forEach(row => {
-      if (!row.classList.contains('has-description')) return;
-      
-      row.addEventListener('click', function() {
-        const descriptionRow = this.nextElementSibling;
-        descriptionRow.classList.toggle('show-description');
-      });
+      if (row.classList.contains('has-description')) {
+        // 带描述的行保持原有展开功能
+        row.addEventListener('click', function() {
+          const descriptionRow = this.nextElementSibling;
+          descriptionRow.classList.toggle('show-description');
+        });
+      } else {
+        // 普通产品行添加跳转功能
+        const productLink = row.querySelector('.col-product a');
+        if (productLink) {
+          row.style.cursor = 'pointer';
+          row.addEventListener('click', function(e) {
+            if (!e.target.closest('a')) { // 避免与内部链接冲突
+              window.location.href = productLink.href;
+            }
+          });
+        }
+      }
     });
   });
 </script>
