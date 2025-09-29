@@ -1,250 +1,396 @@
 {% comment %} Contact Section {% endcomment %}
 <div class="contact-section">
-  {% if section.settings.show_header %}
-  <div class="contact-header">
-    <h1>{{ section.settings.title | default: "联系我们" }}</h1>
-    <p>{{ section.settings.subtitle | default: "我们随时为您提供专业的珠宝咨询服务" }}</p>
-  </div>
-  {% endif %}
-
   {% for block in section.blocks %}
     {% case block.type %}
       {% when 'contact_info' %}
         <div class="contact-info-section" style="background: {{ block.settings.bg_color }};">
           <div class="container">
-            <h2>{{ block.settings.title | default: "联系方式" }}</h2>
+            <h2>{{ block.settings.title | default: '店舗情報' }}</h2>
             <div class="info-grid">
               <div class="info-card">
                 <div class="info-icon">📍</div>
-                <h3>{{ block.settings.address_title | default: "店铺地址" }}</h3>
-                <p>{{ block.settings.address_desc | default: "东京都中央区银座4-6-16 银座珠宝大厦1F-3F" }}</p>
+                <h3>{{ block.settings.address_title | default: '店舗地址' }}</h3>
+                <p>{{ block.settings.address_desc | default: '東京都中央区銀座4-6-16 銀座ジュエリー大厦1F-3F' }}</p>
               </div>
               <div class="info-card">
                 <div class="info-icon">📞</div>
-                <h3>{{ block.settings.phone_title | default: "客服热线" }}</h3>
-                <p>{{ block.settings.phone_desc | default: "+81-3-1234-5678 周一至周日 10:00-20:00" }}</p>
+                <h3>{{ block.settings.phone_title | default: 'お客様サポート' }}</h3>
+                <p>{{ block.settings.phone_desc | default: '+81-3-1234-5678 月～金 10:00～18:00' }}</p>
               </div>
               <div class="info-card">
                 <div class="info-icon">✉️</div>
-                <h3>{{ block.settings.email_title | default: "邮箱咨询" }}</h3>
-                <p>{{ block.settings.email_desc | default: "info@jewelry-store.jp 我们会在24小时内回复" }}</p>
+                <h3>{{ block.settings.email_title | default: 'メールでのお問い合わせ' }}</h3>
+                <p>{{ block.settings.email_desc | default: 'mikamoon@e-mail.jp 原則1営業日以内に返信いたします' }}</p>
               </div>
               <div class="info-card">
-                <div class="info-icon">💬</div>
-                <h3>{{ block.settings.chat_title | default: "在线客服" }}</h3>
-                <p>{{ block.settings.chat_desc | default: "微信客服：JewelryStore_JP LINE客服：@jewelrystore" }}</p>
+                <div class="info-icon">🕒</div>
+                <h3>{{ block.settings.hours_title | default: '営業時間' }}</h3>
+                <p>{{ block.settings.hours_desc | default: '月～金 10:00～18:00<br>土日祝：休業' }}</p>
+              </div>
+            </div>
+
+            <!-- 新增注意事项区域 -->
+            <div class="notice-section">
+              <div class="notice-card">
+                <h3>{{ block.settings.notice_title | default: 'ご注意事項' }}</h3>
+                <ul class="notice-list">
+                  <li>{{ block.settings.notice_1 | default: 'お問い合わせには原則1営業日以内に返信いたします。' }}</li>
+                  <li>
+                    {{ block.settings.notice_2 | default: '営業時間外のお問い合わせは翌営業日の対応となります。' }}
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
         </div>
 
       {% when 'contact_form' %}
-        <div class="contact-form-section" style="background: {{ block.settings.bg_color }};">
+        <div class="contact-form-section">
           <div class="container">
-            <h2>{{ block.settings.title | default: "留言咨询" }}</h2>
+            <h2>{{ block.settings.title | default: 'お問い合わせフォーム' }}</h2>
+
+            <!-- 新增：表单上方的重要信息区域 -->
+            <div class="contact-info-highlight">
+              <div class="info-highlight-card">
+                <div class="highlight-item">
+                  <span class="highlight-label">メールアドレス：</span>
+                  <span class="highlight-value">mikamoon@e-mail.jp</span>
+                </div>
+                <div class="highlight-item">
+                  <span class="highlight-label">営業時間：</span>
+                  <span class="highlight-value"
+                    >月～金 10:00 ～ 18:00<br>
+                    土日祝：休業</span
+                  >
+                </div>
+                <div class="highlight-notices">
+                  <p>※お問い合わせには原則1営業日以内に返信いたします。</p>
+                  <p>※営業時間外のお問い合わせは翌営業日の対応となります。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-description">
+              <p>
+                {{
+                  block.settings.form_description
+                  | default: '当店へのご質問・ご相談は下記よりお気軽にご連絡ください'
+                }}
+              </p>
+            </div>
+
             <form class="contact-form" action="/contact#contact_form" method="post" id="contact_form">
               <input type="hidden" name="form_type" value="contact">
               <input type="hidden" name="utf8" value="✓">
-              
+
               <div class="form-group">
-                <label for="contact-name">{{ block.settings.name_label | default: "姓名 *" }}</label>
+                <label for="contact-name">{{ block.settings.name_label | default: 'お名前 *' }}</label>
                 <input type="text" id="contact-name" name="contact[name]" required>
               </div>
-              
+
               <div class="form-group">
-                <label for="contact-email">{{ block.settings.email_label | default: "邮箱 *" }}</label>
+                <label for="contact-email">{{ block.settings.email_label | default: 'メールアドレス *' }}</label>
                 <input type="email" id="contact-email" name="contact[email]" required>
               </div>
-              
+
               <div class="form-group">
-                <label for="contact-message">{{ block.settings.message_label | default: "留言内容 *" }}</label>
-                <textarea id="contact-message" name="contact[body]" rows="6" required 
-                          placeholder="{{ block.settings.message_placeholder | default: "请详细描述您的问题，我们会尽快回复您..." }}"></textarea>
+                <label for="contact-message">{{ block.settings.message_label | default: 'お問い合わせ内容 *' }}</label>
+                <textarea
+                  id="contact-message"
+                  name="contact[body]"
+                  rows="6"
+                  required
+                  placeholder="{{ block.settings.message_placeholder | default: "ご質問・ご相談内容を詳しくお書きください..." }}"
+                ></textarea>
               </div>
-              
-              <button type="submit" class="submit-btn">{{ block.settings.submit_text | default: "发送留言" }}</button>
+
+              <button type="submit" class="submit-btn">
+                {{ block.settings.submit_text | default: 'お問い合わせを送信' }}
+              </button>
             </form>
           </div>
         </div>
-
     {% endcase %}
   {% endfor %}
 </div>
 
 <style>
-.contact-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 60px 20px;
-}
-
-.contact-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.contact-header h1 {
-  font-size: 42px;
-  font-weight: 300;
-  color: #333;
-  margin-bottom: 15px;
-  letter-spacing: 2px;
-}
-
-.contact-header p {
-  font-size: 18px;
-  color: #666;
-}
-
-.contact-content {
-  display: grid;
-  gap: 60px;
-}
-
-.contact-info-section h2,
-.contact-form-section h2 {
-  font-size: 32px;
-  font-weight: 300;
-  color: #333;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
-}
-
-.info-card {
-  text-align: center;
-  padding: 40px 30px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  transition: transform 0.3s ease;
-}
-
-.info-card:hover {
-  transform: translateY(-5px);
-}
-
-.info-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
-}
-
-.info-card h3 {
-  font-size: 20px;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.info-card p {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.6;
-}
-
-.contact-form {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 25px;
-}
-
-.form-group label {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #333;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 18px;
-  background: #333;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.submit-btn:hover {
-  background: #555;
-}
-
-@media (max-width: 768px) {
   .contact-section {
-    padding: 40px 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 20px;
   }
-  
-  .contact-header h1 {
+
+  .contact-content {
+    display: grid;
+    gap: 60px;
+  }
+
+  .contact-info-section h2,
+  .contact-form-section h2 {
     font-size: 32px;
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
   }
-  
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 20px;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
-  
+
   .info-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
   }
-}
+
+  .info-card {
+    text-align: center;
+    padding: 40px 30px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .info-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .info-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+
+  .info-card h3 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  .info-card p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+  }
+
+  /* 新增注意事项样式 */
+  .notice-section {
+    margin-top: 40px;
+  }
+
+  .notice-card {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .notice-card h3 {
+    font-size: 22px;
+    color: #856404;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .notice-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .notice-list li {
+    font-size: 16px;
+    color: #856404;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.6;
+  }
+
+  .notice-list li:before {
+    content: '※';
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+
+  .notice-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 新增：表单上方重要信息区域样式 */
+  .contact-info-highlight {
+    margin-bottom: 30px;
+  }
+
+  .info-highlight-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #dee2e6;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .highlight-item {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .highlight-label {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+    min-width: 120px;
+  }
+
+  .highlight-value {
+    font-size: 18px;
+    color: #212529;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .highlight-notices {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+  }
+
+  .highlight-notices p {
+    font-size: 15px;
+    color: #6c757d;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  .highlight-notices p:last-child {
+    margin-bottom: 0;
+  }
+
+  .form-description {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .form-description p {
+    font-size: 16px;
+    color: #666;
+    padding: 15px;
+  }
+
+  .contact-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25px;
+  }
+
+  .form-group label {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #333;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background: #555;
+  }
+
+  @media (max-width: 768px) {
+    .contact-section {
+      padding: 40px 15px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .notice-card {
+      padding: 20px;
+    }
+
+    .notice-list li {
+      font-size: 14px;
+    }
+
+    /* 移动端适配 */
+    .info-highlight-card {
+      padding: 20px;
+    }
+
+    .highlight-item {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .highlight-label {
+      min-width: auto;
+      margin-bottom: 5px;
+    }
+
+    .highlight-value {
+      font-size: 16px;
+    }
+
+    .highlight-notices p {
+      font-size: 14px;
+    }
+  }
 </style>
 
 {% schema %}
 {
   "name": "Contact Section",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "show_header",
-      "label": "显示标题",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "主标题",
-      "default": "联系我们"
-    },
-    {
-      "type": "text",
-      "id": "subtitle",
-      "label": "副标题",
-      "default": "我们随时为您提供专业的珠宝咨询服务"
-    }
-  ],
+  "settings": [],
   "blocks": [
     {
       "type": "contact_info",
@@ -254,7 +400,7 @@
           "type": "text",
           "id": "title",
           "label": "标题",
-          "default": "联系方式"
+          "default": "店舗情報"
         },
         {
           "type": "color",
@@ -266,49 +412,67 @@
           "type": "text",
           "id": "address_title",
           "label": "地址标题",
-          "default": "店铺地址"
+          "default": "店舗地址"
         },
         {
           "type": "text",
           "id": "address_desc",
           "label": "地址描述",
-          "default": "东京都中央区银座4-6-16 银座珠宝大厦1F-3F"
+          "default": "東京都中央区銀座4-6-16 銀座ジュエリー大厦1F-3F"
         },
         {
           "type": "text",
           "id": "phone_title",
           "label": "电话标题",
-          "default": "客服热线"
+          "default": "お客様サポート"
         },
         {
           "type": "text",
           "id": "phone_desc",
           "label": "电话描述",
-          "default": "+81-3-1234-5678 周一至周日 10:00-20:00"
+          "default": "+81-3-1234-5678 月～金 10:00～18:00"
         },
         {
           "type": "text",
           "id": "email_title",
           "label": "邮箱标题",
-          "default": "邮箱咨询"
+          "default": "メールでのお問い合わせ"
         },
         {
           "type": "text",
           "id": "email_desc",
           "label": "邮箱描述",
-          "default": "info@jewelry-store.jp 我们会在24小时内回复"
+          "default": "mikamoon@e-mail.jp 原則1営業日以内に返信いたします"
         },
         {
           "type": "text",
-          "id": "chat_title",
-          "label": "在线客服标题",
-          "default": "在线客服"
+          "id": "hours_title",
+          "label": "营业时间标题",
+          "default": "営業時間"
         },
         {
           "type": "text",
-          "id": "chat_desc",
-          "label": "在线客服描述",
-          "default": "微信客服：JewelryStore_JP LINE客服：@jewelrystore"
+          "id": "hours_desc",
+          "label": "营业时间描述",
+          "default": "月～金 10:00～18:00<br>土日祝：休業"
+        },
+        {
+          "type": "text",
+          "id": "notice_title",
+          "label": "注意事项标题",
+          "default": "ご注意事項"
+        },
+        {
+          "type": "text",
+          "id": "notice_1",
+          "label": "注意事项1",
+          "default": "お問い合わせには原則1営業日以内に返信いたします。"
+        },
+        {
+          "type": "text",
+          "id": "notice_2",
+          "label": "注意事项2",
+          "default": "営業時間外のお問い合わせは翌営業日の対応となります。"
         }
       ]
     },
@@ -320,7 +484,7 @@
           "type": "text",
           "id": "title",
           "label": "标题",
-          "default": "留言咨询"
+          "default": "お問い合わせフォーム"
         },
         {
           "type": "color",
@@ -330,33 +494,39 @@
         },
         {
           "type": "text",
+          "id": "form_description",
+          "label": "表单说明",
+          "default": "当店へのご質問・ご相談は下記よりお気軽にご連絡ください"
+        },
+        {
+          "type": "text",
           "id": "name_label",
           "label": "姓名字段标签",
-          "default": "姓名 *"
+          "default": "お名前 *"
         },
         {
           "type": "text",
           "id": "email_label",
           "label": "邮箱字段标签",
-          "default": "邮箱 *"
+          "default": "メールアドレス *"
         },
         {
           "type": "text",
           "id": "message_label",
           "label": "留言字段标签",
-          "default": "留言内容 *"
+          "default": "お問い合わせ内容 *"
         },
         {
           "type": "text",
           "id": "message_placeholder",
           "label": "留言框占位符",
-          "default": "请详细描述您的问题，我们会尽快回复您..."
+          "default": "ご質問・ご相談内容を詳しくお書きください..."
         },
         {
           "type": "text",
           "id": "submit_text",
           "label": "提交按钮文字",
-          "default": "发送留言"
+          "default": "お問い合わせを送信"
         }
       ]
     }
