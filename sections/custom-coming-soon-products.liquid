@@ -82,7 +82,6 @@
   width: 98%;
   font-size: {{ section.settings.title_font_size }}px;
   font-weight: {{ section.settings.title_font_weight }};
-  min-height: 40rem;
 }
 
 .coming-soon-table th {
@@ -97,8 +96,11 @@
   border-bottom: 1px solid #eee;
 }
 
-.coming-soon-table tr:hover td {
+.coming-soon-table tr:not(.has-description):hover td {
   color: #ff4f00;
+}
+.coming-soon-table .product-description {
+  color: #999;
 }
 .coming-soon-table .icon-arrow {
   float: right;
@@ -159,93 +161,93 @@
 
 {%- if selected_collection -%}
   <div class="collection-header">
-    {% if selected_collection %}
-      <h2 style="font-weight: {{ section.settings.title_font_weight }}">{{ selected_collection.title }}</h2>
-      {% if selected_collection.description != blank %}
-        <p>{{ selected_collection.description }}</p>
-      {% endif %}
+    <h2 style="font-weight: {{ section.settings.title_font_weight }}">{{ selected_collection.title }}</h2>
+    {% if selected_collection.description != blank %}
+      <p>{{ selected_collection.description }}</p>
     {% endif %}
   </div>
 
-  <table class="coming-soon-table">
-    <thead>
-      <tr>
-        <th class="col-date">Date</th>
-        <th class="col-brand">Brand</th>
-        <th class="col-product">Product</th>
-        <th class="col-color">Color</th>
-        <th class="col-artno">Art.no.</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for product in selected_collection.products %}
-        {%- assign color_value = product.options_with_values | where: 'name', 'Color' | first -%}
-        <tr class="{% if product.description != blank %}has-description{% endif %}">
-          <td class="col-date">
-            <span class="text-cell">
-              {%- if product.metafields.custom.release_date -%}
-                {{ product.metafields.custom.release_date | date: "%d/%m/%y" }}
-              {%- else -%}
-                Coming Soon
-              {%- endif -%}
-            </span>
-          </td>
-          <td class="col-brand">
-            <span class="text-cell">
-              {%- if product.vendor != blank -%}
-                {{ product.vendor }}
-              {%- else -%}
-                &nbsp;
-              {%- endif -%}
-            </span>
-          </td>
-          <td class="col-product">
-            <span class="text-cell">
-              {%- if product.title != blank -%}
-                {{ product.title }}
-              {%- else -%}
-                &nbsp;
-              {%- endif -%}
-            </span>
-          </td>
-          <td class="col-color">
-            <span class="text-cell">
-              {%- if product.metafields.custom.color_description != blank -%}
-                {{ product.metafields.custom.color_description }}
-              {%- elsif color_value != blank -%}
-                {{ color_value | join: ', ' }}
-              {%- else -%}
-                &nbsp;
-              {%- endif -%}
-            </span>
-          </td>
-          <td class="col-artno">
-            <span class="text-cell">
-              {%- if product.metafields.custom.art_no != blank -%}
-                {{ product.metafields.custom.art_no }}
-              {%- elsif product.sku != blank -%}
-                {{ product.sku }}
-              {%- else -%}
-                &nbsp;
-              {%- endif -%}
-            </span>
-            <svg class="icon-arrow" viewBox="0 0 24 24">
-              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
-            </svg>
-          </td>
+  <div class="table-wrapper" style="min-height:40rem">
+    <table class="coming-soon-table">
+      <thead>
+        <tr>
+          <th class="col-date">Date</th>
+          <th class="col-brand">Brand</th>
+          <th class="col-product">Product</th>
+          <th class="col-color">Color</th>
+          <th class="col-artno">Art.no.</th>
         </tr>
-        {% if product.description != blank %}
-          <tr>
-            <td class="col-date"><span class="text-cell"></span></td>
-            <td class="col-brand"><span class="text-cell"></span></td>
-            <td colspan="3" class="product-description">
-              <span class="text-cell">{{ product.description }}</span>
+      </thead>
+      <tbody>
+        {% for product in selected_collection.products %}
+          {%- assign color_value = product.options_with_values | where: 'name', 'Color' | first -%}
+          <tr class="{% if product.description != blank %}has-description{% endif %}">
+            <td class="col-date">
+              <span class="text-cell">
+                {%- if product.metafields.custom.release_date -%}
+                  {{ product.metafields.custom.release_date | date: "%d/%m/%y" }}
+                {%- else -%}
+                  Coming Soon
+                {%- endif -%}
+              </span>
+            </td>
+            <td class="col-brand">
+              <span class="text-cell">
+                {%- if product.vendor != blank -%}
+                  {{ product.vendor }}
+                {%- else -%}
+                  &nbsp;
+                {%- endif -%}
+              </span>
+            </td>
+            <td class="col-product">
+              <span class="text-cell">
+                {%- if product.title != blank -%}
+                  {{ product.title }}
+                {%- else -%}
+                  &nbsp;
+                {%- endif -%}
+              </span>
+            </td>
+            <td class="col-color">
+              <span class="text-cell">
+                {%- if product.metafields.custom.color_description != blank -%}
+                  {{ product.metafields.custom.color_description }}
+                {%- elsif color_value != blank -%}
+                  {{ color_value | join: ', ' }}
+                {%- else -%}
+                  &nbsp;
+                {%- endif -%}
+              </span>
+            </td>
+            <td class="col-artno">
+              <span class="text-cell">
+                {%- if product.metafields.custom.art_no != blank -%}
+                  {{ product.metafields.custom.art_no }}
+                {%- elsif product.sku != blank -%}
+                  {{ product.sku }}
+                {%- else -%}
+                  &nbsp;
+                {%- endif -%}
+              </span>
+              <svg class="icon-arrow" viewBox="0 0 24 24">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+              </svg>
             </td>
           </tr>
-        {% endif %}
-      {% endfor %}
-    </tbody>
-  </table>
+          {% if product.description != blank %}
+            <tr>
+              <td class="col-date"><span class="text-cell"></span></td>
+              <td class="col-brand"><span class="text-cell"></span></td>
+              <td colspan="3" class="product-description">
+                <span class="text-cell">{{ product.description }}</span>
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 {%- else -%}
   <p>请选择一个产品系列</p>
 {%- endif -%}
