@@ -757,34 +757,35 @@
       console.log('Clicked index:', clickedIndex);
       console.log('Original index:', originalIndex);
       
-      // Calculate target scroll position
-      let targetPos;
+      // Calculate target position based on original index
+      let targetIndex;
       if (clickedIndex < cloneOffset) {
         // Beginning clone - map to end original
-        targetPos = (originalIndex + cloneOffset) * 280;
+        targetIndex = originalIndex + cloneOffset;
       } else if (clickedIndex >= cloneOffset + totalBlocks) {
         // End clone - map to beginning original
-        targetPos = originalIndex * 280;
+        targetIndex = originalIndex;
       } else {
         // Original item
-        targetPos = clickedIndex * 280;
+        targetIndex = clickedIndex;
       }
       
-      // Adjust for center positioning
-      const containerWidth = slider.offsetWidth;
-      targetPos = targetPos - (containerWidth / 2) + 140; // 140 = 280/2
+      // Ensure target is within bounds
+      if (targetIndex >= slides.length) {
+        targetIndex = targetIndex % totalBlocks;
+      }
       
-      // Ensure target position is within bounds
-      const maxScroll = slider.scrollWidth - containerWidth;
-      targetPos = Math.max(0, Math.min(maxScroll, targetPos));
-      
-      if (!isScrolling) {
+      if (slides[targetIndex] && !isScrolling) {
         isScrolling = true;
-        slider.scrollTo({
-          left: targetPos,
-          behavior: 'smooth'
+        
+        // Scroll to the target item
+        slides[targetIndex].scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
         });
         
+        // Force update center item
         setTimeout(() => {
           updateCenterItem(true);
           isScrolling = false;
