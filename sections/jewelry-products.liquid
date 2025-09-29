@@ -365,6 +365,11 @@
     width: 100%;
     height: auto;
     align-items: stretch;
+    /* 移动端滑动优化 */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    will-change: transform;
   }
 
   .products-grid:active {
@@ -402,6 +407,7 @@
     flex-direction: column;
     height: auto;
     position: relative;
+    scroll-snap-align: start;
   }
 
   .product-card:hover {
@@ -738,6 +744,19 @@
 
     .products-grid {
       gap: {{ section.settings.productgap | minus: 5 }}px;
+      /* 移动端优化 */
+      cursor: default;
+      user-select: auto;
+    }
+
+    .product-card {
+      /* 移动端禁用悬停效果 */
+      transition: none;
+    }
+
+    .product-card:hover {
+      transform: none;
+      box-shadow: {{ section.settings.cardshadow }};
     }
 
     .hover-add-to-cart {
@@ -766,6 +785,11 @@
     .product-tag {
       font-size: {{ section.settings.tagfontsize | minus: 1 }}px;
       padding: {{ section.settings.tagpaddingy | minus: 1 }}px {{ section.settings.tagpaddingx | minus: 1 }}px;
+      transition: none;
+    }
+
+    .product-tag:hover {
+      transform: none;
     }
   }
 
@@ -959,25 +983,31 @@
       // 为所有产品网格添加滚动监听
       const allGrids = document.querySelectorAll('.products-grid');
       allGrids.forEach(grid => {
+        let scrollTimeout;
         grid.addEventListener('scroll', function() {
-          updateArrowStates(this);
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            updateArrowStates(this);
+          }, 16); // 约60fps
         });
       });
     }, 100);
   });
 
-  // 图片轮播功能
+  // 图片轮播功能 - 优化移动端性能
   function initializeImageCarousel() {
     const productCards = document.querySelectorAll('.product-card');
+    const isMobile = window.innerWidth <= 768;
     
     productCards.forEach(card => {
       const images = card.querySelectorAll('.product-image');
       const progressDots = card.querySelectorAll('.progress-dot');
       
-      if (images.length <= 1) return;
+      if (images.length <= 1 || isMobile) return; // 移动端禁用自动轮播
       
       let currentIndex = 0;
       let carouselInterval;
+      let animationFrame;
       
       // 鼠标进入开始轮播
       card.addEventListener('mouseenter', () => {
@@ -994,13 +1024,17 @@
         carouselInterval = setInterval(() => {
           currentIndex = (currentIndex + 1) % images.length;
           updateCarousel();
-        }, 1500); // 每1.5秒切换一张图片
+        }, 1500);
       }
       
       function stopCarousel() {
         if (carouselInterval) {
           clearInterval(carouselInterval);
           carouselInterval = null;
+        }
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = null;
         }
       }
       
@@ -1010,14 +1044,16 @@
       }
       
       function updateCarousel() {
-        // 更新图片显示
-        images.forEach((img, index) => {
-          img.classList.toggle('active', index === currentIndex);
-        });
-        
-        // 更新进度条
-        progressDots.forEach((dot, index) => {
-          dot.classList.toggle('active', index === currentIndex);
+        animationFrame = requestAnimationFrame(() => {
+          // 更新图片显示
+          images.forEach((img, index) => {
+            img.classList.toggle('active', index === currentIndex);
+          });
+          
+          // 更新进度条
+          progressDots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentIndex);
+          });
         });
       }
       
@@ -1028,19 +1064,46 @@
     });
   }
 
-  // 初始化拖拽滑动功能
+  // 初始化拖拽滑动功能 - 移动端优化
   function initializeDragScroll() {
     const grids = document.querySelectorAll('.products-grid');
+    const isMobile = window.innerWidth <= 768;
     
     grids.forEach(grid => {
+      if (isMobile) {
+        // 移动端使用原生滚动，不添加复杂的拖拽逻辑
+        grid.addEventListener('scroll', () => {
+          updateArrowStates(grid);
+        });
+        return;
+      }
+
       let isDown = false;
       let startX;
       let scrollLeft;
       let isDragging = false;
       let hasMoved = false;
+      let lastClickTime = 0;
+
+      // 防抖处理
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
 
       // 鼠标事件 - 优化拖拽体验
       grid.addEventListener('mousedown', (e) => {
+        const now = Date.now();
+        if (now - lastClickTime < 300) return; // 防止快速点击
+        lastClickTime = now;
+
         // 如果点击的是链接或按钮，不启动拖拽
         if (e.target.closest('a, button, input')) {
           return;
@@ -1052,7 +1115,7 @@
         startX = e.pageX;
         scrollLeft = grid.scrollLeft;
         grid.classList.add('dragging');
-        grid.style.scrollBehavior = 'auto'; // 拖拽时禁用平滑滚动
+        grid.style.scrollBehavior = 'auto';
         e.preventDefault();
       });
 
@@ -1062,9 +1125,8 @@
         e.preventDefault();
         
         const x = e.pageX;
-        const walk = (x - startX) * 2; // 调整拖拽灵敏度
+        const walk = (x - startX) * 2;
         
-        // 设置拖拽阈值
         if (Math.abs(walk) > 3) {
           isDragging = true;
           hasMoved = true;
@@ -1079,9 +1141,8 @@
         
         isDown = false;
         grid.classList.remove('dragging');
-        grid.style.scrollBehavior = 'smooth'; // 恢复平滑滚动
+        grid.style.scrollBehavior = 'smooth';
         
-        // 如果发生了拖拽，阻止点击事件
         if (isDragging || hasMoved) {
           e.preventDefault();
           e.stopPropagation();
@@ -1093,58 +1154,21 @@
         }, 100);
       });
 
-      // 触摸事件
-      let touchStartX = 0;
-      let touchScrollLeft = 0;
-      let isTouchDragging = false;
-
-      grid.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchScrollLeft = grid.scrollLeft;
-        isTouchDragging = false;
-        grid.style.scrollBehavior = 'auto';
-      }, { passive: true });
-
-      grid.addEventListener('touchmove', (e) => {
-        if (!touchStartX) return;
-        
-        const touchX = e.touches[0].clientX;
-        const diff = touchStartX - touchX;
-        
-        if (Math.abs(diff) > 5) {
-          isTouchDragging = true;
-          grid.classList.add('dragging');
-        }
-        
-        grid.scrollLeft = touchScrollLeft + diff;
-        updateArrowStates(grid);
-      }, { passive: true });
-
-      grid.addEventListener('touchend', () => {
-        touchStartX = 0;
-        grid.classList.remove('dragging');
-        grid.style.scrollBehavior = 'smooth';
-        
-        setTimeout(() => {
-          isTouchDragging = false;
-        }, 100);
-        
-        updateArrowStates(grid);
-      });
-
       // 阻止拖拽时的链接点击
       grid.addEventListener('click', (e) => {
-        if (isDragging || isTouchDragging || hasMoved) {
+        if (isDragging || hasMoved) {
           e.preventDefault();
           e.stopPropagation();
           return false;
         }
       }, true);
 
-      // 滚动事件监听
-      grid.addEventListener('scroll', () => {
+      // 滚动事件监听 - 使用防抖
+      const debouncedUpdateArrows = debounce(() => {
         updateArrowStates(grid);
-      });
+      }, 16);
+
+      grid.addEventListener('scroll', debouncedUpdateArrows);
     });
   }
 
@@ -1153,9 +1177,9 @@
     const activeGrid = document.querySelector('.tab-pane.active .products-grid');
     if (!activeGrid) return;
     
-    const cardWidth = {{ section.settings.cardwidth }}; // 卡片宽度
-    const gap = {{ section.settings.productgap }}; // 间距
-    const scrollAmount = (cardWidth + gap) * 2; // 每次滑动2个产品的距离
+    const cardWidth = {{ section.settings.cardwidth }};
+    const gap = {{ section.settings.productgap }};
+    const scrollAmount = (cardWidth + gap) * 2;
     
     if (direction === 'left') {
       activeGrid.scrollLeft = Math.max(0, activeGrid.scrollLeft - scrollAmount);
@@ -1164,7 +1188,6 @@
       activeGrid.scrollLeft = Math.min(maxScroll, activeGrid.scrollLeft + scrollAmount);
     }
     
-    // 延迟更新箭头状态，等待滚动完成
     setTimeout(() => {
       updateArrowStates(activeGrid);
     }, 300);
@@ -1183,7 +1206,6 @@
     leftArrow.disabled = isAtStart;
     rightArrow.disabled = isAtEnd;
     
-    // 箭头始终显示，不隐藏
     leftArrow.style.display = 'flex';
     rightArrow.style.display = 'flex';
     leftArrow.style.visibility = 'visible';
