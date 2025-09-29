@@ -681,15 +681,16 @@
   function handleInfiniteScroll(centerIndex) {
     const slides = slider.querySelectorAll('.slide-item');
     const totalSlides = slides.length;
+    const visibleItems = Math.floor(slider.offsetWidth / 280); // Adjusted for 280px width
     
     // If we're in the clone area at the beginning
     if (centerIndex < cloneOffset) {
-      const targetIndex = totalSlides - cloneOffset - (cloneOffset - centerIndex);
+      const targetIndex = totalSlides - cloneOffset - (cloneOffset - centerIndex) - visibleItems;
       jumpToSlide(targetIndex);
     }
     // If we're in the clone area at the end
     else if (centerIndex >= cloneOffset + totalBlocks) {
-      const targetIndex = cloneOffset + (centerIndex - cloneOffset - totalBlocks);
+      const targetIndex = cloneOffset + (centerIndex - cloneOffset - totalBlocks) + visibleItems;
       jumpToSlide(targetIndex);
     }
   }
