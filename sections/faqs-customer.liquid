@@ -1,0 +1,336 @@
+<style>
+  .faq-section {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    background-color: #f8f8f8;
+  }
+
+  .faq-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .faq-category {
+    margin-bottom: 60px;
+  }
+
+  .faq-category-title {
+    position: relative;
+    font-size: 48px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 40px;
+    padding-left: 60px;
+    line-height: 1.2;
+  }
+
+  .faq-category-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -8px;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(194, 46, 53, 0.15);
+    border-radius: 50%;
+    z-index: 1;
+  }
+
+  .faq-item {
+    margin-bottom: 32px;
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .faq-question {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .faq-answer {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .contact-message {
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+  }
+
+  .contact-message p {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .faq-category-title {
+      font-size: 32px;
+      padding-left: 50px;
+    }
+
+    .faq-category-title::before {
+      width: 32px;
+      height: 32px;
+      top: -4px;
+    }
+
+    .faq-item {
+      padding: 20px;
+    }
+
+    .faq-question {
+      font-size: 16px;
+    }
+
+    .faq-answer {
+      font-size: 14px;
+    }
+
+    .contact-message {
+      padding: 30px 20px;
+    }
+
+    .contact-message p {
+      font-size: 18px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .faq-category-title {
+      font-size: 28px;
+      padding-left: 45px;
+    }
+
+    .faq-category-title::before {
+      width: 28px;
+      height: 28px;
+      top: -2px;
+    }
+  }
+</style>
+
+<div class="faq-section">
+  <div class="faq-container">
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'faqcategory' %}
+          {% if block.settings.categorytitle != blank %}
+            <div class="faq-category" {{ block.shopify_attributes }}>
+              <h2 class="faq-category-title">{{ block.settings.categorytitle }}</h2>
+
+              {% for i in (1..10) %}
+                {% assign question_key = 'question' | append: i %}
+                {% assign answer_key = 'answer' | append: i %}
+                {% assign question = block.settings[question_key] %}
+                {% assign answer = block.settings[answer_key] %}
+
+                {% if question != blank and answer != blank %}
+                  <div class="faq-item">
+                    <h3 class="faq-question">{{ question }}</h3>
+                    <p class="faq-answer">{{ answer }}</p>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+        {% when 'contactmessage' %}
+          {% if block.settings.message != blank %}
+            <div class="contact-message" {{ block.shopify_attributes }}>
+              <p>{{ block.settings.message }}</p>
+            </div>
+          {% endif %}
+      {% endcase %}
+    {% endfor %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "FAQ Customer Section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faqcategory",
+      "name": "FAQ Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "categorytitle",
+          "label": "Category Title",
+          "default": "FAQ Category"
+        },
+        {
+          "type": "text",
+          "id": "question1",
+          "label": "Question 1"
+        },
+        {
+          "type": "textarea",
+          "id": "answer1",
+          "label": "Answer 1"
+        },
+        {
+          "type": "text",
+          "id": "question2",
+          "label": "Question 2"
+        },
+        {
+          "type": "textarea",
+          "id": "answer2",
+          "label": "Answer 2"
+        },
+        {
+          "type": "text",
+          "id": "question3",
+          "label": "Question 3"
+        },
+        {
+          "type": "textarea",
+          "id": "answer3",
+          "label": "Answer 3"
+        },
+        {
+          "type": "text",
+          "id": "question4",
+          "label": "Question 4"
+        },
+        {
+          "type": "textarea",
+          "id": "answer4",
+          "label": "Answer 4"
+        },
+        {
+          "type": "text",
+          "id": "question5",
+          "label": "Question 5"
+        },
+        {
+          "type": "textarea",
+          "id": "answer5",
+          "label": "Answer 5"
+        },
+        {
+          "type": "text",
+          "id": "question6",
+          "label": "Question 6"
+        },
+        {
+          "type": "textarea",
+          "id": "answer6",
+          "label": "Answer 6"
+        },
+        {
+          "type": "text",
+          "id": "question7",
+          "label": "Question 7"
+        },
+        {
+          "type": "textarea",
+          "id": "answer7",
+          "label": "Answer 7"
+        },
+        {
+          "type": "text",
+          "id": "question8",
+          "label": "Question 8"
+        },
+        {
+          "type": "textarea",
+          "id": "answer8",
+          "label": "Answer 8"
+        },
+        {
+          "type": "text",
+          "id": "question9",
+          "label": "Question 9"
+        },
+        {
+          "type": "textarea",
+          "id": "answer9",
+          "label": "Answer 9"
+        },
+        {
+          "type": "text",
+          "id": "question10",
+          "label": "Question 10"
+        },
+        {
+          "type": "textarea",
+          "id": "answer10",
+          "label": "Answer 10"
+        }
+      ]
+    },
+    {
+      "type": "contactmessage",
+      "name": "Contact Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "message",
+          "label": "Contact Message",
+          "default": "If you have any other questions, please feel free to contact us!"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Customer Section",
+      "blocks": [
+        {
+          "type": "faqcategory",
+          "settings": {
+            "categorytitle": "Customization & OEM",
+            "question1": "1. Can I customize the size, color, or accessories of the equipment?",
+            "answer1": "Yes, we support customization for size, color, and various accessories according to your needs.",
+            "question2": "2. Do you offer private labeling or custom logo branding?",
+            "answer2": "Yes, we can apply your brand logo to the equipment as requested."
+          }
+        },
+        {
+          "type": "contactmessage",
+          "settings": {
+            "message": "If you have any other questions, please feel free to contact us!"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
