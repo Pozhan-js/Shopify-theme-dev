@@ -1,8 +1,8 @@
 <style>
   .faq-section {
-    background-color: #f5f5f5;
-    padding: 60px 20px;
-    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    padding: 80px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
   .faq-container {
@@ -11,7 +11,11 @@
   }
 
   .faq-category {
-    margin-bottom: 60px;
+    margin-bottom: 80px;
+    background-color: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   }
 
   .faq-category:last-child {
@@ -19,45 +23,58 @@
   }
 
   .faq-title {
-    font-size: 32px;
-    font-weight: bold;
+    font-size: 36px;
+    font-weight: 700;
     color: #333;
-    margin-bottom: 30px;
+    margin: 0;
+    padding: 40px 50px 30px;
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+    position: relative;
     line-height: 1.2;
   }
 
+  .faq-content {
+    padding: 40px 50px 50px;
+  }
+
   .faq-item {
-    margin-bottom: 25px;
+    margin-bottom: 40px;
+  }
+
+  .faq-item:last-child {
+    margin-bottom: 0;
   }
 
   .faq-question {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c2c2c;
+    margin-bottom: 16px;
     line-height: 1.4;
   }
 
   .faq-answer {
     font-size: 16px;
-    color: #666;
-    line-height: 1.5;
+    color: #555;
+    line-height: 1.6;
     margin-left: 0;
   }
 
   .faq-contact-message {
     text-align: center;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 50px;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid #f8d7da;
   }
 
   .faq-contact-message p {
-    font-size: 18px;
+    font-size: 20px;
     color: #333;
-    font-weight: 500;
+    font-weight: 600;
     margin: 0;
+    line-height: 1.4;
   }
 
   @media (max-width: 768px) {
@@ -65,25 +82,39 @@
       padding: 40px 15px;
     }
 
+    .faq-category {
+      margin-bottom: 40px;
+      border-radius: 12px;
+    }
+
     .faq-title {
-      font-size: 24px;
-      margin-bottom: 20px;
+      font-size: 28px;
+      padding: 30px 25px 20px;
+    }
+
+    .faq-content {
+      padding: 30px 25px 35px;
+    }
+
+    .faq-item {
+      margin-bottom: 30px;
     }
 
     .faq-question {
-      font-size: 15px;
+      font-size: 16px;
+      margin-bottom: 12px;
     }
 
     .faq-answer {
       font-size: 15px;
     }
 
-    .faq-category {
-      margin-bottom: 40px;
+    .faq-contact-message {
+      padding: 35px 25px;
     }
 
     .faq-contact-message p {
-      font-size: 16px;
+      font-size: 18px;
     }
   }
 </style>
@@ -95,22 +126,21 @@
         <div class="faq-category">
           <h2 class="faq-title">{{ block.settings.category_title }}</h2>
 
-          {% assign faq_data = block.settings.faqs | strip %}
-          {% if faq_data != blank %}
-            {% assign faq_items = faq_data | remove: '[' | remove: ']' | split: '}, {' %}
-            {% for item in faq_items %}
-              {% assign clean_item = item | remove: '{' | remove: '}' %}
-              {% assign parts = clean_item | split: ', "answer": "' %}
-              {% if parts.size == 2 %}
-                {% assign question = parts[0] | remove: '"question": "' | remove: '"' %}
-                {% assign answer = parts[1] | remove: '"' %}
+          <div class="faq-content">
+            {% for i in (1..20) %}
+              {% assign question_key = 'question_' | append: i %}
+              {% assign answer_key = 'answer_' | append: i %}
+              {% assign question = block.settings[question_key] %}
+              {% assign answer = block.settings[answer_key] %}
+
+              {% if question != blank and answer != blank %}
                 <div class="faq-item">
                   <div class="faq-question">{{ question }}</div>
                   <div class="faq-answer">{{ answer }}</div>
                 </div>
               {% endif %}
             {% endfor %}
-          {% endif %}
+          </div>
         </div>
       {% elsif block.type == 'contact_message' %}
         <div class="faq-category">
@@ -143,14 +173,107 @@
           "type": "text",
           "id": "category_title",
           "label": "Category Title",
-          "default": "Category Title"
+          "default": "FAQ Category"
+        },
+        {
+          "type": "text",
+          "id": "question_1",
+          "label": "Question 1"
         },
         {
           "type": "textarea",
-          "id": "faqs",
-          "label": "FAQ Items (JSON format)",
-          "info": "JSON format: [{\"question\": \"Question?\", \"answer\": \"Answer.\"}]",
-          "default": "[{\"question\": \"Sample Question?\", \"answer\": \"Sample Answer.\"}]"
+          "id": "answer_1",
+          "label": "Answer 1"
+        },
+        {
+          "type": "text",
+          "id": "question_2",
+          "label": "Question 2"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_2",
+          "label": "Answer 2"
+        },
+        {
+          "type": "text",
+          "id": "question_3",
+          "label": "Question 3"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_3",
+          "label": "Answer 3"
+        },
+        {
+          "type": "text",
+          "id": "question_4",
+          "label": "Question 4"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_4",
+          "label": "Answer 4"
+        },
+        {
+          "type": "text",
+          "id": "question_5",
+          "label": "Question 5"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_5",
+          "label": "Answer 5"
+        },
+        {
+          "type": "text",
+          "id": "question_6",
+          "label": "Question 6"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_6",
+          "label": "Answer 6"
+        },
+        {
+          "type": "text",
+          "id": "question_7",
+          "label": "Question 7"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_7",
+          "label": "Answer 7"
+        },
+        {
+          "type": "text",
+          "id": "question_8",
+          "label": "Question 8"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_8",
+          "label": "Answer 8"
+        },
+        {
+          "type": "text",
+          "id": "question_9",
+          "label": "Question 9"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_9",
+          "label": "Answer 9"
+        },
+        {
+          "type": "text",
+          "id": "question_10",
+          "label": "Question 10"
+        },
+        {
+          "type": "textarea",
+          "id": "answer_10",
+          "label": "Answer 10"
         }
       ]
     },
@@ -175,21 +298,62 @@
           "type": "faq_category",
           "settings": {
             "category_title": "Customization & OEM",
-            "faqs": "[{\"question\": \"1. Can I customize the size, color, or accessories of the equipment?\", \"answer\": \"Yes, we support customization for size, color, and various accessories according to your needs.\"}, {\"question\": \"2. Do you offer private labeling or custom logo branding?\", \"answer\": \"Yes, we can apply your brand logo to the equipment as requested.\"}, {\"question\": \"3. What is the minimum order quantity (MOQ) for custom orders?\", \"answer\": \"MOQ for customized products is typically 50 units, depending on the model. Larger quantities offer better pricing.\"}, {\"question\": \"4. Can I request a sample before placing a bulk order? What is the sample cost?\", \"answer\": \"Yes, samples are available. The sample price is usually 1.5-2 times the bulk unit price and depends on the specific model.\"}, {\"question\": \"5. Can you manufacture according to our design or provided drawings?\", \"answer\": \"Yes, we welcome production based on your designs or technical drawings.\"}]"
+            "question_1": "1. Can I customize the size, color, or accessories of the equipment?",
+            "answer_1": "Yes, we support customization for size, color, and various accessories according to your needs.",
+            "question_2": "2. Do you offer private labeling or custom logo branding?",
+            "answer_2": "Yes, we can apply your brand logo to the equipment as requested.",
+            "question_3": "3. What is the minimum order quantity (MOQ) for custom orders?",
+            "answer_3": "MOQ for customized products is typically 50 units, depending on the model. Larger quantities offer better pricing.",
+            "question_4": "4. Can I request a sample before placing a bulk order? What is the sample cost?",
+            "answer_4": "Yes, samples are available. The sample price is usually 1.5-2 times the bulk unit price and depends on the specific model.",
+            "question_5": "5. Can you manufacture according to our design or provided drawings?",
+            "answer_5": "Yes, we welcome production based on your designs or technical drawings."
           }
         },
         {
           "type": "faq_category",
           "settings": {
             "category_title": "Factory & Certification",
-            "faqs": "[{\"question\": \"6. Do you have CE, ISO, RoHS, or other international certifications?\", \"answer\": \"Yes, our products are certified with CE, ISO, RoHS, and other relevant international standards.\"}, {\"question\": \"7. Can I visit your factory or arrange a video tour?\", \"answer\": \"Yes, you're welcome to visit our facility in person or schedule a video tour.\"}]"
+            "question_1": "6. Do you have CE, ISO, RoHS, or other international certifications?",
+            "answer_1": "Yes, our products are certified with CE, ISO, RoHS, and other relevant international standards.",
+            "question_2": "7. Can I visit your factory or arrange a video tour?",
+            "answer_2": "Yes, you're welcome to visit our facility in person or schedule a video tour."
           }
         },
         {
           "type": "faq_category",
           "settings": {
             "category_title": "Order & Delivery",
-            "faqs": "[{\"question\": \"8. What is your typical production lead time?\", \"answer\": \"Lead time is usually 20-30 days, depending on your order size and customization requirements.\"}, {\"question\": \"9. Can I place a mixed order (e.g., Reformers, Chairs, and Accessories in one order)?\", \"answer\": \"Yes, we support mixed orders.\"}, {\"question\": \"10. Do you handle urgent or time-sensitive orders?\", \"answer\": \"Yes, we do our best to accommodate urgent and time-sensitive orders.\"}]"
+            "question_1": "8. What is your typical production lead time?",
+            "answer_1": "Lead time is usually 20-30 days, depending on your order size and customization requirements.",
+            "question_2": "9. Can I place a mixed order (e.g., Reformers, Chairs, and Accessories in one order)?",
+            "answer_2": "Yes, we support mixed orders.",
+            "question_3": "10. Do you handle urgent or time-sensitive orders?",
+            "answer_3": "Yes, we do our best to accommodate urgent and time-sensitive orders."
+          }
+        },
+        {
+          "type": "faq_category",
+          "settings": {
+            "category_title": "Warranty & Support",
+            "question_1": "11. What is your warranty policy?",
+            "answer_1": "10-year warranty covers the Pilates machine frame; other parts are covered for 2 years.",
+            "question_2": "12. What if I receive damaged or defective products?",
+            "answer_2": "All items are inspected before shipping. If damages occur due to shipping or unpacking at your location, please handle appropriately. For ongoing customers, we can provide replacement parts with your next order.",
+            "question_3": "13. Do you supply spare parts or maintenance kits?",
+            "answer_3": "We can include requested spare parts in subsequent orders.",
+            "question_4": "14. Do you provide technical support or installation guidance?",
+            "answer_4": "Yes, we provide installation manuals or installation videos. If you encounter any issues during installation, please feel free to contact our after-sales support team for further assistance."
+          }
+        },
+        {
+          "type": "faq_category",
+          "settings": {
+            "category_title": "Business Partnership",
+            "question_1": "15. Do you work with distributors or resellers?",
+            "answer_1": "Yes, we welcome collaboration with distributors and resellers.",
+            "question_2": "16. Can I obtain exclusive rights for my country or region?",
+            "answer_2": "We offer style-based exclusivity per country/region. If a distributor holds exclusivity for a certain model in a region, other customers there will not be able to purchase the same model, but may purchase other models."
           }
         },
         {
