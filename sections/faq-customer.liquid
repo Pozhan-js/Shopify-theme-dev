@@ -1,0 +1,205 @@
+<style>
+  .faq-section {
+    background-color: #f5f5f5;
+    padding: 60px 20px;
+    font-family: Arial, sans-serif;
+  }
+
+  .faq-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .faq-category {
+    margin-bottom: 60px;
+  }
+
+  .faq-category:last-child {
+    margin-bottom: 0;
+  }
+
+  .faq-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+
+  .faq-item {
+    margin-bottom: 25px;
+  }
+
+  .faq-question {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .faq-answer {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    margin-left: 0;
+  }
+
+  .faq-contact-message {
+    text-align: center;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .faq-contact-message p {
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .faq-section {
+      padding: 40px 15px;
+    }
+
+    .faq-title {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    .faq-question {
+      font-size: 15px;
+    }
+
+    .faq-answer {
+      font-size: 15px;
+    }
+
+    .faq-category {
+      margin-bottom: 40px;
+    }
+
+    .faq-contact-message p {
+      font-size: 16px;
+    }
+  }
+</style>
+
+<div class="faq-section">
+  <div class="faq-container">
+    {% for block in section.blocks %}
+      {% if block.type == 'faq_category' %}
+        <div class="faq-category">
+          <h2 class="faq-title">{{ block.settings.category_title }}</h2>
+
+          {% assign faq_data = block.settings.faqs | strip %}
+          {% if faq_data != blank %}
+            {% assign faq_items = faq_data | remove: '[' | remove: ']' | split: '}, {' %}
+            {% for item in faq_items %}
+              {% assign clean_item = item | remove: '{' | remove: '}' %}
+              {% assign parts = clean_item | split: ', "answer": "' %}
+              {% if parts.size == 2 %}
+                {% assign question = parts[0] | remove: '"question": "' | remove: '"' %}
+                {% assign answer = parts[1] | remove: '"' %}
+                <div class="faq-item">
+                  <div class="faq-question">{{ question }}</div>
+                  <div class="faq-answer">{{ answer }}</div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      {% elsif block.type == 'contact_message' %}
+        <div class="faq-category">
+          <div class="faq-contact-message">
+            <p>{{ block.settings.message }}</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "FAQ Section",
+  "tag": "section",
+  "class": "faq-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "FAQ Section Settings"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_category",
+      "name": "FAQ Category",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category_title",
+          "label": "Category Title",
+          "default": "Category Title"
+        },
+        {
+          "type": "textarea",
+          "id": "faqs",
+          "label": "FAQ Items (JSON format)",
+          "info": "JSON format: [{\"question\": \"Question?\", \"answer\": \"Answer.\"}]",
+          "default": "[{\"question\": \"Sample Question?\", \"answer\": \"Sample Answer.\"}]"
+        }
+      ]
+    },
+    {
+      "type": "contact_message",
+      "name": "Contact Message",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "message",
+          "label": "Contact Message",
+          "default": "If you have any other questions, please feel free to contact us!"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Section",
+      "blocks": [
+        {
+          "type": "faq_category",
+          "settings": {
+            "category_title": "Customization & OEM",
+            "faqs": "[{\"question\": \"1. Can I customize the size, color, or accessories of the equipment?\", \"answer\": \"Yes, we support customization for size, color, and various accessories according to your needs.\"}, {\"question\": \"2. Do you offer private labeling or custom logo branding?\", \"answer\": \"Yes, we can apply your brand logo to the equipment as requested.\"}, {\"question\": \"3. What is the minimum order quantity (MOQ) for custom orders?\", \"answer\": \"MOQ for customized products is typically 50 units, depending on the model. Larger quantities offer better pricing.\"}, {\"question\": \"4. Can I request a sample before placing a bulk order? What is the sample cost?\", \"answer\": \"Yes, samples are available. The sample price is usually 1.5-2 times the bulk unit price and depends on the specific model.\"}, {\"question\": \"5. Can you manufacture according to our design or provided drawings?\", \"answer\": \"Yes, we welcome production based on your designs or technical drawings.\"}]"
+          }
+        },
+        {
+          "type": "faq_category",
+          "settings": {
+            "category_title": "Factory & Certification",
+            "faqs": "[{\"question\": \"6. Do you have CE, ISO, RoHS, or other international certifications?\", \"answer\": \"Yes, our products are certified with CE, ISO, RoHS, and other relevant international standards.\"}, {\"question\": \"7. Can I visit your factory or arrange a video tour?\", \"answer\": \"Yes, you're welcome to visit our facility in person or schedule a video tour.\"}]"
+          }
+        },
+        {
+          "type": "faq_category",
+          "settings": {
+            "category_title": "Order & Delivery",
+            "faqs": "[{\"question\": \"8. What is your typical production lead time?\", \"answer\": \"Lead time is usually 20-30 days, depending on your order size and customization requirements.\"}, {\"question\": \"9. Can I place a mixed order (e.g., Reformers, Chairs, and Accessories in one order)?\", \"answer\": \"Yes, we support mixed orders.\"}, {\"question\": \"10. Do you handle urgent or time-sensitive orders?\", \"answer\": \"Yes, we do our best to accommodate urgent and time-sensitive orders.\"}]"
+          }
+        },
+        {
+          "type": "contact_message",
+          "settings": {
+            "message": "If you have any other questions, please feel free to contact us!"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
