@@ -1,297 +1,570 @@
 <!-- Products Grid Section - 可后台编辑的产品展示 -->
 <div class="products-grid-section">
-    <div class="section-container">
-        {% if section.settings.show_title %}
-            <div class="section-header">
-                <h2 class="section-title" style="color: {{ section.settings.title_color }};">
-                    {{ section.settings.title | default: '全部商品' }}
-                </h2>
-                {% if section.settings.subtitle != blank %}
-                    <p class="section-subtitle">{{ section.settings.subtitle }}</p>
-                {% endif %}
-            </div>
-        {% endif %}
+  <div class="section-container">
+    <div class="section-top-row section-align-{{ section.settings.layout_alignment }}">
+      {% if section.settings.show_title %}
+        <div class="section-header">
+          <h2 class="section-title" style="color: {{ section.settings.title_color }};">
+            {{ section.settings.title | default: '全部商品' }}
+          </h2>
+          {% if section.settings.subtitle != blank %}
+            <p class="section-subtitle">{{ section.settings.subtitle }}</p>
+          {% endif %}
+        </div>
+      {% endif %}
 
-        {% assign products_to_show = section.settings.products_per_page | default: 20 %}
-        {% assign collection_handle = section.settings.collection | default: 'all' %}
-        {% assign target_collection = collections[collection_handle] %}
-
-        {% if target_collection and target_collection.products.size > 0 %}
-            <div class="products-grid" 
-                 style="grid-template-columns: repeat(auto-fill, minmax({{ section.settings.product_width }}px, 1fr));">
-                
-                {% for product in target_collection.products limit: products_to_show %}
-                    <div class="product-card">
-                        <div class="product-image-container">
-                            <a href="{{ product.url }}" class="product-link">
-                                {% if product.featured_image %}
-                                    <img src="{{ product.featured_image | image_url: width: 220, height: 220, crop: 'center' }}" 
-                                         alt="{{ product.title }}" 
-                                         class="product-image"
-                                         loading="lazy">
-                                {% else %}
-                                    <div class="placeholder-image">
-                                        <span>🥐</span>
-                                    </div>
-                                {% endif %}
-                            </a>
-                        </div>
-                        
-                        <div class="product-info">
-                            <h3 class="product-title">
-                                <a href="{{ product.url }}">{{ product.title | default: '商品名称' }}</a>
-                            </h3>
-                            
-                            {% if section.settings.show_add_to_cart %}
-                                <a href="{{ product.url }}" class="view-product-btn">
-                                    {{ section.settings.add_to_cart_text | default: '查看详情' }}
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            
-            {% if section.settings.show_view_more and target_collection.products.size > products_to_show %}
-                <div class="view-more">
-                    <a href="{{ target_collection.url }}" class="view-more-btn">
-                        {{ section.settings.view_more_text | default: '查看更多商品' }}
-                    </a>
-                </div>
-            {% endif %}
-        {% else %}
-            <div class="empty-state">
-                <div class="empty-icon">🥐</div>
-                <h3>{{ section.settings.empty_title | default: '暂无商品' }}</h3>
-                <p>{{ section.settings.empty_message | default: '我们正在上架更多美味商品，敬请期待！' }}</p>
-                {% if section.settings.show_empty_button %}
-                    <a href="{{ section.settings.empty_button_link | default: '/' }}" class="back-home-btn">
-                        {{ section.settings.empty_button_text | default: '返回首页' }}
-                    </a>
-                {% endif %}
-            </div>
-        {% endif %}
+      {% if section.settings.enable_difficulty_filter %}
+        <div class="difficulty-filter">
+          <label class="filter-label">按难度筛选：</label>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-difficulty="all">全部</button>
+            <button class="filter-btn" data-difficulty="easy">简单</button>
+            <button class="filter-btn" data-difficulty="medium">中等</button>
+            <button class="filter-btn" data-difficulty="hard">困难</button>
+          </div>
+        </div>
+      {% endif %}
     </div>
+
+    {% assign products_to_show = section.settings.products_per_page | default: 20 %}
+    {% assign collection_handle = section.settings.collection | default: 'all' %}
+    {% assign target_collection = collections[collection_handle] %}
+
+    {% if target_collection and target_collection.products.size > 0 %}
+      <div
+        class="products-grid"
+        style="grid-template-columns: repeat(auto-fill, minmax({{ section.settings.product_width }}px, 1fr));"
+        data-difficulty-filter="all"
+      >
+        {% for product in target_collection.products limit: products_to_show %}
+          {% assign difficulty = 'easy' %}
+          {% if product.variants.size > 0 %}
+            {% assign first_variant = product.variants.first %}
+            {% assign option1_value = first_variant.option1 | default: '' %}
+            {% assign numeric_value = 1 %}
+            {% if option1_value contains '1' %}
+              {% assign numeric_value = 1 %}
+            {% elsif option1_value contains '2' %}
+              {% assign numeric_value = 2 %}
+            {% elsif option1_value contains '3' %}
+              {% assign numeric_value = 3 %}
+            {% elsif option1_value contains '4' %}
+              {% assign numeric_value = 4 %}
+            {% elsif option1_value contains '5' %}
+              {% assign numeric_value = 5 %}
+            {% else %}
+              {% assign numeric_value = 1 %}
+            {% endif %}
+            {% case numeric_value %}
+              {% when 1, 2 %}
+                {% assign difficulty = 'easy' %}
+              {% when 3 %}
+                {% assign difficulty = 'medium' %}
+              {% when 4, 5 %}
+                {% assign difficulty = 'hard' %}
+              {% else %}
+                {% assign difficulty = 'easy' %}
+            {% endcase %}
+          {% endif %}
+          <div class="product-card" data-difficulty="{{ difficulty }}">
+            <div class="product-image-container">
+              <a href="{{ product.url }}" class="product-link">
+                {% if product.featured_image %}
+                  <img
+                    src="{{ product.featured_image | image_url: width: 220, height: 220, crop: 'center' }}"
+                    alt="{{ product.title }}"
+                    class="product-image"
+                    loading="lazy"
+                    width="220"
+                    height="220"
+                  >
+                {% else %}
+                  <div class="placeholder-image">
+                    <span>🥐</span>
+                  </div>
+                {% endif %}
+              </a>
+              {% if section.settings.show_difficulty_badge %}
+                <div class="difficulty-badge difficulty-{{ difficulty }}">
+                  {% case difficulty %}
+                    {% when 'easy' -%}
+                      简单
+                    {% when 'medium' -%}
+                      中等
+                    {% when 'hard' -%}
+                      困难
+                    {% else -%}
+                      简单
+                  {% endcase %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="product-info">
+              <h3 class="product-title">
+                <a href="{{ product.url }}">{{ product.title | default: '商品名称' }}</a>
+              </h3>
+
+              {% if section.settings.show_add_to_cart %}
+                <a href="{{ product.url }}" class="view-product-btn">
+                  {{ section.settings.add_to_cart_text | default: '查看详情' }}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if section.settings.show_view_more and target_collection.products.size > products_to_show %}
+        <div class="view-more">
+          <a href="{{ target_collection.url }}" class="view-more-btn">
+            {{ section.settings.view_more_text | default: '查看更多商品' }}
+          </a>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🥐</div>
+        <h3>{{ section.settings.empty_title | default: '暂无商品' }}</h3>
+        <p>{{ section.settings.empty_message | default: '我们正在上架更多美味商品，敬请期待！' }}</p>
+        {% if section.settings.show_empty_button %}
+          <a href="{{ section.settings.empty_button_link | default: '/' }}" class="back-home-btn">
+            {{ section.settings.empty_button_text | default: '返回首页' }}
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
 </div>
 
 <style>
+  .products-grid-section {
+    padding: 40px 20px;
+  }
+
+  .section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-top-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .section-header {
+    margin-bottom: 0;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .section-title {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 16px;
+    color: #666;
+  }
+
+  .products-grid {
+    display: grid;
+    gap: 20px;
+  }
+
+  .product-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .product-image-container {
+    position: relative;
+    padding-bottom: 100%;
+    overflow: hidden;
+    background: #fafafa;
+  }
+
+  .product-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+  .product-card:hover .product-image {
+    transform: scale(1.03);
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    color: #d8a26c;
+    font-size: 24px;
+  }
+
+  .product-info {
+    padding: 12px;
+  }
+
+  .product-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    height: 36px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .product-title a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .product-title a:hover {
+    color: #d8a26c;
+  }
+
+  .view-product-btn {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    background: #8b4513;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .view-product-btn:hover {
+    background: #654321;
+  }
+
+  .view-more {
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .view-more-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #d8a26c;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+
+  .view-more-btn:hover {
+    background: #c6925a;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .empty-state h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    color: #666;
+    margin-bottom: 16px;
+  }
+
+  .back-home-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: #d8a26c;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+
+  .back-home-btn:hover {
+    background: #c6925a;
+  }
+
+  .section-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .section-align-left {
+    justify-content: space-between;
+  }
+
+  .section-align-center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .section-align-right {
+    justify-content: space-between;
+    flex-direction: row-reverse;
+  }
+
+  .section-header {
+    margin-bottom: 0;
+    text-align: left;
+  }
+
+  .section-align-center .section-header {
+    text-align: center;
+  }
+
+  .section-align-right .section-header {
+    text-align: right;
+  }
+
+  .difficulty-filter {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  .filter-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #666;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: #d8a26c;
+    color: #d8a26c;
+  }
+
+  .filter-btn.active {
+    background: #d8a26c;
+    border-color: #d8a26c;
+    color: white;
+  }
+
+  .difficulty-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+    z-index: 1;
+  }
+
+  .difficulty-easy {
+    background: #4caf50;
+  }
+
+  .difficulty-medium {
+    background: #ff9800;
+  }
+
+  .difficulty-hard {
+    background: #f44336;
+  }
+
+  .product-card[data-difficulty] {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .product-card.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
     .products-grid-section {
-        padding: 40px 20px;
+      padding: 30px 15px;
     }
 
-    .section-container {
-        max-width: 1200px;
-        margin: 0 auto;
+    .section-top-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+
+    .section-align-center {
+      align-items: center;
+      text-align: center;
+    }
+
+    .section-align-right {
+      align-items: flex-start;
+      text-align: left;
     }
 
     .section-header {
-        text-align: center;
-        margin-bottom: 40px;
+      text-align: left !important;
+    }
+
+    .section-align-center .section-header {
+      text-align: center !important;
+    }
+
+    .section-align-right .section-header {
+      text-align: right !important;
+    }
+
+    .difficulty-filter {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
     }
 
     .section-title {
-        font-size: 32px;
-        font-weight: 600;
-        margin-bottom: 8px;
+      font-size: 28px;
     }
 
     .section-subtitle {
-        font-size: 16px;
-        color: #666;
+      font-size: 14px;
     }
 
     .products-grid {
-        display: grid;
-        gap: 20px;
-    }
-
-    .product-card {
-        background: #fff;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .product-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    .product-image-container {
-        position: relative;
-        padding-bottom: 100%;
-        overflow: hidden;
-        background: #fafafa;
-    }
-
-    .product-link {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-    }
-
-    .product-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.2s ease;
-    }
-
-    .product-card:hover .product-image {
-        transform: scale(1.03);
-    }
-
-    .placeholder-image {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f5f5f5;
-        color: #D8A26C;
-        font-size: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+      gap: 15px;
     }
 
     .product-info {
-        padding: 12px;
+      padding: 10px;
     }
 
     .product-title {
-        font-size: 14px;
-        font-weight: 500;
-        margin-bottom: 8px;
-        line-height: 1.3;
-        height: 36px;
-        overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+      font-size: 13px;
+      height: 32px;
     }
 
-    .product-title a {
-        color: #333;
-        text-decoration: none;
-    }
-
-    .product-title a:hover {
-        color: #D8A26C;
+    .current-price {
+      font-size: 14px;
     }
 
     .view-product-btn {
-        display: block;
-        width: 100%;
-        padding: 8px 12px;
-        background: #8B4513;
-        color: white;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 4px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+      font-size: 12px;
+      padding: 6px 10px;
     }
 
-    .view-product-btn:hover {
-        background: #654321;
+    .filter-label {
+      font-size: 14px;
     }
 
-    .view-more {
-        text-align: center;
-        margin-top: 40px;
+    .filter-buttons {
+      gap: 6px;
     }
 
-    .view-more-btn {
-        display: inline-block;
-        padding: 12px 30px;
-        background: #D8A26C;
-        color: white;
-        text-decoration: none;
-        border-radius: 20px;
-        font-size: 14px;
-        transition: background-color 0.2s ease;
+    .filter-btn {
+      padding: 6px 12px;
+      font-size: 12px;
     }
-
-    .view-more-btn:hover {
-        background: #c6925a;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-
-    .empty-icon {
-        font-size: 48px;
-        margin-bottom: 16px;
-    }
-
-    .empty-state h3 {
-        font-size: 20px;
-        color: #333;
-        margin-bottom: 8px;
-    }
-
-    .empty-state p {
-        color: #666;
-        margin-bottom: 16px;
-    }
-
-    .back-home-btn {
-        display: inline-block;
-        padding: 10px 24px;
-        background: #D8A26C;
-        color: white;
-        text-decoration: none;
-        border-radius: 20px;
-        font-size: 14px;
-        transition: background-color 0.2s ease;
-    }
-
-    .back-home-btn:hover {
-        background: #c6925a;
-    }
-
-    @media (max-width: 768px) {
-        .products-grid-section {
-            padding: 30px 15px;
-        }
-
-        .section-title {
-            font-size: 28px;
-        }
-
-        .section-subtitle {
-            font-size: 14px;
-        }
-
-        .products-grid {
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
-            gap: 15px;
-        }
-
-        .product-info {
-            padding: 10px;
-        }
-
-        .product-title {
-            font-size: 13px;
-            height: 32px;
-        }
-
-        .current-price {
-            font-size: 14px;
-        }
-
-        .view-product-btn {
-            font-size: 12px;
-            padding: 6px 10px;
-        }
-    }
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const filterSection = document.querySelector('.products-grid-section');
+    if (!filterSection) return;
+
+    const filterButtons = filterSection.querySelectorAll('.filter-btn');
+    const productCards = filterSection.querySelectorAll('.product-card[data-difficulty]');
+    const productsGrid = filterSection.querySelector('.products-grid');
+
+    if (!filterButtons.length || !productCards.length) return;
+
+    filterButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        const selectedDifficulty = this.getAttribute('data-difficulty');
+
+        // 更新按钮状态
+        filterButtons.forEach((btn) => btn.classList.remove('active'));
+        this.classList.add('active');
+
+        // 更新网格筛选状态
+        productsGrid.setAttribute('data-difficulty-filter', selectedDifficulty);
+
+        // 筛选产品
+        productCards.forEach((card) => {
+          const cardDifficulty = card.getAttribute('data-difficulty');
+
+          if (selectedDifficulty === 'all' || cardDifficulty === selectedDifficulty) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+  });
+</script>
 
 {% schema %}
 {
@@ -313,6 +586,26 @@
       "id": "title_color",
       "label": "标题颜色",
       "default": "#D8A26C"
+    },
+    {
+      "type": "select",
+      "id": "layout_alignment",
+      "label": "标题和筛选条件对齐方式",
+      "options": [
+        {
+          "value": "left",
+          "label": "左对齐（标题左，筛选右）"
+        },
+        {
+          "value": "center",
+          "label": "居中对齐"
+        },
+        {
+          "value": "right",
+          "label": "右对齐（标题右，筛选左）"
+        }
+      ],
+      "default": "left"
     },
     {
       "type": "collection",
@@ -396,6 +689,18 @@
       "id": "empty_button_link",
       "label": "空状态按钮链接",
       "default": "/"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_difficulty_filter",
+      "label": "启用难度筛选功能",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_difficulty_badge",
+      "label": "显示难度徽章",
+      "default": true
     }
   ],
   "presets": [
