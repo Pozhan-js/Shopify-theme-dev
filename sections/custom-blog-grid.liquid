@@ -124,9 +124,19 @@
         <!--调试：文章{{ forloop.index }}标题 = {{ article.title }} -->
         <!--调试：文章标签 = {{ article.tags | join: ', ' }} -->
         {% endfor %}
-        {% comment %} {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%} {% endcomment %}
-        <!--调试：filtered_articles = {{ filtered_articles ｜ json }} -->
+        {%- assign downcased_current_tag = current_tag | downcase -%}
+        {%- assign filtered_articles = "" | split: "" -%}
         {%- for article in blog.articles -%}
+          {%- assign article_tags_downcased = article.tags | join: ',' | downcase | split: ',' -%}
+          {%- if article.tags contains current_tag or article_tags_downcased contains downcased_current_tag -%}
+            {%- assign filtered_articles = filtered_articles | concat: [article] -%}
+          {%- endif -%}
+        {%- endfor -%}
+        <!-- 调试：current_tag = {{ current_tag }} -->
+        <!-- 调试：downcased_current_tag = {{ downcased_current_tag }} -->
+        <!-- 调试：filtered_articles数量 = {{ filtered_articles.size }} -->
+        <!--调试：filtered_articles = {{ filtered_articles ｜ json }} -->
+        {%- for article in filtered_articles -%}
           <div class="blog-articles__article article">
             {%- render 'custom-article-card',
               article: article,
