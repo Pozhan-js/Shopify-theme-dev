@@ -212,7 +212,7 @@
   }
 
   .mega-menu-category a {
-    color: #6B7280;
+    color: #161616;
     text-decoration: none;
     font-size: 14px;
     transition: color 0.2s ease;
@@ -496,7 +496,7 @@
       gap: 12px;
     }
 
-    .mega-dropdo5wn-menu {
+    .mega-dropdown-menu {
       width: 100%;
       padding: 16px;
     }
@@ -509,6 +509,11 @@
     .mega-menu-cta {
       grid-column: span 2;
       min-height: 200px;
+    }
+
+    .mega-menu-cta::before {
+      width: 80px;
+      height: 80px;
     }
   }
 
@@ -563,6 +568,11 @@
     .mega-menu-cta {
       grid-column: span 2;
       min-height: 220px;
+    }
+
+    .mega-menu-cta::before {
+      width: 100px;
+      height: 100px;
     }
   }
 
@@ -646,6 +656,11 @@
       grid-column: span 1;
       min-height: 260px;
     }
+
+    .mega-menu-cta::before {
+      width: 110px;
+      height: 110px;
+    }
   }
 
   @media (min-width: 1024px) and (max-width: 1279px) {
@@ -721,6 +736,11 @@
 
     .mega-dropdown-menu {
       padding: 28px;
+    }
+
+    .mega-menu-cta::before {
+      width: 140px;
+      height: 140px;
     }
   }
 
@@ -798,6 +818,11 @@
     .mobile-menu {
       display: none !important;
     }
+
+    .mega-menu-cta::before {
+      width: 180px;
+      height: 180px;
+    }
   }
 
   @media (min-width: 1920px) {
@@ -874,6 +899,23 @@
     .mobile-menu {
       display: none !important;
     }
+
+    .mega-menu-category {
+      margin-bottom: 45px;
+    }
+
+    .mega-menu-category h3 {
+      font-size: 28px;
+    }
+
+    .mega-menu-category a {
+      font-size: 18px;
+    }
+
+    .mega-menu-cta::before {
+      width: 320px;
+      height: 492px;
+    }
   }
 </style>
 
@@ -883,19 +925,19 @@
       <div class="nav-flex">
         <!-- Logo -->
         <div class="logo-container">
-          <a href="{{ routes.root_url }}">
-            {% if section.settings.logo_image %}
+          <a href="{{ routes.rooturl }}">
+            {% if section.settings.logoimage %}
               <div class="logo-image">
-                {% assign logo_size_2x = section.settings.logo_size | default: 48 | times: 2 %}
+                {% assign logosize2x = section.settings.logosize | default: 48 | times: 2 %}
                 <img
-                  src="{{ section.settings.logo_image | img_url: logo_size_2x }}"
-                  alt="{{ section.settings.site_name | default: shop.name }}"
-                  width="{{ section.settings.logo_size | default: 48 }}"
-                  height="{{ section.settings.logo_size | default: 48 }}">
+                  src="{{ section.settings.logoimage | imgurl: logosize2x }}"
+                  alt="{{ section.settings.sitename | default: shop.name }}"
+                  width="{{ section.settings.logosize | default: 48 }}"
+                  height="{{ section.settings.logosize | default: 48 }}">
               </div>
             {% else %}
               <div class="logo-bg">
-                <span>{{ section.settings.logo_text | default: 'XS' }}</span>
+                <span>{{ section.settings.logotext | default: 'XS' }}</span>
               </div>
             {% endif %}
           </a>
@@ -1011,10 +1053,10 @@
           </a>
 
           <!-- 原有的动态菜单作为备用 -->
-          {% assign main_menu_handle = section.settings.main_menu | default: 'main-menu' %}
-          {% assign main_menu = linklists[main_menu_handle] %}
-          {% if main_menu and main_menu.links.size > 0 %}
-            {% for link in main_menu.links %}
+          {% assign mainmenuhandle = section.settings.mainmenu | default: 'main-menu' %}
+          {% assign mainmenu = linklists[mainmenuhandle] %}
+          {% if mainmenu and mainmenu.links.size > 0 %}
+            {% for link in mainmenu.links %}
               <div class="dropdown" style="display: none;">
                 {% if link.title == 'Pilates Equipment' %}
                   <span class="nav-item" style="cursor: pointer;">
@@ -1101,9 +1143,9 @@
                   </span>
                   <div class="dropdown-menu">
                     <div style="padding: 8px 0;">
-                      {% for child_link in link.links %}
-                        <a href="{{ child_link.url }}" class="dropdown-item">
-                          {{ child_link.title | escape }}
+                      {% for childlink in link.links %}
+                        <a href="{{ childlink.url }}" class="dropdown-item">
+                          {{ childlink.title | escape }}
                         </a>
                       {% endfor %}
                     </div>
@@ -1121,8 +1163,8 @@
         <!-- Right Side Actions -->
         <div class="right-actions">
           <!-- Contact Us Button -->
-          <a href="{{ section.settings.contact_link }}" class="contact-badge">
-            <span>{{ section.settings.contact_text | default: 'Contact Us' | escape }}</span>
+          <a href="{{ section.settings.contactlink }}" class="contact-badge">
+            <span>{{ section.settings.contacttext | default: 'Contact Us' | escape }}</span>
             <div class="contact-arrow-icon">
               <svg
                 viewBox="0 0 10.417 10.3762"
@@ -1207,8 +1249,8 @@
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
       <div class="mobile-menu-content">
-        {% if main_menu and main_menu.links.size > 0 %}
-          {% for link in main_menu.links %}
+        {% if mainmenu and mainmenu.links.size > 0 %}
+          {% for link in mainmenu.links %}
             <div>
               {% if link.links.size > 0 %}
                 <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
@@ -1218,9 +1260,9 @@
                   class="mobile-submenu"
                   id="submenu{{ forloop.index }}"
                   style="display: none;">
-                  {% for child_link in link.links %}
-                    <a href="{{ child_link.url }}" class="mobile-submenu-item">
-                      {{ child_link.title | escape }}
+                  {% for childlink in link.links %}
+                    <a href="{{ childlink.url }}" class="mobile-submenu-item">
+                      {{ childlink.title | escape }}
                     </a>
                   {% endfor %}
                 </div>
@@ -1233,8 +1275,8 @@
           {% endfor %}
         {% endif %}
 
-        <a href="{{ section.settings.contact_link }}" class="mobile-contact-badge">
-          <span>{{ section.settings.contact_text | default: 'Contact Us' | escape }}</span>
+        <a href="{{ section.settings.contactlink }}" class="mobile-contact-badge">
+          <span>{{ section.settings.contacttext | default: 'Contact Us' | escape }}</span>
           <div class="contact-arrow-icon">
             <svg
               viewBox="0 0 10.417 10.3762"
@@ -1314,27 +1356,27 @@ function toggleSearch() {
     },
     {
       "type": "image_picker",
-      "id": "logo_image",
+      "id": "logoimage",
       "label": "Logo Image",
       "info": "Upload a logo image (recommended size: 64x64px). If no image is uploaded, logo text will be displayed instead."
     },
     {
       "type": "text",
-      "id": "site_name",
+      "id": "sitename",
       "label": "Site Name",
       "default": "XSPilates",
       "info": "Display name for your site (leave empty to use shop name)"
     },
     {
       "type": "text",
-      "id": "logo_text",
+      "id": "logotext",
       "label": "Logo Text",
       "default": "XS",
       "info": "Short text displayed in logo (only shown if no logo image is uploaded)"
     },
     {
       "type": "range",
-      "id": "logo_size",
+      "id": "logosize",
       "label": "Logo Size",
       "min": 32,
       "max": 80,
@@ -1349,27 +1391,27 @@ function toggleSearch() {
     },
     {
       "type": "link_list",
-      "id": "main_menu",
+      "id": "mainmenu",
       "label": "Main Menu",
       "default": "main-menu",
       "info": "Select the menu to display in the navigation"
     },
     {
       "type": "text",
-      "id": "contact_text",
+      "id": "contacttext",
       "label": "Contact Button Text",
       "default": "Contact Us"
     },
     {
       "type": "text",
-      "id": "contact_number",
+      "id": "contactnumber",
       "label": "Contact Badge Number",
       "default": "21",
       "info": "Number displayed in contact badge"
     },
     {
       "type": "url",
-      "id": "contact_link",
+      "id": "contactlink",
       "label": "Contact Button Link"
     },
     {
@@ -1378,19 +1420,19 @@ function toggleSearch() {
     },
     {
       "type": "color",
-      "id": "nav_background_color",
+      "id": "navbackgroundcolor",
       "label": "Navigation Background Color",
       "default": "rgba(255, 255, 255, 0.08)"
     },
     {
       "type": "color",
-      "id": "nav_text_color",
+      "id": "navtextcolor",
       "label": "Navigation Text Color",
       "default": "#FFFFFF"
     },
     {
       "type": "color",
-      "id": "contact_button_color",
+      "id": "contactbuttoncolor",
       "label": "Contact Button Color",
       "default": "#DC2626"
     }
@@ -1399,7 +1441,7 @@ function toggleSearch() {
     {
       "name": "Header Navigation",
       "settings": {
-        "main_menu": "main-menu"
+        "mainmenu": "main-menu"
       }
     }
   ]
