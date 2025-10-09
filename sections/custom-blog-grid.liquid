@@ -100,43 +100,76 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+{% assign current_tag = request.path | split: 'tagged/' | last %}
 <div class="blog-grid">
   <div class="blog-grid__header">
-    <h2 class="blog-grid__title">Blog</h2>
-    <!-- 调试输出1-blocks: {{ section.blocks ｜ json }} -->
+    <h2 class="blog-grid__title">
+      {% if current_tag != blank %}
+        {{ current_tag | capitalize }}
+      {% else %}
+        Blog
+      {% endif %}
+    </h2>
     <div class="blog-tags">
-      <div class="blog-tag active">All</div>
-      <!-- 调试输出2-all_tags: {{ blog.all_tags | join: ', ' }} -->
+      <a href="{{ blog.url }}" class="blog-tag {% if current_tag == blank %}active{% endif %}">All</a>
       {% for tag in blog.all_tags %}
-        <div class="blog-tag">{{ tag }}</div>
+        <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-tag {% if current_tag == tag %}active{% endif %}">
+          {{ tag }}
+        </a>
       {% endfor %}
     </div>
   </div>
   
   <div class="blog-grid__items">
-      <!-- 调试输出3-articles: {{ blog.articles | join: ', ' }} -->
-    {% for article in blog.articles %}
-      <a href="{{ article.url }}" class="article-card">
-        {% if article.image %}
-          <div class="article-card__image-container">
-            <img
-              class="article-card__image"
-              src="{{ article.image | img_url: '800x600' }}"
-              alt="{{ article.title | escape }}"
-              loading="lazy"
-              width="800"
-              height="600"
-            >
-          </div>
-        {% endif %}
-        
-        <div class="article-card__info">
-          {% if article.tags.size > 0 %}
-            <div class="article-card__tag">{{ article.tags.first }}</div>
+    {%- if current_tag != blank -%}
+      {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%}
+      {%- for article in filtered_articles -%}
+        <a href="{{ article.url }}" class="article-card">
+          {% if article.image %}
+            <div class="article-card__image-container">
+              <img
+                class="article-card__image"
+                src="{{ article.image | img_url: '800x600' }}"
+                alt="{{ article.title | escape }}"
+                loading="lazy"
+                width="800"
+                height="600"
+              >
+            </div>
           {% endif %}
-          <h3 class="article-card__title">{{ article.title }}</h3>
-        </div>
-      </a>
-    {% endfor %}
+          
+          <div class="article-card__info">
+            {% if article.tags.size > 0 %}
+              <div class="article-card__tag">{{ article.tags.first }}</div>
+            {% endif %}
+            <h3 class="article-card__title">{{ article.title }}</h3>
+          </div>
+        </a>
+      {%- endfor -%}
+    {%- else -%}
+      {%- for article in blog.articles -%}
+        <a href="{{ article.url }}" class="article-card">
+          {% if article.image %}
+            <div class="article-card__image-container">
+              <img
+                class="article-card__image"
+                src="{{ article.image | img_url: '800x600' }}"
+                alt="{{ article.title | escape }}"
+                loading="lazy"
+                width="800"
+                height="600"
+              >
+            </div>
+          {% endif %}
+          
+          <div class="article-card__info">
+            {% if article.tags.size > 0 %}
+              <div class="article-card__tag">{{ article.tags.first }}</div>
+            {% endif %}
+            <h3 class="article-card__title">{{ article.title }}</h3>
+          </div>
+        </a>
+      {%- endfor -%}
+    {%- endif -%}
   </div>
 </div>
