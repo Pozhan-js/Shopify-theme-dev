@@ -1054,183 +1054,148 @@
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          <!-- 临时测试菜单 - 如果没有配置菜单则显示默认菜单 -->
-          <div class="dropdown">
-            <span class="nav-item" style="cursor: pointer;">
-              <span>Pilates Equipment</span>
-              <span class="dropdown-arrow"></span>
-            </span>
-            <div class="mega-dropdown-menu">
-              <div class="mega-menu-grid">
-                <div class="mega-menu-column">
-                  <div class="mega-menu-category">
-                    <h3>Reformer</h3>
-                    <ul>
-                      <li><a href="#">Pilates Reformer XSRF100</a></li>
-                      <li><a href="#">Aluminum Reformer XSRF04</a></li>
-                      <li><a href="#">Aluminum Reformer XSRF07</a></li>
-                      <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
-                    </ul>
-                  </div>
-                  <div class="mega-menu-category">
-                    <h3>Pilates Chair</h3>
-                    <ul>
-                      <li><a href="#">Basic Pilates Chair XSCC29</a></li>
-                      <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
-                      <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="mega-menu-column">
-                  <div class="mega-menu-category">
-                    <h3>Ladder Barrel</h3>
-                    <ul>
-                      <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
-                      <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
-                    </ul>
-                  </div>
-                  <div class="mega-menu-category">
-                    <h3>Cadillac</h3>
-                    <ul>
-                      <li><a href="#">Cadillac XSCL19</a></li>
-                      <li><a href="#">Cadillac XSCL01</a></li>
-                    </ul>
-                  </div>
-                  <div class="mega-menu-category">
-                    <h3>Spine Corrector</h3>
-                    <ul>
-                      <li><a href="#">Spine Corrector XSSC43</a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="mega-menu-column">
-                  <div class="mega-menu-category">
-                    <h3>Accessories</h3>
-                    <ul>
-                      <li><a href="#">Padded Wedge XSWD49</a></li>
-                      <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
-                      <li><a href="#">Pilates Ring XSAC04</a></li>
-                      <li><a href="#">Pilates Ball XSAC05</a></li>
-                      <li><a href="#">Resistance Bands XSAC06</a></li>
-                      <li><a href="#">Massage Ball XSAC07</a></li>
-                      <li><a href="#">Small Wedge XSAC08</a></li>
-                    </ul>
-                  </div>
-                </div>
-                <div class="mega-menu-column">
-                  <div class="mega-menu-cta">
-                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
-                  </div>
-                </div>
-              </div>
-              <div class="mega-menu-footer">
-                {% if section.settings.contactfootericon %}
-                  <div class="mega-menu-footer-icon">
-                    <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
-                  </div>
-                {% endif %}
-                <span>CONTACT US</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="dropdown">
-            <span class="nav-item" style="cursor: pointer;">
-              <span>About Us</span>
-              <span class="dropdown-arrow"></span>
-            </span>
-            <div class="dropdown-menu">
-              <div style="padding: 8px 0;">
-                <a href="#" class="dropdown-item">Our Story</a>
-                <a href="#" class="dropdown-item">Team</a>
-                <a href="#" class="dropdown-item">Certifications</a>
-              </div>
-            </div>
-          </div>
-
-          <a href="#" class="nav-item">
-            <span>Training</span>
-          </a>
-
-          <a href="#" class="nav-item">
-            <span>Support</span>
-          </a>
-
-          <a href="#" class="nav-item">
-            <span>News</span>
-          </a>
-
-          <!-- 原有的动态菜单作为备用 -->
           {% assign mainmenuhandle = section.settings.mainmenu | default: 'main-menu' %}
           {% assign mainmenu = linklists[mainmenuhandle] %}
           {% if mainmenu and mainmenu.links.size > 0 %}
             {% for link in mainmenu.links %}
-              <div class="dropdown" style="display: none;">
-                {% if link.title == 'Pilates Equipment' %}
+              <div class="dropdown">
+                {% assign is_mega_menu = false %}
+                {% if section.settings.megamenu_title != blank %}
+                  {% if link.title == section.settings.megamenu_title %}
+                    {% assign is_mega_menu = true %}
+                  {% endif %}
+                {% else %}
+                  {% if link.title == 'Pilates Equipment' %}
+                    {% assign is_mega_menu = true %}
+                  {% endif %}
+                {% endif %}
+                
+                {% if is_mega_menu %}
                   <span class="nav-item" style="cursor: pointer;">
                     <span>{{ link.title | escape }}</span>
                     <span class="dropdown-arrow"></span>
                   </span>
                   <div class="mega-dropdown-menu">
                     <div class="mega-menu-grid">
+                      <!-- Column 1 -->
                       <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Reformer</h3>
-                          <ul>
-                            <li><a href="#">Pilates Reformer XSRF100</a></li>
-                            <li><a href="#">Aluminum Reformer XSRF04</a></li>
-                            <li><a href="#">Aluminum Reformer XSRF07</a></li>
-                            <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Pilates Chair</h3>
-                          <ul>
-                            <li><a href="#">Basic Pilates Chair XSCC29</a></li>
-                            <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
-                            <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
-                          </ul>
-                        </div>
+                        {% if section.settings.category1_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category1_title }}</h3>
+                            <ul>
+                              {% if section.settings.category1_link1_text != blank %}
+                                <li><a href="{{ section.settings.category1_link1_url }}">{{ section.settings.category1_link1_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category1_link2_text != blank %}
+                                <li><a href="{{ section.settings.category1_link2_url }}">{{ section.settings.category1_link2_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category1_link3_text != blank %}
+                                <li><a href="{{ section.settings.category1_link3_url }}">{{ section.settings.category1_link3_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category1_link4_text != blank %}
+                                <li><a href="{{ section.settings.category1_link4_url }}">{{ section.settings.category1_link4_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
+                        {% if section.settings.category2_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category2_title }}</h3>
+                            <ul>
+                              {% if section.settings.category2_link1_text != blank %}
+                                <li><a href="{{ section.settings.category2_link1_url }}">{{ section.settings.category2_link1_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category2_link2_text != blank %}
+                                <li><a href="{{ section.settings.category2_link2_url }}">{{ section.settings.category2_link2_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category2_link3_text != blank %}
+                                <li><a href="{{ section.settings.category2_link3_url }}">{{ section.settings.category2_link3_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
                       </div>
+                      
+                      <!-- Column 2 -->
                       <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Ladder Barrel</h3>
-                          <ul>
-                            <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
-                            <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Cadillac</h3>
-                          <ul>
-                            <li><a href="#">Cadillac XSCL19</a></li>
-                            <li><a href="#">Cadillac XSCL01</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Spine Corrector</h3>
-                          <ul>
-                            <li><a href="#">Spine Corrector XSSC43</a></li>
-                          </ul>
-                        </div>
+                        {% if section.settings.category3_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category3_title }}</h3>
+                            <ul>
+                              {% if section.settings.category3_link1_text != blank %}
+                                <li><a href="{{ section.settings.category3_link1_url }}">{{ section.settings.category3_link1_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category3_link2_text != blank %}
+                                <li><a href="{{ section.settings.category3_link2_url }}">{{ section.settings.category3_link2_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
+                        {% if section.settings.category4_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category4_title }}</h3>
+                            <ul>
+                              {% if section.settings.category4_link1_text != blank %}
+                                <li><a href="{{ section.settings.category4_link1_url }}">{{ section.settings.category4_link1_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category4_link2_text != blank %}
+                                <li><a href="{{ section.settings.category4_link2_url }}">{{ section.settings.category4_link2_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
+                        {% if section.settings.category5_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category5_title }}</h3>
+                            <ul>
+                              {% if section.settings.category5_link1_text != blank %}
+                                <li><a href="{{ section.settings.category5_link1_url }}">{{ section.settings.category5_link1_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
                       </div>
+                      
+                      <!-- Column 3 -->
                       <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Accessories</h3>
-                          <ul>
-                            <li><a href="#">Padded Wedge XSWD49</a></li>
-                            <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
-                            <li><a href="#">Pilates Ring XSAC04</a></li>
-                            <li><a href="#">Pilates Ball XSAC05</a></li>
-                            <li><a href="#">Resistance Bands XSAC06</a></li>
-                            <li><a href="#">Massage Ball XSAC07</a></li>
-                            <li><a href="#">Small Wedge XSAC08</a></li>
-                          </ul>
-                        </div>
+                        {% if section.settings.category6_title != blank %}
+                          <div class="mega-menu-category">
+                            <h3>{{ section.settings.category6_title }}</h3>
+                            <ul>
+                              {% if section.settings.category6_link1_text != blank %}
+                                <li><a href="{{ section.settings.category6_link1_url }}">{{ section.settings.category6_link1_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link2_text != blank %}
+                                <li><a href="{{ section.settings.category6_link2_url }}">{{ section.settings.category6_link2_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link3_text != blank %}
+                                <li><a href="{{ section.settings.category6_link3_url }}">{{ section.settings.category6_link3_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link4_text != blank %}
+                                <li><a href="{{ section.settings.category6_link4_url }}">{{ section.settings.category6_link4_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link5_text != blank %}
+                                <li><a href="{{ section.settings.category6_link5_url }}">{{ section.settings.category6_link5_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link6_text != blank %}
+                                <li><a href="{{ section.settings.category6_link6_url }}">{{ section.settings.category6_link6_text }}</a></li>
+                              {% endif %}
+                              {% if section.settings.category6_link7_text != blank %}
+                                <li><a href="{{ section.settings.category6_link7_url }}">{{ section.settings.category6_link7_text }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                        {% endif %}
                       </div>
+                      
+                      <!-- Column 4 - Image -->
                       <div class="mega-menu-column">
                         <div class="mega-menu-cta">
-                          <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
+                          {% if section.settings.megamenu_image %}
+                            <img src="{{ section.settings.megamenu_image | img_url: '640x984' }}" alt="{{ section.settings.megamenu_image_alt | default: 'Mega Menu Image' }}" />
+                          {% else %}
+                            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Default Pilates Equipment" />
+                          {% endif %}
                         </div>
                       </div>
                     </div>
@@ -1240,7 +1205,7 @@
                           <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
                         </div>
                       {% endif %}
-                      <span>CONTACT US</span>
+                      <span>{{ section.settings.contacttext | default: 'CONTACT US' | escape }}</span>
                     </div>
                   </div>
                 {% elsif link.links.size > 0 %}
@@ -1264,6 +1229,117 @@
                 {% endif %}
               </div>
             {% endfor %}
+          {% else %}
+            <!-- 默认菜单 - 当没有配置菜单时显示 -->
+            <div class="dropdown">
+              <span class="nav-item" style="cursor: pointer;">
+                <span>{{ section.settings.megamenu_title | default: 'Pilates Equipment' }}</span>
+                <span class="dropdown-arrow"></span>
+              </span>
+              <div class="mega-dropdown-menu">
+                <div class="mega-menu-grid">
+                  <!-- Column 1 -->
+                  <div class="mega-menu-column">
+                    <div class="mega-menu-category">
+                      <h3>Reformer</h3>
+                      <ul>
+                        <li><a href="#">Pilates Reformer XSRF100</a></li>
+                        <li><a href="#">Aluminum Reformer XSRF04</a></li>
+                        <li><a href="#">Aluminum Reformer XSRF07</a></li>
+                        <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
+                      </ul>
+                    </div>
+                    <div class="mega-menu-category">
+                      <h3>Pilates Chair</h3>
+                      <ul>
+                        <li><a href="#">Basic Pilates Chair XSCC29</a></li>
+                        <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
+                        <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="mega-menu-column">
+                    <div class="mega-menu-category">
+                      <h3>Ladder Barrel</h3>
+                      <ul>
+                        <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
+                        <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
+                      </ul>
+                    </div>
+                    <div class="mega-menu-category">
+                      <h3>Cadillac</h3>
+                      <ul>
+                        <li><a href="#">Cadillac XSCL19</a></li>
+                        <li><a href="#">Cadillac XSCL01</a></li>
+                      </ul>
+                    </div>
+                    <div class="mega-menu-category">
+                      <h3>Spine Corrector</h3>
+                      <ul>
+                        <li><a href="#">Spine Corrector XSSC43</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="mega-menu-column">
+                    <div class="mega-menu-category">
+                      <h3>Accessories</h3>
+                      <ul>
+                        <li><a href="#">Padded Wedge XSWD49</a></li>
+                        <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
+                        <li><a href="#">Pilates Ring XSAC04</a></li>
+                        <li><a href="#">Pilates Ball XSAC05</a></li>
+                        <li><a href="#">Resistance Bands XSAC06</a></li>
+                        <li><a href="#">Massage Ball XSAC07</a></li>
+                        <li><a href="#">Small Wedge XSAC08</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div class="mega-menu-column">
+                    <div class="mega-menu-cta">
+                      {% if section.settings.megamenu_image %}
+                        <img src="{{ section.settings.megamenu_image | img_url: '640x984' }}" alt="{{ section.settings.megamenu_image_alt | default: 'Mega Menu Image' }}" />
+                      {% else %}
+                        <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Default Pilates Equipment" />
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="mega-menu-footer">
+                  {% if section.settings.contactfootericon %}
+                    <div class="mega-menu-footer-icon">
+                      <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
+                    </div>
+                  {% endif %}
+                  <span>{{ section.settings.contacttext | default: 'CONTACT US' | escape }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="dropdown">
+              <span class="nav-item" style="cursor: pointer;">
+                <span>About Us</span>
+                <span class="dropdown-arrow"></span>
+              </span>
+              <div class="dropdown-menu">
+                <div style="padding: 8px 0;">
+                  <a href="#" class="dropdown-item">Our Story</a>
+                  <a href="#" class="dropdown-item">Team</a>
+                  <a href="#" class="dropdown-item">Certifications</a>
+                </div>
+              </div>
+            </div>
+
+            <a href="#" class="nav-item">
+              <span>Training</span>
+            </a>
+
+            <a href="#" class="nav-item">
+              <span>Support</span>
+            </a>
+
+            <a href="#" class="nav-item">
+              <span>News</span>
+            </a>
           {% endif %}
         </div>
 
@@ -1526,6 +1602,299 @@ function toggleSearch() {
       "id": "contactfootericon",
       "label": "Contact Footer Icon",
       "info": "Upload an icon for the contact footer section (recommended size: 22x22px)"
+    },
+    {
+      "type": "header",
+      "content": "Mega Menu Settings"
+    },
+    {
+      "type": "text",
+      "id": "megamenu_title",
+      "label": "Mega Menu Title",
+      "default": "Pilates Equipment",
+      "info": "The menu item that will trigger the mega menu dropdown"
+    },
+    {
+      "type": "image_picker",
+      "id": "megamenu_image",
+      "label": "Mega Menu Image",
+      "info": "Upload an image for the right side of the mega menu (recommended size: 320x492px)"
+    },
+    {
+      "type": "text",
+      "id": "megamenu_image_alt",
+      "label": "Mega Menu Image Alt Text",
+      "default": "Pilates Equipment",
+      "info": "Alt text for the mega menu image"
+    },
+    {
+      "type": "header",
+      "content": "Category 1 - Reformer"
+    },
+    {
+      "type": "text",
+      "id": "category1_title",
+      "label": "Category 1 Title",
+      "default": "Reformer"
+    },
+    {
+      "type": "text",
+      "id": "category1_link1_text",
+      "label": "Link 1 Text",
+      "default": "Pilates Reformer XSRF100"
+    },
+    {
+      "type": "url",
+      "id": "category1_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "category1_link2_text",
+      "label": "Link 2 Text",
+      "default": "Aluminum Reformer XSRF04"
+    },
+    {
+      "type": "url",
+      "id": "category1_link2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "category1_link3_text",
+      "label": "Link 3 Text",
+      "default": "Aluminum Reformer XSRF07"
+    },
+    {
+      "type": "url",
+      "id": "category1_link3_url",
+      "label": "Link 3 URL"
+    },
+    {
+      "type": "text",
+      "id": "category1_link4_text",
+      "label": "Link 4 Text",
+      "default": "Classic Aluminum Reformer XSCAR"
+    },
+    {
+      "type": "url",
+      "id": "category1_link4_url",
+      "label": "Link 4 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category 2 - Pilates Chair"
+    },
+    {
+      "type": "text",
+      "id": "category2_title",
+      "label": "Category 2 Title",
+      "default": "Pilates Chair"
+    },
+    {
+      "type": "text",
+      "id": "category2_link1_text",
+      "label": "Link 1 Text",
+      "default": "Basic Pilates Chair XSCC29"
+    },
+    {
+      "type": "url",
+      "id": "category2_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "category2_link2_text",
+      "label": "Link 2 Text",
+      "default": "Pilates Chair Wooden Base XSCC01"
+    },
+    {
+      "type": "url",
+      "id": "category2_link2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "category2_link3_text",
+      "label": "Link 3 Text",
+      "default": "Pro Pilates Wunda Chair XSCC32"
+    },
+    {
+      "type": "url",
+      "id": "category2_link3_url",
+      "label": "Link 3 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category 3 - Ladder Barrel"
+    },
+    {
+      "type": "text",
+      "id": "category3_title",
+      "label": "Category 3 Title",
+      "default": "Ladder Barrel"
+    },
+    {
+      "type": "text",
+      "id": "category3_link1_text",
+      "label": "Link 1 Text",
+      "default": "Pilates Ladder Barrel XSLB01"
+    },
+    {
+      "type": "url",
+      "id": "category3_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "category3_link2_text",
+      "label": "Link 2 Text",
+      "default": "Pro Pilates Ladder Barrel XSLB37"
+    },
+    {
+      "type": "url",
+      "id": "category3_link2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category 4 - Cadillac"
+    },
+    {
+      "type": "text",
+      "id": "category4_title",
+      "label": "Category 4 Title",
+      "default": "Cadillac"
+    },
+    {
+      "type": "text",
+      "id": "category4_link1_text",
+      "label": "Link 1 Text",
+      "default": "Cadillac XSCL19"
+    },
+    {
+      "type": "url",
+      "id": "category4_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "category4_link2_text",
+      "label": "Link 2 Text",
+      "default": "Cadillac XSCL01"
+    },
+    {
+      "type": "url",
+      "id": "category4_link2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category 5 - Spine Corrector"
+    },
+    {
+      "type": "text",
+      "id": "category5_title",
+      "label": "Category 5 Title",
+      "default": "Spine Corrector"
+    },
+    {
+      "type": "text",
+      "id": "category5_link1_text",
+      "label": "Link 1 Text",
+      "default": "Spine Corrector XSSC43"
+    },
+    {
+      "type": "url",
+      "id": "category5_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "header",
+      "content": "Category 6 - Accessories"
+    },
+    {
+      "type": "text",
+      "id": "category6_title",
+      "label": "Category 6 Title",
+      "default": "Accessories"
+    },
+    {
+      "type": "text",
+      "id": "category6_link1_text",
+      "label": "Link 1 Text",
+      "default": "Padded Wedge XSWD49"
+    },
+    {
+      "type": "url",
+      "id": "category6_link1_url",
+      "label": "Link 1 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link2_text",
+      "label": "Link 2 Text",
+      "default": "Pilates Balance Cushion XSAC03"
+    },
+    {
+      "type": "url",
+      "id": "category6_link2_url",
+      "label": "Link 2 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link3_text",
+      "label": "Link 3 Text",
+      "default": "Pilates Ring XSAC04"
+    },
+    {
+      "type": "url",
+      "id": "category6_link3_url",
+      "label": "Link 3 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link4_text",
+      "label": "Link 4 Text",
+      "default": "Pilates Ball XSAC05"
+    },
+    {
+      "type": "url",
+      "id": "category6_link4_url",
+      "label": "Link 4 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link5_text",
+      "label": "Link 5 Text",
+      "default": "Resistance Bands XSAC06"
+    },
+    {
+      "type": "url",
+      "id": "category6_link5_url",
+      "label": "Link 5 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link6_text",
+      "label": "Link 6 Text",
+      "default": "Massage Ball XSAC07"
+    },
+    {
+      "type": "url",
+      "id": "category6_link6_url",
+      "label": "Link 6 URL"
+    },
+    {
+      "type": "text",
+      "id": "category6_link7_text",
+      "label": "Link 7 Text",
+      "default": "Small Wedge XSAC08"
+    },
+    {
+      "type": "url",
+      "id": "category6_link7_url",
+      "label": "Link 7 URL"
     },
     {
       "type": "header",
