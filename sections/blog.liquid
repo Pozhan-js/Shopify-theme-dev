@@ -1,0 +1,63 @@
+<div class="blog-section">
+  <div class="blog-container">
+    <div class="blog-main">
+      {% content_for 'blocks' %}
+    </div>
+    
+    {% if section.settings.show_sidebar %}
+      <aside class="blog-sidebar-container">
+        {% render 'blog-sidebar' %}
+      </aside>
+    {% endif %}
+  </div>
+</div>
+
+{% stylesheet %}
+  .blog-section {
+    padding: 2rem 0;
+  }
+
+  .blog-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 0 var(--page-margin);
+  }
+
+  @media screen and (min-width: 990px) {
+    .blog-container {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+
+  .blog-main {
+    min-height: 50vh;
+  }
+
+  .blog-sidebar-container {
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "label": "Show sidebar",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@theme"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,129 @@
+{% comment %}
+  Blog Sidebar
+  
+  This snippet provides a sidebar for blog pages.
+  It can include recent posts, categories, tags, and other blog-related content.
+{% endcomment %}
+
+<div class="blog-sidebar">
+  <div class="blog-sidebar__section">
+    <h3 class="blog-sidebar__title">Recent Posts</h3>
+    <ul class="blog-sidebar__list">
+      {% for article in blog.articles limit: 5 %}
+        <li class="blog-sidebar__item">
+          <a href="{{ article.url }}" class="blog-sidebar__link">
+            {{ article.title }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="blog-sidebar__section">
+    <h3 class="blog-sidebar__title">Categories</h3>
+    <ul class="blog-sidebar__list">
+      {% for tag in blog.all_tags %}
+        <li class="blog-sidebar__item">
+          <a href="{{ tag | link_to_tag: tag }}" class="blog-sidebar__link">
+            {{ tag }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {% if section.settings.show_search %}
+    <div class="blog-sidebar__section">
+      <h3 class="blog-sidebar__title">Search</h3>
+      <form action="{{ routes.search_url }}" method="get" role="search" class="blog-sidebar__search">
+        <input type="hidden" name="type" value="article">
+        <input type="search"
+               name="q"
+               placeholder="Search posts..."
+               class="blog-sidebar__search-input"
+               aria-label="Search">
+        <button type="submit" class="blog-sidebar__search-button">
+          <span class="visually-hidden">Search</span>
+          <svg class="icon icon-search" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.3361 11.4361C13.3439 10.2314 14 8.64311 14 6.88889C14 3.08889 10.9111 0 7.11111 0C3.31111 0 0.222222 3.08889 0.222222 6.88889C0.222222 10.6889 3.31111 13.7778 7.11111 13.7778C8.86533 13.7778 10.4536 13.1217 11.6583 12.1139L15.7628 16.2184C16.3461 16.8017 17.2928 16.8017 17.8761 16.2184C18.4594 15.6351 18.4594 14.6884 17.8761 14.1051L12.3361 11.4361ZM7.11111 11.5556C4.57778 11.5556 2.44444 9.42222 2.44444 6.88889C2.44444 4.35556 4.57778 2.22222 7.11111 2.22222C9.64444 2.22222 11.7778 4.35556 11.7778 6.88889C11.7778 9.42222 9.64444 11.5556 7.11111 11.5556Z" fill="currentColor"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  .blog-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .blog-sidebar__section {
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+
+  .blog-sidebar__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 1rem 0;
+    color: rgb(var(--color-foreground-rgb));
+  }
+
+  .blog-sidebar__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .blog-sidebar__item {
+    margin-bottom: 0.5rem;
+  }
+
+  .blog-sidebar__item:last-child {
+    margin-bottom: 0;
+  }
+
+  .blog-sidebar__link {
+    color: rgb(var(--color-foreground-rgb) / 0.7);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .blog-sidebar__link:hover {
+    color: rgb(var(--color-foreground-rgb));
+  }
+
+  .blog-sidebar__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .blog-sidebar__search-input {
+    width: 100%;
+    padding: 0.75rem;
+    padding-right: 2.5rem;
+    border: 1px solid rgb(var(--color-foreground-rgb) / 0.2);
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  .blog-sidebar__search-button {
+    position: absolute;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    color: rgb(var(--color-foreground-rgb) / 0.5);
+    transition: color 0.2s ease;
+  }
+
+  .blog-sidebar__search-button:hover {
+    color: rgb(var(--color-foreground-rgb));
+  }
+{% endstylesheet %}
