@@ -1,0 +1,273 @@
+{% schema %}
+{
+  "name": "自定义产品网格列表",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "collection_list",
+      "id": "collections",
+      "label": "选择产品系列",
+      "limit": 4
+    },
+    {
+      "type": "header",
+      "content": "文字样式"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "产品名称字体大小",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "产品名称字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "常规"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "加粗"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "产品价格字体大小",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "price_font_weight",
+      "label": "产品价格字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "常规"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "加粗"
+        }
+      ],
+      "default": "400"
+    }
+  ],
+  "presets": [
+    {
+      "name": "自定义产品网格列表"
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+.pagination {
+  margin-top: 3rem;
+  text-align: center;
+}
+.pagination a,
+.pagination .current {
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border: 1px solid #ddd;
+  text-decoration: none;
+}
+.pagination .current {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding: 2rem 1rem 2rem 0;
+  min-height: 60rem;
+}
+
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  main#MainContent.content-for-layout {
+    padding-left: 1.6rem !important;
+  }
+}
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.product-image-container {
+  position: relative;
+}
+.product-image {
+  width: 100%;
+  height: auto;
+}
+h3.product-title {
+  margin-block-start:0;
+  margin-block-end:0;
+}
+.product-price {
+  padding-bottom: 2rem;
+  margin-top: 1rem;
+}
+.image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.product-image-container:hover .image-nav {
+  opacity: 1;
+}
+.prev {
+  left: 1rem;
+}
+.next {
+  right: 1rem;
+}
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+.product-count {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #000;
+}
+.filter-btn {
+  width:10rem;
+  height:3rem;
+  background: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.filter-btn::before {
+  content: "+";
+  font-size: 3rem;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+.filter-sidebar.active ~ .product-header .filter-btn::after {
+  transform: rotate(90deg);
+}
+{%- endstyle -%}
+<!-- debug 产品系列头部信息 {{ section.settings.collection }}-->
+<!-- debug page url {{ page.url }}-->
+{%- assign all_products = "" | split: "" -%}
+{%- assign total_products = 0 -%}
+{%- for collection in section.settings.collections -%}
+  {%- assign all_products = all_products | concat: collection.products -%}
+  {%- assign total_products = total_products | plus: collection.products_count -%}
+{%- endfor -%}
+
+{%- if section.settings.collections.size > 0 -%}
+  {% paginate all_products by 24 %}
+    
+<div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
+  <h2 style="font-weight: {{ section.settings.title_font_weight }}">多系列产品</h2>
+</div>
+
+<div class="product-header">
+  <div class="product-count">
+    {{ total_products }} products
+  </div>
+  <div class="filter-btn" onclick="toggleFilter()">Filter</div>
+</div>
+
+<div class="product-grid">
+  {% for product in all_products %}
+    <div class="product-card">
+      <div class="product-image-container">
+        {% for image in product.images %}
+          <img class="product-image" src="{{ image | img_url: '400x' }}" alt="{{ product.title }}" width="400" height="400" loading="lazy" {% unless forloop.first %}style="display:none"{% endunless %}>
+        {% endfor %}
+        <button class="image-nav prev" onclick="prevImage(this)">❮</button>
+        <button class="image-nav next" onclick="nextImage(this)">❯</button>
+      </div>
+
+      <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
+      <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
+    </div>
+  {% endfor %}
+
+</div>
+
+<div class="pagination">
+  {% if paginate.pages > 1 %}
+    {{ paginate | default_pagination }}
+  {% endif %}
+</div>
+  {% endpaginate %}
+{%- else -%}
+  <p>请选择一个产品系列</p>
+{%- endif -%}
+
+<div id="filter-sidebar" class="filter-sidebar">
+  {% render 'custom-product-filter' %}
+</div>
+
+<script>
+  function toggleFilter() {
+    const sidebar = document.getElementById('filter-sidebar');
+    sidebar.classList.toggle('active');
+  }
+
+  function prevImage(button) {
+    const container = button.parentNode;
+    const images = container.querySelectorAll('img');
+    const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+    const prevIndex = (currentIndex - 1 + images.length) % images.length;
+    
+    images[currentIndex].style.display = 'none';
+    images[prevIndex].style.display = 'block';
+  }
+
+  function nextImage(button) {
+    const container = button.parentNode;
+    const images = container.querySelectorAll('img');
+    const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
+    const nextIndex = (currentIndex + 1) % images.length;
+    
+    images[currentIndex].style.display = 'none';
+    images[nextIndex].style.display = 'block';
+  }
+</script>
