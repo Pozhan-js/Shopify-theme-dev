@@ -3,7 +3,33 @@
   "name": "自定义博客网格",
   "tag": "section", 
   "class": "section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "options": [
+        {
+          "value": "grid",
+          "label": "网格布局"
+        },
+        {
+          "value": "collage",
+          "label": "拼贴布局"
+        }
+      ],
+      "default": "grid",
+      "label": "布局"
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 6,
+      "label": "每页文章数"
+    }
+  ],
   "presets": [
     {
       "name": "自定义博客网格"
@@ -14,158 +40,81 @@
 
 {%- style -%}
   @import url('{{ 'component-article-card.css' | asset_url }}');
+  @import url('{{ 'section-main-blog.css' | asset_url }}');
   
   .blog-grid {
     padding: 4rem 0;
-    font-weight: bold;
-  }
-  
-  .blog-grid__header {
-    text-align: left;
-    margin-bottom: 3rem;
-  }
-  
-  .blog-grid__title {
-    font-size: 2.4rem;
-    margin-bottom: 2rem;
   }
   
   .blog-tags {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
     gap: 1rem;
     margin-bottom: 3rem;
   }
   
   .blog-tag {
-    font-size: 2rem;
-    padding: .5rem 2rem;
-    border-radius: 3rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    color:#fff;
-    background:#000;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
   }
   
-  .blog-tag:hover,
   .blog-tag.active {
-    background: #aaa;
-  }
-  
-  .blog-grid__items {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-  
-  @media screen and (max-width: 990px) {
-    .blog-grid__items {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media screen and (max-width: 608px) {
-    .blog-grid__items {
-      grid-template-columns: 1fr;
-    }
+    background: #555;
   }
 {%- endstyle -%}
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tags = document.querySelectorAll('.blog-tag');
-  
-  tags.forEach(tag => {
-    tag.addEventListener('click', function() {
-      // 移除所有active类
-      tags.forEach(t => t.classList.remove('active'));
-      // 给当前点击的标签添加active类
-      this.classList.add('active');
+{%- paginate blog.articles by section.settings.articles_per_page -%}
+  {% assign current_tag = request.path | split: 'tagged/' | last %}
+  <div class="blog-grid page-width">
+    <div class="blog-grid__header">
+      <h1 class="title--primary">
+        Blogs
+      </h1>
       
-      const selectedTag = this.textContent.trim();
-      const articles = document.querySelectorAll('.article-card');
-      
-      articles.forEach(article => {
-        const articleTag = article.querySelector('.article-card__tag');
-        if (selectedTag === 'All' || 
-            (articleTag && articleTag.textContent.trim() === selectedTag)) {
-          article.style.display = 'block';
-        } else {
-          article.style.display = 'none';
-        }
-      });
-    });
-  });
-});
-</script>
-
-{% assign current_tag = request.path | split: 'tagged/' | last %}
-<div class="blog-grid">
-  <div class="blog-grid__header">
-    <h2 class="blog-grid__title">
-      Blog
-    </h2>
-    <div class="blog-tags">
-      <a href="{{ blog.url }}" class="blog-tag {% if current_tag == blank %}active{% endif %}">All</a>
-      {% for tag in blog.all_tags %}
-        <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-tag {% if current_tag == tag %}active{% endif %}">
-          {{ tag }}
-        </a>
-      {% endfor %}
+      <div class="blog-tags">
+        <a href="{{ blog.url }}" class="blog-tag {% if current_tag == blank %}active{% endif %}">全部</a>
+        {% for tag in blog.all_tags %}
+          <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-tag {% if current_tag == tag %}active{% endif %}">
+            {{ tag }}
+          </a>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-  
-  <div class="blog-grid__items">
-    {%- if current_tag != blank -%}
-      {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%}
-      {%- for article in filtered_articles -%}
-        <a href="{{ article.url }}" class="article-card">
-          {% if article.image %}
-            <div class="article-card__image-container">
-              <img
-                class="article-card__image"
-                src="{{ article.image | img_url: '800x600' }}"
-                alt="{{ article.title | escape }}"
-                loading="lazy"
-                width="800"
-                height="600"
-              >
-            </div>
-          {% endif %}
-          
-          <div class="article-card__info">
-            {% if article.tags.size > 0 %}
-              <div class="article-card__tag">{{ article.tags.first }}</div>
-            {% endif %}
-            <h3 class="article-card__title">{{ article.title }}</h3>
+
+    <div class="blog-articles {% if section.settings.layout == 'collage' %}blog-articles--collage{% endif %}">
+      {%- if current_tag != blank -%}
+        {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%}
+        {%- for article in filtered_articles -%}
+          <div class="blog-articles__article article">
+            {%- render 'article-card',
+              article: article,
+              show_image: true,
+              show_date: true,
+              show_author: false,
+              show_excerpt: true
+            -%}
           </div>
-        </a>
-      {%- endfor -%}
-    {%- else -%}
-      {%- for article in blog.articles -%}
-        <a href="{{ article.url }}" class="article-card">
-          {% if article.image %}
-            <div class="article-card__image-container">
-              <img
-                class="article-card__image"
-                src="{{ article.image | img_url: '800x600' }}"
-                alt="{{ article.title | escape }}"
-                loading="lazy"
-                width="800"
-                height="600"
-              >
-            </div>
-          {% endif %}
-          
-          <div class="article-card__info">
-            {% if article.tags.size > 0 %}
-              <div class="article-card__tag">{{ article.tags.first }}</div>
-            {% endif %}
-            <h3 class="article-card__title">{{ article.title }}</h3>
+        {%- endfor -%}
+      {%- else -%}
+        {%- for article in blog.articles -%}
+          <div class="blog-articles__article article">
+            {%- render 'article-card',
+              article: article,
+              show_image: true,
+              show_date: true,
+              show_author: false,
+              show_excerpt: true
+            -%}
           </div>
-        </a>
-      {%- endfor -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if paginate.pages > 1 -%}
+      {%- render 'pagination', paginate: paginate -%}
     {%- endif -%}
   </div>
-</div>
+{%- endpaginate -%}
