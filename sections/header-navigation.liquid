@@ -151,6 +151,143 @@
     color: #111827;
   }
 
+  /* Pilates Equipment Mega Menu */
+  .mega-dropdown-menu {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    position: absolute;
+    top: 100%;
+    left: -200px;
+    margin-top: 8px;
+    width: 1000px;
+    border-radius: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    padding: 32px;
+  }
+
+  .dropdown:hover .mega-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mega-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    height: 100%;
+  }
+
+  .mega-menu-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mega-menu-category {
+    margin-bottom: 24px;
+  }
+
+  .mega-menu-category h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #161616;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #DC2626;
+    position: relative;
+  }
+
+  .mega-menu-category ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .mega-menu-category li {
+    margin-bottom: 8px;
+  }
+
+  .mega-menu-category a {
+    color: #6B7280;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s ease;
+    display: block;
+    padding: 4px 0;
+  }
+
+  .mega-menu-category a:hover {
+    color: #DC2626;
+  }
+
+  .mega-menu-cta {
+    background: linear-gradient(135deg, #1F2937 0%, #374151 100%);
+    border-radius: 12px;
+    padding: 24px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 280px;
+  }
+
+  .mega-menu-cta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 120px;
+    background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&crop=center') center/cover;
+    opacity: 0.3;
+    border-radius: 0 12px 0 50px;
+  }
+
+  .mega-menu-cta h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: white;
+    border: none;
+    padding: 0;
+  }
+
+  .mega-menu-cta p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #D1D5DB;
+    margin-bottom: 20px;
+  }
+
+  .mega-menu-cta-button {
+    background: #DC2626;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .mega-menu-cta-button:hover {
+    background: #B91C1C;
+    transform: translateY(-1px);
+  }
+
+  .mega-menu-cta-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .right-actions {
     display: flex;
     align-items: center;
@@ -356,6 +493,22 @@
     .right-actions {
       gap: 12px;
     }
+
+    .mega-dropdown-menu {
+      width: 95vw;
+      left: -300px;
+      padding: 16px;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .mega-menu-cta {
+      grid-column: span 2;
+      min-height: 200px;
+    }
   }
 
   @media (min-width: 481px) and (max-width: 768px) {
@@ -394,6 +547,22 @@
 
     .right-actions {
       gap: 14px;
+    }
+
+    .mega-dropdown-menu {
+      width: 90vw;
+      left: -250px;
+      padding: 20px;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .mega-menu-cta {
+      grid-column: span 2;
+      min-height: 220px;
     }
   }
 
@@ -457,6 +626,22 @@
 
     .mobile-menu {
       display: none !important;
+    }
+
+    .mega-dropdown-menu {
+      width: 800px;
+      left: -150px;
+      padding: 24px;
+    }
+
+    .mega-menu-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .mega-menu-cta {
+      grid-column: span 1;
+      min-height: 260px;
     }
   }
 
@@ -524,6 +709,12 @@
 
     .mobile-menu {
       display: none !important;
+    }
+
+    .mega-dropdown-menu {
+      width: 900px;
+      left: -180px;
+      padding: 28px;
     }
   }
 
@@ -703,7 +894,85 @@
           {% if main_menu and main_menu.links.size > 0 %}
             {% for link in main_menu.links %}
               <div class="dropdown">
-                {% if link.links.size > 0 %}
+                {% if link.title == 'Pilates Equipment' %}
+                  <span class="nav-item" style="cursor: pointer;">
+                    <span>{{ link.title | escape }}</span>
+                    <span class="dropdown-arrow"></span>
+                  </span>
+                  <div class="mega-dropdown-menu">
+                    <div class="mega-menu-grid">
+                      <div class="mega-menu-column">
+                        <div class="mega-menu-category">
+                          <h3>Reformer</h3>
+                          <ul>
+                            <li><a href="#">Pilates Reformer XSRF100</a></li>
+                            <li><a href="#">Aluminum Reformer XSRF04</a></li>
+                            <li><a href="#">Aluminum Reformer XSRF07</a></li>
+                            <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
+                          </ul>
+                        </div>
+                        <div class="mega-menu-category">
+                          <h3>Pilates Chair</h3>
+                          <ul>
+                            <li><a href="#">Basic Pilates Chair XSCC29</a></li>
+                            <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
+                            <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="mega-menu-column">
+                        <div class="mega-menu-category">
+                          <h3>Ladder Barrel</h3>
+                          <ul>
+                            <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
+                            <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
+                          </ul>
+                        </div>
+                        <div class="mega-menu-category">
+                          <h3>Cadillac</h3>
+                          <ul>
+                            <li><a href="#">Cadillac XSCL19</a></li>
+                            <li><a href="#">Cadillac XSCL01</a></li>
+                          </ul>
+                        </div>
+                        <div class="mega-menu-category">
+                          <h3>Spine Corrector</h3>
+                          <ul>
+                            <li><a href="#">Spine Corrector XSSC43</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="mega-menu-column">
+                        <div class="mega-menu-category">
+                          <h3>Accessories</h3>
+                          <ul>
+                            <li><a href="#">Padded Wedge XSWD49</a></li>
+                            <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
+                            <li><a href="#">Pilates Ring XSAC04</a></li>
+                            <li><a href="#">Pilates Ball XSAC05</a></li>
+                            <li><a href="#">Resistance Bands XSAC06</a></li>
+                            <li><a href="#">Massage Ball XSAC07</a></li>
+                            <li><a href="#">Small Wedge XSAC08</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="mega-menu-column">
+                        <div class="mega-menu-cta">
+                          <div>
+                            <h3>Product Catalog Download</h3>
+                            <p>Explore our full range of premium Pilates equipment. Download detailed product brochure to find the perfect fit for your business.</p>
+                          </div>
+                          <a href="#" class="mega-menu-cta-button">
+                            CONTACT US
+                            <svg viewBox="0 0 16 16" fill="currentColor">
+                              <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                            </svg>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% elsif link.links.size > 0 %}
                   <span class="nav-item" style="cursor: pointer;">
                     <span>{{ link.title | escape }}</span>
                     <span class="dropdown-arrow"></span>
