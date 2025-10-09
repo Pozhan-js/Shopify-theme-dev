@@ -117,7 +117,13 @@
 
     <div class="blog-articles {% if section.settings.layout == 'collage' %}blog-articles--collage{% endif %}">
       {%- if current_tag != blank -%}
-        <!--调试：blog.articles = {{ blog.articles ｜ json }} -->
+        <!--调试：current_tag = {{ current_tag }} -->
+        <!--调试：blog对象验证 = {{ blog | json }} -->
+        <!--调试：文章数量 = {{ blog.articles.size }} -->
+        {% for article in blog.articles limit: 3 %}
+        <!--调试：文章{{ forloop.index }}标题 = {{ article.title }} -->
+        <!--调试：文章标签 = {{ article.tags | join: ', ' }} -->
+        {% endfor %}
         {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%}
         <!--调试：filtered_articles = {{ filtered_articles ｜ json }} -->
         {%- for article in filtered_articles -%}
