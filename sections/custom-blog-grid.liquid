@@ -5,6 +5,11 @@
   "class": "section",
   "settings": [
     {
+      "type": "blog",
+      "id": "blog",
+      "label": "选择博客"
+    },
+    {
       "type": "select",
       "id": "layout",
       "options": [
@@ -90,7 +95,8 @@
   }
 {%- endstyle -%}
 
-{%- paginate blog.articles by section.settings.articles_per_page -%}
+{%- assign selected_blog = blogs[section.settings.blog] -%}
+{%- paginate selected_blog.articles by section.settings.articles_per_page -%}
   {% assign current_tag = request.path | split: 'tagged/' | last %}
   <div class="blog-grid page-width">
     <div class="blog-grid__header">
@@ -99,11 +105,11 @@
       </h1>
       <!--调试：current_tag = {{ current_tag }} -->
       <div class="blog-tags">
-        <a href="{{ blog.url }}" class="blog-tag {% if current_tag == '/blogs/news' %}active{% endif %}">ALL</a>
-        {% for tag in blog.all_tags %}
+        <a href="{{ selected_blog.url }}" class="blog-tag {% if current_tag == '/blogs/news' %}active{% endif %}">ALL</a>
+        {% for tag in selected_blog.all_tags %}
           <!--调试：tag = {{ tag }} -->
           {% assign downcased_tag = tag | downcase %}
-          <a href="{{ blog.url }}/tagged/{{ tag | handleize }}" class="blog-tag {% if current_tag == downcased_tag %}active{% endif %}">
+          <a href="{{ selected_blog.url }}/tagged/{{ tag | handleize }}" class="blog-tag {% if current_tag == downcased_tag %}active{% endif %}">
             {{ tag }}
           </a>
         {% endfor %}
@@ -112,7 +118,7 @@
 
     <div class="blog-articles {% if section.settings.layout == 'collage' %}blog-articles--collage{% endif %}">
       {%- if current_tag != blank -%}
-        {%- assign filtered_articles = blog.articles | where: "tags", current_tag -%}
+        {%- assign filtered_articles = selected_blog.articles | where: "tags", current_tag -%}
         {%- for article in filtered_articles -%}
           <div class="blog-articles__article article">
             {%- render 'custom-article-card',
@@ -125,7 +131,7 @@
           </div>
         {%- endfor -%}
       {%- else -%}
-        {%- for article in blog.articles -%}
+        {%- for article in selected_blog.articles -%}
           <div class="blog-articles__article article">
             {%- render 'custom-article-card',
               article: article,
