@@ -1054,7 +1054,7 @@
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          <!-- 临时测试菜单 - 如果没有配置菜单则显示默认菜单 -->
+          <!-- Pilates Equipment Mega Menu -->
           <div class="dropdown">
             <span class="nav-item" style="cursor: pointer;">
               <span>Pilates Equipment</span>
@@ -1134,6 +1134,7 @@
             </div>
           </div>
 
+          <!-- About Us Dropdown -->
           <div class="dropdown">
             <span class="nav-item" style="cursor: pointer;">
               <span>About Us</span>
@@ -1148,14 +1149,35 @@
             </div>
           </div>
 
+          <!-- Training Link -->
           <a href="#" class="nav-item">
             <span>Training</span>
           </a>
 
+          <!-- Resources Dropdown -->
+          <div class="dropdown">
+            <span class="nav-item" style="cursor: pointer;">
+              <span>Resources</span>
+              <span class="dropdown-arrow"></span>
+            </span>
+            <div class="dropdown-menu">
+              <div style="padding: 8px 0;">
+                <a href="{{ section.settings.blog_link | default: '/blogs/news' }}" class="dropdown-item">Blog</a>
+                <a href="{{ section.settings.customer_story_link | default: '/pages/customer-story' }}" class="dropdown-item">Customer Story</a>
+                <a href="{{ section.settings.certificates_link | default: '/pages/certificates' }}" class="dropdown-item">Certificates</a>
+                <a href="{{ section.settings.faqs_link | default: '/pages/faqs' }}" class="dropdown-item">FAQs</a>
+                <a href="{{ section.settings.aftersales_link | default: '/pages/aftersales' }}" class="dropdown-item">Aftersales</a>
+                <a href="{{ section.settings.support_link | default: '/pages/support' }}" class="dropdown-item">Support</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Support Link -->
           <a href="#" class="nav-item">
             <span>Support</span>
           </a>
 
+          <!-- News Link -->
           <a href="#" class="nav-item">
             <span>News</span>
           </a>
@@ -1356,9 +1378,61 @@
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
       <div class="mobile-menu-content">
+        <!-- Mobile Pilates Equipment -->
+        <div>
+          <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuEquipment')">
+            Pilates Equipment
+          </button>
+          <div class="mobile-submenu" id="mobileSubmenuEquipment" style="display: none;">
+            <a href="#" class="mobile-submenu-item">Reformer</a>
+            <a href="#" class="mobile-submenu-item">Pilates Chair</a>
+            <a href="#" class="mobile-submenu-item">Ladder Barrel</a>
+            <a href="#" class="mobile-submenu-item">Cadillac</a>
+            <a href="#" class="mobile-submenu-item">Spine Corrector</a>
+            <a href="#" class="mobile-submenu-item">Accessories</a>
+          </div>
+        </div>
+
+        <!-- Mobile About Us -->
+        <div>
+          <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuAbout')">
+            About Us
+          </button>
+          <div class="mobile-submenu" id="mobileSubmenuAbout" style="display: none;">
+            <a href="#" class="mobile-submenu-item">Our Story</a>
+            <a href="#" class="mobile-submenu-item">Team</a>
+            <a href="#" class="mobile-submenu-item">Certifications</a>
+          </div>
+        </div>
+
+        <!-- Mobile Training -->
+        <a href="#" class="mobile-menu-item">Training</a>
+
+        <!-- Mobile Resources -->
+        <div>
+          <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuResources')">
+            Resources
+          </button>
+          <div class="mobile-submenu" id="mobileSubmenuResources" style="display: none;">
+            <a href="{{ section.settings.blog_link | default: '/blogs/news' }}" class="mobile-submenu-item">Blog</a>
+            <a href="{{ section.settings.customer_story_link | default: '/pages/customer-story' }}" class="mobile-submenu-item">Customer Story</a>
+            <a href="{{ section.settings.certificates_link | default: '/pages/certificates' }}" class="mobile-submenu-item">Certificates</a>
+            <a href="{{ section.settings.faqs_link | default: '/pages/faqs' }}" class="mobile-submenu-item">FAQs</a>
+            <a href="{{ section.settings.aftersales_link | default: '/pages/aftersales' }}" class="mobile-submenu-item">Aftersales</a>
+            <a href="{{ section.settings.support_link | default: '/pages/support' }}" class="mobile-submenu-item">Support</a>
+          </div>
+        </div>
+
+        <!-- Mobile Support -->
+        <a href="#" class="mobile-menu-item">Support</a>
+
+        <!-- Mobile News -->
+        <a href="#" class="mobile-menu-item">News</a>
+
+        <!-- Dynamic Menu Items -->
         {% if mainmenu and mainmenu.links.size > 0 %}
           {% for link in mainmenu.links %}
-            <div>
+            <div style="display: none;">
               {% if link.links.size > 0 %}
                 <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
                   {{ link.title | escape }}
@@ -1500,7 +1574,6 @@ function toggleSearch() {
       "type": "link_list",
       "id": "mainmenu",
       "label": "Main Menu",
-      "default": "main-menu",
       "info": "Select the menu to display in the navigation"
     },
     {
@@ -1517,7 +1590,7 @@ function toggleSearch() {
       "info": "Number displayed in contact badge"
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "contactlink",
       "label": "Contact Button Link"
     },
@@ -1526,6 +1599,46 @@ function toggleSearch() {
       "id": "contactfootericon",
       "label": "Contact Footer Icon",
       "info": "Upload an icon for the contact footer section (recommended size: 22x22px)"
+    },
+    {
+      "type": "header",
+      "content": "Resources Menu Settings"
+    },
+    {
+      "type": "text",
+      "id": "blog_link",
+      "label": "Blog Link",
+      "default": "/blogs/news"
+    },
+    {
+      "type": "text",
+      "id": "customer_story_link",
+      "label": "Customer Story Link",
+      "default": "/pages/customer-story"
+    },
+    {
+      "type": "text",
+      "id": "certificates_link",
+      "label": "Certificates Link",
+      "default": "/pages/certificates"
+    },
+    {
+      "type": "text",
+      "id": "faqs_link",
+      "label": "FAQs Link",
+      "default": "/pages/faqs"
+    },
+    {
+      "type": "text",
+      "id": "aftersales_link",
+      "label": "Aftersales Link",
+      "default": "/pages/aftersales"
+    },
+    {
+      "type": "text",
+      "id": "support_link",
+      "label": "Support Link",
+      "default": "/pages/support"
     },
     {
       "type": "header",
@@ -1550,12 +1663,9 @@ function toggleSearch() {
       "default": "#DC2626"
     }
   ],
-  "presets": [
+      "presets": [
     {
-      "name": "Header Navigation",
-      "settings": {
-        "mainmenu": "main-menu"
-      }
+      "name": "Header Navigation"
     }
   ]
 }
