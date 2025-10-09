@@ -192,14 +192,20 @@ h3.product-title {
 {%- endstyle -%}
 <!-- debug 产品系列头部信息 {{ section.settings.collection }}-->
 <!-- debug page url {{ page.url }}-->
+<!-- 调试: 选择的系列数量 {{ section.settings.collections.size }} -->
+<!-- 调试: 选择的系列 {{ section.settings.collections | json }} -->
 {%- assign all_products = "" | split: "" -%}
 {%- assign total_products = 0 -%}
-{%- for collection in section.settings.collections -%}
-  {%- assign all_products = all_products | concat: collection.products -%}
-  {%- assign total_products = total_products | plus: collection.products_count -%}
+{%- for collection_handle in section.settings.collections -%}
+  {%- assign collection = collections[collection_handle] -%}
+  <!-- 调试: 系列 {{ collection_handle }} 的产品数量 {{ collection.products_count }} -->
+  {%- if collection -%}
+    {%- assign all_products = all_products | concat: collection.products -%}
+    {%- assign total_products = total_products | plus: collection.products_count -%}
+  {%- endif -%}
 {%- endfor -%}
 
-{%- if section.settings.collections.size > 0 -%}
+{%- if total_products > 0 -%}
   {% paginate all_products by 24 %}
     
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
