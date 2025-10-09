@@ -1,0 +1,137 @@
+{% schema %}
+{
+  "name": "自定义博客网格",
+  "tag": "section", 
+  "class": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "自定义博客网格"
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+  @import url('{{ 'component-article-card.css' | asset_url }}');
+  
+  .blog-grid {
+    padding: 4rem 0;
+  }
+  
+  .blog-grid__header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .blog-grid__title {
+    font-size: 2.4rem;
+    margin-bottom: 2rem;
+  }
+  
+  .blog-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  
+  .blog-tag {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid rgba(var(--color-foreground), 0.2);
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .blog-tag:hover,
+  .blog-tag.active {
+    background: rgba(var(--color-foreground), 0.1);
+  }
+  
+  .blog-grid__items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  
+  @media screen and (max-width: 1024px) {
+    .blog-grid__items {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media screen and (max-width: 608px) {
+    .blog-grid__items {
+      grid-template-columns: 1fr;
+    }
+  }
+{%- endstyle -%}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const tags = document.querySelectorAll('.blog-tag');
+  
+  tags.forEach(tag => {
+    tag.addEventListener('click', function() {
+      // 移除所有active类
+      tags.forEach(t => t.classList.remove('active'));
+      // 给当前点击的标签添加active类
+      this.classList.add('active');
+      
+      const selectedTag = this.textContent.trim();
+      const articles = document.querySelectorAll('.article-card');
+      
+      articles.forEach(article => {
+        const articleTag = article.querySelector('.article-card__tag');
+        if (selectedTag === 'All' || 
+            (articleTag && articleTag.textContent.trim() === selectedTag)) {
+          article.style.display = 'block';
+        } else {
+          article.style.display = 'none';
+        }
+      });
+    });
+  });
+});
+</script>
+
+<div class="blog-grid">
+  <div class="blog-grid__header">
+    <h2 class="blog-grid__title">Blog</h2>
+    
+    <div class="blog-tags">
+      <div class="blog-tag active">All</div>
+      {% for tag in blog.all_tags %}
+        <div class="blog-tag">{{ tag }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <div class="blog-grid__items">
+    {% for article in blog.articles %}
+      <a href="{{ article.url }}" class="article-card">
+        {% if article.image %}
+          <div class="article-card__image-container">
+            <img
+              class="article-card__image"
+              src="{{ article.image | img_url: '800x600' }}"
+              alt="{{ article.title | escape }}"
+              loading="lazy"
+              width="800"
+              height="600"
+            >
+          </div>
+        {% endif %}
+        
+        <div class="article-card__info">
+          {% if article.tags.size > 0 %}
+            <div class="article-card__tag">{{ article.tags.first }}</div>
+          {% endif %}
+          <h3 class="article-card__title">{{ article.title }}</h3>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
