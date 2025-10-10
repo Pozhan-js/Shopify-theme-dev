@@ -24,59 +24,28 @@
         </div>
         <div class="uc-color-grid">
           {% if selected_product %}
-            {% comment %} 调试信息 - 可以在开发时查看 {% endcomment %}
-            {% comment %} 产品选项: {{ selected_product.options_with_values | json }} {% endcomment %}
-            
-            {% assign processed_colors = '' %}
             {% assign first_color_processed = false %}
-            {% assign color_option_found = false %}
             
-            {% comment %} 遍历所有产品选项，寻找颜色相关的选项 {% endcomment %}
+            {% comment %} 查找颜色选项 {% endcomment %}
             {% for option in selected_product.options_with_values %}
-              {% assign option_name_lower = option.name | downcase %}
-              {% assign color_option_name_lower = section.settings.color_option_name | default: 'Color' | downcase %}
-              
-              {% comment %} 检查选项名称是否匹配颜色 {% endcomment %}
-              {% if option_name_lower == color_option_name_lower or 
-                     option_name_lower contains 'color' or 
-                     option_name_lower contains 'colour' or 
-                     option_name_lower contains 'upholstery' or 
-                     option_name_lower contains 'fabric' or
-                     option_name_lower contains '颜色' %}
-                
-                {% assign color_option_found = true %}
-                {% assign option_index = forloop.index0 %}
-                
-                {% comment %} 遍历该选项的所有值 {% endcomment %}
+              {% if option.name == '颜色' or option.name == 'Color' or option.name == 'color' %}
                 {% for value in option.values %}
-                  {% unless processed_colors contains value %}
-                    {% assign processed_colors = processed_colors | append: value | append: ',' %}
-                    {% assign variant_found = false %}
-                    {% assign variant_id = '' %}
-                    {% assign variant_image = '' %}
-                    {% assign color_hex = '' %}
-                    
-                    {% comment %} 查找对应的变体 {% endcomment %}
-                    {% for variant in selected_product.variants %}
-                      {% assign match_found = false %}
-                      
-                      {% if option_index == 0 and variant.option1 == value %}
-                        {% assign match_found = true %}
-                      {% elsif option_index == 1 and variant.option2 == value %}
-                        {% assign match_found = true %}
-                      {% elsif option_index == 2 and variant.option3 == value %}
-                        {% assign match_found = true %}
-                      {% endif %}
-                      
-                      {% if match_found and variant_found == false %}
+                  {% assign variant_found = false %}
+                  {% assign variant_id = '' %}
+                  {% assign variant_image = '' %}
+                  {% assign color_hex = '#CCCCCC' %}
+                  
+                  {% comment %} 查找对应的变体 {% endcomment %}
+                  {% for variant in selected_product.variants %}
+                    {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
+                      {% unless variant_found %}
                         {% assign variant_found = true %}
                         {% assign variant_id = variant.id %}
                         {% if variant.image %}
                           {% assign variant_image = variant.image | img_url: '890x412' %}
                         {% endif %}
                         
-                        {% comment %} 优先从变体的元字段获取颜色值 {% endcomment %}
-                        {% comment %} 尝试多种可能的元字段路径 {% endcomment %}
+                        {% comment %} 获取颜色值 {% endcomment %}
                         {% if variant.metafields.custom.color.value %}
                           {% assign color_hex = variant.metafields.custom.color.value %}
                         {% elsif variant.metafields.custom.color %}
@@ -85,119 +54,32 @@
                           {% assign color_hex = variant.metafields.color.value %}
                         {% elsif variant.metafields.color %}
                           {% assign color_hex = variant.metafields.color %}
-                        {% elsif variant.metafields.custom.color_hex.value %}
-                          {% assign color_hex = variant.metafields.custom.color_hex.value %}
-                        {% elsif variant.metafields.custom.color_hex %}
-                          {% assign color_hex = variant.metafields.custom.color_hex %}
-                        {% elsif variant.metafields.color.hex.value %}
-                          {% assign color_hex = variant.metafields.color.hex.value %}
-                        {% elsif variant.metafields.color.hex %}
-                          {% assign color_hex = variant.metafields.color.hex %}
-                        {% elsif variant.metafields.custom.color_value.value %}
-                          {% assign color_hex = variant.metafields.custom.color_value.value %}
-                        {% elsif variant.metafields.custom.color_value %}
-                          {% assign color_hex = variant.metafields.custom.color_value %}
-                        {% elsif variant.metafields.custom.swatch.value %}
-                          {% assign color_hex = variant.metafields.custom.swatch.value %}
-                        {% elsif variant.metafields.custom.swatch %}
-                          {% assign color_hex = variant.metafields.custom.swatch %}
-                        {% elsif variant.metafields.swatch.color.value %}
-                          {% assign color_hex = variant.metafields.swatch.color.value %}
-                        {% elsif variant.metafields.swatch.color %}
-                          {% assign color_hex = variant.metafields.swatch.color %}
-                        {% elsif variant.metafields.global.color_swatch.value %}
-                          {% assign color_hex = variant.metafields.global.color_swatch.value %}
-                        {% elsif variant.metafields.global.color_swatch %}
-                          {% assign color_hex = variant.metafields.global.color_swatch %}
-                        {% else %}
-                          {% comment %} 如果元字段中没有找到，尝试从颜色名称映射获取 {% endcomment %}
-                          {% assign value_lower = value | downcase %}
-                          {% case value_lower %}
-                            {% when 'black', '黑色' %}
-                              {% assign color_hex = '#000000' %}
-                            {% when 'white', '白色' %}
-                              {% assign color_hex = '#FFFFFF' %}
-                            {% when 'red', '红色' %}
-                              {% assign color_hex = '#FF0000' %}
-                            {% when 'blue', '蓝色' %}
-                              {% assign color_hex = '#0000FF' %}
-                            {% when 'green', '绿色' %}
-                              {% assign color_hex = '#008000' %}
-                            {% when 'yellow', '黄色' %}
-                              {% assign color_hex = '#FFFF00' %}
-                            {% when 'orange', '橙色' %}
-                              {% assign color_hex = '#FFA500' %}
-                            {% when 'purple', '紫色' %}
-                              {% assign color_hex = '#800080' %}
-                            {% when 'pink', '粉色' %}
-                              {% assign color_hex = '#FFC0CB' %}
-                            {% when 'brown', '棕色' %}
-                              {% assign color_hex = '#A52A2A' %}
-                            {% when 'gray', 'grey', '灰色' %}
-                              {% assign color_hex = '#808080' %}
-                            {% when 'navy', '深蓝色' %}
-                              {% assign color_hex = '#000080' %}
-                            {% when 'beige', '米色' %}
-                              {% assign color_hex = '#F5F5DC' %}
-                            {% when 'tan', '棕褐色' %}
-                              {% assign color_hex = '#D2B48C' %}
-                            {% when 'maroon', '栗色' %}
-                              {% assign color_hex = '#800000' %}
-                            {% when 'olive', '橄榄色' %}
-                              {% assign color_hex = '#808000' %}
-                            {% when 'lime', '酸橙色' %}
-                              {% assign color_hex = '#00FF00' %}
-                            {% when 'aqua', 'cyan', '青色' %}
-                              {% assign color_hex = '#00FFFF' %}
-                            {% when 'teal', '蓝绿色' %}
-                              {% assign color_hex = '#008080' %}
-                            {% when 'silver', '银色' %}
-                              {% assign color_hex = '#C0C0C0' %}
-                            {% when 'fuchsia', 'magenta', '洋红色' %}
-                              {% assign color_hex = '#FF00FF' %}
-                            {% else %}
-                              {% assign color_hex = '#CCCCCC' %}
-                          {% endcase %}
                         {% endif %}
-                        
-                        {% comment %} 调试信息 - 临时启用查看获取到的颜色值 {% endcomment %}
-                        {% comment %} 变体: {{ variant.title }}, 颜色名: {{ value }}, 颜色值: {{ color_hex }}, 元字段: {{ variant.metafields.custom.color }} {% endcomment %}
-                        
-                        {% break %}
-                      {% endif %}
-                    {% endfor %}
-                    
-                    <div class="uc-color-item">
-                      <div class="uc-color-option {% unless first_color_processed %}uc-selected{% endunless %}" 
-                           style="background-color: {{ color_hex }};"
-                           data-color="{{ value }}"
-                           data-variant-id="{{ variant_id }}"
-                           data-variant-image="{{ variant_image }}">
-                        {% unless first_color_processed %}
-                          <div class="uc-color-checkmark">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                            </svg>
-                          </div>
-                          {% assign first_color_processed = true %}
-                        {% endunless %}
-                      </div>
-                      <div class="uc-color-label">{{ value }}</div>
+                      {% endunless %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  <div class="uc-color-item">
+                    <div class="uc-color-option {% unless first_color_processed %}uc-selected{% endunless %}" 
+                         style="background-color: {{ color_hex }};"
+                         data-color="{{ value }}"
+                         data-variant-id="{{ variant_id }}"
+                         data-variant-image="{{ variant_image }}">
+                      {% unless first_color_processed %}
+                        <div class="uc-color-checkmark">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                          </svg>
+                        </div>
+                        {% assign first_color_processed = true %}
+                      {% endunless %}
                     </div>
-                  {% endunless %}
+                    <div class="uc-color-label">{{ value }}</div>
+                  </div>
                 {% endfor %}
-                
                 {% break %}
               {% endif %}
             {% endfor %}
-            
-            {% comment %} 如果没有找到颜色选项，显示提示信息 {% endcomment %}
-            {% unless color_option_found %}
-              <div class="uc-no-colors-message">
-                <p>未找到颜色选项。请确保产品有名为 "{{ section.settings.color_option_name | default: 'Color' }}" 的选项，或包含 "color"、"upholstery"、"fabric" 等关键词的选项。</p>
-                <p>当前产品选项：{% for option in selected_product.options_with_values %}{{ option.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}</p>
-              </div>
-            {% endunless %}
           {% else %}
             {% for block in section.blocks %}
               {% if block.type == 'color_option' %}
