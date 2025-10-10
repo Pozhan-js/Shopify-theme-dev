@@ -13,6 +13,58 @@
       "id": "content",
       "label": "内容",
       "default": "<p>在此输入风水布局内容</p>"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "背景颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "base_font_size",
+      "label": "基础字体大小",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "h1_size",
+      "label": "H1字体大小",
+      "min": 24,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "h2_size",
+      "label": "H2字体大小",
+      "min": 20,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "h3_size",
+      "label": "H3字体大小",
+      "min": 18,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 22
     }
   ],
   "presets": [
@@ -24,97 +76,111 @@
 }
 {% endschema %}
 
-<div class="fengshui-celestial-section">
+<div class="custom-rich-text-section" style="background-color: {{ section.settings.bg_color }};">
   <div class="page-width">
     {% if section.settings.title != blank %}
-      <h2 class="celestial-title">{{ section.settings.title }}</h2>
+      <h1 class="rich-text-title" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.h1_size }}px;">{{ section.settings.title }}</h1>
     {% endif %}
-    <div class="celestial-content">
-      <div class="custom-rich-text">
-        {{ section.settings.content }}
-      </div>
+    <div class="rich-text-content" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.base_font_size }}px;">
+      {{ section.settings.content }}
     </div>
   </div>
 </div>
 
 <style>
-  .fengshui-celestial-section {
-    padding: 0;
+  .custom-rich-text-section {
+    padding: 60px 0;
     position: relative;
     min-height: 500px;
-    background: #000000;
+    display: flex;
+    align-items: center;
   }
 
   .page-width {
     position: relative;
     z-index: 11;
-  }
-
-  .celestial-title {
-    text-align: center;
-    font-size: 2.2rem;
-    color: #ffffff;
-    margin-bottom: 30px;
-    margin-top: 0;
-  }
-
-  .celestial-content {
-    max-width: 1000px;
-    padding: 30px;
-    border-radius: 8px;
-    color: #ffffff;
-  }
-
-  .custom-rich-text {
     width: 100%;
   }
 
-  .custom-rich-text h1,
-  .custom-rich-text h2,
-  .custom-rich-text h3,
-  .custom-rich-text h4,
-  .custom-rich-text h5,
-  .custom-rich-text h6 {
-    color: #ffffff;
-    margin: 1.5rem 0 1rem 0;
+  .rich-text-title {
+    text-align: center;
+    margin-bottom: 30px;
+    margin-top: 0;
+    font-weight: bold;
   }
 
-  .custom-rich-text p {
-    color: #ffffff;
-    margin: 1rem 0;
+  .rich-text-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 30px;
     line-height: 1.8;
   }
 
-  .custom-rich-text ul,
-  .custom-rich-text ol {
-    color: #ffffff;
+  .rich-text-content h1 {
+    font-size: {{ section.settings.h1_size }}px;
+    margin: 1.5rem 0 1rem 0;
+    font-weight: bold;
+  }
+
+  .rich-text-content h2 {
+    font-size: {{ section.settings.h2_size }}px;
+    margin: 1.5rem 0 1rem 0;
+    font-weight: bold;
+  }
+
+  .rich-text-content h3 {
+    font-size: {{ section.settings.h3_size }}px;
+    margin: 1.5rem 0 1rem 0;
+    font-weight: bold;
+  }
+
+  .rich-text-content p {
+    margin: 1rem 0;
+  }
+
+  .rich-text-content ul,
+  .rich-text-content ol {
     margin: 1rem 0;
     padding-left: 2rem;
   }
 
-  .custom-rich-text li {
-    color: #ffffff;
+  .rich-text-content li {
     margin: 0.5rem 0;
   }
 
-  .custom-rich-text strong {
-    color: #ffffff;
+  .rich-text-content strong {
     font-weight: bold;
   }
 
-  .custom-rich-text em {
-    color: #ffffff;
+  .rich-text-content em {
     font-style: italic;
   }
 
   @media (max-width: 768px) {
-    .fengshui-celestial-section {
-      padding: 30px 0;
-      min-height: 300px;
+    .custom-rich-text-section {
+      padding: 40px 20px;
+      min-height: auto;
     }
 
-    .celestial-title {
-      font-size: 1.8rem;
+    .rich-text-title {
+      font-size: 28px;
+    }
+
+    .rich-text-content {
+      padding: 0 20px;
+      font-size: 14px;
+    }
+
+    .rich-text-content h1 {
+      font-size: 28px;
+    }
+
+    .rich-text-content h2 {
+      font-size: 24px;
+    }
+
+    .rich-text-content h3 {
+      font-size: 20px;
     }
   }
 </style>
