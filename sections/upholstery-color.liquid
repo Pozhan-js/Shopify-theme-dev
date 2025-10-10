@@ -11,11 +11,14 @@
     
     <div class="uc-content">
       <div class="uc-equipment-display">
-        {% if section.settings.equipment_image != blank %}
-          <img src="{{ section.settings.equipment_image | img_url: '1072x688' }}" alt="Pilates Equipment" class="uc-equipment-image">
+        {% assign selected_product = all_products[section.settings.selected_product] %}
+        {% if selected_product and selected_product.featured_image %}
+          <img src="{{ selected_product.featured_image | img_url: '890x412' }}" alt="{{ selected_product.title }}" class="uc-equipment-image">
+        {% elsif section.settings.equipment_image != blank %}
+          <img src="{{ section.settings.equipment_image | img_url: '890x412' }}" alt="Pilates Equipment" class="uc-equipment-image">
         {% else %}
           <div class="uc-equipment-image-placeholder">
-            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1072&q=80" alt="Pilates Equipment" class="uc-equipment-image">
+            <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=890&q=80" alt="Pilates Equipment" class="uc-equipment-image">
           </div>
         {% endif %}
       </div>
@@ -25,21 +28,72 @@
           <h3 class="uc-colors-title">Upholstery Colors</h3>
         </div>
         <div class="uc-color-grid">
-          {% for block in section.blocks %}
-            {% if block.type == 'color_option' %}
-              <div class="uc-color-option {% if block.settings.is_selected %}uc-selected{% endif %}" 
-                   style="background-color: {{ block.settings.color_value | default: '#000000' }};"
-                   data-color="{{ block.settings.color_name }}">
-                {% if block.settings.is_selected %}
-                  <div class="uc-color-checkmark">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                    </svg>
+          {% if selected_product %}
+            {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
+            {% for variant in selected_product.variants %}
+              {% for option in variant.options %}
+                {% if variant.option1 == option and selected_product.options_with_values[0].name == color_option_name %}
+                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                       style="background-color: {{ color_value }};"
+                       data-color="{{ option }}"
+                       data-variant-id="{{ variant.id }}">
+                    {% if forloop.first %}
+                      <div class="uc-color-checkmark">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% elsif variant.option2 == option and selected_product.options_with_values[1].name == color_option_name %}
+                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                       style="background-color: {{ color_value }};"
+                       data-color="{{ option }}"
+                       data-variant-id="{{ variant.id }}">
+                    {% if forloop.first %}
+                      <div class="uc-color-checkmark">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% elsif variant.option3 == option and selected_product.options_with_values[2].name == color_option_name %}
+                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                       style="background-color: {{ color_value }};"
+                       data-color="{{ option }}"
+                       data-variant-id="{{ variant.id }}">
+                    {% if forloop.first %}
+                      <div class="uc-color-checkmark">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                        </svg>
+                      </div>
+                    {% endif %}
                   </div>
                 {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
+              {% endfor %}
+            {% endfor %}
+          {% else %}
+            {% for block in section.blocks %}
+              {% if block.type == 'color_option' %}
+                <div class="uc-color-option {% if block.settings.is_selected %}uc-selected{% endif %}" 
+                     style="background-color: {{ block.settings.color_value | default: '#000000' }};"
+                     data-color="{{ block.settings.color_name }}">
+                  {% if block.settings.is_selected %}
+                    <div class="uc-color-checkmark">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                      </svg>
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         </div>
         
         {% if section.settings.button_text != blank %}
@@ -53,6 +107,51 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const colorOptions = document.querySelectorAll('.uc-color-option');
+  
+  colorOptions.forEach(option => {
+    option.addEventListener('click', function() {
+      // 移除所有选中状态
+      colorOptions.forEach(opt => {
+        opt.classList.remove('uc-selected');
+        const checkmark = opt.querySelector('.uc-color-checkmark');
+        if (checkmark) {
+          checkmark.remove();
+        }
+      });
+      
+      // 添加选中状态到当前选项
+      this.classList.add('uc-selected');
+      
+      // 添加选中标记
+      const checkmark = document.createElement('div');
+      checkmark.className = 'uc-color-checkmark';
+      checkmark.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+        </svg>
+      `;
+      this.appendChild(checkmark);
+      
+      // 触发自定义事件，可用于其他功能
+      const colorName = this.getAttribute('data-color');
+      const variantId = this.getAttribute('data-variant-id');
+      
+      const event = new CustomEvent('colorSelected', {
+        detail: {
+          colorName: colorName,
+          variantId: variantId
+        }
+      });
+      
+      document.dispatchEvent(event);
+    });
+  });
+});
+</script>
 
 <style>
 .uc-section {
@@ -694,9 +793,23 @@
       "default": "Choose from our premium upholstery options to match your studio's aesthetic."
     },
     {
+      "type": "product",
+      "id": "selected_product",
+      "label": "Select Product",
+      "info": "Choose a product to display its image and color variants"
+    },
+    {
+      "type": "text",
+      "id": "color_option_name",
+      "label": "Color Option Name",
+      "default": "Color",
+      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric')"
+    },
+    {
       "type": "image_picker",
       "id": "equipment_image",
-      "label": "Equipment Image"
+      "label": "Fallback Equipment Image",
+      "info": "Used when no product is selected"
     },
     {
       "type": "text",
