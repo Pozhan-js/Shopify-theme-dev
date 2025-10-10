@@ -98,41 +98,19 @@
                         {% unless color_hex %}
                           {% assign color_hex = variant.metafields.color.value %}
                         {% endunless %}
-                        
-                        {% comment %} 如果仍然没有颜色值，根据颜色名称设置默认颜色 {% endcomment %}
                         {% unless color_hex %}
-                          {% assign color_name_lower = value | downcase %}
-                          {% if color_name_lower contains 'black' or color_name_lower contains '黑' %}
-                            {% assign color_hex = '#000000' %}
-                          {% elsif color_name_lower contains 'white' or color_name_lower contains '白' %}
-                            {% assign color_hex = '#FFFFFF' %}
-                          {% elsif color_name_lower contains 'red' or color_name_lower contains '红' %}
-                            {% assign color_hex = '#C22E35' %}
-                          {% elsif color_name_lower contains 'blue' or color_name_lower contains '蓝' %}
-                            {% assign color_hex = '#4169E1' %}
-                          {% elsif color_name_lower contains 'green' or color_name_lower contains '绿' %}
-                            {% assign color_hex = '#228B22' %}
-                          {% elsif color_name_lower contains 'brown' or color_name_lower contains '棕' %}
-                            {% assign color_hex = '#8B4513' %}
-                          {% elsif color_name_lower contains 'gray' or color_name_lower contains 'grey' or color_name_lower contains '灰' %}
-                            {% assign color_hex = '#808080' %}
-                          {% elsif color_name_lower contains 'beige' or color_name_lower contains '米' %}
-                            {% assign color_hex = '#F5F5DC' %}
-                          {% elsif color_name_lower contains 'navy' or color_name_lower contains '深蓝' %}
-                            {% assign color_hex = '#000080' %}
-                          {% elsif color_name_lower contains 'tan' or color_name_lower contains '棕褐' %}
-                            {% assign color_hex = '#D2B48C' %}
-                          {% elsif color_name_lower contains 'yellow' or color_name_lower contains '黄' %}
-                            {% assign color_hex = '#FFD700' %}
-                          {% elsif color_name_lower contains 'purple' or color_name_lower contains '紫' %}
-                            {% assign color_hex = '#800080' %}
-                          {% elsif color_name_lower contains 'orange' or color_name_lower contains '橙' %}
-                            {% assign color_hex = '#FFA500' %}
-                          {% elsif color_name_lower contains 'pink' or color_name_lower contains '粉' %}
-                            {% assign color_hex = '#FFC0CB' %}
-                          {% else %}
-                            {% assign color_hex = '#CCCCCC' %}
-                          {% endif %}
+                          {% assign color_hex = variant.metafields.custom.swatch %}
+                        {% endunless %}
+                        {% unless color_hex %}
+                          {% assign color_hex = variant.metafields.swatch.color %}
+                        {% endunless %}
+                        {% unless color_hex %}
+                          {% assign color_hex = variant.metafields.global.color_swatch.value %}
+                        {% endunless %}
+                        
+                        {% comment %} 如果仍然没有颜色值，使用透明色或提示色 {% endcomment %}
+                        {% unless color_hex %}
+                          {% assign color_hex = 'rgba(204, 204, 204, 0.3)' %}
                         {% endunless %}
                         
                         {% break %}
@@ -167,6 +145,7 @@
             {% unless color_option_found %}
               <div class="uc-no-colors-message">
                 <p>未找到颜色选项。请确保产品有名为 "{{ section.settings.color_option_name | default: 'Color' }}" 的选项，或包含 "color"、"upholstery"、"fabric" 等关键词的选项。</p>
+                <p>当前产品选项：{% for option in selected_product.options_with_values %}{{ option.name }}{% unless forloop.last %}, {% endunless %}{% endfor %}</p>
               </div>
             {% endunless %}
           {% else %}
@@ -400,6 +379,24 @@ document.addEventListener('DOMContentLoaded', function() {
   align-items: center;
   justify-content: center;
   border: 2px solid transparent;
+}
+
+.uc-color-option[style*="rgba"] {
+  border: 1px solid #ddd;
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                    linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+}
+
+.uc-color-option[style*="rgba"]:after {
+  content: "未设置颜色";
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .uc-color-label {
