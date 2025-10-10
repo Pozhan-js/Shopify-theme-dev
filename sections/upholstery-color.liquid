@@ -75,43 +75,55 @@
                           {% assign variant_image = variant.image | img_url: '890x412' %}
                         {% endif %}
                         
-                        {% comment %} 尝试多种方式获取颜色值 {% endcomment %}
-                        {% assign color_hex = variant.metafields.custom.color_hex.value %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.custom.color_value.value %}
-                        {% endunless %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.color.hex.value %}
-                        {% endunless %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.color.value.value %}
-                        {% endunless %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.custom.color_hex %}
-                        {% endunless %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.custom.color_value %}
-                        {% endunless %}
-                        {% unless color_hex %}
-                          {% assign color_hex = variant.metafields.color.hex %}
-                        {% endunless %}
-                        {% unless color_hex %}
+                        {% comment %} 尝试获取颜色值 - 优先从最常用的路径开始 {% endcomment %}
+                        {% comment %} 首先尝试 Color 字段（Shopify 标准颜色字段） {% endcomment %}
+                        {% if variant.metafields.custom.color %}
+                          {% assign color_hex = variant.metafields.custom.color %}
+                        {% elsif variant.metafields.custom.color.value %}
+                          {% assign color_hex = variant.metafields.custom.color.value %}
+                        {% elsif variant.metafields.color %}
+                          {% assign color_hex = variant.metafields.color %}
+                        {% elsif variant.metafields.color.value %}
                           {% assign color_hex = variant.metafields.color.value %}
-                        {% endunless %}
-                        {% unless color_hex %}
+                        {% comment %} 然后尝试 color_hex 字段 {% endcomment %}
+                        {% elsif variant.metafields.custom.color_hex %}
+                          {% assign color_hex = variant.metafields.custom.color_hex %}
+                        {% elsif variant.metafields.custom.color_hex.value %}
+                          {% assign color_hex = variant.metafields.custom.color_hex.value %}
+                        {% elsif variant.metafields.color.hex %}
+                          {% assign color_hex = variant.metafields.color.hex %}
+                        {% elsif variant.metafields.color.hex.value %}
+                          {% assign color_hex = variant.metafields.color.hex.value %}
+                        {% comment %} 尝试 color_value 字段 {% endcomment %}
+                        {% elsif variant.metafields.custom.color_value %}
+                          {% assign color_hex = variant.metafields.custom.color_value %}
+                        {% elsif variant.metafields.custom.color_value.value %}
+                          {% assign color_hex = variant.metafields.custom.color_value.value %}
+                        {% elsif variant.metafields.color.value %}
+                          {% assign color_hex = variant.metafields.color.value %}
+                        {% elsif variant.metafields.color.value.value %}
+                          {% assign color_hex = variant.metafields.color.value.value %}
+                        {% comment %} 尝试 swatch 相关字段 {% endcomment %}
+                        {% elsif variant.metafields.custom.swatch %}
                           {% assign color_hex = variant.metafields.custom.swatch %}
-                        {% endunless %}
-                        {% unless color_hex %}
+                        {% elsif variant.metafields.custom.swatch.value %}
+                          {% assign color_hex = variant.metafields.custom.swatch.value %}
+                        {% elsif variant.metafields.swatch.color %}
                           {% assign color_hex = variant.metafields.swatch.color %}
-                        {% endunless %}
-                        {% unless color_hex %}
+                        {% elsif variant.metafields.swatch.color.value %}
+                          {% assign color_hex = variant.metafields.swatch.color.value %}
+                        {% comment %} 尝试全局颜色样本字段 {% endcomment %}
+                        {% elsif variant.metafields.global.color_swatch %}
+                          {% assign color_hex = variant.metafields.global.color_swatch %}
+                        {% elsif variant.metafields.global.color_swatch.value %}
                           {% assign color_hex = variant.metafields.global.color_swatch.value %}
-                        {% endunless %}
-                        
-                        {% comment %} 如果仍然没有颜色值，使用透明色或提示色 {% endcomment %}
-                        {% unless color_hex %}
+                        {% comment %} 如果都没有找到，使用透明背景 {% endcomment %}
+                        {% else %}
                           {% assign color_hex = 'rgba(204, 204, 204, 0.3)' %}
-                        {% endunless %}
+                        {% endif %}
+                        
+                        {% comment %} 调试信息 - 可以临时启用查看获取到的颜色值 {% endcomment %}
+                        {% comment %} 变体ID: {{ variant_id }}, 颜色名: {{ value }}, 颜色值: {{ color_hex }} {% endcomment %}
                         
                         {% break %}
                       {% endif %}
