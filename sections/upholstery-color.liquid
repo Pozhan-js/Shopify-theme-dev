@@ -64,118 +64,153 @@
                       {% comment %} 重置颜色值 {% endcomment %}
                       {% assign color_hex = '' %}
                       {% assign color_found = false %}
+                      {% assign debug_info = '' %}
                       
-                      {% comment %} 尝试多种元字段路径获取颜色值 {% endcomment %}
+                      {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
+                      
+                      {% comment %} 1. 尝试 custom.color.value {% endcomment %}
                       {% unless color_found %}
-                        {% if variant.metafields.custom.color.value and variant.metafields.custom.color.value != blank %}
-                          {% assign color_hex = variant.metafields.custom.color.value %}
+                        {% assign test_value = variant.metafields.custom.color.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
                           {% assign color_found = true %}
+                          {% assign debug_info = 'custom.color.value' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 2. 尝试 custom.color {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.custom.color %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'custom.color' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 3. 尝试 color.value {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.color.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'color.value' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 4. 尝试 color {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.color %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'color' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 5. 尝试 global.color.value {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.global.color.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'global.color.value' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 6. 尝试 global.color {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.global.color %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'global.color' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 7. 尝试其他可能的命名 {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields.custom.hex_color.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'custom.hex_color.value' %}
                         {% endif %}
                       {% endunless %}
                       
                       {% unless color_found %}
-                        {% if variant.metafields.custom.color and variant.metafields.custom.color != blank %}
-                          {% assign color_hex = variant.metafields.custom.color %}
+                        {% assign test_value = variant.metafields.custom.color_code.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
                           {% assign color_found = true %}
+                          {% assign debug_info = 'custom.color_code.value' %}
                         {% endif %}
                       {% endunless %}
                       
                       {% unless color_found %}
-                        {% if variant.metafields.color.value and variant.metafields.color.value != blank %}
-                          {% assign color_hex = variant.metafields.color.value %}
+                        {% assign test_value = variant.metafields.custom.color_hex.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
                           {% assign color_found = true %}
+                          {% assign debug_info = 'custom.color_hex.value' %}
                         {% endif %}
                       {% endunless %}
                       
+                      {% comment %} 8. 尝试基于颜色名称的预设颜色映射 {% endcomment %}
                       {% unless color_found %}
-                        {% if variant.metafields.color and variant.metafields.color != blank %}
-                          {% assign color_hex = variant.metafields.color %}
-                          {% assign color_found = true %}
-                        {% endif %}
+                        {% assign value_lower = value | downcase %}
+                        {% case value_lower %}
+                          {% when 'black' %}
+                            {% assign color_hex = '#000000' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-black' %}
+                          {% when 'white' %}
+                            {% assign color_hex = '#FFFFFF' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-white' %}
+                          {% when 'red' %}
+                            {% assign color_hex = '#FF0000' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-red' %}
+                          {% when 'blue' %}
+                            {% assign color_hex = '#0000FF' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-blue' %}
+                          {% when 'green' %}
+                            {% assign color_hex = '#008000' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-green' %}
+                          {% when 'gray', 'grey' %}
+                            {% assign color_hex = '#808080' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-gray' %}
+                          {% when 'steel gray', 'steel grey' %}
+                            {% assign color_hex = '#71797E' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-steel-gray' %}
+                          {% when 'brown' %}
+                            {% assign color_hex = '#8B4513' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-brown' %}
+                          {% when 'navy' %}
+                            {% assign color_hex = '#000080' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-navy' %}
+                          {% when 'beige' %}
+                            {% assign color_hex = '#F5F5DC' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-beige' %}
+                          {% when 'tan' %}
+                            {% assign color_hex = '#D2B48C' %}
+                            {% assign color_found = true %}
+                            {% assign debug_info = 'preset-tan' %}
+                        {% endcase %}
                       {% endunless %}
                       
-                      {% unless color_found %}
-                        {% if variant.metafields.custom.colour.value and variant.metafields.custom.colour.value != blank %}
-                          {% assign color_hex = variant.metafields.custom.colour.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.custom.colour and variant.metafields.custom.colour != blank %}
-                          {% assign color_hex = variant.metafields.custom.colour %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.colour.value and variant.metafields.colour.value != blank %}
-                          {% assign color_hex = variant.metafields.colour.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.colour and variant.metafields.colour != blank %}
-                          {% assign color_hex = variant.metafields.colour %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.global.color.value and variant.metafields.global.color.value != blank %}
-                          {% assign color_hex = variant.metafields.global.color.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.global.color and variant.metafields.global.color != blank %}
-                          {% assign color_hex = variant.metafields.global.color %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 尝试其他可能的元字段命名 {% endcomment %}
-                      {% unless color_found %}
-                        {% if variant.metafields.custom.hex_color.value and variant.metafields.custom.hex_color.value != blank %}
-                          {% assign color_hex = variant.metafields.custom.hex_color.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.custom.color_code.value and variant.metafields.custom.color_code.value != blank %}
-                          {% assign color_hex = variant.metafields.custom.color_code.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% if variant.metafields.custom.color_hex.value and variant.metafields.custom.color_hex.value != blank %}
-                          {% assign color_hex = variant.metafields.custom.color_hex.value %}
-                          {% assign color_found = true %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 如果变体没有颜色元字段，尝试从产品级别获取 {% endcomment %}
-                      {% unless color_found %}
-                        {% for product_metafield in selected_product.metafields %}
-                          {% assign metafield_key = product_metafield[0] %}
-                          {% assign metafield_value = product_metafield[1] %}
-                          {% if metafield_key contains 'color' or metafield_key contains 'colour' %}
-                            {% if metafield_value[value] and metafield_value[value] != blank %}
-                              {% assign color_hex = metafield_value[value] %}
-                              {% assign color_found = true %}
-                              {% break %}
-                            {% endif %}
-                          {% endif %}
-                        {% endfor %}
-                      {% endunless %}
-                      
-                      {% comment %} 如果仍然没有找到颜色，使用默认颜色 {% endcomment %}
+                      {% comment %} 9. 如果仍然没有找到颜色，使用默认颜色 {% endcomment %}
                       {% unless color_found %}
                         {% assign color_hex = '#CCCCCC' %}
+                        {% assign debug_info = 'default-fallback' %}
                       {% endunless %}
                     {% endif %}
                   {% endfor %}
@@ -195,7 +230,8 @@
                          data-color="{{ value }}"
                          data-variant-id="{{ variant_id }}"
                          data-variant-image="{{ variant_image }}"
-                         data-color-hex="{{ color_hex }}">
+                         data-color-hex="{{ color_hex }}"
+         data-debug-info="{{ debug_info }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -259,45 +295,73 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 检查是否有空的颜色值
   let emptyColorCount = 0;
+  let presetColorCount = 0;
+  let metafieldColorCount = 0;
   
   colorOptions.forEach((option, index) => {
     const colorName = option.getAttribute('data-color');
     const colorHex = option.getAttribute('data-color-hex');
     const variantId = option.getAttribute('data-variant-id');
     const variantImage = option.getAttribute('data-variant-image');
+    const debugInfo = option.getAttribute('data-debug-info');
     
-    // 检查空颜色值
-    if (!colorHex || colorHex === '#{}' || colorHex === '#' || colorHex === '#CCCCCC') {
-      emptyColorCount++;
-      console.warn(`⚠️ 颜色 ${index + 1} "${colorName}" 没有有效的颜色值:`, {
+    // 检查颜色来源
+    if (debugInfo && debugInfo.startsWith('preset-')) {
+      presetColorCount++;
+      console.log(`🎨 颜色 ${index + 1} "${colorName}" 使用预设颜色:`, {
         name: colorName,
         hex: colorHex,
-        variantId: variantId,
-        isEmpty: true
-      });
-    } else {
-      console.log(`✅ 颜色 ${index + 1}:`, {
-        name: colorName,
-        hex: colorHex,
+        source: debugInfo,
         variantId: variantId,
         hasImage: !!variantImage
+      });
+    } else if (debugInfo && debugInfo !== 'default-fallback') {
+      metafieldColorCount++;
+      console.log(`✅ 颜色 ${index + 1} "${colorName}" 从元字段获取:`, {
+        name: colorName,
+        hex: colorHex,
+        source: debugInfo,
+        variantId: variantId,
+        hasImage: !!variantImage
+      });
+    } else {
+      emptyColorCount++;
+      console.warn(`⚠️ 颜色 ${index + 1} "${colorName}" 使用默认颜色:`, {
+        name: colorName,
+        hex: colorHex,
+        source: debugInfo || 'unknown',
+        variantId: variantId,
+        hasImage: !!variantImage,
+        isEmpty: true
       });
     }
   });
   
   // 显示调试总结
+  console.log('📊 颜色来源统计:');
+  console.log(`   - 元字段颜色: ${metafieldColorCount} 个`);
+  console.log(`   - 预设颜色: ${presetColorCount} 个`);
+  console.log(`   - 默认颜色: ${emptyColorCount} 个`);
+  
   if (emptyColorCount > 0) {
-    console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色没有有效的颜色值`);
+    console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
     console.log('💡 建议检查以下元字段路径是否正确设置:');
-    console.log('   - variant.metafields.custom.color.value');
-    console.log('   - variant.metafields.custom.color');
-    console.log('   - variant.metafields.color.value');
-    console.log('   - variant.metafields.color');
-    console.log('   - variant.metafields.custom.hex_color.value');
-    console.log('   - variant.metafields.custom.color_code.value');
-    console.log('   - variant.metafields.custom.color_hex.value');
-  } else {
-    console.log('✅ 所有颜色都有有效的颜色值');
+    console.log('   优先级顺序:');
+    console.log('   1. variant.metafields.custom.color.value');
+    console.log('   2. variant.metafields.custom.color');
+    console.log('   3. variant.metafields.color.value');
+    console.log('   4. variant.metafields.color');
+    console.log('   5. variant.metafields.global.color.value');
+    console.log('   6. variant.metafields.global.color');
+    console.log('   7. variant.metafields.custom.hex_color.value');
+    console.log('   8. variant.metafields.custom.color_code.value');
+    console.log('   9. variant.metafields.custom.color_hex.value');
+    console.log('');
+    console.log('🔧 或者在 Shopify 后台为每个变体设置颜色元字段');
+  }
+  
+  if (presetColorCount > 0) {
+    console.log('ℹ️ 部分颜色使用了基于名称的预设值，建议在后台设置准确的颜色值');
   }
   
   colorOptions.forEach((option, index) => {
@@ -350,12 +414,16 @@ document.addEventListener('DOMContentLoaded', function() {
       document.dispatchEvent(event);
       
       // 详细的调试信息
+      const debugInfo = this.getAttribute('data-debug-info');
       console.log('🎨 选择了颜色:', {
         name: colorName,
         hex: colorHex,
+        source: debugInfo,
         variantId: variantId,
         image: variantImage,
-        hasValidColor: colorHex && colorHex !== '#{}' && colorHex !== '#' && colorHex !== '#CCCCCC'
+        hasValidColor: colorHex && colorHex !== '#{}' && colorHex !== '#' && colorHex !== '#CCCCCC',
+        isPreset: debugInfo && debugInfo.startsWith('preset-'),
+        isMetafield: debugInfo && !debugInfo.startsWith('preset-') && debugInfo !== 'default-fallback'
       });
     });
   });
