@@ -30,66 +30,88 @@
         <div class="uc-color-grid">
           {% if selected_product %}
             {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
+            {% assign processed_colors = '' %}
             {% for variant in selected_product.variants %}
               {% for option in variant.options %}
                 {% if variant.option1 == option and selected_product.options_with_values[0].name == color_option_name %}
-                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
-                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
-                       style="background-color: {{ color_value }};"
-                       data-color="{{ option }}"
-                       data-variant-id="{{ variant.id }}">
-                    {% if forloop.first %}
-                      <div class="uc-color-checkmark">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                        </svg>
+                  {% unless processed_colors contains option %}
+                    {% assign processed_colors = processed_colors | append: option | append: ',' %}
+                    {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                    <div class="uc-color-item">
+                      <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                           style="background-color: {{ color_value }};"
+                           data-color="{{ option }}"
+                           data-variant-id="{{ variant.id }}">
+                        {% if forloop.first %}
+                          <div class="uc-color-checkmark">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                            </svg>
+                          </div>
+                        {% endif %}
                       </div>
-                    {% endif %}
-                  </div>
+                      <div class="uc-color-label">{{ option }}</div>
+                    </div>
+                  {% endunless %}
                 {% elsif variant.option2 == option and selected_product.options_with_values[1].name == color_option_name %}
-                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
-                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
-                       style="background-color: {{ color_value }};"
-                       data-color="{{ option }}"
-                       data-variant-id="{{ variant.id }}">
-                    {% if forloop.first %}
-                      <div class="uc-color-checkmark">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                        </svg>
+                  {% unless processed_colors contains option %}
+                    {% assign processed_colors = processed_colors | append: option | append: ',' %}
+                    {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                    <div class="uc-color-item">
+                      <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                           style="background-color: {{ color_value }};"
+                           data-color="{{ option }}"
+                           data-variant-id="{{ variant.id }}">
+                        {% if forloop.first %}
+                          <div class="uc-color-checkmark">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                            </svg>
+                          </div>
+                        {% endif %}
                       </div>
-                    {% endif %}
-                  </div>
+                      <div class="uc-color-label">{{ option }}</div>
+                    </div>
+                  {% endunless %}
                 {% elsif variant.option3 == option and selected_product.options_with_values[2].name == color_option_name %}
-                  {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
-                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
-                       style="background-color: {{ color_value }};"
-                       data-color="{{ option }}"
-                       data-variant-id="{{ variant.id }}">
-                    {% if forloop.first %}
-                      <div class="uc-color-checkmark">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                        </svg>
+                  {% unless processed_colors contains option %}
+                    {% assign processed_colors = processed_colors | append: option | append: ',' %}
+                    {% assign color_value = variant.metafields.custom.color_value | default: '#000000' %}
+                    <div class="uc-color-item">
+                      <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
+                           style="background-color: {{ color_value }};"
+                           data-color="{{ option }}"
+                           data-variant-id="{{ variant.id }}">
+                        {% if forloop.first %}
+                          <div class="uc-color-checkmark">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                            </svg>
+                          </div>
+                        {% endif %}
                       </div>
-                    {% endif %}
-                  </div>
+                      <div class="uc-color-label">{{ option }}</div>
+                    </div>
+                  {% endunless %}
                 {% endif %}
               {% endfor %}
             {% endfor %}
           {% else %}
             {% for block in section.blocks %}
               {% if block.type == 'color_option' %}
-                <div class="uc-color-option {% if block.settings.is_selected %}uc-selected{% endif %}" 
-                     style="background-color: {{ block.settings.color_value | default: '#000000' }};"
-                     data-color="{{ block.settings.color_name }}">
-                  {% if block.settings.is_selected %}
-                    <div class="uc-color-checkmark">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                      </svg>
-                    </div>
-                  {% endif %}
+                <div class="uc-color-item">
+                  <div class="uc-color-option {% if block.settings.is_selected %}uc-selected{% endif %}" 
+                       style="background-color: {{ block.settings.color_value | default: '#000000' }};"
+                       data-color="{{ block.settings.color_name }}">
+                    {% if block.settings.is_selected %}
+                      <div class="uc-color-checkmark">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="uc-color-label">{{ block.settings.color_name }}</div>
                 </div>
               {% endif %}
             {% endfor %}
@@ -245,9 +267,44 @@ document.addEventListener('DOMContentLoaded', function() {
 .uc-color-grid {
   display: grid;
   grid-template-columns: repeat(3, 80px);
-  grid-template-rows: repeat(3, 80px);
+  grid-auto-rows: 110px;
   gap: 20px;
   margin-bottom: 40px;
+  height: 280px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+/* 自定义滚动条样式 */
+.uc-color-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.uc-color-grid::-webkit-scrollbar-track {
+  background: #F3F3F3;
+  border-radius: 4px;
+}
+
+.uc-color-grid::-webkit-scrollbar-thumb {
+  background: #AB3A39;
+  border-radius: 4px;
+}
+
+.uc-color-grid::-webkit-scrollbar-thumb:hover {
+  background: #8B2E2F;
+}
+
+/* Firefox 滚动条样式 */
+.uc-color-grid {
+  scrollbar-width: thin;
+  scrollbar-color: #AB3A39 #F3F3F3;
+}
+
+.uc-color-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .uc-color-option {
@@ -261,6 +318,17 @@ document.addEventListener('DOMContentLoaded', function() {
   align-items: center;
   justify-content: center;
   border: 2px solid transparent;
+}
+
+.uc-color-label {
+  font-size: 12px;
+  font-weight: 400;
+  color: #161616;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 80px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .uc-color-option:hover {
@@ -358,9 +426,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 80px);
-    grid-template-rows: repeat(3, 80px);
+    grid-auto-rows: 110px;
     gap: 20px;
     margin-bottom: 40px;
+    height: 280px;
   }
   
   .uc-color-option {
@@ -413,14 +482,20 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 68px);
-    grid-template-rows: repeat(3, 68px);
+    grid-auto-rows: 94px;
     gap: 16px;
     margin-bottom: 35px;
+    height: 240px;
   }
   
   .uc-color-option {
     width: 68px;
     height: 68px;
+  }
+  
+  .uc-color-label {
+    font-size: 11px;
+    max-width: 68px;
   }
   
   .uc-btn-swatch {
@@ -470,14 +545,20 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 60px);
-    grid-template-rows: repeat(3, 60px);
+    grid-auto-rows: 82px;
     gap: 15px;
     margin-bottom: 30px;
+    height: 210px;
   }
   
   .uc-color-option {
     width: 60px;
     height: 60px;
+  }
+  
+  .uc-color-label {
+    font-size: 10px;
+    max-width: 60px;
   }
   
   .uc-color-checkmark {
@@ -540,15 +621,21 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 55px);
-    grid-template-rows: repeat(3, 55px);
+    grid-auto-rows: 75px;
     gap: 12px;
     margin-bottom: 25px;
     justify-content: center;
+    height: 190px;
   }
   
   .uc-color-option {
     width: 55px;
     height: 55px;
+  }
+  
+  .uc-color-label {
+    font-size: 9px;
+    max-width: 55px;
   }
   
   .uc-color-checkmark {
@@ -611,15 +698,21 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 50px);
-    grid-template-rows: repeat(3, 50px);
+    grid-auto-rows: 68px;
     gap: 10px;
     margin-bottom: 20px;
     justify-content: center;
+    height: 170px;
   }
   
   .uc-color-option {
     width: 50px;
     height: 50px;
+  }
+  
+  .uc-color-label {
+    font-size: 8px;
+    max-width: 50px;
   }
   
   .uc-color-checkmark {
@@ -682,10 +775,11 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 45px);
-    grid-template-rows: repeat(3, 45px);
+    grid-auto-rows: 61px;
     gap: 8px;
     margin-bottom: 18px;
     justify-content: center;
+    height: 155px;
   }
   
   .uc-color-option {
@@ -693,9 +787,20 @@ document.addEventListener('DOMContentLoaded', function() {
     height: 45px;
   }
   
+  .uc-color-label {
+    font-size: 7px;
+    max-width: 45px;
+  }
+  
   .uc-color-checkmark {
     width: 14px;
     height: 14px;
+  }
+  
+  .uc-btn {
+    width: 180px;
+    height: 34px;
+    font-size: 12px;
   }
   
   .uc-btn-swatch {
@@ -749,15 +854,21 @@ document.addEventListener('DOMContentLoaded', function() {
   
   .uc-color-grid {
     grid-template-columns: repeat(3, 40px);
-    grid-template-rows: repeat(3, 40px);
+    grid-auto-rows: 54px;
     gap: 6px;
     margin-bottom: 15px;
     justify-content: center;
+    height: 140px;
   }
   
   .uc-color-option {
     width: 40px;
     height: 40px;
+  }
+  
+  .uc-color-label {
+    font-size: 6px;
+    max-width: 40px;
   }
   
   .uc-color-checkmark {
