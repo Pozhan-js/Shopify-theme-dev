@@ -1,37 +1,52 @@
-<!-- Equipment Mega Menu Snippet - 动态获取产品系列和产品 -->
+<!-- Equipment Mega Menu Snippet - 完全动态获取所有产品系列 -->
 <div class="mega-dropdown-menu">
   <div class="mega-menu-grid equipment-grid">
     <!-- 左侧三列产品分类 -->
     <div class="mega-menu-column equipment-left">
       
-      <!-- 获取所有产品系列 -->
+      <!-- 获取所有已发布的产品系列 -->
       {% assign all_collections = collections | where: 'published', true %}
-      {% assign equipment_collections = all_collections | where: 'handle', 'reformer' %}
-      {% assign equipment_collections = equipment_collections | concat: all_collections | where: 'handle', 'pilates-chair' %}
-      {% assign equipment_collections = equipment_collections | concat: all_collections | where: 'handle', 'ladder-barrel' %}
-      {% assign equipment_collections = equipment_collections | concat: all_collections | where: 'handle', 'cadillac' %}
-      {% assign equipment_collections = equipment_collections | concat: all_collections | where: 'handle', 'spine-corrector' %}
-      {% assign equipment_collections = equipment_collections | concat: all_collections | where: 'handle', 'accessories' %}
+      {% assign equipment_collections = '' | split: ',' %}
       
-      <!-- 如果没有找到专门的产品系列，使用所有产品系列 -->
+      <!-- 过滤掉系统默认的集合 -->
+      {% for collection in all_collections %}
+        {% unless collection.handle == 'all' or collection.handle == 'frontpage' or collection.handle contains 'blog' %}
+          {% assign equipment_collections = equipment_collections | concat: collection %}
+        {% endunless %}
+      {% endfor %}
+      
+      <!-- 如果没有产品系列，使用默认内容 -->
       {% if equipment_collections.size == 0 %}
         {% assign equipment_collections = all_collections | slice: 0, 6 %}
       {% endif %}
       
+      <!-- 计算每列应该显示的系列数量 -->
+      {% assign total_collections = equipment_collections.size %}
+      {% assign collections_per_column = total_collections | divided_by: 3.0 | ceil %}
+      
       <!-- 第一列 -->
       <div class="equipment-column">
-        <!-- Reformer 系列 -->
-        {% assign reformer_collection = collections['reformer'] %}
-        {% if reformer_collection and reformer_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ reformer_collection.url }}">{{ reformer_collection.title | default: 'Reformer' }}</a></h3>
-            <ul>
-              {% for product in reformer_collection.products limit: 4 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+        {% assign start_index = 0 %}
+        {% assign end_index = collections_per_column | minus: 1 %}
+        {% for i in (start_index..end_index) %}
+          {% assign collection = equipment_collections[i] %}
+          {% if collection %}
+            <div class="mega-menu-category">
+              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
+              <ul>
+                {% for product in collection.products limit: 4 %}
+                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+                {% endfor %}
+                {% if collection.products.size == 0 %}
+                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        <!-- 如果没有动态系列，显示默认的第一列内容 -->
+        {% if equipment_collections.size == 0 %}
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat1_title | default: 'Reformer' }}</h3>
             <ul>
@@ -50,20 +65,7 @@
               {% endif %}
             </ul>
           </div>
-        {% endif %}
-        
-        <!-- Pilates Chair 系列 -->
-        {% assign chair_collection = collections['pilates-chair'] %}
-        {% if chair_collection and chair_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ chair_collection.url }}">{{ chair_collection.title | default: 'Pilates Chair' }}</a></h3>
-            <ul>
-              {% for product in chair_collection.products limit: 4 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+          
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat2_title | default: 'Pilates Chair' }}</h3>
             <ul>
@@ -86,18 +88,27 @@
       
       <!-- 第二列 -->
       <div class="equipment-column">
-        <!-- Ladder Barrel 系列 -->
-        {% assign barrel_collection = collections['ladder-barrel'] %}
-        {% if barrel_collection and barrel_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ barrel_collection.url }}">{{ barrel_collection.title | default: 'Ladder Barrel' }}</a></h3>
-            <ul>
-              {% for product in barrel_collection.products limit: 4 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+        {% assign start_index = collections_per_column %}
+        {% assign end_index = collections_per_column | times: 2 | minus: 1 %}
+        {% for i in (start_index..end_index) %}
+          {% assign collection = equipment_collections[i] %}
+          {% if collection %}
+            <div class="mega-menu-category">
+              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
+              <ul>
+                {% for product in collection.products limit: 4 %}
+                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+                {% endfor %}
+                {% if collection.products.size == 0 %}
+                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        <!-- 如果没有动态系列，显示默认的第二列内容 -->
+        {% if equipment_collections.size == 0 %}
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat3_title | default: 'Ladder Barrel' }}</h3>
             <ul>
@@ -114,20 +125,7 @@
               {% endif %}
             </ul>
           </div>
-        {% endif %}
-        
-        <!-- Cadillac 系列 -->
-        {% assign cadillac_collection = collections['cadillac'] %}
-        {% if cadillac_collection and cadillac_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ cadillac_collection.url }}">{{ cadillac_collection.title | default: 'Cadillac' }}</a></h3>
-            <ul>
-              {% for product in cadillac_collection.products limit: 4 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+          
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat4_title | default: 'Cadillac' }}</h3>
             <ul>
@@ -144,20 +142,7 @@
               {% endif %}
             </ul>
           </div>
-        {% endif %}
-        
-        <!-- Spine Corrector 系列 -->
-        {% assign spine_collection = collections['spine-corrector'] %}
-        {% if spine_collection and spine_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ spine_collection.url }}">{{ spine_collection.title | default: 'Spine Corrector' }}</a></h3>
-            <ul>
-              {% for product in spine_collection.products limit: 4 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+          
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat5_title | default: 'Spine Corrector' }}</h3>
             <ul>
@@ -178,18 +163,27 @@
       
       <!-- 第三列 -->
       <div class="equipment-column">
-        <!-- Accessories 系列 -->
-        {% assign accessories_collection = collections['accessories'] %}
-        {% if accessories_collection and accessories_collection.products.size > 0 %}
-          <div class="mega-menu-category">
-            <h3><a href="{{ accessories_collection.url }}">{{ accessories_collection.title | default: 'Accessories' }}</a></h3>
-            <ul>
-              {% for product in accessories_collection.products limit: 7 %}
-                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% else %}
+        {% assign start_index = collections_per_column | times: 2 %}
+        {% assign end_index = equipment_collections.size | minus: 1 %}
+        {% for i in (start_index..end_index) %}
+          {% assign collection = equipment_collections[i] %}
+          {% if collection %}
+            <div class="mega-menu-category">
+              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
+              <ul>
+                {% for product in collection.products limit: 7 %}
+                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+                {% endfor %}
+                {% if collection.products.size == 0 %}
+                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endfor %}
+        
+        <!-- 如果没有动态系列，显示默认的第三列内容 -->
+        {% if equipment_collections.size == 0 %}
           <div class="mega-menu-category">
             <h3>{{ section.settings.equipment_cat6_title | default: 'Accessories' }}</h3>
             <ul>
