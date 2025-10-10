@@ -189,28 +189,9 @@
     z-index: 1000;
   }
 
-  /* 确保大型菜单优先级高于普通下拉菜单 */
-  .dropdown.has-mega-menu .mega-dropdown-menu {
-    display: block !important;
-  }
-
-  .dropdown.has-mega-menu:hover .mega-dropdown-menu {
+  .dropdown:hover .mega-dropdown-menu {
     opacity: 1;
     visibility: visible;
-  }
-
-  .dropdown.has-mega-menu .dropdown-menu {
-    display: none !important;
-  }
-
-  /* 普通下拉菜单样式 */
-  .dropdown:not(.has-mega-menu):hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .dropdown:not(.has-mega-menu):hover .mega-dropdown-menu {
-    display: none !important;
   }
 
   .mega-menu-grid {
@@ -1073,235 +1054,264 @@
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          {% assign mainmenuhandle = section.settings.mainmenu | default: 'main-menu' %}
-          {% assign mainmenu = linklists[mainmenuhandle] %}
-          {% if mainmenu and mainmenu.links.size > 0 %}
-            {% for link in mainmenu.links %}
-              {% if link.title == 'Pilates Equipment' %}
-                <!-- Pilates Equipment Mega Menu -->
-                <div class="dropdown has-mega-menu">
-                  <span class="nav-item dropdown-trigger" style="cursor: pointer;">
-                    <span>{{ link.title | escape }}</span>
-                    <span class="dropdown-arrow"></span>
-                  </span>
-                  <div class="mega-dropdown-menu">
-                    <div class="mega-menu-grid">
-                      {% assign column_count = 0 %}
-                      {% assign items_per_column = 3 %}
-                      {% assign current_column_items = 0 %}
-                      
-                      {% if link.links.size > 0 %}
-                        {% for childlink in link.links %}
-                          {% if current_column_items == 0 %}
-                            <div class="mega-menu-column">
-                          {% endif %}
-                          
-                          <div class="mega-menu-category">
-                            <h3>{{ childlink.title | escape }}</h3>
-                            {% if childlink.links.size > 0 %}
-                              <ul>
-                                {% for grandchildlink in childlink.links %}
-                                  <li><a href="{{ grandchildlink.url }}">{{ grandchildlink.title | escape }}</a></li>
-                                {% endfor %}
-                              </ul>
-                            {% else %}
-                              <ul>
-                                <li><a href="{{ childlink.url }}">{{ childlink.title | escape }}</a></li>
-                              </ul>
-                            {% endif %}
-                          </div>
-                          
-                          {% assign current_column_items = current_column_items | plus: 1 %}
-                          
-                          {% if current_column_items >= items_per_column or forloop.last %}
-                            </div>
-                            {% assign current_column_items = 0 %}
-                            {% assign column_count = column_count | plus: 1 %}
-                          {% endif %}
-                        {% endfor %}
-                      {% else %}
-                        <!-- 如果没有子菜单，显示默认内容 -->
-                        <div class="mega-menu-column">
-                          <div class="mega-menu-category">
-                            <h3>Reformer</h3>
-                            <ul>
-                              <li><a href="#">Pilates Reformer XSRF100</a></li>
-                              <li><a href="#">Aluminum Reformer XSRF04</a></li>
-                              <li><a href="#">Aluminum Reformer XSRF07</a></li>
-                              <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
-                            </ul>
-                          </div>
-                          <div class="mega-menu-category">
-                            <h3>Pilates Chair</h3>
-                            <ul>
-                              <li><a href="#">Basic Pilates Chair XSCC29</a></li>
-                              <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
-                              <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
-                            </ul>
-                          </div>
-                        </div>
-                        <div class="mega-menu-column">
-                          <div class="mega-menu-category">
-                            <h3>Ladder Barrel</h3>
-                            <ul>
-                              <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
-                              <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
-                            </ul>
-                          </div>
-                          <div class="mega-menu-category">
-                            <h3>Cadillac</h3>
-                            <ul>
-                              <li><a href="#">Cadillac XSCL19</a></li>
-                              <li><a href="#">Cadillac XSCL01</a></li>
-                            </ul>
-                          </div>
-                          <div class="mega-menu-category">
-                            <h3>Spine Corrector</h3>
-                            <ul>
-                              <li><a href="#">Spine Corrector XSSC43</a></li>
-                            </ul>
-                          </div>
-                        </div>
-                        <div class="mega-menu-column">
-                          <div class="mega-menu-category">
-                            <h3>Accessories</h3>
-                            <ul>
-                              <li><a href="#">Padded Wedge XSWD49</a></li>
-                              <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
-                              <li><a href="#">Pilates Ring XSAC04</a></li>
-                              <li><a href="#">Pilates Ball XSAC05</a></li>
-                              <li><a href="#">Resistance Bands XSAC06</a></li>
-                              <li><a href="#">Massage Ball XSAC07</a></li>
-                              <li><a href="#">Small Wedge XSAC08</a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      {% endif %}
-                      
-                      <!-- 图片列 -->
-                      <div class="mega-menu-column">
-                        <div class="mega-menu-cta">
-                          <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mega-menu-footer">
-                      {% if section.settings.contactfootericon %}
-                        <div class="mega-menu-footer-icon">
-                          <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
-                        </div>
-                      {% endif %}
-                      <span>CONTACT US</span>
-                    </div>
+          <!-- Pilates Equipment Mega Menu -->
+          <div class="dropdown">
+            <span class="nav-item" style="cursor: pointer;">
+              <span>Pilates Equipment</span>
+              <span class="dropdown-arrow"></span>
+            </span>
+            <div class="mega-dropdown-menu">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Reformer</h3>
+                    <ul>
+                      <li><a href="#">Pilates Reformer XSRF100</a></li>
+                      <li><a href="#">Aluminum Reformer XSRF04</a></li>
+                      <li><a href="#">Aluminum Reformer XSRF07</a></li>
+                      <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Pilates Chair</h3>
+                    <ul>
+                      <li><a href="#">Basic Pilates Chair XSCC29</a></li>
+                      <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
+                      <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
+                    </ul>
                   </div>
                 </div>
-              {% elsif link.title == 'Resources' %}
-                <!-- Resources Mega Menu -->
-                <div class="dropdown has-mega-menu">
-                  <span class="nav-item dropdown-trigger" style="cursor: pointer;">
-                    <span>{{ link.title | escape }}</span>
-                    <span class="dropdown-arrow"></span>
-                  </span>
-                  <div class="mega-dropdown-menu">
-                    <div class="mega-menu-grid">
-                      <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Learning</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.blog_link | default: '/blogs/news' }}">Blog</a></li>
-                            <li><a href="{{ section.settings.training_guides_link | default: '/pages/training-guides' }}">Training Guides</a></li>
-                            <li><a href="{{ section.settings.video_tutorials_link | default: '/pages/video-tutorials' }}">Video Tutorials</a></li>
-                            <li><a href="{{ section.settings.exercise_library_link | default: '/pages/exercise-library' }}">Exercise Library</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Documentation</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.user_manuals_link | default: '/pages/user-manuals' }}">User Manuals</a></li>
-                            <li><a href="{{ section.settings.assembly_guides_link | default: '/pages/assembly-guides' }}">Assembly Guides</a></li>
-                            <li><a href="{{ section.settings.maintenance_tips_link | default: '/pages/maintenance-tips' }}">Maintenance Tips</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Support</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.faqs_link | default: '/pages/faqs' }}">FAQs</a></li>
-                            <li><a href="{{ section.settings.technical_support_link | default: '/pages/technical-support' }}">Technical Support</a></li>
-                            <li><a href="{{ section.settings.warranty_info_link | default: '/pages/warranty-info' }}">Warranty Information</a></li>
-                            <li><a href="{{ section.settings.aftersales_link | default: '/pages/aftersales' }}">Aftersales Service</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Community</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.customer_story_link | default: '/pages/customer-story' }}">Customer Stories</a></li>
-                            <li><a href="{{ section.settings.testimonials_link | default: '/pages/testimonials' }}">Testimonials</a></li>
-                            <li><a href="{{ section.settings.community_forum_link | default: '/pages/community-forum' }}">Community Forum</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div class="mega-menu-column">
-                        <div class="mega-menu-category">
-                          <h3>Certifications</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.certificates_link | default: '/pages/certificates' }}">Product Certificates</a></li>
-                            <li><a href="{{ section.settings.quality_standards_link | default: '/pages/quality-standards' }}">Quality Standards</a></li>
-                            <li><a href="{{ section.settings.safety_compliance_link | default: '/pages/safety-compliance' }}">Safety Compliance</a></li>
-                            <li><a href="{{ section.settings.iso_certifications_link | default: '/pages/iso-certifications' }}">ISO Certifications</a></li>
-                          </ul>
-                        </div>
-                        <div class="mega-menu-category">
-                          <h3>Downloads</h3>
-                          <ul>
-                            <li><a href="{{ section.settings.product_catalogs_link | default: '/pages/product-catalogs' }}">Product Catalogs</a></li>
-                            <li><a href="{{ section.settings.specification_sheets_link | default: '/pages/specification-sheets' }}">Specification Sheets</a></li>
-                            <li><a href="{{ section.settings.brochures_link | default: '/pages/brochures' }}">Brochures</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div class="mega-menu-column">
-                        <div class="mega-menu-cta">
-                          <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Resources" />
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mega-menu-footer">
-                      {% if section.settings.contactfootericon %}
-                        <div class="mega-menu-footer-icon">
-                          <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
-                        </div>
-                      {% endif %}
-                      <span>NEED HELP? CONTACT SUPPORT</span>
-                    </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Ladder Barrel</h3>
+                    <ul>
+                      <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
+                      <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Cadillac</h3>
+                    <ul>
+                      <li><a href="#">Cadillac XSCL19</a></li>
+                      <li><a href="#">Cadillac XSCL01</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Spine Corrector</h3>
+                    <ul>
+                      <li><a href="#">Spine Corrector XSSC43</a></li>
+                    </ul>
                   </div>
                 </div>
-              {% elsif link.links.size > 0 %}
-                <!-- Regular Dropdown Menu -->
-                <div class="dropdown">
-                  <span class="nav-item" style="cursor: pointer;">
-                    <span>{{ link.title | escape }}</span>
-                    <span class="dropdown-arrow"></span>
-                  </span>
-                  <div class="dropdown-menu">
-                    <div style="padding: 8px 0;">
-                      {% for childlink in link.links %}
-                        <a href="{{ childlink.url }}" class="dropdown-item">
-                          {{ childlink.title | escape }}
-                        </a>
-                      {% endfor %}
-                    </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Accessories</h3>
+                    <ul>
+                      <li><a href="#">Padded Wedge XSWD49</a></li>
+                      <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
+                      <li><a href="#">Pilates Ring XSAC04</a></li>
+                      <li><a href="#">Pilates Ball XSAC05</a></li>
+                      <li><a href="#">Resistance Bands XSAC06</a></li>
+                      <li><a href="#">Massage Ball XSAC07</a></li>
+                      <li><a href="#">Small Wedge XSAC08</a></li>
+                    </ul>
                   </div>
                 </div>
-              {% else %}
-                <!-- Simple Link -->
-                <a href="{{ link.url }}" class="nav-item">
-                  <span>{{ link.title | escape }}</span>
-                </a>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
+                <div class="mega-menu-column">
+                  <div class="mega-menu-cta">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
+                  </div>
+                </div>
+              </div>
+              <div class="mega-menu-footer">
+                {% if section.settings.contactfootericon %}
+                  <div class="mega-menu-footer-icon">
+                    <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
+                  </div>
+                {% endif %}
+                <span>CONTACT US</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resources Mega Menu -->
+          <div class="dropdown">
+            <span class="nav-item" style="cursor: pointer;">
+              <span>Resources</span>
+              <span class="dropdown-arrow"></span>
+            </span>
+            <div class="mega-dropdown-menu">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Learning</h3>
+                    <ul>
+                      <li><a href="/blogs/news">Blog</a></li>
+                      <li><a href="/pages/training-guides">Training Guides</a></li>
+                      <li><a href="/pages/video-tutorials">Video Tutorials</a></li>
+                      <li><a href="/pages/exercise-library">Exercise Library</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Documentation</h3>
+                    <ul>
+                      <li><a href="/pages/user-manuals">User Manuals</a></li>
+                      <li><a href="/pages/assembly-guides">Assembly Guides</a></li>
+                      <li><a href="/pages/maintenance-tips">Maintenance Tips</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Support</h3>
+                    <ul>
+                      <li><a href="/pages/faqs">FAQs</a></li>
+                      <li><a href="/pages/technical-support">Technical Support</a></li>
+                      <li><a href="/pages/warranty-info">Warranty Information</a></li>
+                      <li><a href="/pages/aftersales">Aftersales Service</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Community</h3>
+                    <ul>
+                      <li><a href="/pages/customer-story">Customer Stories</a></li>
+                      <li><a href="/pages/testimonials">Testimonials</a></li>
+                      <li><a href="/pages/community-forum">Community Forum</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Certifications</h3>
+                    <ul>
+                      <li><a href="/pages/certificates">Product Certificates</a></li>
+                      <li><a href="/pages/quality-standards">Quality Standards</a></li>
+                      <li><a href="/pages/safety-compliance">Safety Compliance</a></li>
+                      <li><a href="/pages/iso-certifications">ISO Certifications</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Downloads</h3>
+                    <ul>
+                      <li><a href="/pages/product-catalogs">Product Catalogs</a></li>
+                      <li><a href="/pages/specification-sheets">Specification Sheets</a></li>
+                      <li><a href="/pages/brochures">Brochures</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-cta">
+                    <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Resources" />
+                  </div>
+                </div>
+              </div>
+              <div class="mega-menu-footer">
+                {% if section.settings.contactfootericon %}
+                  <div class="mega-menu-footer-icon">
+                    <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
+                  </div>
+                {% endif %}
+                <span>NEED HELP? CONTACT SUPPORT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- About Us Mega Menu -->
+          <div class="dropdown">
+            <span class="nav-item" style="cursor: pointer;">
+              <span>About Us</span>
+              <span class="dropdown-arrow"></span>
+            </span>
+            <div class="mega-dropdown-menu">
+              <div class="mega-menu-grid">
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Our Company</h3>
+                    <ul>
+                      <li><a href="/pages/our-story">Our Story</a></li>
+                      <li><a href="/pages/mission-vision">Mission & Vision</a></li>
+                      <li><a href="/pages/company-values">Company Values</a></li>
+                      <li><a href="/pages/company-history">Company History</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Our Team</h3>
+                    <ul>
+                      <li><a href="/pages/leadership-team">Leadership Team</a></li>
+                      <li><a href="/pages/certified-instructors">Certified Instructors</a></li>
+                      <li><a href="/pages/advisory-board">Advisory Board</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Achievements</h3>
+                    <ul>
+                      <li><a href="/pages/awards-recognition">Awards & Recognition</a></li>
+                      <li><a href="/pages/company-milestones">Company Milestones</a></li>
+                      <li><a href="/pages/media-coverage">Media Coverage</a></li>
+                      <li><a href="/pages/testimonials">Client Testimonials</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Quality & Standards</h3>
+                    <ul>
+                      <li><a href="/pages/quality-commitment">Quality Commitment</a></li>
+                      <li><a href="/pages/manufacturing-process">Manufacturing Process</a></li>
+                      <li><a href="/pages/certifications">Certifications</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-category">
+                    <h3>Careers</h3>
+                    <ul>
+                      <li><a href="/pages/career-opportunities">Career Opportunities</a></li>
+                      <li><a href="/pages/company-culture">Company Culture</a></li>
+                      <li><a href="/pages/employee-benefits">Employee Benefits</a></li>
+                      <li><a href="/pages/internship-programs">Internship Programs</a></li>
+                    </ul>
+                  </div>
+                  <div class="mega-menu-category">
+                    <h3>Sustainability</h3>
+                    <ul>
+                      <li><a href="/pages/environmental-commitment">Environmental Commitment</a></li>
+                      <li><a href="/pages/sustainable-practices">Sustainable Practices</a></li>
+                      <li><a href="/pages/community-involvement">Community Involvement</a></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="mega-menu-column">
+                  <div class="mega-menu-cta">
+                    <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=1200&fit=crop&crop=center" alt="About XS Pilates" />
+                  </div>
+                </div>
+              </div>
+              <div class="mega-menu-footer">
+                {% if section.settings.contactfootericon %}
+                  <div class="mega-menu-footer-icon">
+                    <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
+                  </div>
+                {% endif %}
+                <span>LEARN MORE ABOUT US</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Training Link -->
+          <a href="/pages/training" class="nav-item">
+            <span>Training</span>
+          </a>
+
+          <!-- Support Link -->
+          <a href="/pages/support" class="nav-item">
+            <span>Support</span>
+          </a>
+
+          <!-- News Link -->
+          <a href="/blogs/news" class="nav-item">
+            <span>News</span>
+          </a>
         </div>
 
         <!-- Right Side Actions -->
