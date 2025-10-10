@@ -1,0 +1,148 @@
+{% schema %}
+{
+  "name": "Video Banner",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "视频设置"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "上传视频",
+      "info": "支持 .mp4 或 .mov 格式，建议尺寸 1920x1080，最大 500MB"
+    },
+    {
+      "type": "url",
+      "id": "youtube_url",
+      "label": "或输入 YouTube 视频链接",
+      "info": "例如: https://www.youtube.com/watch?v=XXXX"
+    },
+    {
+      "type": "url",
+      "id": "vimeo_url",
+      "label": "或输入 Vimeo 视频链接",
+      "info": "例如: https://vimeo.com/XXXX"
+    },
+    {
+      "type": "range",
+      "id": "height_desktop",
+      "label": "桌面端视频高度 (px)",
+      "min": 300,
+      "max": 1000,
+      "step": 50,
+      "default": 600,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "label": "移动端视频高度 (px)",
+      "min": 200,
+      "max": 600,
+      "step": 50,
+      "default": 400,
+      "unit": "px"
+    }
+  ],
+  "presets": [
+    {
+      "name": "视频展示区"
+    }
+  ]
+}
+{% endschema %}
+
+{% style %}
+  .section-{{ section.id }} {
+    position: relative;
+    max-width:  1280px;
+    width: 90%;
+    margin: 0 auto;
+    margin-bottom: 4rem;
+    height: {{ section.settings.height_desktop }}px;
+    overflow: hidden;
+    border-radius:1rem;
+
+  }
+
+  .section-{{ section.id }} video,
+  .section-{{ section.id }} iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  /* 确保视频铺满，无白边 */
+  .section-{{ section.id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* 移动端适配 */
+  @media (max-width: 749px) {
+    .section-{{ section.id }} {
+      height: {{ section.settings.height_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="section-{{ section.id }}">
+  {% if section.settings.video %}
+    {{ section.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, preload: 'auto' }}
+  {% elsif section.settings.youtube_url %}
+    <iframe
+      src="{{ section.settings.youtube_url | youtube_embed_url }}?autoplay=1&loop=1&playlist={{ section.settings.youtube_url | split: 'v=' | last }}&mute=1&controls=0&modestbranding=1&showinfo=0&rel=0&disablekb=1&fs=0&iv_load_policy=3"
+      frameborder="0"
+      allowfullscreen
+      allow="autoplay; encrypted-media; fullscreen"
+      aria-label="Embedded video"
+    >
+    </iframe>
+  {% elsif section.settings.vimeo_url %}
+    <iframe
+      src="{{ section.settings.vimeo_url | vimeo_embed_url }}?autoplay=1&loop=1&muted=1&autopause=0&title=0&byline=0&portrait=0"
+      frameborder="0"
+      allowfullscreen
+      allow="autoplay; encrypted-media; fullscreen"
+      aria-label="Embedded video"
+    >
+    </iframe>
+  {% else %}
+    <p style="color: #ccc; text-align: center; line-height: {{ section.settings.height_desktop }}px; font-size: 16px; margin: 0;">
+      请在主题编辑器中上传视频或添加 YouTube / Vimeo 链接
+    </p>
+  {% endif %}
+</div>
+
+{% javascript %}
+  document.addEventListener('DOMContentLoaded', function () {
+    const section = document.querySelector('.section-{{ section.id }}');
+    if (!section) return;
+
+    const video = section.querySelector('video');
+    if (video) {
+      // 确保静音和自动播放
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+
+      // 尝试播放
+      video.play().catch((err) => {
+        console.warn('自动播放被浏览器阻止:', err.message);
+      });
+    }
+  });
+{% endjavascript %}
