@@ -4,33 +4,56 @@
   {% for link in mainmenu.links %}
     {% assign link_handle = link.title | handleize %}
     
-    {% if link_handle == 'pilates-equipment' or link_handle == 'products' or link_handle == 'equipment' %}
-      <!-- Mobile Equipment Menu -->
-      <div>
-        <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuEquipment')">
-          {{ link.title | escape }}
-        </button>
-        <div class="mobile-submenu" id="mobileSubmenuEquipment" style="display: none;">
-          {% if link.links.size > 0 %}
-            {% for childlink in link.links %}
-              {% if childlink.links.size > 0 %}
-                {% for grandchildlink in childlink.links %}
-                  <a href="{{ grandchildlink.url }}" class="mobile-submenu-item">{{ grandchildlink.title | escape }}</a>
-                {% endfor %}
-              {% else %}
-                <a href="{{ childlink.url }}" class="mobile-submenu-item">{{ childlink.title | escape }}</a>
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            <a href="#" class="mobile-submenu-item">Reformer</a>
-            <a href="#" class="mobile-submenu-item">Pilates Chair</a>
-            <a href="#" class="mobile-submenu-item">Ladder Barrel</a>
-            <a href="#" class="mobile-submenu-item">Cadillac</a>
-            <a href="#" class="mobile-submenu-item">Spine Corrector</a>
-            <a href="#" class="mobile-submenu-item">Accessories</a>
-          {% endif %}
-        </div>
-      </div>
+            {% if link_handle == 'pilates-equipment' or link_handle == 'products' or link_handle == 'equipment' %}
+              <!-- Mobile Equipment Menu -->
+              <div>
+                <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuEquipment')">
+                  {{ link.title | escape }}
+                </button>
+                <div class="mobile-submenu" id="mobileSubmenuEquipment" style="display: none;">
+                  {% if link.links.size > 0 %}
+                    {% for childlink in link.links %}
+                      {% if childlink.links.size > 0 %}
+                        {% for grandchildlink in childlink.links %}
+                          <a href="{{ grandchildlink.url }}" class="mobile-submenu-item">{{ grandchildlink.title | escape }}</a>
+                        {% endfor %}
+                      {% else %}
+                        <a href="{{ childlink.url }}" class="mobile-submenu-item">{{ childlink.title | escape }}</a>
+                      {% endif %}
+                    {% endfor %}
+                  {% else %}
+                    <a href="#" class="mobile-submenu-item">Reformer</a>
+                    <a href="#" class="mobile-submenu-item">Pilates Chair</a>
+                    <a href="#" class="mobile-submenu-item">Ladder Barrel</a>
+                    <a href="#" class="mobile-submenu-item">Cadillac</a>
+                    <a href="#" class="mobile-submenu-item">Spine Corrector</a>
+                    <a href="#" class="mobile-submenu-item">Accessories</a>
+                  {% endif %}
+                </div>
+              </div>
+            {% elsif link_handle == 'pilates-equipment-custom' %}
+              <!-- Mobile Custom Equipment Menu -->
+              <div>
+                <button class="mobile-menu-item" onclick="toggleSubmenu('mobileSubmenuEquipmentCustom')">
+                  {{ link.title | escape }}
+                </button>
+                <div class="mobile-submenu" id="mobileSubmenuEquipmentCustom" style="display: none;">
+                  {% for i in (1..10) %}
+                    {% assign item_title = 'equipment_dropdown_item' | append: i | append: '_title' %}
+                    {% assign item_url = 'equipment_dropdown_item' | append: i | append: '_url' %}
+                    {% if section.settings[item_title] != blank %}
+                      <a href="{{ section.settings[item_url] | default: '#' }}" class="mobile-submenu-item">{{ section.settings[item_title] }}</a>
+                    {% endif %}
+                  {% endfor %}
+                  {% if section.settings.equipment_dropdown_item1_title == blank %}
+                    <a href="#" class="mobile-submenu-item">All Equipment</a>
+                    <a href="#" class="mobile-submenu-item">Reformers</a>
+                    <a href="#" class="mobile-submenu-item">Chairs</a>
+                    <a href="#" class="mobile-submenu-item">Barrels</a>
+                    <a href="#" class="mobile-submenu-item">Accessories</a>
+                  {% endif %}
+                </div>
+              </div>
     {% elsif link_handle == 'resources' or link_handle == 'support' %}
       <!-- Mobile Resources Menu -->
       <div>
