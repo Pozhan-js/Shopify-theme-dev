@@ -25,10 +25,14 @@
         <div class="uc-color-grid">
           {% if selected_product %}
             {% assign first_color_processed = false %}
+            {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
             
-            {% comment %} 查找颜色选项 {% endcomment %}
+            {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
             {% for option in selected_product.options_with_values %}
-              {% if option.name == '颜色' or option.name == 'Color' or option.name == 'color' %}
+              {% assign option_name_lower = option.name | downcase %}
+              {% assign target_name_lower = color_option_name | downcase %}
+              
+              {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
                 {% for value in option.values %}
                   {% assign variant_found = false %}
                   {% assign variant_id = '' %}
@@ -37,34 +41,81 @@
                   
                   {% comment %} 查找对应的变体 {% endcomment %}
                   {% for variant in selected_product.variants %}
-                    {% if variant.option1 == value or variant.option2 == value or variant.option3 == value %}
-                      {% unless variant_found %}
-                        {% assign variant_found = true %}
-                        {% assign variant_id = variant.id %}
-                        {% if variant.image %}
-                          {% assign variant_image = variant.image | img_url: '890x412' %}
-                        {% endif %}
-                        
-                        {% comment %} 获取颜色值 {% endcomment %}
-                        {% if variant.metafields.custom.color.value %}
-                          {% assign color_hex = variant.metafields.custom.color.value %}
-                        {% elsif variant.metafields.custom.color %}
-                          {% assign color_hex = variant.metafields.custom.color %}
-                        {% elsif variant.metafields.color.value %}
-                          {% assign color_hex = variant.metafields.color.value %}
-                        {% elsif variant.metafields.color %}
-                          {% assign color_hex = variant.metafields.color %}
-                        {% endif %}
-                      {% endunless %}
+                    {% assign value_matches = false %}
+                    
+                    {% comment %} 检查变体的所有选项值 {% endcomment %}
+                    {% if variant.option1 == value %}
+                      {% assign value_matches = true %}
+                    {% elsif variant.option2 == value %}
+                      {% assign value_matches = true %}
+                    {% elsif variant.option3 == value %}
+                      {% assign value_matches = true %}
+                    {% endif %}
+                    
+                    {% if value_matches and variant_found == false %}
+                      {% assign variant_found = true %}
+                      {% assign variant_id = variant.id %}
+                      
+                      {% comment %} 获取变体图片 {% endcomment %}
+                      {% if variant.image %}
+                        {% assign variant_image = variant.image | img_url: '890x412' %}
+                      {% endif %}
+                      
+                      {% comment %} 获取颜色值 - 支持多种元字段路径 {% endcomment %}
+                      {% if variant.metafields.custom.color.value %}
+                        {% assign color_hex = variant.metafields.custom.color.value %}
+                      {% elsif variant.metafields.custom.color %}
+                        {% assign color_hex = variant.metafields.custom.color %}
+                      {% elsif variant.metafields.color.value %}
+                        {% assign color_hex = variant.metafields.color.value %}
+                      {% elsif variant.metafields.color %}
+                        {% assign color_hex = variant.metafields.color %}
+                      {% elsif variant.metafields.custom.colour.value %}
+                        {% assign color_hex = variant.metafields.custom.colour.value %}
+                      {% elsif variant.metafields.custom.colour %}
+                        {% assign color_hex = variant.metafields.custom.colour %}
+                      {% elsif variant.metafields.colour.value %}
+                        {% assign color_hex = variant.metafields.colour.value %}
+                      {% elsif variant.metafields.colour %}
+                        {% assign color_hex = variant.metafields.colour %}
+                      {% elsif variant.metafields.global.color.value %}
+                        {% assign color_hex = variant.metafields.global.color.value %}
+                      {% elsif variant.metafields.global.color %}
+                        {% assign color_hex = variant.metafields.global.color %}
+                      {% endif %}
+                      
+                      {% comment %} 如果变体没有颜色元字段，尝试从产品级别获取 {% endcomment %}
+                      {% if color_hex == '#CCCCCC' %}
+                        {% for product_metafield in selected_product.metafields %}
+                          {% assign metafield_key = product_metafield[0] %}
+                          {% assign metafield_value = product_metafield[1] %}
+                          {% if metafield_key contains 'color' or metafield_key contains 'colour' %}
+                            {% if metafield_value[value] %}
+                              {% assign color_hex = metafield_value[value] %}
+                              {% break %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
                     {% endif %}
                   {% endfor %}
+                  
+                  {% comment %} 确保颜色值格式正确 {% endcomment %}
+                  {% unless color_hex contains '#' %}
+                    {% if color_hex != '' %}
+                      {% assign color_hex = '#' | append: color_hex %}
+                    {% else %}
+                      {% assign color_hex = '#CCCCCC' %}
+                    {% endif %}
+                  {% endunless %}
                   
                   <div class="uc-color-item">
                     <div class="uc-color-option {% unless first_color_processed %}uc-selected{% endunless %}" 
                          style="background-color: {{ color_hex }};"
                          data-color="{{ value }}"
                          data-variant-id="{{ variant_id }}"
-                         data-variant-image="{{ variant_image }}">
+                         data-variant-image="{{ variant_image }}"
+                         data-color-hex="{{ color_hex }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -81,13 +132,15 @@
               {% endif %}
             {% endfor %}
           {% else %}
+            {% comment %} 如果没有选择产品，使用区块配置的颜色 {% endcomment %}
             {% for block in section.blocks %}
               {% if block.type == 'color_option' %}
                 <div class="uc-color-item">
                   <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
                        style="background-color: {{ block.settings.color_value | default: '#000000' }};"
                        data-color="{{ block.settings.color_name }}"
-                       data-variant-image="">
+                       data-variant-image=""
+                       data-color-hex="{{ block.settings.color_value | default: '#000000' }}">
                     {% if forloop.first %}
                       <div class="uc-color-checkmark">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -120,7 +173,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const colorOptions = document.querySelectorAll('.uc-color-option');
   const mainImage = document.getElementById('uc-main-image');
   
-  colorOptions.forEach(option => {
+  // 调试信息 - 在开发环境中可以启用
+  console.log('找到颜色选项数量:', colorOptions.length);
+  
+  colorOptions.forEach((option, index) => {
+    const colorName = option.getAttribute('data-color');
+    const colorHex = option.getAttribute('data-color-hex');
+    const variantId = option.getAttribute('data-variant-id');
+    
+    // 调试信息
+    console.log(`颜色 ${index + 1}:`, {
+      name: colorName,
+      hex: colorHex,
+      variantId: variantId
+    });
+    
     option.addEventListener('click', function() {
       // 移除所有选中状态
       colorOptions.forEach(opt => {
@@ -148,22 +215,55 @@ document.addEventListener('DOMContentLoaded', function() {
       const variantImage = this.getAttribute('data-variant-image');
       if (variantImage && variantImage !== '') {
         mainImage.src = variantImage;
+        console.log('切换图片到:', variantImage);
       }
       
       // 触发自定义事件，可用于其他功能
       const colorName = this.getAttribute('data-color');
       const variantId = this.getAttribute('data-variant-id');
+      const colorHex = this.getAttribute('data-color-hex');
       
       const event = new CustomEvent('colorSelected', {
         detail: {
           colorName: colorName,
+          colorHex: colorHex,
           variantId: variantId,
           variantImage: variantImage
         }
       });
       
       document.dispatchEvent(event);
+      
+      // 调试信息
+      console.log('选择了颜色:', {
+        name: colorName,
+        hex: colorHex,
+        variantId: variantId,
+        image: variantImage
+      });
     });
+  });
+  
+  // 监听颜色选择事件，可以用于与其他组件通信
+  document.addEventListener('colorSelected', function(event) {
+    console.log('颜色选择事件触发:', event.detail);
+    
+    // 这里可以添加其他逻辑，比如更新购物车、价格等
+    // 例如：更新产品变体选择
+    if (event.detail.variantId) {
+      // 可以触发产品表单的变体选择
+      const productForm = document.querySelector('form[action*="/cart/add"]');
+      if (productForm) {
+        const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
+        if (variantInput) {
+          variantInput.value = event.detail.variantId;
+          
+          // 触发变化事件
+          const changeEvent = new Event('change', { bubbles: true });
+          variantInput.dispatchEvent(changeEvent);
+        }
+      }
+    }
   });
 });
 </script>
@@ -227,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
   object-fit: cover;
   object-position: center;
   border-radius: 16px;
+  transition: opacity 0.3s ease;
 }
 
 .uc-equipment-image-placeholder {
@@ -247,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .uc-colors-title {
-    display: inline;
+  display: inline;
   font-size: 24px;
   font-weight: 500;
   color: #161616;
@@ -313,18 +414,21 @@ document.addEventListener('DOMContentLoaded', function() {
   border: 2px solid transparent;
 }
 
-.uc-color-option[style*="rgba"] {
+/* 处理透明或未设置的颜色 */
+.uc-color-option[style*="rgba(0,0,0,0)"],
+.uc-color-option[style*="transparent"],
+.uc-color-option[data-color-hex="#CCCCCC"] {
   border: 1px solid #ddd;
-  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                    linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                    linear-gradient(45deg, transparent 75%, #ccc 75%), 
-                    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
   background-size: 8px 8px;
   background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
 }
 
-.uc-color-option[style*="rgba"]:after {
-  content: "未设置颜色";
+.uc-color-option[data-color-hex="#CCCCCC"]:after {
+  content: "默认";
   font-size: 10px;
   color: #666;
   text-align: center;
@@ -362,6 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1;
 }
 
 .uc-swatch-cta {
@@ -924,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "id": "color_option_name",
       "label": "Color Option Name",
       "default": "Color",
-      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric')"
+      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric', '颜色')"
     },
     {
       "type": "image_picker",
