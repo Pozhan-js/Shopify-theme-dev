@@ -290,20 +290,22 @@
 
   .image-container {
     width: 100%;
-    height: {{ section.settings.imageheight }}px;
+    max-width: 630px;
+    height: 700px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     border-radius: {{ section.settings.imageborderradius }}px;
-    overflow: hidden;
+    /* overflow: hidden; */
     position: relative;
+    flex-direction: column;
   }
 
   .main-image {
     max-width: 100%;
-    max-height: 100%;
+
     width: auto;
-    height: auto;
+    height: {{ section.settings.imageheight }}px;
     object-fit: contain;
     border-radius: {{ section.settings.imageborderradius }}px;
     transition: opacity 0.3s ease;
@@ -324,6 +326,44 @@
     background: #f9fafb;
     border-radius: {{ section.settings.imageborderradius }}px;
     border: 2px dashed #d1d5db;
+  }
+
+  .thumbnail-gallery {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    overflow-x: auto;
+    padding: 8px 16px;
+    width: 100%;
+    scrollbar-width: thin;
+    /* position: absolute;
+    bottom: -100px; */
+  }
+
+  @media (max-width: 768px) {
+    .thumbnail-gallery {
+      max-width: 100% ;
+      padding: 8px;
+    }
+  }
+
+  .thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .thumbnail:hover {
+    border-color: #9ABD48;
+  }
+
+  .thumbnail.active {
+    border: 2px solid #9ABD48;
   }
 
   .product-form {
@@ -374,6 +414,22 @@
 
     .image-container {
       justify-content: center;
+      height: auto;
+      max-width: 83vw;
+      max-height: 500px;
+      padding-bottom: 20px;
+    }
+
+    .main-image {
+      height: auto;
+      max-height: 300px;
+    }
+
+    .thumbnail-gallery {
+      position: static;
+      margin-top: 10px;
+      padding: 8px 0;
+      width: 100%;
     }
   }
 </style>
@@ -572,6 +628,8 @@
             src="{{ imageurl }}"
             alt="{{ imagealt }}"
             class="main-image"
+            width="800"
+            height="800"
             loading="lazy"
             onload="console.log('Image loaded successfully');"
             onerror="console.log('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -583,6 +641,26 @@
           {% comment %} Show placeholder when no image is available {% endcomment %}
           <div id="main-product-image" class="placeholder-image">
             <span>{{ displayproduct.title | default: 'No Image Available' }}</span>
+          </div>
+        {% endif %}
+
+        {% comment %} Thumbnail gallery {% endcomment %}
+        {% if displayproduct.images.size > 1 %}
+          <div class="thumbnail-gallery">
+            {% for image in displayproduct.images %}
+              <img
+                src="{{ image | img_url: '100x100' }}"
+                alt="{{ image.alt | default: displayproduct.title }}"
+                class="thumbnail{% if forloop.first %} active{% endif %}"
+                width="100"
+                height="100"
+                onclick="
+                  document.getElementById('main-product-image').src='{{ image | img_url: '800x800' }}';
+                  document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+                  this.classList.add('active');
+                "
+              >
+            {% endfor %}
           </div>
         {% endif %}
       </div>
