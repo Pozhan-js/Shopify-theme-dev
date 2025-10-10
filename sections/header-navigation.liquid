@@ -151,7 +151,8 @@
     transition: all 0.2s ease;
   }
 
-  .dropdown:hover .dropdown-menu {
+  /* 只有非大菜单的下拉菜单才显示 */
+  .dropdown:not(.has-mega-menu):hover .dropdown-menu {
     opacity: 1;
     visibility: visible;
   }
@@ -189,15 +190,15 @@
     z-index: 1000;
   }
 
+  /* 大菜单显示 - 提高优先级 */
   .dropdown.has-mega-menu:hover .mega-dropdown-menu {
-    opacity: 1;
-    visibility: visible;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
-  /* Ensure regular dropdown menus still work */
-  .dropdown:not(.has-mega-menu):hover .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
+  /* 确保大菜单不显示普通下拉菜单 */
+  .dropdown.has-mega-menu .dropdown-menu {
+    display: none !important;
   }
 
   .mega-menu-grid {
@@ -1091,7 +1092,7 @@
               
               {% if link_handle == 'pilates-equipment' or link_handle == 'products' or link_handle == 'equipment' %}
                 <!-- Equipment Mega Menu -->
-                <div class="dropdown has-mega-menu">
+                <div class="dropdown has-mega-menu equipment-mega">
                   <span class="nav-item dropdown-arrow">{{ link.title | escape }}</span>
                   {% render 'mega-menu-equipment' %}
                 </div>
@@ -1123,7 +1124,7 @@
 
               {% elsif link_handle == 'resources' or link_handle == 'support' %}
                 <!-- Resources Mega Menu -->
-                <div class="dropdown has-mega-menu">
+                <div class="dropdown has-mega-menu resources-mega">
                   <span class="nav-item dropdown-arrow">{{ link.title | escape }}</span>
                   {% render 'mega-menu-resources' %}
                 </div>
@@ -1156,7 +1157,7 @@
 
               {% elsif link_handle == 'about-us' or link_handle == 'about' %}
                 <!-- About Us Mega Menu -->
-                <div class="dropdown has-mega-menu">
+                <div class="dropdown has-mega-menu about-mega">
                   <span class="nav-item dropdown-arrow">{{ link.title | escape }}</span>
                   {% render 'mega-menu-about' %}
                 </div>
@@ -1209,27 +1210,18 @@
             {% endfor %}
           {% else %}
             <!-- Default Menu Items if no menu is configured -->
-            <div class="dropdown has-mega-menu">
-              <a href="#" class="nav-item">
-                <span>Pilates Equipment</span>
-                <span class="dropdown-arrow"></span>
-              </a>
+            <div class="dropdown has-mega-menu equipment-mega">
+              <span class="nav-item dropdown-arrow">Pilates Equipment</span>
               {% render 'mega-menu-equipment' %}
             </div>
 
-            <div class="dropdown has-mega-menu">
-              <a href="#" class="nav-item">
-                <span>Resources</span>
-                <span class="dropdown-arrow"></span>
-              </a>
+            <div class="dropdown has-mega-menu resources-mega">
+              <span class="nav-item dropdown-arrow">Resources</span>
               {% render 'mega-menu-resources' %}
             </div>
 
-            <div class="dropdown has-mega-menu">
-              <a href="#" class="nav-item">
-                <span>About Us</span>
-                <span class="dropdown-arrow"></span>
-              </a>
+            <div class="dropdown has-mega-menu about-mega">
+              <span class="nav-item dropdown-arrow">About Us</span>
               {% render 'mega-menu-about' %}
             </div>
           {% endif %}
