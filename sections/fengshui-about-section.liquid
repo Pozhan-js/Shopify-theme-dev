@@ -69,51 +69,47 @@
 }
 {% endschema %}
 
-<div
-  class="fengshui-about-section"
->
+<div class="fengshui-about-section">
   <div class="page-width">
-    <div class="about-content">
-      <div class="content-left">
-        {% if section.settings.content_image != blank %}
+    <div class="about-content-vertical">
+      {% if section.settings.content_image != blank %}
+        <div class="content-image">
           <img
-            src="{{ section.settings.content_image | img_url: '800x' }}"
+            src="{{ section.settings.content_image | img_url: '600x' }}"
             alt="事业财富风水布局"
-            width="800"
-            height="800"
+            width="600"
+            height="600"
             loading="lazy"
-            style="max-width: 100%; height: auto;"
           >
-        {% endif %}
-      </div>
-      <div class="content-right">
-        <div class="content-text">
-          <div class="about-words">
-            <span class="word">{{ section.settings.title_line1 }}</span>
-            <span class="word">{{ section.settings.title_line2 }}</span>
-            <span class="word">{{ section.settings.title_line3 }}</span>
-            <span class="word">{{ section.settings.title_line4 }}</span>
-            <span class="word">{{ section.settings.title_line5 }}</span>
-          </div>
-          <div>{{ section.settings.content_text }}</div>
-          {% if section.settings.button_text != blank %}
-            <a href="{{ section.settings.button_link }}" class="button fengshui-button">
-              {{ section.settings.button_text }}
-            </a>
-          {% endif %}
         </div>
+      {% endif %}
+      
+      <div class="content-description">
+        {{ section.settings.content_text }}
       </div>
+      
+      {% if section.settings.button_text != blank %}
+        <div class="content-button">
+          <a href="{{ section.settings.button_link }}" class="button fengshui-button">
+            {{ section.settings.button_text }}
+          </a>
+        </div>
+      {% endif %}
     </div>
   </div>
 </div>
 
 <style>
   .fengshui-about-section {
-    padding: 30px 0;
+    padding: 60px 0;
     background-size: cover;
     background-position: center;
     position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
   }
+  
   .fengshui-about-section::before {
     content: '';
     position: absolute;
@@ -124,56 +120,46 @@
     background-color: {{ section.settings.bg_color }};
     z-index: 0;
   }
+  
   .fengshui-about-section .page-width {
     position: relative;
     z-index: 1;
+    width: 100%;
   }
 
-  .about-words {
+  .about-content-vertical {
     display: flex;
     flex-direction: column;
-    font-size: 4rem;
-    text-shadow: 2px 2px 4px rgba(255,255,255,0.1);
-    pointer-events: none;
-    text-align: right;
-  }
-
-  .about-title {
-    text-align: right;
-    font-size: 5rem;
-    color: #fff;
-  }
-
-  .about-content {
-    display: flex;
-    gap: 40px;
-    max-width: 1200px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    max-width: 800px;
     margin: 0 auto;
+    gap: 40px;
   }
 
-  .content-left {
-    flex: 1;
+  .content-image {
+    margin-bottom: 20px;
   }
-  .content-left img {
+  
+  .content-image img {
     width: 100%;
+    max-width: 400px;
     height: auto;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   }
 
-  .content-right {
-    flex: 1;
-    display: flex;
-    align-items: center;
-  }
-  .content-text {
+  .content-description {
     font-size: 1.5rem;
     line-height: 1.8;
     color: #fff;
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .content-button {
+    margin-top: 20px;
   }
 
   .fengshui-button {
@@ -183,14 +169,11 @@
     border: 2px solid white;
     border-radius: 4px;
     font-size: 1.5rem;
-    margin-bottom: 20px;
     display: inline-block;
     text-align: center;
-    min-width: fit-content;
-    max-width: 310px;
-    width: auto;
     transition: all 0.3s ease;
     --border-opacity: transparent;
+    text-decoration: none;
   }
 
   .fengshui-button:hover {
@@ -204,11 +187,21 @@
   }
 
   @media (max-width: 768px) {
-    .about-content {
-      flex-direction: column;
+    .fengshui-about-section {
+      padding: 40px 20px;
+      min-height: auto;
     }
-    .about-title {
-      font-size: 1.8rem;
+    
+    .about-content-vertical {
+      gap: 30px;
+    }
+    
+    .content-image img {
+      max-width: 300px;
+    }
+    
+    .content-description {
+      font-size: 1.3rem;
     }
   }
 </style>
