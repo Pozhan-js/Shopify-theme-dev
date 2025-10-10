@@ -1,54 +1,26 @@
-<!-- Equipment Mega Menu Snippet - 完全动态获取所有产品系列 -->
+<!-- Equipment Mega Menu Snippet - 按设计图固定布局展示 -->
 <div class="mega-dropdown-menu">
   <div class="mega-menu-grid equipment-grid">
     <!-- 左侧三列产品分类 -->
     <div class="mega-menu-column equipment-left">
       
-      <!-- 获取所有已发布的产品系列 -->
-      {% assign all_collections = collections | where: 'published', true %}
-      {% assign equipment_collections = '' | split: ',' %}
-      
-      <!-- 过滤掉系统默认的集合 -->
-      {% for collection in all_collections %}
-        {% unless collection.handle == 'all' or collection.handle == 'frontpage' or collection.handle contains 'blog' %}
-          {% assign equipment_collections = equipment_collections | concat: collection %}
-        {% endunless %}
-      {% endfor %}
-      
-      <!-- 如果没有产品系列，使用默认内容 -->
-      {% if equipment_collections.size == 0 %}
-        {% assign equipment_collections = all_collections | slice: 0, 6 %}
-      {% endif %}
-      
-      <!-- 计算每列应该显示的系列数量 -->
-      {% assign total_collections = equipment_collections.size %}
-      {% assign collections_per_column = total_collections | divided_by: 3.0 | ceil %}
-      
-      <!-- 第一列 -->
+      <!-- 第一列：REFORMER + PILATES CHAIR -->
       <div class="equipment-column">
-        {% assign start_index = 0 %}
-        {% assign end_index = collections_per_column | minus: 1 %}
-        {% for i in (start_index..end_index) %}
-          {% assign collection = equipment_collections[i] %}
-          {% if collection %}
-            <div class="mega-menu-category">
-              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
-              <ul>
-                {% for product in collection.products limit: 4 %}
-                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-                {% endfor %}
-                {% if collection.products.size == 0 %}
-                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
-                {% endif %}
-              </ul>
-            </div>
-          {% endif %}
-        {% endfor %}
-        
-        <!-- 如果没有动态系列，显示默认的第一列内容 -->
-        {% if equipment_collections.size == 0 %}
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat1_title | default: 'Reformer' }}</h3>
+        <!-- REFORMER -->
+        <div class="mega-menu-category">
+          {% assign reformer_collection = collections['reformer'] %}
+          {% if reformer_collection %}
+            <h3><a href="{{ reformer_collection.url }}">{{ reformer_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in reformer_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if reformer_collection.products.size == 0 %}
+                <li><a href="{{ reformer_collection.url }}">View {{ reformer_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat1_url | default: '#' }}">{{ section.settings.equipment_cat1_title | default: 'REFORMER' }}</a></h3>
             <ul>
               {% for i in (1..4) %}
                 {% assign item_title = 'equipment_cat1_item' | append: i | append: '_title' %}
@@ -64,10 +36,24 @@
                 <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
               {% endif %}
             </ul>
-          </div>
-          
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat2_title | default: 'Pilates Chair' }}</h3>
+          {% endif %}
+        </div>
+        
+        <!-- PILATES CHAIR -->
+        <div class="mega-menu-category">
+          {% assign chair_collection = collections['pilates-chair'] %}
+          {% if chair_collection %}
+            <h3><a href="{{ chair_collection.url }}">{{ chair_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in chair_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if chair_collection.products.size == 0 %}
+                <li><a href="{{ chair_collection.url }}">View {{ chair_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat2_url | default: '#' }}">{{ section.settings.equipment_cat2_title | default: 'PILATES CHAIR' }}</a></h3>
             <ul>
               {% for i in (1..4) %}
                 {% assign item_title = 'equipment_cat2_item' | append: i | append: '_title' %}
@@ -82,35 +68,27 @@
                 <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
               {% endif %}
             </ul>
-          </div>
-        {% endif %}
+          {% endif %}
+        </div>
       </div>
       
-      <!-- 第二列 -->
+      <!-- 第二列：LADDER BARREL + CADILLAC + SPINE CORRECTOR -->
       <div class="equipment-column">
-        {% assign start_index = collections_per_column %}
-        {% assign end_index = collections_per_column | times: 2 | minus: 1 %}
-        {% for i in (start_index..end_index) %}
-          {% assign collection = equipment_collections[i] %}
-          {% if collection %}
-            <div class="mega-menu-category">
-              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
-              <ul>
-                {% for product in collection.products limit: 4 %}
-                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-                {% endfor %}
-                {% if collection.products.size == 0 %}
-                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
-                {% endif %}
-              </ul>
-            </div>
-          {% endif %}
-        {% endfor %}
-        
-        <!-- 如果没有动态系列，显示默认的第二列内容 -->
-        {% if equipment_collections.size == 0 %}
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat3_title | default: 'Ladder Barrel' }}</h3>
+        <!-- LADDER BARREL -->
+        <div class="mega-menu-category">
+          {% assign barrel_collection = collections['ladder-barrel'] %}
+          {% if barrel_collection %}
+            <h3><a href="{{ barrel_collection.url }}">{{ barrel_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in barrel_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if barrel_collection.products.size == 0 %}
+                <li><a href="{{ barrel_collection.url }}">View {{ barrel_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat3_url | default: '#' }}">{{ section.settings.equipment_cat3_title | default: 'LADDER BARREL' }}</a></h3>
             <ul>
               {% for i in (1..4) %}
                 {% assign item_title = 'equipment_cat3_item' | append: i | append: '_title' %}
@@ -124,10 +102,24 @@
                 <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
               {% endif %}
             </ul>
-          </div>
-          
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat4_title | default: 'Cadillac' }}</h3>
+          {% endif %}
+        </div>
+        
+        <!-- CADILLAC -->
+        <div class="mega-menu-category">
+          {% assign cadillac_collection = collections['cadillac'] %}
+          {% if cadillac_collection %}
+            <h3><a href="{{ cadillac_collection.url }}">{{ cadillac_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in cadillac_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if cadillac_collection.products.size == 0 %}
+                <li><a href="{{ cadillac_collection.url }}">View {{ cadillac_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat4_url | default: '#' }}">{{ section.settings.equipment_cat4_title | default: 'CADILLAC' }}</a></h3>
             <ul>
               {% for i in (1..4) %}
                 {% assign item_title = 'equipment_cat4_item' | append: i | append: '_title' %}
@@ -141,10 +133,24 @@
                 <li><a href="#">Cadillac XSCL01</a></li>
               {% endif %}
             </ul>
-          </div>
-          
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat5_title | default: 'Spine Corrector' }}</h3>
+          {% endif %}
+        </div>
+        
+        <!-- SPINE CORRECTOR -->
+        <div class="mega-menu-category">
+          {% assign spine_collection = collections['spine-corrector'] %}
+          {% if spine_collection %}
+            <h3><a href="{{ spine_collection.url }}">{{ spine_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in spine_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if spine_collection.products.size == 0 %}
+                <li><a href="{{ spine_collection.url }}">View {{ spine_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat5_url | default: '#' }}">{{ section.settings.equipment_cat5_title | default: 'SPINE CORRECTOR' }}</a></h3>
             <ul>
               {% for i in (1..4) %}
                 {% assign item_title = 'equipment_cat5_item' | append: i | append: '_title' %}
@@ -157,35 +163,26 @@
                 <li><a href="#">Spine Corrector XSSC43</a></li>
               {% endif %}
             </ul>
-          </div>
-        {% endif %}
+          {% endif %}
+        </div>
       </div>
       
-      <!-- 第三列 -->
+      <!-- 第三列：ACCESSORIES -->
       <div class="equipment-column">
-        {% assign start_index = collections_per_column | times: 2 %}
-        {% assign end_index = equipment_collections.size | minus: 1 %}
-        {% for i in (start_index..end_index) %}
-          {% assign collection = equipment_collections[i] %}
-          {% if collection %}
-            <div class="mega-menu-category">
-              <h3><a href="{{ collection.url }}">{{ collection.title }}</a></h3>
-              <ul>
-                {% for product in collection.products limit: 7 %}
-                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-                {% endfor %}
-                {% if collection.products.size == 0 %}
-                  <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
-                {% endif %}
-              </ul>
-            </div>
-          {% endif %}
-        {% endfor %}
-        
-        <!-- 如果没有动态系列，显示默认的第三列内容 -->
-        {% if equipment_collections.size == 0 %}
-          <div class="mega-menu-category">
-            <h3>{{ section.settings.equipment_cat6_title | default: 'Accessories' }}</h3>
+        <div class="mega-menu-category">
+          {% assign accessories_collection = collections['accessories'] %}
+          {% if accessories_collection %}
+            <h3><a href="{{ accessories_collection.url }}">{{ accessories_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in accessories_collection.products limit: 7 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if accessories_collection.products.size == 0 %}
+                <li><a href="{{ accessories_collection.url }}">View {{ accessories_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat6_url | default: '#' }}">{{ section.settings.equipment_cat6_title | default: 'ACCESSORIES' }}</a></h3>
             <ul>
               {% for i in (1..7) %}
                 {% assign item_title = 'equipment_cat6_item' | append: i | append: '_title' %}
@@ -204,12 +201,12 @@
                 <li><a href="#">Small Wedge XSAC08</a></li>
               {% endif %}
             </ul>
-          </div>
-        {% endif %}
+          {% endif %}
+        </div>
       </div>
     </div>
-    
-    <!-- 右侧图片和CTA -->
+
+    <!-- 右侧图片区域 -->
     <div class="mega-menu-column equipment-right">
       <div class="mega-menu-cta">
         {% if section.settings.equipment_image %}
@@ -224,6 +221,7 @@
       </div>
     </div>
   </div>
+  
   <div class="mega-menu-footer">
     {% if section.settings.contactfootericon %}
       <div class="mega-menu-footer-icon">
@@ -233,3 +231,212 @@
     <span>CONTACT US</span>
   </div>
 </div>
+=======
+<!-- Equipment Mega Menu Snippet - 按设计图固定布局展示 -->
+<div class="mega-dropdown-menu">
+  <div class="mega-menu-grid equipment-grid">
+    <!-- 左侧三列产品分类 -->
+    <div class="mega-menu-column equipment-left">
+      
+      <!-- 第一列：REFORMER + PILATES CHAIR -->
+      <div class="equipment-column">
+        <!-- REFORMER -->
+        <div class="mega-menu-category">
+          {% assign reformer_collection = collections['reformer'] %}
+          {% if reformer_collection %}
+            <h3><a href="{{ reformer_collection.url }}">{{ reformer_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in reformer_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if reformer_collection.products.size == 0 %}
+                <li><a href="{{ reformer_collection.url }}">View {{ reformer_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat1_url | default: '#' }}">{{ section.settings.equipment_cat1_title | default: 'REFORMER' }}</a></h3>
+            <ul>
+              {% for i in (1..4) %}
+                {% assign item_title = 'equipment_cat1_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat1_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat1_item1_title == blank %}
+                <li><a href="#">Pilates Reformer XSRF100</a></li>
+                <li><a href="#">Aluminum Reformer XSRF04</a></li>
+                <li><a href="#">Aluminum Reformer XSRF07</a></li>
+                <li><a href="#">Classic Aluminum Reformer XSCAR</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+        
+        <!-- PILATES CHAIR -->
+        <div class="mega-menu-category">
+          {% assign chair_collection = collections['pilates-chair'] %}
+          {% if chair_collection %}
+            <h3><a href="{{ chair_collection.url }}">{{ chair_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in chair_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if chair_collection.products.size == 0 %}
+                <li><a href="{{ chair_collection.url }}">View {{ chair_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat2_url | default: '#' }}">{{ section.settings.equipment_cat2_title | default: 'PILATES CHAIR' }}</a></h3>
+            <ul>
+              {% for i in (1..4) %}
+                {% assign item_title = 'equipment_cat2_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat2_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat2_item1_title == blank %}
+                <li><a href="#">Basic Pilates Chair XSCC29</a></li>
+                <li><a href="#">Pilates Chair Wooden Base XSCC01</a></li>
+                <li><a href="#">Pro Pilates Wunda Chair XSCC32</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- 第二列：LADDER BARREL + CADILLAC + SPINE CORRECTOR -->
+      <div class="equipment-column">
+        <!-- LADDER BARREL -->
+        <div class="mega-menu-category">
+          {% assign barrel_collection = collections['ladder-barrel'] %}
+          {% if barrel_collection %}
+            <h3><a href="{{ barrel_collection.url }}">{{ barrel_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in barrel_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if barrel_collection.products.size == 0 %}
+                <li><a href="{{ barrel_collection.url }}">View {{ barrel_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat3_url | default: '#' }}">{{ section.settings.equipment_cat3_title | default: 'LADDER BARREL' }}</a></h3>
+            <ul>
+              {% for i in (1..4) %}
+                {% assign item_title = 'equipment_cat3_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat3_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat3_item1_title == blank %}
+                <li><a href="#">Pilates Ladder Barrel XSLB01</a></li>
+                <li><a href="#">Pro Pilates Ladder Barrel XSLB37</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+        
+        <!-- CADILLAC -->
+        <div class="mega-menu-category">
+          {% assign cadillac_collection = collections['cadillac'] %}
+          {% if cadillac_collection %}
+            <h3><a href="{{ cadillac_collection.url }}">{{ cadillac_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in cadillac_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if cadillac_collection.products.size == 0 %}
+                <li><a href="{{ cadillac_collection.url }}">View {{ cadillac_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat4_url | default: '#' }}">{{ section.settings.equipment_cat4_title | default: 'CADILLAC' }}</a></h3>
+            <ul>
+              {% for i in (1..4) %}
+                {% assign item_title = 'equipment_cat4_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat4_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat4_item1_title == blank %}
+                <li><a href="#">Cadillac XSCL19</a></li>
+                <li><a href="#">Cadillac XSCL01</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+        
+        <!-- SPINE CORRECTOR -->
+        <div class="mega-menu-category">
+          {% assign spine_collection = collections['spine-corrector'] %}
+          {% if spine_collection %}
+            <h3><a href="{{ spine_collection.url }}">{{ spine_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in spine_collection.products limit: 4 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if spine_collection.products.size == 0 %}
+                <li><a href="{{ spine_collection.url }}">View {{ spine_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat5_url | default: '#' }}">{{ section.settings.equipment_cat5_title | default: 'SPINE CORRECTOR' }}</a></h3>
+            <ul>
+              {% for i in (1..4) %}
+                {% assign item_title = 'equipment_cat5_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat5_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat5_item1_title == blank %}
+                <li><a href="#">Spine Corrector XSSC43</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- 第三列：ACCESSORIES -->
+      <div class="equipment-column">
+        <div class="mega-menu-category">
+          {% assign accessories_collection = collections['accessories'] %}
+          {% if accessories_collection %}
+            <h3><a href="{{ accessories_collection.url }}">{{ accessories_collection.title | upcase }}</a></h3>
+            <ul>
+              {% for product in accessories_collection.products limit: 7 %}
+                <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+              {% endfor %}
+              {% if accessories_collection.products.size == 0 %}
+                <li><a href="{{ accessories_collection.url }}">View {{ accessories_collection.title }}</a></li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <h3><a href="{{ section.settings.equipment_cat6_url | default: '#' }}">{{ section.settings.equipment_cat6_title | default: 'ACCESSORIES' }}</a></h3>
+            <ul>
+              {% for i in (1..7) %}
+                {% assign item_title = 'equipment_cat6_item' | append: i | append: '_title' %}
+                {% assign item_url = 'equipment_cat6_item' | append: i | append: '_url' %}
+                {% if section.settings[item_title] != blank %}
+                  <li><a href="{{ section.settings[item_url] | default: '#' }}">{{ section.settings[item_title] }}</a></li>
+                {% endif %}
+              {% endfor %}
+              {% if section.settings.equipment_cat6_item1_title == blank %}
+                <li><a href="#">Padded Wedge XSWD49</a></li>
+                <li><a href="#">Pilates Balance Cushion XSAC03</a></li>
+                <li><a href="#">Pilates Ring XSAC04</a></li>
+                <li><a href="#">Pilates Ball XSAC05</a></li>
+                <li><a href="#">Resistance Bands XSAC06</a></li>
+                <li><a href="#">Massage Ball XSAC07</a></li>
+                <li><a href="#">Small Wedge XSAC08</a></li>
+              {% endif %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
++++++++ REPLACE
