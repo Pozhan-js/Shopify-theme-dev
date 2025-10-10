@@ -13,6 +13,166 @@
       "id": "content",
       "label": "内容",
       "default": "<p>在此输入风水布局内容</p>"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "背景颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "base_font_size",
+      "label": "基础字体大小",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "h1_size",
+      "label": "H1字体大小",
+      "min": 24,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "h2_size",
+      "label": "H2字体大小",
+      "min": 20,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "h3_size",
+      "label": "H3字体大小",
+      "min": 18,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "header",
+      "content": "标题间距设置"
+    },
+    {
+      "type": "range",
+      "id": "h1_margin_top",
+      "label": "H1上边距",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "h1_margin_bottom",
+      "label": "H1下边距",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "h2_margin_top",
+      "label": "H2上边距",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "h2_margin_bottom",
+      "label": "H2下边距",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "h3_margin_top",
+      "label": "H3上边距",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "h3_margin_bottom",
+      "label": "H3下边距",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "整体间距设置"
+    },
+    {
+      "type": "range",
+      "id": "content_padding_top",
+      "label": "内容上内边距",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "content_padding_bottom",
+      "label": "内容下内边距",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "content_margin_top",
+      "label": "内容上边距",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "content_margin_bottom",
+      "label": "内容下边距",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
     }
   ],
   "presets": [
@@ -24,53 +184,119 @@
 }
 {% endschema %}
 
-<div class="fengshui-celestial-section">
-  <div
-    class="page-width"
-  >
-    <h2 class="celestial-title">{{ section.settings.title }}</h2>
-    <div class="celestial-content">
+<div class="custom-rich-text-section" style="background-color: {{ section.settings.bg_color }}; padding-top: {{ section.settings.content_padding_top }}px; padding-bottom: {{ section.settings.content_padding_bottom }}px; margin-top: {{ section.settings.content_margin_top }}px; margin-bottom: {{ section.settings.content_margin_bottom }}px;">
+  <div class="page-width">
+    {% if section.settings.title != blank %}
+      <h1 class="rich-text-title" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.h1_size }}px;">{{ section.settings.title }}</h1>
+    {% endif %}
+    <div class="rich-text-content" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.base_font_size }}px; background-color: transparent;">
       {{ section.settings.content }}
     </div>
   </div>
 </div>
 
 <style>
-  .fengshui-celestial-section {
-    padding: 0;
+  .custom-rich-text-section {
     position: relative;
     min-height: 500px;
+    display: flex;
+    align-items: center;
   }
 
   .page-width {
     position: relative;
     z-index: 11;
+    width: 100%;
   }
 
-  .celestial-title {
+  .rich-text-title {
     text-align: center;
-    font-size: 2.2rem;
-    color: #fff;
     margin-bottom: 30px;
     margin-top: 0;
+    font-weight: bold;
+    color: {{ section.settings.text_color }};
   }
 
-  .celestial-content {
+  .rich-text-content {
     max-width: 1000px;
-    margin: 0 auto;
-    padding: 30px;
-    background: transparent;
-    border-radius: 8px;
+    padding: 0 30px;
+    line-height: 1.8;
+    background-color: transparent;
+  }
+
+  .rich-text-content h1 {
+    font-size: {{ section.settings.h1_size }}px;
+    margin: {{ section.settings.h1_margin_top }}px 0 {{ section.settings.h1_margin_bottom }}px 0;
+    font-weight: bold;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content h2 {
+    font-size: {{ section.settings.h2_size }}px;
+    margin: {{ section.settings.h2_margin_top }}px 0 {{ section.settings.h2_margin_bottom }}px 0;
+    font-weight: bold;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content h3 {
+    font-size: {{ section.settings.h3_size }}px;
+    margin: {{ section.settings.h3_margin_top }}px 0 {{ section.settings.h3_margin_bottom }}px 0;
+    font-weight: bold;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content p {
+    margin: 1rem 0;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content ul,
+  .rich-text-content ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content li {
+    margin: 0.5rem 0;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content strong {
+    font-weight: bold;
+    color: {{ section.settings.text_color }};
+  }
+
+  .rich-text-content em {
+    font-style: italic;
+    color: {{ section.settings.text_color }};
   }
 
   @media (max-width: 768px) {
-    .fengshui-celestial-section {
-      padding: 30px 0;
-      min-height: 300px;
+    .custom-rich-text-section {
+      padding: 40px 20px;
+      min-height: auto;
     }
 
-    .celestial-title {
-      font-size: 1.8rem;
+    .rich-text-title {
+      font-size: 28px;
+    }
+
+    .rich-text-content {
+      padding: 0 20px;
+      font-size: 14px;
+    }
+
+    .rich-text-content h1 {
+      font-size: 28px;
+    }
+
+    .rich-text-content h2 {
+      font-size: 24px;
+    }
+
+    .rich-text-content h3 {
+      font-size: 20px;
     }
   }
 </style>
