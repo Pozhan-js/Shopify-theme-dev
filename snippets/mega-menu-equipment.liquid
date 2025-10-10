@@ -1,37 +1,10 @@
 <!-- Equipment Mega Menu Snippet - 按设计图1比1还原 -->
 <div class="mega-dropdown-menu">
-  <div class="mega-menu-grid">
-    <div class="mega-menu-column">
-      <!-- 动态获取产品系列，按设计图布局 -->
-      {% assign equipment_collections = collections | where: 'published', true %}
-      {% assign has_collections = false %}
-      
-      <!-- 检查是否有产品系列 -->
-      {% for collection in equipment_collections limit: 6 %}
-        {% if collection.products.size > 0 %}
-          {% assign has_collections = true %}
-          {% break %}
-        {% endif %}
-      {% endfor %}
-      
-      {% if has_collections %}
-        <!-- 动态显示产品系列 -->
-        {% assign collection_count = 0 %}
-        {% for collection in equipment_collections limit: 6 %}
-          {% if collection.products.size > 0 and collection_count < 6 %}
-            <div class="mega-menu-category">
-              <h3>{{ collection.title }}</h3>
-              <ul>
-                {% for product in collection.products limit: 4 %}
-                  <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-                {% endfor %}
-              </ul>
-            </div>
-            {% assign collection_count = collection_count | plus: 1 %}
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        <!-- 默认产品系列内容，按设计图布局 -->
+  <div class="mega-menu-grid equipment-grid">
+    <!-- 左侧三列产品分类 -->
+    <div class="mega-menu-column equipment-left">
+      <!-- 第一列 -->
+      <div class="equipment-column">
         <div class="mega-menu-category">
           <h3>{{ section.settings.equipment_cat1_title | default: 'Reformer' }}</h3>
           <ul>
@@ -68,7 +41,10 @@
             {% endif %}
           </ul>
         </div>
-        
+      </div>
+      
+      <!-- 第二列 -->
+      <div class="equipment-column">
         <div class="mega-menu-category">
           <h3>{{ section.settings.equipment_cat3_title | default: 'Ladder Barrel' }}</h3>
           <ul>
@@ -118,7 +94,10 @@
             {% endif %}
           </ul>
         </div>
-        
+      </div>
+      
+      <!-- 第三列 -->
+      <div class="equipment-column">
         <div class="mega-menu-category">
           <h3>{{ section.settings.equipment_cat6_title | default: 'Accessories' }}</h3>
           <ul>
@@ -140,9 +119,11 @@
             {% endif %}
           </ul>
         </div>
-      {% endif %}
+      </div>
     </div>
-    <div class="mega-menu-column">
+    
+    <!-- 右侧图片和CTA -->
+    <div class="mega-menu-column equipment-right">
       <div class="mega-menu-cta">
         {% if section.settings.equipment_image %}
           <img src="{{ section.settings.equipment_image | img_url: '800x1200' }}" alt="{{ section.settings.equipment_image_alt | default: 'Pilates Equipment' }}" />
@@ -162,6 +143,6 @@
         <img src="{{ section.settings.contactfootericon | img_url: '44x44' }}" alt="Contact Icon">
       </div>
     {% endif %}
-    <span>{{ section.settings.equipment_footer_text | default: 'CONTACT US' }}</span>
+    <span>CONTACT US</span>
   </div>
 </div>
