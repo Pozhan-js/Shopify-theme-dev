@@ -66,9 +66,24 @@
                       {% assign color_found = false %}
                       {% assign debug_info = '' %}
                       
-                      {% comment %} 调试：打印shopify--color-pattern的完整内容 {% endcomment %}
+                      {% comment %} 调试：打印所有可能的颜色相关元字段 {% endcomment %}
                       {% assign color_pattern_metafield = variant.metafields['shopify--color-pattern'] %}
                       {% assign debug_color_pattern = color_pattern_metafield | json %}
+                      
+                      {% comment %} 尝试多种可能的元字段命名方式 {% endcomment %}
+                      {% assign debug_all_metafields = variant.metafields | json %}
+                      {% assign debug_shopify_metafields = variant.metafields.shopify | json %}
+                      {% assign debug_custom_metafields = variant.metafields.custom | json %}
+                      {% assign debug_global_metafields = variant.metafields.global | json %}
+                      
+                      {% comment %} 新增：检查产品级别的颜色元字段 {% endcomment %}
+                      {% assign product_color_metafields = selected_product.metafields | json %}
+                      
+                      {% comment %} 新增：检查变体的所有选项值 {% endcomment %}
+                      {% assign variant_options_debug = '' %}
+                      {% assign variant_options_debug = variant_options_debug | append: 'Option1: ' | append: variant.option1 | append: ' | ' %}
+                      {% assign variant_options_debug = variant_options_debug | append: 'Option2: ' | append: variant.option2 | append: ' | ' %}
+                      {% assign variant_options_debug = variant_options_debug | append: 'Option3: ' | append: variant.option3 %}
                       
                       {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
                       
@@ -255,8 +270,16 @@
                          data-variant-id="{{ variant_id }}"
                          data-variant-image="{{ variant_image }}"
                          data-color-hex="{{ color_hex }}"
-         data-debug-info="{{ debug_info }}"
-         data-color-pattern-debug="{{ debug_color_pattern | escape }}">
+                         data-debug-info="{{ debug_info }}"
+                         data-color-pattern-debug="{{ debug_color_pattern | escape }}"
+                         data-all-metafields-debug="{{ debug_all_metafields | escape }}"
+                         data-shopify-metafields-debug="{{ debug_shopify_metafields | escape }}"
+                         data-custom-metafields-debug="{{ debug_custom_metafields | escape }}"
+                         data-global-metafields-debug="{{ debug_global_metafields | escape }}"
+                         data-product-metafields-debug="{{ product_color_metafields | escape }}"
+                         data-variant-options-debug="{{ variant_options_debug | escape }}"
+                         data-variant-id-debug="{{ variant.id }}"
+                         data-variant-title-debug="{{ variant.title | escape }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -338,14 +361,119 @@ document.addEventListener('DOMContentLoaded', function() {
     const debugInfo = option.getAttribute('data-debug-info');
     const colorPatternDebug = option.getAttribute('data-color-pattern-debug');
     
-    // 打印shopify--color-pattern的完整内容
+    // 打印所有元字段信息进行调试
+    const allMetafieldsDebug = option.getAttribute('data-all-metafields-debug');
+    const shopifyMetafieldsDebug = option.getAttribute('data-shopify-metafields-debug');
+    const customMetafieldsDebug = option.getAttribute('data-custom-metafields-debug');
+    const globalMetafieldsDebug = option.getAttribute('data-global-metafields-debug');
+    
+    console.log(`🔍 === 变体 "${colorName}" 的完整调试信息 ===`);
+    
+    // 1. 变体基本信息
+    const variantId = option.getAttribute('data-variant-id-debug');
+    const variantTitle = option.getAttribute('data-variant-title-debug');
+    const variantOptionsDebug = option.getAttribute('data-variant-options-debug');
+    
+    console.log(`📋 变体基本信息:`);
+    console.log(`   - 变体ID: ${variantId}`);
+    console.log(`   - 变体标题: ${variantTitle}`);
+    console.log(`   - 变体选项: ${variantOptionsDebug}`);
+    console.log(`   - 当前颜色名称: ${colorName}`);
+    
+    // 2. 产品级别元字段
+    const productMetafieldsDebug = option.getAttribute('data-product-metafields-debug');
+    console.log(`🏷️ 产品级别元字段:`, productMetafieldsDebug);
+    
+    // 3. 变体级别元字段
+    console.log(`📋 变体级别所有元字段:`, allMetafieldsDebug);
+    try {
+      const allMetafields = JSON.parse(allMetafieldsDebug);
+      console.log(`🔑 变体元字段的命名空间:`, Object.keys(allMetafields));
+      
+      // 检查是否有包含 color 的键
+      for (const [namespace, fields] of Object.entries(allMetafields)) {
+        if (fields && typeof fields === 'object') {
+          const colorFields = Object.keys(fields).filter(key => 
+            key.toLowerCase().includes('color') || 
+            key.toLowerCase().includes('pattern') ||
+            key.toLowerCase().includes('hex')
+          );
+          if (colorFields.length > 0) {
+            console.log(`🎨 命名空间 "${namespace}" 中的颜色相关字段:`, colorFields);
+            colorFields.forEach(field => {
+              console.log(`   - ${namespace}.${field}:`, fields[field]);
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn(`⚠️ 无法解析变体元字段 JSON:`, e);
+    }
+    
+    // 4. 产品级别元字段解析
+    if (productMetafieldsDebug && productMetafieldsDebug !== 'null' && productMetafieldsDebug !== '') {
+      try {
+        const productMetafields = JSON.parse(productMetafieldsDebug);
+        console.log(`🏷️ 产品级别元字段解析:`, productMetafields);
+        console.log(`🔑 产品元字段的命名空间:`, Object.keys(productMetafields));
+        
+        // 检查产品级别的颜色字段
+        for (const [namespace, fields] of Object.entries(productMetafields)) {
+          if (fields && typeof fields === 'object') {
+            const colorFields = Object.keys(fields).filter(key => 
+              key.toLowerCase().includes('color') || 
+              key.toLowerCase().includes('pattern') ||
+              key.toLowerCase().includes('hex')
+            );
+            if (colorFields.length > 0) {
+              console.log(`🎨 产品命名空间 "${namespace}" 中的颜色相关字段:`, colorFields);
+              colorFields.forEach(field => {
+                console.log(`   - product.${namespace}.${field}:`, fields[field]);
+              });
+            }
+          }
+        }
+      } catch (e) {
+        console.warn(`⚠️ 无法解析产品元字段 JSON:`, e);
+      }
+    } else {
+      console.log(`❌ 产品没有元字段数据`);
+    }
+      } catch (e) {
+        console.warn(`⚠️ 无法解析所有元字段 JSON:`, e);
+      }
+    } else {
+      console.log(`❌ 变体 "${colorName}" 没有任何元字段数据`);
+    }
+    
+    // 2. 打印 shopify 命名空间
+    if (shopifyMetafieldsDebug && shopifyMetafieldsDebug !== 'null' && shopifyMetafieldsDebug !== '') {
+      console.log(`🏪 Shopify 命名空间元字段:`, shopifyMetafieldsDebug);
+    } else {
+      console.log(`❌ 没有 shopify 命名空间的元字段`);
+    }
+    
+    // 3. 打印 custom 命名空间
+    if (customMetafieldsDebug && customMetafieldsDebug !== 'null' && customMetafieldsDebug !== '') {
+      console.log(`🛠️ Custom 命名空间元字段:`, customMetafieldsDebug);
+    } else {
+      console.log(`❌ 没有 custom 命名空间的元字段`);
+    }
+    
+    // 4. 打印 global 命名空间
+    if (globalMetafieldsDebug && globalMetafieldsDebug !== 'null' && globalMetafieldsDebug !== '') {
+      console.log(`🌍 Global 命名空间元字段:`, globalMetafieldsDebug);
+    } else {
+      console.log(`❌ 没有 global 命名空间的元字段`);
+    }
+    
+    // 5. 打印 shopify--color-pattern 特定调试
     if (colorPatternDebug && colorPatternDebug !== 'null' && colorPatternDebug !== '') {
-      console.log(`🔍 变体 "${colorName}" 的 shopify--color-pattern 内容:`, colorPatternDebug);
+      console.log(`🔍 shopify--color-pattern 内容:`, colorPatternDebug);
       try {
         const parsedColorPattern = JSON.parse(colorPatternDebug);
         console.log(`📋 解析后的 shopify--color-pattern:`, parsedColorPattern);
         
-        // 详细打印所有属性
         if (parsedColorPattern && typeof parsedColorPattern === 'object') {
           console.log(`🔑 shopify--color-pattern 的所有键:`, Object.keys(parsedColorPattern));
           for (const [key, value] of Object.entries(parsedColorPattern)) {
@@ -356,8 +484,10 @@ document.addEventListener('DOMContentLoaded', function() {
         console.warn(`⚠️ 无法解析 shopify--color-pattern JSON:`, e);
       }
     } else {
-      console.log(`❌ 变体 "${colorName}" 没有 shopify--color-pattern 数据`);
+      console.log(`❌ 没有 shopify--color-pattern 数据`);
     }
+    
+    console.log(`🔍 === 变体 "${colorName}" 调试信息结束 ===\n`);
     
     // 检查颜色来源
     if (debugInfo && debugInfo.startsWith('preset-')) {
@@ -399,21 +529,21 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (emptyColorCount > 0) {
     console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
-    console.log('💡 建议检查以下元字段路径是否正确设置:');
-    console.log('   优先级顺序:');
-    console.log('   1. variant.metafields["shopify--color-pattern"].color');
-    console.log('   2. variant.metafields["shopify--color-pattern"].color.value');
-    console.log('   3. variant.metafields.custom.color.value');
-    console.log('   4. variant.metafields.custom.color');
-    console.log('   5. variant.metafields.color.value');
-    console.log('   6. variant.metafields.color');
-    console.log('   7. variant.metafields.global.color.value');
-    console.log('   8. variant.metafields.global.color');
-    console.log('   9. variant.metafields.custom.hex_color.value');
-    console.log('   10. variant.metafields.custom.color_code.value');
-    console.log('   11. variant.metafields.custom.color_hex.value');
+    console.log('💡 建议检查以下可能的问题:');
+    console.log('   1. 颜色是否在产品选项中正确配置？');
+    console.log('   2. 变体是否有对应的颜色元字段？');
+    console.log('   3. 元字段的命名空间和键名是否正确？');
     console.log('');
-    console.log('🔧 或者在 Shopify 后台为每个变体设置颜色元字段');
+    console.log('🔧 可能的解决方案:');
+    console.log('   - 检查 Shopify 后台产品选项设置');
+    console.log('   - 确认变体的颜色元字段配置');
+    console.log('   - 验证元字段的访问路径');
+    console.log('');
+    console.log('📋 常见的颜色元字段路径:');
+    console.log('   1. variant.metafields["shopify--color-pattern"].color');
+    console.log('   2. variant.metafields.custom.color.value');
+    console.log('   3. variant.metafields.custom.color');
+    console.log('   4. product.metafields.custom.colors[variant_option]');
   }
   
   if (presetColorCount > 0) {
