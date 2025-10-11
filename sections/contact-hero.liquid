@@ -60,6 +60,36 @@
                 {{ section.settings.button_text }}
               </a>
             {% endif %}
+            
+            {% if section.settings.catalog_button_text != blank %}
+              <a
+                href="{{ section.settings.catalog_button_url | default: '#' }}"
+                class="catalog-button"
+                {% if section.settings.catalog_open_new_tab %}
+                  target="_blank"
+                {% endif %}
+              >
+                {% if section.settings.catalog_button_icon != blank %}
+                  <img src="{{ section.settings.catalog_button_icon | img_url: '18x18' }}" alt="Catalog Icon" class="catalog-icon">
+                {% else %}
+                  <svg
+                    class="catalog-icon"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                {% endif %}
+                {{ section.settings.catalog_button_text }}
+              </a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -179,6 +209,9 @@
 
   .button-content {
     flex-shrink: 0;
+    display: flex;
+    gap: 20px;
+    align-items: center;
   }
 
   .contact-button {
@@ -200,6 +233,32 @@
     white-space: nowrap;
   }
 
+  .catalog-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 30px;
+    background-color: #ffffff;
+    color: #161616;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 0px solid transparent;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .catalog-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+  }
+
   .cta-icon {
     flex-shrink: 0;
     transition: transform 0.3s ease;
@@ -215,6 +274,17 @@
 
   .contact-button:hover .cta-icon {
     transform: translateX(2px);
+  }
+
+  .catalog-button:hover {
+    background-color: #f5f5f5;
+    color: #161616;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .catalog-button:hover .catalog-icon {
+    transform: translateY(2px);
   }
 
   /* 响应式设计 - 基于1920px设计图按比例缩放 */
@@ -290,6 +360,25 @@
       flex-direction: row;
     }
     
+    .button-content {
+      gap: calc(20px * (100vw / 1920px));
+      min-gap: 10px;
+    }
+    
+    .catalog-button {
+      font-size: calc(18px * (100vw / 1920px));
+      padding: calc(16px * (100vw / 1920px)) calc(30px * (100vw / 1920px));
+      min-font-size: 12px;
+      min-padding: 8px 15px;
+    }
+    
+    .catalog-icon {
+      width: calc(18px * (100vw / 1920px));
+      height: calc(18px * (100vw / 1920px));
+      min-width: 12px;
+      min-height: 12px;
+    }
+    
     .text-content {
       max-width: calc(800px * (100vw / 1920px));
       margin-left: calc(287px * (100vw / 1920px));
@@ -341,6 +430,26 @@
       gap: calc(100px * (100vw / 768px));
       width: 100%;
       min-gap: 20px;
+    }
+    
+    .button-content {
+      flex-direction: column;
+      gap: calc(20px * (100vw / 768px));
+      min-gap: 10px;
+    }
+    
+    .catalog-button {
+      font-size: calc(18px * (100vw / 768px));
+      padding: calc(16px * (100vw / 768px)) calc(30px * (100vw / 768px));
+      min-font-size: 12px;
+      min-padding: 8px 15px;
+    }
+    
+    .catalog-icon {
+      width: calc(18px * (100vw / 768px));
+      height: calc(18px * (100vw / 768px));
+      min-width: 12px;
+      min-height: 12px;
     }
     
     .text-content {
@@ -423,6 +532,22 @@
       font-size: clamp(10px, 2.5vw, 14px);
       padding: clamp(8px, 2vw, 12px) clamp(15px, 4vw, 20px);
       letter-spacing: 0.2px;
+    }
+    
+    .button-content {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .catalog-button {
+      font-size: clamp(12px, 3vw, 18px);
+      padding: clamp(8px, 2vw, 12px) clamp(15px, 4vw, 20px);
+      letter-spacing: 0.2px;
+    }
+    
+    .catalog-icon {
+      width: clamp(12px, 3vw, 18px);
+      height: clamp(12px, 3vw, 18px);
     }
   }
 </style>
@@ -692,6 +817,33 @@
       "id": "button_hover_border_color",
       "label": "按钮悬停边框色",
       "default": "#c53030"
+    },
+    {
+      "type": "header",
+      "content": "下载目录按钮设置"
+    },
+    {
+      "type": "text",
+      "id": "catalog_button_text",
+      "label": "下载目录按钮文本",
+      "default": "DOWNLOAD CATALOG"
+    },
+    {
+      "type": "url",
+      "id": "catalog_button_url",
+      "label": "下载目录按钮链接"
+    },
+    {
+      "type": "checkbox",
+      "id": "catalog_open_new_tab",
+      "label": "在新标签页打开下载目录",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "catalog_button_icon",
+      "label": "下载目录按钮图标",
+      "info": "推荐尺寸：18x18px，如不上传将使用默认下载图标"
     }
   ],
   "presets": [
@@ -701,6 +853,7 @@
         "heading": "GET IN TOUCH",
         "description": "Tell us your needs- we'll reply within 24 hours with customized support.",
         "button_text": "CONTACT US",
+        "catalog_button_text": "DOWNLOAD CATALOG",
         "heading_color": "#ffffff",
         "description_color": "#ffffff",
         "button_bg_color": "#e53e3e",
