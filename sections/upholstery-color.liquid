@@ -32,12 +32,61 @@
               {% assign option_name_lower = option.name | downcase %}
               {% assign target_name_lower = color_option_name | downcase %}
               
-              {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'Color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
+              {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
                 {% for value in option.values %}
                   {% assign variant_found = false %}
                   {% assign variant_id = '' %}
                   {% assign variant_image = '' %}
                   {% assign color_hex = '#CCCCCC' %}
+                  {% assign debug_info = '' %}
+                  
+                  {% comment %} 首先尝试使用 color_swatch.color 获取颜色 {% endcomment %}
+                  {% assign color_swatch = value.swatch %}
+                  {% if color_swatch and color_swatch.color %}
+                    {% assign color_hex = color_swatch.color %}
+                    {% assign debug_info = 'color_swatch.color' %}
+                  {% else %}
+                    {% comment %} 如果没有 color_swatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
+                    {% assign value_lower = value | downcase %}
+                    {% case value_lower %}
+                      {% when 'black' %}
+                        {% assign color_hex = '#000000' %}
+                        {% assign debug_info = 'preset-black' %}
+                      {% when 'white' %}
+                        {% assign color_hex = '#FFFFFF' %}
+                        {% assign debug_info = 'preset-white' %}
+                      {% when 'red' %}
+                        {% assign color_hex = '#FF0000' %}
+                        {% assign debug_info = 'preset-red' %}
+                      {% when 'blue' %}
+                        {% assign color_hex = '#0000FF' %}
+                        {% assign debug_info = 'preset-blue' %}
+                      {% when 'green' %}
+                        {% assign color_hex = '#008000' %}
+                        {% assign debug_info = 'preset-green' %}
+                      {% when 'gray', 'grey' %}
+                        {% assign color_hex = '#808080' %}
+                        {% assign debug_info = 'preset-gray' %}
+                      {% when 'steel gray', 'steel grey' %}
+                        {% assign color_hex = '#71797E' %}
+                        {% assign debug_info = 'preset-steel-gray' %}
+                      {% when 'brown' %}
+                        {% assign color_hex = '#8B4513' %}
+                        {% assign debug_info = 'preset-brown' %}
+                      {% when 'navy' %}
+                        {% assign color_hex = '#000080' %}
+                        {% assign debug_info = 'preset-navy' %}
+                      {% when 'beige' %}
+                        {% assign color_hex = '#F5F5DC' %}
+                        {% assign debug_info = 'preset-beige' %}
+                      {% when 'tan' %}
+                        {% assign color_hex = '#D2B48C' %}
+                        {% assign debug_info = 'preset-tan' %}
+                      {% else %}
+                        {% assign color_hex = '#CCCCCC' %}
+                        {% assign debug_info = 'default-fallback' %}
+                    {% endcase %}
+                  {% endif %}
                   
                   {% comment %} 查找对应的变体 {% endcomment %}
                   {% for variant in selected_product.variants %}
@@ -60,197 +109,6 @@
                       {% if variant.image %}
                         {% assign variant_image = variant.image | img_url: '890x412' %}
                       {% endif %}
-                      
-                      {% comment %} 重置颜色值 {% endcomment %}
-                      {% assign color_hex = '' %}
-                      {% assign color_found = false %}
-                      {% assign debug_info = '' %}
-                      
-                      {% comment %} 调试：打印所有可能的颜色相关元字段 {% endcomment %}
-                      {% assign color_pattern_metafield = variant.metafields['shopify--color-pattern'] %}
-                      {% assign debug_color_pattern = color_pattern_metafield | json %}
-                      
-                      {% comment %} 尝试多种可能的元字段命名方式 {% endcomment %}
-                      {% assign debug_all_metafields = variant.metafields | json %}
-                      {% assign debug_shopify_metafields = variant.metafields.shopify | json %}
-                      {% assign debug_custom_metafields = variant.metafields.custom | json %}
-                      {% assign debug_global_metafields = variant.metafields.global | json %}
-                      
-                      {% comment %} 新增：检查产品级别的颜色元字段 {% endcomment %}
-                      {% assign product_color_metafields = selected_product.metafields | json %}
-                      
-                      {% comment %} 新增：检查变体的所有选项值 {% endcomment %}
-                      {% assign variant_options_debug = '' %}
-                      {% assign variant_options_debug = variant_options_debug | append: 'Option1: ' | append: variant.option1 | append: ' | ' %}
-                      {% assign variant_options_debug = variant_options_debug | append: 'Option2: ' | append: variant.option2 | append: ' | ' %}
-                      {% assign variant_options_debug = variant_options_debug | append: 'Option3: ' | append: variant.option3 %}
-                      
-                      {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
-                      
-                      {% comment %} 1. 尝试 shopify--color-pattern.color (Shopify标准颜色字段) {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields['shopify--color-pattern'].color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'shopify--color-pattern.color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 2. 尝试 shopify--color-pattern.color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields['shopify--color-pattern'].color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'shopify--color-pattern.color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 3. 尝试 custom.color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 4. 尝试 custom.color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 5. 尝试 color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 6. 尝试 color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 7. 尝试 global.color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.global.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'global.color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 8. 尝试 global.color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.global.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'global.color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 9. 尝试其他可能的命名 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.hex_color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.hex_color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color_code.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color_code.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color_hex.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color_hex.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 8. 尝试基于颜色名称的预设颜色映射 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign value_lower = value | downcase %}
-                        {% case value_lower %}
-                          {% when 'black' %}
-                            {% assign color_hex = '#000000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-black' %}
-                          {% when 'white' %}
-                            {% assign color_hex = '#FFFFFF' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-white' %}
-                          {% when 'red' %}
-                            {% assign color_hex = '#FF0000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-red' %}
-                          {% when 'blue' %}
-                            {% assign color_hex = '#0000FF' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-blue' %}
-                          {% when 'green' %}
-                            {% assign color_hex = '#008000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-green' %}
-                          {% when 'gray', 'grey' %}
-                            {% assign color_hex = '#808080' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-gray' %}
-                          {% when 'steel gray', 'steel grey' %}
-                            {% assign color_hex = '#71797E' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-steel-gray' %}
-                          {% when 'brown' %}
-                            {% assign color_hex = '#8B4513' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-brown' %}
-                          {% when 'navy' %}
-                            {% assign color_hex = '#000080' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-navy' %}
-                          {% when 'beige' %}
-                            {% assign color_hex = '#F5F5DC' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-beige' %}
-                          {% when 'tan' %}
-                            {% assign color_hex = '#D2B48C' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-tan' %}
-                        {% endcase %}
-                      {% endunless %}
-                      
-                      {% comment %} 9. 如果仍然没有找到颜色，使用默认颜色 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign color_hex = '#CCCCCC' %}
-                        {% assign debug_info = 'default-fallback' %}
-                      {% endunless %}
                     {% endif %}
                   {% endfor %}
                   
@@ -271,15 +129,7 @@
                          data-variant-image="{{ variant_image }}"
                          data-color-hex="{{ color_hex }}"
                          data-debug-info="{{ debug_info }}"
-                         data-color-pattern-debug="{{ debug_color_pattern | escape }}"
-                         data-all-metafields-debug="{{ debug_all_metafields | escape }}"
-                         data-shopify-metafields-debug="{{ debug_shopify_metafields | escape }}"
-                         data-custom-metafields-debug="{{ debug_custom_metafields | escape }}"
-                         data-global-metafields-debug="{{ debug_global_metafields | escape }}"
-                         data-product-metafields-debug="{{ product_color_metafields | escape }}"
-                         data-variant-options-debug="{{ variant_options_debug | escape }}"
-                         data-variant-id-debug="{{ variant.id }}"
-                         data-variant-title-debug="{{ variant.title | escape }}">
+                         data-color-swatch="{{ color_swatch | json | escape }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -351,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // 检查是否有空的颜色值
   let emptyColorCount = 0;
   let presetColorCount = 0;
-  let metafieldColorCount = 0;
+  let swatchColorCount = 0;
   
   colorOptions.forEach((option, index) => {
     const colorName = option.getAttribute('data-color');
@@ -359,143 +209,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const variantId = option.getAttribute('data-variant-id');
     const variantImage = option.getAttribute('data-variant-image');
     const debugInfo = option.getAttribute('data-debug-info');
-    const colorPatternDebug = option.getAttribute('data-color-pattern-debug');
+    const colorSwatchDebug = option.getAttribute('data-color-swatch');
     
-    // 打印所有元字段信息进行调试
-    const allMetafieldsDebug = option.getAttribute('data-all-metafields-debug');
-    const shopifyMetafieldsDebug = option.getAttribute('data-shopify-metafields-debug');
-    const customMetafieldsDebug = option.getAttribute('data-custom-metafields-debug');
-    const globalMetafieldsDebug = option.getAttribute('data-global-metafields-debug');
+    console.log(`🔍 === 颜色 "${colorName}" 调试信息 ===`);
+    console.log(`📋 基本信息:`);
+    console.log(`   - 颜色名称: ${colorName}`);
+    console.log(`   - 颜色值: ${colorHex}`);
+    console.log(`   - 变体ID: ${variantId}`);
+    console.log(`   - 变体图片: ${variantImage}`);
+    console.log(`   - 颜色来源: ${debugInfo}`);
     
-      console.log(`🔍 === 变体 "${colorName}" 的完整调试信息 ===`);
-    
-    // 1. 变体基本信息
-    const debugVariantId = option.getAttribute('data-variant-id-debug');
-    const variantTitle = option.getAttribute('data-variant-title-debug');
-    const variantOptionsDebug = option.getAttribute('data-variant-options-debug');
-    
-    console.log(`📋 变体基本信息:`);
-    console.log(`   - 变体ID: ${debugVariantId}`);
-    console.log(`   - 变体标题: ${variantTitle}`);
-    console.log(`   - 变体选项: ${variantOptionsDebug}`);
-    console.log(`   - 当前颜色名称: ${colorName}`);
-    
-    // 2. 产品级别元字段
-    const productMetafieldsDebug = option.getAttribute('data-product-metafields-debug');
-    console.log(`🏷️ 产品级别元字段:`, productMetafieldsDebug);
-    
-    // 3. 变体级别元字段
-    console.log(`📋 变体级别所有元字段:`, allMetafieldsDebug);
-    try {
-      const allMetafields = JSON.parse(allMetafieldsDebug);
-      console.log(`🔑 变体元字段的命名空间:`, Object.keys(allMetafields));
-      
-      // 检查是否有包含 color 的键
-      for (const [namespace, fields] of Object.entries(allMetafields)) {
-        if (fields && typeof fields === 'object') {
-          const colorFields = Object.keys(fields).filter(key => 
-            key.toLowerCase().includes('color') || 
-            key.toLowerCase().includes('pattern') ||
-            key.toLowerCase().includes('hex')
-          );
-          if (colorFields.length > 0) {
-            console.log(`🎨 命名空间 "${namespace}" 中的颜色相关字段:`, colorFields);
-            colorFields.forEach(field => {
-              console.log(`   - ${namespace}.${field}:`, fields[field]);
-            });
-          }
-        }
-      }
-    } catch (e) {
-      console.warn(`⚠️ 无法解析变体元字段 JSON:`, e);
-    }
-    
-    // 4. 产品级别元字段解析
-    if (productMetafieldsDebug && productMetafieldsDebug !== 'null' && productMetafieldsDebug !== '') {
+    // 打印 color_swatch 信息
+    if (colorSwatchDebug && colorSwatchDebug !== 'null' && colorSwatchDebug !== '') {
       try {
-        const productMetafields = JSON.parse(productMetafieldsDebug);
-        console.log(`🏷️ 产品级别元字段解析:`, productMetafields);
-        console.log(`🔑 产品元字段的命名空间:`, Object.keys(productMetafields));
-        
-        // 检查产品级别的颜色字段
-        for (const [namespace, fields] of Object.entries(productMetafields)) {
-          if (fields && typeof fields === 'object') {
-            const colorFields = Object.keys(fields).filter(key => 
-              key.toLowerCase().includes('color') || 
-              key.toLowerCase().includes('pattern') ||
-              key.toLowerCase().includes('hex')
-            );
-            if (colorFields.length > 0) {
-              console.log(`🎨 产品命名空间 "${namespace}" 中的颜色相关字段:`, colorFields);
-              colorFields.forEach(field => {
-                console.log(`   - product.${namespace}.${field}:`, fields[field]);
-              });
-            }
-          }
+        const colorSwatch = JSON.parse(colorSwatchDebug);
+        console.log(`🎨 Color Swatch 信息:`, colorSwatch);
+        if (colorSwatch && colorSwatch.color) {
+          console.log(`   - Swatch 颜色: ${colorSwatch.color}`);
+        }
+        if (colorSwatch && colorSwatch.image) {
+          console.log(`   - Swatch 图片: ${colorSwatch.image}`);
         }
       } catch (e) {
-        console.warn(`⚠️ 无法解析产品元字段 JSON:`, e);
+        console.warn(`⚠️ 无法解析 color_swatch JSON:`, e);
       }
     } else {
-      console.log(`❌ 产品没有元字段数据`);
+      console.log(`❌ 没有 color_swatch 数据`);
     }
     
-    // 2. 打印 shopify 命名空间
-    if (shopifyMetafieldsDebug && shopifyMetafieldsDebug !== 'null' && shopifyMetafieldsDebug !== '') {
-      console.log(`🏪 Shopify 命名空间元字段:`, shopifyMetafieldsDebug);
-    } else {
-      console.log(`❌ 没有 shopify 命名空间的元字段`);
-    }
-    
-    // 3. 打印 custom 命名空间
-    if (customMetafieldsDebug && customMetafieldsDebug !== 'null' && customMetafieldsDebug !== '') {
-      console.log(`🛠️ Custom 命名空间元字段:`, customMetafieldsDebug);
-    } else {
-      console.log(`❌ 没有 custom 命名空间的元字段`);
-    }
-    
-    // 4. 打印 global 命名空间
-    if (globalMetafieldsDebug && globalMetafieldsDebug !== 'null' && globalMetafieldsDebug !== '') {
-      console.log(`🌍 Global 命名空间元字段:`, globalMetafieldsDebug);
-    } else {
-      console.log(`❌ 没有 global 命名空间的元字段`);
-    }
-    
-    // 5. 打印 shopify--color-pattern 特定调试
-    if (colorPatternDebug && colorPatternDebug !== 'null' && colorPatternDebug !== '') {
-      console.log(`🔍 shopify--color-pattern 内容:`, colorPatternDebug);
-      try {
-        const parsedColorPattern = JSON.parse(colorPatternDebug);
-        console.log(`📋 解析后的 shopify--color-pattern:`, parsedColorPattern);
-        
-        if (parsedColorPattern && typeof parsedColorPattern === 'object') {
-          console.log(`🔑 shopify--color-pattern 的所有键:`, Object.keys(parsedColorPattern));
-          for (const [key, value] of Object.entries(parsedColorPattern)) {
-            console.log(`   - ${key}:`, value, `(类型: ${typeof value})`);
-          }
-        }
-      } catch (e) {
-        console.warn(`⚠️ 无法解析 shopify--color-pattern JSON:`, e);
-      }
-    } else {
-      console.log(`❌ 没有 shopify--color-pattern 数据`);
-    }
-    
-    console.log(`🔍 === 变体 "${colorName}" 调试信息结束 ===\n`);
+    console.log(`🔍 === 颜色 "${colorName}" 调试信息结束 ===\n`);
     
     // 检查颜色来源
-    if (debugInfo && debugInfo.startsWith('preset-')) {
-      presetColorCount++;
-      console.log(`🎨 颜色 ${index + 1} "${colorName}" 使用预设颜色:`, {
+    if (debugInfo === 'color_swatch.color') {
+      swatchColorCount++;
+      console.log(`✅ 颜色 ${index + 1} "${colorName}" 从 color_swatch 获取:`, {
         name: colorName,
         hex: colorHex,
         source: debugInfo,
         variantId: variantId,
         hasImage: !!variantImage
       });
-    } else if (debugInfo && debugInfo !== 'default-fallback') {
-      metafieldColorCount++;
-      console.log(`✅ 颜色 ${index + 1} "${colorName}" 从元字段获取:`, {
+    } else if (debugInfo && debugInfo.startsWith('preset-')) {
+      presetColorCount++;
+      console.log(`🎨 颜色 ${index + 1} "${colorName}" 使用预设颜色:`, {
         name: colorName,
         hex: colorHex,
         source: debugInfo,
@@ -517,31 +273,28 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 显示调试总结
   console.log('📊 颜色来源统计:');
-  console.log(`   - 元字段颜色: ${metafieldColorCount} 个`);
+  console.log(`   - Color Swatch 颜色: ${swatchColorCount} 个`);
   console.log(`   - 预设颜色: ${presetColorCount} 个`);
   console.log(`   - 默认颜色: ${emptyColorCount} 个`);
+  
+  if (swatchColorCount > 0) {
+    console.log('✅ 成功从 color_swatch.color 获取颜色！');
+  }
   
   if (emptyColorCount > 0) {
     console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
     console.log('💡 建议检查以下可能的问题:');
     console.log('   1. 颜色是否在产品选项中正确配置？');
-    console.log('   2. 变体是否有对应的颜色元字段？');
-    console.log('   3. 元字段的命名空间和键名是否正确？');
+    console.log('   2. 是否为颜色选项设置了 color swatch？');
+    console.log('   3. 颜色选项的名称是否正确？');
     console.log('');
-    console.log('🔧 可能的解决方案:');
-    console.log('   - 检查 Shopify 后台产品选项设置');
-    console.log('   - 确认变体的颜色元字段配置');
-    console.log('   - 验证元字段的访问路径');
-    console.log('');
-    console.log('📋 常见的颜色元字段路径:');
-    console.log('   1. variant.metafields["shopify--color-pattern"].color');
-    console.log('   2. variant.metafields.custom.color.value');
-    console.log('   3. variant.metafields.custom.color');
-    console.log('   4. product.metafields.custom.colors[variant_option]');
+    console.log('🔧 解决方案:');
+    console.log('   - 在 Shopify 后台产品选项中为每个颜色值设置 color swatch');
+    console.log('   - 确保颜色选项名称为 "颜色" 或 "Color"');
   }
   
   if (presetColorCount > 0) {
-    console.log('ℹ️ 部分颜色使用了基于名称的预设值，建议在后台设置准确的颜色值');
+    console.log('ℹ️ 部分颜色使用了基于名称的预设值，建议在后台设置 color swatch');
   }
   
   colorOptions.forEach((option, index) => {
