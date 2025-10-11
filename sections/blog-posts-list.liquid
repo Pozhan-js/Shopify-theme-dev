@@ -2,159 +2,89 @@
   <div class="page-width">
     <h2 class="blog-posts-title">{{ section.settings.title }}</h2>
     
-    <div class="blog-filter-buttons">
-      <button class="filter-btn active" data-filter="all">全部</button>
-      <button class="filter-btn" data-filter="day">日</button>
-      <button class="filter-btn" data-filter="week">周</button>
-      <button class="filter-btn" data-filter="month">月</button>
-    </div>
-    
-    <div class="blog-posts-grid" id="blog-posts-container">
-      {% assign all_articles = blogs.news.articles %}
-      {% assign current_date = 'now' | date: '%s' %}
-      
-      {% for article in all_articles %}
-        {% assign article_date = article.published_at | date: '%s' %}
-        {% assign days_diff = current_date | minus: article_date | divided_by: 86400 %}
-        
-        {% assign filter_class = '' %}
-        {% if days_diff <= 1 %}
-          {% assign filter_class = 'filter-day' %}
-        {% elsif days_diff <= 7 %}
-          {% assign filter_class = 'filter-week' %}
-        {% elsif days_diff <= 30 %}
-          {% assign filter_class = 'filter-month' %}
-        {% endif %}
-        
-        <article class="blog-post-card {{ filter_class }}" data-days="{{ days_diff }}">
-          {% if article.image != blank %}
-            <div class="blog-post-image">
-              <a href="{{ article.url }}">
-                <img src="{{ article.image | image_url: width: 400 }}" 
-                     alt="{{ article.image.alt | default: article.title }}"
-                     width="400"
-                     height="300"
-                     loading="lazy">
-              </a>
-            </div>
-          {% endif %}
-          <div class="blog-post-content">
-            <div class="blog-post-meta">
-              <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
-                {{ article.published_at | date: '%Y年%m月%d日' }}
-              </time>
-              <span class="days-ago">
-                {% if days_diff == 0 %}今天
-                {% elsif days_diff == 1 %}昨天
-                {% elsif days_diff <= 7 %}{{ days_diff }}天前
-                {% elsif days_diff <= 30 %}{{ days_diff }}天前
-                {% else %}{{ days_diff }}天前{% endif %}
-              </span>
-            </div>
-            <h3 class="blog-post-title">
-              <a href="{{ article.url }}">{{ article.title }}</a>
-            </h3>
-            <div class="blog-post-excerpt">
-              {{ article.excerpt | strip_html | truncatewords: 30 }}
-            </div>
-            <a href="{{ article.url }}" class="blog-post-link">阅读更多</a>
-          </div>
-        </article>
+    <ul class="blog-posts-simple-list">
+      {% for article in blogs.news.articles %}
+        <li class="blog-post-simple-item">
+          <a href="{{ article.url }}" class="blog-post-simple-link">
+            <span class="blog-post-date">{{ article.published_at | date: '%Y-%m-%d' }}</span>
+            <span class="blog-post-title-text">{{ article.title }}</span>
+          </a>
+        </li>
       {% endfor %}
-    </div>
+    </ul>
     
-    <div class="blog-posts-more">
-      <a href="/blogs/news" class="blog-posts-all-link">查看所有文章</a>
-    </div>
+    {% if blogs.news.articles.size > 0 %}
+      <div class="blog-posts-more">
+        <a href="/blogs/news" class="blog-posts-all-link">查看所有文章</a>
+      </div>
+    {% endif %}
   </div>
 </div>
 
 <style>
 .blog-posts-list-section {
-  padding: 60px 0;
-  background-color: #f8f8f8;
+  padding: 40px 0;
+  background-color: {{ section.settings.background_color }};
 }
 
 .blog-posts-title {
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 40px;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: {{ section.settings.title_color }};
+}
+
+.blog-posts-simple-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.blog-post-simple-item {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s ease;
+}
+
+.blog-post-simple-item:hover {
+  background-color: #f9f9f9;
+}
+
+.blog-post-simple-link {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  text-decoration: none;
   color: #333;
+  transition: color 0.3s ease;
 }
 
-.blog-posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 40px;
+.blog-post-simple-link:hover {
+  color: #007bff;
 }
 
-.blog-post-card {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.blog-post-card:hover {
-  transform: translateY(-5px);
-}
-
-.blog-post-image img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.blog-post-content {
-  padding: 20px;
-}
-
-.blog-post-meta {
-  color: #666;
+.blog-post-date {
   font-size: 0.9rem;
-  margin-bottom: 10px;
-}
-
-.blog-post-title {
-  font-size: 1.3rem;
-  margin: 0 0 10px 0;
-  line-height: 1.4;
-}
-
-.blog-post-title a {
-  color: #333;
-  text-decoration: none;
-}
-
-.blog-post-title a:hover {
-  color: #007bff;
-}
-
-.blog-post-excerpt {
   color: #666;
-  line-height: 1.6;
-  margin-bottom: 15px;
+  min-width: 100px;
+  margin-right: 20px;
 }
 
-.blog-post-link {
-  color: #007bff;
-  text-decoration: none;
+.blog-post-title-text {
+  font-size: 1.1rem;
   font-weight: 500;
-}
-
-.blog-post-link:hover {
-  text-decoration: underline;
+  line-height: 1.4;
 }
 
 .blog-posts-more {
   text-align: center;
+  margin-top: 30px;
 }
 
 .blog-posts-all-link {
   display: inline-block;
-  padding: 12px 30px;
+  padding: 10px 25px;
   background-color: #333;
   color: white;
   text-decoration: none;
@@ -162,121 +92,36 @@
   transition: background-color 0.3s ease;
 }
 
-  .blog-posts-all-link:hover {
-    background-color: #555;
-  }
+.blog-posts-all-link:hover {
+  background-color: #555;
+}
 
-  .blog-filter-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
+@media (max-width: 768px) {
+  .blog-posts-list-section {
+    padding: 30px 20px;
   }
-
-  .filter-btn {
-    padding: 8px 20px;
-    border: 2px solid #333;
-    background-color: transparent;
-    color: #333;
-    border-radius: 25px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    min-width: 60px;
-  }
-
-  .filter-btn:hover {
-    background-color: #333;
-    color: white;
-  }
-
-  .filter-btn.active {
-    background-color: #333;
-    color: white;
-  }
-
-  .days-ago {
-    color: #007bff;
-    font-size: 0.85rem;
-    margin-left: 10px;
-  }
-
-  @media (max-width: 768px) {
-    .blog-posts-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    
-    .blog-posts-title {
-      font-size: 2rem;
-    }
-    
-    .blog-filter-buttons {
-      gap: 8px;
-    }
-    
-    .filter-btn {
-      padding: 6px 15px;
-      font-size: 0.9rem;
-    }
-  }
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const filterButtons = document.querySelectorAll('.filter-btn');
-  const blogCards = document.querySelectorAll('.blog-post-card');
-  const container = document.getElementById('blog-posts-container');
   
-  filterButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const filter = this.dataset.filter;
-      
-      // 更新按钮状态
-      filterButtons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      
-      // 过滤文章
-      let visibleCount = 0;
-      blogCards.forEach(card => {
-        const days = parseInt(card.dataset.days);
-        let shouldShow = false;
-        
-        switch(filter) {
-          case 'all':
-            shouldShow = true;
-            break;
-          case 'day':
-            shouldShow = days <= 1;
-            break;
-          case 'week':
-            shouldShow = days <= 7;
-            break;
-          case 'month':
-            shouldShow = days <= 30;
-            break;
-        }
-        
-        if (shouldShow) {
-          card.style.display = 'block';
-          visibleCount++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-      
-      // 显示或隐藏"查看更多"按钮
-      const moreSection = document.querySelector('.blog-posts-more');
-      if (visibleCount === 0) {
-        moreSection.style.display = 'block';
-      } else {
-        moreSection.style.display = 'block';
-      }
-    });
-  });
-});
-</script>
+  .blog-posts-title {
+    font-size: 1.5rem;
+  }
+  
+  .blog-post-simple-link {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px 15px;
+  }
+  
+  .blog-post-date {
+    margin-right: 0;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+  }
+  
+  .blog-post-title-text {
+    font-size: 1rem;
+  }
+}
+</style>
 
 {% schema %}
 {
@@ -286,22 +131,13 @@ document.addEventListener('DOMContentLoaded', function() {
       "type": "text",
       "id": "title",
       "label": "标题",
-      "default": "最新博客文章"
-    },
-    {
-      "type": "range",
-      "id": "post_count",
-      "label": "显示文章数量",
-      "min": 3,
-      "max": 12,
-      "step": 1,
-      "default": 6
+      "default": "博客文章列表"
     },
     {
       "type": "color",
       "id": "background_color",
       "label": "背景颜色",
-      "default": "#f8f8f8"
+      "default": "#ffffff"
     },
     {
       "type": "color",
