@@ -1,3 +1,54 @@
+<!-- 联系卡片区域 -->
+<div class="contact-cards-section">
+  <div class="contact-cards-container">
+    <!-- Schedule a Call Card -->
+    <div class="contact-card">
+      <h3 class="contact-card-title">
+        {{ section.settings.schedule_title | default: "Schedule a Call" }}
+      </h3>
+      <p class="contact-card-description">
+        {{ section.settings.schedule_description | default: "Choose a time that works for you - we'll connect you with a specialist." }}
+      </p>
+      {% if section.settings.schedule_button_text != blank %}
+        <a href="{{ section.settings.schedule_url | default: '#' }}" class="contact-card-button">
+          {{ section.settings.schedule_button_text | default: "CALL NOW" }}
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- WhatsApp Card -->
+    <div class="contact-card">
+      <h3 class="contact-card-title">
+        {{ section.settings.whatsapp_title | default: "WhatsApp Us" }}
+      </h3>
+      <p class="contact-card-description">
+        {{ section.settings.whatsapp_description | default: "Message us on WhatsApp for questions and quotes.We typically reply within 1 business day." }}
+      </p>
+      {% if section.settings.whatsapp_button_text != blank %}
+        <a href="{{ section.settings.whatsapp_url | default: '#' }}" class="contact-card-button">
+          {{ section.settings.whatsapp_button_text | default: "START CHAT" }}
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- Email Support Card -->
+    <div class="contact-card">
+      <h3 class="contact-card-title">
+        {{ section.settings.email_title | default: "Email Support" }}
+      </h3>
+      <p class="contact-card-description">
+        {{ section.settings.email_description | default: "Send us detailed questions and receive comprehensive answers" }}
+      </p>
+      {% if section.settings.email_button_text != blank %}
+        <a href="{{ section.settings.email_url | default: '#' }}" class="contact-card-button">
+          {{ section.settings.email_button_text | default: "SEND EMAIL" }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 主要底部导航区域 -->
 <div class="footer-navigation">
   <div class="footer-container">
     <!-- Logo and Social Media -->
@@ -8,6 +59,7 @@
         <h2 class="footer-brand-text">{{ section.settings.brand_text | default: shop.name }}</h2>
       {% endif %}
 
+      <!-- Social Media Links -->
       <div class="social-links">
         {% if section.settings.linkedin_url %}
           <a href="{{ section.settings.linkedin_url }}" target="_blank" class="social-link">
@@ -42,39 +94,30 @@
         {% endif %}
       </div>
 
-      <!-- Logo Bottom Icons -->
-      <div class="logo-bottom-icons">
-        {% if section.settings.icon_1_image %}
-          <a href="{{ section.settings.icon_1_url }}" target="_blank" class="logo-icon">
-            <img src="{{ section.settings.icon_1_image | img_url: '28x' }}" alt="Icon 1">
-          </a>
-        {% endif %}
-
-        {% if section.settings.icon_2_image %}
-          <a href="{{ section.settings.icon_2_url }}" target="_blank" class="logo-icon">
-            <img src="{{ section.settings.icon_2_image | img_url: '28x' }}" alt="Icon 2">
-          </a>
-        {% endif %}
-
-        {% if section.settings.icon_3_image %}
-          <a href="{{ section.settings.icon_3_url }}" target="_blank" class="logo-icon">
-            <img src="{{ section.settings.icon_3_image | img_url: '28x' }}" alt="Icon 3">
-          </a>
-        {% endif %}
-
-        {% if section.settings.icon_4_image %}
-          <a href="{{ section.settings.icon_4_url }}" target="_blank" class="logo-icon">
-            <img src="{{ section.settings.icon_4_image | img_url: '28x' }}" alt="Icon 4">
-          </a>
-        {% endif %}
-      </div>
+      <!-- Newsletter Subscription -->
+      {% if section.settings.show_newsletter %}
+        <div class="newsletter-subscription">
+          <form action="{{ routes.cart_add_url }}" method="post" class="newsletter-form">
+            <input 
+              type="email" 
+              name="contact[email]" 
+              placeholder="{{ section.settings.newsletter_placeholder | default: 'Enter your business email' }}"
+              class="newsletter-input"
+              required
+            >
+            <button type="submit" class="newsletter-button">
+              {{ section.settings.newsletter_button_text | default: "CONNECT WITH US" }}
+            </button>
+          </form>
+        </div>
+      {% endif %}
     </div>
 
     <!-- Navigation Columns -->
     <div class="footer-nav-columns">
       <!-- Products Column -->
       <div class="footer-column">
-        <h3 class="footer-column-title">{{ section.settings.products_title | default: 'Products' }}</h3>
+        <h3 class="footer-column-title">{{ section.settings.products_title | default: 'PRODUCTS' }}</h3>
         <ul class="footer-nav-list">
           {% for block in section.blocks %}
             {% if block.type == 'product_link' %}
@@ -90,23 +133,29 @@
 
       <!-- OEM Service Column -->
       <div class="footer-column">
-        <h3 class="footer-column-title">{{ section.settings.service_title | default: 'OEM Service' }}</h3>
-        <ul class="footer-nav-list">
-          {% for block in section.blocks %}
-            {% if block.type == 'service_link' %}
-              <li class="footer-nav-item">
-                <a href="{{ block.settings.link }}" class="footer-nav-link">
-                  {{ block.settings.text }}
-                </a>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
+        <h3 class="footer-column-title">{{ section.settings.service_title | default: 'OEM SERVICE PROCESS' }}</h3>
+        <div class="footer-nav-subcolumns">
+          <!-- Resources Subcolumn -->
+          <div class="footer-subcolumn">
+            <h4 class="footer-subcolumn-title">{{ section.settings.resources_title | default: 'RESOURCES' }}</h4>
+            <ul class="footer-nav-list">
+              {% for block in section.blocks %}
+                {% if block.type == 'resource_link' %}
+                  <li class="footer-nav-item">
+                    <a href="{{ block.settings.link }}" class="footer-nav-link">
+                      {{ block.settings.text }}
+                    </a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
 
       <!-- Company Column -->
       <div class="footer-column">
-        <h3 class="footer-column-title">{{ section.settings.company_title | default: 'Company' }}</h3>
+        <h3 class="footer-column-title">{{ section.settings.company_title | default: 'COMPANY' }}</h3>
         <ul class="footer-nav-list">
           {% for block in section.blocks %}
             {% if block.type == 'company_link' %}
@@ -123,508 +172,656 @@
   </div>
 </div>
 
+<!-- 法律链接区域 -->
+<div class="footer-legal">
+  <div class="footer-legal-container">
+    <div class="legal-links">
+      {% if section.settings.privacy_policy_url %}
+        <a href="{{ section.settings.privacy_policy_url }}" class="legal-link">
+          {{ section.settings.privacy_policy_text | default: "Privacy Policy" }}
+        </a>
+      {% endif %}
+      
+      {% if section.settings.cookie_policy_url %}
+        <a href="{{ section.settings.cookie_policy_url }}" class="legal-link">
+          {{ section.settings.cookie_policy_text | default: "Cookie Policy" }}
+        </a>
+      {% endif %}
+      
+      {% if section.settings.terms_conditions_url %}
+        <a href="{{ section.settings.terms_conditions_url }}" class="legal-link">
+          {{ section.settings.terms_conditions_text | default: "Terms and Conditions" }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 <style>
+/* 联系卡片区域样式 */
+.contact-cards-section {
+  background-color: #f8f8f8;
+  padding: 60px 0;
+}
+
+.contact-cards-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+.contact-card {
+  background-color: #ffffff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.contact-card-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.contact-card-description {
+  font-size: 16px;
+  font-weight: 400;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.contact-card-button {
+  display: inline-block;
+  background-color: #C22E35;
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.contact-card-button:hover {
+  background-color: #A02329;
+  transform: translateY(-2px);
+}
+
+/* 主要底部导航样式 */
+.footer-navigation {
+  background-color: #1b1b1b;
+  color: #ffffff;
+  padding: 60px 0 40px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.footer-logo {
+  max-width: 250px;
+  width: 250px;
+  height: 81px;
+  object-fit: contain;
+}
+
+.footer-brand-text {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: #ffffff;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+
+.social-link:hover {
+  color: #C22E35;
+}
+
+.newsletter-subscription {
+  width: 100%;
+  max-width: 400px;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  font-size: 14px;
+  color: #333333;
+  background-color: #ffffff;
+  outline: none;
+}
+
+.newsletter-input::placeholder {
+  color: #999999;
+}
+
+.newsletter-button {
+  background-color: #C22E35;
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.newsletter-button:hover {
+  background-color: #A02329;
+}
+
+.footer-nav-columns {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 60px;
+  align-items: start;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-column-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 25px 0;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.footer-nav-subcolumns {
+  width: 100%;
+}
+
+.footer-subcolumn {
+  margin-bottom: 30px;
+}
+
+.footer-subcolumn-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.footer-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-nav-item {
+  margin: 0;
+}
+
+.footer-nav-link {
+  color: #cccccc;
+  text-decoration: none;
+  font-size: 16px;
+  line-height: 1.5;
+  transition: color 0.3s ease;
+}
+
+.footer-nav-link:hover {
+  color: #ffffff;
+}
+
+/* 法律链接区域样式 */
+.footer-legal {
+  background-color: #1b1b1b;
+  border-top: 1px solid #333333;
+  padding: 20px 0;
+}
+
+.footer-legal-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.legal-links {
+  display: flex;
+  gap: 30px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.legal-link {
+  color: #cccccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.legal-link:hover {
+  color: #ffffff;
+}
+
+.legal-link:not(:last-child)::after {
+  content: '|';
+  position: absolute;
+  right: -18px;
+  color: #666666;
+}
+
+/* 响应式设计 */
+
+/* 大屏幕 (1920px+) */
+@media (min-width: 1920px) {
+  .contact-cards-container {
+    max-width: 1600px;
+    padding: 0 120px;
+    gap: 40px;
+  }
+
+  .contact-card {
+    padding: 50px 40px;
+  }
+
+  .footer-container {
+    max-width: 1600px;
+    padding: 0 120px;
+    gap: 100px;
+  }
+
   .footer-navigation {
-    background-color: #1b1b1b;
-    color: #ffffff;
-    padding: 60px 0 40px;
+    padding: 70px 0 50px;
+  }
+
+  .footer-brand {
+    gap: 35px;
+  }
+
+  .footer-logo {
+    max-width: 300px;
+    width: 300px;
+    height: 97px;
+  }
+
+  .footer-nav-columns {
+    gap: 70px;
+    margin-top: 30px;
+  }
+}
+
+/* 中等屏幕 (1024px - 1919px) */
+@media (min-width: 1024px) and (max-width: 1919px) {
+  .contact-cards-container {
+    max-width: 1200px;
+    padding: 0 40px;
+    gap: 30px;
   }
 
   .footer-container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    padding: 0 40px;
     gap: 80px;
-    align-items: start;
+  }
+}
+
+/* 平板屏幕 (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .contact-cards-container {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    padding: 0 30px;
+  }
+
+  .contact-card {
+    padding: 35px 25px;
+    text-align: center;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 50px;
+    padding: 0 30px;
   }
 
   .footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    align-items: flex-start;
-  }
-
-  .footer-logo {
-    max-width: 250px;
-    width: 250px;
-    height: 81px;
-    object-fit: contain;
-  }
-
-  .footer-brand-text {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0;
-    color: #ffffff;
-  }
-
-  .social-links {
-    display: flex;
-    gap: 12px;
-  }
-
-  .social-link {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    color: #ffffff;
-    transition: color 0.3s ease;
-  }
-
-  .social-link:hover {
-    color: #ff6b6b;
-  }
-
-  .logo-bottom-icons {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .logo-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    transition: opacity 0.3s ease;
-  }
-
-  .logo-icon:hover {
-    opacity: 0.8;
-  }
-
-  .logo-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    text-align: center;
   }
 
   .footer-nav-columns {
-    margin-top: 24px;
-    display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 60px;
-    align-items: start;
+    gap: 40px;
+    margin-top: 0;
+  }
+
+  .newsletter-subscription {
+    max-width: 100%;
+  }
+
+  .legal-links {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+}
+
+/* 小屏幕 (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  .contact-cards-section {
+    padding: 40px 0;
+  }
+
+  .contact-cards-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 20px;
+  }
+
+  .contact-card {
+    padding: 30px 20px;
+    text-align: center;
+  }
+
+  .contact-card-title {
+    font-size: 20px;
+  }
+
+  .contact-card-description {
+    font-size: 14px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 0 20px;
+  }
+
+  .footer-brand {
+    align-items: center;
+    text-align: center;
+    gap: 25px;
+  }
+
+  .footer-nav-columns {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    margin-top: 0;
   }
 
   .footer-column {
-    display: flex;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-navigation {
+    padding: 40px 0 30px;
+  }
+
+  .newsletter-form {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .newsletter-input {
+    border-radius: 4px;
+  }
+
+  .newsletter-button {
+    border-radius: 4px;
+    padding: 14px 20px;
+  }
+
+  .legal-links {
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .legal-link:not(:last-child)::after {
+    display: none;
+  }
+}
+
+/* 超小屏幕 (最大480px) */
+@media (max-width: 480px) {
+  .contact-cards-section {
+    padding: 30px 0;
+  }
+
+  .contact-cards-container {
+    padding: 0 15px;
+    gap: 15px;
+  }
+
+  .contact-card {
+    padding: 25px 15px;
+  }
+
+  .contact-card-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .contact-card-description {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .contact-card-button {
+    padding: 10px 20px;
+    font-size: 12px;
+  }
+
+  .footer-container {
+    padding: 0 15px;
+    gap: 35px;
+  }
+
+  .footer-brand {
+    gap: 20px;
+  }
+
+  .footer-logo {
+    max-width: 200px;
+    width: 200px;
+    height: 65px;
+  }
+
+  .footer-brand-text {
+    font-size: 20px;
+  }
+
+  .social-links {
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .social-link {
+    width: 32px;
+    height: 32px;
+  }
+
+  .footer-nav-columns {
+    grid-template-columns: 1fr;
+    gap: 25px;
   }
 
   .footer-column-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 25px 0;
-    color: #ffffff;
-  }
-
-  .footer-nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .footer-nav-item {
-    margin: 0;
+    font-size: 15px;
+    margin-bottom: 15px;
   }
 
   .footer-nav-link {
-    color: #cccccc;
-    text-decoration: none;
-    font-size: 16px;
-    line-height: 1.5;
-    transition: color 0.3s ease;
+    font-size: 13px;
   }
 
-  .footer-nav-link:hover {
-    color: #ffffff;
+  .footer-navigation {
+    padding: 30px 0 25px;
   }
 
-  /* Responsive Design - 基于1920px设计图 */
-
-  /* 超大屏幕 (1920px+) */
-  @media (min-width: 1920px) {
-    .footer-container {
-      max-width: 1600px;
-      padding: 0 120px;
-      gap: 100px;
-    }
-
-    .footer-navigation {
-      padding: 70px 0 50px;
-    }
-
-    .footer-brand {
-      gap: 35px;
-    }
-
-    .footer-logo {
-      max-width: 300px;
-      width: 300px;
-      height: 97px;
-    }
-
-    .footer-brand-text {
-      font-size: 28px;
-    }
-
-    .social-links {
-      gap: 15px;
-    }
-
-    .social-link {
-      width: 32px;
-      height: 32px;
-    }
-
-    .logo-bottom-icons {
-      gap: 15px;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-    }
-
-    .footer-nav-columns {
-      gap: 70px;
-      margin-top: 30px;
-    }
-
-    .footer-column-title {
-      font-size: 20px;
-      margin-bottom: 28px;
-    }
-
-    .footer-nav-link {
-      font-size: 17px;
-    }
-
-    .footer-nav-list {
-      gap: 14px;
-    }
+  .newsletter-input {
+    padding: 10px 14px;
+    font-size: 13px;
   }
 
-  /* 大屏幕 (1440px - 1919px) */
-  @media (min-width: 1440px) and (max-width: 1919px) {
-    .footer-container {
-      max-width: 1300px;
-      padding: 0 60px;
-      gap: 85px;
-    }
-
-    .footer-navigation {
-      padding: 65px 0 45px;
-    }
-
-    .footer-brand {
-      gap: 32px;
-    }
-
-    .footer-logo {
-      max-width: 280px;
-      width: 280px;
-      height: 91px;
-    }
-
-    .footer-brand-text {
-      font-size: 26px;
-    }
-
-    .social-links {
-      gap: 14px;
-    }
-
-    .social-link {
-      width: 30px;
-      height: 30px;
-    }
-
-    .logo-bottom-icons {
-      gap: 14px;
-    }
-
-    .logo-icon {
-      width: 30px;
-      height: 30px;
-    }
-
-    .footer-nav-columns {
-      gap: 65px;
-      margin-top: 26px;
-    }
-
-    .footer-column-title {
-      font-size: 19px;
-      margin-bottom: 26px;
-    }
-
-    .footer-nav-link {
-      font-size: 16px;
-    }
-
-    .footer-nav-list {
-      gap: 13px;
-    }
+  .newsletter-button {
+    padding: 12px 18px;
+    font-size: 11px;
   }
 
-  /* 中等屏幕 (1024px - 1439px) */
-  @media (min-width: 1024px) and (max-width: 1439px) {
-    .footer-container {
-      max-width: 1200px;
-      padding: 0 40px;
-      gap: 80px;
-    }
-
-    .footer-navigation {
-      padding: 60px 0 40px;
-    }
-
-    .footer-brand {
-      gap: 30px;
-    }
-
-    .footer-logo {
-      max-width: 315px;
-      width: 315px;
-      height: 102px;
-    }
-
-    .footer-brand-text {
-      font-size: 28px;
-    }
-
-    .social-links {
-      gap: 15px;
-    }
-
-    .social-link {
-      width: 35px;
-      height: 35px;
-    }
-
-    .logo-bottom-icons {
-      gap: 15px;
-    }
-
-    .logo-icon {
-      width: 35px;
-      height: 35px;
-    }
-
-    .footer-nav-columns {
-      gap: 60px;
-      margin-top: 24px;
-    }
-
-    .footer-column-title {
-      font-size: 18px;
-      margin-bottom: 25px;
-    }
-
-    .footer-nav-link {
-      font-size: 16px;
-    }
-
-    .footer-nav-list {
-      gap: 12px;
-    }
+  .footer-legal {
+    padding: 15px 0;
   }
 
-  /* 平板屏幕 (768px - 1023px) */
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .footer-container {
-      grid-template-columns: 1fr;
-      gap: 50px;
-      padding: 0 30px;
-    }
-
-    .footer-brand {
-      align-items: center;
-      text-align: center;
-    }
-
-    .footer-nav-columns {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-      margin-top: 0;
-    }
-
-    .footer-navigation {
-      padding: 50px 0 40px;
-    }
-
-    .footer-logo {
-      max-width: 280px;
-      width: 280px;
-      height: 90px;
-    }
-
-    .footer-brand-text {
-      font-size: 26px;
-    }
-
-    .footer-column-title {
-      font-size: 17px;
-      margin-bottom: 20px;
-    }
-
-    .footer-nav-link {
-      font-size: 15px;
-    }
+  .legal-links {
+    gap: 10px;
   }
 
-  /* 小屏幕 (481px - 767px) */
-  @media (min-width: 481px) and (max-width: 767px) {
-    .footer-container {
-      grid-template-columns: 1fr;
-      gap: 40px;
-      padding: 0 20px;
-    }
-
-    .footer-brand {
-      align-items: center;
-      text-align: center;
-      gap: 25px;
-    }
-
-    .footer-nav-columns {
-      grid-template-columns: 1fr;
-      gap: 30px;
-      margin-top: 0;
-    }
-
-    .footer-navigation {
-      padding: 40px 0 30px;
-    }
-
-    .footer-logo {
-      max-width: 250px;
-      width: 250px;
-      height: 81px;
-    }
-
-    .footer-brand-text {
-      font-size: 24px;
-    }
-
-    .social-links {
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .logo-bottom-icons {
-      gap: 12px;
-      justify-content: center;
-    }
-
-    .footer-column {
-      align-items: center;
-      text-align: center;
-    }
-
-    .footer-column-title {
-      font-size: 16px;
-      margin-bottom: 18px;
-    }
-
-    .footer-nav-link {
-      font-size: 14px;
-    }
-
-    .footer-nav-list {
-      gap: 10px;
-    }
+  .legal-link {
+    font-size: 12px;
   }
-
-  /* 超小屏幕 (最大480px) */
-  @media (max-width: 480px) {
-    .footer-container {
-      padding: 0 15px;
-      gap: 35px;
-    }
-
-    .footer-brand {
-      align-items: center;
-      text-align: center;
-      gap: 20px;
-    }
-
-    .footer-logo {
-      max-width: 200px;
-      width: 200px;
-      height: 65px;
-    }
-
-    .footer-brand-text {
-      font-size: 20px;
-    }
-
-    .social-links {
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .social-link {
-      width: 32px;
-      height: 32px;
-    }
-
-    .logo-bottom-icons {
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-    }
-
-    .footer-nav-columns {
-      grid-template-columns: 1fr;
-      gap: 25px;
-      margin-top: 0;
-    }
-
-    .footer-column {
-      align-items: center;
-      text-align: center;
-    }
-
-    .footer-column-title {
-      font-size: 15px;
-      margin-bottom: 15px;
-    }
-
-    .footer-nav-link {
-      font-size: 13px;
-    }
-
-    .footer-nav-list {
-      gap: 8px;
-    }
-
-    .footer-navigation {
-      padding: 30px 0 25px;
-    }
-  }
+}
 </style>
 
 {% schema %}
 {
   "name": "Footer Navigation",
   "settings": [
+    {
+      "type": "header",
+      "content": "联系卡片设置"
+    },
+    {
+      "type": "text",
+      "id": "schedule_title",
+      "label": "预约通话标题",
+      "default": "Schedule a Call"
+    },
+    {
+      "type": "textarea",
+      "id": "schedule_description",
+      "label": "预约通话描述",
+      "default": "Choose a time that works for you - we'll connect you with a specialist."
+    },
+    {
+      "type": "text",
+      "id": "schedule_button_text",
+      "label": "预约通话按钮文字",
+      "default": "CALL NOW"
+    },
+    {
+      "type": "url",
+      "id": "schedule_url",
+      "label": "预约通话链接"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_title",
+      "label": "WhatsApp标题",
+      "default": "WhatsApp Us"
+    },
+    {
+      "type": "textarea",
+      "id": "whatsapp_description",
+      "label": "WhatsApp描述",
+      "default": "Message us on WhatsApp for questions and quotes.We typically reply within 1 business day."
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_button_text",
+      "label": "WhatsApp按钮文字",
+      "default": "START CHAT"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_url",
+      "label": "WhatsApp链接"
+    },
+    {
+      "type": "text",
+      "id": "email_title",
+      "label": "邮件支持标题",
+      "default": "Email Support"
+    },
+    {
+      "type": "textarea",
+      "id": "email_description",
+      "label": "邮件支持描述",
+      "default": "Send us detailed questions and receive comprehensive answers"
+    },
+    {
+      "type": "text",
+      "id": "email_button_text",
+      "label": "邮件支持按钮文字",
+      "default": "SEND EMAIL"
+    },
+    {
+      "type": "url",
+      "id": "email_url",
+      "label": "邮件支持链接"
+    },
+    {
+      "type": "header",
+      "content": "品牌设置"
+    },
     {
       "type": "image_picker",
       "id": "logo",
@@ -633,8 +830,12 @@
     {
       "type": "text",
       "id": "brand_text",
-      "label": "Brand Text",
+      "label": "品牌文字",
       "default": "XSPilates"
+    },
+    {
+      "type": "header",
+      "content": "社交媒体链接"
     },
     {
       "type": "url",
@@ -657,110 +858,139 @@
       "label": "YouTube URL"
     },
     {
+      "type": "header",
+      "content": "邮件订阅设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "显示邮件订阅",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_placeholder",
+      "label": "邮件输入框占位符",
+      "default": "Enter your business email"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button_text",
+      "label": "订阅按钮文字",
+      "default": "CONNECT WITH US"
+    },
+    {
+      "type": "header",
+      "content": "导航栏目标题"
+    },
+    {
       "type": "text",
       "id": "products_title",
-      "label": "Products Column Title",
-      "default": "Products"
+      "label": "产品栏目标题",
+      "default": "PRODUCTS"
     },
     {
       "type": "text",
       "id": "service_title",
-      "label": "Service Column Title",
-      "default": "OEM Service"
+      "label": "服务栏目标题",
+      "default": "OEM SERVICE PROCESS"
+    },
+    {
+      "type": "text",
+      "id": "resources_title",
+      "label": "资源子栏目标题",
+      "default": "RESOURCES"
     },
     {
       "type": "text",
       "id": "company_title",
-      "label": "Company Column Title",
-      "default": "Company"
+      "label": "公司栏目标题",
+      "default": "COMPANY"
     },
     {
-      "type": "image_picker",
-      "id": "icon_1_image",
-      "label": "Logo Bottom Icon 1"
-    },
-    {
-      "type": "url",
-      "id": "icon_1_url",
-      "label": "Icon 1 Link URL"
-    },
-    {
-      "type": "image_picker",
-      "id": "icon_2_image",
-      "label": "Logo Bottom Icon 2"
+      "type": "header",
+      "content": "法律链接设置"
     },
     {
       "type": "url",
-      "id": "icon_2_url",
-      "label": "Icon 2 Link URL"
+      "id": "privacy_policy_url",
+      "label": "隐私政策链接"
     },
     {
-      "type": "image_picker",
-      "id": "icon_3_image",
-      "label": "Logo Bottom Icon 3"
-    },
-    {
-      "type": "url",
-      "id": "icon_3_url",
-      "label": "Icon 3 Link URL"
-    },
-    {
-      "type": "image_picker",
-      "id": "icon_4_image",
-      "label": "Logo Bottom Icon 4"
+      "type": "text",
+      "id": "privacy_policy_text",
+      "label": "隐私政策文字",
+      "default": "Privacy Policy"
     },
     {
       "type": "url",
-      "id": "icon_4_url",
-      "label": "Icon 4 Link URL"
+      "id": "cookie_policy_url",
+      "label": "Cookie政策链接"
+    },
+    {
+      "type": "text",
+      "id": "cookie_policy_text",
+      "label": "Cookie政策文字",
+      "default": "Cookie Policy"
+    },
+    {
+      "type": "url",
+      "id": "terms_conditions_url",
+      "label": "条款和条件链接"
+    },
+    {
+      "type": "text",
+      "id": "terms_conditions_text",
+      "label": "条款和条件文字",
+      "default": "Terms and Conditions"
     }
   ],
   "blocks": [
     {
       "type": "product_link",
-      "name": "Product Link",
+      "name": "产品链接",
       "settings": [
         {
           "type": "text",
           "id": "text",
-          "label": "Link Text"
+          "label": "链接文字"
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Link URL"
+          "label": "链接URL"
         }
       ]
     },
     {
-      "type": "service_link",
-      "name": "Service Link",
+      "type": "resource_link",
+      "name": "资源链接",
       "settings": [
         {
           "type": "text",
           "id": "text",
-          "label": "Link Text"
+          "label": "链接文字"
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Link URL"
+          "label": "链接URL"
         }
       ]
     },
     {
       "type": "company_link",
-      "name": "Company Link",
+      "name": "公司链接",
       "settings": [
         {
           "type": "text",
           "id": "text",
-          "label": "Link Text"
+          "label": "链接文字"
         },
         {
           "type": "url",
           "id": "link",
-          "label": "Link URL"
+          "label": "链接URL"
         }
       ]
     }
@@ -807,40 +1037,33 @@
         {
           "type": "product_link",
           "settings": {
-            "text": "Pilates Accessories",
+            "text": "Accessories",
             "link": "/collections/accessories"
           }
         },
         {
-          "type": "service_link",
-          "settings": {
-            "text": "Resources",
-            "link": "/pages/resources"
-          }
-        },
-        {
-          "type": "service_link",
+          "type": "resource_link",
           "settings": {
             "text": "Customer Stories",
             "link": "/pages/customer-stories"
           }
         },
         {
-          "type": "service_link",
+          "type": "resource_link",
           "settings": {
             "text": "Certificates",
             "link": "/pages/certificates"
           }
         },
         {
-          "type": "service_link",
+          "type": "resource_link",
           "settings": {
             "text": "FAQs",
             "link": "/pages/faqs"
           }
         },
         {
-          "type": "service_link",
+          "type": "resource_link",
           "settings": {
             "text": "After-Sales Support",
             "link": "/pages/support"
