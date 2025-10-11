@@ -1,0 +1,671 @@
+<div class="pilates-wheels-section">
+  <div class="pilates-wheels-container">
+    <div class="pilates-wheels-header">
+      <h2 class="pilates-wheels-title">
+        {{ section.settings.title | default: "Customize Your Pilates Equipment - Optional Wheels" }}
+      </h2>
+      <p class="pilates-wheels-subtitle">
+        {{ section.settings.subtitle | default: "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product." }}
+      </p>
+    </div>
+    
+    <div class="pilates-wheels-content">
+      <div class="pilates-wheels-options">
+        <!-- With Wheels Option -->
+        <div class="pilates-wheels-option {% if section.settings.default_selection == 'with_wheels' %}pilates-wheels-selected{% endif %}" 
+             data-option="with_wheels">
+          <div class="pilates-wheels-image-container">
+            <div class="pilates-wheels-label">With Wheels</div>
+            <img src="{% if section.settings.with_wheels_image != blank %}{{ section.settings.with_wheels_image | img_url: '650x550' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=650&q=80{% endif %}" 
+                 alt="Pilates Equipment With Wheels" 
+                 class="pilates-wheels-equipment-image">
+          </div>
+          <div class="pilates-wheels-description">
+            <p>{{ section.settings.with_wheels_description | default: "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces." }}</p>
+          </div>
+        </div>
+        
+        <!-- Without Wheels Option -->
+        <div class="pilates-wheels-option {% if section.settings.default_selection == 'without_wheels' %}pilates-wheels-selected{% endif %}" 
+             data-option="without_wheels">
+          <div class="pilates-wheels-image-container">
+            <div class="pilates-wheels-label">Without Wheels</div>
+            <img src="{% if section.settings.without_wheels_image != blank %}{{ section.settings.without_wheels_image | img_url: '650x550' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=650&q=80{% endif %}" 
+                 alt="Pilates Equipment Without Wheels" 
+                 class="pilates-wheels-equipment-image">
+          </div>
+          <div class="pilates-wheels-description">
+            <p>{{ section.settings.without_wheels_description | default: "Provides a stable, permanent base. Perfect for dedicated studios." }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const options = document.querySelectorAll('.pilates-wheels-option');
+  
+  options.forEach(option => {
+    option.addEventListener('click', function() {
+      // 移除所有选中状态
+      options.forEach(opt => opt.classList.remove('pilates-wheels-selected'));
+      
+      // 添加选中状态到当前选项
+      this.classList.add('pilates-wheels-selected');
+      
+      // 获取选择的选项
+      const selectedOption = this.getAttribute('data-option');
+      
+      // 触发自定义事件
+      const event = new CustomEvent('wheelOptionSelected', {
+        detail: {
+          option: selectedOption,
+          element: this
+        }
+      });
+      
+      document.dispatchEvent(event);
+      
+      console.log('选择了轮子选项:', selectedOption);
+    });
+  });
+  
+  // 监听轮子选择事件
+  document.addEventListener('wheelOptionSelected', function(event) {
+    console.log('轮子选择事件触发:', event.detail);
+    
+    // 这里可以添加其他逻辑，比如更新产品变体、价格等
+    // 例如：与产品表单集成
+    const productForm = document.querySelector('form[action*="/cart/add"]');
+    if (productForm) {
+      // 可以根据轮子选择更新隐藏的表单字段
+      let wheelInput = productForm.querySelector('input[name="properties[Wheels]"]');
+      if (!wheelInput) {
+        wheelInput = document.createElement('input');
+        wheelInput.type = 'hidden';
+        wheelInput.name = 'properties[Wheels]';
+        productForm.appendChild(wheelInput);
+      }
+      
+      wheelInput.value = event.detail.option === 'with_wheels' ? 'With Wheels' : 'Without Wheels';
+    }
+  });
+});
+</script>
+
+<style>
+.pilates-wheels-section {
+  padding: 80px 0;
+  background-color: #ffffff;
+}
+
+.pilates-wheels-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.pilates-wheels-header {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.pilates-wheels-title {
+  font-size: 48px;
+  font-weight: 500;
+  color: #161616;
+  margin: 0 0 24px 0;
+  line-height: 1.2;
+}
+
+.pilates-wheels-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(22, 22, 22, 0.6);
+  margin: 0 auto;
+  max-width: 800px;
+  line-height: 1.6;
+}
+
+.pilates-wheels-content {
+  display: flex;
+  justify-content: center;
+}
+
+.pilates-wheels-options {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.pilates-wheels-option {
+  flex: 0 0 650px;
+  width: 650px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option:hover {
+  transform: translateY(-4px);
+}
+
+.pilates-wheels-option.pilates-wheels-selected {
+  transform: translateY(-8px);
+}
+
+.pilates-wheels-image-container {
+  position: relative;
+  width: 650px;
+  height: 550px;
+  background-color: #F1F0ED;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option:hover .pilates-wheels-image-container {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.pilates-wheels-option.pilates-wheels-selected .pilates-wheels-image-container {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+  border: 2px solid #C22E35;
+}
+
+.pilates-wheels-label {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background-color: #ffffff;
+  color: #161616;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option.pilates-wheels-selected .pilates-wheels-label {
+  background-color: #C22E35;
+  color: #ffffff;
+}
+
+.pilates-wheels-equipment-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option:hover .pilates-wheels-equipment-image {
+  transform: scale(1.02);
+}
+
+.pilates-wheels-description {
+  text-align: left;
+  padding: 0 8px;
+}
+
+.pilates-wheels-description p {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(22, 22, 22, 0.7);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+/* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
+@media (min-width: 1920px) {
+  .pilates-wheels-section {
+    padding: 80px 0;
+  }
+  
+  .pilates-wheels-container {
+    max-width: 1600px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 80px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 48px;
+    margin-bottom: 24px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 18px;
+  }
+  
+  .pilates-wheels-options {
+    gap: 40px;
+  }
+  
+  .pilates-wheels-option {
+    width: 650px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 650px;
+    height: 550px;
+    margin-bottom: 24px;
+  }
+  
+  .pilates-wheels-label {
+    top: 24px;
+    left: 24px;
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 16px;
+  }
+}
+
+/* 笔记本电脑 (1366px - 1919px) */
+@media (max-width: 1919px) and (min-width: 1366px) {
+  .pilates-wheels-section {
+    padding: 70px 0;
+  }
+  
+  .pilates-wheels-container {
+    max-width: 1200px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 70px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 42px;
+    margin-bottom: 20px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 16px;
+  }
+  
+  .pilates-wheels-options {
+    gap: 35px;
+  }
+  
+  .pilates-wheels-option {
+    width: 550px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 550px;
+    height: 465px;
+    margin-bottom: 20px;
+  }
+  
+  .pilates-wheels-label {
+    top: 20px;
+    left: 20px;
+    font-size: 15px;
+    padding: 10px 18px;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 15px;
+  }
+}
+
+/* 小笔记本 (1024px - 1365px) */
+@media (max-width: 1365px) and (min-width: 1024px) {
+  .pilates-wheels-section {
+    padding: 60px 0;
+  }
+  
+  .pilates-wheels-container {
+    max-width: 960px;
+    padding: 0 30px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 60px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 36px;
+    margin-bottom: 18px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 15px;
+  }
+  
+  .pilates-wheels-options {
+    gap: 30px;
+  }
+  
+  .pilates-wheels-option {
+    width: 450px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 450px;
+    height: 380px;
+    margin-bottom: 18px;
+  }
+  
+  .pilates-wheels-label {
+    top: 18px;
+    left: 18px;
+    font-size: 14px;
+    padding: 9px 16px;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 14px;
+  }
+}
+
+/* 平板横屏 (768px - 1023px) - 改为单栏布局 */
+@media (max-width: 1023px) and (min-width: 768px) {
+  .pilates-wheels-section {
+    padding: 50px 0;
+  }
+  
+  .pilates-wheels-container {
+    padding: 0 25px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 50px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 14px;
+  }
+  
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 420px;
+    margin-bottom: 16px;
+  }
+  
+  .pilates-wheels-label {
+    top: 16px;
+    left: 16px;
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 13px;
+  }
+}
+
+/* 平板竖屏和大手机 (481px - 767px) */
+@media (max-width: 767px) and (min-width: 481px) {
+  .pilates-wheels-section {
+    padding: 40px 0;
+  }
+  
+  .pilates-wheels-container {
+    padding: 0 20px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 40px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 13px;
+  }
+  
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 340px;
+    margin-bottom: 14px;
+  }
+  
+  .pilates-wheels-label {
+    top: 14px;
+    left: 14px;
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 12px;
+  }
+}
+
+/* 小手机 (320px - 480px) */
+@media (max-width: 480px) {
+  .pilates-wheels-section {
+    padding: 35px 0;
+  }
+  
+  .pilates-wheels-container {
+    padding: 0 15px;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 35px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 12px;
+  }
+  
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 270px;
+    margin-bottom: 12px;
+  }
+  
+  .pilates-wheels-label {
+    top: 12px;
+    left: 12px;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 11px;
+  }
+}
+
+/* 超小屏幕 (最小320px) */
+@media (max-width: 320px) {
+  .pilates-wheels-section {
+    padding: 30px 0;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 30px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 11px;
+  }
+  
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 290px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 245px;
+    margin-bottom: 10px;
+  }
+  
+  .pilates-wheels-label {
+    top: 10px;
+    left: 10px;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 10px;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "Pilates Equipment Wheels",
+  "tag": "section",
+  "class": "pilates-wheels-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Customize Your Pilates Equipment - Optional Wheels"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Section Subtitle",
+      "default": "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product."
+    },
+    {
+      "type": "select",
+      "id": "default_selection",
+      "label": "Default Selection",
+      "options": [
+        {
+          "value": "with_wheels",
+          "label": "With Wheels"
+        },
+        {
+          "value": "without_wheels",
+          "label": "Without Wheels"
+        }
+      ],
+      "default": "with_wheels"
+    },
+    {
+      "type": "header",
+      "content": "With Wheels Option"
+    },
+    {
+      "type": "image_picker",
+      "id": "with_wheels_image",
+      "label": "With Wheels Image"
+    },
+    {
+      "type": "textarea",
+      "id": "with_wheels_description",
+      "label": "With Wheels Description",
+      "default": "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces."
+    },
+    {
+      "type": "header",
+      "content": "Without Wheels Option"
+    },
+    {
+      "type": "image_picker",
+      "id": "without_wheels_image",
+      "label": "Without Wheels Image"
+    },
+    {
+      "type": "textarea",
+      "id": "without_wheels_description",
+      "label": "Without Wheels Description",
+      "default": "Provides a stable, permanent base. Perfect for dedicated studios."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pilates Equipment Wheels",
+      "settings": {
+        "title": "Customize Your Pilates Equipment - Optional Wheels",
+        "subtitle": "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product.",
+        "default_selection": "with_wheels",
+        "with_wheels_description": "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces.",
+        "without_wheels_description": "Provides a stable, permanent base. Perfect for dedicated studios."
+      }
+    }
+  ]
+}
+{% endschema %}
