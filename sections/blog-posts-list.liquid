@@ -1,0 +1,190 @@
+<div class="blog-posts-list-section">
+  <div class="page-width">
+    <h2 class="blog-posts-title">最新博客文章</h2>
+    <div class="blog-posts-grid">
+      {% for article in blogs.news.articles limit: 10 %}
+        <article class="blog-post-card">
+          {% if article.image != blank %}
+            <div class="blog-post-image">
+              <a href="{{ article.url }}">
+                <img src="{{ article.image | image_url: width: 400 }}" 
+                     alt="{{ article.image.alt | default: article.title }}"
+                     loading="lazy">
+              </a>
+            </div>
+          {% endif %}
+          <div class="blog-post-content">
+            <div class="blog-post-meta">
+              <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                {{ article.published_at | date: '%Y年%m月%d日' }}
+              </time>
+            </div>
+            <h3 class="blog-post-title">
+              <a href="{{ article.url }}">{{ article.title }}</a>
+            </h3>
+            <div class="blog-post-excerpt">
+              {{ article.excerpt | strip_html | truncatewords: 30 }}
+            </div>
+            <a href="{{ article.url }}" class="blog-post-link">阅读更多</a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+    
+    {% if blogs.news.articles.size > 10 %}
+      <div class="blog-posts-more">
+        <a href="/blogs/news" class="blog-posts-all-link">查看所有文章</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.blog-posts-list-section {
+  padding: 60px 0;
+  background-color: #f8f8f8;
+}
+
+.blog-posts-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.blog-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.blog-post-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.blog-post-card:hover {
+  transform: translateY(-5px);
+}
+
+.blog-post-image img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.blog-post-content {
+  padding: 20px;
+}
+
+.blog-post-meta {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.blog-post-title {
+  font-size: 1.3rem;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.blog-post-title a {
+  color: #333;
+  text-decoration: none;
+}
+
+.blog-post-title a:hover {
+  color: #007bff;
+}
+
+.blog-post-excerpt {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.blog-post-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.blog-post-link:hover {
+  text-decoration: underline;
+}
+
+.blog-posts-more {
+  text-align: center;
+}
+
+.blog-posts-all-link {
+  display: inline-block;
+  padding: 12px 30px;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.blog-posts-all-link:hover {
+  background-color: #555;
+}
+
+@media (max-width: 768px) {
+  .blog-posts-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .blog-posts-title {
+    font-size: 2rem;
+  }
+}
+</style>
+
+{% schema %}
+{
+  "name": "博客文章列表",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "最新博客文章"
+    },
+    {
+      "type": "range",
+      "id": "post_count",
+      "label": "显示文章数量",
+      "min": 3,
+      "max": 12,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#f8f8f8"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客文章列表",
+      "category": "内容"
+    }
+  ]
+}
+{% endschema %}
