@@ -1,291 +1,43 @@
-<div class="upholstery-color-section">
-  <div class="upholstery-color-container">
-    <div class="upholstery-color-header">
-      <h2 class="upholstery-color-title">
-        {{ section.settings.title | default: "Upholstery Color" }}
+<div class="pilates-wheels-section">
+  <div class="pilates-wheels-container">
+    <div class="pilates-wheels-header">
+      <h2 class="pilates-wheels-title">
+        {{ section.settings.title | default: "Customize Your Pilates Equipment - Optional Wheels" }}
       </h2>
-      <p class="upholstery-color-subtitle">
-        {{ section.settings.subtitle | default: "Choose from our premium upholstery options to match your studio's aesthetic." }}
+      <p class="pilates-wheels-subtitle">
+        {{ section.settings.subtitle | default: "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product." }}
       </p>
     </div>
     
-    <div class="upholstery-color-content">
-      <div class="upholstery-color-equipment-display">
-        {% assign selected_product = all_products[section.settings.selected_product] %}
-        <img id="upholstery-color-main-image" 
-             src="{% if selected_product and selected_product.featured_image %}{{ selected_product.featured_image | img_url: '890x412' }}{% elsif section.settings.equipment_image != blank %}{{ section.settings.equipment_image | img_url: '890x412' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=890&q=80{% endif %}" 
-             alt="Pilates Equipment" 
-             class="upholstery-color-equipment-image">
-      </div>
-      
-      <div class="upholstery-color-selection">
-        <div class="upholstery-color-colors-header">
-          <h3 class="upholstery-color-colors-title">Upholstery Colors</h3>
-        </div>
-        <div class="upholstery-color-grid">
-          {% if selected_product %}
-            {% assign first_color_processed = false %}
-            {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
-            
-            {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
-            {% for option in selected_product.options_with_values %}
-              {% assign option_name_lower = option.name | downcase %}
-              {% assign target_name_lower = color_option_name | downcase %}
-              
-              {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
-                {% for value in option.values %}
-                  {% assign variant_found = false %}
-                  {% assign variant_id = '' %}
-                  {% assign variant_image = '' %}
-                  {% assign color_hex = '#CCCCCC' %}
-                  
-                  {% comment %} 查找对应的变体 {% endcomment %}
-                  {% for variant in selected_product.variants %}
-                    {% assign value_matches = false %}
-                    
-                    {% comment %} 检查变体的所有选项值 {% endcomment %}
-                    {% if variant.option1 == value %}
-                      {% assign value_matches = true %}
-                    {% elsif variant.option2 == value %}
-                      {% assign value_matches = true %}
-                    {% elsif variant.option3 == value %}
-                      {% assign value_matches = true %}
-                    {% endif %}
-                    
-                    {% if value_matches and variant_found == false %}
-                      {% assign variant_found = true %}
-                      {% assign variant_id = variant.id %}
-                      
-                      {% comment %} 获取变体图片 {% endcomment %}
-                      {% if variant.image %}
-                        {% assign variant_image = variant.image | img_url: '890x412' %}
-                      {% endif %}
-                      
-                      {% comment %} 重置颜色值 {% endcomment %}
-                      {% assign color_hex = '' %}
-                      {% assign color_found = false %}
-                      {% assign debug_info = '' %}
-                      
-                      {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
-                      
-                      {% comment %} 1. 尝试 custom.color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 2. 尝试 custom.color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 3. 尝试 color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 4. 尝试 color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 5. 尝试 global.color.value {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.global.color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'global.color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 6. 尝试 global.color {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.global.color %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'global.color' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 7. 尝试其他可能的命名 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.hex_color.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.hex_color.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color_code.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color_code.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% unless color_found %}
-                        {% assign test_value = variant.metafields.custom.color_hex.value %}
-                        {% if test_value and test_value != blank and test_value != '' %}
-                          {% assign color_hex = test_value %}
-                          {% assign color_found = true %}
-                          {% assign debug_info = 'custom.color_hex.value' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      {% comment %} 8. 尝试基于颜色名称的预设颜色映射 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign value_lower = value | downcase %}
-                        {% case value_lower %}
-                          {% when 'black' %}
-                            {% assign color_hex = '#000000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-black' %}
-                          {% when 'white' %}
-                            {% assign color_hex = '#FFFFFF' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-white' %}
-                          {% when 'red' %}
-                            {% assign color_hex = '#FF0000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-red' %}
-                          {% when 'blue' %}
-                            {% assign color_hex = '#0000FF' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-blue' %}
-                          {% when 'green' %}
-                            {% assign color_hex = '#008000' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-green' %}
-                          {% when 'gray', 'grey' %}
-                            {% assign color_hex = '#808080' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-gray' %}
-                          {% when 'steel gray', 'steel grey' %}
-                            {% assign color_hex = '#71797E' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-steel-gray' %}
-                          {% when 'brown' %}
-                            {% assign color_hex = '#8B4513' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-brown' %}
-                          {% when 'navy' %}
-                            {% assign color_hex = '#000080' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-navy' %}
-                          {% when 'beige' %}
-                            {% assign color_hex = '#F5F5DC' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-beige' %}
-                          {% when 'tan' %}
-                            {% assign color_hex = '#D2B48C' %}
-                            {% assign color_found = true %}
-                            {% assign debug_info = 'preset-tan' %}
-                        {% endcase %}
-                      {% endunless %}
-                      
-                      {% comment %} 9. 如果仍然没有找到颜色，使用默认颜色 {% endcomment %}
-                      {% unless color_found %}
-                        {% assign color_hex = '#CCCCCC' %}
-                        {% assign debug_info = 'default-fallback' %}
-                      {% endunless %}
-                    {% endif %}
-                  {% endfor %}
-                  
-                  {% comment %} 确保颜色值格式正确 {% endcomment %}
-                  {% unless color_hex contains '#' %}
-                    {% if color_hex != '' %}
-                      {% assign color_hex = '#' | append: color_hex %}
-                    {% else %}
-                      {% assign color_hex = '#CCCCCC' %}
-                    {% endif %}
-                  {% endunless %}
-                  
-                  <div class="upholstery-color-item">
-                    <div class="upholstery-color-option {% unless first_color_processed %}upholstery-color-selected{% endunless %}" 
-                         style="background-color: {{ color_hex }};"
-                         data-color="{{ value }}"
-                         data-variant-id="{{ variant_id }}"
-                         data-variant-image="{{ variant_image }}"
-                         data-color-hex="{{ color_hex }}"
-         data-debug-info="{{ debug_info }}">
-                      {% unless first_color_processed %}
-                        <div class="upholstery-color-checkmark">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                          </svg>
-                        </div>
-                        {% assign first_color_processed = true %}
-                      {% endunless %}
-                    </div>
-                    <div class="upholstery-color-label">{{ value }}</div>
-                  </div>
-                {% endfor %}
-                {% break %}
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            {% comment %} 如果没有选择产品，使用区块配置的颜色 {% endcomment %}
-            {% for block in section.blocks %}
-              {% if block.type == 'color_option' %}
-                <div class="upholstery-color-item">
-                  <div class="upholstery-color-option {% if forloop.first %}upholstery-color-selected{% endif %}" 
-                       style="background-color: {{ block.settings.color_value | default: '#000000' }};"
-                       data-color="{{ block.settings.color_name }}"
-                       data-variant-image=""
-                       data-color-hex="{{ block.settings.color_value | default: '#000000' }}">
-                    {% if forloop.first %}
-                      <div class="upholstery-color-checkmark">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                        </svg>
-                      </div>
-                    {% endif %}
-                  </div>
-                  <div class="upholstery-color-label">{{ block.settings.color_name }}</div>
-                </div>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
+    <div class="pilates-wheels-content">
+      <div class="pilates-wheels-options">
+        <!-- With Wheels Option -->
+        <div class="pilates-wheels-option {% if section.settings.default_selection == 'with_wheels' %}pilates-wheels-selected{% endif %}" 
+             data-option="with_wheels">
+          <div class="pilates-wheels-image-container">
+            <div class="pilates-wheels-label">With Wheels</div>
+            <img src="{% if section.settings.with_wheels_image != blank %}{{ section.settings.with_wheels_image | img_url: '650x550' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=650&q=80{% endif %}" 
+                 alt="Pilates Equipment With Wheels" 
+                 class="pilates-wheels-equipment-image">
+          </div>
+          <div class="pilates-wheels-description">
+            <p>{{ section.settings.with_wheels_description | default: "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces." }}</p>
+          </div>
         </div>
         
-        {% if section.settings.button_text != blank %}
-          <div class="upholstery-color-swatch-cta">
-            <a href="{{ section.settings.button_url | default: '#' }}" class="upholstery-color-btn upholstery-color-btn-swatch">
-              {% if section.settings.button_icon != blank %}
-                <img src="{{ section.settings.button_icon | img_url: '12x8' }}" alt="Icon" class="upholstery-color-btn-icon">
-              {% else %}
-                <svg class="upholstery-color-btn-icon" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8.5 1L11.5 4L8.5 7M11 4H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              {% endif %}
-              <span class="upholstery-color-btn-text">{{ section.settings.button_text }}</span>
-            </a>
+        <!-- Without Wheels Option -->
+        <div class="pilates-wheels-option {% if section.settings.default_selection == 'without_wheels' %}pilates-wheels-selected{% endif %}" 
+             data-option="without_wheels">
+          <div class="pilates-wheels-image-container">
+            <div class="pilates-wheels-label">Without Wheels</div>
+            <img src="{% if section.settings.without_wheels_image != blank %}{{ section.settings.without_wheels_image | img_url: '650x550' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=650&q=80{% endif %}" 
+                 alt="Pilates Equipment Without Wheels" 
+                 class="pilates-wheels-equipment-image">
           </div>
-        {% endif %}
+          <div class="pilates-wheels-description">
+            <p>{{ section.settings.without_wheels_description | default: "Provides a stable, permanent base. Perfect for dedicated studios." }}</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -293,1105 +45,633 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const colorOptions = document.querySelectorAll('.upholstery-color-option');
-  const mainImage = document.getElementById('upholstery-color-main-image');
+  const options = document.querySelectorAll('.pilates-wheels-option');
   
-  // 调试信息 - 在开发环境中可以启用
-  console.log('=== 颜色选择器调试信息 ===');
-  console.log('找到颜色选项数量:', colorOptions.length);
-  
-  // 检查是否有空的颜色值
-  let emptyColorCount = 0;
-  let presetColorCount = 0;
-  let metafieldColorCount = 0;
-  
-  colorOptions.forEach((option, index) => {
-    const colorName = option.getAttribute('data-color');
-    const colorHex = option.getAttribute('data-color-hex');
-    const variantId = option.getAttribute('data-variant-id');
-    const variantImage = option.getAttribute('data-variant-image');
-    const debugInfo = option.getAttribute('data-debug-info');
-    
-    // 检查颜色来源
-    if (debugInfo && debugInfo.startsWith('preset-')) {
-      presetColorCount++;
-      console.log(`🎨 颜色 ${index + 1} "${colorName}" 使用预设颜色:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        hasImage: !!variantImage
-      });
-    } else if (debugInfo && debugInfo !== 'default-fallback') {
-      metafieldColorCount++;
-      console.log(`✅ 颜色 ${index + 1} "${colorName}" 从元字段获取:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        hasImage: !!variantImage
-      });
-    } else {
-      emptyColorCount++;
-      console.warn(`⚠️ 颜色 ${index + 1} "${colorName}" 使用默认颜色:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo || 'unknown',
-        variantId: variantId,
-        hasImage: !!variantImage,
-        isEmpty: true
-      });
-    }
-  });
-  
-  // 显示调试总结
-  console.log('📊 颜色来源统计:');
-  console.log(`   - 元字段颜色: ${metafieldColorCount} 个`);
-  console.log(`   - 预设颜色: ${presetColorCount} 个`);
-  console.log(`   - 默认颜色: ${emptyColorCount} 个`);
-  
-  if (emptyColorCount > 0) {
-    console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
-    console.log('💡 建议检查以下元字段路径是否正确设置:');
-    console.log('   优先级顺序:');
-    console.log('   1. variant.metafields.custom.color.value');
-    console.log('   2. variant.metafields.custom.color');
-    console.log('   3. variant.metafields.color.value');
-    console.log('   4. variant.metafields.color');
-    console.log('   5. variant.metafields.global.color.value');
-    console.log('   6. variant.metafields.global.color');
-    console.log('   7. variant.metafields.custom.hex_color.value');
-    console.log('   8. variant.metafields.custom.color_code.value');
-    console.log('   9. variant.metafields.custom.color_hex.value');
-    console.log('');
-    console.log('🔧 或者在 Shopify 后台为每个变体设置颜色元字段');
-  }
-  
-  if (presetColorCount > 0) {
-    console.log('ℹ️ 部分颜色使用了基于名称的预设值，建议在后台设置准确的颜色值');
-  }
-  
-  colorOptions.forEach((option, index) => {
+  options.forEach(option => {
     option.addEventListener('click', function() {
       // 移除所有选中状态
-      colorOptions.forEach(opt => {
-        opt.classList.remove('upholstery-color-selected');
-        const checkmark = opt.querySelector('.upholstery-color-checkmark');
-        if (checkmark) {
-          checkmark.remove();
-        }
-      });
+      options.forEach(opt => opt.classList.remove('pilates-wheels-selected'));
       
       // 添加选中状态到当前选项
-      this.classList.add('upholstery-color-selected');
+      this.classList.add('pilates-wheels-selected');
       
-      // 添加选中标记
-      const checkmark = document.createElement('div');
-      checkmark.className = 'upholstery-color-checkmark';
-      checkmark.innerHTML = `
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-        </svg>
-      `;
-      this.appendChild(checkmark);
+      // 获取选择的选项
+      const selectedOption = this.getAttribute('data-option');
       
-      // 切换主图片
-      const variantImage = this.getAttribute('data-variant-image');
-      if (variantImage && variantImage !== '') {
-        mainImage.src = variantImage;
-        console.log('🖼️ 切换图片到:', variantImage);
-      } else {
-        console.log('⚠️ 该颜色没有对应的图片');
-      }
-      
-      // 触发自定义事件，可用于其他功能
-      const colorName = this.getAttribute('data-color');
-      const variantId = this.getAttribute('data-variant-id');
-      const colorHex = this.getAttribute('data-color-hex');
-      
-      const event = new CustomEvent('colorSelected', {
+      // 触发自定义事件
+      const event = new CustomEvent('wheelOptionSelected', {
         detail: {
-          colorName: colorName,
-          colorHex: colorHex,
-          variantId: variantId,
-          variantImage: variantImage
+          option: selectedOption,
+          element: this
         }
       });
       
       document.dispatchEvent(event);
       
-      // 详细的调试信息
-      const debugInfo = this.getAttribute('data-debug-info');
-      console.log('🎨 选择了颜色:', {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        image: variantImage,
-        hasValidColor: colorHex && colorHex !== '#{}' && colorHex !== '#' && colorHex !== '#CCCCCC',
-        isPreset: debugInfo && debugInfo.startsWith('preset-'),
-        isMetafield: debugInfo && !debugInfo.startsWith('preset-') && debugInfo !== 'default-fallback'
-      });
+      console.log('选择了轮子选项:', selectedOption);
     });
   });
   
-  // 监听颜色选择事件，可以用于与其他组件通信
-  document.addEventListener('colorSelected', function(event) {
-    console.log('颜色选择事件触发:', event.detail);
+  // 监听轮子选择事件
+  document.addEventListener('wheelOptionSelected', function(event) {
+    console.log('轮子选择事件触发:', event.detail);
     
-    // 这里可以添加其他逻辑，比如更新购物车、价格等
-    // 例如：更新产品变体选择
-    if (event.detail.variantId) {
-      // 可以触发产品表单的变体选择
-      const productForm = document.querySelector('form[action*="/cart/add"]');
-      if (productForm) {
-        const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
-        if (variantInput) {
-          variantInput.value = event.detail.variantId;
-          
-          // 触发变化事件
-          const changeEvent = new Event('change', { bubbles: true });
-          variantInput.dispatchEvent(changeEvent);
-        }
+    // 这里可以添加其他逻辑，比如更新产品变体、价格等
+    // 例如：与产品表单集成
+    const productForm = document.querySelector('form[action*="/cart/add"]');
+    if (productForm) {
+      // 可以根据轮子选择更新隐藏的表单字段
+      let wheelInput = productForm.querySelector('input[name="properties[Wheels]"]');
+      if (!wheelInput) {
+        wheelInput = document.createElement('input');
+        wheelInput.type = 'hidden';
+        wheelInput.name = 'properties[Wheels]';
+        productForm.appendChild(wheelInput);
       }
+      
+      wheelInput.value = event.detail.option === 'with_wheels' ? 'With Wheels' : 'Without Wheels';
     }
   });
 });
 </script>
 
 <style>
-.upholstery-color-section {
+.pilates-wheels-section {
   padding: 40px 0;
   background-color: #ffffff;
 }
 
-.upholstery-color-container {
+.pilates-wheels-container {
   max-width: 1600px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-.upholstery-color-header {
+.pilates-wheels-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 80px;
 }
 
-.upholstery-color-title {
+.pilates-wheels-title {
   font-size: 48px;
   font-weight: 500;
   color: #161616;
-  margin: 0 0 16px 0;
+  margin: 0 0 24px 0;
   line-height: 1.2;
 }
 
-.upholstery-color-subtitle {
+.pilates-wheels-subtitle {
   font-size: 18px;
   font-weight: 400;
-  color: rgba(22, 22, 22, 0.5);
-  margin: 0;
-  line-height: 1.5;
+  color: rgba(22, 22, 22, 0.6);
   margin: 0 auto;
+  max-width: 890px;
+  line-height: 1.6;
 }
 
-.upholstery-color-content {
+.pilates-wheels-content {
   display: flex;
-  gap: 30px;
-  align-items: flex-start;
   justify-content: center;
 }
 
-.upholstery-color-equipment-display {
-  flex: 0 0 1029px;
-  width: 1029px;
-  height: 532px;
+.pilates-wheels-options {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.pilates-wheels-option {
+  flex: 0 0 700px;
+  width: 700px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option:hover {
+  transform: translateY(-4px);
+}
+
+.pilates-wheels-option.pilates-wheels-selected {
+  transform: translateY(-8px);
+}
+
+.pilates-wheels-image-container {
+  position: relative;
+  width: 700px;
+  height: 380px;
   background-color: #F1F0ED;
   border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  justify-content: flex-end;
+  padding-right: 0px;
 }
 
-.upholstery-color-equipment-image {
-  width: 890px;
-  height: 412px;
+.pilates-wheels-option:hover .pilates-wheels-image-container {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.pilates-wheels-option.pilates-wheels-selected .pilates-wheels-image-container {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.16);
+  border: 2px solid #C22E35;
+}
+
+.pilates-wheels-label {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background-color: #ffffff;
+  color: #161616;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.pilates-wheels-option.pilates-wheels-selected .pilates-wheels-label {
+  background-color: #C22E35;
+  color: #ffffff;
+}
+
+.pilates-wheels-equipment-image {
+  width: 406px;
+  height: 361px;
   object-fit: cover;
   object-position: center;
-  border-radius: 16px;
-  transition: opacity 0.3s ease;
-}
-
-.upholstery-color-equipment-image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.upholstery-color-selection {
-  flex: 0 0 366px;
-  width: 366px;
-}
-
-.upholstery-color-colors-header {
-  margin-bottom: 40px;
-}
-
-.upholstery-color-colors-title {
-  display: inline;
-  font-size: 24px;
-  font-weight: 500;
-  color: #161616;
-  margin: 0;
-  line-height: 60px;
-  border-bottom: 1px solid rgba(194, 46, 53, 1);
-  padding-bottom: 8px;
-}
-
-.upholstery-color-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-auto-rows: 110px;
-  gap: 20px;
-  margin-bottom: 40px;
-  height: 280px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-/* 自定义滚动条样式 */
-.upholstery-color-grid::-webkit-scrollbar {
-  width: 1px;
-}
-
-.upholstery-color-grid::-webkit-scrollbar-track {
-  background: #F3F3F3;
-  border-radius: 1px;
-}
-
-.upholstery-color-grid::-webkit-scrollbar-thumb {
-  background: #AB3A39;
-  border-radius: 1px;
-}
-
-.upholstery-color-grid::-webkit-scrollbar-thumb:hover {
-  background: #8B2E2F;
-}
-
-/* Firefox 滚动条样式 */
-.upholstery-color-grid {
-  scrollbar-color: #AB3A39 #F3F3F3;
-}
-
-.upholstery-color-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.upholstery-color-option {
-  width: 80px;
-  height: 80px;
+  transition: all 0.3s ease;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid transparent;
 }
 
-/* 处理透明或未设置的颜色 */
-.upholstery-color-option[style*="rgba(0,0,0,0)"],
-.upholstery-color-option[style*="transparent"],
-.upholstery-color-option[data-color-hex="#CCCCCC"] {
-  border: 1px solid #ddd;
-  background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
-                    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
-                    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
-                    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
-  background-size: 8px 8px;
-  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+.pilates-wheels-option:hover .pilates-wheels-equipment-image {
+  transform: scale(1.02);
 }
 
-.upholstery-color-option[data-color-hex="#CCCCCC"]:after {
-  content: "默认";
-  font-size: 10px;
-  color: #666;
-  text-align: center;
-  line-height: 1.2;
+.pilates-wheels-description {
+  text-align: left;
+  padding: 0 8px;
 }
 
-.upholstery-color-label {
-  font-size: 12px;
+.pilates-wheels-description p {
+  font-size: 16px;
   font-weight: 400;
-  color: #161616;
-  text-align: center;
-  line-height: 1.2;
-  max-width: 80px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.upholstery-color-option:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.upholstery-color-option.upholstery-color-selected {
-  border: 2px solid #C22E35;
-  box-shadow: 0 4px 15px rgba(194, 46, 53, 0.3);
-}
-
-.upholstery-color-checkmark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.upholstery-color-swatch-cta {
-  text-align: left;
-}
-
-.upholstery-color-btn {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.upholstery-color-btn-swatch {
-  background-color: #C22E35;
-  color: white;
-  width: 200px;
-  height: 40px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 16px;
-  gap: 8px;
-}
-
-.upholstery-color-btn-icon {
-  width: 12px;
-  height: 8px;
-  flex-shrink: 0;
-}
-
-.upholstery-color-btn-text {
-  flex: 1;
-  text-align: left;
-}
-
-.upholstery-color-btn-swatch:hover {
-  background-color: #A02329;
-  transform: translateY(-2px);
+  color: rgba(22, 22, 22, 0.7);
+  margin: 0;
+  line-height: 1.5;
 }
 
 /* 响应式设计 */
 /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
 @media (min-width: 1920px) {
-  .upholstery-color-container {
+  
+  .pilates-wheels-container {
     max-width: 1600px;
   }
   
-  .upholstery-color-header {
-    margin-bottom: 60px;
+  .pilates-wheels-header {
+    margin-bottom: 80px;
   }
   
-  .upholstery-color-title {
+  .pilates-wheels-title {
     font-size: 48px;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
   }
   
-  .upholstery-color-subtitle {
+  .pilates-wheels-subtitle {
     font-size: 18px;
   }
   
-  .upholstery-color-content {
-    gap: 30px;
+  .pilates-wheels-options {
+    gap: 32px;
   }
   
-  .upholstery-color-equipment-display {
-    width: 1029px;
-    height: 532px;
+  .pilates-wheels-option {
+    width: 700px;
   }
   
-  .upholstery-color-equipment-image {
-    width: 890px;
-    height: 412px;
+  .pilates-wheels-image-container {
+    width: 700px;
+    height: 380px;
+    margin-bottom: 24px;
+    padding-right: 0px;
   }
   
-  .upholstery-color-selection {
-    width: 366px;
+  .pilates-wheels-equipment-image {
+    width: 406px;
+    height: 361px;
   }
   
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 80px);
-    grid-auto-rows: 110px;
-    gap: 20px;
-    margin-bottom: 40px;
-    height: 280px;
+  .pilates-wheels-label {
+    top: 24px;
+    left: 24px;
+    font-size: 16px;
+    padding: 12px 20px;
   }
   
-  .upholstery-color-option {
-    width: 80px;
-    height: 80px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-  }
-  
-  .upholstery-color-btn-icon {
-    width: 12px;
-    height: 8px;
+  .pilates-wheels-description p {
+    font-size: 16px;
   }
 }
 
 /* 笔记本电脑 (1366px - 1919px) */
 @media (max-width: 1919px) and (min-width: 1366px) {
-  .upholstery-color-container {
-    max-width: 1100px;
+
+  .pilates-wheels-container {
+    max-width: 1200px;
   }
   
-  .upholstery-color-header {
-    margin-bottom: 50px;
+  .pilates-wheels-header {
+    margin-bottom: 70px;
   }
   
-  .upholstery-color-title {
+  .pilates-wheels-title {
     font-size: 42px;
-    margin-bottom: 14px;
+    margin-bottom: 20px;
   }
   
-  .upholstery-color-subtitle {
+  .pilates-wheels-subtitle {
     font-size: 16px;
   }
   
-  .upholstery-color-content {
-    gap: 30px;
+  .pilates-wheels-options {
+    gap: 27px;
   }
   
-  .upholstery-color-equipment-display {
-    width: 864px;
-    height: 447px;
+  .pilates-wheels-option {
+    width: 588px;
   }
   
-  .upholstery-color-equipment-image {
-    width: 747px;
-    height: 346px;
+  .pilates-wheels-image-container {
+    width: 588px;
+    height: 319px;
+    margin-bottom: 20px;
+    padding-right: 0px;
   }
   
-  .upholstery-color-selection {
-    width: 308px;
+  .pilates-wheels-equipment-image {
+    width: 341px;
+    height: 303px;
   }
   
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 68px);
-    grid-auto-rows: 94px;
-    gap: 16px;
-    margin-bottom: 35px;
-    height: 240px;
+  .pilates-wheels-label {
+    top: 20px;
+    left: 20px;
+    font-size: 15px;
+    padding: 10px 18px;
   }
   
-  .upholstery-color-option {
-    width: 68px;
-    height: 68px;
-  }
-  
-  .upholstery-color-label {
-    font-size: 11px;
-    max-width: 68px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-    font-size: 14px;
-  }
-  
-  .upholstery-color-btn-icon {
-    width: 11px;
-    height: 7px;
+  .pilates-wheels-description p {
+    font-size: 15px;
   }
 }
 
 /* 小笔记本 (1024px - 1365px) */
 @media (max-width: 1365px) and (min-width: 1024px) {
-  .upholstery-color-container {
+  .pilates-wheels-container {
     max-width: 960px;
     padding: 0 30px;
   }
   
-  .upholstery-color-header {
-    margin-bottom: 45px;
+  .pilates-wheels-header {
+    margin-bottom: 60px;
   }
   
-  .upholstery-color-title {
-    font-size: 38px;
-    margin-bottom: 12px;
+  .pilates-wheels-title {
+    font-size: 36px;
+    margin-bottom: 18px;
   }
   
-  .upholstery-color-subtitle {
+  .pilates-wheels-subtitle {
     font-size: 15px;
   }
   
-  .upholstery-color-content {
-    gap: 30px;
+  .pilates-wheels-options {
+    gap: 23px;
   }
   
-  .upholstery-color-equipment-display {
-    width: 720px;
-    height: 372px;
+  .pilates-wheels-option {
+    width: 480px;
   }
   
-  .upholstery-color-equipment-image {
-    width: 622px;
-    height: 288px;
+  .pilates-wheels-image-container {
+    width: 480px;
+    height: 260px;
+    margin-bottom: 18px;
+    padding-right: 0px;
   }
   
-  .upholstery-color-selection {
-    width: 270px;
+  .pilates-wheels-equipment-image {
+    width: 278px;
+    height: 247px;
   }
   
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 60px);
-    grid-auto-rows: 82px;
-    gap: 15px;
-    margin-bottom: 30px;
-    height: 210px;
-  }
-  
-  .upholstery-color-option {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .upholstery-color-label {
-    font-size: 10px;
-    max-width: 60px;
-  }
-  
-  .upholstery-color-checkmark {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
+  .pilates-wheels-label {
+    top: 18px;
+    left: 18px;
     font-size: 14px;
+    padding: 9px 16px;
   }
   
-  .upholstery-color-btn-icon {
-    width: 10px;
-    height: 7px;
+  .pilates-wheels-description p {
+    font-size: 14px;
   }
 }
 
 /* 平板横屏 (768px - 1023px) - 改为单栏布局 */
 @media (max-width: 1023px) and (min-width: 768px) {
-  .upholstery-color-section {
-    padding: 60px 0;
-  }
   
-  .upholstery-color-container {
+  .pilates-wheels-container {
     padding: 0 25px;
   }
   
-  .upholstery-color-header {
-    margin-bottom: 40px;
+  .pilates-wheels-header {
+    margin-bottom: 50px;
   }
   
-  .upholstery-color-title {
-    font-size: 34px;
-    margin-bottom: 10px;
+  .pilates-wheels-title {
+    font-size: 32px;
+    margin-bottom: 16px;
   }
   
-  .upholstery-color-subtitle {
+  .pilates-wheels-subtitle {
     font-size: 14px;
   }
   
-  .upholstery-color-content {
+  .pilates-wheels-options {
     flex-direction: column;
     gap: 30px;
     align-items: center;
   }
   
-  .upholstery-color-equipment-display {
+  .pilates-wheels-option {
     width: 100%;
-    max-width: 600px;
-    height: 385px;
+    max-width: 500px;
   }
   
-  .upholstery-color-equipment-image {
+  .pilates-wheels-image-container {
     width: 100%;
-    height: 100%;
+    height: 420px;
+    margin-bottom: 16px;
   }
   
-  .upholstery-color-selection {
-    width: 100%;
-    max-width: 300px;
+  .pilates-wheels-label {
+    top: 16px;
+    left: 16px;
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+  
+  .pilates-wheels-description {
     text-align: center;
   }
   
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 55px);
-    grid-auto-rows: 75px;
-    gap: 12px;
-    margin-bottom: 25px;
-    justify-content: center;
-    height: 190px;
-  }
-  
-  .upholstery-color-option {
-    width: 55px;
-    height: 55px;
-  }
-  
-  .upholstery-color-label {
-    font-size: 9px;
-    max-width: 55px;
-  }
-  
-  .upholstery-color-checkmark {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-    font-size: 14px;
-  }
-  
-  .upholstery-color-btn-icon {
-    width: 10px;
-    height: 6px;
+  .pilates-wheels-description p {
+    font-size: 13px;
   }
 }
 
-/* 平板竖屏和大手机 (481px - 767px) - 单栏布局 */
+/* 平板竖屏和大手机 (481px - 767px) */
 @media (max-width: 767px) and (min-width: 481px) {
-  .upholstery-color-section {
-    padding: 50px 0;
-  }
   
-  .upholstery-color-container {
+  .pilates-wheels-container {
     padding: 0 20px;
   }
   
-  .upholstery-color-header {
-    margin-bottom: 35px;
+  .pilates-wheels-header {
+    margin-bottom: 40px;
   }
   
-  .upholstery-color-title {
-    font-size: 30px;
-    margin-bottom: 8px;
+  .pilates-wheels-title {
+    font-size: 28px;
+    margin-bottom: 14px;
   }
   
-  .upholstery-color-subtitle {
+  .pilates-wheels-subtitle {
     font-size: 13px;
   }
   
-  .upholstery-color-content {
-    flex-direction: column;
-    gap: 30px;
-    align-items: center;
-  }
-  
-  .upholstery-color-equipment-display {
-    width: 100%;
-    max-width: 450px;
-    height: 289px;
-  }
-  
-  .upholstery-color-equipment-image {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .upholstery-color-selection {
-    width: 100%;
-    max-width: 250px;
-    text-align: center;
-  }
-  
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 50px);
-    grid-auto-rows: 68px;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-    height: 170px;
-  }
-  
-  .upholstery-color-option {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .upholstery-color-label {
-    font-size: 8px;
-    max-width: 50px;
-  }
-  
-  .upholstery-color-checkmark {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-    font-size: 14px;
-  }
-  
-  .upholstery-color-btn-icon {
-    width: 9px;
-    height: 6px;
-  }
-}
-
-/* 小手机 (320px - 480px) - 单栏布局 */
-@media (max-width: 480px) {
-  .upholstery-color-section {
-    padding: 40px 0;
-  }
-  
-  .upholstery-color-container {
-    padding: 0 15px;
-  }
-  
-  .upholstery-color-header {
-    margin-bottom: 30px;
-  }
-  
-  .upholstery-color-title {
-    font-size: 26px;
-    margin-bottom: 6px;
-  }
-  
-  .upholstery-color-subtitle {
-    font-size: 12px;
-  }
-  
-  .upholstery-color-content {
-    flex-direction: column;
-    gap: 30px;
-    align-items: center;
-  }
-  
-  .upholstery-color-equipment-display {
-    width: 100%;
-    max-width: 320px;
-    height: 205px;
-  }
-  
-  .upholstery-color-equipment-image {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .upholstery-color-selection {
-    width: 100%;
-    max-width: 200px;
-    text-align: center;
-  }
-  
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 45px);
-    grid-auto-rows: 61px;
-    gap: 8px;
-    margin-bottom: 18px;
-    justify-content: center;
-    height: 155px;
-  }
-  
-  .upholstery-color-option {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .upholstery-color-label {
-    font-size: 7px;
-    max-width: 45px;
-  }
-  
-  .upholstery-color-checkmark {
-    width: 14px;
-    height: 14px;
-  }
-  
-  .upholstery-color-btn {
-    width: 180px;
-    height: 34px;
-    font-size: 12px;
-  }
-  
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-    font-size: 14px;
-  }
-  
-  .upholstery-color-btn-icon {
-    width: 8px;
-    height: 5px;
-  }
-}
-
-/* 超小屏幕 (最小320px) - 单栏布局 */
-@media (max-width: 320px) {
-  .upholstery-color-section {
-    padding: 35px 0;
-  }
-  
-  .upholstery-color-header {
-    margin-bottom: 25px;
-  }
-  
-  .upholstery-color-title {
-    font-size: 22px;
-    margin-bottom: 5px;
-  }
-  
-  .upholstery-color-subtitle {
-    font-size: 11px;
-  }
-  
-  .upholstery-color-content {
+  .pilates-wheels-options {
     flex-direction: column;
     gap: 25px;
     align-items: center;
   }
   
-  .upholstery-color-equipment-display {
+  .pilates-wheels-option {
     width: 100%;
-    max-width: 290px;
-    height: 186px;
+    max-width: 400px;
   }
   
-  .upholstery-color-equipment-image {
+  .pilates-wheels-image-container {
     width: 100%;
-    height: 100%;
+    height: 340px;
+    margin-bottom: 14px;
   }
   
-  .upholstery-color-selection {
-    width: 100%;
-    max-width: 180px;
+  .pilates-wheels-label {
+    top: 14px;
+    left: 14px;
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+  
+  .pilates-wheels-description {
     text-align: center;
   }
   
-  .upholstery-color-grid {
-    grid-template-columns: repeat(3, 40px);
-    grid-auto-rows: 54px;
-    gap: 6px;
-    margin-bottom: 15px;
-    justify-content: center;
-    height: 140px;
+  .pilates-wheels-description p {
+    font-size: 12px;
+  }
+}
+
+/* 小手机 (320px - 480px) */
+@media (max-width: 480px) {
+  .pilates-wheels-section {
+    padding: 35px 0;
   }
   
-  .upholstery-color-option {
-    width: 40px;
-    height: 40px;
+  .pilates-wheels-container {
+    padding: 0 15px;
   }
   
-  .upholstery-color-label {
-    font-size: 6px;
-    max-width: 40px;
+  .pilates-wheels-header {
+    margin-bottom: 35px;
   }
   
-  .upholstery-color-checkmark {
-    width: 12px;
-    height: 12px;
+  .pilates-wheels-title {
+    font-size: 24px;
+    margin-bottom: 12px;
   }
   
-  .upholstery-color-btn-swatch {
-    width: 200px;
-    height: 40px;
-    font-size: 14px;
+  .pilates-wheels-subtitle {
+    font-size: 12px;
   }
   
-  .upholstery-color-btn-icon {
-    width: 7px;
-    height: 5px;
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 270px;
+    margin-bottom: 12px;
+  }
+  
+  .pilates-wheels-label {
+    top: 12px;
+    left: 12px;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 11px;
+  }
+}
+
+/* 超小屏幕 (最小320px) */
+@media (max-width: 320px) {
+  .pilates-wheels-section {
+    padding: 30px 0;
+  }
+  
+  .pilates-wheels-header {
+    margin-bottom: 30px;
+  }
+  
+  .pilates-wheels-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .pilates-wheels-subtitle {
+    font-size: 11px;
+  }
+  
+  .pilates-wheels-options {
+    flex-direction: column;
+    gap: 18px;
+    align-items: center;
+  }
+  
+  .pilates-wheels-option {
+    width: 100%;
+    max-width: 290px;
+  }
+  
+  .pilates-wheels-image-container {
+    width: 100%;
+    height: 245px;
+    margin-bottom: 10px;
+  }
+  
+  .pilates-wheels-label {
+    top: 10px;
+    left: 10px;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  
+  .pilates-wheels-description {
+    text-align: center;
+  }
+  
+  .pilates-wheels-description p {
+    font-size: 10px;
   }
 }
 </style>
 
 {% schema %}
 {
-  "name": "Upholstery Color",
+  "name": "Pilates Equipment Wheels",
   "tag": "section",
-  "class": "upholstery-color-section",
+  "class": "pilates-wheels-section",
   "settings": [
     {
       "type": "text",
       "id": "title",
       "label": "Section Title",
-      "default": "Upholstery Color"
+      "default": "Customize Your Pilates Equipment - Optional Wheels"
     },
     {
       "type": "textarea",
       "id": "subtitle",
       "label": "Section Subtitle",
-      "default": "Choose from our premium upholstery options to match your studio's aesthetic."
+      "default": "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product."
     },
     {
-      "type": "product",
-      "id": "selected_product",
-      "label": "Select Product",
-      "info": "Choose a product to display its image and color variants"
-    },
-    {
-      "type": "text",
-      "id": "color_option_name",
-      "label": "Color Option Name",
-      "default": "Color",
-      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric', '颜色')"
-    },
-    {
-      "type": "image_picker",
-      "id": "equipment_image",
-      "label": "Fallback Equipment Image",
-      "info": "Used when no product is selected"
-    },
-    {
-      "type": "text",
-      "id": "button_text",
-      "label": "Button Text",
-      "default": "REQUEST A SWATCH KIT"
-    },
-    {
-      "type": "url",
-      "id": "button_url",
-      "label": "Button URL"
-    },
-    {
-      "type": "image_picker",
-      "id": "button_icon",
-      "label": "Button Icon",
-      "info": "Optional icon to display on the left side of the button text. If not provided, a default arrow icon will be used."
-    }
-  ],
-  "blocks": [
-    {
-      "type": "color_option",
-      "name": "Color Option",
-      "settings": [
+      "type": "select",
+      "id": "default_selection",
+      "label": "Default Selection",
+      "options": [
         {
-          "type": "text",
-          "id": "color_name",
-          "label": "Color Name"
+          "value": "with_wheels",
+          "label": "With Wheels"
         },
         {
-          "type": "color",
-          "id": "color_value",
-          "label": "Color Value",
-          "default": "#000000"
-        },
-        {
-          "type": "checkbox",
-          "id": "is_selected",
-          "label": "Selected by Default",
-          "default": false
+          "value": "without_wheels",
+          "label": "Without Wheels"
         }
-      ]
+      ],
+      "default": "with_wheels"
+    },
+    {
+      "type": "header",
+      "content": "With Wheels Option"
+    },
+    {
+      "type": "image_picker",
+      "id": "with_wheels_image",
+      "label": "With Wheels Image"
+    },
+    {
+      "type": "textarea",
+      "id": "with_wheels_description",
+      "label": "With Wheels Description",
+      "default": "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces."
+    },
+    {
+      "type": "header",
+      "content": "Without Wheels Option"
+    },
+    {
+      "type": "image_picker",
+      "id": "without_wheels_image",
+      "label": "Without Wheels Image"
+    },
+    {
+      "type": "textarea",
+      "id": "without_wheels_description",
+      "label": "Without Wheels Description",
+      "default": "Provides a stable, permanent base. Perfect for dedicated studios."
     }
   ],
   "presets": [
     {
-      "name": "Upholstery Color",
+      "name": "Pilates Equipment Wheels",
       "settings": {
-        "title": "Upholstery Color",
-        "subtitle": "Choose from our premium upholstery options to match your studio's aesthetic.",
-        "button_text": "REQUEST A SWATCH KIT"
-      },
-      "blocks": [
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Black",
-            "color_value": "#000000",
-            "is_selected": true
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Dark Gray",
-            "color_value": "#4A4A4A"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Light Gray",
-            "color_value": "#CCCCCC"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Brown",
-            "color_value": "#8B4513"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Tan",
-            "color_value": "#D2B48C"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Beige",
-            "color_value": "#F5F5DC"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Navy",
-            "color_value": "#000080"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Blue",
-            "color_value": "#4169E1"
-          }
-        },
-        {
-          "type": "color_option",
-          "settings": {
-            "color_name": "Red",
-            "color_value": "#C22E35"
-          }
-        }
-      ]
+        "title": "Customize Your Pilates Equipment - Optional Wheels",
+        "subtitle": "Whether you need your equipment to be easily moved for cleaning or storage, or you prefer a stationary setup, you can add or remove wheels to any product.",
+        "default_selection": "with_wheels",
+        "with_wheels_description": "Effortlessly roll your equipment to a new spot. Ideal for multi-purpose spaces.",
+        "without_wheels_description": "Provides a stable, permanent base. Perfect for dedicated studios."
+      }
     }
   ]
 }
