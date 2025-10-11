@@ -38,53 +38,39 @@
                   {% assign variant_id = '' %}
                   {% assign variant_image = '' %}
                   {% assign color_hex = '#CCCCCC' %}
-                  {% assign debug_info = '' %}
                   
                   {% comment %} 首先尝试使用 color_swatch.color 获取颜色 {% endcomment %}
                   {% assign color_swatch = value.swatch %}
                   {% if color_swatch and color_swatch.color %}
                     {% assign color_hex = color_swatch.color %}
-                    {% assign debug_info = 'color_swatch.color' %}
                   {% else %}
                     {% comment %} 如果没有 color_swatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
                     {% assign value_lower = value | downcase %}
                     {% case value_lower %}
                       {% when 'black' %}
                         {% assign color_hex = '#000000' %}
-                        {% assign debug_info = 'preset-black' %}
                       {% when 'white' %}
                         {% assign color_hex = '#FFFFFF' %}
-                        {% assign debug_info = 'preset-white' %}
                       {% when 'red' %}
                         {% assign color_hex = '#FF0000' %}
-                        {% assign debug_info = 'preset-red' %}
                       {% when 'blue' %}
                         {% assign color_hex = '#0000FF' %}
-                        {% assign debug_info = 'preset-blue' %}
                       {% when 'green' %}
                         {% assign color_hex = '#008000' %}
-                        {% assign debug_info = 'preset-green' %}
                       {% when 'gray', 'grey' %}
                         {% assign color_hex = '#808080' %}
-                        {% assign debug_info = 'preset-gray' %}
                       {% when 'steel gray', 'steel grey' %}
                         {% assign color_hex = '#71797E' %}
-                        {% assign debug_info = 'preset-steel-gray' %}
                       {% when 'brown' %}
                         {% assign color_hex = '#8B4513' %}
-                        {% assign debug_info = 'preset-brown' %}
                       {% when 'navy' %}
                         {% assign color_hex = '#000080' %}
-                        {% assign debug_info = 'preset-navy' %}
                       {% when 'beige' %}
                         {% assign color_hex = '#F5F5DC' %}
-                        {% assign debug_info = 'preset-beige' %}
                       {% when 'tan' %}
                         {% assign color_hex = '#D2B48C' %}
-                        {% assign debug_info = 'preset-tan' %}
                       {% else %}
                         {% assign color_hex = '#CCCCCC' %}
-                        {% assign debug_info = 'default-fallback' %}
                     {% endcase %}
                   {% endif %}
                   
@@ -127,9 +113,7 @@
                          data-color="{{ value }}"
                          data-variant-id="{{ variant_id }}"
                          data-variant-image="{{ variant_image }}"
-                         data-color-hex="{{ color_hex }}"
-                         data-debug-info="{{ debug_info }}"
-                         data-color-swatch="{{ color_swatch | json | escape }}">
+                         data-color-hex="{{ color_hex }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -194,109 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const colorOptions = document.querySelectorAll('.uc-color-option');
   const mainImage = document.getElementById('uc-main-image');
   
-  // 调试信息 - 在开发环境中可以启用
-  console.log('=== 颜色选择器调试信息 ===');
-  console.log('找到颜色选项数量:', colorOptions.length);
-  
-  // 检查是否有空的颜色值
-  let emptyColorCount = 0;
-  let presetColorCount = 0;
-  let swatchColorCount = 0;
-  
-  colorOptions.forEach((option, index) => {
-    const colorName = option.getAttribute('data-color');
-    const colorHex = option.getAttribute('data-color-hex');
-    const variantId = option.getAttribute('data-variant-id');
-    const variantImage = option.getAttribute('data-variant-image');
-    const debugInfo = option.getAttribute('data-debug-info');
-    const colorSwatchDebug = option.getAttribute('data-color-swatch');
-    
-    console.log(`🔍 === 颜色 "${colorName}" 调试信息 ===`);
-    console.log(`📋 基本信息:`);
-    console.log(`   - 颜色名称: ${colorName}`);
-    console.log(`   - 颜色值: ${colorHex}`);
-    console.log(`   - 变体ID: ${variantId}`);
-    console.log(`   - 变体图片: ${variantImage}`);
-    console.log(`   - 颜色来源: ${debugInfo}`);
-    
-    // 打印 color_swatch 信息
-    if (colorSwatchDebug && colorSwatchDebug !== 'null' && colorSwatchDebug !== '') {
-      try {
-        const colorSwatch = JSON.parse(colorSwatchDebug);
-        console.log(`🎨 Color Swatch 信息:`, colorSwatch);
-        if (colorSwatch && colorSwatch.color) {
-          console.log(`   - Swatch 颜色: ${colorSwatch.color}`);
-        }
-        if (colorSwatch && colorSwatch.image) {
-          console.log(`   - Swatch 图片: ${colorSwatch.image}`);
-        }
-      } catch (e) {
-        console.warn(`⚠️ 无法解析 color_swatch JSON:`, e);
-      }
-    } else {
-      console.log(`❌ 没有 color_swatch 数据`);
-    }
-    
-    console.log(`🔍 === 颜色 "${colorName}" 调试信息结束 ===\n`);
-    
-    // 检查颜色来源
-    if (debugInfo === 'color_swatch.color') {
-      swatchColorCount++;
-      console.log(`✅ 颜色 ${index + 1} "${colorName}" 从 color_swatch 获取:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        hasImage: !!variantImage
-      });
-    } else if (debugInfo && debugInfo.startsWith('preset-')) {
-      presetColorCount++;
-      console.log(`🎨 颜色 ${index + 1} "${colorName}" 使用预设颜色:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        hasImage: !!variantImage
-      });
-    } else {
-      emptyColorCount++;
-      console.warn(`⚠️ 颜色 ${index + 1} "${colorName}" 使用默认颜色:`, {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo || 'unknown',
-        variantId: variantId,
-        hasImage: !!variantImage,
-        isEmpty: true
-      });
-    }
-  });
-  
-  // 显示调试总结
-  console.log('📊 颜色来源统计:');
-  console.log(`   - Color Swatch 颜色: ${swatchColorCount} 个`);
-  console.log(`   - 预设颜色: ${presetColorCount} 个`);
-  console.log(`   - 默认颜色: ${emptyColorCount} 个`);
-  
-  if (swatchColorCount > 0) {
-    console.log('✅ 成功从 color_swatch.color 获取颜色！');
-  }
-  
-  if (emptyColorCount > 0) {
-    console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
-    console.log('💡 建议检查以下可能的问题:');
-    console.log('   1. 颜色是否在产品选项中正确配置？');
-    console.log('   2. 是否为颜色选项设置了 color swatch？');
-    console.log('   3. 颜色选项的名称是否正确？');
-    console.log('');
-    console.log('🔧 解决方案:');
-    console.log('   - 在 Shopify 后台产品选项中为每个颜色值设置 color swatch');
-    console.log('   - 确保颜色选项名称为 "颜色" 或 "Color"');
-  }
-  
-  if (presetColorCount > 0) {
-    console.log('ℹ️ 部分颜色使用了基于名称的预设值，建议在后台设置 color swatch');
-  }
-  
   colorOptions.forEach((option, index) => {
     option.addEventListener('click', function() {
       // 移除所有选中状态
@@ -325,9 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const variantImage = this.getAttribute('data-variant-image');
       if (variantImage && variantImage !== '') {
         mainImage.src = variantImage;
-        console.log('🖼️ 切换图片到:', variantImage);
-      } else {
-        console.log('⚠️ 该颜色没有对应的图片');
       }
       
       // 触发自定义事件，可用于其他功能
@@ -345,26 +223,11 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       document.dispatchEvent(event);
-      
-      // 详细的调试信息
-      const debugInfo = this.getAttribute('data-debug-info');
-      console.log('🎨 选择了颜色:', {
-        name: colorName,
-        hex: colorHex,
-        source: debugInfo,
-        variantId: variantId,
-        image: variantImage,
-        hasValidColor: colorHex && colorHex !== '#{}' && colorHex !== '#' && colorHex !== '#CCCCCC',
-        isPreset: debugInfo && debugInfo.startsWith('preset-'),
-        isMetafield: debugInfo && !debugInfo.startsWith('preset-') && debugInfo !== 'default-fallback'
-      });
     });
   });
   
   // 监听颜色选择事件，可以用于与其他组件通信
   document.addEventListener('colorSelected', function(event) {
-    console.log('颜色选择事件触发:', event.detail);
-    
     // 这里可以添加其他逻辑，比如更新购物车、价格等
     // 例如：更新产品变体选择
     if (event.detail.variantId) {
