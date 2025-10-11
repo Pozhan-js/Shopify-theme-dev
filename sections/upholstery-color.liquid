@@ -68,7 +68,27 @@
                       
                       {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
                       
-                      {% comment %} 1. 尝试 custom.color.value {% endcomment %}
+                      {% comment %} 1. 尝试 shopify--color-pattern.color (Shopify标准颜色字段) {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields['shopify--color-pattern'].color %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'shopify--color-pattern.color' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 2. 尝试 shopify--color-pattern.color.value {% endcomment %}
+                      {% unless color_found %}
+                        {% assign test_value = variant.metafields['shopify--color-pattern'].color.value %}
+                        {% if test_value and test_value != blank and test_value != '' %}
+                          {% assign color_hex = test_value %}
+                          {% assign color_found = true %}
+                          {% assign debug_info = 'shopify--color-pattern.color.value' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      {% comment %} 3. 尝试 custom.color.value {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.custom.color.value %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -78,7 +98,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 2. 尝试 custom.color {% endcomment %}
+                      {% comment %} 4. 尝试 custom.color {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.custom.color %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -88,7 +108,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 3. 尝试 color.value {% endcomment %}
+                      {% comment %} 5. 尝试 color.value {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.color.value %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -98,7 +118,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 4. 尝试 color {% endcomment %}
+                      {% comment %} 6. 尝试 color {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.color %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -108,7 +128,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 5. 尝试 global.color.value {% endcomment %}
+                      {% comment %} 7. 尝试 global.color.value {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.global.color.value %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -118,7 +138,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 6. 尝试 global.color {% endcomment %}
+                      {% comment %} 8. 尝试 global.color {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.global.color %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -128,7 +148,7 @@
                         {% endif %}
                       {% endunless %}
                       
-                      {% comment %} 7. 尝试其他可能的命名 {% endcomment %}
+                      {% comment %} 9. 尝试其他可能的命名 {% endcomment %}
                       {% unless color_found %}
                         {% assign test_value = variant.metafields.custom.hex_color.value %}
                         {% if test_value and test_value != blank and test_value != '' %}
@@ -354,15 +374,17 @@ document.addEventListener('DOMContentLoaded', function() {
     console.warn(`⚠️ 发现 ${emptyColorCount} 个颜色使用默认值`);
     console.log('💡 建议检查以下元字段路径是否正确设置:');
     console.log('   优先级顺序:');
-    console.log('   1. variant.metafields.custom.color.value');
-    console.log('   2. variant.metafields.custom.color');
-    console.log('   3. variant.metafields.color.value');
-    console.log('   4. variant.metafields.color');
-    console.log('   5. variant.metafields.global.color.value');
-    console.log('   6. variant.metafields.global.color');
-    console.log('   7. variant.metafields.custom.hex_color.value');
-    console.log('   8. variant.metafields.custom.color_code.value');
-    console.log('   9. variant.metafields.custom.color_hex.value');
+    console.log('   1. variant.metafields["shopify--color-pattern"].color');
+    console.log('   2. variant.metafields["shopify--color-pattern"].color.value');
+    console.log('   3. variant.metafields.custom.color.value');
+    console.log('   4. variant.metafields.custom.color');
+    console.log('   5. variant.metafields.color.value');
+    console.log('   6. variant.metafields.color');
+    console.log('   7. variant.metafields.global.color.value');
+    console.log('   8. variant.metafields.global.color');
+    console.log('   9. variant.metafields.custom.hex_color.value');
+    console.log('   10. variant.metafields.custom.color_code.value');
+    console.log('   11. variant.metafields.custom.color_hex.value');
     console.log('');
     console.log('🔧 或者在 Shopify 后台为每个变体设置颜色元字段');
   }
