@@ -1,14 +1,39 @@
 <div class="blog-posts-list-section">
   <div class="page-width">
-    <h2 class="blog-posts-title">最新博客文章</h2>
-    <div class="blog-posts-grid">
-      {% for article in blogs.news.articles limit: 10 %}
-        <article class="blog-post-card">
+    <h2 class="blog-posts-title">{{ section.settings.title }}</h2>
+    
+    <div class="blog-filter-buttons">
+      <button class="filter-btn active" data-filter="all">全部</button>
+      <button class="filter-btn" data-filter="day">日</button>
+      <button class="filter-btn" data-filter="week">周</button>
+      <button class="filter-btn" data-filter="month">月</button>
+    </div>
+    
+    <div class="blog-posts-grid" id="blog-posts-container">
+      {% assign all_articles = blogs.news.articles %}
+      {% assign current_date = 'now' | date: '%s' %}
+      
+      {% for article in all_articles %}
+        {% assign article_date = article.published_at | date: '%s' %}
+        {% assign days_diff = current_date | minus: article_date | divided_by: 86400 %}
+        
+        {% assign filter_class = '' %}
+        {% if days_diff <= 1 %}
+          {% assign filter_class = 'filter-day' %}
+        {% elsif days_diff <= 7 %}
+          {% assign filter_class = 'filter-week' %}
+        {% elsif days_diff <= 30 %}
+          {% assign filter_class = 'filter-month' %}
+        {% endif %}
+        
+        <article class="blog-post-card {{ filter_class }}" data-days="{{ days_diff }}">
           {% if article.image != blank %}
             <div class="blog-post-image">
               <a href="{{ article.url }}">
                 <img src="{{ article.image | image_url: width: 400 }}" 
                      alt="{{ article.image.alt | default: article.title }}"
+                     width="400"
+                     height="300"
                      loading="lazy">
               </a>
             </div>
@@ -18,6 +43,13 @@
               <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
                 {{ article.published_at | date: '%Y年%m月%d日' }}
               </time>
+              <span class="days-ago">
+                {% if days_diff == 0 %}今天
+                {% elsif days_diff == 1 %}昨天
+                {% elsif days_diff <= 7 %}{{ days_diff }}天前
+                {% elsif days_diff <= 30 %}{{ days_diff }}天前
+                {% else %}{{ days_diff }}天前{% endif %}
+              </span>
             </div>
             <h3 class="blog-post-title">
               <a href="{{ article.url }}">{{ article.title }}</a>
@@ -31,11 +63,9 @@
       {% endfor %}
     </div>
     
-    {% if blogs.news.articles.size > 10 %}
-      <div class="blog-posts-more">
-        <a href="/blogs/news" class="blog-posts-all-link">查看所有文章</a>
-      </div>
-    {% endif %}
+    <div class="blog-posts-more">
+      <a href="/blogs/news" class="blog-posts-all-link">查看所有文章</a>
+    </div>
   </div>
 </div>
 
@@ -132,21 +162,121 @@
   transition: background-color 0.3s ease;
 }
 
-.blog-posts-all-link:hover {
-  background-color: #555;
-}
+  .blog-posts-all-link:hover {
+    background-color: #555;
+  }
 
-@media (max-width: 768px) {
-  .blog-posts-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .blog-filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
   }
-  
-  .blog-posts-title {
-    font-size: 2rem;
+
+  .filter-btn {
+    padding: 8px 20px;
+    border: 2px solid #333;
+    background-color: transparent;
+    color: #333;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    min-width: 60px;
   }
-}
+
+  .filter-btn:hover {
+    background-color: #333;
+    color: white;
+  }
+
+  .filter-btn.active {
+    background-color: #333;
+    color: white;
+  }
+
+  .days-ago {
+    color: #007bff;
+    font-size: 0.85rem;
+    margin-left: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .blog-posts-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    .blog-posts-title {
+      font-size: 2rem;
+    }
+    
+    .blog-filter-buttons {
+      gap: 8px;
+    }
+    
+    .filter-btn {
+      padding: 6px 15px;
+      font-size: 0.9rem;
+    }
+  }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const blogCards = document.querySelectorAll('.blog-post-card');
+  const container = document.getElementById('blog-posts-container');
+  
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const filter = this.dataset.filter;
+      
+      // 更新按钮状态
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+      
+      // 过滤文章
+      let visibleCount = 0;
+      blogCards.forEach(card => {
+        const days = parseInt(card.dataset.days);
+        let shouldShow = false;
+        
+        switch(filter) {
+          case 'all':
+            shouldShow = true;
+            break;
+          case 'day':
+            shouldShow = days <= 1;
+            break;
+          case 'week':
+            shouldShow = days <= 7;
+            break;
+          case 'month':
+            shouldShow = days <= 30;
+            break;
+        }
+        
+        if (shouldShow) {
+          card.style.display = 'block';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      // 显示或隐藏"查看更多"按钮
+      const moreSection = document.querySelector('.blog-posts-more');
+      if (visibleCount === 0) {
+        moreSection.style.display = 'block';
+      } else {
+        moreSection.style.display = 'block';
+      }
+    });
+  });
+});
+</script>
 
 {% schema %}
 {
