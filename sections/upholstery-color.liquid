@@ -66,6 +66,10 @@
                       {% assign color_found = false %}
                       {% assign debug_info = '' %}
                       
+                      {% comment %} 调试：打印shopify--color-pattern的完整内容 {% endcomment %}
+                      {% assign color_pattern_metafield = variant.metafields['shopify--color-pattern'] %}
+                      {% assign debug_color_pattern = color_pattern_metafield | json %}
+                      
                       {% comment %} 尝试多种元字段路径获取颜色值 - 按优先级排序 {% endcomment %}
                       
                       {% comment %} 1. 尝试 shopify--color-pattern.color (Shopify标准颜色字段) {% endcomment %}
@@ -251,7 +255,8 @@
                          data-variant-id="{{ variant_id }}"
                          data-variant-image="{{ variant_image }}"
                          data-color-hex="{{ color_hex }}"
-         data-debug-info="{{ debug_info }}">
+         data-debug-info="{{ debug_info }}"
+         data-color-pattern-debug="{{ debug_color_pattern | escape }}">
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -326,13 +331,33 @@ document.addEventListener('DOMContentLoaded', function() {
   let metafieldColorCount = 0;
   
   colorOptions.forEach((option, index) => {
-    console.log(1111)
-    console.log(option)
     const colorName = option.getAttribute('data-color');
     const colorHex = option.getAttribute('data-color-hex');
     const variantId = option.getAttribute('data-variant-id');
     const variantImage = option.getAttribute('data-variant-image');
     const debugInfo = option.getAttribute('data-debug-info');
+    const colorPatternDebug = option.getAttribute('data-color-pattern-debug');
+    
+    // 打印shopify--color-pattern的完整内容
+    if (colorPatternDebug && colorPatternDebug !== 'null' && colorPatternDebug !== '') {
+      console.log(`🔍 变体 "${colorName}" 的 shopify--color-pattern 内容:`, colorPatternDebug);
+      try {
+        const parsedColorPattern = JSON.parse(colorPatternDebug);
+        console.log(`📋 解析后的 shopify--color-pattern:`, parsedColorPattern);
+        
+        // 详细打印所有属性
+        if (parsedColorPattern && typeof parsedColorPattern === 'object') {
+          console.log(`🔑 shopify--color-pattern 的所有键:`, Object.keys(parsedColorPattern));
+          for (const [key, value] of Object.entries(parsedColorPattern)) {
+            console.log(`   - ${key}:`, value, `(类型: ${typeof value})`);
+          }
+        }
+      } catch (e) {
+        console.warn(`⚠️ 无法解析 shopify--color-pattern JSON:`, e);
+      }
+    } else {
+      console.log(`❌ 变体 "${colorName}" 没有 shopify--color-pattern 数据`);
+    }
     
     // 检查颜色来源
     if (debugInfo && debugInfo.startsWith('preset-')) {
