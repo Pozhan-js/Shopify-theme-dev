@@ -1,5 +1,5 @@
 <div class="materials-stability-section" {{ section.shopify_attributes }}>
-  <div class="container">
+  <div class="materials-stability-container">
     <!-- 标题 -->
     <div class="section-header">
       <h2 class="section-title">{{ section.settings.section_title }}</h2>
@@ -67,8 +67,8 @@
     background-color: #fff;
   }
 
-  .container {
-    max-width: 1300px;
+  .materials-stability-container {
+    max-width: 1520px;
     margin: 0 auto;
     padding: 0 20px;
   }
@@ -94,10 +94,10 @@
   .materials-layout {
     display: grid;
     grid-template-columns: 400px 400px 1fr;
-    gap: 18px;
+    gap: {{ section.settings.layout_gap }}px;
     align-items: start;
     justify-content: start;
-    max-width: 1200px;
+    max-width: 1520px;
     margin: 0 auto;
   }
 
@@ -203,30 +203,93 @@
     display: {% if section.settings.show_cta_underline %}block{% else %}none{% endif %};
   }
 
-  /* 响应式设计 */
-  @media (max-width: 1200px) {
+  /* 响应式设计 - 基于1920px设计图按比例缩放 */
+
+  /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
+  @media (min-width: 1920px) {
+    .materials-stability-container {
+      max-width: 1520px;
+    }
+    
     .materials-layout {
-      grid-template-columns: 350px 350px 1fr;
-      gap: 18px;
+      grid-template-columns: 400px 400px 1fr;
+      gap: {{ section.settings.layout_gap }}px;
+      max-width: 1520px;
     }
 
     .brand-logo-container {
-      height: 350px;
+      height: 400px;
     }
 
     .product-image-container.top-image {
-      height: 165px;
+      height: 190px;
     }
 
     .product-image-container.bottom-image {
-      height: 165px;
+      height: 190px;
     }
   }
 
-  @media (max-width: 1024px) {
+  /* 笔记本电脑 (1366px - 1919px) - 按比例缩放 (约0.84倍) */
+  @media (max-width: 1919px) and (min-width: 1366px) {
+    .materials-stability-container {
+      max-width: 1277px; /* 1520 * 0.84 */
+    }
+    
+    .materials-layout {
+      grid-template-columns: 336px 336px 1fr; /* 400 * 0.84 */
+      gap: {{ section.settings.layout_gap | times: 0.84 | round }}px;
+      max-width: 1277px; /* 1520 * 0.84 */
+    }
+
+    .brand-logo-container {
+      height: 336px; /* 400 * 0.84 */
+    }
+
+    .product-image-container.top-image {
+      height: 160px; /* 190 * 0.84 */
+    }
+
+    .product-image-container.bottom-image {
+      height: 160px; /* 190 * 0.84 */
+    }
+  }
+
+  /* 小笔记本 (1024px - 1365px) - 按比例缩放 (约0.67倍) */
+  @media (max-width: 1365px) and (min-width: 1024px) {
+    .materials-stability-container {
+      max-width: 1018px; /* 1520 * 0.67 */
+      padding: 0 30px;
+    }
+    
+    .materials-layout {
+      grid-template-columns: 268px 268px 1fr; /* 400 * 0.67 */
+      gap: {{ section.settings.layout_gap | times: 0.67 | round }}px;
+      max-width: 1018px; /* 1520 * 0.67 */
+    }
+
+    .brand-logo-container {
+      height: 268px; /* 400 * 0.67 */
+    }
+
+    .product-image-container.top-image {
+      height: 127px; /* 190 * 0.67 */
+    }
+
+    .product-image-container.bottom-image {
+      height: 127px; /* 190 * 0.67 */
+    }
+  }
+
+  /* 平板横屏 (768px - 1023px) - 按比例缩放 (约0.5倍) */
+  @media (max-width: 1023px) and (min-width: 768px) {
+    .materials-stability-container {
+      padding: 0 25px;
+    }
+    
     .materials-layout {
       grid-template-columns: 1fr;
-      gap: 18px;
+      gap: {{ section.settings.layout_gap | times: 0.5 | round }}px;
       text-align: center;
       max-width: 100%;
     }
@@ -251,40 +314,52 @@
     }
 
     .brand-logo-container {
-      height: 300px;
-      max-width: 400px;
+      height: 200px; /* 400 * 0.5 */
+      max-width: 200px; /* 400 * 0.5 */
       margin: 0 auto;
     }
 
     .product-image-container {
-      max-width: 280px;
+      max-width: 200px; /* 400 * 0.5 */
     }
 
     .product-image-container.top-image {
-      height: 150px;
+      height: 95px; /* 190 * 0.5 */
     }
 
     .product-image-container.bottom-image {
-      height: 150px;
+      height: 95px; /* 190 * 0.5 */
     }
   }
 
-  @media (max-width: 768px) {
+  /* 平板竖屏和大手机 (481px - 767px) - 单栏布局，按比例缩放 (约0.4倍) */
+  @media (max-width: 767px) and (min-width: 481px) {
+    .materials-stability-container {
+      padding: 0 20px;
+    }
+    
+    .materials-layout {
+      grid-template-columns: 1fr;
+      gap: {{ section.settings.layout_gap | times: 0.4 | round }}px;
+      text-align: center;
+      max-width: 100%;
+    }
+
     .section-title {
-      font-size: {{ section.settings.title_font_size | minus: 8 }}px;
+      font-size: {{ section.settings.title_font_size | times: 0.4 | round }}px;
     }
 
     .product-images-area {
       flex-direction: column;
-      gap: 20px;
+      gap: 12px; /* 20 * 0.6 */
     }
 
     .main-description {
-      font-size: {{ section.settings.description_font_size | minus: 2 }}px;
+      font-size: {{ section.settings.description_font_size | times: 0.4 | round }}px;
     }
 
     .cta-text {
-      font-size: {{ section.settings.cta_font_size | minus: 2 }}px;
+      font-size: {{ section.settings.cta_font_size | times: 0.4 | round }}px;
     }
 
     .cta-text::after {
@@ -292,22 +367,36 @@
     }
 
     .brand-logo-container {
-      height: 250px;
-      max-width: 350px;
+      height: 160px; /* 400 * 0.4 */
+      max-width: 160px; /* 400 * 0.4 */
+      margin: 0 auto;
+    }
+
+    .product-image-container {
+      max-width: 160px; /* 400 * 0.4 */
+    }
+
+    .product-image-container.top-image {
+      height: 76px; /* 190 * 0.4 */
+    }
+
+    .product-image-container.bottom-image {
+      height: 76px; /* 190 * 0.4 */
     }
   }
 
+  /* 小手机 (320px - 480px) - 单栏布局，按比例缩放 (约0.33倍) */
   @media (max-width: 480px) {
-    .container {
+    .materials-stability-container {
       padding: 0 15px;
     }
 
     .materials-stability-section {
-      padding: {{ section.settings.section_padding_top | divided_by: 2 }}px 0;
+      padding: {{ section.settings.section_padding_top | times: 0.33 | round }}px 0;
     }
 
     .section-title {
-      font-size: {{ section.settings.title_font_size | minus: 12 }}px;
+      font-size: {{ section.settings.title_font_size | times: 0.33 | round }}px;
     }
 
     .brand-logo-container,
@@ -316,20 +405,66 @@
     }
 
     .brand-logo-container {
-      height: 200px;
-      max-width: 300px;
+      height: 132px; /* 400 * 0.33 */
+      max-width: 132px; /* 400 * 0.33 */
+      margin: 0 auto;
+    }
+
+    .product-image-container {
+      max-width: 132px; /* 400 * 0.33 */
     }
 
     .product-image-container.top-image {
-      height: 125px;
+      height: 63px; /* 190 * 0.33 */
     }
 
     .product-image-container.bottom-image {
-      height: 125px;
+      height: 63px; /* 190 * 0.33 */
+    }
+
+    .main-description {
+      font-size: {{ section.settings.description_font_size | times: 0.33 | round }}px;
+    }
+
+    .cta-text {
+      font-size: {{ section.settings.cta_font_size | times: 0.33 | round }}px;
     }
 
     .cta-text::after {
       background: linear-gradient(to right, {{ section.settings.cta_underline_color }} 0%, {{ section.settings.cta_underline_color }} 70%, transparent 70%);
+    }
+  }
+
+  /* 超小屏幕 (最小320px) - 单栏布局，按比例缩放 (约0.25倍) */
+  @media (max-width: 320px) {
+    .section-title {
+      font-size: {{ section.settings.title_font_size | times: 0.25 | round }}px;
+    }
+
+    .brand-logo-container {
+      height: 100px; /* 400 * 0.25 */
+      max-width: 100px; /* 400 * 0.25 */
+      margin: 0 auto;
+    }
+
+    .product-image-container {
+      max-width: 100px; /* 400 * 0.25 */
+    }
+
+    .product-image-container.top-image {
+      height: 48px; /* 190 * 0.25 */
+    }
+
+    .product-image-container.bottom-image {
+      height: 48px; /* 190 * 0.25 */
+    }
+
+    .main-description {
+      font-size: {{ section.settings.description_font_size | times: 0.25 | round }}px;
+    }
+
+    .cta-text {
+      font-size: {{ section.settings.cta_font_size | times: 0.25 | round }}px;
     }
   }
 </style>
