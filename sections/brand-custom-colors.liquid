@@ -96,7 +96,7 @@
   /* 自适应下划线 - 根据最后一行文字长度 */
   .brand-custom-colors-cta-text {
     position: relative;
-    display: inline-block;
+    display: block;
   }
 
   .brand-custom-colors-cta-text::after {
@@ -104,15 +104,16 @@
     position: absolute;
     bottom: -{{ section.settings.underline_margin_top }}px;
     left: 0;
-    width: 100%;
+    width: var(--last-line-width, 100%);
     height: {{ section.settings.underline_height }}px;
     background-color: {{ section.settings.underline_color }};
     display: {% if section.settings.show_underline %}block{% else %}none{% endif %};
+    transition: width 0.3s ease;
   }
 
-  /* 使用JavaScript动态计算最后一行宽度的备选方案 */
-  .brand-custom-colors-cta-text.js-underline-calculated::after {
-    width: var(--last-line-width, 100%);
+  /* 默认状态下的红线宽度 */
+  .brand-custom-colors-cta-text:not(.js-calculated)::after {
+    width: 80%;
   }
 
   /* 右侧颜色图片 */
@@ -327,6 +328,84 @@
     }
   }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function calculateLastLineWidth() {
+    const ctaTexts = document.querySelectorAll('.brand-custom-colors-cta-text');
+    
+    ctaTexts.forEach(function(ctaText) {
+      if (!ctaText) return;
+      
+      // 创建一个临时的测量元素
+      const tempElement = document.createElement('div');
+      tempElement.style.cssText = `
+        position: absolute;
+        visibility: hidden;
+        height: auto;
+        width: auto;
+        white-space: nowrap;
+        font-family: ${getComputedStyle(ctaText).fontFamily};
+        font-size: ${getComputedStyle(ctaText).fontSize};
+        font-weight: ${getComputedStyle(ctaText).fontWeight};
+        line-height: ${getComputedStyle(ctaText).lineHeight};
+        letter-spacing: ${getComputedStyle(ctaText).letterSpacing};
+      `;
+      
+      document.body.appendChild(tempElement);
+      
+      // 获取文本内容并按空格分割成单词
+      const text = ctaText.textContent || ctaText.innerText;
+      const words = text.trim().split(/\s+/);
+      const containerWidth = ctaText.offsetWidth;
+      
+      let currentLine = '';
+      let lastLineWidth = 0;
+      
+      // 逐个添加单词，检测换行
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + words[i];
+        tempElement.textContent = testLine;
+        
+        if (tempElement.offsetWidth > containerWidth && currentLine !== '') {
+          // 发生换行，当前行就是上一行
+          tempElement.textContent = currentLine;
+          // 开始新行
+          currentLine = words[i];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      
+      // 最后一行的宽度
+      tempElement.textContent = currentLine;
+      lastLineWidth = tempElement.offsetWidth;
+      
+      // 清理临时元素
+      document.body.removeChild(tempElement);
+      
+      // 设置CSS变量
+      ctaText.style.setProperty('--last-line-width', lastLineWidth + 'px');
+      ctaText.classList.add('js-calculated');
+    });
+  }
+  
+  // 初始计算
+  calculateLastLineWidth();
+  
+  // 窗口大小改变时重新计算
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(calculateLastLineWidth, 250);
+  });
+  
+  // 字体加载完成后重新计算
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(calculateLastLineWidth);
+  }
+});
+</script>
 
 {% schema %}
 {
