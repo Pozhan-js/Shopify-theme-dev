@@ -37,7 +37,16 @@
           id="pdt-description-content"
         >
           <div class="pdt-description-content">
-            {{ section.settings.description_content }}
+            {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+            {% assign current_product = product %}
+            {% assign selected_product = all_products[section.settings.product_handle] %}
+            {% assign display_product = current_product | default: selected_product %}
+            
+            {% if display_product and display_product.description != blank %}
+              {{ display_product.description }}
+            {% else %}
+              {{ section.settings.description_content }}
+            {% endif %}
           </div>
         </div>
       {% endif %}
@@ -143,7 +152,16 @@
           id="pdt-warranty-content"
         >
           <div class="pdt-warranty-content">
-            {{ section.settings.warranty_content }}
+            {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+            {% assign current_product = product %}
+            {% assign selected_product = all_products[section.settings.product_handle] %}
+            {% assign display_product = current_product | default: selected_product %}
+            
+            {% if display_product and display_product.metafields.custom.warranty != blank %}
+              {{ display_product.metafields.custom.warranty }}
+            {% else %}
+              {{ section.settings.warranty_content }}
+            {% endif %}
           </div>
         </div>
       {% endif %}
