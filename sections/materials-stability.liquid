@@ -188,10 +188,10 @@
   }
 
   .ms-cta-text {
-    font-size: {{ section.settings.cta_font_size }}px;
-    color: {{ section.settings.cta_color }};
-    font-weight: {{ section.settings.cta_font_weight }};
-    line-height: {{ section.settings.cta_line_height }};
+    font-size: 18px;
+    color: #161616;
+    font-weight: 600;
+    line-height: 36px;
     margin: 0;
     position: relative;
     padding-bottom: {{ section.settings.cta_underline_margin_top }}px;
@@ -202,10 +202,16 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%;
+    width: var(--last-line-width, 85%);
     height: {{ section.settings.cta_underline_height }}px;
-    background: linear-gradient(to right, {{ section.settings.cta_underline_color }} 0%, {{ section.settings.cta_underline_color }} 85%, transparent 85%);
+    background-color: {{ section.settings.cta_underline_color }};
     display: {% if section.settings.show_cta_underline %}block{% else %}none{% endif %};
+    transition: width 0.3s ease;
+  }
+
+  /* 默认状态下的红线宽度 */
+  .ms-cta-text:not(.js-calculated)::after {
+    width: 85%;
   }
 
   /* 右侧内容区域 */
@@ -344,8 +350,10 @@
     }
 
     .ms-cta-text {
-      font-size: calc({{ section.settings.cta_font_size }}px * (100vw / 1920px));
+      font-size: calc(18px * (100vw / 1920px));
+      line-height: calc(36px * (100vw / 1920px));
       min-font-size: 12px;
+      min-line-height: 18px;
     }
   }
 
@@ -437,10 +445,89 @@
     }
 
     .ms-cta-text {
-      font-size: clamp(12px, 3vw, 16px);
+      font-size: clamp(12px, 3vw, 18px);
+      line-height: clamp(18px, 6vw, 36px);
     }
   }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function calculateLastLineWidth() {
+    const ctaTexts = document.querySelectorAll('.ms-cta-text');
+    
+    ctaTexts.forEach(function(ctaText) {
+      if (!ctaText) return;
+      
+      // 创建一个临时的测量元素
+      const tempElement = document.createElement('div');
+      tempElement.style.cssText = `
+        position: absolute;
+        visibility: hidden;
+        height: auto;
+        width: auto;
+        white-space: nowrap;
+        font-family: ${getComputedStyle(ctaText).fontFamily};
+        font-size: ${getComputedStyle(ctaText).fontSize};
+        font-weight: ${getComputedStyle(ctaText).fontWeight};
+        line-height: ${getComputedStyle(ctaText).lineHeight};
+        letter-spacing: ${getComputedStyle(ctaText).letterSpacing};
+      `;
+      
+      document.body.appendChild(tempElement);
+      
+      // 获取文本内容并按空格分割成单词
+      const text = ctaText.textContent || ctaText.innerText;
+      const words = text.trim().split(/\s+/);
+      const containerWidth = ctaText.offsetWidth;
+      
+      let currentLine = '';
+      let lastLineWidth = 0;
+      
+      // 逐个添加单词，检测换行
+      for (let i = 0; i < words.length; i++) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + words[i];
+        tempElement.textContent = testLine;
+        
+        if (tempElement.offsetWidth > containerWidth && currentLine !== '') {
+          // 发生换行，当前行就是上一行
+          tempElement.textContent = currentLine;
+          // 开始新行
+          currentLine = words[i];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      
+      // 最后一行的宽度
+      tempElement.textContent = currentLine;
+      lastLineWidth = tempElement.offsetWidth;
+      
+      // 清理临时元素
+      document.body.removeChild(tempElement);
+      
+      // 设置CSS变量
+      ctaText.style.setProperty('--last-line-width', lastLineWidth + 'px');
+      ctaText.classList.add('js-calculated');
+    });
+  }
+  
+  // 初始计算
+  calculateLastLineWidth();
+  
+  // 窗口大小改变时重新计算
+  let resizeTimer;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(calculateLastLineWidth, 250);
+  });
+  
+  // 字体加载完成后重新计算
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(calculateLastLineWidth);
+  }
+});
+</script>
 
 {% schema %}
 {
