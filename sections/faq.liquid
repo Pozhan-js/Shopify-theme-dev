@@ -1,0 +1,284 @@
+<!-- FAQ Section -->
+<section class="faq-section">
+  <div class="container">
+    <!-- 可编辑标题 -->
+    {% if section.settings.faq_title != blank %}
+      <h3 class="faq-title">{{ section.settings.faq_title }}</h3>
+    {% endif %}
+    
+    <!-- FAQ内容区域 -->
+    <div class="faq-content">
+      <div class="faq-grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'faq_item' %}
+            <div class="faq-item" {{ block.shopify_attributes }}>
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <h3>{{ block.settings.question }}</h3>
+                <span class="faq-icon">+</span>
+              </div>
+              <div class="faq-answer">
+                <div class="faq-answer-content">
+                  {{ block.settings.answer }}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.faq-section {
+  padding: 60px 0;
+  background-color: transparent; /* 透明背景 */
+  padding-bottom: 20px;
+  padding-top: 30px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.faq-title {
+    font-family: Georgia, serif;
+  text-align: center;
+  font-weight: normal;
+  color: var(--color, var(--font-h3-color));
+  margin-bottom: 24px;
+}
+
+/* 修复布局问题的关键：防止 grid 行被拉伸 */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;           /* 关键：避免 item 纵向拉伸 */
+  grid-auto-rows: min-content;  /* 关键：行高由内容最小需求决定 */
+}
+
+.faq-item {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.faq-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.faq-question {
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: transparent;
+  color: var(--color, var(--font-h3-color));
+  transition: background 0.3s ease;
+}
+
+.faq-question h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  flex: 1;
+  padding-right: 15px;
+}
+
+.faq-icon {
+  font-size: 1rem;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+  min-width: 30px;
+  text-align: center;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  background: white;
+}
+
+.faq-answer-content {
+  padding: 0 25px 25px; /* 底部留出空间 */
+  color: #666;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 500px;
+  padding: 25px 0;
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(45deg);
+}
+
+
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .faq-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .faq-title {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+  
+  .faq-question {
+    padding: 20px;
+  }
+  
+  .faq-question h3 {
+    font-size: 1.1rem;
+  }
+  
+  .faq-answer-content {
+    padding: 0 20px 20px;
+  }
+  
+  .faq-item.active .faq-answer {
+    padding: 20px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-section {
+    padding: 40px 0;
+  }
+  
+  .container {
+    padding: 0 15px;
+  }
+  
+  .faq-title {
+    font-size: 1.8rem;
+  }
+  
+  .faq-question {
+    padding: 15px;
+  }
+  
+  .faq-answer-content {
+    padding: 0 15px 15px;
+    font-size: 0.9rem;
+  }
+}
+</style>
+
+<script>
+function toggleFaq(element) {
+  const faqItem = element.parentElement;
+  const isActive = faqItem.classList.contains('active');
+  
+  // 切换当前项状态（允许多开）
+  if (isActive) {
+    faqItem.classList.remove('active');
+    element.setAttribute('aria-expanded', 'false');
+  } else {
+    faqItem.classList.add('active');
+    element.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// 键盘访问性支持
+document.addEventListener('DOMContentLoaded', function() {
+  const faqQuestions = document.querySelectorAll('.faq-question');
+  
+  faqQuestions.forEach(question => {
+    question.setAttribute('tabindex', '0');
+    question.setAttribute('role', 'button');
+    question.setAttribute('aria-expanded', 'false');
+    
+    question.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleFaq(this);
+      }
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "FAQ Section",
+  "tag": "section",
+  "class": "faq-section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "faq_title",
+      "label": "FAQ标题",
+      "default": "常见问题"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ项目",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "问题",
+          "default": "这是一个常见问题？"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "答案",
+          "default": "<p>这里是问题的详细答案内容。</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ Section",
+      "blocks": [
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "如何使用这个功能？",
+            "answer": "<p>详细的使用说明和步骤...</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "支持哪些支付方式？",
+            "answer": "<p>我们支持多种支付方式，包括信用卡、支付宝、微信支付等。</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "退换货政策是什么？",
+            "answer": "<p>我们提供30天无理由退换货服务，商品未使用且包装完好即可申请。</p>"
+          }
+        },
+        {
+          "type": "faq_item",
+          "settings": {
+            "question": "如何联系客服？",
+            "answer": "<p>您可以通过在线客服、邮箱 support@example.com 或拨打 400-123-4567 联系我们。</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

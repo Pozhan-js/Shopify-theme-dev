@@ -1,0 +1,490 @@
+{% comment %}
+  Instagram图片展示 - 带轮播功能
+  1. 头部左右布局：左边文本区域，右边Instagram按钮
+  2. 直接展示配置的图片
+{% endcomment %}
+
+<div class="instagram-carousel-section" data-section-id="{{ section.id }}">
+  <div class="container">
+    <!-- 左右布局的头部区域 -->
+    <div class="header-layout">
+      <!-- 左侧文本区域 -->
+      <div class="text-content">
+        {% if section.settings.text_content != blank %}
+          <p class="header-text">{{ section.settings.text_content }}</p>
+        {% endif %}
+      </div>
+      
+      <!-- 右侧Instagram按钮 -->
+      {% if section.settings.instagram_link != blank %}
+        <div class="button-content">
+          <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
+            <svg class="instagram-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            {{ section.settings.button_text | default: 'Follow Us' }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 图片轮播部分 -->
+    <div class="carousel-wrapper">
+      <div class="carousel-content active">
+        <div class="carousel-track">
+          {% for block in section.blocks %}
+            {% if block.type == 'image_item' %}
+              <div class="card-container small-card">
+                <div class="card-inner">
+                  <!-- 图片容器 -->
+                  <div class="image-container">
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x500' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="card-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 导航按钮 -->
+      <button class="nav-button-img prev-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button class="nav-button-img next-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Variables CSS */
+:root {
+  --cream: #F5F1EB;
+  --warm-beige: #E8DDD4;
+  --soft-brown: #C4A484;
+  --pearl-white: #FFF8F0;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --white: #FFFFFF;
+  --amber-400: #FBBF24;
+  --orange-400: #FB923C;
+}
+
+/* Section principale */
+.instagram-carousel-section {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: transparent;
+  min-height: 50vh;
+  padding: 1rem 0;
+}
+
+/* Container principal */
+.container {
+  max-width: 100rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  margin-bottom: 2rem;
+}
+
+/* 头部左右布局 */
+.header-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 2rem;
+}
+
+/* 左侧文本区域 */
+.text-content {
+  flex: 1;
+  text-align: left;
+}
+
+.header-text {
+  font-size: 1.125rem;
+  color: var(--color-foreground);
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* 右侧按钮区域 */
+.button-content {
+  flex-shrink: 0;
+}
+
+.instagram-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  background-color: transparent;
+  border: 1px solid #000;
+  border-radius: 0.5rem;
+  color: var(--gray-700);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.instagram-button:hover {
+
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.instagram-button:active {
+  transform: translateY(0);
+}
+
+.instagram-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--gray-600);
+  transition: color 0.3s ease;
+}
+
+.instagram-button:hover .instagram-icon {
+  color: var(--gray-800);
+}
+
+/* Carousel wrapper */
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-content {
+  display: none;
+}
+
+.carousel-content.active {
+  display: block;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 1rem;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+  user-select: none;
+}
+
+.carousel-track:active {
+  cursor: grabbing;
+}
+
+/* Cards containers */
+.card-container {
+  flex-shrink: 0;
+}
+
+.small-card {
+  width: 18rem;
+}
+
+/* Image containers */
+.image-container {
+  position: relative;
+  background-color: var(--white);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.small-card .image-container {
+  height: 20rem;
+  border-radius: 8px;
+}
+
+.image-container:hover {
+  transform: scale(1.02);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background-color: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+/* Boutons de navigation */
+.nav-button-img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-button-img:hover {
+  background-color: var(--gray-50);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.nav-button-img.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.prev-button {
+  left: 1rem;
+}
+
+.next-button {
+  right: 1rem;
+}
+
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .header-layout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .text-content {
+    text-align: center;
+  }
+  
+  .button-content {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .header-text {
+    font-size: 1rem;
+  }
+  
+  .carousel-track {
+    gap: 1rem;
+  }
+  
+  .small-card {
+    width: 16rem;
+  }
+  
+  .small-card .image-container {
+    height: 22rem;
+  }
+  
+  .nav-button-img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .nav-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-layout {
+    margin-bottom: 1.5rem;
+  }
+  
+  .header-text {
+    font-size: 0.875rem;
+  }
+  
+  .instagram-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8rem;
+  }
+  
+  .instagram-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .small-card {
+    width: 14rem;
+  }
+  
+  .small-card .image-container {
+    height: 20rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const section = document.querySelector('.instagram-carousel-section');
+  if (!section) return;
+
+  const track = section.querySelector('.carousel-track');
+  const prevButton = section.querySelector('.prev-button');
+  const nextButton = section.querySelector('.next-button');
+  let currentSlide = 0;
+
+  // 更新轮播位置
+  function updateCarousel() {
+    if (!track) return;
+    
+    const cards = track.querySelectorAll('.card-container');
+    if (cards.length === 0) return;
+    
+    const cardWidth = cards[0].offsetWidth + 16; // 包含间距
+    const offset = currentSlide * cardWidth;
+    track.style.transform = `translateX(-${offset}px)`;
+    
+    // 更新导航按钮状态
+    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
+    const trackWidth = track.scrollWidth;
+    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
+    
+    prevButton.classList.toggle('visible', currentSlide > 0);
+    nextButton.classList.toggle('visible', currentSlide < maxSlide);
+  }
+
+  // 上一张
+  prevButton.addEventListener('click', () => {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateCarousel();
+    }
+  });
+
+  // 下一张
+  nextButton.addEventListener('click', () => {
+    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
+    const trackWidth = track.scrollWidth;
+    const cards = track.querySelectorAll('.card-container');
+    const cardWidth = cards[0].offsetWidth + 16;
+    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
+    
+    if (currentSlide < maxSlide) {
+      currentSlide++;
+      updateCarousel();
+    }
+  });
+
+  // 初始更新
+  updateCarousel();
+  
+  // 响应式调整
+  window.addEventListener('resize', () => {
+    updateCarousel();
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Instagram图片展示",
+  "tag": "section",
+  "class": "instagram-carousel-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "text_content",
+      "label": "文本内容",
+      "default": "关注我们的Instagram，获取最新产品动态和时尚灵感"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "按钮文本",
+      "default": "Follow Us"
+    },
+    {
+      "type": "url",
+      "id": "instagram_link",
+      "label": "Instagram链接",
+      "info": "输入Instagram主页链接"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_item",
+      "name": "图片项",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Instagram图片展示",
+      "settings": {
+        "text_content": "关注我们的Instagram，获取最新产品动态和时尚灵感",
+        "button_text": "Follow Us"
+      },
+      "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

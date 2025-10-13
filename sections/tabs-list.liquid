@@ -1,0 +1,767 @@
+{% comment %}
+  Carousel de bijoux - Section Liquid (Final Version)
+  Affichage des collections avec onglets et carousel cliquable
+  ✅ Removed: Hover "Add to Cart" button
+  ✅ Added: Entire card is a clickable link to product page
+  ✅ Kept: Tabs, carousel navigation, bestseller badge
+  ✅ Added: Clickable main title with configurable link
+{% endcomment %}
+
+<div class="jewelry-carousel-section" data-section-id="{{ section.id }}">
+  <div class="container">
+    
+    <!-- Section Title and Subtitle -->
+    {% if section.settings.section_title != blank  %}
+      <div class="section-header">
+        {% if section.settings.section_title != blank %}
+          {% if section.settings.title_link != blank %}
+            <a href="{{ section.settings.title_link }}" class="section-title-link">
+              <h2 class="section-title1">{{ section.settings.section_title }}</h2>
+            </a>
+          {% else %}
+            <h2 class="section-title1">{{ section.settings.section_title }}</h2>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <!-- Navigation par onglets -->
+    <div class="tab-navigation">
+      <div class="tab-container">
+        {% for block in section.blocks %}
+          {% if block.type == 'collection_tab' %}
+            <button
+              class="tab-button"
+              data-tab="{{ block.id }}"
+              data-collection="{{ block.settings.collection.handle }}"
+            >
+              {{ block.settings.tab_title | upcase }}
+            </button>
+          
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Conteneur du carousel -->
+    <div class="carousel-wrapper">
+      {% for block in section.blocks %}
+        {% if block.type == 'collection_tab' %}
+          <div 
+            class="carousel-content"
+            data-content="{{ block.id }}"
+          >
+            <div class="carousel-track">
+              
+              <!-- Cartes produits : chaque carte est un lien vers la page produit -->
+              {% assign collection = collections[block.settings.collection.handle] %}
+              {% if collection and collection.products.size > 0 %}
+                {% for product in collection.products limit: block.settings.products_limit %}
+                  <a href="{{ product.url }}" class="card-container small-card card-link">
+                    <div class="card-inner">
+                      <!-- Image container -->
+                      <div class="image-container product-card">
+                        {% if product.featured_image %}
+                          <img
+                            src="{{ product.featured_image | img_url: '400x500' }}"
+                            alt="{{ product.title }}"
+                            class="card-image main-image"
+                          >
+                          {% if product.images[1] %}
+                            <img
+                              src="{{ product.images[1] | img_url: '400x500' }}"
+                              alt="{{ product.title }}"
+                              class="card-image hover-image"
+                            >
+                          {% endif %}
+                        {% else %}
+                          <div class="placeholder-image">
+                            <span>{{ product.title }}</span>
+                          </div>
+                        {% endif %}
+                        
+                        <!-- Badge Best Seller conditionnel -->
+                        {% if product.tags contains 'bestseller' %}
+                          <div class="bestseller-badge"> 
+                            BEST SELLER
+                          </div>
+                        {% endif %}
+                      </div>
+                      
+                      <!-- Informations produit -->
+                      <div class="product-info">
+                        <h3 class="product-title">
+                          {{ product.title }}
+                        </h3>
+                        <p class="product-price2">
+                          {{ product.price | money }}
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Boutons de navigation -->
+      <button class="nav-button prev-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button class="nav-button next-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Variables CSS */
+:root {
+  --cream: #F5F1EB;
+  --warm-beige: #E8DDD4;
+  --soft-brown: #C4A484;
+  --pearl-white: #FFF8F0;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --white: #FFFFFF;
+  --amber-400: #FBBF24;
+  --orange-400: #FB923C;
+}
+
+/* Section principale */
+.jewelry-carousel-section {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: transparent;
+  min-height: 50vh;
+  padding: 1rem 0;
+}
+
+/* Container principal */
+.container {
+  max-width: 100rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Section Header */
+.section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* 新增：标题链接样式 */
+.section-title-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.section-title-link:hover {
+  transform: translateY(-2px);
+  opacity: 0.8;
+}
+
+.section-title-link:hover .section-title1 {
+  color: var(--soft-brown);
+}
+
+.section-title1 {
+  font-size: 2.5rem;
+  font-family: Georgia, serif;
+  font-weight: normal;
+  color: var(--color, var(--font-h2-color));
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+  transition: color 0.3s ease;
+}
+
+/* 当标题是链接时，添加光标指针 */
+.section-title-link .section-title1 {
+  cursor: pointer;
+}
+
+.section-subtitle1 {
+  font-size: 1rem;
+  color: var(--color-foreground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Navigation des onglets */
+.tab-navigation {
+  margin-bottom: 2rem;
+}
+
+.tab-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #5c3d3b;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.tab-button:hover,
+.tab-button.active {
+  color: var(--gray-900);
+}
+
+.tab-button.active {
+  font-weight: 600;
+}
+
+.tab-separator {
+  color: var(--gray-400);
+  font-size: 0.875rem;
+  user-select: none;
+}
+
+/* Carousel wrapper */
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-content {
+  display: none;
+}
+
+.carousel-content.active {
+  display: block;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 1rem;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+  user-select: none;
+}
+
+.carousel-track:active {
+  cursor: grabbing;
+}
+
+/* Cards containers */
+.card-container {
+  flex-shrink: 0;
+}
+
+.small-card {
+  width: 18rem;
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all 0.3s ease;
+}
+
+.card-link:hover {
+  transform: translateY(-6px);
+}
+
+.card-link .card-inner {
+  height: 100%;
+}
+
+/* Image containers */
+.image-container {
+  position: relative;
+  background-color: var(--white);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.small-card .image-container {
+  height: 25rem;
+}
+
+.image-container:hover {
+  transform: scale(1.02);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.hover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+
+.product-card:hover .hover-image {
+  opacity: 1;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background-color: var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  font-size: 0.875rem;
+}
+
+/* Badges */
+.bestseller-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, var(--amber-400) 0%, var(--orange-400) 100%);
+  color: var(--white);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+  z-index: 2;
+}
+
+/* Informations produit */
+.product-info {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.product-title {
+  font-weight: 500;
+  color: var(--button-color);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.375;
+}
+
+.product-price2 {
+  font-weight: 400;
+  color: var(--color-foreground);
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Boutons de navigation */
+.nav-button {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-button:hover {
+  background-color: var(--gray-50);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.nav-button.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.prev-button {
+  left: 1rem;
+}
+
+.next-button {
+  right: 1rem;
+}
+
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .section-title1 {
+    font-size: 2rem;
+  }
+  
+  .section-subtitle1 {
+    font-size: 1rem;
+  }
+  
+  .tab-container {
+    gap: 0.75rem;
+  }
+  
+  .carousel-track {
+    gap: 1rem;
+  }
+  
+  .small-card {
+    width: 16rem;
+  }
+  
+  .small-card .image-container {
+    height: 22rem;
+  }
+  
+  .nav-button {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .nav-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .card-link:hover {
+    transform: translateY(-4px);
+  }
+
+  .section-title-link:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 480px) {
+  .section-header {
+    margin-bottom: 2rem;
+  }
+  
+  .section-title1 {
+    font-size: 1.75rem;
+  }
+  
+  .small-card {
+    width: 14rem;
+  }
+  
+  .small-card .image-container {
+    height: 20rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sectionId = '{{ section.id }}';
+  const section = document.querySelector(`[data-section-id="${sectionId}"]`);
+  
+  if (!section) return;
+  
+  const tabButtons = section.querySelectorAll('.tab-button');
+  const carouselContents = section.querySelectorAll('.carousel-content');
+  const prevButton = section.querySelector('.prev-button');
+  const nextButton = section.querySelector('.next-button');
+  
+  let currentTabIndex = 0;
+  let currentSlideIndex = 0;
+
+  // 初始化第一个标签页
+  if (tabButtons.length > 0) {
+    activateTab(0);
+  }
+
+  // 标签页切换
+  tabButtons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+      activateTab(index);
+    });
+  });
+
+  function activateTab(index) {
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    carouselContents.forEach(content => content.classList.remove('active'));
+    
+    tabButtons[index].classList.add('active');
+    carouselContents[index].classList.add('active');
+    
+    currentTabIndex = index;
+    currentSlideIndex = 0;
+    updateCarousel();
+    updateNavigationButtons();
+  }
+
+  // 上一张
+  prevButton.addEventListener('click', () => {
+    if (currentSlideIndex > 0) {
+      currentSlideIndex--;
+      updateCarousel();
+      updateNavigationButtons();
+    }
+  });
+
+  // 下一张
+  nextButton.addEventListener('click', () => {
+    const activeContent = carouselContents[currentTabIndex];
+    const track = activeContent.querySelector('.carousel-track');
+    const wrapper = section.querySelector('.carousel-wrapper');
+
+    if (!track || !wrapper) return;
+
+    const trackWidth = track.scrollWidth;
+    const wrapperWidth = wrapper.offsetWidth;
+    const maxScroll = trackWidth - wrapperWidth;
+    const currentScroll = getCurrentOffset();
+
+    if (currentScroll < maxScroll - 5) {
+      const cardWidth = getAverageCardWidth();
+      const nextOffset = currentScroll + cardWidth;
+
+      let newIndex = currentSlideIndex + 1;
+      let accumulated = 0;
+      const cards = activeContent.querySelectorAll('.card-container');
+      for (let i = 0; i < cards.length; i++) {
+        const w = cards[i].offsetWidth + 16;
+        if (accumulated + w > nextOffset) break;
+        accumulated += w;
+        newIndex = i + 1;
+      }
+
+      currentSlideIndex = Math.min(newIndex, cards.length - 1);
+      updateCarousel();
+      updateNavigationButtons();
+    }
+  });
+
+  function getCurrentOffset() {
+    const activeContent = carouselContents[currentTabIndex];
+    const cards = activeContent.querySelectorAll('.card-container');
+    let offset = 0;
+    for (let i = 0; i < currentSlideIndex; i++) {
+      const card = cards[i];
+      if (card) {
+        offset += card.offsetWidth + 16; // gap
+      }
+    }
+    return offset;
+  }
+
+  function getAverageCardWidth() {
+    const activeContent = carouselContents[currentTabIndex];
+    const cards = activeContent.querySelectorAll('.card-container');
+    if (cards.length === 0) return 0;
+    return cards[0].offsetWidth + 16;
+  }
+
+  function updateCarousel() {
+    const activeContent = carouselContents[currentTabIndex];
+    const track = activeContent.querySelector('.carousel-track');
+    const offset = getCurrentOffset();
+    track.style.transform = `translateX(-${offset}px)`;
+  }
+
+  function updateNavigationButtons() {
+    const activeContent = carouselContents[currentTabIndex];
+    const track = activeContent.querySelector('.carousel-track');
+    const wrapper = section.querySelector('.carousel-wrapper');
+
+    if (!track || !wrapper) return;
+
+    const trackWidth = track.scrollWidth;
+    const wrapperWidth = wrapper.offsetWidth;
+    const currentScroll = getCurrentOffset();
+    const maxScroll = trackWidth - wrapperWidth;
+
+    prevButton.classList.toggle('visible', currentScroll > 5);
+    nextButton.classList.toggle('visible', currentScroll < maxScroll - 5);
+  }
+
+  // 鼠标拖拽支持
+  let isDragging = false;
+  let startPos = 0;
+  let startScroll = 0;
+
+  function addDragSupport(trackEl) {
+    trackEl.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      startPos = e.pageX - trackEl.offsetLeft;
+      startScroll = trackEl.scrollLeft;
+      trackEl.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    trackEl.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const pos = e.pageX - trackEl.offsetLeft;
+      const move = pos - startPos;
+      trackEl.scrollLeft = startScroll - move;
+    });
+
+    trackEl.addEventListener('mouseup', () => {
+      isDragging = false;
+      trackEl.style.cursor = 'grab';
+    });
+
+    trackEl.addEventListener('mouseleave', () => {
+      isDragging = false;
+    });
+
+    // Touch support
+    trackEl.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      startPos = e.touches[0].pageX - trackEl.offsetLeft;
+      startScroll = trackEl.scrollLeft;
+    });
+
+    trackEl.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      const pos = e.touches[0].pageX - trackEl.offsetLeft;
+      const move = pos - startPos;
+      trackEl.scrollLeft = startScroll - move;
+      e.preventDefault();
+    });
+
+    trackEl.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+  }
+
+  // 初始化拖拽功能
+  carouselContents.forEach(content => {
+    const track = content.querySelector('.carousel-track');
+    if (track) {
+      track.style.cursor = 'grab';
+      addDragSupport(track);
+    }
+  });
+
+  // 窗口大小改变时更新布局
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      updateCarousel();
+      updateNavigationButtons();
+    }, 150);
+  });
+
+  // 初始更新按钮状态
+  setTimeout(updateNavigationButtons, 200);
+});
+</script>
+
+{% schema %}
+{
+  "name": "Carousel de bijoux",
+  "tag": "section",
+  "class": "jewelry-carousel-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Configuration générale"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Titre de la section",
+      "default": "Nos Collections"
+    },
+    {
+      "type": "url",
+      "id": "title_link",
+      "label": "Lien du titre",
+      "info": "Laisser vide si vous ne voulez pas que le titre soit cliquable"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tab",
+      "name": "Onglet de collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_title",
+          "label": "Titre de l'onglet",
+          "default": "Colliers"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "range",
+          "id": "products_limit",
+          "label": "Nombre de produits à afficher",
+          "min": 1,
+          "max": 20,
+          "step": 1,
+          "default": 8
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carousel de bijoux",
+      "settings": {
+        "section_title": "Nos Collections"
+      },
+      "blocks": [
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Colliers"
+          }
+        },
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Boucles d'oreilles"
+          }
+        },
+        {
+          "type": "collection_tab",
+          "settings": {
+            "tab_title": "Bagues"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
