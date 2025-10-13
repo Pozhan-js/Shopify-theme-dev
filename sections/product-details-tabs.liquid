@@ -52,20 +52,85 @@
             <!-- 产品型号 -->
             {% if section.settings.show_model_section %}
               <div class="pdt-model-section">
-                <h3 class="pdt-model-title">{{ section.settings.model_title }}</h3>
+                {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+                {% assign current_product = product %}
+                {% assign selected_product = all_products[section.settings.product_handle] %}
+                {% assign display_product = current_product | default: selected_product %}
+                
+                {% if display_product %}
+                  <h3 class="pdt-model-title">Model No. {{ display_product.variants.first.sku | default: display_product.handle | upcase }}</h3>
+                {% else %}
+                  <h3 class="pdt-model-title">{{ section.settings.model_title }}</h3>
+                {% endif %}
               </div>
             {% endif %}
 
-            <!-- 产品规格表格 -->
+            <!-- 产品规格表格 - 从产品元字段获取数据 -->
             <div class="pdt-specifications-table">
-              {% for block in section.blocks %}
-                {% if block.type == 'specification' %}
-                  <div class="pdt-spec-row" {{ block.shopify_attributes }}>
-                    <div class="pdt-spec-label">{{ block.settings.spec_label }}</div>
-                    <div class="pdt-spec-value">{{ block.settings.spec_value }}</div>
+              {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+              {% assign current_product = product %}
+              {% assign selected_product = all_products[section.settings.product_handle] %}
+              {% assign display_product = current_product | default: selected_product %}
+              
+              {% if display_product %}
+                <!-- Size -->
+                {% if display_product.metafields.specifications.size %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Size</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.size }}</div>
                   </div>
                 {% endif %}
-              {% endfor %}
+                
+                <!-- Weight -->
+                {% if display_product.metafields.specifications.weight %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Weight</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.weight }}</div>
+                  </div>
+                {% endif %}
+                
+                <!-- Material -->
+                {% if display_product.metafields.specifications.material %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Material</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.material }}</div>
+                  </div>
+                {% endif %}
+                
+                <!-- Load-bearing -->
+                {% if display_product.metafields.specifications.load_bearing %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Load-bearing</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.load_bearing }}</div>
+                  </div>
+                {% endif %}
+                
+                <!-- Drag (N) -->
+                {% if display_product.metafields.specifications.drag %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Drag (N)</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.drag }}</div>
+                  </div>
+                {% endif %}
+                
+                <!-- Standard Accessories -->
+                {% if display_product.metafields.specifications.standard_accessories %}
+                  <div class="pdt-spec-row">
+                    <div class="pdt-spec-label">Standard Accessories</div>
+                    <div class="pdt-spec-value">{{ display_product.metafields.specifications.standard_accessories }}</div>
+                  </div>
+                {% endif %}
+              {% else %}
+                <!-- 如果没有产品，使用区块配置的规格 -->
+                {% for block in section.blocks %}
+                  {% if block.type == 'specification' %}
+                    <div class="pdt-spec-row" {{ block.shopify_attributes }}>
+                      <div class="pdt-spec-label">{{ block.settings.spec_label }}</div>
+                      <div class="pdt-spec-value">{{ block.settings.spec_value }}</div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             </div>
           </div>
         </div>
@@ -610,6 +675,20 @@
     },
     {
       "type": "header",
+      "content": "Product Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "This section will automatically use the current product when placed on a product page. You can also manually select a product for other pages."
+    },
+    {
+      "type": "product",
+      "id": "product_handle",
+      "label": "Manual Product Selection (optional)",
+      "info": "Leave empty to use current product on product pages"
+    },
+    {
+      "type": "header",
       "content": "Model Section"
     },
     {
@@ -621,8 +700,9 @@
     {
       "type": "text",
       "id": "model_title",
-      "label": "Model Title",
-      "default": "Model No. XSRF100"
+      "label": "Fallback Model Title",
+      "default": "Model No. XSRF100",
+      "info": "Used when no product is available"
     },
     {
       "type": "color",
@@ -639,6 +719,14 @@
       "unit": "px",
       "label": "Model Title Font Size",
       "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Product Metafields"
+    },
+    {
+      "type": "paragraph",
+      "content": "Product specifications will be automatically loaded from product metafields. The following metafields are expected: specifications.size, specifications.weight, specifications.material, specifications.load_bearing, specifications.drag, specifications.standard_accessories"
     },
     {
       "type": "header",
