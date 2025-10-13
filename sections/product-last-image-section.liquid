@@ -1,0 +1,234 @@
+<div class="pli-section" {{ section.shopify_attributes }}>
+  <div class="pli-container">
+    <div class="pli-image-wrapper">
+      {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+      {% assign current_product = product %}
+      {% assign selected_product = all_products[section.settings.product_handle] %}
+      {% assign display_product = current_product | default: selected_product %}
+      
+      {% if display_product and display_product.images.size > 0 %}
+        {% assign last_image = display_product.images.last %}
+        <img
+          src="{{ last_image | img_url: '1871x919' }}"
+          alt="{{ display_product.title }} - {{ section.settings.image_alt_suffix }}"
+          class="pli-product-image"
+        >
+      {% elsif section.settings.fallback_image %}
+        <img
+          src="{{ section.settings.fallback_image | img_url: '1871x919' }}"
+          alt="{{ section.settings.fallback_image_alt }}"
+          class="pli-product-image"
+        >
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .pli-section {
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+    background-color: {{ section.settings.section_background_color }};
+  }
+
+  .pli-container {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .pli-image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .pli-product-image {
+    width: 1871px;
+    height: 919px;
+    border-radius: 16px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    box-shadow: {{ section.settings.image_shadow }};
+  }
+
+  /* 响应式设计 - 基于1920px设计图按比例缩放 */
+
+  /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
+  @media (min-width: 1920px) {
+    .pli-container {
+      max-width: 1520px;
+    }
+    
+    .pli-product-image {
+      width: 1871px;
+      height: 919px;
+      border-radius: 16px;
+    }
+  }
+
+  /* 其余尺寸自适应 - 基于视口宽度动态计算 */
+  @media (max-width: 1919px) {
+    .pli-container {
+      max-width: calc(1520px * (100vw / 1920px));
+      min-max-width: 320px;
+    }
+    
+    .pli-product-image {
+      width: calc(1871px * (100vw / 1920px));
+      height: calc(919px * (100vw / 1920px));
+      border-radius: calc(16px * (100vw / 1920px));
+      min-width: 300px;
+      min-height: 147px;
+      min-border-radius: 8px;
+    }
+  }
+
+  /* 平板和手机端 - 保持比例 */
+  @media (max-width: 768px) {
+    .pli-container {
+      padding: 0 15px;
+    }
+    
+    .pli-product-image {
+      width: calc(1871px * (100vw / 768px));
+      height: calc(919px * (100vw / 768px));
+      border-radius: calc(16px * (100vw / 768px));
+      max-width: 100%;
+      height: auto;
+      min-border-radius: 8px;
+    }
+  }
+
+  /* 超小屏幕优化 */
+  @media (max-width: 480px) {
+    .pli-section {
+      padding: {{ section.settings.section_padding_top | divided_by: 2 }}px 0;
+    }
+    
+    .pli-container {
+      padding: 0 10px;
+    }
+    
+    .pli-product-image {
+      width: 100%;
+      height: auto;
+      border-radius: clamp(8px, 2vw, 16px);
+      aspect-ratio: 1871 / 919;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Product Last Image",
+  "tag": "section",
+  "class": "product-last-image-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Product Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "This section will automatically use the current product when placed on a product page. You can also manually select a product for other pages."
+    },
+    {
+      "type": "product",
+      "id": "product_handle",
+      "label": "Manual Product Selection (optional)",
+      "info": "Leave empty to use current product on product pages"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "text",
+      "id": "image_alt_suffix",
+      "label": "Image Alt Text Suffix",
+      "default": "Product Detail",
+      "info": "Will be added after product title in alt text"
+    },
+    {
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "Fallback Image",
+      "info": "Used when no product is available or product has no images"
+    },
+    {
+      "type": "text",
+      "id": "fallback_image_alt",
+      "label": "Fallback Image Alt Text",
+      "default": "Product Detail Image"
+    },
+    {
+      "type": "select",
+      "id": "image_shadow",
+      "label": "Image Shadow",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "0 2px 8px rgba(0, 0, 0, 0.1)",
+          "label": "Light"
+        },
+        {
+          "value": "0 4px 16px rgba(0, 0, 0, 0.15)",
+          "label": "Medium"
+        },
+        {
+          "value": "0 8px 32px rgba(0, 0, 0, 0.2)",
+          "label": "Strong"
+        }
+      ],
+      "default": "none"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Last Image",
+      "settings": {
+        "section_padding_top": 60,
+        "section_padding_bottom": 60,
+        "section_background_color": "#ffffff",
+        "image_alt_suffix": "Product Detail",
+        "fallback_image_alt": "Product Detail Image"
+      }
+    }
+  ]
+}
+{% endschema %}
