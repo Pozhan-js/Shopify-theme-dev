@@ -96,6 +96,7 @@
   /* 自适应下划线 - 根据最后一行文字长度 */
   .brand-custom-colors-cta-text {
     position: relative;
+    display: inline-block;
   }
 
   .brand-custom-colors-cta-text::after {
@@ -105,20 +106,13 @@
     left: 0;
     width: 100%;
     height: {{ section.settings.underline_height }}px;
-    background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 85%, transparent 85%);
+    background-color: {{ section.settings.underline_color }};
     display: {% if section.settings.show_underline %}block{% else %}none{% endif %};
   }
 
-  @media (max-width: 768px) {
-    .brand-custom-colors-cta-text::after {
-      background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 75%, transparent 75%);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .brand-custom-colors-cta-text::after {
-      background: linear-gradient(to right, {{ section.settings.underline_color }} 0%, {{ section.settings.underline_color }} 70%, transparent 70%);
-    }
+  /* 使用JavaScript动态计算最后一行宽度的备选方案 */
+  .brand-custom-colors-cta-text.js-underline-calculated::after {
+    width: var(--last-line-width, 100%);
   }
 
   /* 右侧颜色图片 */
