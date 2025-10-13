@@ -104,25 +104,133 @@
           <div class="color-selection">
             <h3 class="color-title">{{ section.settings.color_section_title }}</h3>
             <div class="color-options">
-              {% for block in section.blocks %}
-                {% if block.type == 'color_option' %}
-                  <div
-                    class="color-option {% if block.settings.is_selected %}selected{% endif %}"
-                    {{ block.shopify_attributes }}
-                    data-color="{{ block.settings.color_value }}"
-                  >
-                    <div
-                      class="color-swatch"
-                      style="background-color: {{ block.settings.color_value }};"
-                    >
-                      <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <polyline points="20,6 9,17 4,12"></polyline>
-                      </svg>
+              {% if display_product %}
+                {% assign first_color_processed = false %}
+                {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
+                
+                {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
+                {% for option in display_product.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% assign target_name_lower = color_option_name | downcase %}
+                  
+                  {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
+                    {% for value in option.values %}
+                      {% assign variant_found = false %}
+                      {% assign variant_id = '' %}
+                      {% assign variant_image = '' %}
+                      {% assign color_hex = '#CCCCCC' %}
+                      
+                      {% comment %} 首先尝试使用 color_swatch.color 获取颜色 {% endcomment %}
+                      {% assign color_swatch = value.swatch %}
+                      {% if color_swatch and color_swatch.color %}
+                        {% assign color_hex = color_swatch.color %}
+                      {% else %}
+                        {% comment %} 如果没有 color_swatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
+                        {% assign value_lower = value | downcase %}
+                        {% case value_lower %}
+                          {% when 'black' %}
+                            {% assign color_hex = '#000000' %}
+                          {% when 'white' %}
+                            {% assign color_hex = '#FFFFFF' %}
+                          {% when 'red' %}
+                            {% assign color_hex = '#FF0000' %}
+                          {% when 'blue' %}
+                            {% assign color_hex = '#0000FF' %}
+                          {% when 'green' %}
+                            {% assign color_hex = '#008000' %}
+                          {% when 'gray', 'grey' %}
+                            {% assign color_hex = '#808080' %}
+                          {% when 'steel gray', 'steel grey' %}
+                            {% assign color_hex = '#71797E' %}
+                          {% when 'brown' %}
+                            {% assign color_hex = '#8B4513' %}
+                          {% when 'navy' %}
+                            {% assign color_hex = '#000080' %}
+                          {% when 'beige' %}
+                            {% assign color_hex = '#F5F5DC' %}
+                          {% when 'tan' %}
+                            {% assign color_hex = '#D2B48C' %}
+                          {% else %}
+                            {% assign color_hex = '#CCCCCC' %}
+                        {% endcase %}
+                      {% endif %}
+                      
+                      {% comment %} 查找对应的变体 {% endcomment %}
+                      {% for variant in display_product.variants %}
+                        {% assign value_matches = false %}
+                        
+                        {% comment %} 检查变体的所有选项值 {% endcomment %}
+                        {% if variant.option1 == value %}
+                          {% assign value_matches = true %}
+                        {% elsif variant.option2 == value %}
+                          {% assign value_matches = true %}
+                        {% elsif variant.option3 == value %}
+                          {% assign value_matches = true %}
+                        {% endif %}
+                        
+                        {% if value_matches and variant_found == false %}
+                          {% assign variant_found = true %}
+                          {% assign variant_id = variant.id %}
+                          
+                          {% comment %} 获取变体图片 {% endcomment %}
+                          {% if variant.image %}
+                            {% assign variant_image = variant.image | img_url: '1200x' %}
+                          {% endif %}
+                        {% endif %}
+                      {% endfor %}
+                      
+                      {% comment %} 确保颜色值格式正确 {% endcomment %}
+                      {% unless color_hex contains '#' %}
+                        {% if color_hex != '' %}
+                          {% assign color_hex = '#' | append: color_hex %}
+                        {% else %}
+                          {% assign color_hex = '#CCCCCC' %}
+                        {% endif %}
+                      {% endunless %}
+                      
+                      <div class="color-option {% unless first_color_processed %}selected{% endunless %}" 
+                           data-color="{{ value }}"
+                           data-variant-id="{{ variant_id }}"
+                           data-variant-image="{{ variant_image }}"
+                           data-color-hex="{{ color_hex }}">
+                        <div class="color-swatch" style="background-color: {{ color_hex }};">
+                          {% unless first_color_processed %}
+                            <div class="color-checkmark">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                              </svg>
+                            </div>
+                            {% assign first_color_processed = true %}
+                          {% endunless %}
+                        </div>
+                        <span class="color-name">{{ value }}</span>
+                      </div>
+                    {% endfor %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                {% comment %} 如果没有产品，使用区块配置的颜色 {% endcomment %}
+                {% for block in section.blocks %}
+                  {% if block.type == 'color_option' %}
+                    <div class="color-option {% if block.settings.is_selected %}selected{% endif %}"
+                         {{ block.shopify_attributes }}
+                         data-color="{{ block.settings.color_name }}"
+                         data-color-hex="{{ block.settings.color_value }}">
+                      <div class="color-swatch" style="background-color: {{ block.settings.color_value }};">
+                        {% if block.settings.is_selected %}
+                          <div class="color-checkmark">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                            </svg>
+                          </div>
+                        {% endif %}
+                      </div>
+                      <span class="color-name">{{ block.settings.color_name }}</span>
                     </div>
-                    <span class="color-name">{{ block.settings.color_name }}</span>
-                  </div>
-                {% endif %}
-              {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             </div>
           </div>
         {% endif %}
@@ -291,7 +399,7 @@
     margin-right: 8px;
   }
 
-  /* 颜色选择区域 */
+  /* 颜色选择区域 - 参考 upholstery-color-section.liquid */
   .color-selection {
     text-align: left;
   }
@@ -308,8 +416,36 @@
 
   .color-options {
     display: grid;
-    grid-template-columns: repeat({{ section.settings.color_columns }}, 1fr);
+    grid-template-columns: repeat({{ section.settings.color_columns }}, 60px);
+    grid-auto-rows: 82px;
     gap: 15px;
+    height: 210px;
+    overflow-y: auto;
+    padding: 10px 18px 10px 10px;
+  }
+
+  /* 自定义滚动条样式 */
+  .color-options::-webkit-scrollbar {
+    width: 1px;
+  }
+
+  .color-options::-webkit-scrollbar-track {
+    background: #F3F3F3;
+    border-radius: 1px;
+  }
+
+  .color-options::-webkit-scrollbar-thumb {
+    background: #AB3A39;
+    border-radius: 1px;
+  }
+
+  .color-options::-webkit-scrollbar-thumb:hover {
+    background: #8B2E2F;
+  }
+
+  /* Firefox 滚动条样式 */
+  .color-options {
+    scrollbar-color: #AB3A39 #F3F3F3;
   }
 
   .color-option {
@@ -325,40 +461,75 @@
     width: 60px;
     height: 60px;
     border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    position: relative;
+    border: 2px solid transparent;
   }
 
-  .color-option:hover .color-swatch {
-    transform: scale(1.1);
+  /* 处理透明或未设置的颜色 */
+  .color-swatch[style*="rgba(0,0,0,0)"],
+  .color-swatch[style*="transparent"],
+  .color-option[data-color-hex="#CCCCCC"] .color-swatch {
+    border: 1px solid #ddd;
+    background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
+                      linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
+                      linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
+                      linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
   }
 
-  .color-option.selected .color-swatch {
-    transform: scale(1.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  .check-icon {
-    width: 24px;
-    height: 24px;
-    color: white;
-    stroke-width: 3;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .color-option.selected .check-icon {
-    opacity: 1;
+  .color-option[data-color-hex="#CCCCCC"] .color-swatch:after {
+    content: "默认";
+    font-size: 10px;
+    color: #666;
+    text-align: center;
+    line-height: 1.2;
   }
 
   .color-name {
     font-size: 12px;
-    color: {{ section.settings.description_color }};
+    font-weight: 400;
+    color: #161616;
     text-align: center;
     line-height: 1.2;
+    max-width: 60px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .color-option:hover .color-swatch {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .color-option.selected .color-swatch {
+    transform: scale(1.2);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    position: relative;
+  }
+
+  .color-checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 49px;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .color-checkmark svg {
+    width: 49px;
+    height: 49px;
   }
 
   /* 响应式设计 */
@@ -371,6 +542,33 @@
     .main-image {
       height: {{ section.settings.main_image_height | minus: 100 }}px;
     }
+
+    .color-options {
+      grid-template-columns: repeat({{ section.settings.color_columns }}, 50px);
+      grid-auto-rows: 68px;
+      height: 170px;
+      padding: 5px 8px 5px 5px;
+    }
+
+    .color-swatch {
+      width: 50px;
+      height: 50px;
+    }
+
+    .color-checkmark {
+      width: 25px;
+      height: 25px;
+    }
+
+    .color-checkmark svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .color-name {
+      font-size: 10px;
+      max-width: 50px;
+    }
   }
 
   @media (max-width: 768px) {
@@ -379,7 +577,30 @@
     }
 
     .color-options {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, 45px);
+      grid-auto-rows: 61px;
+      height: 155px;
+      padding: 4px 7px 4px 4px;
+    }
+
+    .color-swatch {
+      width: 45px;
+      height: 45px;
+    }
+
+    .color-checkmark {
+      width: 20px;
+      height: 20px;
+    }
+
+    .color-checkmark svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .color-name {
+      font-size: 8px;
+      max-width: 45px;
     }
 
     .main-image {
@@ -398,6 +619,33 @@
 
     .thumbnail-images {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .color-options {
+      grid-template-columns: repeat(2, 40px);
+      grid-auto-rows: 54px;
+      height: 140px;
+      padding: 3px 6px 3px 3px;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+    }
+
+    .color-checkmark {
+      width: 16px;
+      height: 16px;
+    }
+
+    .color-checkmark svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .color-name {
+      font-size: 7px;
+      max-width: 40px;
     }
 
     .main-image {
@@ -431,7 +679,7 @@
       });
     });
 
-    // 颜色选择功能
+    // 颜色选择功能 - 参考 upholstery-color-section.liquid
     const colorOptions = document.querySelectorAll('.color-option');
 
     colorOptions.forEach(function (option) {
@@ -439,15 +687,68 @@
         // 移除所有选中状态
         colorOptions.forEach(function (opt) {
           opt.classList.remove('selected');
+          const checkmark = opt.querySelector('.color-checkmark');
+          if (checkmark) {
+            checkmark.remove();
+          }
         });
 
-        // 添加选中状态到当前点击的颜色
+        // 添加选中状态到当前选项
         this.classList.add('selected');
 
-        // 可以在这里添加颜色选择的回调函数
-        const selectedColor = this.getAttribute('data-color');
-        console.log('Selected color:', selectedColor);
+        // 添加选中标记
+        const checkmark = document.createElement('div');
+        checkmark.className = 'color-checkmark';
+        checkmark.innerHTML = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+          </svg>
+        `;
+        this.querySelector('.color-swatch').appendChild(checkmark);
+
+        // 切换主图片
+        const variantImage = this.getAttribute('data-variant-image');
+        if (variantImage && variantImage !== '' && mainImage) {
+          mainImage.src = variantImage;
+        }
+
+        // 触发自定义事件，可用于其他功能
+        const colorName = this.getAttribute('data-color');
+        const variantId = this.getAttribute('data-variant-id');
+        const colorHex = this.getAttribute('data-color-hex');
+
+        const event = new CustomEvent('colorSelected', {
+          detail: {
+            colorName: colorName,
+            colorHex: colorHex,
+            variantId: variantId,
+            variantImage: variantImage
+          }
+        });
+
+        document.dispatchEvent(event);
+
+        console.log('Selected color:', colorName, 'Variant ID:', variantId);
       });
+    });
+
+    // 监听颜色选择事件，可以用于与其他组件通信
+    document.addEventListener('colorSelected', function(event) {
+      // 这里可以添加其他逻辑，比如更新购物车、价格等
+      // 例如：更新产品变体选择
+      if (event.detail.variantId) {
+        const productForm = document.querySelector('form[action*="/cart/add"]');
+        if (productForm) {
+          const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
+          if (variantInput) {
+            variantInput.value = event.detail.variantId;
+            
+            // 触发变化事件
+            const changeEvent = new Event('change', { bubbles: true });
+            variantInput.dispatchEvent(changeEvent);
+          }
+        }
+      }
     });
   });
 </script>
@@ -620,6 +921,13 @@
       "id": "color_section_title",
       "label": "Color Section Title",
       "default": "Upholstery Colors"
+    },
+    {
+      "type": "text",
+      "id": "color_option_name",
+      "label": "Color Option Name",
+      "default": "Color",
+      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric', '颜色')"
     },
     {
       "type": "range",
