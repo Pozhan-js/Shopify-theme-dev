@@ -6,9 +6,10 @@
       {% assign selected_product = all_products[section.settings.product_handle] %}
       {% assign display_product = current_product | default: selected_product %}
       
-      {% if display_product and display_product.metafields.custom.mode-pictures %}
+      {% if display_product and display_product.images.size > 0 %}
+        {% assign last_image = display_product.images.last %}
         <img
-          src="{{ display_product.metafields.custom.mode-pictures | img_url: '1871x919' }}"
+          src="{{ last_image | img_url: '1871x919' }}"
           alt="{{ display_product.title }} - {{ section.settings.image_alt_suffix }}"
           class="product-last-image-img"
         >
@@ -25,7 +26,7 @@
 
 <style>
   .product-last-image-section {
-    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+    padding-bottom: 24px;
     background-color: {{ section.settings.section_background_color }};
   }
 
