@@ -33,10 +33,14 @@
               {% if block.type == 'support_item' %}
                 <div class="wcs-support-item" {{ block.shopify_attributes }}>
                   <div class="wcs-support-icon">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="8" cy="8" r="7" stroke="#C22E35" stroke-width="2"/>
-                      <path d="M5 8l2 2 4-4" stroke="#C22E35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    {% if block.settings.support_icon != blank %}
+                      <img src="{{ block.settings.support_icon | img_url: '16x16' }}" alt="Support Icon" class="wcs-support-icon-image">
+                    {% else %}
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="8" cy="8" r="7" stroke="#C22E35" stroke-width="2"/>
+                        <path d="M5 8l2 2 4-4" stroke="#C22E35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    {% endif %}
                   </div>
                   <span class="wcs-support-text">{{ block.settings.support_text }}</span>
                 </div>
@@ -234,6 +238,17 @@
 
 .wcs-support-icon {
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wcs-support-icon-image {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .wcs-support-text {
@@ -853,6 +868,12 @@ document.addEventListener('DOMContentLoaded', function() {
           "type": "text",
           "id": "support_text",
           "label": "支持文本"
+        },
+        {
+          "type": "image_picker",
+          "id": "support_icon",
+          "label": "支持图标",
+          "info": "推荐尺寸：16x16px，如不上传将使用默认勾选图标"
         }
       ]
     }
