@@ -1,10 +1,10 @@
-<div class="pilates-reformer-section" {{ section.shopify_attributes }}>
-  <div class="container">
-    <div class="product-layout">
+<div class="prf-pilates-reformer-section" {{ section.shopify_attributes }}>
+  <div class="prf-container">
+    <div class="prf-product-layout">
       <!-- 左侧产品图片区域 -->
-      <div class="product-images">
+      <div class="prf-product-images">
         <!-- 主图 -->
-        <div class="main-image">
+        <div class="prf-main-image">
           {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品，最后是回退图片 {% endcomment %}
           {% assign current_product = product %}
           {% assign selected_product = all_products[section.settings.product_handle] %}
@@ -14,31 +14,31 @@
             <img
               src="{{ display_product.images.first | img_url: '1200x' }}"
               alt="{{ display_product.title }}"
-              class="main-product-image"
-              id="main-product-image"
+              class="prf-main-product-image"
+              id="prf-main-product-image"
             >
           {% elsif section.settings.fallback_image %}
             <img
               src="{{ section.settings.fallback_image | img_url: '1200x' }}"
               alt="{{ section.settings.product_title }}"
-              class="main-product-image"
-              id="main-product-image"
+              class="prf-main-product-image"
+              id="prf-main-product-image"
             >
           {% endif %}
         </div>
 
         <!-- 缩略图 -->
-        <div class="thumbnail-images">
+        <div class="prf-thumbnail-images">
           {% if display_product and display_product.images.size > 0 %}
             {% for image in display_product.images %}
               <div
-                class="thumbnail-item {% if forloop.first %}active{% endif %}"
+                class="prf-thumbnail-item {% if forloop.first %}prf-active{% endif %}"
                 data-image-url="{{ image | img_url: '1200x' }}"
               >
                 <img
                   src="{{ image | img_url: '150x' }}"
                   alt="Product image {{ forloop.index }}"
-                  class="thumbnail-image"
+                  class="prf-thumbnail-image"
                 >
               </div>
             {% endfor %}
@@ -46,7 +46,7 @@
             {% for block in section.blocks %}
               {% if block.type == 'thumbnail' %}
                 <div
-                  class="thumbnail-item"
+                  class="prf-thumbnail-item"
                   {{ block.shopify_attributes }}
                   data-image-url="{{ block.settings.thumbnail_image | img_url: '1200x' }}"
                 >
@@ -54,7 +54,7 @@
                     <img
                       src="{{ block.settings.thumbnail_image | img_url: '150x' }}"
                       alt="Product thumbnail"
-                      class="thumbnail-image"
+                      class="prf-thumbnail-image"
                     >
                   {% endif %}
                 </div>
@@ -65,35 +65,35 @@
       </div>
 
       <!-- 右侧产品信息区域 -->
-      <div class="product-info">
+      <div class="prf-product-info">
         <!-- 产品标题和型号 -->
-        <div class="product-header">
+        <div class="prf-product-header">
           {% if display_product %}
-            <h1 class="product-title">{{ display_product.title }}</h1>
-            <div class="model-info">
-              <span class="model-number">
+            <h1 class="prf-product-title">{{ display_product.title }}</h1>
+            <div class="prf-model-info">
+              <span class="prf-model-number">
                 {{- display_product.variants.first.sku | default: display_product.handle | upcase -}}
               </span>
             </div>
           {% else %}
-            <h1 class="product-title">{{ section.settings.product_title }}</h1>
-            <div class="model-info">
-              <span class="model-number">{{ section.settings.model_number }}</span>
+            <h1 class="prf-product-title">{{ section.settings.product_title }}</h1>
+            <div class="prf-model-info">
+              <span class="prf-model-number">{{ section.settings.model_number }}</span>
             </div>
           {% endif %}
         </div>
 
         <!-- 定制询问区域 -->
-        <div class="customization-section">
-          <h2 class="customization-title">{{ section.settings.customization_title }}</h2>
-          <p class="customization-description">{{ section.settings.customization_description }}</p>
+        <div class="prf-customization-section">
+          <h2 class="prf-customization-title">{{ section.settings.customization_title }}</h2>
+          <p class="prf-customization-description">{{ section.settings.customization_description }}</p>
 
           {% if section.settings.quote_button_text %}
             {% assign quote_link = section.settings.quote_button_link %}
             {% if quote_link == blank and display_product %}
               {% assign quote_link = '/pages/contact?product=' | append: display_product.handle %}
             {% endif %}
-            <a href="{{ quote_link }}" class="quote-button">
+            <a href="{{ quote_link }}" class="prf-quote-button">
               {{ section.settings.quote_button_text }}
             </a>
           {% endif %}
@@ -101,9 +101,9 @@
 
         <!-- 颜色选择区域 -->
         {% if section.settings.show_color_selection %}
-          <div class="color-selection">
-            <h3 class="color-title">{{ section.settings.color_section_title }}</h3>
-            <div class="color-options">
+          <div class="prf-color-selection">
+            <h3 class="prf-color-title">{{ section.settings.color_section_title }}</h3>
+            <div class="prf-color-options">
               {% if display_product %}
                 {% assign first_color_processed = false %}
                 {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
@@ -188,14 +188,14 @@
                         {% endif %}
                       {% endunless %}
                       
-                      <div class="color-option {% unless first_color_processed %}selected{% endunless %}" 
+                      <div class="prf-color-option {% unless first_color_processed %}prf-selected{% endunless %}" 
                            data-color="{{ value }}"
                            data-variant-id="{{ variant_id }}"
                            data-variant-image="{{ variant_image }}"
                            data-color-hex="{{ color_hex }}">
-                        <div class="color-swatch" style="background-color: {{ color_hex }};">
+                        <div class="prf-color-swatch" style="background-color: {{ color_hex }};">
                           {% unless first_color_processed %}
-                            <div class="color-checkmark">
+                            <div class="prf-color-checkmark">
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
                               </svg>
@@ -203,7 +203,7 @@
                             {% assign first_color_processed = true %}
                           {% endunless %}
                         </div>
-                        <span class="color-name">{{ value }}</span>
+                        <span class="prf-color-name">{{ value }}</span>
                       </div>
                     {% endfor %}
                     {% break %}
@@ -213,20 +213,20 @@
                 {% comment %} 如果没有产品，使用区块配置的颜色 {% endcomment %}
                 {% for block in section.blocks %}
                   {% if block.type == 'color_option' %}
-                    <div class="color-option {% if block.settings.is_selected %}selected{% endif %}"
+                    <div class="prf-color-option {% if block.settings.is_selected %}prf-selected{% endif %}"
                          {{ block.shopify_attributes }}
                          data-color="{{ block.settings.color_name }}"
                          data-color-hex="{{ block.settings.color_value }}">
-                      <div class="color-swatch" style="background-color: {{ block.settings.color_value }};">
+                      <div class="prf-color-swatch" style="background-color: {{ block.settings.color_value }};">
                         {% if block.settings.is_selected %}
-                          <div class="color-checkmark">
+                          <div class="prf-color-checkmark">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
                             </svg>
                           </div>
                         {% endif %}
                       </div>
-                      <span class="color-name">{{ block.settings.color_name }}</span>
+                      <span class="prf-color-name">{{ block.settings.color_name }}</span>
                     </div>
                   {% endif %}
                 {% endfor %}
@@ -240,18 +240,18 @@
 </div>
 
 <style>
-  .pilates-reformer-section {
+  .prf-pilates-reformer-section {
     padding: 0px 0 {{ section.settings.section_padding_bottom }}px 0;
     background-color: #fff;
   }
 
-  .container {
+  .prf-container {
     max-width: 1808px;
     margin: 0 auto;
     padding: 0 20px;
   }
 
-  .product-layout {
+  .prf-product-layout {
     display: grid;
     grid-template-columns: 1fr 400px;
     gap: 60px;
@@ -259,13 +259,13 @@
   }
 
   /* 产品图片区域 */
-  .product-images {
+  .prf-product-images {
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
 
-  .main-image {
+  .prf-main-image {
     border-radius: 8px;
     overflow: hidden;
     background: {{ section.settings.main_image_background }};
@@ -278,14 +278,14 @@
     flex-shrink: 0;
   }
 
-  .main-product-image {
+  .prf-main-product-image {
     width: 1139px;
     height: 527px;
     display: block;
     object-fit: contain;
   }
 
-  .thumbnail-images {
+  .prf-thumbnail-images {
     display: grid;
     grid-template-columns: repeat(6, 190px);
     gap: 12px;
@@ -293,7 +293,7 @@
     justify-content: flex-start;
   }
 
-  .thumbnail-item {
+  .prf-thumbnail-item {
     border: 1px solid rgba(22, 22, 22, 0.25);
     border-radius: 8px;
     overflow: hidden;
@@ -308,16 +308,16 @@
     justify-content: center;
   }
 
-  .thumbnail-item:hover {
+  .prf-thumbnail-item:hover {
     transform: scale(1.05);
   }
 
-  .thumbnail-item.active {
+  .prf-thumbnail-item.prf-active {
     border: 1px solid rgba(194, 46, 53, 1);
     box-shadow: 0 2px 8px rgba(194, 46, 53, 0.3);
   }
 
-  .thumbnail-image {
+  .prf-thumbnail-image {
     width: 186px;
     height: auto;
     max-height: 156px;
@@ -326,17 +326,17 @@
   }
 
   /* 产品信息区域 */
-  .product-info {
+  .prf-product-info {
     display: flex;
     flex-direction: column;
     gap: 30px;
   }
 
-  .product-header {
+  .prf-product-header {
     text-align: left;
   }
 
-  .product-title {
+  .prf-product-title {
     font-size: {{ section.settings.product_title_size }}px;
     font-weight: 500;
     color: {{ section.settings.product_title_color }};
@@ -344,14 +344,14 @@
     line-height: 1.2;
   }
 
-  .model-info {
+  .prf-model-info {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     gap: 10px;
   }
 
-  .model-number {
+  .prf-model-number {
     border: 1px solid {{ section.settings.model_number_color }};
     padding: 4px 12px;
     border-radius: 4px;
@@ -361,25 +361,25 @@
   }
 
   /* 定制区域 */
-  .customization-section {
+  .prf-customization-section {
     text-align: left;
   }
 
-  .customization-title {
+  .prf-customization-title {
     font-size: {{ section.settings.customization_title_size }}px;
     font-weight: 500;
     color: {{ section.settings.customization_title_color }};
     margin: 0 0 15px 0;
   }
 
-  .customization-description {
+  .prf-customization-description {
     color: {{ section.settings.description_color }};
     line-height: 1.6;
     margin: 0 0 20px 0;
     font-size: {{ section.settings.description_font_size }}px;
   }
 
-  .quote-button {
+  .prf-quote-button {
     display: inline-block;
     background: white;
     color: #161616;
@@ -395,7 +395,7 @@
     transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
   }
 
-  .quote-button::before {
+  .prf-quote-button::before {
     content: "";
     position: absolute;
     top: 0;
@@ -407,15 +407,15 @@
     z-index: -1;
   }
 
-  .quote-button:hover {
+  .prf-quote-button:hover {
     color: white;
   }
 
-  .quote-button:hover::before {
+  .prf-quote-button:hover::before {
     left: 0;
   }
 
-  .quote-button::after {
+  .prf-quote-button::after {
     content: ">";
     margin-left: 8px;
     position: relative;
@@ -423,12 +423,12 @@
   }
 
   /* 颜色选择区域 - 参考 upholstery-color-section.liquid */
-  .color-selection {
+  .prf-color-selection {
     text-align: left;
     margin-top: 60px;
   }
 
-  .color-title {
+  .prf-color-title {
     font-size: 18px;
     font-weight: bold;
     color: #333;
@@ -438,7 +438,7 @@
     display: inline-block;
   }
 
-  .color-options {
+  .prf-color-options {
     display: grid;
     grid-template-columns: repeat({{ section.settings.color_columns }}, 88px);
     grid-auto-rows: 130px;
@@ -451,30 +451,30 @@
   }
 
   /* 自定义滚动条样式 */
-  .color-options::-webkit-scrollbar {
+  .prf-color-options::-webkit-scrollbar {
     width: 1px;
   }
 
-  .color-options::-webkit-scrollbar-track {
+  .prf-color-options::-webkit-scrollbar-track {
     background: #F3F3F3;
     border-radius: 1px;
   }
 
-  .color-options::-webkit-scrollbar-thumb {
+  .prf-color-options::-webkit-scrollbar-thumb {
     background: #AB3A39;
     border-radius: 1px;
   }
 
-  .color-options::-webkit-scrollbar-thumb:hover {
+  .prf-color-options::-webkit-scrollbar-thumb:hover {
     background: #8B2E2F;
   }
 
   /* Firefox 滚动条样式 */
-  .color-options {
+  .prf-color-options {
     scrollbar-color: #AB3A39 #F3F3F3;
   }
 
-  .color-option {
+  .prf-color-option {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -484,7 +484,7 @@
     position: relative;
   }
 
-  .color-swatch {
+  .prf-color-swatch {
     width: 88px;
     height: 88px;
     border-radius: 8px;
@@ -499,9 +499,9 @@
   }
 
   /* 处理透明或未设置的颜色 */
-  .color-swatch[style*="rgba(0,0,0,0)"],
-  .color-swatch[style*="transparent"],
-  .color-option[data-color-hex="#CCCCCC"] .color-swatch {
+  .prf-color-swatch[style*="rgba(0,0,0,0)"],
+  .prf-color-swatch[style*="transparent"],
+  .prf-color-option[data-color-hex="#CCCCCC"] .prf-color-swatch {
     border: 1px solid #ddd;
     background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
                       linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
@@ -511,7 +511,7 @@
     background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
   }
 
-  .color-option[data-color-hex="#CCCCCC"] .color-swatch:after {
+  .prf-color-option[data-color-hex="#CCCCCC"] .prf-color-swatch:after {
     content: "默认";
     font-size: 10px;
     color: #666;
@@ -519,7 +519,7 @@
     line-height: 1.2;
   }
 
-  .color-name {
+  .prf-color-name {
     font-size: 12px;
     font-weight: 400;
     color: #161616;
@@ -532,23 +532,23 @@
     margin-top: 0;
   }
 
-  .color-option:hover .color-swatch {
+  .prf-color-option:hover .prf-color-swatch {
     transform: scale(1.05);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 
-  .color-option.selected .color-swatch {
+  .prf-color-option.prf-selected .prf-color-swatch {
     transform: scale(1.3);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     z-index: 10;
     position: relative;
   }
 
-  .color-option.selected .color-name {
+  .prf-color-option.prf-selected .prf-color-name {
     margin-top: 8px;
   }
 
-  .color-checkmark {
+  .prf-color-checkmark {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -561,58 +561,58 @@
     z-index: 1;
   }
 
-  .color-checkmark svg {
+  .prf-color-checkmark svg {
     width: 49px;
     height: 49px;
   }
 
   /* 响应式设计 */
   @media (max-width: 1365px) and (min-width: 1024px) {
-    .container {
+    .prf-container {
       max-width: 1518px; /* 1808 * 0.84 */
     }
 
-    .product-layout {
+    .prf-product-layout {
       grid-template-columns: 1fr;
       gap: 40px;
     }
 
-    .main-image {
+    .prf-main-image {
       width: 100%;
       max-width: 1234px;
       height: 590px; /* 702 * 0.84 */
     }
 
-    .main-product-image {
+    .prf-main-product-image {
       width: 957px; /* 1139 * 0.84 */
       height: 443px; /* 527 * 0.84 */
     }
 
-    .thumbnail-images {
+    .prf-thumbnail-images {
       width: 1037px; /* 1234 * 0.84 */
       grid-template-columns: repeat(6, 160px); /* 190 * 0.84 */
       gap: 10px; /* 12 * 0.84 */
     }
 
-    .thumbnail-item {
+    .prf-thumbnail-item {
       width: 160px; /* 190 * 0.84 */
       height: 131px; /* 156 * 0.84 */
     }
 
-    .thumbnail-image {
+    .prf-thumbnail-image {
       width: 156px; /* 186 * 0.84 */
       max-height: 131px; /* 156 * 0.84 */
     }
 
-    .color-selection {
+    .prf-color-selection {
       margin-top: 102px; /* 121 * 0.84 */
     }
 
-    .color-title {
+    .prf-color-title {
       margin-bottom: 25px;
     }
 
-    .color-options {
+    .prf-color-options {
       grid-template-columns: repeat({{ section.settings.color_columns }}, 70px);
       grid-auto-rows: 108px;
       height: 220px;
@@ -622,93 +622,93 @@
       margin: -8px -15px;
     }
 
-    .color-swatch {
+    .prf-color-swatch {
       width: 70px;
       height: 70px;
       flex-shrink: 0;
     }
 
-    .color-option.selected .color-swatch {
+    .prf-color-option.prf-selected .prf-color-swatch {
       transform: scale(1.3);
     }
 
-    .color-option.selected .color-name {
+    .prf-color-option.prf-selected .prf-color-name {
       margin-top: 6px;
     }
 
-    .color-checkmark {
+    .prf-color-checkmark {
       width: 35px;
       height: 35px;
     }
 
-    .color-checkmark svg {
+    .prf-color-checkmark svg {
       width: 35px;
       height: 35px;
     }
 
-    .color-name {
+    .prf-color-name {
       font-size: 10px;
       max-width: 100px;
     }
   }
 
   @media (max-width: 1023px) and (min-width: 1024px) {
-    .container {
+    .prf-container {
       max-width: 1211px; /* 1808 * 0.67 */
     }
 
-    .product-layout {
+    .prf-product-layout {
       grid-template-columns: 1fr;
       gap: 30px;
     }
   }
 
   @media (max-width: 1023px) and (min-width: 768px) {
-    .container {
+    .prf-container {
       max-width: 904px; /* 1808 * 0.5 */
     }
 
-    .product-layout {
+    .prf-product-layout {
       grid-template-columns: 1fr;
       gap: 30px;
     }
 
-    .thumbnail-images {
+    .prf-thumbnail-images {
       width: 617px; /* 1234 * 0.5 */
       grid-template-columns: repeat(3, 95px); /* 190 * 0.5 */
       gap: 6px; /* 12 * 0.5 */
     }
 
-    .thumbnail-item {
+    .prf-thumbnail-item {
       width: 95px; /* 190 * 0.5 */
       height: 78px; /* 156 * 0.5 */
     }
 
-    .thumbnail-image {
+    .prf-thumbnail-image {
       width: 93px; /* 186 * 0.5 */
       max-height: 78px; /* 156 * 0.5 */
     }
 
-    .main-image {
+    .prf-main-image {
       width: 100%;
       max-width: 617px; /* 1234 * 0.5 */
       height: 351px; /* 702 * 0.5 */
     }
 
-    .main-product-image {
+    .prf-main-product-image {
       width: 570px; /* 1139 * 0.5 */
       height: 264px; /* 527 * 0.5 */
     }
 
-    .color-selection {
+    .prf-color-selection {
       margin-top: 61px; /* 121 * 0.5 */
     }
 
-    .color-title {
+    .prf-color-title {
       margin-bottom: 20px;
     }
 
-    .color-options {
+    .prf-color-options {
       grid-template-columns: repeat(2, 60px);
       grid-auto-rows: 98px;
       height: 180px;
@@ -718,93 +718,93 @@
       margin: -6px -12px;
     }
 
-    .color-swatch {
+    .prf-color-swatch {
       width: 60px;
       height: 60px;
       flex-shrink: 0;
     }
 
-    .color-option.selected .color-swatch {
+    .prf-color-option.prf-selected .prf-color-swatch {
       transform: scale(1.3);
     }
 
-    .color-option.selected .color-name {
+    .prf-color-option.prf-selected .prf-color-name {
       margin-top: 5px;
     }
 
-    .color-checkmark {
+    .prf-color-checkmark {
       width: 30px;
       height: 30px;
     }
 
-    .color-checkmark svg {
+    .prf-color-checkmark svg {
       width: 30px;
       height: 30px;
     }
 
-    .color-name {
+    .prf-color-name {
       font-size: 9px;
       max-width: 90px;
     }
   }
 
   @media (max-width: 767px) and (min-width: 481px) {
-    .container {
+    .prf-container {
       max-width: 723px; /* 1808 * 0.4 */
     }
 
-    .product-layout {
+    .prf-product-layout {
       grid-template-columns: 1fr;
       gap: 25px;
     }
   }
 
   @media (max-width: 480px) {
-    .container {
+    .prf-container {
       max-width: 597px; /* 1808 * 0.33 */
       padding: 0 15px;
     }
 
-    .pilates-reformer-section {
+    .prf-pilates-reformer-section {
       padding-bottom: {{ section.settings.section_padding_top | divided_by: 2 }}px;
     }
 
-    .thumbnail-images {
+    .prf-thumbnail-images {
       width: 407px; /* 1234 * 0.33 */
       grid-template-columns: repeat(2, 63px); /* 190 * 0.33 */
       gap: 4px; /* 12 * 0.33 */
     }
 
-    .thumbnail-item {
+    .prf-thumbnail-item {
       width: 63px; /* 190 * 0.33 */
       height: 51px; /* 156 * 0.33 */
     }
 
-    .thumbnail-image {
+    .prf-thumbnail-image {
       width: 61px; /* 186 * 0.33 */
       max-height: 51px; /* 156 * 0.33 */
     }
 
-    .main-image {
+    .prf-main-image {
       width: 100%;
       max-width: 407px; /* 1234 * 0.33 */
       height: 232px; /* 702 * 0.33 */
     }
 
-    .main-product-image {
+    .prf-main-product-image {
       width: 376px; /* 1139 * 0.33 */
       height: 174px; /* 527 * 0.33 */
     }
 
-    .color-selection {
+    .prf-color-selection {
       margin-top: 40px; /* 121 * 0.33 */
     }
 
-    .color-title {
+    .prf-color-title {
       margin-bottom: 15px;
     }
 
-    .color-options {
+    .prf-color-options {
       grid-template-columns: repeat(2, 50px);
       grid-auto-rows: 88px;
       height: 160px;
@@ -814,38 +814,38 @@
       margin: -5px -10px;
     }
 
-    .color-swatch {
+    .prf-color-swatch {
       width: 50px;
       height: 50px;
       flex-shrink: 0;
     }
 
-    .color-option.selected .color-swatch {
+    .prf-color-option.prf-selected .prf-color-swatch {
       transform: scale(1.3);
     }
 
-    .color-option.selected .color-name {
+    .prf-color-option.prf-selected .prf-color-name {
       margin-top: 4px;
     }
 
-    .color-checkmark {
+    .prf-color-checkmark {
       width: 25px;
       height: 25px;
     }
 
-    .color-checkmark svg {
+    .prf-color-checkmark svg {
       width: 25px;
       height: 25px;
     }
 
-    .color-name {
+    .prf-color-name {
       font-size: 8px;
       max-width: 80px;
     }
   }
 
   @media (max-width: 320px) {
-    .container {
+    .prf-container {
       max-width: 452px; /* 1808 * 0.25 */
     }
   }
@@ -854,59 +854,59 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // 缩略图切换功能
-    const thumbnailItems = document.querySelectorAll('.thumbnail-item');
-    const mainImage = document.getElementById('main-product-image');
+    const prfThumbnailItems = document.querySelectorAll('.prf-thumbnail-item');
+    const prfMainImage = document.getElementById('prf-main-product-image');
 
-    thumbnailItems.forEach(function (item) {
+    prfThumbnailItems.forEach(function (item) {
       item.addEventListener('click', function () {
         const imageUrl = this.getAttribute('data-image-url');
 
-        if (imageUrl && mainImage) {
+        if (imageUrl && prfMainImage) {
           // 移除所有active类
-          thumbnailItems.forEach(function (thumb) {
-            thumb.classList.remove('active');
+          prfThumbnailItems.forEach(function (thumb) {
+            thumb.classList.remove('prf-active');
           });
 
           // 添加active类到当前点击的缩略图
-          this.classList.add('active');
+          this.classList.add('prf-active');
 
           // 更换主图
-          mainImage.src = imageUrl;
+          prfMainImage.src = imageUrl;
         }
       });
     });
 
     // 颜色选择功能 - 参考 upholstery-color-section.liquid
-    const colorOptions = document.querySelectorAll('.color-option');
+    const prfColorOptions = document.querySelectorAll('.prf-color-option');
 
-    colorOptions.forEach(function (option) {
+    prfColorOptions.forEach(function (option) {
       option.addEventListener('click', function () {
         // 移除所有选中状态
-        colorOptions.forEach(function (opt) {
-          opt.classList.remove('selected');
-          const checkmark = opt.querySelector('.color-checkmark');
+        prfColorOptions.forEach(function (opt) {
+          opt.classList.remove('prf-selected');
+          const checkmark = opt.querySelector('.prf-color-checkmark');
           if (checkmark) {
             checkmark.remove();
           }
         });
 
         // 添加选中状态到当前选项
-        this.classList.add('selected');
+        this.classList.add('prf-selected');
 
         // 添加选中标记
         const checkmark = document.createElement('div');
-        checkmark.className = 'color-checkmark';
+        checkmark.className = 'prf-color-checkmark';
         checkmark.innerHTML = `
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
           </svg>
         `;
-        this.querySelector('.color-swatch').appendChild(checkmark);
+        this.querySelector('.prf-color-swatch').appendChild(checkmark);
 
         // 切换主图片
         const variantImage = this.getAttribute('data-variant-image');
-        if (variantImage && variantImage !== '' && mainImage) {
-          mainImage.src = variantImage;
+        if (variantImage && variantImage !== '' && prfMainImage) {
+          prfMainImage.src = variantImage;
         }
 
         // 触发自定义事件，可用于其他功能
@@ -914,7 +914,7 @@
         const variantId = this.getAttribute('data-variant-id');
         const colorHex = this.getAttribute('data-color-hex');
 
-        const event = new CustomEvent('colorSelected', {
+        const event = new CustomEvent('prfColorSelected', {
           detail: {
             colorName: colorName,
             colorHex: colorHex,
@@ -930,7 +930,7 @@
     });
 
     // 监听颜色选择事件，可以用于与其他组件通信
-    document.addEventListener('colorSelected', function(event) {
+    document.addEventListener('prfColorSelected', function(event) {
       // 这里可以添加其他逻辑，比如更新购物车、价格等
       // 例如：更新产品变体选择
       if (event.detail.variantId) {
