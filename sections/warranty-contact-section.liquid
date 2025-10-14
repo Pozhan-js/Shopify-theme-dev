@@ -1,0 +1,864 @@
+<div class="wcs-warranty-contact-section">
+  <div class="wcs-container">
+    <div class="wcs-content-layout">
+      <!-- 左侧保修信息区域 -->
+      <div class="wcs-warranty-info">
+        <!-- 保修覆盖区域 -->
+        <div class="wcs-warranty-coverage">
+          <h2 class="wcs-section-title">{{ section.settings.warranty_title | default: "WARRANTY COVERAGE" }}</h2>
+          
+          <div class="wcs-warranty-item">
+            <div class="wcs-warranty-header">
+              <div class="wcs-warranty-line"></div>
+              <h3 class="wcs-warranty-subtitle">{{ section.settings.frame_warranty_title | default: "10-Year Frame Warranty" }}</h3>
+            </div>
+            <p class="wcs-warranty-description">{{ section.settings.frame_warranty_description | default: "Complete structural coverage for all Pilates machine frames" }}</p>
+          </div>
+
+          <div class="wcs-warranty-item">
+            <div class="wcs-warranty-header">
+              <div class="wcs-warranty-line"></div>
+              <h3 class="wcs-warranty-subtitle">{{ section.settings.parts_warranty_title | default: "2-Year Parts Warranty" }}</h3>
+            </div>
+            <p class="wcs-warranty-description">{{ section.settings.parts_warranty_description | default: "Coverage for springs, pulleys, upholstery, and accessories" }}</p>
+          </div>
+        </div>
+
+        <!-- 技术支持区域 -->
+        <div class="wcs-technical-support">
+          <h2 class="wcs-section-title">{{ section.settings.support_title | default: "TECHNICAL SUPPORT" }}</h2>
+          
+          <div class="wcs-support-list">
+            {% for block in section.blocks %}
+              {% if block.type == 'support_item' %}
+                <div class="wcs-support-item" {{ block.shopify_attributes }}>
+                  <div class="wcs-support-icon">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="8" r="7" stroke="#C22E35" stroke-width="2"/>
+                      <path d="M5 8l2 2 4-4" stroke="#C22E35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <span class="wcs-support-text">{{ block.settings.support_text }}</span>
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧联系表单区域 -->
+      <div class="wcs-contact-form">
+        <h2 class="wcs-form-title">{{ section.settings.form_title | default: "SEND EMAIL" }}</h2>
+        <p class="wcs-form-subtitle">{{ section.settings.form_subtitle | default: "* required fields" }}</p>
+        <p class="wcs-form-description">{{ section.settings.form_description | default: "I want to be contacted back" }}</p>
+
+        <form action="{{ routes.cart_add_url }}" method="post" class="wcs-contact-form-element" accept-charset="UTF-8">
+          <input type="hidden" name="form_type" value="contact">
+          <input type="hidden" name="utf8" value="✓">
+
+          <!-- 联系偏好选择 -->
+          <div class="wcs-form-group wcs-full-width">
+            <select name="contact[contact_preference]" class="wcs-form-select" required>
+              <option value="">{{ section.settings.contact_preference_placeholder | default: "Select contact preference" }}</option>
+              <option value="email">Email</option>
+              <option value="phone">Phone</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+            <div class="wcs-select-arrow">
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L6 6L11 1" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 姓名字段 -->
+          <div class="wcs-form-row">
+            <div class="wcs-form-group">
+              <input type="text" name="contact[first_name]" placeholder="{{ section.settings.first_name_placeholder | default: 'NAME *' }}" class="wcs-form-input" required>
+            </div>
+            <div class="wcs-form-group">
+              <input type="text" name="contact[last_name]" placeholder="{{ section.settings.last_name_placeholder | default: 'LAST NAME *' }}" class="wcs-form-input" required>
+            </div>
+          </div>
+
+          <!-- 邮箱和电话字段 -->
+          <div class="wcs-form-row">
+            <div class="wcs-form-group">
+              <input type="email" name="contact[email]" placeholder="{{ section.settings.email_placeholder | default: 'EMAIL ADDRESS *' }}" class="wcs-form-input" required>
+            </div>
+            <div class="wcs-form-group wcs-phone-group">
+              <div class="wcs-phone-input">
+                <select name="contact[country_code]" class="wcs-country-select">
+                  <option value="+44">+44</option>
+                  <option value="+1">+1</option>
+                  <option value="+86">+86</option>
+                  <option value="+33">+33</option>
+                  <option value="+49">+49</option>
+                </select>
+                <input type="tel" name="contact[phone]" placeholder="{{ section.settings.phone_placeholder | default: 'PHONE *' }}" class="wcs-form-input wcs-phone-number" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- 城市和邮编字段 -->
+          <div class="wcs-form-row">
+            <div class="wcs-form-group">
+              <input type="text" name="contact[city]" placeholder="{{ section.settings.city_placeholder | default: 'CITY' }}" class="wcs-form-input">
+            </div>
+            <div class="wcs-form-group">
+              <input type="text" name="contact[postcode]" placeholder="{{ section.settings.postcode_placeholder | default: 'POSTCODE' }}" class="wcs-form-input">
+            </div>
+          </div>
+
+          <!-- 请求内容 -->
+          <div class="wcs-form-group wcs-full-width">
+            <label class="wcs-form-label">{{ section.settings.request_label | default: "YOUR REQUEST" }}</label>
+            <textarea name="contact[message]" placeholder="{{ section.settings.request_placeholder | default: 'Please describe your support request, warranty claim, or technical question...' }}" class="wcs-form-textarea" rows="6"></textarea>
+          </div>
+
+          <!-- 同意条款 -->
+          <div class="wcs-form-group wcs-full-width">
+            <label class="wcs-checkbox-label">
+              <input type="checkbox" name="contact[marketing_consent]" class="wcs-checkbox">
+              <span class="wcs-checkbox-custom"></span>
+              <span class="wcs-checkbox-text">{{ section.settings.marketing_consent_text | default: "I wish to receive personalised communications on XS Pilates products and services." }}</span>
+            </label>
+          </div>
+
+          <!-- 隐私政策 -->
+          <div class="wcs-form-group wcs-full-width">
+            <p class="wcs-privacy-text">
+              {{ section.settings.privacy_text | default: "If you would like to know how XS Pilates processes your data, please read our" }}
+              <a href="{{ section.settings.privacy_policy_url | default: '/pages/privacy-policy' }}" class="wcs-privacy-link">{{ section.settings.privacy_link_text | default: "Privacy policy" }}</a>.
+            </p>
+          </div>
+
+          <!-- 提交按钮 -->
+          <div class="wcs-form-group wcs-full-width">
+            <button type="submit" class="wcs-submit-button">
+              <span class="wcs-button-text">{{ section.settings.submit_button_text | default: "SEND" }}</span>
+              <svg class="wcs-button-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.wcs-warranty-contact-section {
+  background-color: #f8f8f8;
+  padding: 80px 0;
+}
+
+.wcs-container {
+  max-width: 1750px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.wcs-content-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 120px;
+  align-items: start;
+}
+
+/* 左侧保修信息样式 */
+.wcs-warranty-info {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.wcs-section-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #999999;
+  margin: 0 0 40px 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.wcs-warranty-item {
+  margin-bottom: 40px;
+}
+
+.wcs-warranty-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.wcs-warranty-line {
+  width: 4px;
+  height: 24px;
+  background-color: #C22E35;
+  flex-shrink: 0;
+}
+
+.wcs-warranty-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0;
+}
+
+.wcs-warranty-description {
+  font-size: 16px;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.wcs-support-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wcs-support-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.wcs-support-icon {
+  flex-shrink: 0;
+}
+
+.wcs-support-text {
+  font-size: 16px;
+  color: #666666;
+  line-height: 1.5;
+}
+
+/* 右侧表单样式 */
+.wcs-contact-form {
+  background-color: #ffffff;
+  padding: 60px 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.wcs-form-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333333;
+  margin: 0 0 8px 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.wcs-form-subtitle {
+  font-size: 14px;
+  color: #999999;
+  margin: 0 0 16px 0;
+}
+
+.wcs-form-description {
+  font-size: 16px;
+  color: #333333;
+  margin: 0 0 32px 0;
+  font-weight: 500;
+}
+
+.wcs-contact-form-element {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wcs-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.wcs-form-group {
+  position: relative;
+}
+
+.wcs-form-group.wcs-full-width {
+  grid-column: 1 / -1;
+}
+
+.wcs-form-input {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333333;
+  background-color: #ffffff;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.wcs-form-input:focus {
+  outline: none;
+  border-color: #C22E35;
+}
+
+.wcs-form-input::placeholder {
+  color: #999999;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.wcs-form-select {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #999999;
+  background-color: #ffffff;
+  appearance: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.wcs-form-select:focus {
+  outline: none;
+  border-color: #C22E35;
+  color: #333333;
+}
+
+.wcs-select-arrow {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.wcs-phone-group {
+  position: relative;
+}
+
+.wcs-phone-input {
+  display: flex;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wcs-country-select {
+  width: 80px;
+  padding: 16px 12px;
+  border: none;
+  background-color: #f8f8f8;
+  font-size: 14px;
+  color: #333333;
+  appearance: none;
+  cursor: pointer;
+}
+
+.wcs-phone-number {
+  flex: 1;
+  border: none;
+  border-left: 1px solid #e0e0e0;
+}
+
+.wcs-phone-input:focus-within {
+  border-color: #C22E35;
+}
+
+.wcs-form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.wcs-form-textarea {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333333;
+  background-color: #ffffff;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.wcs-form-textarea:focus {
+  outline: none;
+  border-color: #C22E35;
+}
+
+.wcs-form-textarea::placeholder {
+  color: #999999;
+  font-size: 14px;
+}
+
+.wcs-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.wcs-checkbox {
+  display: none;
+}
+
+.wcs-checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 3px;
+  background-color: #ffffff;
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: all 0.3s ease;
+}
+
+.wcs-checkbox:checked + .wcs-checkbox-custom {
+  background-color: #C22E35;
+  border-color: #C22E35;
+}
+
+.wcs-checkbox:checked + .wcs-checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.wcs-checkbox-text {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.wcs-privacy-text {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.wcs-privacy-link {
+  color: #C22E35;
+  text-decoration: underline;
+}
+
+.wcs-privacy-link:hover {
+  text-decoration: none;
+}
+
+.wcs-submit-button {
+  background: white;
+  color: #161616;
+  border: 1px solid #c22e35;
+  padding: 16px 32px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  align-self: flex-start;
+}
+
+.wcs-submit-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #c22e35;
+  transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
+  z-index: -1;
+}
+
+.wcs-submit-button:hover {
+  color: white;
+}
+
+.wcs-submit-button:hover::before {
+  left: 0;
+}
+
+.wcs-button-text,
+.wcs-button-icon {
+  position: relative;
+  z-index: 2;
+}
+
+.wcs-button-icon {
+  transition: transform 0.3s ease;
+}
+
+.wcs-submit-button:hover .wcs-button-icon {
+  transform: translateX(2px);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .wcs-content-layout {
+    gap: 80px;
+  }
+  
+  .wcs-contact-form {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 968px) {
+  .wcs-content-layout {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  
+  .wcs-warranty-info {
+    gap: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wcs-warranty-contact-section {
+    padding: 60px 0;
+  }
+  
+  .wcs-container {
+    padding: 0 15px;
+  }
+  
+  .wcs-contact-form {
+    padding: 30px 20px;
+  }
+  
+  .wcs-form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .wcs-section-title {
+    font-size: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .wcs-form-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .wcs-warranty-contact-section {
+    padding: 40px 0;
+  }
+  
+  .wcs-warranty-info {
+    gap: 40px;
+  }
+  
+  .wcs-warranty-item {
+    margin-bottom: 30px;
+  }
+  
+  .wcs-warranty-subtitle {
+    font-size: 16px;
+  }
+  
+  .wcs-warranty-description {
+    font-size: 14px;
+  }
+  
+  .wcs-support-text {
+    font-size: 14px;
+  }
+  
+  .wcs-contact-form {
+    padding: 20px 15px;
+  }
+  
+  .wcs-form-title {
+    font-size: 18px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 表单提交处理
+  const form = document.querySelector('.wcs-contact-form-element');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // 获取表单数据
+      const formData = new FormData(form);
+      
+      // 使用 Shopify 的联系表单提交
+      fetch('/contact', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          // 成功提交
+          alert('Thank you for your message. We will get back to you soon!');
+          form.reset();
+        } else {
+          // 提交失败
+          alert('Sorry, there was an error sending your message. Please try again.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Sorry, there was an error sending your message. Please try again.');
+      });
+    });
+  }
+  
+  // 自定义选择框样式
+  const selects = document.querySelectorAll('.wcs-form-select');
+  selects.forEach(select => {
+    select.addEventListener('change', function() {
+      if (this.value) {
+        this.style.color = '#333333';
+      } else {
+        this.style.color = '#999999';
+      }
+    });
+  });
+});
+</script>
+
+{% schema %}
+{
+  "name": "保修信息和联系表单",
+  "tag": "section",
+  "class": "warranty-contact-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "保修信息设置"
+    },
+    {
+      "type": "text",
+      "id": "warranty_title",
+      "label": "保修标题",
+      "default": "WARRANTY COVERAGE"
+    },
+    {
+      "type": "text",
+      "id": "frame_warranty_title",
+      "label": "框架保修标题",
+      "default": "10-Year Frame Warranty"
+    },
+    {
+      "type": "textarea",
+      "id": "frame_warranty_description",
+      "label": "框架保修描述",
+      "default": "Complete structural coverage for all Pilates machine frames"
+    },
+    {
+      "type": "text",
+      "id": "parts_warranty_title",
+      "label": "零件保修标题",
+      "default": "2-Year Parts Warranty"
+    },
+    {
+      "type": "textarea",
+      "id": "parts_warranty_description",
+      "label": "零件保修描述",
+      "default": "Coverage for springs, pulleys, upholstery, and accessories"
+    },
+    {
+      "type": "header",
+      "content": "技术支持设置"
+    },
+    {
+      "type": "text",
+      "id": "support_title",
+      "label": "技术支持标题",
+      "default": "TECHNICAL SUPPORT"
+    },
+    {
+      "type": "header",
+      "content": "联系表单设置"
+    },
+    {
+      "type": "text",
+      "id": "form_title",
+      "label": "表单标题",
+      "default": "SEND EMAIL"
+    },
+    {
+      "type": "text",
+      "id": "form_subtitle",
+      "label": "表单副标题",
+      "default": "* required fields"
+    },
+    {
+      "type": "text",
+      "id": "form_description",
+      "label": "表单描述",
+      "default": "I want to be contacted back"
+    },
+    {
+      "type": "text",
+      "id": "contact_preference_placeholder",
+      "label": "联系偏好占位符",
+      "default": "Select contact preference"
+    },
+    {
+      "type": "text",
+      "id": "first_name_placeholder",
+      "label": "名字占位符",
+      "default": "NAME *"
+    },
+    {
+      "type": "text",
+      "id": "last_name_placeholder",
+      "label": "姓氏占位符",
+      "default": "LAST NAME *"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "label": "邮箱占位符",
+      "default": "EMAIL ADDRESS *"
+    },
+    {
+      "type": "text",
+      "id": "phone_placeholder",
+      "label": "电话占位符",
+      "default": "PHONE *"
+    },
+    {
+      "type": "text",
+      "id": "city_placeholder",
+      "label": "城市占位符",
+      "default": "CITY"
+    },
+    {
+      "type": "text",
+      "id": "postcode_placeholder",
+      "label": "邮编占位符",
+      "default": "POSTCODE"
+    },
+    {
+      "type": "text",
+      "id": "request_label",
+      "label": "请求标签",
+      "default": "YOUR REQUEST"
+    },
+    {
+      "type": "textarea",
+      "id": "request_placeholder",
+      "label": "请求占位符",
+      "default": "Please describe your support request, warranty claim, or technical question..."
+    },
+    {
+      "type": "textarea",
+      "id": "marketing_consent_text",
+      "label": "营销同意文本",
+      "default": "I wish to receive personalised communications on XS Pilates products and services."
+    },
+    {
+      "type": "textarea",
+      "id": "privacy_text",
+      "label": "隐私政策文本",
+      "default": "If you would like to know how XS Pilates processes your data, please read our"
+    },
+    {
+      "type": "url",
+      "id": "privacy_policy_url",
+      "label": "隐私政策链接"
+    },
+    {
+      "type": "text",
+      "id": "privacy_link_text",
+      "label": "隐私政策链接文本",
+      "default": "Privacy policy"
+    },
+    {
+      "type": "text",
+      "id": "submit_button_text",
+      "label": "提交按钮文本",
+      "default": "SEND"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "support_item",
+      "name": "技术支持项目",
+      "settings": [
+        {
+          "type": "text",
+          "id": "support_text",
+          "label": "支持文本"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "保修信息和联系表单",
+      "blocks": [
+        {
+          "type": "support_item",
+          "settings": {
+            "support_text": "Installation video guides"
+          }
+        },
+        {
+          "type": "support_item",
+          "settings": {
+            "support_text": "Remote video call assistance"
+          }
+        },
+        {
+          "type": "support_item",
+          "settings": {
+            "support_text": "Maintenance kits and spare parts"
+          }
+        },
+        {
+          "type": "support_item",
+          "settings": {
+            "support_text": "100% pre-shipment quality inspection"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
