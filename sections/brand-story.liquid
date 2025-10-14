@@ -1,0 +1,292 @@
+{%
+  schema
+%}
+{
+  "name": "Brand Story",
+  "tag": "section",
+  "class": "brand-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "品牌故事"
+    },
+    {
+      "type": "richtext",
+      "id": "story_paragraph_1",
+      "label": "Story Paragraph 1",
+      "default": "<p>AlmaZen is a spiritual lifestyle brand deeply rooted in Chinese Zen heritage, nurturing mindfulness and connection with body, mind, and nature.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "story_paragraph_2",
+      "label": "Story Paragraph 2",
+      "default": "<p>Zen is infused in every product — handcrafted and blessed in sacred temples to bring peace into your daily life.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "story_paragraph_3",
+      "label": "Story Paragraph 3",
+      "default": "<p>We believe everyone deserves a sanctuary of calm in today’s fast-paced world.</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "value_card",
+      "name": "Value Card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Card Title",
+          "default": "Zen Heritage"
+        },
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Card Subtitle",
+          "default": "Rooted in Chinese Zen culture"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Portrait Image",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Upload Image"
+        },
+        {
+          "type": "text",
+          "id": "alt",
+          "label": "Image Alt Text",
+          "default": "Brand image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Story - Full Height Match",
+      "category": "About"
+    }
+  ]
+}
+{%
+  endschema
+%}
+
+<section class="brand-section section" id="brand">
+  <div class="container">
+    <!-- 标题居中 -->
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.section_title }}</h2>
+    </div>
+
+    <!-- 左右布局：关键是要让右侧等高 -->
+    <div class="brand-content">
+      <!-- 左侧：文字内容 -->
+      <div class="brand-text">
+        <div class="brand-story">
+          {{ section.settings.story_paragraph_1 }}
+          {{ section.settings.story_paragraph_2 }}
+          {{ section.settings.story_paragraph_3 }}
+        </div>
+
+        {% assign value_cards = section.blocks | where: 'type', 'value_card' %}
+        {% if value_cards.size > 0 %}
+          <div class="brand-values">
+            {% for block in value_cards %}
+              <div class="value-item" {{ block.shopify_attributes }}>
+                <h4>{{ block.settings.title }}</h4>
+                <p>{{ block.settings.subtitle }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- 右侧：双图横排，高度匹配左侧 -->
+      <div class="brand-visual">
+        <div class="visual-grid">
+          {% assign images = section.blocks | where: 'type', 'image' %}
+
+          {% for block in images limit:2 %}
+            <div class="visual-item" {{ block.shopify_attributes }}>
+              {% if block.settings.image %}
+                <img src="{{ block.settings.image | image_url: '800x1200', crop: 'faces' }}"
+                     alt="{{ block.settings.alt }}"
+                     loading="lazy">
+              {% else %}
+                <div class="placeholder">Add Image</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <!-- 缺图占位 -->
+          {% if images.size == 0 %}
+            <div class="visual-item"><div class="placeholder">Add Image</div></div>
+            <div class="visual-item"><div class="placeholder">Add Image</div></div>
+          {% elsif images.size == 1 %}
+            <div class="visual-item"><div class="placeholder">Add Second Image</div></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .brand-section {
+      background: transparent;
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      color: #2c2c2c;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: #d4b896;
+      margin: 15px auto 0;
+    }
+
+    /* 关键：左右等高布局 */
+    .brand-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .brand-text {
+      text-align: left;
+    }
+
+    .brand-story p {
+      color: #666;
+      line-height: 1.8;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    /* 卡片 */
+    .brand-values {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .value-item {
+      text-align: center;
+      padding: 16px;
+      border: 1px solid rgba(212, 184, 150, 0.2);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .value-item:hover {
+      border-color: #d4b896;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(212, 184, 150, 0.2);
+    }
+
+    .value-item h4 {
+      font-size: 1.1rem;
+      color: #2c2c2c;
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    .value-item p {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* 右侧视觉区：强制撑满高度 */
+    .brand-visual {
+      display: flex;
+      height: 100%;
+    }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      width: 100%;
+      height: 92%; /* 尽可能撑高 */
+    }
+
+    .visual-item {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      background: #f8f8f8;
+      position: relative;
+    }
+
+    .visual-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.4s ease;
+    }
+
+    .visual-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .placeholder {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    /* 响应式：移动端堆叠 */
+    @media (max-width: 968px) {
+      .brand-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .section-header {
+        margin-bottom: 40px;
+      }
+
+      .brand-values {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .visual-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</section>

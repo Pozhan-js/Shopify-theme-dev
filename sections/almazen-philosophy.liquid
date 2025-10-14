@@ -1,0 +1,271 @@
+{% comment %}
+  AlmaZen Our Philosophy Section
+{% endcomment %}
+
+<style>
+  .almazen-philosophy {
+    padding: 5rem 1.5rem;
+    background: white;
+  }
+  
+  .almazen-philosophy .container {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+  
+  .almazen-philosophy .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  .almazen-philosophy .section-title {
+    font-size: 2.5rem;
+    font-family: 'Noto Serif', serif;
+    font-weight: 300;
+    color: #4a3f32;
+    margin-bottom: 1.5rem;
+  }
+  
+  .almazen-philosophy .section-divider {
+    width: 4rem;
+    height: 2px;
+    background: #5a7c5a;
+    margin: 0 auto 2rem;
+  }
+  
+  .almazen-philosophy .section-intro {
+    font-size: 1.125rem;
+    color: #8b7d68;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  .almazen-philosophy .principles-grid {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+  
+  .almazen-philosophy .principle-card {
+    text-align: center;
+    background: #faf9f7;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .almazen-philosophy .principle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(45, 36, 27, 0.15);
+  }
+  
+  .almazen-philosophy .principle-icon {
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, #7d9a7d, #8b7d68);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .almazen-philosophy .principle-card:hover .principle-icon {
+    transform: scale(1.1);
+  }
+  
+  .almazen-philosophy .principle-title {
+    font-size: 1.25rem;
+    font-family: 'Noto Serif', serif;
+    color: #4a3f32;
+    margin-bottom: 1rem;
+  }
+  
+  .almazen-philosophy .principle-description {
+    color: #8b7d68;
+    line-height: 1.6;
+  }
+  
+  .almazen-philosophy .highlight-section {
+    position: relative;
+  }
+  
+  .almazen-philosophy .highlight-bg {
+    height: 24rem;
+    border-radius: 1rem;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .almazen-philosophy .highlight-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 1rem;
+  }
+  
+  .almazen-philosophy .highlight-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    color: white;
+    padding: 0 1.5rem;
+  }
+  
+  .almazen-philosophy .highlight-title {
+    font-size: 1.875rem;
+    font-family: 'Noto Serif', serif;
+    font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  
+  .almazen-philosophy .highlight-text {
+    font-size: 1.125rem;
+    opacity: 0.9;
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+  
+  @media (min-width: 768px) {
+    .almazen-philosophy .section-title {
+      font-size: 3rem;
+    }
+    .almazen-philosophy .principles-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .almazen-philosophy .highlight-title {
+      font-size: 2.25rem;
+    }
+    .almazen-philosophy .highlight-text {
+      font-size: 1.25rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .almazen-philosophy {
+      padding: 5rem 3rem;
+    }
+    .almazen-philosophy .principles-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .almazen-philosophy .highlight-bg {
+      background-attachment: scroll;
+    }
+  }
+  
+  @keyframes slideUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<section id="philosophy" class="almazen-philosophy">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        {{ section.settings.philosophy_title | default: 'Our Philosophy' }}
+      </h2>
+      <div class="section-divider"></div>
+      <p class="section-intro">
+        {{ section.settings.philosophy_intro }}
+      </p>
+    </div>
+
+    <div class="principles-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'philosophy_principle' %}
+          <div class="principle-card">
+            {% comment %} <div class="principle-icon">
+              <i class="fas {{ block.settings.principle_icon }}" style="color: white; font-size: 1.25rem;"></i>
+            </div> {% endcomment %}
+            <h3 class="principle-title">{{ block.settings.principle_title }}</h3>
+            <p class="principle-description">{{ block.settings.principle_description }}</p>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    {% if section.settings.philosophy_bg_image %}
+      <div class="highlight-section">
+        <div 
+          class="highlight-bg"
+          style="background-image: url('{{ section.settings.philosophy_bg_image | img_url: '2048x' }}');"
+        >
+          <div class="highlight-overlay"></div>
+          <div class="highlight-content">
+            <h3 class="highlight-title">
+              {{ section.settings.philosophy_highlight_title }}
+            </h3>
+            <p class="highlight-text">
+              {{ section.settings.philosophy_highlight_text }}
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Our Philosophy",
+  "settings": [
+    {
+      "type": "text",
+      "id": "philosophy_title",
+      "label": "Section Title",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "textarea",
+      "id": "philosophy_intro",
+      "label": "Introduction Text",
+      "default": "Deeply rooted in Zen principles, our philosophy guides every aspect of AlmaZen, from product creation to community building."
+    },
+    {
+      "type": "text",
+      "id": "philosophy_highlight_title",
+      "label": "Highlight Title",
+      "default": "Zen in Every Detail"
+    },
+    {
+      "type": "textarea",
+      "id": "philosophy_highlight_text",
+      "label": "Highlight Text",
+      "default": "Our philosophy isn't just words—it's woven into every thread, carved into every surface, and blessed into every creation."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "philosophy_principle",
+      "name": "Philosophy Principle",
+      "settings": [
+        {
+          "type": "text",
+          "id": "principle_title",
+          "label": "Principle Title"
+        },
+        {
+          "type": "textarea",
+          "id": "principle_description",
+          "label": "Principle Description"
+        }
+      ]
+    }
+  ],
+}
+{% endschema %}

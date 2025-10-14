@@ -1,0 +1,601 @@
+{%
+  schema
+%}
+{
+  "name": "Product Tabs Section",
+  "tag": "section",
+  "class": "product-tabs-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Main Title",
+      "default": "精选系列"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "探索我们的禅意生活方式系列"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 6,
+      "max": 48,
+      "step": 6,
+      "default": 12
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection Tab",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select Collection"
+        },
+        {
+          "type": "text",
+          "id": "tab_label",
+          "label": "Tab Label",
+          "default": "New Arrivals"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Tabs with Collections",
+      "category": "Products"
+    }
+  ]
+}
+{%
+  endschema
+%}
+
+<section class="product-tabs-section" id="product-tabs">
+  <div class="container">
+    <!-- 标题区 -->
+    <div class="section-header">
+      <h2 class="section-title">{{ section.settings.title }}</h2>
+      <p class="section-subtitle">{{ section.settings.subtitle }}</p>
+    </div>
+
+    <!-- Tab 导航 -->
+    <div class="tabs-nav">
+      <ul class="tab-list">
+        {% for block in section.blocks %}
+          <li class="tab-item">
+            <button 
+              class="tab-btn{% if forloop.first %} is-active{% endif %}"
+              data-target="tab-{{ block.id }}"
+              data-collection="{{ block.settings.collection }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+              {{ block.settings.tab_label }}
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- 产品内容区 -->
+    <div class="tab-content">
+      {% for block in section.blocks %}
+        {% assign collection_handle = block.settings.collection %}
+        {% assign collection = collections[collection_handle] %}
+        {% assign products_per_page = section.settings.products_per_page %}
+
+        <div 
+          class="tab-panel{% if forloop.first %} is-active{% endif %}" 
+          id="tab-{{ block.id }}" 
+          data-collection="{{ collection_handle }}"
+          data-total-products="{{ collection.products.size }}"
+          data-products-per-page="{{ products_per_page }}"
+          aria-hidden="{% unless forloop.first %}true{% else %}false{% endunless %}">
+
+          {% if collection and collection.products.size > 0 %}
+            <!-- 产品网格容器 -->
+            <div class="products-grid-container">
+              <div class="products-grid" data-page="1">
+                {% for product in collection.products limit: products_per_page %}
+                  <div class="product-card">
+                    <a href="{{ product.url }}" class="product-link">
+                      <div class="product-image">
+                        {% if product.featured_image %}
+                          {{ product.featured_image | img_url: '500x' | img_tag: product.title, 'lazyload' }}
+                        {% else %}
+                          <div class="placeholder">No Image</div>
+                        {% endif %}
+                      </div>
+                      <div class="product-info">
+                        <h3 class="product-title">{{ product.title }}</h3>
+                        <div class="product-price">
+                          {% if product.compare_at_price > product.price %}
+                            <span class="price-sale">{{ product.price | money }}</span>
+                            <span class="price-original">{{ product.compare_at_price | money }}</span>
+                          {% else %}
+                            <span class="price-sale">{{ product.price | money }}</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- 分页器 -->
+            {% if collection.products.size > products_per_page %}
+              <div class="pagination-container">
+                <div class="pagination">
+                  <button class="pagination-btn prev-btn" disabled>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M10 12l-4-4 4-4"/>
+                    </svg>
+                  </button>
+                  <div class="pagination-numbers"></div>
+                  <button class="pagination-btn next-btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M6 4l4 4-4 4"/>
+                    </svg>
+                  </button>
+                </div>
+                <div class="pagination-info">
+                  <span class="current-range">1-{{ products_per_page }}</span> / 
+                  <span class="total-products">{{ collection.products.size }}</span> 商品
+                </div>
+              </div>
+            {% endif %}
+
+          {% else %}
+            <p class="no-products">该系列暂无商品。</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <style>
+    .product-tabs-section {
+      background: white;
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      color: #2c2c2c;
+      margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #666;
+    }
+
+    /* Tab 导航 */
+    .tabs-nav {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .tab-list {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 10px;
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: #f5f5f5;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #555;
+    }
+
+    .tab-btn:hover,
+    .tab-btn.is-active {
+      background: #d4b896;
+      color: white;
+    }
+
+    /* 产品网格 - 固定卡片大小 */
+    .products-grid-container {
+      margin-bottom: 30px;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      padding: 10px 0;
+      justify-items: center;
+    }
+
+    .product-card {
+      width: 280px;
+      max-width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+      background: white;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .product-image {
+      width: 100%;
+      height: 280px;
+      background: #f8f8f8;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.05);
+    }
+
+    .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f0f0;
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .product-info {
+      padding: 16px;
+      text-align: left;
+    }
+
+    .product-title {
+      font-size: 1.1rem;
+      color: #2c2c2c;
+      margin: 0 0 8px;
+      font-weight: 400;
+      line-height: 1.4;
+      height: 2.8em;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .product-price {
+      font-size: 1rem;
+    }
+
+    .price-sale {
+      {% comment %} color: #d4b896; {% endcomment %}
+      font-weight: 600;
+    }
+
+    .price-original {
+      color: #999;
+      text-decoration: line-through;
+      margin-left: 8px;
+    }
+
+    .no-products {
+      text-align: center;
+      color: #999;
+      grid-column: 1 / -1;
+    }
+
+    /* 分页器样式 */
+    .pagination-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 40px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pagination-btn {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: #d4b896;
+      color: white;
+      border-color: #d4b896;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination-numbers {
+      display: flex;
+      gap: 5px;
+    }
+
+    .page-number {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .page-number:hover,
+    .page-number.active {
+      background: #d4b896;
+      color: white;
+      border-color: #d4b896;
+    }
+
+    .pagination-info {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* 隐藏非激活面板 */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.is-active {
+      display: block;
+    }
+
+    /* 加载状态 */
+    .products-grid.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+      @media (max-width: 768px) {
+        .section-title {
+          font-size: 2rem;
+        }
+
+        .tab-list {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        .tab-btn {
+          font-size: 0.9rem;
+          padding: 10px 16px;
+        }
+
+        .products-grid {
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 12px;
+        }
+
+        .product-card {
+          width: 250px;
+        }
+
+        .product-image {
+          height: 250px;
+        }
+
+        .pagination-container {
+          margin-top: 30px;
+        }
+
+        .pagination {
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .products-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .product-card {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabPanels = document.querySelectorAll('.tab-panel');
+
+      // 存储所有商品数据
+      const collectionsData = {};
+
+      // 初始化分页功能
+      function initPagination() {
+        tabPanels.forEach(panel => {
+          const collectionHandle = panel.dataset.collection;
+          const totalProducts = parseInt(panel.dataset.totalProducts);
+          const productsPerPage = parseInt(panel.dataset.productsPerPage);
+
+          if (totalProducts > productsPerPage) {
+            setupPagination(panel, collectionHandle, totalProducts, productsPerPage);
+          }
+        });
+      }
+
+      // 设置分页
+      function setupPagination(panel, collectionHandle, totalProducts, productsPerPage) {
+        const totalPages = Math.ceil(totalProducts / productsPerPage);
+        const paginationNumbers = panel.querySelector('.pagination-numbers');
+        const prevBtn = panel.querySelector('.prev-btn');
+        const nextBtn = panel.querySelector('.next-btn');
+        const currentRange = panel.querySelector('.current-range');
+
+        let currentPage = 1;
+
+        // 生成页码按钮
+        function renderPageNumbers() {
+          paginationNumbers.innerHTML = '';
+          
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, currentPage + 2);
+
+          if (endPage - startPage < 4) {
+            if (startPage === 1) {
+              endPage = Math.min(totalPages, startPage + 4);
+            } else {
+              startPage = Math.max(1, endPage - 4);
+            }
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = `page-number ${i === currentPage ? 'active' : ''}`;
+            pageBtn.textContent = i;
+            pageBtn.addEventListener('click', () => goToPage(i));
+            paginationNumbers.appendChild(pageBtn);
+          }
+        }
+
+        // 跳转到指定页面
+        function goToPage(page) {
+          if (page < 1 || page > totalPages || page === currentPage) return;
+
+          currentPage = page;
+          loadProductsForPage(collectionHandle, page, productsPerPage, panel);
+          updatePaginationState();
+          updateCurrentRange();
+        }
+
+        // 更新分页状态
+        function updatePaginationState() {
+          prevBtn.disabled = currentPage === 1;
+          nextBtn.disabled = currentPage === totalPages;
+          renderPageNumbers();
+        }
+
+        // 更新当前范围显示
+        function updateCurrentRange() {
+          const start = (currentPage - 1) * productsPerPage + 1;
+          const end = Math.min(currentPage * productsPerPage, totalProducts);
+          currentRange.textContent = `${start}-${end}`;
+        }
+
+        // 绑定前后按钮事件
+        prevBtn.addEventListener('click', () => goToPage(currentPage - 1));
+        nextBtn.addEventListener('click', () => goToPage(currentPage + 1));
+
+        // 初始化
+        renderPageNumbers();
+        updateCurrentRange();
+      }
+
+      // 加载指定页面的商品
+      async function loadProductsForPage(collectionHandle, page, productsPerPage, panel) {
+        const productsGrid = panel.querySelector('.products-grid');
+        productsGrid.classList.add('loading');
+
+        try {
+          // 这里应该调用 Shopify API 获取商品数据
+          // 由于这是模板文件，我们模拟异步加载
+          await new Promise(resolve => setTimeout(resolve, 300));
+
+          // 实际项目中，这里需要通过 AJAX 调用获取商品数据
+          // 现在我们只是模拟更新页面属性
+          productsGrid.dataset.page = page;
+          
+        } catch (error) {
+          console.error('加载商品失败:', error);
+        } finally {
+          productsGrid.classList.remove('loading');
+        }
+      }
+
+      // Tab 切换功能
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // 更新按钮状态
+          tabBtns.forEach(b => {
+            b.classList.remove('is-active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('is-active');
+          btn.setAttribute('aria-selected', 'true');
+
+          // 显示对应面板
+          const targetId = btn.getAttribute('data-target');
+          tabPanels.forEach(panel => {
+            panel.classList.remove('is-active');
+            panel.setAttribute('aria-hidden', 'true');
+          });
+          const targetPanel = document.getElementById(targetId);
+          if (targetPanel) {
+            targetPanel.classList.add('is-active');
+            targetPanel.setAttribute('aria-hidden', 'false');
+          }
+        });
+      });
+
+      // 初始化
+      initPagination();
+    });
+  </script>
+</section>

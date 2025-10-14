@@ -1,0 +1,370 @@
+{% comment %}
+  AlmaZen Our Mission Section
+{% endcomment %}
+
+<style>
+  .almazen-mission {
+    padding: 5rem 1.5rem;
+    background: linear-gradient(135deg, #f6f7f6 0%, #e3e7e3 50%, #c7d2c7 100%);
+  }
+  
+  .almazen-mission .container {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+  
+  .almazen-mission .section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: slideUp 0.6s ease-out;
+  }
+  
+  .almazen-mission .section-title {
+    font-size: 2.5rem;
+    font-family: 'Noto Serif', serif;
+    font-weight: 300;
+    color: #4a3f32;
+    margin-bottom: 1.5rem;
+  }
+  
+  .almazen-mission .section-divider {
+    width: 4rem;
+    height: 2px;
+    background: #5a7c5a;
+    margin: 0 auto 2rem;
+  }
+  
+  .almazen-mission .section-intro {
+    font-size: 1.125rem;
+    color: #8b7d68;
+    max-width: 48rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  .almazen-mission .missions-grid {
+    display: grid;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+  
+  .almazen-mission .mission-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+  }
+  
+  .almazen-mission .mission-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(45, 36, 27, 0.15);
+  }
+  
+  .almazen-mission .mission-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  
+  .almazen-mission .mission-left {
+    flex-shrink: 0;
+  }
+  
+  .almazen-mission .mission-icon {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #7d9a7d, #8b7d68);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .almazen-mission .mission-card:hover .mission-icon {
+    transform: scale(1.1);
+  }
+  
+  .almazen-mission .mission-number {
+    font-size: 2.5rem;
+    font-family: 'Noto Serif', serif;
+    font-weight: 300;
+    color: #a4b8a4;
+    transition: color 0.3s ease;
+  }
+  
+  .almazen-mission .mission-card:hover .mission-number {
+    color: #7d9a7d;
+  }
+  
+  .almazen-mission .mission-right {
+    flex: 1;
+  }
+  
+  .almazen-mission .mission-title {
+    font-size: 1.25rem;
+    font-family: 'Noto Serif', serif;
+    color: #4a3f32;
+    margin-bottom: 0.75rem;
+  }
+  
+  .almazen-mission .mission-description {
+    color: #8b7d68;
+    line-height: 1.6;
+  }
+  
+  .almazen-mission .cta-section {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 10px 40px rgba(45, 36, 27, 0.1);
+  }
+  
+  .almazen-mission .cta-content {
+    max-width: 64rem;
+    margin: 0 auto;
+  }
+  
+  .almazen-mission .cta-title {
+    font-size: 1.5rem;
+    font-family: 'Noto Serif', serif;
+    color: #4a3f32;
+    margin-bottom: 1.5rem;
+  }
+  
+  .almazen-mission .cta-text {
+    font-size: 1.125rem;
+    color: #8b7d68;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  
+  .almazen-mission .features-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+  
+  .almazen-mission .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #456245;
+  }
+  
+  .almazen-mission .feature-text {
+    font-weight: 500;
+  }
+  
+  @media (min-width: 768px) {
+    .almazen-mission .section-title {
+      font-size: 3rem;
+    }
+    .almazen-mission .cta-section {
+      padding: 3rem;
+    }
+    .almazen-mission .cta-title {
+      font-size: 1.875rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .almazen-mission {
+      padding: 5rem 3rem;
+    }
+    .almazen-mission .missions-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @keyframes slideUp {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+</style>
+
+<section id="mission" class="almazen-mission">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        {{ section.settings.mission_title | default: 'Our Mission' }}
+      </h2>
+      <div class="section-divider"></div>
+      <p class="section-intro">
+        {{ section.settings.mission_intro }}
+      </p>
+    </div>
+
+    <div class="missions-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'mission_item' %}
+          <div class="mission-card">
+            <div class="mission-content">
+              <div class="mission-left">
+                <span class="mission-number">
+                  {{ block.settings.mission_number }}
+                </span>
+              </div>
+              <div class="mission-right">
+                <h3 class="mission-title">{{ block.settings.mission_title }}</h3>
+                <p class="mission-description">{{ block.settings.mission_description }}</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="cta-section">
+      <div class="cta-content">
+        <h3 class="cta-title">
+          {{ section.settings.mission_cta_title }}
+        </h3>
+        <p class="cta-text">
+          {{ section.settings.mission_cta_text }}
+        </p>
+        <div class="features-list">
+          {% for block in section.blocks %}
+            {% if block.type == 'mission_feature' %}
+              <div class="feature-item">
+                <i class="fas fa-check-circle"></i>
+                <span class="feature-text">{{ block.settings.feature_text }}</span>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Our Mission",
+  "settings": [
+    {
+      "type": "text",
+      "id": "mission_title",
+      "label": "Section Title",
+      "default": "Our Mission"
+    },
+    {
+      "type": "textarea",
+      "id": "mission_intro",
+      "label": "Introduction Text",
+      "default": "We are committed to nurturing a mindful and meaningful connection with body, mind, and nature for every individual who joins our community."
+    },
+    {
+      "type": "text",
+      "id": "mission_cta_title",
+      "label": "CTA Title",
+      "default": "Together, We Create Meaningful Change"
+    },
+    {
+      "type": "textarea",
+      "id": "mission_cta_text",
+      "label": "CTA Text",
+      "default": "Our mission extends beyond products—we're building a movement of conscious living, where every choice reflects our values of mindfulness, sustainability, and spiritual growth. Join us in creating a more peaceful and connected world."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mission_item",
+      "name": "Mission Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "mission_number",
+          "label": "Mission Number",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "mission_title",
+          "label": "Mission Title"
+        },
+        {
+          "type": "textarea",
+          "id": "mission_description",
+          "label": "Mission Description"
+        }
+      ]
+    },
+    {
+      "type": "mission_feature",
+      "name": "Mission Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "feature_text",
+          "label": "Feature Text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Mission",
+      "blocks": [
+        {
+          "type": "mission_item",
+          "settings": {
+            "mission_number": "01",
+            "mission_title": "Mindful Living",
+            "mission_description": "Inspire individuals to embrace mindfulness in their daily routines, creating moments of peace and reflection.",
+          }
+        },
+        {
+          "type": "mission_item",
+          "settings": {
+            "mission_number": "02",
+            "mission_title": "Wellness Community",
+            "mission_description": "Build a supportive community where people can share their wellness journey and learn from each other.",
+
+          }
+        },
+        {
+          "type": "mission_item",
+          "settings": {
+            "mission_number": "03",
+            "mission_title": "Cultural Bridge",
+            "mission_description": "Connect ancient Chinese Zen wisdom with modern lifestyle needs, making timeless teachings accessible.",
+
+          }
+        },
+        {
+          "type": "mission_item",
+          "settings": {
+            "mission_number": "04",
+            "mission_title": "Sustainable Future",
+            "mission_description": "Promote environmental consciousness through sustainable practices and eco-friendly product creation.",
+
+          }
+        },
+        {
+          "type": "mission_feature",
+          "settings": {
+            "feature_text": "Mindful Products"
+          }
+        },
+        {
+          "type": "mission_feature",
+          "settings": {
+            "feature_text": "Community Support"
+          }
+        },
+        {
+          "type": "mission_feature",
+          "settings": {
+            "feature_text": "Sustainable Practices"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
