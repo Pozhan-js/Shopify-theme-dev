@@ -137,6 +137,43 @@
     margin: 0 auto;
   }
   
+  .almazen-philosophy .bottom-image-section {
+    margin-top: 4rem;
+    text-align: center;
+  }
+  
+  .almazen-philosophy .bottom-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .almazen-philosophy .bottom-image-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .almazen-philosophy .bottom-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .almazen-philosophy .bottom-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .almazen-philosophy .bottom-image-container:hover .bottom-image-overlay {
+    opacity: 1;
+  }
+  
   @media (min-width: 768px) {
     .almazen-philosophy .section-title {
       font-size: 3rem;
@@ -203,7 +240,7 @@
       <div class="highlight-section">
         <div 
           class="highlight-bg"
-          style="background-image: url('{{ section.settings.philosophy_bg_image | img_url: '2048x' }}');"
+          style="background-image: url('{{ section.settings.philosophy_bg_image | image_url: width: 2048 }}');"
         >
           <div class="highlight-overlay"></div>
           <div class="highlight-content">
@@ -214,6 +251,22 @@
               {{ section.settings.philosophy_highlight_text }}
             </p>
           </div>
+        </div>
+      </div>
+    {% endif %}
+    
+    {% if section.settings.bottom_image %}
+      <div class="bottom-image-section">
+        <div class="bottom-image-container" style="height: {{ section.settings.bottom_image_height }}px;">
+          <img 
+            src="{{ section.settings.bottom_image | image_url: width: 2048 }}" 
+            alt="{{ section.settings.bottom_image_alt }}"
+            class="bottom-image"
+            loading="lazy"
+            width="2048"
+            height="{{ section.settings.bottom_image_height }}"
+          >
+          <div class="bottom-image-overlay"></div>
         </div>
       </div>
     {% endif %}
@@ -247,6 +300,26 @@
       "id": "philosophy_highlight_text",
       "label": "Highlight Text",
       "default": "Our philosophy isn't just words—it's woven into every thread, carved into every surface, and blessed into every creation."
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_image",
+      "label": "Bottom Image"
+    },
+    {
+      "type": "text",
+      "id": "bottom_image_alt",
+      "label": "Bottom Image Alt Text",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "range",
+      "id": "bottom_image_height",
+      "label": "Bottom Image Height (px)",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "default": 400
     }
   ],
   "blocks": [
