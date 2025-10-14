@@ -118,9 +118,11 @@
           {% for block in images limit:2 %}
             <div class="visual-item" {{ block.shopify_attributes }}>
               {% if block.settings.image %}
-                <img src="{{ block.settings.image | image_url: '800x1200', crop: 'faces' }}"
+                <img src="{{ block.settings.image | image_url: width: 600, height: 300, crop: 'faces' }}"
                      alt="{{ block.settings.alt }}"
-                     loading="lazy">
+                     loading="lazy"
+                     width="600"
+                     height="300">
               {% else %}
                 <div class="placeholder">Add Image</div>
               {% endif %}
@@ -223,18 +225,18 @@
       font-size: 0.9rem;
     }
 
-    /* 右侧视觉区：强制撑满高度 */
+    /* 调整为上下结构，缩小尺寸 */
     .brand-visual {
       display: flex;
-      height: 100%;
+      justify-content: center;
     }
 
     .visual-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
       width: 100%;
-      height: 92%; /* 尽可能撑高 */
     }
 
     .visual-item {
@@ -243,6 +245,7 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
       background: #f8f8f8;
       position: relative;
+      height: 300px; /* 缩小图片高度 */
     }
 
     .visual-item img {
@@ -267,25 +270,32 @@
       font-size: 0.9rem;
     }
 
-    /* 响应式：移动端堆叠 */
+    /* 响应式：移动端适配 */
     @media (max-width: 968px) {
       .brand-content {
-        grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 30px;
       }
 
       .section-header {
-        margin-bottom: 40px;
+        margin-bottom: 30px;
       }
 
       .brand-values {
         grid-template-columns: 1fr;
       }
+
+      .visual-item {
+        height: 250px; /* 移动端更小的高度 */
+      }
     }
 
     @media (max-width: 600px) {
+      .visual-item {
+        height: 200px; /* 手机端更小的高度 */
+      }
+      
       .visual-grid {
-        grid-template-columns: 1fr;
+        gap: 15px;
       }
     }
   </style>
