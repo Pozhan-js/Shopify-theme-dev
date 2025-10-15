@@ -592,6 +592,13 @@
           <div class="thumbnail-gallery">
             {% for image in displayproduct.images %}
               {%- assign keytext = image.src | downcase -%}
+              {%- assign filename = image.src | split: '/' | last | split: '.' | first -%}
+              {%- assign sort_number_raw = filename | replace_first: '_', ' ' | split: ' ' | first -%}
+              {%- comment -%} 检查提取的数字是否有效，如果无效则使用循环索引作为备用 {%- endcomment -%}
+              {%- assign sort_number = sort_number_raw -%}
+              {%- unless sort_number_raw contains '0' or sort_number_raw contains '1' or sort_number_raw contains '2' or sort_number_raw contains '3' or sort_number_raw contains '4' or sort_number_raw contains '5' or sort_number_raw contains '6' or sort_number_raw contains '7' or sort_number_raw contains '8' or sort_number_raw contains '9' -%}
+                {%- assign sort_number = forloop.index -%}
+              {%- endunless -%}
               <img
                 src="{{ image | img_url: '100x100' }}"
                 alt="{{ image.alt | default: displayproduct.title }}"
@@ -600,6 +607,8 @@
                 height="100"
                 loading="lazy"
                 data-image-key="{{ keytext }}"
+                data-sort-number="{{ sort_number }}"
+                data-filename="{{ filename }}"
                 data-main-image="{{ image | img_url: '800x800' }}"
                 data-main-image-webp="{{ image | img_url: '800x800', format: 'webp' }}"
                 onclick="switchMainImage(this)"
@@ -613,6 +622,64 @@
 </section>
 
 <script>
+  // 按数字排序缩略图的函数
+  function sortThumbnailsByNumber() {
+    const gallery = document.querySelector('.thumbnail-gallery');
+    if (!gallery) return;
+    
+    const thumbnails = Array.from(gallery.querySelectorAll('.thumbnail'));
+    if (thumbnails.length === 0) return;
+    
+    // 按数字排序，增强异常处理
+    thumbnails.sort((a, b) => {
+      const sortNumA = a.getAttribute('data-sort-number');
+      const sortNumB = b.getAttribute('data-sort-number');
+      
+      // 尝试解析为数字
+      const numA = parseInt(sortNumA);
+      const numB = parseInt(sortNumB);
+      
+      // 如果都是有效数字，按数字排序
+      if (!isNaN(numA) && !isNaN(numB)) {
+        return numA - numB;
+      }
+      
+      // 如果只有一个是有效数字，有效数字排在前面
+      if (!isNaN(numA) && isNaN(numB)) return -1;
+      if (isNaN(numA) && !isNaN(numB)) return 1;
+      
+      // 如果都不是有效数字，按文件名字母顺序排序
+      const filenameA = a.getAttribute('data-filename') || '';
+      const filenameB = b.getAttribute('data-filename') || '';
+      return filenameA.localeCompare(filenameB);
+    });
+    
+    // 重新排列DOM元素
+    thumbnails.forEach(thumb => gallery.appendChild(thumb));
+    
+    // 激活第一个缩略图
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    if (thumbnails.length > 0) {
+      thumbnails[0].classList.add('active');
+      // 更新主图为第一个缩略图
+      const firstThumb = thumbnails[0];
+      const mainImage = document.getElementById('main-product-image');
+      const picture = mainImage.parentElement;
+      const webpSource = picture.querySelector('source[type="image/webp"]');
+      
+      if (mainImage && firstThumb) {
+        const newImageSrc = firstThumb.getAttribute('data-main-image');
+        const newImageWebp = firstThumb.getAttribute('data-main-image-webp');
+        
+        if (webpSource && newImageWebp) {
+          webpSource.srcset = newImageWebp;
+        }
+        mainImage.src = newImageSrc;
+        mainImage.alt = firstThumb.alt;
+      }
+    }
+  }
+
   // 图片切换函数 - 带渐隐过渡效果
   function switchMainImage(thumbnail) {
     const mainImage = document.getElementById('main-product-image');
@@ -741,6 +808,7 @@
           const mainImage = document.getElementById('main-product-image');
 
           // 先过滤缩略图并移除 active 状态
+          const visibleThumbnails = [];
           thumbnails.forEach((thumb, index) => {
             const key = thumb.getAttribute('data-image-key').toLowerCase();
             const shouldShow = variantOzPattern && key.includes(variantOzPattern);
@@ -748,22 +816,57 @@
             
             thumb.style.display = displayStyle;
             thumb.classList.remove('active');
+            
+            // 收集可见的缩略图用于排序
+            if (displayStyle !== 'none') {
+              visibleThumbnails.push(thumb);
+            }
           });
 
-          // 直接使用第一个可见缩略图来更新主图
+          // 对可见的缩略图按数字排序，增强异常处理
+          visibleThumbnails.sort((a, b) => {
+            const sortNumA = a.getAttribute('data-sort-number');
+            const sortNumB = b.getAttribute('data-sort-number');
+            
+            // 尝试解析为数字
+            const numA = parseInt(sortNumA);
+            const numB = parseInt(sortNumB);
+            
+            // 如果都是有效数字，按数字排序
+            if (!isNaN(numA) && !isNaN(numB)) {
+              return numA - numB;
+            }
+            
+            // 如果只有一个是有效数字，有效数字排在前面
+            if (!isNaN(numA) && isNaN(numB)) return -1;
+            if (isNaN(numA) && !isNaN(numB)) return 1;
+            
+            // 如果都不是有效数字，按文件名字母顺序排序
+            const filenameA = a.getAttribute('data-filename') || '';
+            const filenameB = b.getAttribute('data-filename') || '';
+            return filenameA.localeCompare(filenameB);
+          });
+
+          // 使用排序后的第一个可见缩略图来更新主图
           let finalImageSrc = null;
           let finalImageAlt = '';
 
-          // 使用第一个可见缩略图
-          const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
-          if (visibleThumb) {
-            finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
-            finalImageAlt = visibleThumb.alt || '';
-            visibleThumb.classList.add('active');
+          if (visibleThumbnails.length > 0) {
+            const firstVisibleThumb = visibleThumbnails[0];
+            finalImageSrc = firstVisibleThumb.getAttribute('data-main-image');
+            finalImageAlt = firstVisibleThumb.alt || '';
+            firstVisibleThumb.classList.add('active');
           }
 
           // 更新主图
           if (finalImageSrc && mainImage) {
+            const picture = mainImage.parentElement;
+            const webpSource = picture.querySelector('source[type="image/webp"]');
+            const webpSrc = visibleThumbnails[0]?.getAttribute('data-main-image-webp');
+            
+            if (webpSource && webpSrc) {
+              webpSource.srcset = webpSrc;
+            }
             mainImage.src = finalImageSrc;
             mainImage.alt = finalImageAlt;
           }
@@ -790,6 +893,9 @@
     });
 
     updateTotalPrice();
+
+    // 页面载入时按数字排序缩略图
+    sortThumbnailsByNumber();
 
     // 页面载入时按默认变体自动过滤
     const firstChecked = document.querySelector('input[name="id"]:checked');
