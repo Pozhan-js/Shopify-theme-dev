@@ -602,7 +602,12 @@
             {% for image in displayproduct.images %}
               {%- assign keytext = image.src | downcase -%}
               {%- assign filename = image.src | split: '/' | last | split: '.' | first -%}
-              {%- assign sort_number_raw = filename | replace_first: '_', ' ' | split: ' ' | first -%}
+              {%- comment -%} 从文件名格式 '12oz_2_B' 中提取中间的数字 '2' {%- endcomment -%}
+              {%- assign filename_parts = filename | split: '_' -%}
+              {%- assign sort_number_raw = '' -%}
+              {%- if filename_parts.size >= 2 -%}
+                {%- assign sort_number_raw = filename_parts[1] -%}
+              {%- endif -%}
               {%- comment -%} 检查提取的数字是否有效，如果无效则使用循环索引作为备用 {%- endcomment -%}
               {%- assign sort_number = sort_number_raw -%}
               {%- unless sort_number_raw contains '0' or sort_number_raw contains '1' or sort_number_raw contains '2' or sort_number_raw contains '3' or sort_number_raw contains '4' or sort_number_raw contains '5' or sort_number_raw contains '6' or sort_number_raw contains '7' or sort_number_raw contains '8' or sort_number_raw contains '9' -%}
