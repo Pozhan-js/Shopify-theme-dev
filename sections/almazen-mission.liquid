@@ -160,6 +160,71 @@
     font-weight: 500;
   }
   
+  .almazen-mission .text-section {
+    margin: 4rem 0;
+    text-align: center;
+  }
+  
+  .almazen-mission .text-content {
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    box-shadow: 0 10px 40px rgba(45, 36, 27, 0.1);
+  }
+  
+  .almazen-mission .text-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(45, 36, 27, 0.15);
+  }
+  
+  .almazen-mission .text-body {
+    color: #8b7d68;
+    line-height: 1.6;
+  }
+  
+  .almazen-mission .text-body.wrap-enabled {
+    white-space: pre-line;
+    word-wrap: break-word;
+  }
+  
+  .almazen-mission .text-body.wrap-disabled {
+    white-space: normal;
+    word-wrap: break-word;
+  }
+  
+  .almazen-mission .text-body p {
+    margin-bottom: 1rem;
+  }
+  
+  .almazen-mission .text-body p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .almazen-mission .text-body ul,
+  .almazen-mission .text-body ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+  }
+  
+  .almazen-mission .text-body li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .almazen-mission .text-body h1,
+  .almazen-mission .text-body h2,
+  .almazen-mission .text-body h3,
+  .almazen-mission .text-body h4,
+  .almazen-mission .text-body h5,
+  .almazen-mission .text-body h6 {
+    color: #4a3f32;
+    margin-bottom: 1rem;
+    font-family: 'Noto Serif', serif;
+  }
+  
   @media (min-width: 768px) {
     .almazen-mission .section-title {
       font-size: 3rem;
@@ -169,6 +234,9 @@
     }
     .almazen-mission .cta-title {
       font-size: 1.875rem;
+    }
+    .almazen-mission .text-content {
+      padding: 3rem;
     }
   }
   
@@ -219,6 +287,19 @@
       {% endfor %}
     </div>
 
+    {% if section.settings.rich_text_content != blank %}
+      <div class="text-section">
+        <div class="text-content">
+          <div 
+            class="text-body {% if section.settings.rich_text_wrap_enabled %}wrap-enabled{% else %}wrap-disabled{% endif %}"
+            style="font-size: {{ section.settings.rich_text_font_size }}px;"
+          >
+            {{ section.settings.rich_text_content }}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
     <div class="cta-section">
       <div class="cta-content">
         <h3 class="cta-title">
@@ -257,6 +338,27 @@
       "id": "mission_intro",
       "label": "Introduction Text",
       "default": "We are committed to nurturing a mindful and meaningful connection with body, mind, and nature for every individual who joins our community."
+    },
+    {
+      "type": "richtext",
+      "id": "rich_text_content",
+      "label": "Rich Text Content (Above CTA)",
+      "default": "<p>Add your custom content here to appear above the CTA section.</p>"
+    },
+    {
+      "type": "range",
+      "id": "rich_text_font_size",
+      "label": "Rich Text Font Size (px)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "checkbox",
+      "id": "rich_text_wrap_enabled",
+      "label": "Enable Text Wrapping",
+      "default": true
     },
     {
       "type": "text",
