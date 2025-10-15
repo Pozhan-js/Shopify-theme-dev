@@ -16,12 +16,10 @@
 {%- assign enable_newsletter    	= section.settings.enable_newsletter -%}
 {%- assign placeholder_text		    = section.settings.placeholder_text -%}
 {%- assign button_text			    = section.settings.button_text -%}
-{%- assign default_success_text     = 'newsletter.success' | t -%}
-{%- assign success_message	    	= section.settings.success_message | default_success_text -%}
+{%- assign success_message	    = section.settings.success_message | default: 'newsletter.success' | t -%}
 {%- assign enable_gdpr              = section.settings.enable_gdpr -%}
 {%- assign gdpr_text                = section.settings.gdpr_text -%}
 {%- assign current_year				= 'now' | date: '%Y'  -%}
-{%- assign last_section_block		= section.blocks | last -%}
 
 {%- assign is_show_country_selector  = section.settings.is_show_country_selector -%}
 {%- assign is_show_language_selector = section.settings.is_show_language_selector -%}
@@ -190,14 +188,14 @@
 						aria-required="true"
 						autocapitalize="off"
 						autocomplete="email"
-						{% if form.errors %}
-							aria-invalid="true"
-							aria-describedby="Newsletter-error--{{- section.id -}}"
-						{% elsif form.posted_successfully? %}
-							aria-describedby="Newsletter-success--{{- section.id -}}"
-						{% endif %}
-						placeholder="{{- email_placeholder | default: placeholder_text -}}"
-						required
+							{% if form.errors %}
+								aria-invalid="true"
+								aria-describedby="Newsletter-error--{{- section.id -}}"
+							{% elsif form.posted_successfully? %}
+								aria-describedby="Newsletter-success--{{- section.id -}}"
+							{% endif %}
+							placeholder="{{- placeholder_text -}}"
+							required
 					/>
 
 					<button
