@@ -2,15 +2,40 @@
   <div class="product-collection-container">
     <!-- 标题和描述区域 -->
     <div class="collection-header">
-      {% if section.settings.collection_title != blank %}
-        <h2 class="collection-title">{{ section.settings.collection_title }}</h2>
-      {% endif %}
-      
-      {% if section.settings.collection_description != blank %}
-        <div class="collection-description">
-          <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
-          <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
-        </div>
+      {% comment %} 优先使用产品系列的标题和描述 {% endcomment %}
+      {% if target_collection %}
+        <h2 class="collection-title">{{ target_collection.title | default: section.settings.collection_title }}</h2>
+        
+        {% if target_collection.description != blank %}
+          <div class="collection-description">
+            <div class="description-paragraph">{{ target_collection.description }}</div>
+          </div>
+        {% elsif section.settings.collection_description_1 != blank or section.settings.collection_description_2 != blank %}
+          <div class="collection-description">
+            {% if section.settings.collection_description_1 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
+            {% endif %}
+            {% if section.settings.collection_description_2 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% else %}
+        {% comment %} 如果没有找到产品系列，使用后台设置的标题和描述 {% endcomment %}
+        {% if section.settings.collection_title != blank %}
+          <h2 class="collection-title">{{ section.settings.collection_title }}</h2>
+        {% endif %}
+        
+        {% if section.settings.collection_description_1 != blank or section.settings.collection_description_2 != blank %}
+          <div class="collection-description">
+            {% if section.settings.collection_description_1 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
+            {% endif %}
+            {% if section.settings.collection_description_2 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
       {% endif %}
     </div>
 
@@ -57,7 +82,10 @@
       {% comment %} 获取指定的产品系列 {% endcomment %}
       {% if url_collection_handle != blank %}
         {% assign target_collection = collections[url_collection_handle] %}
-        {% if target_collection and target_collection.products.size > 0 %}
+      {% endif %}
+      
+      {% comment %} 显示产品 {% endcomment %}
+      {% if target_collection and target_collection.products.size > 0 %}
           {% for product in target_collection.products limit: section.settings.products_limit %}
             <div class="product-card">
               <!-- 产品图片 -->
@@ -112,12 +140,11 @@
               </div>
             </div>
           {% endfor %}
-        {% else %}
-          {% comment %} 如果指定的系列没有产品，显示提示信息 {% endcomment %}
-          <div class="no-products-message">
-            <p>{{ section.settings.no_products_message | default: 'No products found in this collection.' }}</p>
-          </div>
-        {% endif %}
+      {% elsif target_collection and target_collection.products.size == 0 %}
+        {% comment %} 如果指定的系列没有产品，显示提示信息 {% endcomment %}
+        <div class="no-products-message">
+          <p>{{ section.settings.no_products_message | default: 'No products found in this collection.' }}</p>
+        </div>
       {% else %}
         {% comment %} 如果没有指定系列，显示手动配置的产品卡片 {% endcomment %}
         {% for block in section.blocks %}
@@ -522,8 +549,9 @@
     {
       "type": "text",
       "id": "collection_title",
-      "label": "系列标题",
-      "default": "XS Pilates Reformer Collection"
+      "label": "备选系列标题",
+      "default": "XS Pilates Reformer Collection",
+      "info": "当产品系列没有标题时使用此标题"
     },
     {
       "type": "color",
@@ -534,14 +562,16 @@
     {
       "type": "textarea",
       "id": "collection_description_1",
-      "label": "描述第一段",
-      "default": "Engineered for professional results, XS Pilates Reformers feature adjustable spring resistances and stable pull-ropes to activate deep muscles, improve trunk stability, and enhance flexibility, strength, and coordination."
+      "label": "备选描述第一段",
+      "default": "Engineered for professional results, XS Pilates Reformers feature adjustable spring resistances and stable pull-ropes to activate deep muscles, improve trunk stability, and enhance flexibility, strength, and coordination.",
+      "info": "当产品系列没有描述时使用此描述"
     },
     {
       "type": "textarea",
       "id": "collection_description_2",
-      "label": "描述第二段",
-      "default": "With their elegant, ergonomic design and premium materials, they deliver both comfort and durability—making them the perfect choice for creating a high-end, inspiring Pilates studio experience."
+      "label": "备选描述第二段",
+      "default": "With their elegant, ergonomic design and premium materials, they deliver both comfort and durability—making them the perfect choice for creating a high-end, inspiring Pilates studio experience.",
+      "info": "当产品系列没有描述时使用此描述"
     },
     {
       "type": "color",
