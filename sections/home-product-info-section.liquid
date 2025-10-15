@@ -643,27 +643,19 @@
 <script>
   // 按数字排序缩略图的函数
   function sortThumbnailsByNumber() {
-    console.log('🔢 [初始排序] 开始按数字排序缩略图');
+    
     
     const gallery = document.querySelector('.thumbnail-gallery');
     if (!gallery) {
-      console.log('❌ [初始排序] 未找到缩略图画廊容器');
       return;
     }
     
     const thumbnails = Array.from(gallery.querySelectorAll('.thumbnail'));
     if (thumbnails.length === 0) {
-      console.log('❌ [初始排序] 未找到任何缩略图');
       return;
     }
     
-    console.log('📊 [初始排序] 找到缩略图数量:', thumbnails.length);
-    console.log('📋 [初始排序] 排序前缩略图信息:', thumbnails.map((thumb, index) => ({
-      index: index + 1,
-      filename: thumb.getAttribute('data-filename'),
-      sortNumber: thumb.getAttribute('data-sort-number'),
-      src: thumb.src
-    })));
+    
     
     // 按数字排序，增强异常处理
     thumbnails.sort((a, b) => {
@@ -698,24 +690,16 @@
       return filenameA.localeCompare(filenameB);
     });
     
-    console.log('✅ [初始排序] 排序完成，排序后顺序:', thumbnails.map((thumb, index) => ({
-      index: index + 1,
-      filename: thumb.getAttribute('data-filename'),
-      sortNumber: thumb.getAttribute('data-sort-number')
-    })));
+    
     
     // 重新排列DOM元素
     thumbnails.forEach(thumb => gallery.appendChild(thumb));
-    console.log('🔄 [初始排序] DOM元素重新排列完成');
+    
     
     // 激活第一个缩略图
     thumbnails.forEach(thumb => thumb.classList.remove('active'));
     if (thumbnails.length > 0) {
       thumbnails[0].classList.add('active');
-      console.log('🎯 [初始排序] 激活第一个缩略图:', {
-        filename: thumbnails[0].getAttribute('data-filename'),
-        sortNumber: thumbnails[0].getAttribute('data-sort-number')
-      });
       
       // 更新主图为第一个缩略图
       const firstThumb = thumbnails[0];
@@ -727,11 +711,7 @@
         const newImageSrc = firstThumb.getAttribute('data-main-image');
         const newImageWebp = firstThumb.getAttribute('data-main-image-webp');
         
-        console.log('🖼️ [初始排序] 更新主图:', {
-          newImageSrc,
-          newImageWebp,
-          alt: firstThumb.alt
-        });
+        
         
         if (webpSource && newImageWebp) {
           webpSource.srcset = newImageWebp;
@@ -739,23 +719,15 @@
         mainImage.src = newImageSrc;
         mainImage.alt = firstThumb.alt;
         
-        console.log('✅ [初始排序] 主图更新完成');
+        
       }
     }
     
-    console.log('🎉 [初始排序] 缩略图排序功能执行完成');
+    
   }
 
   // 图片切换函数 - 带渐隐过渡效果
   function switchMainImage(thumbnail) {
-    console.log('🖼️ [图片切换] 开始切换图片');
-    console.log('📋 [图片切换] 缩略图信息:', {
-      src: thumbnail.src,
-      alt: thumbnail.alt,
-      filename: thumbnail.getAttribute('data-filename'),
-      sortNumber: thumbnail.getAttribute('data-sort-number'),
-      imageKey: thumbnail.getAttribute('data-image-key')
-    });
     
     const mainImage = document.getElementById('main-product-image');
     const picture = mainImage.parentElement;
@@ -765,23 +737,13 @@
     const newImageWebp = thumbnail.getAttribute('data-main-image-webp');
     const newImageAlt = thumbnail.alt;
     
-    console.log('🎯 [图片切换] 目标图片信息:', {
-      newImageSrc,
-      newImageWebp,
-      newImageAlt,
-      currentSrc: mainImage ? mainImage.src : 'null'
-    });
+    
     
     if (!mainImage || !newImageSrc || mainImage.src === newImageSrc) {
-      console.log('⚠️ [图片切换] 跳过切换 - 条件不满足:', {
-        hasMainImage: !!mainImage,
-        hasNewImageSrc: !!newImageSrc,
-        isSameImage: mainImage ? mainImage.src === newImageSrc : false
-      });
       return;
     }
     
-    console.log('✨ [图片切换] 开始渐隐过渡效果');
+    
     // 添加过渡效果
     mainImage.style.transition = 'opacity 0.3s ease';
     mainImage.style.opacity = '0.3';
@@ -789,30 +751,27 @@
     // 预加载新图片（只有支持WebP的格式才尝试WebP）
     const preloadImage = new Image();
     preloadImage.onload = function() {
-      console.log('✅ [图片切换] 图片预加载成功');
       // 只有当WebP源存在且不为空时才更新WebP source
       if (webpSource && newImageWebp && newImageWebp.trim() !== '') {
         webpSource.srcset = newImageWebp;
-        console.log('🔄 [图片切换] 已更新WebP源:', newImageWebp);
       }
       
       mainImage.src = newImageSrc;
       mainImage.alt = newImageAlt;
       mainImage.style.opacity = '1';
 
-      console.log('🎨 [图片切换] 主图已更新，恢复透明度');
+      
       
       // 更新缩略图active状态
       const allThumbs = document.querySelectorAll('.thumbnail');
       allThumbs.forEach(thumb => thumb.classList.remove('active'));
       thumbnail.classList.add('active');
       
-      console.log('🏷️ [图片切换] 缩略图active状态已更新');
-      console.log('🎉 [图片切换] 图片切换完成');
+      
     };
     
     preloadImage.onerror = function() {
-      console.log('❌ [图片切换] 图片加载失败，尝试原格式');
+      
       // 如果WebP加载失败，尝试原格式
       const fallbackImage = new Image();
       fallbackImage.onload = function() {
@@ -899,32 +858,19 @@
 
         // 添加错误处理
         try {
-          console.log('🔄 [变体切换1] 开始处理变体切换');
-          console.log('📝 [变体切换1] 变体信息:', {
-            variantTitle: this.nextElementSibling.textContent,
-            newPrice,
-            newOldPrice,
-            isAvailable,
-            newImage,
-            newImageAlt
-          });
+          
           
           // 🧩 根据变体名称中的数字+oz组合过滤缩略图
           const variantTitle = this.nextElementSibling.textContent.toLowerCase();
           const ozMatch = variantTitle.match(/(\d+)oz/);
           const variantOzPattern = ozMatch ? ozMatch[1] + 'oz' : '';
           
-          console.log('🔍 [变体过滤] 解析变体模式:', {
-            originalTitle: this.nextElementSibling.textContent,
-            lowerCaseTitle: variantTitle,
-            ozMatch: ozMatch,
-            variantOzPattern: variantOzPattern
-          });
+          
           
           const thumbnails = document.querySelectorAll('.thumbnail');
           const mainImage = document.getElementById('main-product-image');
           
-          console.log('📊 [变体过滤] 找到缩略图数量:', thumbnails.length);
+          
 
           // 先过滤缩略图并移除 active 状态
           const visibleThumbnails = [];
@@ -933,13 +879,7 @@
             const shouldShow = variantOzPattern && key.includes(variantOzPattern);
             const displayStyle = shouldShow ? 'inline-block' : (variantOzPattern ? 'none' : 'inline-block');
             
-            console.log(`🖼️ [变体过滤] 缩略图 ${index + 1}:`, {
-              filename: thumb.getAttribute('data-filename'),
-              imageKey: key,
-              shouldShow: shouldShow,
-              displayStyle: displayStyle,
-              sortNumber: thumb.getAttribute('data-sort-number')
-            });
+            
             
             thumb.style.display = displayStyle;
             thumb.classList.remove('active');
@@ -950,14 +890,10 @@
             }
           });
 
-          console.log('✅ [变体过滤] 过滤完成，可见缩略图数量:', visibleThumbnails.length);
-          console.log('📋 [变体过滤] 可见缩略图列表:', visibleThumbnails.map(thumb => ({
-            filename: thumb.getAttribute('data-filename'),
-            sortNumber: thumb.getAttribute('data-sort-number')
-          })));
+          
 
           // 对可见的缩略图按数字排序，增强异常处理
-          console.log('🔢 [变体排序] 开始对可见缩略图进行排序');
+          
           visibleThumbnails.sort((a, b) => {
             const sortNumA = a.getAttribute('data-sort-number');
             const sortNumB = b.getAttribute('data-sort-number');
@@ -990,10 +926,7 @@
             return filenameA.localeCompare(filenameB);
           });
 
-          console.log('✅ [变体排序] 排序完成，排序后顺序:', visibleThumbnails.map(thumb => ({
-            filename: thumb.getAttribute('data-filename'),
-            sortNumber: thumb.getAttribute('data-sort-number')
-          })));
+          
 
           // 使用排序后的第一个可见缩略图来更新主图
           let finalImageSrc = null;
@@ -1005,14 +938,9 @@
             finalImageAlt = firstVisibleThumb.alt || '';
             firstVisibleThumb.classList.add('active');
             
-            console.log('🎯 [变体选择] 选择第一个可见缩略图作为主图:', {
-              filename: firstVisibleThumb.getAttribute('data-filename'),
-              sortNumber: firstVisibleThumb.getAttribute('data-sort-number'),
-              finalImageSrc: finalImageSrc,
-              finalImageAlt: finalImageAlt
-            });
+            
           } else {
-            console.log('⚠️ [变体选择] 没有找到可见的缩略图');
+            
           }
 
           // 更新主图
@@ -1028,7 +956,7 @@
             mainImage.alt = finalImageAlt;
           }
         } catch (error) {
-          console.error('❌ SKU 图片切换出错:', error);
+          
         }
 
         // 更新按钮状态
@@ -1046,7 +974,7 @@
       const formData = new FormData(form);
       fetch('/cart/add.js', { method: 'POST', body: formData })
         .then(() => { window.location.href = '/checkout'; })
-        .catch(err => console.error('Error:', err));
+        .catch(() => {});
     });
 
     updateTotalPrice();
