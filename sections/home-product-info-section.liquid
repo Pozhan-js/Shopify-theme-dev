@@ -673,6 +673,14 @@
           const thumbnails = document.querySelectorAll('.thumbnail');
           const mainImage = document.getElementById('main-product-image');
 
+          // 调试信息
+          console.log('变体切换调试:', {
+            variantTitle: variantTitle,
+            variantNumber: variantNumber,
+            newImage: newImage,
+            thumbnailsCount: thumbnails.length
+          });
+
           // 先过滤缩略图并移除 active 状态
           thumbnails.forEach((thumb, index) => {
             const key = thumb.getAttribute('data-image-key').toLowerCase();
@@ -683,39 +691,28 @@
             thumb.classList.remove('active');
           });
 
-          // 确定主图源：优先级 1. 变体图片 2. 第一个可见缩略图 3. 保持当前
+          // 直接使用第一个可见缩略图来更新主图
           let finalImageSrc = null;
           let finalImageAlt = '';
 
-          if (newImage && newImage.trim() !== '') {
-            // 优先使用变体指定的图片
-            finalImageSrc = newImage;
-            finalImageAlt = newImageAlt || '';
+          // 使用第一个可见缩略图
+          const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
+          if (visibleThumb) {
+            finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
+            finalImageAlt = visibleThumb.alt || '';
+            visibleThumb.classList.add('active');
+            console.log('使用第一个可见缩略图:', finalImageSrc);
           } else {
-            // 如果变体没有指定图片，使用第一个可见缩略图
-            const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
-            if (visibleThumb) {
-              finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
-              finalImageAlt = visibleThumb.alt || '';
-              visibleThumb.classList.add('active');
-            }
+            console.log('没有找到可见的缩略图，保持当前主图');
           }
 
           // 更新主图
           if (finalImageSrc && mainImage) {
+            console.log('更新主图:', finalImageSrc);
             mainImage.src = finalImageSrc;
             mainImage.alt = finalImageAlt;
-            
-            // 如果使用的是变体图片，需要找到对应的缩略图并设为 active
-            if (newImage && newImage.trim() !== '') {
-              const matchingThumb = Array.from(thumbnails).find(thumb => {
-                const thumbLargeUrl = thumb.src.replace('100x100', '800x800');
-                return thumbLargeUrl === finalImageSrc && thumb.style.display !== 'none';
-              });
-              if (matchingThumb) {
-                matchingThumb.classList.add('active');
-              }
-            }
+          } else {
+            console.log('主图更新失败:', { finalImageSrc, mainImage: !!mainImage });
           }
         } catch (error) {
           console.error('❌ SKU 图片切换出错:', error);
