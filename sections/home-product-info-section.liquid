@@ -731,94 +731,82 @@
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
 
-    variantOptions.forEach(function (option) {
-      option.addEventListener('change', function () {
-        if (this.checked) {
-          const newPrice = this.getAttribute('data-price');
-          const newOldPrice = this.getAttribute('data-old-price');
-          const isAvailable = this.getAttribute('data-available') === 'true';
-          const newImage = this.getAttribute('data-image');
-          const newImageAlt = this.getAttribute('data-image-alt');
+    option.addEventListener('change', function () {
+  if (!this.checked) return;
 
-          if (newPrice) currentPriceElement.textContent = newPrice;
+  const variantTitle = this.nextElementSibling.textContent.toLowerCase();
+  console.log('🟢 当前选中的变体标题:', variantTitle);
 
-          if (newOldPrice && newOldPrice !== '') {
-            if (!oldPriceElement) {
-              const priceRow = document.querySelector('.price-row');
-              const oldPriceSpan = document.createElement('span');
-              oldPriceSpan.className = 'price-old price-discount';
-              oldPriceSpan.id = 'old-price';
-              priceRow.appendChild(oldPriceSpan);
-            }
-            document.getElementById('old-price').textContent = newOldPrice;
-            document.getElementById('old-price').style.display = 'inline';
-          } else if (oldPriceElement) {
-            oldPriceElement.style.display = 'none';
-          }
+  // 从标题中提取数字索引，比如 "sku1" → "1"
+  const match = variantTitle.match(/\d+/);
+  const variantNumber = match ? match[0] : '';
+  console.log('🔢 提取出的变体编号:', variantNumber || '(未找到)');
 
-          // Update product image
-          const mainImage = document.getElementById('main-product-image');
-          if (newImage && mainImage) {
-            mainImage.classList.add('changing');
-            setTimeout(function () {
-              if (mainImage.tagName === 'IMG') {
-                mainImage.src = newImage;
-                mainImage.alt = newImageAlt || '';
-                mainImage.onerror = function () {
-                  this.style.display = 'none';
-                  if (this.nextElementSibling) {
-                    this.nextElementSibling.style.display = 'flex';
-                  }
-                };
-              } else {
-                // Convert placeholder div to img if needed
-                const imageContainer = mainImage.parentNode;
-                const newImg = document.createElement('img');
-                newImg.id = 'main-product-image';
-                newImg.src = newImage;
-                newImg.alt = newImageAlt || '';
-                newImg.className = 'main-image';
-                newImg.loading = 'lazy';
-                newImg.onerror = function () {
-                  this.style.display = 'none';
-                  if (this.nextElementSibling) {
-                    this.nextElementSibling.style.display = 'flex';
-                  }
-                };
+  // --- 缩略图过滤逻辑 ---
+  const thumbnails = document.querySelectorAll('.thumbnail');
+  thumbnails.forEach((thumb) => {
+    const key = thumb.getAttribute('data-image-key').toLowerCase();
+    const matches = variantNumber && key.includes(variantNumber);
+    console.log('   🖼️ 检查图片:', key, '→', matches ? '✅ 显示' : '❌ 隐藏');
 
-                // Create fallback placeholder
-                const placeholder = document.createElement('div');
-                placeholder.className = 'placeholder-image';
-                placeholder.innerHTML = '<span>' + (newImageAlt || 'Product Image') + '</span>';
+    if (matches) {
+      thumb.style.display = 'inline-block';
+    } else {
+      thumb.style.display = variantNumber ? 'none' : 'inline-block';
+    }
+  });
 
-                imageContainer.innerHTML = '';
-                imageContainer.appendChild(newImg);
-                imageContainer.appendChild(placeholder);
-              }
-              setTimeout(function () {
-                const currentImage = document.getElementById('main-product-image');
-                if (currentImage) {
-                  currentImage.classList.remove('changing');
-                }
-              }, 50);
-            }, 150);
-          }
+  // --- 自动选中第一个可见缩略图作为主图 ---
+  const mainImage = document.getElementById('main-product-image');
+  const firstVisibleThumb = Array.from(thumbnails).find(img => img.style.display !== 'none');
+  if (firstVisibleThumb && mainImage) {
+    console.log('🎯 切换主图为:', firstVisibleThumb.src);
+    mainImage.src = firstVisibleThumb.src.replace('100x100', '800x800');
+  } else {
+    console.warn('⚠️ 没有符合的缩略图可显示');
+  }
 
-          // Update button states based on availability
-          if (isAvailable) {
-            addToCartBtn.disabled = false;
-            buyNowBtn.disabled = false;
-            addToCartBtn.textContent = '{{ section.settings.addtocarttext }}';
-          } else {
-            addToCartBtn.disabled = true;
-            buyNowBtn.disabled = true;
-            addToCartBtn.textContent = 'Sold Out';
-          }
+  // --- 更新价格与库存状态 ---
+  const newPrice = this.getAttribute('data-price');
+  const newOldPrice = this.getAttribute('data-old-price');
+  const isAvailable = this.getAttribute('data-available') === 'true';
+  const newImage = this.getAttribute('data-image');
+  const newImageAlt = this.getAttribute('data-image-alt');
 
-          updateTotalPrice();
-        }
-      });
-    });
+  if (newPrice) {
+    console.log('💰 更新价格为:', newPrice);
+    currentPriceElement.textContent = newPrice;
+  }
+
+  if (newOldPrice && newOldPrice !== '') {
+    if (!document.getElementById('old-price')) {
+      const priceRow = document.querySelector('.price-row');
+      const oldPriceSpan = document.createElement('span');
+      oldPriceSpan.className = 'price-old price-discount';
+      oldPriceSpan.id = 'old-price';
+      priceRow.appendChild(oldPriceSpan);
+    }
+    document.getElementById('old-price').textContent = newOldPrice;
+    document.getElementById('old-price').style.display = 'inline';
+  } else if (oldPriceElement) {
+    oldPriceElement.style.display = 'none';
+  }
+
+  // --- 如果 variant 自带图片，则更新主图 ---
+  if (newImage && mainImage) {
+    console.log('🖼️ 此变体有独立主图:', newImage);
+    mainImage.src = newImage;
+    mainImage.alt = newImageAlt || '';
+  }
+
+  // --- 更新按钮状态 ---
+  addToCartBtn.disabled = !isAvailable;
+  buyNowBtn.disabled = !isAvailable;
+  addToCartBtn.textContent = isAvailable ? '{{ section.settings.addtocarttext }}' : 'Sold Out';
+  console.log('🛒 库存状态:', isAvailable ? '可购买' : '售罄');
+
+  updateTotalPrice();
+});
 
     // Buy now button functionality
     document.getElementById('buy-now-btn').addEventListener('click', function () {
