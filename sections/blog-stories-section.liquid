@@ -12,7 +12,7 @@
         {% assign selected_blog = blogs[section.settings.blog_handle] %}
         {% if selected_blog and selected_blog.articles.size > 0 %}
           {% for article in selected_blog.articles %}
-            <div class="story-card">
+            <div class="story-card" {% if article.image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ article.image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
               <!-- Logo区域 -->
               <div class="story-logo">
                 {% if section.settings.logo_image != blank %}
@@ -57,7 +57,7 @@
       {% unless has_blog_articles %}
         {% for block in section.blocks %}
           {% if block.type == 'story_card' %}
-            <div class="story-card" {{ block.shopify_attributes }}>
+            <div class="story-card" {{ block.shopify_attributes }} {% if block.settings.card_background_image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ block.settings.card_background_image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
               <!-- Logo区域 -->
               <div class="story-logo">
                 {% if block.settings.card_logo != blank %}
@@ -195,6 +195,17 @@
     line-height: 1.5;
     margin: 0;
     letter-spacing: 0px;
+  }
+
+  /* 有背景图片时的文字样式 */
+  .story-card[style*="background-image"] .story-title {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .story-card[style*="background-image"] .story-excerpt {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   .story-arrow-button {
@@ -622,6 +633,12 @@
           "id": "card_logo",
           "label": "卡片Logo",
           "info": "此卡片专用的Logo，如不设置将使用默认Logo"
+        },
+        {
+          "type": "image_picker",
+          "id": "card_background_image",
+          "label": "卡片背景图片",
+          "info": "推荐尺寸：800x600px，用作卡片背景图片"
         }
       ]
     }
