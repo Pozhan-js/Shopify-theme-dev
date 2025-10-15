@@ -559,15 +559,19 @@
         {% endif %}
 
         {% if imageurl != blank and imageurl != '' %}
-          <img
-            id="main-product-image"
-            src="{{ imageurl }}"
-            alt="{{ imagealt }}"
-            class="main-image"
-            width="800"
-            height="800"
-            loading="lazy"
-          >
+          <!-- 使用picture元素支持WebP格式 -->
+          <picture>
+            <source srcset="{{ imageurl | img_url: '800x800', format: 'webp' }}" type="image/webp">
+            <img
+              id="main-product-image"
+              src="{{ imageurl }}"
+              alt="{{ imagealt }}"
+              class="main-image"
+              width="800"
+              height="800"
+              loading="eager"
+            >
+          </picture>
           <div class="placeholder-image" style="display: none;">
             <span>{{ displayproduct.title | default: 'Product Image' }}</span>
           </div>
@@ -578,6 +582,13 @@
         {% endif %}
 
         {% if displayproduct.images.size > 1 %}
+          <!-- 预加载所有主图资源，优先使用WebP格式 -->
+          {% for image in displayproduct.images %}
+            <link rel="preload" as="image" href="{{ image | img_url: '800x800', format: 'webp' }}">
+            <!-- 为不支持WebP的浏览器提供备用格式 -->
+            <link rel="preload" as="image" href="{{ image | img_url: '800x800' }}">
+          {% endfor %}
+          
           <div class="thumbnail-gallery">
             {% for image in displayproduct.images %}
               {%- assign keytext = image.src | downcase -%}
@@ -587,16 +598,11 @@
                 class="thumbnail{% if forloop.first %} active{% endif %}"
                 width="100"
                 height="100"
+                loading="lazy"
                 data-image-key="{{ keytext }}"
-                onclick="
-                  const mainImage = document.getElementById('main-product-image');
-                  mainImage.src = '{{ image | img_url: '800x800' }}';
-                  
-                  // 更新缩略图active状态
-                  const allThumbs = document.querySelectorAll('.thumbnail');
-                  allThumbs.forEach(thumb => thumb.classList.remove('active'));
-                  this.classList.add('active');
-                "
+                data-main-image="{{ image | img_url: '800x800' }}"
+                data-main-image-webp="{{ image | img_url: '800x800', format: 'webp' }}"
+                onclick="switchMainImage(this)"
               >
             {% endfor %}
           </div>
@@ -607,6 +613,62 @@
 </section>
 
 <script>
+  // 图片切换函数 - 带渐隐过渡效果
+  function switchMainImage(thumbnail) {
+    const mainImage = document.getElementById('main-product-image');
+    const picture = mainImage.parentElement;
+    const webpSource = picture.querySelector('source[type="image/webp"]');
+    
+    const newImageSrc = thumbnail.getAttribute('data-main-image');
+    const newImageWebp = thumbnail.getAttribute('data-main-image-webp');
+    const newImageAlt = thumbnail.alt;
+    
+    if (!mainImage || !newImageSrc || mainImage.src === newImageSrc) return;
+    
+    // 添加过渡效果
+    mainImage.style.transition = 'opacity 0.3s ease';
+    mainImage.style.opacity = '0.3';
+    
+    // 预加载新图片（优先WebP）
+    const preloadImage = new Image();
+    preloadImage.onload = function() {
+      // 更新WebP source
+      if (webpSource && newImageWebp) {
+        webpSource.srcset = newImageWebp;
+      }
+      
+      mainImage.src = newImageSrc;
+      mainImage.alt = newImageAlt;
+      mainImage.style.opacity = '1';
+      
+      // 更新缩略图active状态
+      const allThumbs = document.querySelectorAll('.thumbnail');
+      allThumbs.forEach(thumb => thumb.classList.remove('active'));
+      thumbnail.classList.add('active');
+    };
+    
+    preloadImage.onerror = function() {
+      // 如果WebP加载失败，尝试原格式
+      const fallbackImage = new Image();
+      fallbackImage.onload = function() {
+        mainImage.src = newImageSrc;
+        mainImage.alt = newImageAlt;
+        mainImage.style.opacity = '1';
+        
+        const allThumbs = document.querySelectorAll('.thumbnail');
+        allThumbs.forEach(thumb => thumb.classList.remove('active'));
+        thumbnail.classList.add('active');
+      };
+      fallbackImage.onerror = function() {
+        mainImage.style.opacity = '1';
+      };
+      fallbackImage.src = newImageSrc;
+    };
+    
+    // 优先尝试WebP格式
+    preloadImage.src = newImageWebp || newImageSrc;
+  }
+
   function changeQuantity(change) {
     const quantityInput = document.getElementById('quantity');
     let num = parseInt(quantityInput.value);
@@ -616,7 +678,8 @@
     updateTotalPrice();
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  // 异步初始化产品功能
+  function initializeProductSection() {
     const variantOptions = document.querySelectorAll('input[name="id"]');
     const currentPriceElement = document.getElementById('current-price');
     const oldPriceElement = document.getElementById('old-price');
@@ -745,6 +808,32 @@
       totalPriceElement.textContent = symbol + (num * quantity).toFixed(2);
     }
   }
+
+  // 异步初始化产品功能
+  function initializeProductSection() {
+    // 初始化变体选择器
+    const variantSelectors = document.querySelectorAll('.variant-selector');
+    variantSelectors.forEach(selector => {
+      selector.addEventListener('change', function() {
+        updateVariant();
+      });
+    });
+
+    // 初始化数量选择器
+    const quantityInput = document.getElementById('quantity');
+    if (quantityInput) {
+      quantityInput.addEventListener('input', updateTotalPrice);
+    }
+
+    // 初始化默认状态
+    updateVariant();
+    updateTotalPrice();
+  }
+
+  // 使用异步延迟初始化，提升首次渲染速度
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initializeProductSection, 50);
+  });
 </script>
 
 
