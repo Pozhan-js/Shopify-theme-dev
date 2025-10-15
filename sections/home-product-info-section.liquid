@@ -669,20 +669,29 @@
     thumbnails.sort((a, b) => {
       const sortNumA = a.getAttribute('data-sort-number');
       const sortNumB = b.getAttribute('data-sort-number');
-      
-      // 尝试解析为数字
-      const numA = parseInt(sortNumA);
-      const numB = parseInt(sortNumB);
-      
+
+      // 回退：从文件名中提取第一个下划线后的数字
+      const fallbackParse = (el) => {
+        const fn = el.getAttribute('data-filename') || '';
+        const match = fn.match(/_(\d+)/);
+        return match ? parseInt(match[1], 10) : NaN;
+      };
+
+      // 优先用 data-sort-number，否则用回退解析
+      const parsedA = parseInt(sortNumA, 10);
+      const parsedB = parseInt(sortNumB, 10);
+      const numA = !isNaN(parsedA) ? parsedA : fallbackParse(a);
+      const numB = !isNaN(parsedB) ? parsedB : fallbackParse(b);
+
       // 如果都是有效数字，按数字排序
       if (!isNaN(numA) && !isNaN(numB)) {
         return numA - numB;
       }
-      
+
       // 如果只有一个是有效数字，有效数字排在前面
       if (!isNaN(numA) && isNaN(numB)) return -1;
       if (isNaN(numA) && !isNaN(numB)) return 1;
-      
+
       // 如果都不是有效数字，按文件名字母顺序排序
       const filenameA = a.getAttribute('data-filename') || '';
       const filenameB = b.getAttribute('data-filename') || '';
@@ -952,20 +961,29 @@
           visibleThumbnails.sort((a, b) => {
             const sortNumA = a.getAttribute('data-sort-number');
             const sortNumB = b.getAttribute('data-sort-number');
-            
-            // 尝试解析为数字
-            const numA = parseInt(sortNumA);
-            const numB = parseInt(sortNumB);
-            
+
+            // 回退：从文件名中提取第一个下划线后的数字
+            const fallbackParse = (el) => {
+              const fn = el.getAttribute('data-filename') || '';
+              const match = fn.match(/_(\d+)/);
+              return match ? parseInt(match[1], 10) : NaN;
+            };
+
+            // 优先用 data-sort-number，否则用回退解析
+            const parsedA = parseInt(sortNumA, 10);
+            const parsedB = parseInt(sortNumB, 10);
+            const numA = !isNaN(parsedA) ? parsedA : fallbackParse(a);
+            const numB = !isNaN(parsedB) ? parsedB : fallbackParse(b);
+
             // 如果都是有效数字，按数字排序
             if (!isNaN(numA) && !isNaN(numB)) {
               return numA - numB;
             }
-            
+
             // 如果只有一个是有效数字，有效数字排在前面
             if (!isNaN(numA) && isNaN(numB)) return -1;
             if (isNaN(numA) && !isNaN(numB)) return 1;
-            
+
             // 如果都不是有效数字，按文件名字母顺序排序
             const filenameA = a.getAttribute('data-filename') || '';
             const filenameB = b.getAttribute('data-filename') || '';
@@ -1601,4 +1619,3 @@
   ]
 }
 {% endschema %}
-
