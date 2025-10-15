@@ -589,46 +589,13 @@
                 height="100"
                 data-image-key="{{ keytext }}"
                 onclick="
-                  console.log('缩略图点击事件:', {
-                    clickedImageSrc: '{{ image | img_url: '100x100' }}',
-                    clickedImageKey: '{{ keytext }}',
-                    newMainImageSrc: '{{ image | img_url: '800x800' }}',
-                    clickedImageAlt: '{{ image.alt | default: displayproduct.title }}',
-                    timestamp: new Date().toISOString()
-                  });
-                  
                   const mainImage = document.getElementById('main-product-image');
-                  const oldSrc = mainImage.src;
-                  const newSrc = '{{ image | img_url: '800x800' }}';
-                  
-                  console.log('主图更新:', {
-                    oldSrc: oldSrc,
-                    newSrc: newSrc,
-                    changed: oldSrc !== newSrc
-                  });
-                  
-                  mainImage.src = newSrc;
+                  mainImage.src = '{{ image | img_url: '800x800' }}';
                   
                   // 更新缩略图active状态
                   const allThumbs = document.querySelectorAll('.thumbnail');
-                  console.log('更新缩略图状态:', {
-                    totalThumbnails: allThumbs.length,
-                    clickedThumbnail: this.src
-                  });
-                  
-                  allThumbs.forEach((thumb, index) => {
-                    const wasActive = thumb.classList.contains('active');
-                    thumb.classList.remove('active');
-                    console.log('缩略图状态更新:', {
-                      index: index,
-                      src: thumb.src,
-                      wasActive: wasActive,
-                      isClickedThumb: thumb === this
-                    });
-                  });
-                  
+                  allThumbs.forEach(thumb => thumb.classList.remove('active'));
                   this.classList.add('active');
-                  console.log('设置新的active缩略图:', this.src);
                 "
               >
             {% endfor %}
@@ -710,14 +677,6 @@
           const thumbnails = document.querySelectorAll('.thumbnail');
           const mainImage = document.getElementById('main-product-image');
 
-          // 调试信息
-          console.log('变体切换调试:', {
-            variantTitle: variantTitle,
-            ozMatch: ozMatch,
-            variantOzPattern: variantOzPattern,
-            thumbnailsCount: thumbnails.length
-          });
-
           // 先过滤缩略图并移除 active 状态
           thumbnails.forEach((thumb, index) => {
             const key = thumb.getAttribute('data-image-key').toLowerCase();
@@ -726,14 +685,6 @@
             
             thumb.style.display = displayStyle;
             thumb.classList.remove('active');
-            
-            console.log('缩略图过滤:', {
-              index: index,
-              key: key,
-              variantOzPattern: variantOzPattern,
-              shouldShow: shouldShow,
-              displayStyle: displayStyle
-            });
           });
 
           // 直接使用第一个可见缩略图来更新主图
@@ -746,18 +697,12 @@
             finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
             finalImageAlt = visibleThumb.alt || '';
             visibleThumb.classList.add('active');
-            console.log('使用第一个可见缩略图:', finalImageSrc);
-          } else {
-            console.log('没有找到可见的缩略图，保持当前主图');
           }
 
           // 更新主图
           if (finalImageSrc && mainImage) {
-            console.log('更新主图:', finalImageSrc);
             mainImage.src = finalImageSrc;
             mainImage.alt = finalImageAlt;
-          } else {
-            console.log('主图更新失败:', { finalImageSrc, mainImage: !!mainImage });
           }
         } catch (error) {
           console.error('❌ SKU 图片切换出错:', error);
