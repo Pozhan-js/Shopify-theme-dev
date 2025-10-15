@@ -11,8 +11,7 @@
       {% if section.settings.blog_handle != blank %}
         {% assign selected_blog = blogs[section.settings.blog_handle] %}
         {% if selected_blog and selected_blog.articles.size > 0 %}
-          {% assign articles_limit = section.settings.articles_count | default: 6 %}
-          {% for article in selected_blog.articles limit: articles_limit %}
+          {% for article in selected_blog.articles %}
             <div class="story-card">
               <!-- Logo区域 -->
               <div class="story-logo">
@@ -46,22 +45,17 @@
         {% endif %}
       {% endif %}
 
-      {% comment %} 如果没有博客文章或需要补充，显示手动配置的故事卡片 {% endcomment %}
-      {% assign blog_articles_count = 0 %}
+      {% comment %} 如果没有博客文章，显示手动配置的故事卡片 {% endcomment %}
+      {% assign has_blog_articles = false %}
       {% if section.settings.blog_handle != blank %}
         {% assign selected_blog = blogs[section.settings.blog_handle] %}
-        {% if selected_blog %}
-          {% assign blog_articles_count = selected_blog.articles.size %}
-          {% assign articles_limit = section.settings.articles_count | default: 6 %}
-          {% if blog_articles_count > articles_limit %}
-            {% assign blog_articles_count = articles_limit %}
-          {% endif %}
+        {% if selected_blog and selected_blog.articles.size > 0 %}
+          {% assign has_blog_articles = true %}
         {% endif %}
       {% endif %}
 
-      {% assign remaining_slots = section.settings.articles_count | default: 6 | minus: blog_articles_count %}
-      {% if remaining_slots > 0 %}
-        {% for block in section.blocks limit: remaining_slots %}
+      {% unless has_blog_articles %}
+        {% for block in section.blocks %}
           {% if block.type == 'story_card' %}
             <div class="story-card" {{ block.shopify_attributes }}>
               <!-- Logo区域 -->
@@ -96,7 +90,7 @@
             </div>
           {% endif %}
         {% endfor %}
-      {% endif %}
+      {% endunless %}
     </div>
   </div>
 </div>
@@ -591,15 +585,6 @@
       "id": "blog_handle",
       "label": "选择博客",
       "info": "选择要显示文章的博客"
-    },
-    {
-      "type": "range",
-      "id": "articles_count",
-      "min": 1,
-      "max": 12,
-      "step": 1,
-      "label": "显示文章数量",
-      "default": 6
     },
     {
       "type": "header",
