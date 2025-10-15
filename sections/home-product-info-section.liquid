@@ -603,41 +603,24 @@
 </section>
 
 <script>
-  // 🚀 模板加载日志
-  console.log('🎯 Shopify 产品模板已加载');
-  console.log('📅 加载时间:', new Date().toLocaleString());
-  
   function changeQuantity(change) {
-    console.log('🔢 数量变更:', change);
     const quantityInput = document.getElementById('quantity');
     let num = parseInt(quantityInput.value);
     num = num + change;
     if (num < 1) num = 1;
     quantityInput.value = num;
-    console.log('📊 当前数量:', num);
     updateTotalPrice();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    console.log('🎉 DOM 内容已加载完成');
-    console.log('🔍 开始初始化产品选项...');
     const variantOptions = document.querySelectorAll('input[name="id"]');
     const currentPriceElement = document.getElementById('current-price');
     const oldPriceElement = document.getElementById('old-price');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
 
-    console.log('🔍 找到变体选项数量:', variantOptions.length);
-    console.log('🎛️ 页面元素检查:', {
-      currentPrice: !!currentPriceElement,
-      oldPrice: !!oldPriceElement,
-      addToCartBtn: !!addToCartBtn,
-      buyNowBtn: !!buyNowBtn
-    });
-
     // 添加页面加载完成的总价更新函数
     function updateTotalPrice() {
-      console.log('💰 更新总价被调用');
       const quantityInput = document.getElementById('quantity');
       const currentPriceElement = document.getElementById('current-price');
       const totalPriceElement = document.getElementById('total-price');
@@ -648,10 +631,7 @@
         const price = parseFloat(priceText) || 0;
         const total = quantity * price;
         
-        console.log('🧮 价格计算:', { quantity, price, total });
         totalPriceElement.textContent = '$' + total.toFixed(2);
-      } else {
-        console.log('⚠️ 总价更新失败 - 缺少必要元素');
       }
     }
 
@@ -662,21 +642,12 @@
       option.addEventListener('change', function () {
         if (!this.checked) return;
 
-        console.log('🔄 SKU 切换开始 - Variant changed');
-        console.log('📦 选中的变体:', this.value);
-
         const newPrice = this.getAttribute('data-price');
         const newOldPrice = this.getAttribute('data-old-price');
         const isAvailable = this.getAttribute('data-available') === 'true';
         const newImage = this.getAttribute('data-image');
         const newImageAlt = this.getAttribute('data-image-alt');
         const variantTitle = this.nextElementSibling.textContent;
-
-        // 🎉 显示变体切换弹窗
-        alert(`已选择变体: ${variantTitle}\n价格: ${newPrice}\n${newOldPrice ? '原价: ' + newOldPrice : ''}\n${isAvailable ? '有库存' : '缺货'}`);
-
-        console.log('💰 价格信息:', { newPrice, newOldPrice, isAvailable });
-        console.log('🖼️ 图片信息:', { newImage, newImageAlt });
 
         if (newPrice) currentPriceElement.textContent = newPrice;
         if (newOldPrice && newOldPrice !== '') {
@@ -702,21 +673,11 @@
           const thumbnails = document.querySelectorAll('.thumbnail');
           const mainImage = document.getElementById('main-product-image');
 
-          console.log('🏷️ 变体标题:', variantTitle);
-          console.log('🔢 提取的数字:', variantNumber);
-          console.log('🖼️ 找到缩略图数量:', thumbnails.length);
-
           // 先过滤缩略图并移除 active 状态
           thumbnails.forEach((thumb, index) => {
             const key = thumb.getAttribute('data-image-key').toLowerCase();
             const shouldShow = variantNumber && key.includes(variantNumber);
             const displayStyle = shouldShow ? 'inline-block' : (variantNumber ? 'none' : 'inline-block');
-            
-            console.log(`📸 缩略图 ${index + 1}:`, {
-              key: key,
-              shouldShow: shouldShow,
-              display: displayStyle
-            });
             
             thumb.style.display = displayStyle;
             thumb.classList.remove('active');
@@ -730,7 +691,6 @@
             // 优先使用变体指定的图片
             finalImageSrc = newImage;
             finalImageAlt = newImageAlt || '';
-            console.log('🎯 使用变体指定图片:', finalImageSrc);
           } else {
             // 如果变体没有指定图片，使用第一个可见缩略图
             const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
@@ -738,15 +698,11 @@
               finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
               finalImageAlt = visibleThumb.alt || '';
               visibleThumb.classList.add('active');
-              console.log('🎯 使用第一个可见缩略图:', finalImageSrc);
-            } else {
-              console.log('⚠️ 没有找到可见的缩略图，保持当前主图');
             }
           }
 
           // 更新主图
           if (finalImageSrc && mainImage) {
-            console.log('🔄 最终更新主图:', finalImageSrc);
             mainImage.src = finalImageSrc;
             mainImage.alt = finalImageAlt;
             
@@ -758,7 +714,6 @@
               });
               if (matchingThumb) {
                 matchingThumb.classList.add('active');
-                console.log('🎯 设置匹配的缩略图为 active');
               }
             }
           }
@@ -771,17 +726,16 @@
         buyNowBtn.disabled = !isAvailable;
         addToCartBtn.textContent = isAvailable ? '{{ section.settings.addtocarttext }}' : 'Sold Out';
 
-        console.log('✅ SKU 切换完成');
         updateTotalPrice();
       });
     });
 
-    // Buy now
+    // Buy now - redirect to checkout
     document.getElementById('buy-now-btn').addEventListener('click', function () {
       const form = document.querySelector('.product-form');
       const formData = new FormData(form);
       fetch('/cart/add.js', { method: 'POST', body: formData })
-        .then(() => { window.location.href = '/cart'; })
+        .then(() => { window.location.href = '/checkout'; })
         .catch(err => console.error('Error:', err));
     });
 
