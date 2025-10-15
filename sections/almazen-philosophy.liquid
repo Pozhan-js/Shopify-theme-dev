@@ -150,7 +150,7 @@
   }
   
   .almazen-philosophy .text-content {
-    max-width: 48rem;
+    width: 100%;
     margin: 0 auto;
     padding: 2rem;
     background: #faf9f7;
@@ -165,9 +165,47 @@
   }
   
   .almazen-philosophy .text-body {
-    font-size: 1.125rem;
     color: #8b7d68;
     line-height: 1.6;
+  }
+  
+  .almazen-philosophy .text-body.wrap-enabled {
+    white-space: pre-line;
+    word-wrap: break-word;
+  }
+  
+  .almazen-philosophy .text-body.wrap-disabled {
+    white-space: normal;
+    word-wrap: break-word;
+  }
+  
+  .almazen-philosophy .text-body p {
+    margin-bottom: 1rem;
+  }
+  
+  .almazen-philosophy .text-body p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .almazen-philosophy .text-body ul,
+  .almazen-philosophy .text-body ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+  }
+  
+  .almazen-philosophy .text-body li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .almazen-philosophy .text-body h1,
+  .almazen-philosophy .text-body h2,
+  .almazen-philosophy .text-body h3,
+  .almazen-philosophy .text-body h4,
+  .almazen-philosophy .text-body h5,
+  .almazen-philosophy .text-body h6 {
+    color: #4a3f32;
+    margin-bottom: 1rem;
+    font-family: 'Noto Serif', serif;
   }
   
   .almazen-philosophy .bottom-image-section {
@@ -286,7 +324,12 @@
             <h3 class="text-title">{{ section.settings.text_content_title }}</h3>
           {% endif %}
           {% if section.settings.text_content_body != blank %}
-            <div class="text-body">{{ section.settings.text_content_body }}</div>
+            <div 
+              class="text-body {% if section.settings.text_wrap_enabled %}wrap-enabled{% else %}wrap-disabled{% endif %}"
+              style="font-size: {{ section.settings.text_font_size }}px;"
+            >
+              {{ section.settings.text_content_body }}
+            </div>
           {% endif %}
         </div>
       </div>
@@ -375,10 +418,25 @@
       "default": "Our Commitment"
     },
     {
-      "type": "textarea",
+      "type": "richtext",
       "id": "text_content_body",
       "label": "Text Content Body",
-      "default": "At AlmaZen, we believe that true wellness comes from harmony between mind, body, and spirit. Every product we create is designed to support this balance, bringing peace and mindfulness into your daily life."
+      "default": "<p>At AlmaZen, we believe that true wellness comes from harmony between mind, body, and spirit. Every product we create is designed to support this balance, bringing peace and mindfulness into your daily life.</p>"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Text Font Size (px)",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "checkbox",
+      "id": "text_wrap_enabled",
+      "label": "Enable Text Wrapping",
+      "default": true
     }
   ],
   "blocks": [
