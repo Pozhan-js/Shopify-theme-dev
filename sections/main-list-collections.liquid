@@ -1,10 +1,264 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
 
-<div class="page-width">
-  <h1 class="title title--primary inline-richtext{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-    {{ section.settings.title }}
-  </h1>
+{%- style -%}
+  /* 现代合集列表样式 */
+  .collections-container {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .collections-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .collections-title {
+    font-size: 42px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 15px;
+    letter-spacing: -0.02em;
+  }
+
+  .collections-subtitle {
+    font-size: 18px;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* 现代网格布局 */
+  .collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
+  }
+
+  /* 合集卡片 */
+  .collection-card-modern {
+    position: relative;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .collection-card-modern:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  /* 图片容器 */
+  .collection-image-container {
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  }
+
+  .collection-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .collection-card-modern:hover .collection-image {
+    transform: scale(1.05);
+  }
+
+  /* 覆盖层 */
+  .collection-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.6) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .collection-card-modern:hover .collection-overlay {
+    opacity: 1;
+  }
+
+  /* 内容区域 */
+  .collection-content {
+    padding: 25px;
+    position: relative;
+  }
+
+  .collection-name {
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .collection-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .collection-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .product-count {
+    font-size: 14px;
+    color: #888;
+    font-weight: 500;
+  }
+
+  .view-collection-btn {
+    background: #871d16;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+
+  .view-collection-btn:hover {
+    background: #6b1611;
+    transform: translateY(-1px);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .collections-container {
+      padding: 30px 15px;
+    }
+
+    .collections-title {
+      font-size: 32px;
+    }
+
+    .collections-subtitle {
+      font-size: 16px;
+    }
+
+    .collections-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .collection-card-modern {
+      margin: 0 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .collections-grid {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+
+    .collection-card-modern {
+      margin: 0;
+    }
+
+    .collection-content {
+      padding: 20px;
+    }
+
+    .collection-name {
+      font-size: 20px;
+    }
+  }
+
+  /* 加载动画 */
+  .collections-grid {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* 分页样式 */
+  .pagination-modern {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 60px;
+  }
+
+  .pagination-modern a,
+  .pagination-modern span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .pagination-modern a {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+  }
+
+  .pagination-modern a:hover {
+    background: #871d16;
+    color: white;
+    border-color: #871d16;
+  }
+
+  .pagination-modern .current {
+    background: #871d16;
+    color: white;
+    border-color: #871d16;
+  }
+
+  .pagination-modern .deco {
+    display: none;
+  }
+{%- endstyle -%}
+
+<div class="collections-container">
+  <!-- 标题区域 -->
+  <div class="collections-header">
+    <h1 class="collections-title">{{ section.settings.title | default: 'Collections' }}</h1>
+    {%- if section.settings.subtitle != blank -%}
+      <p class="collections-subtitle">{{ section.settings.subtitle }}</p>
+    {%- endif -%}
+  </div>
+
   {%- liquid
     case section.settings.sort
       when 'products_high', 'products_low'
@@ -17,46 +271,94 @@
       assign collections = collections | reverse
     endif
 
-    assign moduloResult = 28 | modulo: section.settings.columns_desktop
+    assign moduloResult = 28 | modulo: 3
     assign paginate_by = 30
     if moduloResult == 0
       assign paginate_by = 28
     endif
   -%}
-  {%- paginate collections by paginate_by -%}
-    <ul
-      class="collection-list grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
-      role="list"
-    >
+
+  {%- paginate collections by 12 -%}
+    <!-- 合集网格 -->
+    <div class="collections-grid">
       {%- for collection in collections -%}
-        <li
-          class="collection-list__item grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          {% if settings.animations_reveal_on_scroll %}
-            data-cascade
-            style="--animation-order: {{ forloop.index }};"
-          {% endif %}
-        >
-          {% render 'card-collection',
-            card_collection: collection,
-            media_aspect_ratio: section.settings.image_ratio,
-            columns: 3
-          %}
-        </li>
+        <div class="collection-card-modern">
+          <a href="{{ collection.url }}" class="collection-link">
+            <!-- 图片区域 -->
+            <div class="collection-image-container">
+              {%- if collection.image -%}
+                <img
+                  src="{{ collection.image | img_url: '600x400' }}"
+                  alt="{{ collection.title }}"
+                  class="collection-image"
+                  loading="lazy"
+                >
+              {%- else -%}
+                <div class="collection-image-placeholder">
+                  <span>{{ collection.title | slice: 0, 2 | upcase }}</span>
+                </div>
+              {%- endif -%}
+              <div class="collection-overlay"></div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="collection-content">
+              <h3 class="collection-name">{{ collection.title }}</h3>
+              {%- if collection.description != blank -%}
+                <p class="collection-description">{{ collection.description | strip_html | truncatewords: 15 }}</p>
+              {%- endif -%}
+
+              <div class="collection-meta">
+                <span class="product-count"> {{ collection.all_products_count }} products </span>
+                <span class="view-collection-btn">View Collection</span>
+              </div>
+            </div>
+          </a>
+        </div>
       {%- endfor -%}
-    </ul>
-    {% render 'pagination', paginate: paginate %}
+    </div>
+
+    <!-- 分页 -->
+    {%- if paginate.pages > 1 -%}
+      <div class="pagination-modern">
+        {%- if paginate.previous -%}
+          <a href="{{ paginate.previous.url }}" class="prev">← Previous</a>
+        {%- endif -%}
+
+        {%- for part in paginate.parts -%}
+          {%- if part.is_link -%}
+            <a href="{{ part.url }}" class="page">{{ part.title }}</a>
+          {%- elsif part.title == '...' -%}
+            <span class="deco">{{ part.title }}</span>
+          {%- else -%}
+            <span class="current page">{{ part.title }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- if paginate.next -%}
+          <a href="{{ paginate.next.url }}" class="next">Next →</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
   {%- endpaginate -%}
 </div>
+
 {% schema %}
 {
-  "name": "t:sections.main-list-collections.name",
+  "name": "Modern Collections List",
   "class": "section",
   "settings": [
     {
       "type": "inline_richtext",
       "id": "title",
-      "label": "t:sections.main-list-collections.settings.title.label",
-      "default": "t:sections.main-list-collections.settings.title.default"
+      "label": "Page Title",
+      "default": "Our Collections"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Discover our curated collections"
     },
     {
       "type": "select",
@@ -64,31 +366,31 @@
       "options": [
         {
           "value": "alphabetical",
-          "label": "t:sections.main-list-collections.settings.sort.options__1.label"
+          "label": "Alphabetical (A-Z)"
         },
         {
           "value": "alphabetical_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__2.label"
+          "label": "Alphabetical (Z-A)"
         },
         {
           "value": "date_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__3.label"
+          "label": "Newest First"
         },
         {
           "value": "date",
-          "label": "t:sections.main-list-collections.settings.sort.options__4.label"
+          "label": "Oldest First"
         },
         {
           "value": "products_high",
-          "label": "t:sections.main-list-collections.settings.sort.options__5.label"
+          "label": "Most Products"
         },
         {
           "value": "products_low",
-          "label": "t:sections.main-list-collections.settings.sort.options__6.label"
+          "label": "Fewest Products"
         }
       ],
       "default": "alphabetical",
-      "label": "t:sections.main-list-collections.settings.sort.label"
+      "label": "Sort Collections By"
     },
     {
       "type": "select",
@@ -96,44 +398,48 @@
       "options": [
         {
           "value": "adapt",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__1.label"
+          "label": "Adapt to image"
         },
         {
           "value": "portrait",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__2.label"
+          "label": "Portrait (4:5)"
         },
         {
           "value": "square",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__3.label"
+          "label": "Square (1:1)"
         }
       ],
       "default": "adapt",
-      "label": "t:sections.main-list-collections.settings.image_ratio.label"
+      "label": "Image ratio"
     },
     {
       "type": "range",
       "id": "columns_desktop",
-      "min": 1,
-      "max": 6,
+      "min": 2,
+      "max": 4,
       "step": 1,
       "default": 3,
-      "label": "t:sections.main-list-collections.settings.columns_desktop.label"
+      "label": "Columns on desktop"
     },
     {
-      "type": "select",
-      "id": "columns_mobile",
-      "options": [
-        {
-          "value": "1",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__1.label"
-        },
-        {
-          "value": "2",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__2.label"
-        }
-      ],
-      "default": "2",
-      "label": "t:sections.main-list-collections.settings.columns_mobile.label"
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
     }
   ]
 }
