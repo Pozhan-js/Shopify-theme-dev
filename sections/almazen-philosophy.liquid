@@ -46,7 +46,13 @@
     display: grid;
     gap: 2rem;
     margin-bottom: 4rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(var(--principle-count, 1), 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    .almazen-philosophy .principles-grid {
+      grid-template-columns: 1fr;
+    }
   }
   
   .almazen-philosophy .principle-card {
@@ -192,7 +198,7 @@
   
   @media (min-width: 769px) and (max-width: 1024px) {
     .almazen-philosophy .principles-grid {
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(var(--principle-count, 1), 1fr);
     }
   }
   
@@ -264,6 +270,16 @@
     {% endif %}
   </div>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const principlesGrid = document.querySelector('.almazen-philosophy .principles-grid');
+    if (principlesGrid) {
+      const principleCount = principlesGrid.children.length;
+      principlesGrid.style.setProperty('--principle-count', principleCount);
+    }
+  });
+</script>
 
 {% schema %}
 {
