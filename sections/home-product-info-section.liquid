@@ -623,11 +623,17 @@
       option.addEventListener('change', function () {
         if (!this.checked) return;
 
+        console.log('🔄 SKU 切换开始 - Variant changed');
+        console.log('📦 选中的变体:', this.value);
+
         const newPrice = this.getAttribute('data-price');
         const newOldPrice = this.getAttribute('data-old-price');
         const isAvailable = this.getAttribute('data-available') === 'true';
         const newImage = this.getAttribute('data-image');
         const newImageAlt = this.getAttribute('data-image-alt');
+
+        console.log('💰 价格信息:', { newPrice, newOldPrice, isAvailable });
+        console.log('🖼️ 图片信息:', { newImage, newImageAlt });
 
         if (newPrice) currentPriceElement.textContent = newPrice;
         if (newOldPrice && newOldPrice !== '') {
@@ -644,31 +650,77 @@
           oldPriceElement.style.display = 'none';
         }
 
-        const mainImage = document.getElementById('main-product-image');
-        if (newImage && mainImage) {
-          mainImage.src = newImage;
-          mainImage.alt = newImageAlt || '';
-        }
+        // 添加错误处理
+        try {
+          // 🧩 根据变体名称中的数字过滤缩略图
+          const variantTitle = this.nextElementSibling.textContent.toLowerCase();
+          const match = variantTitle.match(/\d+/);
+          const variantNumber = match ? match[0] : '';
+          const thumbnails = document.querySelectorAll('.thumbnail');
+          const mainImage = document.getElementById('main-product-image');
 
-        // 🧩 新增逻辑：根据变体名称中的数字过滤缩略图
-        const variantTitle = this.nextElementSibling.textContent.toLowerCase();
-        const match = variantTitle.match(/\d+/);
-        const variantNumber = match ? match[0] : '';
-        const thumbnails = document.querySelectorAll('.thumbnail');
+          console.log('🏷️ 变体标题:', variantTitle);
+          console.log('🔢 提取的数字:', variantNumber);
+          console.log('🖼️ 找到缩略图数量:', thumbnails.length);
 
-        thumbnails.forEach((thumb) => {
-          const key = thumb.getAttribute('data-image-key').toLowerCase();
-          if (variantNumber && key.includes(variantNumber)) {
-            thumb.style.display = 'inline-block';
+          // 先过滤缩略图并移除 active 状态
+          thumbnails.forEach((thumb, index) => {
+            const key = thumb.getAttribute('data-image-key').toLowerCase();
+            const shouldShow = variantNumber && key.includes(variantNumber);
+            const displayStyle = shouldShow ? 'inline-block' : (variantNumber ? 'none' : 'inline-block');
+            
+            console.log(`📸 缩略图 ${index + 1}:`, {
+              key: key,
+              shouldShow: shouldShow,
+              display: displayStyle
+            });
+            
+            thumb.style.display = displayStyle;
+            thumb.classList.remove('active');
+          });
+
+          // 确定主图源：优先级 1. 变体图片 2. 第一个可见缩略图 3. 保持当前
+          let finalImageSrc = null;
+          let finalImageAlt = '';
+
+          if (newImage && newImage.trim() !== '') {
+            // 优先使用变体指定的图片
+            finalImageSrc = newImage;
+            finalImageAlt = newImageAlt || '';
+            console.log('🎯 使用变体指定图片:', finalImageSrc);
           } else {
-            thumb.style.display = variantNumber ? 'none' : 'inline-block';
+            // 如果变体没有指定图片，使用第一个可见缩略图
+            const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
+            if (visibleThumb) {
+              finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
+              finalImageAlt = visibleThumb.alt || '';
+              visibleThumb.classList.add('active');
+              console.log('🎯 使用第一个可见缩略图:', finalImageSrc);
+            } else {
+              console.log('⚠️ 没有找到可见的缩略图，保持当前主图');
+            }
           }
-        });
 
-        // 自动切换主图到第一个可见缩略图
-        const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
-        if (visibleThumb && mainImage) {
-          mainImage.src = visibleThumb.src.replace('100x100', '800x800');
+          // 更新主图
+          if (finalImageSrc && mainImage) {
+            console.log('🔄 最终更新主图:', finalImageSrc);
+            mainImage.src = finalImageSrc;
+            mainImage.alt = finalImageAlt;
+            
+            // 如果使用的是变体图片，需要找到对应的缩略图并设为 active
+            if (newImage && newImage.trim() !== '') {
+              const matchingThumb = Array.from(thumbnails).find(thumb => {
+                const thumbLargeUrl = thumb.src.replace('100x100', '800x800');
+                return thumbLargeUrl === finalImageSrc && thumb.style.display !== 'none';
+              });
+              if (matchingThumb) {
+                matchingThumb.classList.add('active');
+                console.log('🎯 设置匹配的缩略图为 active');
+              }
+            }
+          }
+        } catch (error) {
+          console.error('❌ SKU 图片切换出错:', error);
         }
 
         // 更新按钮状态
@@ -676,6 +728,7 @@
         buyNowBtn.disabled = !isAvailable;
         addToCartBtn.textContent = isAvailable ? '{{ section.settings.addtocarttext }}' : 'Sold Out';
 
+        console.log('✅ SKU 切换完成');
         updateTotalPrice();
       });
     });
