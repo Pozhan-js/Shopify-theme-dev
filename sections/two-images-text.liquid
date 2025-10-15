@@ -1,6 +1,7 @@
 {% comment %}
   Section: 双图左 + 文本右
   描述：左侧两张图片上下排列，每张图最大高度 300px；右侧可编辑富文本
+  已优化移动端显示：竖向堆叠，图片高度自适应，排版清晰
 {% endcomment %}
 
 <div
@@ -8,7 +9,7 @@
   style="
     display: flex;
     gap: 30px;
-    align-items: stretch;
+    flex-wrap: wrap;
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -20,7 +21,7 @@
   <div
     class="image-group"
     style="
-      flex: 1;
+      flex: 1 1 400px;
       display: flex;
       flex-direction: column;
       gap: 15px;
@@ -28,16 +29,13 @@
   >
     {% if section.settings.image_top != blank %}
       <div
-        class="image-top"
         style="
           overflow: hidden;
           border-radius: 8px;
-          background-color: #f5f5f5;
           height: 300px;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow:scroll;
         "
       >
         {{
@@ -50,16 +48,13 @@
 
     {% if section.settings.image_bottom != blank %}
       <div
-        class="image-bottom"
         style="
           overflow: hidden;
           border-radius: 8px;
-          background-color: #f5f5f5;
           height: 300px;
           display: flex;
           align-items: center;
           justify-content: center;
-             overflow:scroll;
         "
       >
         {{
@@ -71,19 +66,48 @@
     {% endif %}
   </div>
 
-  <!-- 右侧：富文本内容，垂直居中 -->
+  <!-- 右侧：富文本内容 -->
   <div
     class="text-content"
     style="
-      flex: 1;
+      flex: 1 1 400px;
       display: flex;
       align-items: center;
       padding: 10px 0;
     "
   >
-    <div>{{ section.settings.text_content }}</div>
+    <div
+      style="
+        width: 100%;
+        line-height: 1.6;
+        color: #333;
+      "
+    >
+      {{ section.settings.text_content }}
+    </div>
   </div>
 </div>
+
+<style>
+  /* 移动端适配：屏幕小于 750px 时堆叠布局 */
+  @media (max-width: 749px) {
+    .two-images-text-section {
+      flex-direction: column;
+      padding: 20px 15px;
+    }
+
+    .two-images-text-section .image-group > div,
+    .two-images-text-section .image-group > div img {
+      height: 220px !important;
+      max-height: 220px !important;
+    }
+
+    .text-content {
+      order: 1;
+      margin-top: 20px;
+    }
+  }
+</style>
 
 {% schema %}
 {
@@ -115,9 +139,3 @@
   ]
 }
 {% endschema %}
-
-{% stylesheet %}
-{% endstylesheet %}
-
-{% javascript %}
-{% endjavascript %}
