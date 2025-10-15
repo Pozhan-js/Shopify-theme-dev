@@ -434,19 +434,6 @@
   }
 </style>
 
-{% comment %}
-  Product Info Section - Multi-SKU Support + Thumbnail Filtering by SKU Number
-{% endcomment %}
-
-{% liquid
-  assign displayproduct = product
-  if section.settings.selectedproduct != blank
-    assign displayproduct = allproducts[section.settings.selectedproduct]
-  elsif displayproduct == blank and collections.all.products.size > 0
-    assign displayproduct = collections.all.products.first
-  endif
-%}
-
 <section class="product-info-section">
   <div class="product-info-container">
     <div class="product-info-grid">
@@ -486,6 +473,7 @@
         {% endif %}
 
         <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data">
+          <!-- SKU Selector for Product Variants -->
           {% if displayproduct.variants.size > 1 %}
             <div class="sku-selector">
               <h3>{{ section.settings.skuselectortitle }}</h3>
@@ -500,20 +488,63 @@
                       data-price="{{ variant.price | money }}"
                       data-old-price="{% if variant.compareatprice > variant.price %}{{ variant.compareatprice | money }}{% endif %}"
                       data-available="{{ variant.available }}"
-                      data-image="{% if variant.image %}{{ variant.image | img_url: '800x800' }}{% elsif displayproduct.featured_image %}{{ displayproduct.featured_image | img_url: '800x800' }}{% endif %}"
+                      data-image="{% if variant.image %}{{ variant.image | img_url: '800x800' }}{% elsif displayproduct.featured_image %}{{ displayproduct.featured_image | img_url: '800x800' }}{% else %}{% endif %}"
                       data-image-alt="{% if variant.image %}{{ variant.image.alt | default: variant.title }}{% else %}{{ displayproduct.featured_image.alt | default: displayproduct.title }}{% endif %}"
-                      {% if forloop.first %}checked{% endif %}
-                      {% unless variant.available %}disabled{% endunless %}
+                      {% if forloop.first %}
+                        checked
+                      {% endif %}
+                      {% unless variant.available %}
+                        disabled
+                      {% endunless %}
                     >
-                    <label for="variant-{{ variant.id }}">{{ variant.title }}</label>
+                    <label for="variant-{{ variant.id }}">
+                      {{ variant.title }}
+                      {% unless variant.available %} - Sold Out{% endunless %}
+                    </label>
                   </div>
                 {% endfor %}
               </div>
             </div>
           {% else %}
-            <input type="hidden" name="id" value="{{ displayproduct.selected_or_first_available_variant.id }}">
+            <!-- Single variant product -->
+            <input type="hidden" name="id" value="{{ displayproduct.selectedorfirstavailablevariant.id }}">
           {% endif %}
 
+          <!-- Custom SKU Options from Section Blocks (if any) -->
+          {% if section.blocks.size > 0 %}
+            {% assign hasskublocks = false %}
+            {% for block in section.blocks %}
+              {% if block.type == 'skuoption' %}
+                {% assign hasskublocks = true %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
+            {% if hasskublocks %}
+              <div class="sku-selector">
+                <h3>{{ section.settings.customskutitle | default: 'Additional Options' }}</h3>
+                <div class="sku-options">
+                  {% for block in section.blocks %}
+                    {% if block.type == 'skuoption' %}
+                      <div class="sku-option">
+                        <input
+                          type="radio"
+                          id="custom-sku-{{ forloop.index }}"
+                          name="customsku"
+                          value="{{ block.settings.variantid }}"
+                          data-price="{{ block.settings.skuprice }}"
+                          data-old-price="{{ block.settings.skuoldprice }}"
+                        >
+                        <label for="custom-sku-{{ forloop.index }}">{{ block.settings.skuname }}</label>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+
+          <!-- Quantity Selector -->
           <div class="quantity-selector">
             <label for="quantity">{{ section.settings.quantitylabel }}:</label>
             <div class="quantity-input">
@@ -523,11 +554,38 @@
             </div>
           </div>
 
+          <!-- Benefits List -->
+          {% if section.blocks.size > 0 %}
+            <div class="benefits-list">
+              {% for block in section.blocks %}
+                {% if block.type == 'benefit' %}
+                  <div class="benefit-item">
+                    <span>{{ block.settings.benefitname }}</span>
+                    <span class="value">{{ block.settings.benefitvalue }}</span>
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
           <div class="total-row">
             <span>{{ section.settings.totallabel }}</span>
             <span id="total-price">{{ displayproduct.price | money }}</span>
           </div>
 
+          {% if section.settings.disclaimertext != blank %}
+            <div class="disclaimer">{{ section.settings.disclaimertext }}</div>
+          {% endif %}
+
+          {% if section.settings.guaranteetext != blank %}
+            <div class="guarantee">{{ section.settings.guaranteetext }}</div>
+          {% endif %}
+
+          {% if section.settings.flexibletext != blank %}
+            <div class="flexible">{{ section.settings.flexibletext }}</div>
+          {% endif %}
+
+          <!-- Button Group -->
           <div class="button-group">
             <button type="submit" name="add" class="add-to-cart-button" id="add-to-cart-btn">
               {{ section.settings.addtocarttext }}
@@ -541,23 +599,29 @@
 
       <!-- Right Image -->
       <div class="image-container">
+        {% comment %} Try to get image from different sources {% endcomment %}
         {% assign imageurl = '' %}
         {% assign imagealt = '' %}
 
+        {% comment %} First priority: Use product image if enabled {% endcomment %}
         {% if section.settings.useproductimage and displayproduct.featured_image %}
           {% assign imageurl = displayproduct.featured_image | img_url: '800x800' %}
           {% assign imagealt = displayproduct.featured_image.alt | default: displayproduct.title %}
+          {% comment %} Second priority: Custom main image {% endcomment %}
         {% elsif section.settings.mainimage != blank %}
           {% assign imageurl = section.settings.mainimage | img_url: '800x800' %}
           {% assign imagealt = section.settings.mainimagealt | default: displayproduct.title %}
+          {% comment %} Third priority: Fallback image {% endcomment %}
         {% elsif section.settings.fallbackimage != blank %}
           {% assign imageurl = section.settings.fallbackimage | img_url: '800x800' %}
           {% assign imagealt = section.settings.mainimagealt | default: displayproduct.title %}
+          {% comment %} Fourth priority: Product featured image as fallback {% endcomment %}
         {% elsif displayproduct.featured_image %}
           {% assign imageurl = displayproduct.featured_image | img_url: '800x800' %}
           {% assign imagealt = displayproduct.featured_image.alt | default: displayproduct.title %}
         {% endif %}
 
+        {% comment %} Display image or placeholder {% endcomment %}
         {% if imageurl != blank and imageurl != '' %}
           <img
             id="main-product-image"
@@ -567,27 +631,29 @@
             width="800"
             height="800"
             loading="lazy"
+            onload="console.log('Image loaded successfully');"
+            onerror="console.log('Image failed to load:', this.src); this.style.display='none'; this.nextElementSibling.style.display='flex';"
           >
           <div class="placeholder-image" style="display: none;">
             <span>{{ displayproduct.title | default: 'Product Image' }}</span>
           </div>
         {% else %}
+          {% comment %} Show placeholder when no image is available {% endcomment %}
           <div id="main-product-image" class="placeholder-image">
             <span>{{ displayproduct.title | default: 'No Image Available' }}</span>
           </div>
         {% endif %}
 
+        {% comment %} Thumbnail gallery {% endcomment %}
         {% if displayproduct.images.size > 1 %}
           <div class="thumbnail-gallery">
             {% for image in displayproduct.images %}
-              {% assign keytext = image.alt | default: image.src | downcase %}
               <img
                 src="{{ image | img_url: '100x100' }}"
                 alt="{{ image.alt | default: displayproduct.title }}"
                 class="thumbnail{% if forloop.first %} active{% endif %}"
                 width="100"
                 height="100"
-                data-image-key="{{ keytext }}"
                 onclick="
                   document.getElementById('main-product-image').src='{{ image | img_url: '800x800' }}';
                   document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
@@ -603,205 +669,156 @@
 </section>
 
 <script>
-  // 🚀 模板加载日志
-  console.log('🎯 Shopify 产品模板已加载');
-  console.log('📅 加载时间:', new Date().toLocaleString());
-  
+  // Quantity change function
   function changeQuantity(change) {
-    console.log('🔢 数量变更:', change);
     const quantityInput = document.getElementById('quantity');
-    let num = parseInt(quantityInput.value);
-    num = num + change;
-    if (num < 1) num = 1;
-    quantityInput.value = num;
-    console.log('📊 当前数量:', num);
+    let currentQuantity = parseInt(quantityInput.value);
+    let newQuantity = currentQuantity + change;
+
+    if (newQuantity < 1) newQuantity = 1;
+
+    quantityInput.value = newQuantity;
     updateTotalPrice();
   }
 
+  // Update price when variant changes
   document.addEventListener('DOMContentLoaded', function () {
-    console.log('🎉 DOM 内容已加载完成');
-    console.log('🔍 开始初始化产品选项...');
     const variantOptions = document.querySelectorAll('input[name="id"]');
     const currentPriceElement = document.getElementById('current-price');
     const oldPriceElement = document.getElementById('old-price');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
 
-    console.log('🔍 找到变体选项数量:', variantOptions.length);
-    console.log('🎛️ 页面元素检查:', {
-      currentPrice: !!currentPriceElement,
-      oldPrice: !!oldPriceElement,
-      addToCartBtn: !!addToCartBtn,
-      buyNowBtn: !!buyNowBtn
-    // 添加页面加载完成的总价更新函数
-    function updateTotalPrice() {
-      console.log('💰 更新总价被调用');
-      const quantityInput = document.getElementById('quantity');
-      const currentPriceElement = document.getElementById('current-price');
-      const totalPriceElement = document.getElementById('total-price');
-      
-      if (quantityInput && currentPriceElement && totalPriceElement) {
-        const quantity = parseInt(quantityInput.value) || 1;
-        const priceText = currentPriceElement.textContent.replace(/[^\d.]/g, '');
-        const price = parseFloat(priceText) || 0;
-        const total = quantity * price;
-        
-        console.log('🧮 价格计算:', { quantity, price, total });
-        totalPriceElement.textContent = '$' + total.toFixed(2);
-      } else {
-        console.log('⚠️ 总价更新失败 - 缺少必要元素');
-      }
-    }
-
-    // 初始化总价
-    updateTotalPrice();
-
     variantOptions.forEach(function (option) {
       option.addEventListener('change', function () {
-        if (!this.checked) return;
+        if (this.checked) {
+          const newPrice = this.getAttribute('data-price');
+          const newOldPrice = this.getAttribute('data-old-price');
+          const isAvailable = this.getAttribute('data-available') === 'true';
+          const newImage = this.getAttribute('data-image');
+          const newImageAlt = this.getAttribute('data-image-alt');
 
-        console.log('🔄 SKU 切换开始 - Variant changed');
-        console.log('📦 选中的变体:', this.value);
+          if (newPrice) currentPriceElement.textContent = newPrice;
 
-        const newPrice = this.getAttribute('data-price');
-        const newOldPrice = this.getAttribute('data-old-price');
-        const isAvailable = this.getAttribute('data-available') === 'true';
-        const newImage = this.getAttribute('data-image');
-        const newImageAlt = this.getAttribute('data-image-alt');
-
-        console.log('💰 价格信息:', { newPrice, newOldPrice, isAvailable });
-        console.log('🖼️ 图片信息:', { newImage, newImageAlt });
-
-        if (newPrice) currentPriceElement.textContent = newPrice;
-        if (newOldPrice && newOldPrice !== '') {
-          if (!document.getElementById('old-price')) {
-            const priceRow = document.querySelector('.price-row');
-            const oldPriceSpan = document.createElement('span');
-            oldPriceSpan.className = 'price-old price-discount';
-            oldPriceSpan.id = 'old-price';
-            priceRow.appendChild(oldPriceSpan);
+          if (newOldPrice && newOldPrice !== '') {
+            if (!oldPriceElement) {
+              const priceRow = document.querySelector('.price-row');
+              const oldPriceSpan = document.createElement('span');
+              oldPriceSpan.className = 'price-old price-discount';
+              oldPriceSpan.id = 'old-price';
+              priceRow.appendChild(oldPriceSpan);
+            }
+            document.getElementById('old-price').textContent = newOldPrice;
+            document.getElementById('old-price').style.display = 'inline';
+          } else if (oldPriceElement) {
+            oldPriceElement.style.display = 'none';
           }
-          document.getElementById('old-price').textContent = newOldPrice;
-          document.getElementById('old-price').style.display = 'inline';
-        } else if (oldPriceElement) {
-          oldPriceElement.style.display = 'none';
-        }
 
-        // 添加错误处理
-        try {
-          // 🧩 根据变体名称中的数字过滤缩略图
-          const variantTitle = this.nextElementSibling.textContent.toLowerCase();
-          const match = variantTitle.match(/\d+/);
-          const variantNumber = match ? match[0] : '';
-          const thumbnails = document.querySelectorAll('.thumbnail');
+          // Update product image
           const mainImage = document.getElementById('main-product-image');
+          if (newImage && mainImage) {
+            mainImage.classList.add('changing');
+            setTimeout(function () {
+              if (mainImage.tagName === 'IMG') {
+                mainImage.src = newImage;
+                mainImage.alt = newImageAlt || '';
+                mainImage.onerror = function () {
+                  this.style.display = 'none';
+                  if (this.nextElementSibling) {
+                    this.nextElementSibling.style.display = 'flex';
+                  }
+                };
+              } else {
+                // Convert placeholder div to img if needed
+                const imageContainer = mainImage.parentNode;
+                const newImg = document.createElement('img');
+                newImg.id = 'main-product-image';
+                newImg.src = newImage;
+                newImg.alt = newImageAlt || '';
+                newImg.className = 'main-image';
+                newImg.loading = 'lazy';
+                newImg.onerror = function () {
+                  this.style.display = 'none';
+                  if (this.nextElementSibling) {
+                    this.nextElementSibling.style.display = 'flex';
+                  }
+                };
 
-          console.log('🏷️ 变体标题:', variantTitle);
-          console.log('🔢 提取的数字:', variantNumber);
-          console.log('🖼️ 找到缩略图数量:', thumbnails.length);
+                // Create fallback placeholder
+                const placeholder = document.createElement('div');
+                placeholder.className = 'placeholder-image';
+                placeholder.innerHTML = '<span>' + (newImageAlt || 'Product Image') + '</span>';
 
-          // 先过滤缩略图并移除 active 状态
-          thumbnails.forEach((thumb, index) => {
-            const key = thumb.getAttribute('data-image-key').toLowerCase();
-            const shouldShow = variantNumber && key.includes(variantNumber);
-            const displayStyle = shouldShow ? 'inline-block' : (variantNumber ? 'none' : 'inline-block');
-            
-            console.log(`📸 缩略图 ${index + 1}:`, {
-              key: key,
-              shouldShow: shouldShow,
-              display: displayStyle
-            });
-            
-            thumb.style.display = displayStyle;
-            thumb.classList.remove('active');
-          });
-
-          // 确定主图源：优先级 1. 变体图片 2. 第一个可见缩略图 3. 保持当前
-          let finalImageSrc = null;
-          let finalImageAlt = '';
-
-          if (newImage && newImage.trim() !== '') {
-            // 优先使用变体指定的图片
-            finalImageSrc = newImage;
-            finalImageAlt = newImageAlt || '';
-            console.log('🎯 使用变体指定图片:', finalImageSrc);
-          } else {
-            // 如果变体没有指定图片，使用第一个可见缩略图
-            const visibleThumb = Array.from(thumbnails).find(t => t.style.display !== 'none');
-            if (visibleThumb) {
-              finalImageSrc = visibleThumb.src.replace('100x100', '800x800');
-              finalImageAlt = visibleThumb.alt || '';
-              visibleThumb.classList.add('active');
-              console.log('🎯 使用第一个可见缩略图:', finalImageSrc);
-            } else {
-              console.log('⚠️ 没有找到可见的缩略图，保持当前主图');
-            }
-          }
-
-          // 更新主图
-          if (finalImageSrc && mainImage) {
-            console.log('🔄 最终更新主图:', finalImageSrc);
-            mainImage.src = finalImageSrc;
-            mainImage.alt = finalImageAlt;
-            
-            // 如果使用的是变体图片，需要找到对应的缩略图并设为 active
-            if (newImage && newImage.trim() !== '') {
-              const matchingThumb = Array.from(thumbnails).find(thumb => {
-                const thumbLargeUrl = thumb.src.replace('100x100', '800x800');
-                return thumbLargeUrl === finalImageSrc && thumb.style.display !== 'none';
-              });
-              if (matchingThumb) {
-                matchingThumb.classList.add('active');
-                console.log('🎯 设置匹配的缩略图为 active');
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(newImg);
+                imageContainer.appendChild(placeholder);
               }
-            }
+              setTimeout(function () {
+                const currentImage = document.getElementById('main-product-image');
+                if (currentImage) {
+                  currentImage.classList.remove('changing');
+                }
+              }, 50);
+            }, 150);
           }
-        } catch (error) {
-          console.error('❌ SKU 图片切换出错:', error);
+
+          // Update button states based on availability
+          if (isAvailable) {
+            addToCartBtn.disabled = false;
+            buyNowBtn.disabled = false;
+            addToCartBtn.textContent = '{{ section.settings.addtocarttext }}';
+          } else {
+            addToCartBtn.disabled = true;
+            buyNowBtn.disabled = true;
+            addToCartBtn.textContent = 'Sold Out';
+          }
+
+          updateTotalPrice();
         }
-
-        // 更新按钮状态
-        addToCartBtn.disabled = !isAvailable;
-        buyNowBtn.disabled = !isAvailable;
-        addToCartBtn.textContent = isAvailable ? '{{ section.settings.addtocarttext }}' : 'Sold Out';
-
-        console.log('✅ SKU 切换完成');
-        updateTotalPrice();
       });
     });
 
-    // Buy now
+    // Buy now button functionality
     document.getElementById('buy-now-btn').addEventListener('click', function () {
       const form = document.querySelector('.product-form');
       const formData = new FormData(form);
-      fetch('/cart/add.js', { method: 'POST', body: formData })
-        .then(() => { window.location.href = '/cart'; })
-        .catch(err => console.error('Error:', err));
+
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          window.location.href = '/cart';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
     });
 
+    // Initialize total price
     updateTotalPrice();
-
-    // 页面载入时按默认变体自动过滤
-    const firstChecked = document.querySelector('input[name="id"]:checked');
-    if (firstChecked) firstChecked.dispatchEvent(new Event('change'));
   });
 
   function updateTotalPrice() {
     const selectedVariant = document.querySelector('input[name="id"]:checked');
     const quantity = parseInt(document.getElementById('quantity').value);
     const totalPriceElement = document.getElementById('total-price');
+
     if (selectedVariant && selectedVariant.getAttribute('data-price')) {
       const unitPrice = selectedVariant.getAttribute('data-price');
-      const num = parseFloat(unitPrice.replace(/[^0-9.]/g, ''));
-      const currency = unitPrice.match(/[^\d\s,\.]+/);
-      const symbol = currency ? currency[0] : '$';
-      totalPriceElement.textContent = symbol + (num * quantity).toFixed(2);
+      // Extract numeric value from price string
+      const priceMatch = unitPrice.match(/[\d,]+\.?\d*/);
+      if (priceMatch) {
+        const numericPrice = parseFloat(priceMatch[0].replace(',', ''));
+        const totalPrice = numericPrice * quantity;
+        const currency = unitPrice.match(/[^\d\s,\.]+/);
+        const currencySymbol = currency ? currency[0] : '$';
+        totalPriceElement.textContent = currencySymbol + totalPrice.toFixed(2);
+      }
     }
   }
 </script>
-
-
-
 
 {% schema %}
 {
