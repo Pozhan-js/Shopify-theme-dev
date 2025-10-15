@@ -16,15 +16,18 @@
               <!-- 内容区域 -->
               <div class="story-content">
                 <h3 class="story-title">{{ article.title | truncate: 60 }}</h3>
-                <p class="story-excerpt">{{ article.excerpt | default: article.content | strip_html | truncate: 120 }}</p>
+                
+                <!-- 箭头按钮 -->
+                <a href="{{ article.url }}" class="story-arrow-button">
+                  {% if section.settings.arrow_icon != blank %}
+                    <img src="{{ section.settings.arrow_icon | img_url: '24x24' }}" alt="Arrow Icon" class="story-arrow-icon">
+                  {% else %}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  {% endif %}
+                </a>
               </div>
-
-              <!-- 箭头按钮 -->
-              <a href="{{ article.url }}" class="story-arrow-button">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
             </div>
           {% endfor %}
         {% endif %}
@@ -46,15 +49,18 @@
               <!-- 内容区域 -->
               <div class="story-content">
                 <h3 class="story-title">{{ block.settings.story_title }}</h3>
-                <p class="story-excerpt">{{ block.settings.story_excerpt }}</p>
+                
+                <!-- 箭头按钮 -->
+                <a href="{{ block.settings.story_url | default: '#' }}" class="story-arrow-button">
+                  {% if section.settings.arrow_icon != blank %}
+                    <img src="{{ section.settings.arrow_icon | img_url: '24x24' }}" alt="Arrow Icon" class="story-arrow-icon">
+                  {% else %}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  {% endif %}
+                </a>
               </div>
-
-              <!-- 箭头按钮 -->
-              <a href="{{ block.settings.story_url | default: '#' }}" class="story-arrow-button">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </a>
             </div>
           {% endif %}
         {% endfor %}
@@ -124,6 +130,7 @@
     background: rgba(22, 22, 22, 0.75);
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 32px;
     margin: 0;
     box-sizing: border-box;
@@ -145,7 +152,33 @@
   }
 
   .story-arrow-button {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64.22px;
+    height: 64.26px;
+    border-radius: 32px;
+    background: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .story-arrow-button:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.05);
+  }
+
+  .story-arrow-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .story-arrow-button svg {
+    width: 24px;
+    height: 24px;
+    color: #161616;
   }
 
   /* 响应式设计 */
@@ -225,6 +258,18 @@
       line-height: calc(24px * 0.84);
       width: calc(315px * 0.84);
     }
+    
+    .story-arrow-button {
+      width: calc(64.22px * 0.84);
+      height: calc(64.26px * 0.84);
+      border-radius: calc(32px * 0.84);
+    }
+    
+    .story-arrow-icon,
+    .story-arrow-button svg {
+      width: calc(24px * 0.84);
+      height: calc(24px * 0.84);
+    }
   }
 
   /* 平板屏幕 (768px - 1023px) - 67%比例缩放，2列布局 */
@@ -263,6 +308,18 @@
       font-size: calc(16px * 0.67);
       line-height: calc(24px * 0.67);
       width: calc(315px * 0.67);
+    }
+    
+    .story-arrow-button {
+      width: calc(64.22px * 0.67);
+      height: calc(64.26px * 0.67);
+      border-radius: calc(32px * 0.67);
+    }
+    
+    .story-arrow-icon,
+    .story-arrow-button svg {
+      width: calc(24px * 0.67);
+      height: calc(24px * 0.67);
     }
   }
 
@@ -307,6 +364,18 @@
       font-size: calc(16px * 0.5);
       line-height: calc(24px * 0.5);
       width: calc(315px * 0.5);
+    }
+    
+    .story-arrow-button {
+      width: calc(64.22px * 0.5);
+      height: calc(64.26px * 0.5);
+      border-radius: calc(32px * 0.5);
+    }
+    
+    .story-arrow-icon,
+    .story-arrow-button svg {
+      width: calc(24px * 0.5);
+      height: calc(24px * 0.5);
     }
   }
 
@@ -362,6 +431,22 @@
       min-line-height: 18px;
       width: calc(315px * 0.33);
       min-width: 200px;
+    }
+    
+    .story-arrow-button {
+      width: calc(64.22px * 0.33);
+      height: calc(64.26px * 0.33);
+      border-radius: calc(32px * 0.33);
+      min-width: 32px;
+      min-height: 32px;
+    }
+    
+    .story-arrow-icon,
+    .story-arrow-button svg {
+      width: calc(24px * 0.33);
+      height: calc(24px * 0.33);
+      min-width: 16px;
+      min-height: 16px;
     }
   }
 </style>
@@ -427,6 +512,12 @@
       "id": "blog_handle",
       "label": "选择博客",
       "info": "选择要显示文章的博客"
+    },
+    {
+      "type": "image_picker",
+      "id": "arrow_icon",
+      "label": "箭头图标",
+      "info": "推荐尺寸：24x24px，如不上传将使用默认箭头图标"
     }
   ],
   "blocks": [
