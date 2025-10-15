@@ -1,0 +1,676 @@
+<div class="blog-stories-section" {{ section.shopify_attributes }}>
+  <div class="blog-stories-container">
+    <!-- 标题区域 -->
+    <div class="blog-stories-header">
+      <h2 class="blog-stories-title">{{ section.settings.section_title | default: "Stories" }}</h2>
+    </div>
+
+    <!-- 故事卡片网格 -->
+    <div class="blog-stories-grid">
+      {% comment %} 优先显示博客文章 {% endcomment %}
+      {% if section.settings.blog_handle != blank %}
+        {% assign selected_blog = blogs[section.settings.blog_handle] %}
+        {% if selected_blog and selected_blog.articles.size > 0 %}
+          {% assign articles_limit = section.settings.articles_count | default: 6 %}
+          {% for article in selected_blog.articles limit: articles_limit %}
+            <div class="story-card">
+              <!-- Logo区域 -->
+              <div class="story-logo">
+                {% if section.settings.logo_image != blank %}
+                  <img src="{{ section.settings.logo_image | img_url: '60x60' }}" alt="Logo" class="story-logo-image">
+                {% else %}
+                  <div class="story-logo-placeholder">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="60" height="60" rx="8" fill="#E5E5E5"/>
+                      <path d="M20 40L30 30L40 40" stroke="#999" stroke-width="2" fill="none"/>
+                      <circle cx="25" cy="25" r="3" fill="#999"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- 内容区域 -->
+              <div class="story-content">
+                <h3 class="story-title">{{ article.title | truncate: 60 }}</h3>
+                <p class="story-excerpt">{{ article.excerpt | default: article.content | strip_html | truncate: 120 }}</p>
+              </div>
+
+              <!-- 箭头按钮 -->
+              <a href="{{ article.url }}" class="story-arrow-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% comment %} 如果没有博客文章或需要补充，显示手动配置的故事卡片 {% endcomment %}
+      {% assign blog_articles_count = 0 %}
+      {% if section.settings.blog_handle != blank %}
+        {% assign selected_blog = blogs[section.settings.blog_handle] %}
+        {% if selected_blog %}
+          {% assign blog_articles_count = selected_blog.articles.size %}
+          {% assign articles_limit = section.settings.articles_count | default: 6 %}
+          {% if blog_articles_count > articles_limit %}
+            {% assign blog_articles_count = articles_limit %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
+
+      {% assign remaining_slots = section.settings.articles_count | default: 6 | minus: blog_articles_count %}
+      {% if remaining_slots > 0 %}
+        {% for block in section.blocks limit: remaining_slots %}
+          {% if block.type == 'story_card' %}
+            <div class="story-card" {{ block.shopify_attributes }}>
+              <!-- Logo区域 -->
+              <div class="story-logo">
+                {% if block.settings.card_logo != blank %}
+                  <img src="{{ block.settings.card_logo | img_url: '60x60' }}" alt="Story Logo" class="story-logo-image">
+                {% elsif section.settings.logo_image != blank %}
+                  <img src="{{ section.settings.logo_image | img_url: '60x60' }}" alt="Logo" class="story-logo-image">
+                {% else %}
+                  <div class="story-logo-placeholder">
+                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="60" height="60" rx="8" fill="#E5E5E5"/>
+                      <path d="M20 40L30 30L40 40" stroke="#999" stroke-width="2" fill="none"/>
+                      <circle cx="25" cy="25" r="3" fill="#999"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- 内容区域 -->
+              <div class="story-content">
+                <h3 class="story-title">{{ block.settings.story_title }}</h3>
+                <p class="story-excerpt">{{ block.settings.story_excerpt }}</p>
+              </div>
+
+              <!-- 箭头按钮 -->
+              <a href="{{ block.settings.story_url | default: '#' }}" class="story-arrow-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .blog-stories-section {
+    background-color: {{ section.settings.background_color }};
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+  }
+
+  .blog-stories-container {
+    max-width: 1654px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .blog-stories-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .blog-stories-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 48px;
+    font-weight: 500;
+    color: {{ section.settings.title_color }};
+    margin: 0;
+    letter-spacing: 0px;
+    line-height: 1.2;
+  }
+
+  .blog-stories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 400px);
+    gap: 80px;
+    justify-content: center;
+  }
+
+  .story-card {
+    width: 400px;
+    height: 280px;
+    background-color: #F8F8F8;
+    border-radius: 12px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .story-logo {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+  }
+
+  .story-logo-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .story-logo-placeholder {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .story-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .story-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #161616;
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: 0px;
+  }
+
+  .story-excerpt {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(22, 22, 22, 0.7);
+    line-height: 1.5;
+    margin: 0;
+    letter-spacing: 0px;
+  }
+
+  .story-arrow-button {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 48px;
+    height: 48px;
+    background-color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #161616;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .story-arrow-button:hover {
+    background-color: #C22E35;
+    color: white;
+    transform: scale(1.1);
+  }
+
+  .story-arrow-button svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 响应式设计 */
+
+  /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
+  @media (min-width: 1920px) {
+    .blog-stories-container {
+      max-width: 1654px;
+      padding: 0;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: 80px;
+    }
+    
+    .blog-stories-title {
+      font-size: 48px;
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(3, 400px);
+      gap: 80px;
+    }
+    
+    .story-card {
+      width: 400px;
+      height: 280px;
+      padding: 40px;
+    }
+    
+    .story-logo,
+    .story-logo-image,
+    .story-logo-placeholder {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .story-content {
+      gap: 16px;
+      margin: 20px 0;
+    }
+    
+    .story-title {
+      font-size: 24px;
+    }
+    
+    .story-excerpt {
+      font-size: 16px;
+    }
+    
+    .story-arrow-button {
+      bottom: 40px;
+      right: 40px;
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  /* 中等屏幕 (1024px - 1919px) - 84%比例缩放 */
+  @media (min-width: 1024px) and (max-width: 1919px) {
+    .blog-stories-container {
+      max-width: calc(1654px * 0.84);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.84);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.84);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(3, calc(400px * 0.84));
+      gap: calc(80px * 0.84);
+    }
+    
+    .story-card {
+      width: calc(400px * 0.84);
+      height: calc(280px * 0.84);
+      padding: calc(40px * 0.84);
+    }
+    
+    .story-logo,
+    .story-logo-image,
+    .story-logo-placeholder {
+      width: calc(60px * 0.84);
+      height: calc(60px * 0.84);
+    }
+    
+    .story-content {
+      gap: calc(16px * 0.84);
+      margin: calc(20px * 0.84) 0;
+    }
+    
+    .story-title {
+      font-size: calc(24px * 0.84);
+    }
+    
+    .story-excerpt {
+      font-size: calc(16px * 0.84);
+    }
+    
+    .story-arrow-button {
+      bottom: calc(40px * 0.84);
+      right: calc(40px * 0.84);
+      width: calc(48px * 0.84);
+      height: calc(48px * 0.84);
+    }
+  }
+
+  /* 平板屏幕 (768px - 1023px) - 67%比例缩放，2列布局 */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .blog-stories-container {
+      max-width: calc(1654px * 0.67);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.67);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.67);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(2, calc(400px * 0.67));
+      gap: calc(80px * 0.67);
+    }
+    
+    .story-card {
+      width: calc(400px * 0.67);
+      height: calc(280px * 0.67);
+      padding: calc(40px * 0.67);
+    }
+    
+    .story-logo,
+    .story-logo-image,
+    .story-logo-placeholder {
+      width: calc(60px * 0.67);
+      height: calc(60px * 0.67);
+    }
+    
+    .story-content {
+      gap: calc(16px * 0.67);
+      margin: calc(20px * 0.67) 0;
+    }
+    
+    .story-title {
+      font-size: calc(24px * 0.67);
+    }
+    
+    .story-excerpt {
+      font-size: calc(16px * 0.67);
+    }
+    
+    .story-arrow-button {
+      bottom: calc(40px * 0.67);
+      right: calc(40px * 0.67);
+      width: calc(48px * 0.67);
+      height: calc(48px * 0.67);
+    }
+  }
+
+  /* 小屏幕 (481px - 767px) - 50%比例缩放，单列布局 */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .blog-stories-section {
+      padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0 calc({{ section.settings.section_padding_bottom }}px * 0.5) 0;
+    }
+    
+    .blog-stories-container {
+      max-width: calc(1654px * 0.5);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.5);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.5);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: 1fr;
+      gap: calc(80px * 0.5);
+      justify-items: center;
+    }
+    
+    .story-card {
+      width: calc(400px * 0.5);
+      height: calc(280px * 0.5);
+      padding: calc(40px * 0.5);
+    }
+    
+    .story-logo,
+    .story-logo-image,
+    .story-logo-placeholder {
+      width: calc(60px * 0.5);
+      height: calc(60px * 0.5);
+    }
+    
+    .story-content {
+      gap: calc(16px * 0.5);
+      margin: calc(20px * 0.5) 0;
+    }
+    
+    .story-title {
+      font-size: calc(24px * 0.5);
+    }
+    
+    .story-excerpt {
+      font-size: calc(16px * 0.5);
+    }
+    
+    .story-arrow-button {
+      bottom: calc(40px * 0.5);
+      right: calc(40px * 0.5);
+      width: calc(48px * 0.5);
+      height: calc(48px * 0.5);
+    }
+  }
+
+  /* 超小屏幕 (最大480px) - 33%比例缩放 */
+  @media (max-width: 480px) {
+    .blog-stories-section {
+      padding: calc({{ section.settings.section_padding_top }}px * 0.33) 0 calc({{ section.settings.section_padding_bottom }}px * 0.33) 0;
+    }
+    
+    .blog-stories-container {
+      max-width: calc(1654px * 0.33);
+      padding: 0 15px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.33);
+      min-margin-bottom: 30px;
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.33);
+      min-font-size: 20px;
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: 1fr;
+      gap: calc(80px * 0.33);
+      min-gap: 20px;
+      justify-items: center;
+    }
+    
+    .story-card {
+      width: calc(400px * 0.33);
+      height: calc(280px * 0.33);
+      padding: calc(40px * 0.33);
+      min-width: 280px;
+      min-height: 200px;
+      min-padding: 20px;
+    }
+    
+    .story-logo,
+    .story-logo-image,
+    .story-logo-placeholder {
+      width: calc(60px * 0.33);
+      height: calc(60px * 0.33);
+      min-width: 30px;
+      min-height: 30px;
+    }
+    
+    .story-content {
+      gap: calc(16px * 0.33);
+      margin: calc(20px * 0.33) 0;
+      min-gap: 8px;
+      min-margin: 10px 0;
+    }
+    
+    .story-title {
+      font-size: calc(24px * 0.33);
+      min-font-size: 14px;
+    }
+    
+    .story-excerpt {
+      font-size: calc(16px * 0.33);
+      min-font-size: 12px;
+    }
+    
+    .story-arrow-button {
+      bottom: calc(40px * 0.33);
+      right: calc(40px * 0.33);
+      width: calc(48px * 0.33);
+      height: calc(48px * 0.33);
+      min-bottom: 20px;
+      min-right: 20px;
+      min-width: 30px;
+      min-height: 30px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "博客故事展示",
+  "tag": "section",
+  "class": "blog-stories-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "区块设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "顶部内边距",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "底部内边距",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "区块标题",
+      "default": "Stories"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#161616"
+    },
+    {
+      "type": "header",
+      "content": "博客设置"
+    },
+    {
+      "type": "blog",
+      "id": "blog_handle",
+      "label": "选择博客",
+      "info": "选择要显示文章的博客"
+    },
+    {
+      "type": "range",
+      "id": "articles_count",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "label": "显示文章数量",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Logo设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "默认Logo图片",
+      "info": "用于所有故事卡片的默认Logo，推荐尺寸：60x60px"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story_card",
+      "name": "故事卡片",
+      "settings": [
+        {
+          "type": "text",
+          "id": "story_title",
+          "label": "故事标题"
+        },
+        {
+          "type": "textarea",
+          "id": "story_excerpt",
+          "label": "故事摘要"
+        },
+        {
+          "type": "url",
+          "id": "story_url",
+          "label": "故事链接"
+        },
+        {
+          "type": "image_picker",
+          "id": "card_logo",
+          "label": "卡片Logo",
+          "info": "此卡片专用的Logo，如不设置将使用默认Logo"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客故事展示",
+      "blocks": [
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Customer Success Story",
+            "story_excerpt": "Discover how our Pilates equipment transformed this studio's business and helped them achieve remarkable growth.",
+            "story_url": "/pages/customer-stories"
+          }
+        },
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Quality Manufacturing",
+            "story_excerpt": "Behind the scenes look at our manufacturing process and commitment to creating the highest quality Pilates equipment.",
+            "story_url": "/pages/manufacturing"
+          }
+        },
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Innovation in Design",
+            "story_excerpt": "Learn about our latest innovations in Pilates equipment design and how we're shaping the future of fitness.",
+            "story_url": "/pages/innovation"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
