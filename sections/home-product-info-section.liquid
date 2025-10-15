@@ -666,29 +666,37 @@
 
         // 添加错误处理
         try {
-          // 🧩 根据变体名称中的数字过滤缩略图
+          // 🧩 根据变体名称中的数字+oz组合过滤缩略图
           const variantTitle = this.nextElementSibling.textContent.toLowerCase();
-          const match = variantTitle.match(/\d+/);
-          const variantNumber = match ? match[0] : '';
+          const ozMatch = variantTitle.match(/(\d+)oz/);
+          const variantOzPattern = ozMatch ? ozMatch[1] + 'oz' : '';
           const thumbnails = document.querySelectorAll('.thumbnail');
           const mainImage = document.getElementById('main-product-image');
 
           // 调试信息
           console.log('变体切换调试:', {
             variantTitle: variantTitle,
-            variantNumber: variantNumber,
-            newImage: newImage,
+            ozMatch: ozMatch,
+            variantOzPattern: variantOzPattern,
             thumbnailsCount: thumbnails.length
           });
 
           // 先过滤缩略图并移除 active 状态
           thumbnails.forEach((thumb, index) => {
             const key = thumb.getAttribute('data-image-key').toLowerCase();
-            const shouldShow = variantNumber && key.includes(variantNumber);
-            const displayStyle = shouldShow ? 'inline-block' : (variantNumber ? 'none' : 'inline-block');
+            const shouldShow = variantOzPattern && key.includes(variantOzPattern);
+            const displayStyle = shouldShow ? 'inline-block' : (variantOzPattern ? 'none' : 'inline-block');
             
             thumb.style.display = displayStyle;
             thumb.classList.remove('active');
+            
+            console.log('缩略图过滤:', {
+              index: index,
+              key: key,
+              variantOzPattern: variantOzPattern,
+              shouldShow: shouldShow,
+              displayStyle: displayStyle
+            });
           });
 
           // 直接使用第一个可见缩略图来更新主图
