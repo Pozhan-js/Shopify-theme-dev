@@ -192,48 +192,17 @@
     cursor: not-allowed;
   }
 
-  /* 无闪烁加载优化 */
+  /* 简化加载 - 移除白屏过渡 */
   .loading-container {
     position: relative;
-    min-height: 200px;
   }
 
   .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.9);
     display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(2px);
-    transition: opacity 0.3s ease;
   }
 
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #871d16;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  /* 无闪烁更新 */
   .products-grid-modern {
-    transition: opacity 0.2s ease;
-  }
-
-  .products-grid-modern.loading {
-    opacity: 0.7;
+    transition: none;
   }
 
   /* 响应式设计 - 适中的留白 */
@@ -308,10 +277,6 @@
       <!-- 产品区域 -->
       <div class="products-section">
         <div class="loading-container">
-          <div class="loading-overlay" id="loading-overlay">
-            <div class="loading-spinner"></div>
-          </div>
-
           {%- if collection.products.size == 0 -%}
             <div class="collection collection--empty" style="text-align: center; padding: 60px 0;">
               <h2 class="title title--primary">No products found</h2>
@@ -392,21 +357,13 @@
 </div>
 
 <script>
-  // AJAX排序功能 - 无闪烁优化
+  // AJAX排序功能 - 无过渡效果
   document.addEventListener('DOMContentLoaded', function () {
     const sortSelect = document.getElementById('SortBy');
     const productsGrid = document.getElementById('products-grid');
-    const loadingOverlay = document.getElementById('loading-overlay');
 
     // 排序功能
     window.sortProducts = function (sortBy) {
-      // 显示加载状态（淡入效果）
-      loadingOverlay.style.display = 'flex';
-      loadingOverlay.style.opacity = '0';
-      setTimeout(() => {
-        loadingOverlay.style.opacity = '1';
-      }, 50);
-
       // 构建AJAX请求URL
       const url = new URL(window.location);
       url.searchParams.set('sort_by', sortBy);
@@ -415,38 +372,18 @@
       fetch(url.toString() + '&view=ajax')
         .then((response) => response.text())
         .then((html) => {
-          // 延迟更新以避免闪烁
-          setTimeout(() => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newProducts = doc.querySelector('#products-grid');
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newProducts = doc.querySelector('#products-grid');
 
-            if (newProducts) {
-              productsGrid.innerHTML = newProducts.innerHTML;
-
-              // 平滑过渡效果
-              productsGrid.style.opacity = '0.8';
-              setTimeout(() => {
-                productsGrid.style.opacity = '1';
-              }, 100);
-
-              // 重新绑定添加到购物车事件
-              bindAddToCartEvents();
-            }
-
-            // 隐藏加载状态（淡出效果）
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => {
-              loadingOverlay.style.display = 'none';
-            }, 300);
-          }, 200);
+          if (newProducts) {
+            productsGrid.innerHTML = newProducts.innerHTML;
+            // 重新绑定添加到购物车事件
+            bindAddToCartEvents();
+          }
         })
         .catch((error) => {
           console.error('Error:', error);
-          loadingOverlay.style.opacity = '0';
-          setTimeout(() => {
-            loadingOverlay.style.display = 'none';
-          }, 300);
           // 如果AJAX失败，回退到页面刷新
           window.location.href = url.toString();
         });
