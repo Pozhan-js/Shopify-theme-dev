@@ -603,21 +603,58 @@
 </section>
 
 <script>
+  // 🚀 模板加载日志
+  console.log('🎯 Shopify 产品模板已加载');
+  console.log('📅 加载时间:', new Date().toLocaleString());
+  
   function changeQuantity(change) {
+    console.log('🔢 数量变更:', change);
     const quantityInput = document.getElementById('quantity');
     let num = parseInt(quantityInput.value);
     num = num + change;
     if (num < 1) num = 1;
     quantityInput.value = num;
+    console.log('📊 当前数量:', num);
     updateTotalPrice();
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    console.log('🎉 DOM 内容已加载完成');
+    console.log('🔍 开始初始化产品选项...');
     const variantOptions = document.querySelectorAll('input[name="id"]');
     const currentPriceElement = document.getElementById('current-price');
     const oldPriceElement = document.getElementById('old-price');
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
+
+    console.log('🔍 找到变体选项数量:', variantOptions.length);
+    console.log('🎛️ 页面元素检查:', {
+      currentPrice: !!currentPriceElement,
+      oldPrice: !!oldPriceElement,
+      addToCartBtn: !!addToCartBtn,
+      buyNowBtn: !!buyNowBtn
+    // 添加页面加载完成的总价更新函数
+    function updateTotalPrice() {
+      console.log('💰 更新总价被调用');
+      const quantityInput = document.getElementById('quantity');
+      const currentPriceElement = document.getElementById('current-price');
+      const totalPriceElement = document.getElementById('total-price');
+      
+      if (quantityInput && currentPriceElement && totalPriceElement) {
+        const quantity = parseInt(quantityInput.value) || 1;
+        const priceText = currentPriceElement.textContent.replace(/[^\d.]/g, '');
+        const price = parseFloat(priceText) || 0;
+        const total = quantity * price;
+        
+        console.log('🧮 价格计算:', { quantity, price, total });
+        totalPriceElement.textContent = '$' + total.toFixed(2);
+      } else {
+        console.log('⚠️ 总价更新失败 - 缺少必要元素');
+      }
+    }
+
+    // 初始化总价
+    updateTotalPrice();
 
     variantOptions.forEach(function (option) {
       option.addEventListener('change', function () {
