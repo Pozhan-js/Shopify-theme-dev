@@ -1,1 +1,487 @@
-24px
+<div class="blog-stories-section" {{ section.shopify_attributes }}>
+  <div class="blog-stories-container">
+    <!-- 标题区域 -->
+    <div class="blog-stories-header">
+      <h2 class="blog-stories-title">{{ section.settings.section_title | default: "Stories" }}</h2>
+    </div>
+
+    <!-- 故事卡片网格 -->
+    <div class="blog-stories-grid">
+      {% comment %} 优先显示博客文章 {% endcomment %}
+      {% if section.settings.blog_handle != blank %}
+        {% assign selected_blog = blogs[section.settings.blog_handle] %}
+        {% if selected_blog and selected_blog.articles.size > 0 %}
+          {% for article in selected_blog.articles %}
+            <div class="story-card" {% if article.image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ article.image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
+              <!-- 内容区域 -->
+              <div class="story-content">
+                <h3 class="story-title">{{ article.title | truncate: 60 }}</h3>
+                <p class="story-excerpt">{{ article.excerpt | default: article.content | strip_html | truncate: 120 }}</p>
+              </div>
+
+              <!-- 箭头按钮 -->
+              <a href="{{ article.url }}" class="story-arrow-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% comment %} 如果没有博客文章，显示手动配置的故事卡片 {% endcomment %}
+      {% assign has_blog_articles = false %}
+      {% if section.settings.blog_handle != blank %}
+        {% assign selected_blog = blogs[section.settings.blog_handle] %}
+        {% if selected_blog and selected_blog.articles.size > 0 %}
+          {% assign has_blog_articles = true %}
+        {% endif %}
+      {% endif %}
+
+      {% unless has_blog_articles %}
+        {% for block in section.blocks %}
+          {% if block.type == 'story_card' %}
+            <div class="story-card" {{ block.shopify_attributes }} {% if block.settings.card_background_image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ block.settings.card_background_image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
+              <!-- 内容区域 -->
+              <div class="story-content">
+                <h3 class="story-title">{{ block.settings.story_title }}</h3>
+                <p class="story-excerpt">{{ block.settings.story_excerpt }}</p>
+              </div>
+
+              <!-- 箭头按钮 -->
+              <a href="{{ block.settings.story_url | default: '#' }}" class="story-arrow-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endunless %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .blog-stories-section {
+    background-color: {{ section.settings.background_color }};
+    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
+  }
+
+  .blog-stories-container {
+    max-width: 1654px;
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .blog-stories-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .blog-stories-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 48px;
+    font-weight: 500;
+    color: {{ section.settings.title_color }};
+    margin: 0;
+    letter-spacing: 0px;
+    line-height: 1.2;
+  }
+
+  .blog-stories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 533px);
+    gap: 80px;
+    justify-content: center;
+  }
+
+  .story-card {
+    width: 533px;
+    height: 422px;
+    background-color: #F8F8F8;
+    border-radius: 32px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .story-content {
+    width: 533px;
+    height: 128.53px;
+    border-radius: 32px;
+    background: rgba(22, 22, 22, 0.75);
+    display: flex;
+    align-items: center;
+    padding: 0 32px;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .story-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #ffffff;
+    margin: 0;
+    line-height: 24px;
+    letter-spacing: 0px;
+  }
+
+  .story-excerpt {
+    display: none;
+  }
+
+  .story-arrow-button {
+    display: none;
+  }
+
+  /* 响应式设计 */
+
+  /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
+  @media (min-width: 1920px) {
+    .blog-stories-container {
+      max-width: 1654px;
+      padding: 0;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: 80px;
+    }
+    
+    .blog-stories-title {
+      font-size: 48px;
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(3, 533px);
+      gap: 80px;
+    }
+    
+    .story-card {
+      width: 533px;
+      height: 422px;
+      padding: 0;
+    }
+    
+    .story-content {
+      width: 533px;
+      height: 128.53px;
+      padding: 0 32px;
+    }
+    
+    .story-title {
+      font-size: 16px;
+      line-height: 24px;
+    }
+  }
+
+  /* 中等屏幕 (1024px - 1919px) - 84%比例缩放 */
+  @media (min-width: 1024px) and (max-width: 1919px) {
+    .blog-stories-container {
+      max-width: calc(1654px * 0.84);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.84);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.84);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(3, calc(533px * 0.84));
+      gap: calc(80px * 0.84);
+    }
+    
+    .story-card {
+      width: calc(533px * 0.84);
+      height: calc(422px * 0.84);
+      padding: 0;
+    }
+    
+    .story-content {
+      width: calc(533px * 0.84);
+      height: calc(128.53px * 0.84);
+      padding: 0 calc(32px * 0.84);
+    }
+    
+    .story-title {
+      font-size: calc(16px * 0.84);
+      line-height: calc(24px * 0.84);
+    }
+  }
+
+  /* 平板屏幕 (768px - 1023px) - 67%比例缩放，2列布局 */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .blog-stories-container {
+      max-width: calc(1654px * 0.67);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.67);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.67);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: repeat(2, calc(533px * 0.67));
+      gap: calc(80px * 0.67);
+    }
+    
+    .story-card {
+      width: calc(533px * 0.67);
+      height: calc(422px * 0.67);
+      padding: 0;
+    }
+    
+    .story-content {
+      width: calc(533px * 0.67);
+      height: calc(128.53px * 0.67);
+      padding: 0 calc(32px * 0.67);
+    }
+    
+    .story-title {
+      font-size: calc(16px * 0.67);
+      line-height: calc(24px * 0.67);
+    }
+  }
+
+  /* 小屏幕 (481px - 767px) - 50%比例缩放，单列布局 */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .blog-stories-section {
+      padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0 calc({{ section.settings.section_padding_bottom }}px * 0.5) 0;
+    }
+    
+    .blog-stories-container {
+      max-width: calc(1654px * 0.5);
+      padding: 0 20px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.5);
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.5);
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: 1fr;
+      gap: calc(80px * 0.5);
+      justify-items: center;
+    }
+    
+    .story-card {
+      width: calc(533px * 0.5);
+      height: calc(422px * 0.5);
+      padding: 0;
+    }
+    
+    .story-content {
+      width: calc(533px * 0.5);
+      height: calc(128.53px * 0.5);
+      padding: 0 calc(32px * 0.5);
+    }
+    
+    .story-title {
+      font-size: calc(16px * 0.5);
+      line-height: calc(24px * 0.5);
+    }
+  }
+
+  /* 超小屏幕 (最大480px) - 33%比例缩放 */
+  @media (max-width: 480px) {
+    .blog-stories-section {
+      padding: calc({{ section.settings.section_padding_top }}px * 0.33) 0 calc({{ section.settings.section_padding_bottom }}px * 0.33) 0;
+    }
+    
+    .blog-stories-container {
+      max-width: calc(1654px * 0.33);
+      padding: 0 15px;
+    }
+    
+    .blog-stories-header {
+      margin-bottom: calc(80px * 0.33);
+      min-margin-bottom: 30px;
+    }
+    
+    .blog-stories-title {
+      font-size: calc(48px * 0.33);
+      min-font-size: 20px;
+    }
+    
+    .blog-stories-grid {
+      grid-template-columns: 1fr;
+      gap: calc(80px * 0.33);
+      min-gap: 20px;
+      justify-items: center;
+    }
+    
+    .story-card {
+      width: calc(533px * 0.33);
+      height: calc(422px * 0.33);
+      padding: 0;
+      min-width: 280px;
+      min-height: 200px;
+    }
+    
+    .story-content {
+      width: calc(533px * 0.33);
+      height: calc(128.53px * 0.33);
+      padding: 0 calc(32px * 0.33);
+      min-width: 280px;
+      min-height: 60px;
+      min-padding: 0 20px;
+    }
+    
+    .story-title {
+      font-size: calc(16px * 0.33);
+      line-height: calc(24px * 0.33);
+      min-font-size: 12px;
+      min-line-height: 18px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "博客故事展示",
+  "tag": "section",
+  "class": "blog-stories-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "区块设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "顶部内边距",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "底部内边距",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "区块标题",
+      "default": "Stories"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#161616"
+    },
+    {
+      "type": "header",
+      "content": "博客设置"
+    },
+    {
+      "type": "blog",
+      "id": "blog_handle",
+      "label": "选择博客",
+      "info": "选择要显示文章的博客"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "story_card",
+      "name": "故事卡片",
+      "settings": [
+        {
+          "type": "text",
+          "id": "story_title",
+          "label": "故事标题"
+        },
+        {
+          "type": "textarea",
+          "id": "story_excerpt",
+          "label": "故事摘要"
+        },
+        {
+          "type": "url",
+          "id": "story_url",
+          "label": "故事链接"
+        },
+        {
+          "type": "image_picker",
+          "id": "card_background_image",
+          "label": "卡片背景图片",
+          "info": "推荐尺寸：800x600px，用作卡片背景图片"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客故事展示",
+      "blocks": [
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Customer Success Story",
+            "story_excerpt": "Discover how our Pilates equipment transformed this studio's business and helped them achieve remarkable growth.",
+            "story_url": "/pages/customer-stories"
+          }
+        },
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Quality Manufacturing",
+            "story_excerpt": "Behind the scenes look at our manufacturing process and commitment to creating the highest quality Pilates equipment.",
+            "story_url": "/pages/manufacturing"
+          }
+        },
+        {
+          "type": "story_card",
+          "settings": {
+            "story_title": "Innovation in Design",
+            "story_excerpt": "Learn about our latest innovations in Pilates equipment design and how we're shaping the future of fitness.",
+            "story_url": "/pages/innovation"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
