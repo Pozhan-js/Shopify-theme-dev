@@ -1,0 +1,312 @@
+{% comment %}
+  产品展示 Section
+  支持配置多个产品，左右布局展示
+{% endcomment %}
+
+<div class="product-showcase-section" id="product-showcase-{{ section.id }}">
+  <div class="container">
+    {% if section.settings.title != blank %}
+      <div class="section-header">
+        <h2 class="section-title">
+          {{ section.settings.title }}
+        </h2>
+      </div>
+    {% endif %}
+
+    <div class="products-grid">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'product_item' %}
+            {% assign product = block.settings.selected_product %}
+            {% if product != blank %}
+              <div class="product-card" {{ block.shopify_attributes }}>
+                <!-- 左侧图片区域 -->
+                <div class="product-image-container">
+                  {% if product.featured_image != blank %}
+                    <img
+                      src="{{ product.featured_image | img_url: '400x300', crop: 'center' }}"
+                      alt="{{ product.title | escape }}"
+                      class="product-image"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="image-placeholder">
+                      <span>{{ 'general.placeholders.image' | t }}</span>
+                    </div>
+                  {% endif %}
+                  <div class="image-overlay"></div>
+                </div>
+
+                <!-- 右侧内容区域 -->
+                <div class="product-content">
+                  <div class="product-info">
+                    <!-- 产品标题 -->
+                    <h3 class="product-title">
+                      {{ product.title }}
+                    </h3>
+
+                    <!-- 产品介绍 -->
+                    {% assign description = block.settings.custom_description | default: product.description %}
+                    {% if description != blank %}
+                      <p class="product-description">
+                        {{ description | strip_html | truncate: 150 }}
+                      </p>
+                    {% endif %}
+                  </div>
+
+                  <!-- 按钮区域 -->
+                  <div class="product-actions">
+                    {% assign button_text = block.settings.button_text | default: '立即购买' %}
+                    <a
+                      href="{{ product.url }}"
+                      class="product-button"
+                      {% if block.settings.open_in_new_tab %}
+                        target="_blank"
+                      {% endif %}
+                    >
+                      {{ button_text }}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  /* 基础样式 */
+  .product-showcase-section {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 3rem 1rem;
+  }
+
+  .product-showcase-section .container {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+
+  /* 标题区域 */
+  .product-showcase-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .product-showcase-section .section-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  /* 产品网格 */
+  .product-showcase-section .products-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .product-showcase-section .products-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* 产品卡片 */
+  .product-showcase-section .product-card {
+    height: 20rem;
+    display: flex;
+    transition: all 0.3s ease;
+  }
+
+  /* 图片容器 */
+  .product-showcase-section .product-image-container {
+    width: 40%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .product-showcase-section .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .product-showcase-section .product-card:hover .product-image {
+    transform: scale(1.05);
+  }
+
+  .product-showcase-section .image-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1));
+  }
+
+  .product-showcase-section .image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+  }
+
+  /* 内容区域 */
+  .product-showcase-section .product-content {
+    width: 60%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .product-showcase-section .product-info {
+    flex: 1;
+  }
+
+  /* 产品标题 */
+  .product-showcase-section .product-title {
+    font-size: 1.25rem;
+    line-height: 1.25;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.75rem 0;
+  }
+
+  /* 产品描述 */
+  .product-showcase-section .product-description {
+    color: #4b5563;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    margin: 0 0 1rem 0;
+  }
+
+  /* 按钮区域 */
+  .product-showcase-section .product-actions {
+    margin-top: auto;
+  }
+
+  .product-showcase-section .product-button {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    background-color: transparent;
+    border: 2px solid #000000;
+    color: #000000;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    box-sizing: border-box;
+  }
+
+  .product-showcase-section .product-button:hover {
+    background-color: #000000;
+    color: #ffffff;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  .product-showcase-section .product-button:active {
+    transform: translateY(0);
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    .product-showcase-section .product-card {
+      flex-direction: column;
+      height: auto;
+    }
+
+    .product-showcase-section .product-image-container {
+      width: 100%;
+      height: 200px;
+    }
+
+    .product-showcase-section .product-content {
+      width: 100%;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "产品展示",
+  "tag": "section",
+  "class": "section-product-showcase",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "精选产品展示"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_item",
+      "name": "产品项目",
+      "settings": [
+        {
+          "type": "product",
+          "id": "selected_product",
+          "label": "选择产品",
+          "info": "产品的标题和图片将自动使用"
+        },
+        {
+          "type": "textarea",
+          "id": "custom_description",
+          "label": "自定义描述（可选）",
+          "info": "留空则使用产品原始描述"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文字",
+          "default": "立即购买"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "在新标签页打开链接",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品展示",
+      "blocks": [
+        {
+          "type": "product_item",
+          "settings": {
+            "button_text": "立即购买"
+          }
+        },
+        {
+          "type": "product_item",
+          "settings": {
+            "button_text": "查看详情"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
