@@ -5,15 +5,6 @@
   Supports backend editing through section settings
 {% endcomment %}
 
-{% liquid
-  assign displayproduct = product
-  if section.settings.selectedproduct != blank
-    assign displayproduct = allproducts[section.settings.selectedproduct]
-  elsif displayproduct == blank and collections.all.products.size > 0
-    assign displayproduct = collections.all.products.first
-  endif
-%}
-
 <style>
   .product-info-section {
     padding: {{ section.settings.paddingtop | times: 0.5 | round: 0 }}px 0 {{ section.settings.paddingbottom | times: 0.5 | round: 0 }}px 0;
@@ -559,9 +550,24 @@
         {% endif %}
 
         {% if imageurl != blank and imageurl != '' %}
-          <!-- 使用picture元素支持WebP格式 -->
-          <picture>
-            <source srcset="{{ imageurl | img_url: '800x800', format: 'webp' }}" type="image/webp">
+          <!-- 检查图片格式，只对jpg和pjpg格式使用WebP -->
+          {% assign image_extension = displayproduct.featured_image.src | split: '.' | last | downcase %}
+          {% if image_extension == 'jpg' or image_extension == 'jpeg' or image_extension == 'pjpg' %}
+            <!-- 使用picture元素支持WebP格式 -->
+            <picture>
+              <source srcset="{{ imageurl | img_url: '800x800', format: 'webp' }}" type="image/webp">
+              <img
+                id="main-product-image"
+                src="{{ imageurl }}"
+                alt="{{ imagealt }}"
+                class="main-image"
+                width="800"
+                height="800"
+                loading="eager"
+              >
+            </picture>
+          {% else %}
+            <!-- 不支持WebP转换的格式，直接使用原图 -->
             <img
               id="main-product-image"
               src="{{ imageurl }}"
@@ -571,7 +577,7 @@
               height="800"
               loading="eager"
             >
-          </picture>
+          {% endif %}
           <div class="placeholder-image" style="display: none;">
             <span>{{ displayproduct.title | default: 'Product Image' }}</span>
           </div>
@@ -582,10 +588,13 @@
         {% endif %}
 
         {% if displayproduct.images.size > 1 %}
-          <!-- 预加载所有主图资源，优先使用WebP格式 -->
+          <!-- 预加载所有主图资源，只对jpg和pjpg格式使用WebP -->
           {% for image in displayproduct.images %}
-            <link rel="preload" as="image" href="{{ image | img_url: '800x800', format: 'webp' }}">
-            <!-- 为不支持WebP的浏览器提供备用格式 -->
+            {% assign img_extension = image.src | split: '.' | last | downcase %}
+            {% if img_extension == 'jpg' or img_extension == 'jpeg' or img_extension == 'pjpg' %}
+              <link rel="preload" as="image" href="{{ image | img_url: '800x800', format: 'webp' }}">
+            {% endif %}
+            <!-- 为所有格式提供备用预加载 -->
             <link rel="preload" as="image" href="{{ image | img_url: '800x800' }}">
           {% endfor %}
           
@@ -610,7 +619,12 @@
                 data-sort-number="{{ sort_number }}"
                 data-filename="{{ filename }}"
                 data-main-image="{{ image | img_url: '800x800' }}"
-                data-main-image-webp="{{ image | img_url: '800x800', format: 'webp' }}"
+                {% assign thumb_extension = image.src | split: '.' | last | downcase %}
+                {% if thumb_extension == 'jpg' or thumb_extension == 'jpeg' or thumb_extension == 'pjpg' %}
+                  data-main-image-webp="{{ image | img_url: '800x800', format: 'webp' }}"
+                {% else %}
+                  data-main-image-webp=""
+                {% endif %}
                 onclick="switchMainImage(this)"
               >
             {% endfor %}
@@ -758,12 +772,12 @@
     mainImage.style.transition = 'opacity 0.3s ease';
     mainImage.style.opacity = '0.3';
     
-    // 预加载新图片（优先WebP）
+    // 预加载新图片（只有支持WebP的格式才尝试WebP）
     const preloadImage = new Image();
     preloadImage.onload = function() {
-      console.log('✅ [图片切换] WebP图片预加载成功');
-      // 更新WebP source
-      if (webpSource && newImageWebp) {
+      console.log('✅ [图片切换] 图片预加载成功');
+      // 只有当WebP源存在且不为空时才更新WebP source
+      if (webpSource && newImageWebp && newImageWebp.trim() !== '') {
         webpSource.srcset = newImageWebp;
         console.log('🔄 [图片切换] 已更新WebP源:', newImageWebp);
       }
@@ -771,7 +785,7 @@
       mainImage.src = newImageSrc;
       mainImage.alt = newImageAlt;
       mainImage.style.opacity = '1';
-      
+
       console.log('🎨 [图片切换] 主图已更新，恢复透明度');
       
       // 更新缩略图active状态
@@ -784,7 +798,7 @@
     };
     
     preloadImage.onerror = function() {
-      console.log('❌ [图片切换] WebP图片加载失败，尝试原格式');
+      console.log('❌ [图片切换] 图片加载失败，尝试原格式');
       // 如果WebP加载失败，尝试原格式
       const fallbackImage = new Image();
       fallbackImage.onload = function() {
@@ -802,8 +816,24 @@
       fallbackImage.src = newImageSrc;
     };
     
-    // 优先尝试WebP格式
-    preloadImage.src = newImageWebp || newImageSrc;
+    // 优先尝试WebP格式（如果存在且不为空）
+    preloadImage.src = (newImageWebp && newImageWebp.trim() !== '') ? newImageWebp : newImageSrc;
+  }
+
+  // 全局函数：更新总价
+  function updateTotalPrice() {
+    const quantityInput = document.getElementById('quantity');
+    const currentPriceElement = document.getElementById('current-price');
+    const totalPriceElement = document.getElementById('total-price');
+    
+    if (quantityInput && currentPriceElement && totalPriceElement) {
+      const quantity = parseInt(quantityInput.value) || 1;
+      const priceText = currentPriceElement.textContent.replace(/[^\d.]/g, '');
+      const price = parseFloat(priceText) || 0;
+      const total = quantity * price;
+      
+      totalPriceElement.textContent = '$' + total.toFixed(2);
+    }
   }
 
   function changeQuantity(change) {
@@ -824,21 +854,6 @@
     const buyNowBtn = document.getElementById('buy-now-btn');
 
     // 添加页面加载完成的总价更新函数
-    function updateTotalPrice() {
-      const quantityInput = document.getElementById('quantity');
-      const currentPriceElement = document.getElementById('current-price');
-      const totalPriceElement = document.getElementById('total-price');
-      
-      if (quantityInput && currentPriceElement && totalPriceElement) {
-        const quantity = parseInt(quantityInput.value) || 1;
-        const priceText = currentPriceElement.textContent.replace(/[^\d.]/g, '');
-        const price = parseFloat(priceText) || 0;
-        const total = quantity * price;
-        
-        totalPriceElement.textContent = '$' + total.toFixed(2);
-      }
-    }
-
     // 初始化总价
     updateTotalPrice();
 
@@ -1019,41 +1034,9 @@
     // 页面载入时按默认变体自动过滤
     const firstChecked = document.querySelector('input[name="id"]:checked');
     if (firstChecked) firstChecked.dispatchEvent(new Event('change'));
-  });
-
-  function updateTotalPrice() {
-    const selectedVariant = document.querySelector('input[name="id"]:checked');
-    const quantity = parseInt(document.getElementById('quantity').value);
-    const totalPriceElement = document.getElementById('total-price');
-    if (selectedVariant && selectedVariant.getAttribute('data-price')) {
-      const unitPrice = selectedVariant.getAttribute('data-price');
-      const num = parseFloat(unitPrice.replace(/[^0-9.]/g, ''));
-      const currency = unitPrice.match(/[^\d\s,\.]+/);
-      const symbol = currency ? currency[0] : '$';
-      totalPriceElement.textContent = symbol + (num * quantity).toFixed(2);
-    }
   }
 
-  // 异步初始化产品功能
-  function initializeProductSection() {
-    // 初始化变体选择器
-    const variantSelectors = document.querySelectorAll('.variant-selector');
-    variantSelectors.forEach(selector => {
-      selector.addEventListener('change', function() {
-        updateVariant();
-      });
-    });
 
-    // 初始化数量选择器
-    const quantityInput = document.getElementById('quantity');
-    if (quantityInput) {
-      quantityInput.addEventListener('input', updateTotalPrice);
-    }
-
-    // 初始化默认状态
-    updateVariant();
-    updateTotalPrice();
-  }
 
   // 使用异步延迟初始化，提升首次渲染速度
   document.addEventListener('DOMContentLoaded', () => {
