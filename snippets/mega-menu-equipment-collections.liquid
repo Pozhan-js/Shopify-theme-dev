@@ -3,104 +3,61 @@
   This snippet renders equipment categories based on collections and their products
 {% endcomment %}
 
-{% assign equipment_collections = collections | where: 'handle', 'reformer', 'pilates-chair', 'ladder-barrel', 'cadillac', 'spine-corrector', 'accessories' %}
+{% comment %} 获取所有可用的产品系列 {% endcomment %}
+{% assign all_collections = collections %}
+{% assign products_per_collection = 6 %}
 
-<div class="mega-menu-column">
-  <div class="mega-menu-category">
-    <h3>Reformer</h3>
-    <ul>
-      {% assign reformer_collection = collections['reformer'] %}
-      {% if reformer_collection and reformer_collection.products.size > 0 %}
-        {% for product in reformer_collection.products limit: 6 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-        {% endfor %}
-      {% else %}
-        <li><a href="/collections/reformer">Pilates Reformer XSRF100</a></li>
-        <li><a href="/collections/reformer">Aluminum Reformer XSRF04</a></li>
-        <li><a href="/collections/reformer">Aluminum Reformer XSRF07</a></li>
-        <li><a href="/collections/reformer">Classic Aluminum Reformer XSCAR</a></li>
-      {% endif %}
-    </ul>
-  </div>
-  <div class="mega-menu-category">
-    <h3>Pilates Chair</h3>
-    <ul>
-      {% assign chair_collection = collections['pilates-chair'] %}
-      {% if chair_collection and chair_collection.products.size > 0 %}
-        {% for product in chair_collection.products limit: 4 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-        {% endfor %}
-      {% else %}
-        <li><a href="/collections/pilates-chair">Basic Pilates Chair XSCC29</a></li>
-        <li><a href="/collections/pilates-chair">Pilates Chair Wooden Base XSCC01</a></li>
-        <li><a href="/collections/pilates-chair">Pro Pilates Wunda Chair XSCC32</a></li>
-      {% endif %}
-    </ul>
-  </div>
-</div>
+{% comment %} 如果有可用的系列，显示前几个系列 {% endcomment %}
+{% if all_collections.size > 0 %}
+  {% assign collections_to_show = all_collections | limit: 6 %}
+  {% assign collections_per_column = 2 %}
+  {% assign total_collections = collections_to_show.size %}
+  {% assign columns_needed = total_collections | divided_by: collections_per_column | ceil %}
+  {% assign max_columns = 3 %}
+  {% if columns_needed > max_columns %}
+    {% assign columns_needed = max_columns %}
+  {% endif %}
 
-<div class="mega-menu-column">
-  <div class="mega-menu-category">
-    <h3>Ladder Barrel</h3>
-    <ul>
-      {% assign barrel_collection = collections['ladder-barrel'] %}
-      {% if barrel_collection and barrel_collection.products.size > 0 %}
-        {% for product in barrel_collection.products limit: 4 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
+  {% for column_index in (0..columns_needed) %}
+    {% assign column_start = column_index | times: collections_per_column %}
+    {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
+    
+    {% if column_start < total_collections %}
+      <div class="mega-menu-column">
+        {% for i in (column_start..column_end) %}
+          {% if i < total_collections %}
+            {% assign collection = collections_to_show[i] %}
+            {% if collection %}
+              <div class="mega-menu-category">
+                <h3>{{ collection.title | escape }}</h3>
+                <ul>
+                  {% if collection.products.size > 0 %}
+                    {% for product in collection.products limit: products_per_collection %}
+                      <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                    {% endfor %}
+                    {% if collection.products.size > products_per_collection %}
+                      <li><a href="{{ collection.url }}" style="font-weight: 600; color: #DC2626;">查看全部 {{ collection.title }}</a></li>
+                    {% endif %}
+                  {% else %}
+                    <li><a href="{{ collection.url }}">查看 {{ collection.title }}</a></li>
+                  {% endif %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endif %}
         {% endfor %}
-      {% else %}
-        <li><a href="/collections/ladder-barrel">Pilates Ladder Barrel XSLB01</a></li>
-        <li><a href="/collections/ladder-barrel">Pro Pilates Ladder Barrel XSLB37</a></li>
-      {% endif %}
-    </ul>
-  </div>
-  <div class="mega-menu-category">
-    <h3>Cadillac</h3>
-    <ul>
-      {% assign cadillac_collection = collections['cadillac'] %}
-      {% if cadillac_collection and cadillac_collection.products.size > 0 %}
-        {% for product in cadillac_collection.products limit: 4 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-        {% endfor %}
-      {% else %}
-        <li><a href="/collections/cadillac">Cadillac XSCL19</a></li>
-        <li><a href="/collections/cadillac">Cadillac XSCL01</a></li>
-      {% endif %}
-    </ul>
-  </div>
-  <div class="mega-menu-category">
-    <h3>Spine Corrector</h3>
-    <ul>
-      {% assign spine_collection = collections['spine-corrector'] %}
-      {% if spine_collection and spine_collection.products.size > 0 %}
-        {% for product in spine_collection.products limit: 3 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-        {% endfor %}
-      {% else %}
-        <li><a href="/collections/spine-corrector">Spine Corrector XSSC43</a></li>
-      {% endif %}
-    </ul>
-  </div>
-</div>
+      </div>
+    {% endif %}
+  {% endfor %}
 
-<div class="mega-menu-column">
-  <div class="mega-menu-category">
-    <h3>Accessories</h3>
-    <ul>
-      {% assign accessories_collection = collections['accessories'] %}
-      {% if accessories_collection and accessories_collection.products.size > 0 %}
-        {% for product in accessories_collection.products limit: 7 %}
-          <li><a href="{{ product.url }}">{{ product.title }}</a></li>
-        {% endfor %}
-      {% else %}
-        <li><a href="/collections/accessories">Padded Wedge XSWD49</a></li>
-        <li><a href="/collections/accessories">Pilates Balance Cushion XSAC03</a></li>
-        <li><a href="/collections/accessories">Pilates Ring XSAC04</a></li>
-        <li><a href="/collections/accessories">Pilates Ball XSAC05</a></li>
-        <li><a href="/collections/accessories">Resistance Bands XSAC06</a></li>
-        <li><a href="/collections/accessories">Massage Ball XSAC07</a></li>
-        <li><a href="/collections/accessories">Small Wedge XSAC08</a></li>
-      {% endif %}
-    </ul>
+{% else %}
+  {% comment %} 如果没有系列，显示提示信息 {% endcomment %}
+  <div class="mega-menu-column">
+    <div class="mega-menu-category">
+      <h3>暂无产品系列</h3>
+      <ul>
+        <li><a href="/collections">查看所有产品</a></li>
+      </ul>
+    </div>
   </div>
-</div>
+{% endif %}
