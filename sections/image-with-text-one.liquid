@@ -7,7 +7,6 @@
 {%- assign image_position        	  = section.settings.image_position -%}
 {%- assign text_alignment        	  = section.settings.text_alignment -%}
 {%- assign content_vertical_alignment = section.settings.content_vertical_alignment -%}
-{%- assign single_image_layout        = section.settings.single_image_layout -%}
 {%- assign two_images_layout          = section.settings.two_images_layout -%}
 {%- assign first_desktop_image        = section.settings.first_desktop_image -%}
 {%- assign first_mobile_image         = section.settings.first_mobile_image | default: first_desktop_image -%}
@@ -31,29 +30,23 @@
 	{% assign container_width = container %}
 {% endif %}
 
+{% assign is_single_layout = false %}
+{% assign is_double_layout = false %}
+{% assign three_img_layout_class = '' %}
+
 {% if first_desktop_image != blank and second_desktop_image == blank and third_desktop_image == blank %}
 	{% assign is_single_layout = true %}
-	{% if single_image_layout == 'horizontal' %}
-		{% assign single_img_layout_class = 'image-with-text__image-container--single-horizontal' %}
-	{% else %}
-		{% assign single_img_layout_class = 'image-with-text__image-container--single-vertical' %}
-	{% endif %}
-{% endif %}
-
-{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
+	{% assign single_img_layout_class = 'image-with-text__image-container--single-vertical' %}
+{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image == blank %}
+	{% assign is_double_layout = true %}
+{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 	{% assign three_img_layout_class = 'image-with-text__image-container--triple' %}
-{% endif %}
-
-{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image == blank %}
-	{% assign is_double_layout = true %}
-{% endif %}
-
-{% if first_desktop_image == blank and second_desktop_image == blank and third_desktop_image == blank %}
-	{% assign is_double_layout = true %}
 {% endif %}
 
 {% if two_images_layout == 'double_horizontal' and is_double_layout %}
 	{% assign two_img_layout_class = 'image-with-text__image-container--double-horizontal' %}
+{% elsif two_images_layout == 'double_vertical' and is_double_layout %}
+	{% assign two_img_layout_class = 'image-with-text__image-container--double-vertical' %}
 {% elsif two_images_layout == 'double_vertical_offset' and is_double_layout %}
 	{% assign two_img_layout_class = 'image-with-text__image-container--double-vertical-offset' %}
 {% elsif two_images_layout == 'double_with_small' and is_double_layout %}
@@ -127,13 +120,8 @@
 {%- assign image_width_2x = "776x" -%}
 
 {% if is_single_layout %}
-	{% if single_image_layout == 'horizontal' %}
-		{%- assign image_width    = "588x235" -%}
-		{%- assign image_width_2x = "1176x470" -%}
-	{% else %}
-		{%- assign image_width    = "388x523" -%}
-		{%- assign image_width_2x = "776x1046" -%}
-	{% endif %}
+	{%- assign image_width    = "388x523" -%}
+	{%- assign image_width_2x = "776x1046" -%}
 {% elsif second_desktop_image != blank or third_desktop_image != blank %}
 	{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 		{%- assign image_width    = "190x287" -%}
@@ -186,13 +174,6 @@
 							image_width: image_width,
 							image_width_2x: image_width_2x,
 							delay_step: 0.5
-						%}
-					{% elsif first_desktop_image == blank and second_desktop_image == blank and third_desktop_image == blank %}
-						{% render 'image-with-text-image',
-							desktop_image: second_desktop_image,
-							mobile_image: second_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x
 						%}
 					{% endif %}
 
@@ -293,7 +274,6 @@
 	</div>
 </section>
 
-
 {%- schema -%}
 	{
 		"name": "Image with text one",
@@ -356,24 +336,6 @@
 					}
 				],
 				"default": "center"
-			},
-
-			{
-				"id": "single_image_layout",
-				"type": "select",
-				"label": "Single image layout",
-				"options": [
-					{
-						"value": "vertical",
-						"label": "Vertical"
-					},
-					{
-						"value": "horizontal",
-						"label": "Horizontal"
-					}
-				],
-				"default": "vertical",
-				"info": "This setting works only when you have one image."
 			},
 			{
 				"id": "two_images_layout",
