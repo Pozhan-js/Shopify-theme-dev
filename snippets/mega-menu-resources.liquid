@@ -8,12 +8,24 @@
       <!-- Left Column - Menu Items -->
       <div class="resources-menu-column">
         <div class="resources-menu-list">
-          <a href="/blogs/news" class="resources-menu-item">Blog</a>
-          <a href="/pages/customer-stories" class="resources-menu-item">Customer Story</a>
-          <a href="/pages/certificates" class="resources-menu-item">Certificates</a>
-          <a href="/pages/faqs" class="resources-menu-item">FAQs</a>
-          <a href="/pages/aftersales" class="resources-menu-item">Aftersales</a>
-          <a href="/pages/support" class="resources-menu-item">Support</a>
+          {% if section.settings.resources_link_1_text != blank %}
+            <a href="{{ section.settings.resources_link_1_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_1_text }}</a>
+          {% endif %}
+          {% if section.settings.resources_link_2_text != blank %}
+            <a href="{{ section.settings.resources_link_2_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_2_text }}</a>
+          {% endif %}
+          {% if section.settings.resources_link_3_text != blank %}
+            <a href="{{ section.settings.resources_link_3_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_3_text }}</a>
+          {% endif %}
+          {% if section.settings.resources_link_4_text != blank %}
+            <a href="{{ section.settings.resources_link_4_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_4_text }}</a>
+          {% endif %}
+          {% if section.settings.resources_link_5_text != blank %}
+            <a href="{{ section.settings.resources_link_5_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_5_text }}</a>
+          {% endif %}
+          {% if section.settings.resources_link_6_text != blank %}
+            <a href="{{ section.settings.resources_link_6_url | default: '#' }}" class="resources-menu-item">{{ section.settings.resources_link_6_text }}</a>
+          {% endif %}
         </div>
       </div>
       
@@ -21,39 +33,35 @@
       <div class="resources-cards-container">
         <!-- Blog Card -->
         <div class="resources-content-column">
-          <div class="resources-blog-card">
-            <div class="resources-blog-tag">Blog</div>
-            <div class="resources-blog-images">
-              <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=240&fit=crop&crop=center" alt="Pilates Exercise" class="resources-blog-image" />
-            </div>
+          <a href="{{ section.settings.resources_blog_url | default: '/blogs/news' }}" class="resources-blog-card" 
+             style="background-image: url('{% if section.settings.resources_blog_image %}{{ section.settings.resources_blog_image | image_url: width: 498 }}{% else %}https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=498&h=394&fit=crop&crop=center{% endif %}');">
+            <div class="resources-blog-tag">{{ section.settings.resources_link_1_text | default: 'Blog' }}</div>
             <div class="resources-blog-content">
-              <h3 class="resources-blog-title">4 Exercises to Relieve Lower Back Pain</h3>
-              <p class="resources-blog-description">Stop stretching your back! Learn 4 science-backed moves to fix the real cause of your chronic pain.</p>
+              <h3 class="resources-blog-title">{{ section.settings.resources_blog_title | default: '4 Exercises to Relieve Lower Back Pain' }}</h3>
+              <p class="resources-blog-description">{{ section.settings.resources_blog_description | default: 'Stop stretching your back! Learn 4 science-backed moves to fix the real cause of your chronic pain.' }}</p>
             </div>
-            <button class="resources-blog-arrow">
+            <div class="resources-blog-arrow">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
-            </button>
-          </div>
+            </div>
+          </a>
         </div>
         
         <!-- Customer Story Card -->
         <div class="resources-story-column">
-          <div class="resources-story-card">
-            <div class="resources-story-tag">Customer Story</div>
-            <div class="resources-story-logo">
-              <img src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200&h=100&fit=crop&crop=center" alt="XS Pilates Logo" class="resources-logo-image" />
-            </div>
+          <a href="{{ section.settings.resources_story_url | default: '/pages/customer-stories' }}" class="resources-story-card"
+             style="background-image: url('{% if section.settings.resources_story_image %}{{ section.settings.resources_story_image | image_url: width: 498 }}{% else %}https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=498&h=394&fit=crop&crop=center{% endif %}');">
+            <div class="resources-story-tag">{{ section.settings.resources_link_2_text | default: 'Customer Story' }}</div>
             <div class="resources-story-content">
-              <p class="resources-story-text">XS Pilates Equipment delivers durable, ergonomic gear trusted by studios for quality Pilates training.</p>
+              <p class="resources-story-text">{{ section.settings.resources_story_title | default: 'XS Pilates Equipment delivers durable, ergonomic gear trusted by studios for quality Pilates training.' }}</p>
             </div>
-            <button class="resources-story-arrow">
+            <div class="resources-story-arrow">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
-            </button>
-          </div>
+            </div>
+          </a>
         </div>
       </div>
     </div>
@@ -135,7 +143,6 @@
 }
 
 .resources-blog-card {
-  background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=498&h=394&fit=crop&crop=center');
   background-size: cover;
   background-position: center;
   border-radius: 16px;
@@ -144,6 +151,13 @@
   height: 394px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.resources-blog-card:hover {
+  transform: translateY(-2px);
 }
 
 .resources-blog-tag {
@@ -221,9 +235,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: #374151;
+  pointer-events: none;
 }
 
-.resources-blog-arrow:hover {
+.resources-blog-card:hover .resources-blog-arrow {
   background: rgba(255, 255, 255, 0.7);
   transform: translateX(2px);
 }
@@ -235,7 +250,6 @@
 }
 
 .resources-story-card {
-  background-image: url('https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=498&h=394&fit=crop&crop=center');
   background-size: cover;
   background-position: center;
   border-radius: 16px;
@@ -244,6 +258,13 @@
   height: 394px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  text-decoration: none;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.resources-story-card:hover {
+  transform: translateY(-2px);
 }
 
 .resources-story-tag {
@@ -312,9 +333,10 @@
   cursor: pointer;
   transition: all 0.2s ease;
   color: #374151;
+  pointer-events: none;
 }
 
-.resources-story-arrow:hover {
+.resources-story-card:hover .resources-story-arrow {
   background: rgba(255, 255, 255, 0.7);
   transform: translateX(2px);
 }
