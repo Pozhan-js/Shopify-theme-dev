@@ -1,0 +1,88 @@
+{%- liquid
+  assign rating_decimal = rating | times: 1.0
+  assign full_stars = rating_decimal | floor
+  assign has_half_star = false
+  assign remainder = rating_decimal | modulo: 1
+
+  if remainder >= 0.5
+    assign has_half_star = true
+  endif
+
+  assign empty_stars = 5 | minus: full_stars | minus: has_half_star
+-%}
+
+<span class="rating rating--{{ size }}" role="img" aria-label="{{ rating }} out of 5 stars">
+  {%- for i in (1..full_stars) -%}
+    <svg
+      class="rating__star rating__star--full"
+      width="{{ size | default: '16' }}"
+      height="{{ size | default: '16' }}"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+    >
+      <path d="M8 12.173l-4.702 2.472.898-5.234L.392 5.528l5.257-.764L8 0l2.351 4.764 5.257.764-3.804 3.883.898 5.234z"/>
+    </svg>
+  {%- endfor -%}
+
+  {%- if has_half_star -%}
+    <svg
+      class="rating__star rating__star--half"
+      width="{{ size | default: '16' }}"
+      height="{{ size | default: '16' }}"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+    >
+      <defs>
+        <linearGradient id="half-star-{{ size }}">
+          <stop offset="50%" stop-color="currentColor"/>
+          <stop offset="50%" stop-color="transparent"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#half-star-{{ size }})" d="M8 12.173l-4.702 2.472.898-5.234L.392 5.528l5.257-.764L8 0l2.351 4.764 5.257.764-3.804 3.883.898 5.234z"/>
+    </svg>
+  {%- endif -%}
+
+  {%- for i in (1..empty_stars) -%}
+    <svg
+      class="rating__star rating__star--empty"
+      width="{{ size | default: '16' }}"
+      height="{{ size | default: '16' }}"
+      viewBox="0 0 16 16"
+      fill="currentColor"
+    >
+      <path d="M8 12.173l-4.702 2.472.898-5.234L.392 5.528l5.257-.764L8 0l2.351 4.764 5.257.764-3.804 3.883.898 5.234z"/>
+    </svg>
+  {%- endfor -%}
+</span>
+
+<style>
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .rating__star {
+    color: #ffc107;
+    transition: color 0.2s ease;
+  }
+
+  .rating__star--empty {
+    color: #e0e0e0;
+  }
+
+  .rating--small .rating__star {
+    width: 14px;
+    height: 14px;
+  }
+
+  .rating--medium .rating__star {
+    width: 16px;
+    height: 16px;
+  }
+
+  .rating--large .rating__star {
+    width: 20px;
+    height: 20px;
+  }
+</style>
