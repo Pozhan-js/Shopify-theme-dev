@@ -734,33 +734,36 @@
 
         <!-- Desktop Navigation -->
         <div class="desktop-nav">
-          <!-- 自定义导航项目 -->
-          {% for block in section.blocks %}
-            {% if block.type == 'nav_item' %}
-              {% if block.settings.show_dropdown %}
-                <!-- 自定义下拉菜单 -->
-                <div class="dropdown" {{ block.shopify_attributes }}>
-                  <a href="{{ block.settings.nav_url | default: '#' }}" class="nav-item dropdown-arrow">
-                    {{ block.settings.nav_title }}
+          {% assign mainmenu = linklists[section.settings.mainmenu] %}
+          {% if mainmenu and mainmenu.links.size > 0 %}
+            {% for link in mainmenu.links %}
+              {% if link.links.size > 0 %}
+                <!-- Dropdown Menu -->
+                <div class="dropdown">
+                  <a href="{{ link.url }}" class="nav-item dropdown-arrow">
+                    {{ link.title | escape }}
                   </a>
                   <div class="dropdown-menu">
-                    {% for dropdown_block in section.blocks %}
-                      {% if dropdown_block.type == 'dropdown_item' and dropdown_block.settings.parent_nav == block.id %}
-                        <a href="{{ dropdown_block.settings.dropdown_url | default: '#' }}" class="dropdown-item" {{ dropdown_block.shopify_attributes }}>
-                          {{ dropdown_block.settings.dropdown_title }}
-                        </a>
-                      {% endif %}
+                    {% for childlink in link.links %}
+                      <a href="{{ childlink.url }}" class="dropdown-item">
+                        {{ childlink.title | escape }}
+                      </a>
                     {% endfor %}
                   </div>
                 </div>
               {% else %}
-                <!-- 简单链接 -->
-                <a href="{{ block.settings.nav_url | default: '#' }}" class="nav-item" {{ block.shopify_attributes }}>
-                  {{ block.settings.nav_title }}
+                <!-- Simple Link -->
+                <a href="{{ link.url }}" class="nav-item">
+                  {{ link.title | escape }}
                 </a>
               {% endif %}
-            {% endif %}
-          {% endfor %}
+            {% endfor %}
+          {% else %}
+            <!-- Default Menu Items if no menu is configured -->
+            <a href="#" class="nav-item">Products</a>
+            <a href="#" class="nav-item">Resources</a>
+            <a href="#" class="nav-item">About Us</a>
+          {% endif %}
         </div>
 
         <!-- Right Side Actions -->
@@ -852,33 +855,36 @@
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
       <div class="mobile-menu-content">
-        <!-- 移动端自定义导航 -->
-        {% for block in section.blocks %}
-          {% if block.type == 'nav_item' %}
-            {% if block.settings.show_dropdown %}
-              <!-- 移动端下拉菜单 -->
+        {% assign mainmenu = linklists[section.settings.mainmenu] %}
+        {% if mainmenu and mainmenu.links.size > 0 %}
+          {% for link in mainmenu.links %}
+            {% if link.links.size > 0 %}
+              <!-- Mobile Dropdown -->
               <div>
-                <button class="mobile-menu-item" onclick="toggleSubmenu('mobile-submenu-{{ block.id }}')">
-                  {{ block.settings.nav_title }}
+                <button class="mobile-menu-item" onclick="toggleSubmenu('mobile-submenu-{{ forloop.index }}')">
+                  {{ link.title | escape }}
                 </button>
-                <div class="mobile-submenu" id="mobile-submenu-{{ block.id }}" style="display: none;">
-                  {% for dropdown_block in section.blocks %}
-                    {% if dropdown_block.type == 'dropdown_item' and dropdown_block.settings.parent_nav == block.id %}
-                      <a href="{{ dropdown_block.settings.dropdown_url | default: '#' }}" class="mobile-submenu-item">
-                        {{ dropdown_block.settings.dropdown_title }}
-                      </a>
-                    {% endif %}
+                <div class="mobile-submenu" id="mobile-submenu-{{ forloop.index }}" style="display: none;">
+                  {% for childlink in link.links %}
+                    <a href="{{ childlink.url }}" class="mobile-submenu-item">
+                      {{ childlink.title | escape }}
+                    </a>
                   {% endfor %}
                 </div>
               </div>
             {% else %}
-              <!-- 移动端简单链接 -->
-              <a href="{{ block.settings.nav_url | default: '#' }}" class="mobile-menu-item">
-                {{ block.settings.nav_title }}
+              <!-- Simple Mobile Link -->
+              <a href="{{ link.url }}" class="mobile-menu-item">
+                {{ link.title | escape }}
               </a>
             {% endif %}
-          {% endif %}
-        {% endfor %}
+          {% endfor %}
+        {% else %}
+          <!-- Default Mobile Menu Items -->
+          <a href="#" class="mobile-menu-item">Products</a>
+          <a href="#" class="mobile-menu-item">Resources</a>
+          <a href="#" class="mobile-menu-item">About Us</a>
+        {% endif %}
 
         <a href="{{ section.settings.contactlink }}" class="mobile-contact-badge">
           <span>{{ section.settings.contacttext | default: 'Contact Us' | escape }}</span>
@@ -992,7 +998,13 @@ function toggleSearch() {
     },
     {
       "type": "header",
-      "content": "Contact Button Settings"
+      "content": "Navigation Settings"
+    },
+    {
+      "type": "link_list",
+      "id": "mainmenu",
+      "label": "Main Menu",
+      "info": "Select the menu to display in the navigation"
     },
     {
       "type": "text",
@@ -1001,102 +1013,14 @@ function toggleSearch() {
       "default": "Contact Us"
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "contactlink",
       "label": "Contact Button Link"
     }
   ],
-  "blocks": [
-    {
-      "type": "nav_item",
-      "name": "导航项目",
-      "settings": [
-        {
-          "type": "text",
-          "id": "nav_title",
-          "label": "导航标题"
-        },
-        {
-          "type": "url",
-          "id": "nav_url",
-          "label": "导航链接"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_dropdown",
-          "label": "显示下拉菜单",
-          "default": false
-        }
-      ]
-    },
-    {
-      "type": "dropdown_item",
-      "name": "下拉菜单项目",
-      "settings": [
-        {
-          "type": "text",
-          "id": "parent_nav",
-          "label": "父级导航ID",
-          "info": "输入对应导航项目的ID，用于关联下拉菜单"
-        },
-        {
-          "type": "text",
-          "id": "dropdown_title",
-          "label": "下拉菜单标题"
-        },
-        {
-          "type": "url",
-          "id": "dropdown_url",
-          "label": "下拉菜单链接"
-        }
-      ]
-    }
-  ],
   "presets": [
     {
-      "name": "Header Navigation",
-      "blocks": [
-        {
-          "type": "nav_item",
-          "settings": {
-            "nav_title": "Products",
-            "nav_url": "/collections",
-            "show_dropdown": true
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_nav": "products",
-            "dropdown_title": "Reformers",
-            "dropdown_url": "/collections/reformers"
-          }
-        },
-        {
-          "type": "dropdown_item",
-          "settings": {
-            "parent_nav": "products",
-            "dropdown_title": "Cadillacs",
-            "dropdown_url": "/collections/cadillacs"
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "nav_title": "Resources",
-            "nav_url": "/pages/resources",
-            "show_dropdown": false
-          }
-        },
-        {
-          "type": "nav_item",
-          "settings": {
-            "nav_title": "About Us",
-            "nav_url": "/pages/about",
-            "show_dropdown": false
-          }
-        }
-      ]
+      "name": "Header Navigation"
     }
   ]
 }
