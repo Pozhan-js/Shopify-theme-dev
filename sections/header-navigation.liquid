@@ -1070,20 +1070,29 @@
                     <div class="mega-menu-grid">
                       {% render 'debug-collections', section: section %}
                       
-                      {% comment %} 直接显示所有产品系列 {% endcomment %}
-                      {% assign all_collections = collections %}
+                      {% comment %} 直接遍历所有产品系列 {% endcomment %}
                       {% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
                       {% assign collections_per_column = section.settings.collections_per_column | default: 2 %}
                       
-                      {% if all_collections.size > 0 %}
-                        {% assign total_collections = all_collections.size %}
+                      {% comment %} 将 collections 转换为数组 {% endcomment %}
+                      {% assign collections_array = '' %}
+                      {% for collection in collections %}
+                        {% assign collections_array = collections_array | append: collection.handle %}
+                        {% unless forloop.last %}
+                          {% assign collections_array = collections_array | append: ',' %}
+                        {% endunless %}
+                      {% endfor %}
+                      {% assign collection_handles = collections_array | split: ',' %}
+                      
+                      {% if collection_handles.size > 0 %}
+                        {% assign total_collections = collection_handles.size %}
                         {% assign columns_needed = total_collections | divided_by: collections_per_column | ceil %}
                         {% assign max_columns = 3 %}
                         {% if columns_needed > max_columns %}
                           {% assign columns_needed = max_columns %}
                         {% endif %}
 
-                        {% for column_index in (0..columns_needed) %}
+                        {% for column_index in (0..2) %}
                           {% assign column_start = column_index | times: collections_per_column %}
                           {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
                           
@@ -1091,7 +1100,8 @@
                             <div class="mega-menu-column">
                               {% for i in (column_start..column_end) %}
                                 {% if i < total_collections %}
-                                  {% assign collection = all_collections[i] %}
+                                  {% assign collection_handle = collection_handles[i] %}
+                                  {% assign collection = collections[collection_handle] %}
                                   {% if collection %}
                                     <div class="mega-menu-category">
                                       <h3>{{ collection.title | escape }}</h3>
@@ -1112,6 +1122,43 @@
                                 {% endif %}
                               {% endfor %}
                             </div>
+                          {% endif %}
+                        {% endfor %}
+                      {% else %}
+                        {% comment %} 如果上面的方法不行，使用直接遍历 {% endcomment %}
+                        {% assign column_count = 0 %}
+                        {% assign items_in_column = 0 %}
+                        
+                        {% for collection in collections %}
+                          {% if items_in_column == 0 %}
+                            <div class="mega-menu-column">
+                          {% endif %}
+                          
+                          <div class="mega-menu-category">
+                            <h3>{{ collection.title | escape }}</h3>
+                            <ul>
+                              {% if collection.products.size > 0 %}
+                                {% for product in collection.products limit: products_per_collection %}
+                                  <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                                {% endfor %}
+                                {% if collection.products.size > products_per_collection %}
+                                  <li><a href="{{ collection.url }}" style="font-weight: 600; color: #DC2626;">View All {{ collection.title }}</a></li>
+                                {% endif %}
+                              {% else %}
+                                <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                              {% endif %}
+                            </ul>
+                          </div>
+                          
+                          {% assign items_in_column = items_in_column | plus: 1 %}
+                          
+                          {% if items_in_column >= collections_per_column or forloop.last %}
+                            </div>
+                            {% assign items_in_column = 0 %}
+                            {% assign column_count = column_count | plus: 1 %}
+                            {% if column_count >= 3 %}
+                              {% break %}
+                            {% endif %}
                           {% endif %}
                         {% endfor %}
                       {% endif %}
