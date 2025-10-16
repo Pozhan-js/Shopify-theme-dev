@@ -78,6 +78,7 @@
   }
 
   .recently-viewed__slide {
+    flex: 0 0 calc(20% - 16px);
     min-width: 0;
   }
 
@@ -88,6 +89,9 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .recently-viewed__product:hover {
@@ -115,6 +119,9 @@
 
   .recently-viewed__content {
     padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
   }
 
   .recently-viewed__product-title {
@@ -127,6 +134,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.8em;
   }
 
   .recently-viewed__product-title a {
@@ -143,6 +151,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
+    margin-top: auto;
   }
 
   .recently-viewed__current-price {
@@ -169,15 +178,21 @@
     color: white;
     border: none;
     padding: 10px 16px;
-    border-radius: 6px;
+    /* border-radius: 6px; */
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    margin-top: auto;
   }
 
   .recently-viewed__add-to-cart:hover {
     background: #6b1611;
+  }
+
+  .recently-viewed__add-to-cart:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 
   .recently-viewed__empty {
@@ -198,14 +213,14 @@
 
   /* 响应式设计 */
   @media (max-width: 1200px) {
-    .recently-viewed__track {
-      grid-template-columns: repeat(4, 1fr);
+    .recently-viewed__slide {
+      flex: 0 0 calc(25% - 15px);
     }
   }
 
   @media (max-width: 992px) {
-    .recently-viewed__track {
-      grid-template-columns: repeat(3, 1fr);
+    .recently-viewed__slide {
+      flex: 0 0 calc(33.333% - 13.333px);
     }
   }
 
@@ -218,14 +233,14 @@
       font-size: 28px;
     }
 
-    .recently-viewed__track {
-      grid-template-columns: repeat(2, 1fr);
+    .recently-viewed__slide {
+      flex: 0 0 calc(50% - 10px);
     }
   }
 
   @media (max-width: 480px) {
-    .recently-viewed__track {
-      grid-template-columns: 1fr;
+    .recently-viewed__slide {
+      flex: 0 0 100%;
     }
   }
 {%- endstyle -%}
@@ -296,9 +311,16 @@
 
                   <button
                     class="recently-viewed__add-to-cart"
-                    onclick="addToCart({{ product.selected_or_first_available_variant.id }})"
+                    onclick="addToCart({{ product.selected_or_first_available_variant.id }}, this)"
+                    {% unless product.available %}
+                      disabled
+                    {% endunless %}
                   >
-                    Add to Cart
+                    {%- if product.available -%}
+                      Add to Cart
+                    {%- else -%}
+                      Sold Out
+                    {%- endif -%}
                   </button>
                 </div>
               </div>
@@ -306,7 +328,7 @@
           {%- endfor -%}
         {%- else -%}
           <div class="recently-viewed__empty">
-            <h3 class="recently-viewed__empty-title">No recently viewed products</h3>
+            <h3 class="recently-viewed__empty-title">{{ section.settings.title | default: 'Recently Viewed' }}</h3>
             <p class="recently-viewed__empty-text">Start browsing to see your recently viewed items here.</p>
           </div>
         {%- endif -%}
@@ -393,9 +415,14 @@
     }
   }
 
-  // 添加到购物车功能 - 修复版本
-  function addToCart(variantId) {
-    event.preventDefault();
+  // 添加到购物车功能 - 无alert版本
+  function addToCart(variantId, button) {
+    const originalText = button.textContent;
+
+    // 显示加载状态
+    button.textContent = 'Adding...';
+    button.disabled = true;
+    button.style.background = '#6b1611';
 
     fetch('/cart/add.js', {
       method: 'POST',
@@ -410,23 +437,51 @@
     })
       .then((response) => response.json())
       .then((data) => {
-        // 显示成功消息
-        alert('Product added to cart!');
-        // 可以在这里触发购物车抽屉或其他反馈
-        console.log('Product added:', data);
+        // 成功反馈 - 按钮状态变化
+        button.textContent = 'Added!';
+        button.style.background = '#28a745';
+
+        // 触发购物车更新事件
+        document.dispatchEvent(
+          new CustomEvent('cart:updated', {
+            detail: { cart: data },
+          })
+        );
+
+        // 恢复按钮状态
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = '';
+          button.disabled = false;
+        }, 1500);
       })
       .catch((error) => {
         console.error('Error adding to cart:', error);
-        alert('Error adding to cart. Please try again.');
+        button.textContent = 'Error';
+        button.style.background = '#dc3545';
+
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = '';
+          button.disabled = false;
+        }, 2000);
       });
   }
 
-  // 记录浏览历史 - 实时更新
+  // 初始化滑块
   document.addEventListener('DOMContentLoaded', function () {
-    // 初始化滑块
     new RecentlyViewedSlider();
 
-    // 记录当前产品浏览
+    // 绑定添加到购物车事件
+    const addButtons = document.querySelectorAll('.recently-viewed__add-to-cart');
+    addButtons.forEach((button) => {
+      button.addEventListener('click', function (e) {
+        const variantId = this.getAttribute('onclick').match(/\d+/)[0];
+        addToCart(variantId, this);
+      });
+    });
+
+    // 记录浏览历史
     if (window.location.pathname.includes('/products/')) {
       const productHandle = window.location.pathname.split('/products/')[1]?.split('/')[0];
       if (productHandle) {
