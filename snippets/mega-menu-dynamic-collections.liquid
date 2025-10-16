@@ -30,7 +30,16 @@
               <div class="mega-menu-category">
                 <h3>{{ collection.title | escape }}</h3>
                 <ul>
-                  {% comment %} 清空内容，等待重新实现 {% endcomment %}
+                  {% if collection.products.size > 0 %}
+                    {% for product in collection.products limit: products_per_collection %}
+                      <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                    {% endfor %}
+                    {% if collection.products.size > products_per_collection %}
+                      <li><a href="{{ collection.url }}" style="font-weight: 600; color: #DC2626;">View All {{ collection.title }}</a></li>
+                    {% endif %}
+                  {% else %}
+                    <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                  {% endif %}
                 </ul>
               </div>
             {% endif %}
@@ -40,14 +49,6 @@
     {% endif %}
   {% endfor %}
 
-{% else %}
-  {% comment %} 如果没有选择系列，显示空的结构 {% endcomment %}
-  <div class="mega-menu-column">
-    <div class="mega-menu-category">
-      <h3>请在后台选择产品系列</h3>
-      <ul>
-        <li><a href="#">暂无产品系列</a></li>
-      </ul>
-    </div>
-  </div>
 {% endif %}
+
+{% comment %} 如果没有配置任何系列，显示空白，不显示默认内容 {% endcomment %}
