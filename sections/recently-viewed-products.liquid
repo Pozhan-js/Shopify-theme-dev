@@ -78,7 +78,6 @@
   }
 
   .recently-viewed__slide {
-    flex: 0 0 calc(20% - 16px);
     min-width: 0;
   }
 
@@ -199,14 +198,14 @@
 
   /* 响应式设计 */
   @media (max-width: 1200px) {
-    .recently-viewed__slide {
-      flex: 0 0 calc(25% - 15px);
+    .recently-viewed__track {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
   @media (max-width: 992px) {
-    .recently-viewed__slide {
-      flex: 0 0 calc(33.333% - 13.333px);
+    .recently-viewed__track {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 
@@ -219,18 +218,14 @@
       font-size: 28px;
     }
 
-    .recently-viewed__slide {
-      flex: 0 0 calc(50% - 10px);
-    }
-
-    .recently-viewed__nav {
-      display: none;
+    .recently-viewed__track {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
   @media (max-width: 480px) {
-    .recently-viewed__slide {
-      flex: 0 0 100%;
+    .recently-viewed__track {
+      grid-template-columns: 1fr;
     }
   }
 {%- endstyle -%}
@@ -349,8 +344,6 @@
     }
 
     calculateVisibleSlides() {
-      const containerWidth = this.track.parentElement.offsetWidth;
-
       if (window.innerWidth <= 480) {
         this.visibleSlides = 1;
       } else if (window.innerWidth <= 768) {
@@ -400,8 +393,10 @@
     }
   }
 
-  // 添加到购物车功能
+  // 添加到购物车功能 - 修复版本
   function addToCart(variantId) {
+    event.preventDefault();
+
     fetch('/cart/add.js', {
       method: 'POST',
       headers: {
@@ -415,22 +410,23 @@
     })
       .then((response) => response.json())
       .then((data) => {
-        // 显示成功消息或更新购物车计数
-        console.log('Product added to cart:', data);
-        // 这里可以触发购物车抽屉打开或其他反馈
+        // 显示成功消息
+        alert('Product added to cart!');
+        // 可以在这里触发购物车抽屉或其他反馈
+        console.log('Product added:', data);
       })
       .catch((error) => {
         console.error('Error adding to cart:', error);
+        alert('Error adding to cart. Please try again.');
       });
   }
 
-  // 初始化滑块
+  // 记录浏览历史 - 实时更新
   document.addEventListener('DOMContentLoaded', function () {
+    // 初始化滑块
     new RecentlyViewedSlider();
-  });
 
-  // 记录浏览历史
-  document.addEventListener('DOMContentLoaded', function () {
+    // 记录当前产品浏览
     if (window.location.pathname.includes('/products/')) {
       const productHandle = window.location.pathname.split('/products/')[1]?.split('/')[0];
       if (productHandle) {
