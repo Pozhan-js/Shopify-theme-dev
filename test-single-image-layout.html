@@ -7,102 +7,80 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .test-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px;
         }
         .test-section {
-            margin-bottom: 30px;
+            margin: 20px 0;
             padding: 20px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
         }
         .test-title {
-            color: #333;
-            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
         .test-description {
             color: #666;
             margin-bottom: 15px;
         }
-        .test-image {
-            width: 100%;
-            max-width: 400px;
-            height: 300px;
-            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #ccc;
-            margin-bottom: 15px;
-        }
-        .layout-options {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .layout-option {
-            padding: 8px 16px;
-            background: #007cba;
-            color: white;
-            border: none;
+        .test-result {
+            background: #f5f5f5;
+            padding: 10px;
             border-radius: 4px;
-            cursor: pointer;
-        }
-        .layout-option:hover {
-            background: #005a87;
+            font-family: monospace;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="test-container">
-        <h1>Single Image Layout Test</h1>
-        
-        <div class="test-section">
-            <h2 class="test-title">单张图片布局功能测试</h2>
-            <p class="test-description">
-                测试新添加的单张图片布局功能。在Shopify主题编辑器中，您现在可以选择：
-            </p>
-            <ul>
-                <li><strong>布局类型：</strong> 单张图片、两张图片、三张图片</li>
-                <li><strong>单张图片布局：</strong> 标准、大图片、全宽</li>
-                <li><strong>图片位置：</strong> 左侧或右侧</li>
-                <li><strong>文本对齐：</strong> 左对齐、居中、右对齐</li>
-            </ul>
+    <h1>Single Image Layout Test</h1>
+    
+    <div class="test-section">
+        <div class="test-title">测试 1: 单张图片垂直布局</div>
+        <div class="test-description">
+            当只有一张图片且 single_image_layout 设置为 "single_vertical" 时，应该使用垂直布局
         </div>
-
-        <div class="test-section">
-            <h3>单张图片布局选项</h3>
-            <div class="layout-options">
-                <button class="layout-option">标准 (388x)</button>
-                <button class="layout-option">大图片 (588x)</button>
-                <button class="layout-option">全宽 (100%x)</button>
-            </div>
-            <div class="test-image">
-                <span>示例图片占位符</span>
-            </div>
-            <p>文本内容区域 - 可以添加标题、副标题、正文文本和按钮</p>
-        </div>
-
-        <div class="test-section">
-            <h3>使用说明</h3>
-            <ol>
-                <li>在Shopify主题编辑器中添加"Image with text"区块</li>
-                <li>在"Layout type"设置中选择"Single image"</li>
-                <li>在"Single image layout"中选择所需的布局样式</li>
-                <li>上传第一张图片</li>
-                <li>配置文本内容和按钮</li>
-                <li>调整图片位置和文本对齐方式</li>
-            </ol>
+        <div class="test-result">
+            single_image_layout: single_vertical<br>
+            single_img_layout_class: image-with-text__image-container--single-vertical<br>
+            image_width: 388x523<br>
+            image_width_2x: 776x1046
         </div>
     </div>
+
+    <div class="test-section">
+        <div class="test-title">测试 2: 单张图片水平布局</div>
+        <div class="test-description">
+            当只有一张图片且 single_image_layout 设置为 "single_horizontal" 时，应该使用水平布局
+        </div>
+        <div class="test-result">
+            single_image_layout: single_horizontal<br>
+            single_img_layout_class: image-with-text__image-container--single-horizontal<br>
+            image_width: 776x388<br>
+            image_width_2x: 1552x776
+        </div>
+    </div>
+
+    <div class="test-section">
+        <div class="test-title">测试 3: 多张图片时设置无效</div>
+        <div class="test-description">
+            当有多张图片时，single_image_layout 设置应该被忽略
+        </div>
+        <div class="test-result">
+            is_single_layout: false<br>
+            single_img_layout_class: (空)<br>
+            使用现有的 two_images_layout 设置
+        </div>
+    </div>
+
+    <h2>修改总结</h2>
+    <ul>
+        <li>✅ 添加了 single_image_layout 设置选项</li>
+        <li>✅ 支持单张图片的 vertical 和 horizontal 布局选择</li>
+        <li>✅ 根据布局类型自动调整图片尺寸</li>
+        <li>✅ 保持向后兼容性（默认为 vertical 布局）</li>
+        <li>✅ 只在单张图片时生效，多张图片时忽略此设置</li>
+    </ul>
 </body>
 </html>
