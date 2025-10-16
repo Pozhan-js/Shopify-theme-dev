@@ -1069,7 +1069,53 @@
                   <div class="mega-dropdown-menu">
                     <div class="mega-menu-grid">
                       {% render 'debug-collections', section: section %}
-                      {% render 'mega-menu-dynamic-collections', section: section %}
+                      
+                      {% comment %} 直接显示所有产品系列 {% endcomment %}
+                      {% assign all_collections = collections %}
+                      {% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
+                      {% assign collections_per_column = section.settings.collections_per_column | default: 2 %}
+                      
+                      {% if all_collections.size > 0 %}
+                        {% assign total_collections = all_collections.size %}
+                        {% assign columns_needed = total_collections | divided_by: collections_per_column | ceil %}
+                        {% assign max_columns = 3 %}
+                        {% if columns_needed > max_columns %}
+                          {% assign columns_needed = max_columns %}
+                        {% endif %}
+
+                        {% for column_index in (0..columns_needed) %}
+                          {% assign column_start = column_index | times: collections_per_column %}
+                          {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
+                          
+                          {% if column_start < total_collections %}
+                            <div class="mega-menu-column">
+                              {% for i in (column_start..column_end) %}
+                                {% if i < total_collections %}
+                                  {% assign collection = all_collections[i] %}
+                                  {% if collection %}
+                                    <div class="mega-menu-category">
+                                      <h3>{{ collection.title | escape }}</h3>
+                                      <ul>
+                                        {% if collection.products.size > 0 %}
+                                          {% for product in collection.products limit: products_per_collection %}
+                                            <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                                          {% endfor %}
+                                          {% if collection.products.size > products_per_collection %}
+                                            <li><a href="{{ collection.url }}" style="font-weight: 600; color: #DC2626;">View All {{ collection.title }}</a></li>
+                                          {% endif %}
+                                        {% else %}
+                                          <li><a href="{{ collection.url }}">View {{ collection.title }}</a></li>
+                                        {% endif %}
+                                      </ul>
+                                    </div>
+                                  {% endif %}
+                                {% endif %}
+                              {% endfor %}
+                            </div>
+                          {% endif %}
+                        {% endfor %}
+                      {% endif %}
+                      
                       <div class="mega-menu-column">
                         <div class="mega-menu-cta">
                           {% if section.settings.mega_menu_image %}
