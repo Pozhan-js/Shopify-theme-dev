@@ -5,50 +5,79 @@
   </span>
   <div class="mega-dropdown-menu about-mega-menu">
     <div class="about-mega-grid">
-      <!-- Our Story Card -->
-      <div class="about-card-column">
-        <h3 class="about-card-title">{{ section.settings.about_story_title | default: 'Our Story' }}</h3>
-        <div class="about-card" style="background-image: url('{% if section.settings.about_story_image %}{{ section.settings.about_story_image | image_url: width: 480 }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=377&fit=crop&crop=center{% endif %}');">
-          <div class="about-card-overlay">
-            <p class="about-card-description">{{ section.settings.about_story_description | default: 'XS Pilates helps studios, instructors, and rehab pros achieve better outcomes - with premium quality and flexible customization at every step.' }}</p>
-            <a href="{{ section.settings.about_story_url | default: '/pages/our-story' }}" class="about-card-arrow">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
+      {% comment %} 动态渲染About Us卡片 {% endcomment %}
+      {% for block in section.blocks %}
+        {% if block.type == 'about_menu_card' and block.settings.card_title != blank %}
+          <div class="about-card-column">
+            <h3 class="about-card-title">{{ block.settings.card_title }}</h3>
+            <div class="about-card" style="background-image: url('{% if block.settings.card_image %}{{ block.settings.card_image | image_url: width: 480 }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=377&fit=crop&crop=center{% endif %}');">
+              <div class="about-card-overlay">
+                <p class="about-card-description">{{ block.settings.card_description }}</p>
+                <a href="{{ block.settings.card_url | default: '#' }}" class="about-card-arrow">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      
+      {% comment %} 如果没有配置任何卡片，显示默认卡片 {% endcomment %}
+      {% assign about_cards_count = 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'about_menu_card' and block.settings.card_title != blank %}
+          {% assign about_cards_count = about_cards_count | plus: 1 %}
+        {% endif %}
+      {% endfor %}
+      
+      {% if about_cards_count == 0 %}
+        <!-- Default Our Story Card -->
+        <div class="about-card-column">
+          <h3 class="about-card-title">Our Story</h3>
+          <div class="about-card" style="background-image: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=377&fit=crop&crop=center');">
+            <div class="about-card-overlay">
+              <p class="about-card-description">XS Pilates helps studios, instructors, and rehab pros achieve better outcomes - with premium quality and flexible customization at every step.</p>
+              <a href="/pages/our-story" class="about-card-arrow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Our Factory Card -->
-      <div class="about-card-column">
-        <h3 class="about-card-title">{{ section.settings.about_factory_title | default: 'Our Factory' }}</h3>
-        <div class="about-card" style="background-image: url('{% if section.settings.about_factory_image %}{{ section.settings.about_factory_image | image_url: width: 480 }}{% else %}https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=480&h=377&fit=crop&crop=center{% endif %}');">
-          <div class="about-card-overlay">
-            <p class="about-card-description">{{ section.settings.about_factory_description | default: 'Step into XS Pilates vertically integrated facility where studio-grade equipment is built through 30+ handcrafted steps, eco-minded finishes, and rigorous QC.' }}</p>
-            <a href="{{ section.settings.about_factory_url | default: '/pages/our-factory' }}" class="about-card-arrow">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
+        <!-- Default Our Factory Card -->
+        <div class="about-card-column">
+          <h3 class="about-card-title">Our Factory</h3>
+          <div class="about-card" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=480&h=377&fit=crop&crop=center');">
+            <div class="about-card-overlay">
+              <p class="about-card-description">Step into XS Pilates vertically integrated facility where studio-grade equipment is built through 30+ handcrafted steps, eco-minded finishes, and rigorous QC.</p>
+              <a href="/pages/our-factory" class="about-card-arrow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Quality Control Card -->
-      <div class="about-card-column">
-        <h3 class="about-card-title">{{ section.settings.about_quality_title | default: 'Quality Control' }}</h3>
-        <div class="about-card" style="background-image: url('{% if section.settings.about_quality_image %}{{ section.settings.about_quality_image | image_url: width: 480 }}{% else %}https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=480&h=377&fit=crop&crop=center{% endif %}');">
-          <div class="about-card-overlay">
-            <p class="about-card-description">{{ section.settings.about_quality_description | default: 'At XS Pilates, quality is not a goal, it is our foundation. We build trust through meticulous craftsmanship and rigorous standards.' }}</p>
-            <a href="{{ section.settings.about_quality_url | default: '/pages/quality-control' }}" class="about-card-arrow">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
+        <!-- Default Quality Control Card -->
+        <div class="about-card-column">
+          <h3 class="about-card-title">Quality Control</h3>
+          <div class="about-card" style="background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=480&h=377&fit=crop&crop=center');">
+            <div class="about-card-overlay">
+              <p class="about-card-description">At XS Pilates, quality is not a goal, it is our foundation. We build trust through meticulous craftsmanship and rigorous standards.</p>
+              <a href="/pages/quality-control" class="about-card-arrow">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
     </div>
     
     <div class="mega-menu-footer">
