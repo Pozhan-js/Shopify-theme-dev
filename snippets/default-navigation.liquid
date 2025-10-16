@@ -5,7 +5,17 @@
   </span>
   <div class="mega-dropdown-menu">
     <div class="mega-menu-grid">
-      {% render 'mega-menu-equipment-collections' %}
+      {% comment %} Use dynamic collections if available, otherwise fallback to static {% endcomment %}
+      {% if collections.size > 0 %}
+        {% assign equipment_collections = collections | where: 'handle', 'reformer', 'pilates-chair', 'ladder-barrel', 'cadillac', 'spine-corrector', 'accessories' %}
+        {% if equipment_collections.size > 0 %}
+          {% render 'mega-menu-dynamic-collections-fallback', collections: equipment_collections %}
+        {% else %}
+          {% render 'mega-menu-equipment-collections' %}
+        {% endif %}
+      {% else %}
+        {% render 'mega-menu-equipment-collections' %}
+      {% endif %}
       <div class="mega-menu-column">
         <div class="mega-menu-cta">
           <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
