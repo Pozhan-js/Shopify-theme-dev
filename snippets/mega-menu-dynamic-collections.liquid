@@ -1,56 +1,19 @@
 {% comment %}
-  Dynamic Equipment Mega Menu with Backend-Configurable Collections
-  This snippet renders equipment categories based on collections selected in the backend
+  Fallback dynamic collections renderer for default navigation
 {% endcomment %}
 
-<!-- 调试信息开始 -->
-<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc; font-size: 12px;">
-  <strong>调试信息:</strong><br>
-  所有可用系列数量: {{ collections.size }}<br>
-  后台配置的系列数量: {{ section.settings.equipment_collections.size }}<br>
-  
-  {% if collections.size > 0 %}
-    <strong>所有系列列表:</strong><br>
-    {% for collection in collections limit: 10 %}
-      - {{ collection.title }} ({{ collection.handle }}) - 产品数: {{ collection.products.size }}<br>
-    {% endfor %}
-  {% endif %}
-  
-  {% if section.settings.equipment_collections.size > 0 %}
-    <strong>后台配置的系列:</strong><br>
-    {% for collection in section.settings.equipment_collections %}
-      - {{ collection.title }} ({{ collection.handle }}) - 产品数: {{ collection.products.size }}<br>
-    {% endfor %}
-  {% else %}
-    <strong>后台没有配置任何系列</strong><br>
-  {% endif %}
-</div>
-<!-- 调试信息结束 -->
+{% assign collections_to_show = collections | default: empty %}
+{% assign collections_per_column = 2 %}
+{% assign products_per_collection = 6 %}
 
-{% assign selected_collections = section.settings.equipment_collections %}
-{% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
-{% assign collections_per_column = section.settings.collections_per_column | default: 2 %}
-{% assign total_collections = selected_collections.size %}
-
-{% comment %} 如果后台没有配置系列，尝试使用所有可用系列进行调试 {% endcomment %}
-{% if selected_collections.size == 0 and collections.size > 0 %}
-  <!-- 调试模式：使用所有系列 -->
-  <div style="background: #ffffcc; padding: 10px; margin: 10px; border: 1px solid #ffcc00;">
-    <strong>调试模式：显示所有可用系列</strong>
-  </div>
-  {% assign selected_collections = collections %}
-  {% assign total_collections = selected_collections.size %}
-{% endif %}
-
-{% if selected_collections and total_collections > 0 %}
-  {% comment %} Calculate number of columns needed {% endcomment %}
+{% if collections_to_show.size > 0 %}
+  {% assign total_collections = collections_to_show.size %}
   {% assign columns_needed = total_collections | divided_by: collections_per_column | ceil %}
   {% assign max_columns = 3 %}
   {% if columns_needed > max_columns %}
     {% assign columns_needed = max_columns %}
   {% endif %}
 
-  {% comment %} Render collections in columns {% endcomment %}
   {% for column_index in (0..columns_needed) %}
     {% assign column_start = column_index | times: collections_per_column %}
     {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
@@ -59,7 +22,7 @@
       <div class="mega-menu-column">
         {% for i in (column_start..column_end) %}
           {% if i < total_collections %}
-            {% assign collection = selected_collections[i] %}
+            {% assign collection = collections_to_show[i] %}
             {% if collection %}
               <div class="mega-menu-category">
                 <h3>{{ collection.title | escape }}</h3>
@@ -82,15 +45,4 @@
       </div>
     {% endif %}
   {% endfor %}
-{% else %}
-  <!-- 没有找到任何系列 -->
-  <div style="background: #ffcccc; padding: 10px; margin: 10px; border: 1px solid #ff0000;">
-    <strong>没有找到任何产品系列</strong><br>
-    请检查：<br>
-    1. 店铺是否有创建产品系列<br>
-    2. 后台是否正确配置了系列选择<br>
-    3. 系列中是否有产品
-  </div>
 {% endif %}
-
-{% comment %} 如果没有配置任何系列，显示空白，不显示默认内容 {% endcomment %}
