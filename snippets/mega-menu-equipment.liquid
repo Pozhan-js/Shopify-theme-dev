@@ -3,8 +3,8 @@
     <span>{{ link.title | escape }}</span>
     <span class="dropdown-arrow"></span>
   </span>
-  <div class="mega-dropdown-menu">
-    <div class="mega-menu-grid">
+  <div class="mega-dropdown-menu equipment-mega-menu">
+    <div class="mega-menu-grid equipment-mega-grid">
       {% comment %} 获取产品系列配置 {% endcomment %}
       {% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
       {% assign collections_per_column = section.settings.collections_per_column | default: 2 %}
@@ -32,13 +32,13 @@
           {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
           
           {% if column_start < total_collections %}
-            <div class="mega-menu-column">
+            <div class="mega-menu-column equipment-menu-column">
               {% for i in (column_start..column_end) %}
                 {% if i < total_collections %}
                   {% assign collection_handle = collection_handles[i] %}
                   {% assign collection = collections[collection_handle] %}
                   {% if collection %}
-                    <div class="mega-menu-category">
+                    <div class="mega-menu-category equipment-menu-category">
                       <h3><a href="{{ collection.url }}">{{ collection.title | escape }}</a></h3>
                       <ul>
                         {% if collection.products.size > 0 %}
@@ -63,10 +63,10 @@
         
         {% for collection in collections %}
           {% if items_in_column == 0 %}
-            <div class="mega-menu-column">
+            <div class="mega-menu-column equipment-menu-column">
           {% endif %}
           
-          <div class="mega-menu-category">
+          <div class="mega-menu-category equipment-menu-category">
             <h3><a href="{{ collection.url }}">{{ collection.title | escape }}</a></h3>
             <ul>
               {% if collection.products.size > 0 %}
@@ -92,7 +92,7 @@
         {% endfor %}
       {% endif %}
       
-      <div class="mega-menu-column">
+      <div class="mega-menu-column equipment-menu-column">
         <div class="nav-mega-cta-container">
           {% if section.settings.nav_cta_image %}
             <img src="{{ section.settings.nav_cta_image | image_url: width: 800 }}" alt="{{ section.settings.nav_cta_image_alt | default: 'Premium Equipment' }}" class="nav-mega-cta-image" />
@@ -133,3 +133,255 @@
     </div>
   </div>
 </div>
+
+<style>
+/* Equipment Mega Menu Specific Styles */
+.equipment-mega-menu {
+  background: #FFFCFC;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  position: fixed;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 8px;
+  width: 100%;
+  border-radius: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  padding: 32px 32px 0 32px;
+  z-index: 1000;
+}
+
+.equipment-mega-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  height: 100%;
+  margin-bottom: 32px;
+}
+
+.equipment-menu-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.equipment-menu-category {
+  margin-bottom: 24px;
+}
+
+.equipment-menu-category h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #161616;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+.equipment-menu-category h3 a {
+  color: #161616;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: block;
+}
+
+.equipment-menu-category h3 a:hover {
+  color: #DC2626;
+}
+
+.equipment-menu-category ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.equipment-menu-category li {
+  margin-bottom: 8px;
+}
+
+.equipment-menu-category a {
+  color: #6B7280;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+  display: block;
+  padding: 4px 0;
+}
+
+.equipment-menu-category a:hover {
+  color: #DC2626;
+}
+
+/* Responsive styles for Equipment menu */
+@media (max-width: 480px) {
+  .equipment-mega-menu {
+    width: 100%;
+    padding: 16px 16px 0 16px;
+    border-radius: 8px;
+    margin-top: 6px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 16px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .equipment-mega-menu {
+    width: 95%;
+    padding: 18px 18px 0 18px;
+    border-radius: 10px;
+    margin-top: 7px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 18px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1023px) {
+  .equipment-mega-menu {
+    width: 95%;
+    max-width: 1200px;
+    padding: 20px 20px 0 20px;
+    border-radius: 10px;
+    margin-top: 7px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 20px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 17px;
+    margin-bottom: 10px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .equipment-mega-menu {
+    width: 95%;
+    max-width: 1300px;
+    padding: 24px 24px 0 24px;
+    border-radius: 11px;
+    margin-top: 8px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 22px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 17px;
+    margin-bottom: 11px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1919px) {
+  .equipment-mega-menu {
+    width: 95%;
+    padding: 28px 28px 0 28px;
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+    margin-bottom: 28px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 22px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 17px;
+    margin-bottom: 11px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .equipment-mega-menu {
+    width: 1654px;
+    padding: 49px 77px 0 77px;
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  
+  .equipment-mega-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+  
+  .equipment-menu-category {
+    margin-bottom: 24px;
+  }
+  
+  .equipment-menu-category h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .equipment-menu-category a {
+    font-size: 14px;
+  }
+}
+</style>
