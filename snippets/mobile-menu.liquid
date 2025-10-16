@@ -1,0 +1,63 @@
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-content">
+    {% assign mainmenu = linklists[section.settings.mainmenu] %}
+    {% if mainmenu and mainmenu.links.size > 0 %}
+      {% for link in mainmenu.links %}
+        {% assign linkhandle = link.title | handleize %}
+        
+        {% if link.links.size > 0 %}
+          <!-- Mobile Dropdown Items -->
+          <div>
+            <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+              {{ link.title | escape }}
+            </button>
+            <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
+              {% for childlink in link.links %}
+                {% if childlink.links.size > 0 %}
+                  {% for grandchildlink in childlink.links %}
+                    <a href="{{ grandchildlink.url }}" class="mobile-submenu-item">{{ grandchildlink.title | escape }}</a>
+                  {% endfor %}
+                {% else %}
+                  <a href="{{ childlink.url }}" class="mobile-submenu-item">{{ childlink.title | escape }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <!-- Simple Link -->
+          <a href="{{ link.url }}" class="mobile-menu-item">
+            {{ link.title | escape }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+    <a href="{{ section.settings.contactlink }}" class="mobile-contact-badge">
+      <span>{{ section.settings.contacttext | default: 'Contact Us' | escape }}</span>
+      <div class="contact-arrow-icon">
+        <svg
+          viewBox="0 0 10.417 10.3762"
+          xmlns="http://www.w3.org/2000/svg"
+          width="10.416992"
+          height="10.376221"
+          fill="none">
+          <g>
+            <path
+              d="M-0.353553 3.26282L3.61638 -0.707107L7.58631 3.26282L6.8792 3.96993L3.26282 0.353553L3.61638 0L3.96993 0.353553L0.353553 3.96993L-0.353553 3.26282Z"
+              fill="rgb(255,255,255)"
+              fill-rule="nonzero"
+              transform="matrix(0.708494,0.705717,-0.708494,0.705716,5.29272,0)" />
+            <line
+              x1="0"
+              x2="7.23275518"
+              y1="0"
+              y2="0"
+              stroke="rgb(255,255,255)"
+              stroke-width="1"
+              transform="matrix(-0.708494,0.705716,-0.708494,-0.705717,7.73047,2.76355)" />
+          </g>
+        </svg>
+      </div>
+    </a>
+  </div>
+</div>
