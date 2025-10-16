@@ -30,6 +30,10 @@
 	{% assign container_width = container %}
 {% endif %}
 
+{% assign is_single_layout = false %}
+{% assign is_double_layout = false %}
+{% assign three_img_layout_class = '' %}
+
 {% if first_desktop_image != blank and second_desktop_image == blank and third_desktop_image == blank %}
 	{% assign is_single_layout = true %}
 	{% assign single_img_layout_class = 'image-with-text__image-container--single-vertical' %}
@@ -37,10 +41,12 @@
 	{% assign is_double_layout = true %}
 {% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 	{% assign three_img_layout_class = 'image-with-text__image-container--triple' %}
-	{% endif %}
+{% endif %}
 
 {% if two_images_layout == 'double_horizontal' and is_double_layout %}
 	{% assign two_img_layout_class = 'image-with-text__image-container--double-horizontal' %}
+{% elsif two_images_layout == 'double_vertical' and is_double_layout %}
+	{% assign two_img_layout_class = 'image-with-text__image-container--double-vertical' %}
 {% elsif two_images_layout == 'double_vertical_offset' and is_double_layout %}
 	{% assign two_img_layout_class = 'image-with-text__image-container--double-vertical-offset' %}
 {% elsif two_images_layout == 'double_with_small' and is_double_layout %}
@@ -168,13 +174,6 @@
 							image_width: image_width,
 							image_width_2x: image_width_2x,
 							delay_step: 0.5
-						%}
-					{% elsif first_desktop_image == blank and second_desktop_image == blank and third_desktop_image == blank %}
-						{% render 'image-with-text-image',
-							desktop_image: second_desktop_image,
-							mobile_image: second_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x
 						%}
 					{% endif %}
 
