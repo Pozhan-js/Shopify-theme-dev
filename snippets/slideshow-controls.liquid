@@ -64,15 +64,18 @@
   {% if class %}
     class="{{ class }}"
   {% endif %}
+  style="position:absolute;bottom:1rem"
 >
   {% if show_arrows_separately == false and show_arrows and pagination_position != 'left' %}
-    <div class="slideshow-controls__arrows">
-      {%- render 'slideshow-arrow', action: 'previous', icon_style: icon_style, icon_shape: shape -%}
+    {% comment %}
+      <div class="slideshow-controls__arrows">
+        {%- render 'slideshow-arrow', action: 'previous', icon_style: icon_style, icon_shape: shape -%}
 
-      {% if pagination_position == 'right' %}
-        {%- render 'slideshow-arrow', action: 'next', icon_style: icon_style, icon_shape: shape -%}
-      {% endif %}
-    </div>
+        {% if pagination_position == 'right' %}
+          {%- render 'slideshow-arrow', action: 'next', icon_style: icon_style, icon_shape: shape -%}
+        {% endif %}
+      </div>
+    {% endcomment %}
   {% endif %}
 
   {% if autoplay %}
@@ -105,8 +108,8 @@
             <button
               class="slideshow-control button button-unstyled slideshow-controls__thumbnail"
               aria-label="{{ 'accessibility.slide_status' | t: index: forloop.index, length: forloop.length }}"
-              on:click="/select/{{ forloop.index0 }}"
-              style="--aspect-ratio: {% if aspect_ratio == 'adapt' %}{{ media.preview_image.aspect_ratio | default: 1.0 }}{% else %}{{ aspect_ratio }}{% endif %};"
+              data-slide-index="{{ forloop.index0 }}"
+              style="--aspect-ratio: {% if aspect_ratio == 'adapt' %}{{ media.preview_image.aspect_ratio | default: 1.0 }}{% else %}{{ aspect_ratio }}{% endif %}; opacity:0.5"
               ref="thumbnails[]"
               {% if forloop.first %}
                 aria-selected="true"
@@ -154,12 +157,16 @@
                 aria-selected="true"
               {% endif %}
             >
-              {{ media.preview_image | image_url: width: 120 | image_tag: 
-                loading: 'lazy', 
-                width: 60,
-                height: 60,
-                class: 'slideshow-controls__dot-image',
-                alt: media.alt | escape 
+              {{
+                media.preview_image
+                | image_url: width: 120
+                | image_tag:
+                  loading: 'lazy',
+                  width: 60,
+                  height: 60,
+                  class: 'slideshow-controls__dot-image',
+                  alt: media.alt
+                | escape
               }}
             </button>
           </li>

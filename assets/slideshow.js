@@ -121,6 +121,9 @@ export class Slideshow extends Component {
       });
 
       this.#resizeObserver.observe(this.refs.slideshowContainer);
+
+      // 👉 添加：设置缩略图 hover 监听
+      this.#setupThumbnailHover();
     });
   }
 
@@ -138,6 +141,9 @@ export class Slideshow extends Component {
     if (this.#resizeObserver) {
       this.#resizeObserver.disconnect();
     }
+
+    // 👉 清理缩略图事件
+    this.#thumbnailHoverCleanup?.();
   }
 
   /** Indicates whether the slideshow is nested inside another slideshow. */
@@ -157,6 +163,8 @@ export class Slideshow extends Component {
    * @param {boolean} [options.animate=true] - Whether to animate the selection.
    */
   async select(input, event, options = {}) {
+    console.log('[Slideshow] Select:', input, event);
+
     if (this.#disabled || !this.refs.slides?.length) return;
 
     for (const slide of this.refs.slides) {
@@ -427,6 +435,7 @@ export class Slideshow extends Component {
   set disabled(value) {
     this.setAttribute('disabled', String(value));
   }
+
   /**
    * Whether the slideshow is disabled.
    * @type {boolean}
@@ -460,6 +469,12 @@ export class Slideshow extends Component {
    * @type {ResizeObserver}
    */
   #resizeObserver;
+
+  /**
+   * Cleanup function for thumbnail hover listeners
+   * @type {Function|undefined}
+   */
+  #thumbnailHoverCleanup;
 
   /**
    * Callback invoked on user initiated scroll to sync the current slide index
@@ -659,11 +674,6 @@ export class Slideshow extends Component {
 
     document.addEventListener('pointermove', onPointerMove, { signal });
     document.addEventListener('pointerup', onPointerUp, { signal });
-    /**
-     * pointerDown calls onPointerUp to fix an issue where the first tap-and-drag
-     * on the zoom dialog is captured by the pointerMove/pointerUp listeners,
-     * sometimes causing the slideshow to change slides unexpectedly
-     */
     document.addEventListener('pointerdown', onPointerUp, { signal });
     document.addEventListener('pointercancel', onPointerUp, { signal });
     document.addEventListener('pointercapturelost', onPointerUp, { signal });
@@ -742,6 +752,30 @@ export class Slideshow extends Component {
     });
 
     return visibleSlides.length;
+  }
+
+  // 👉 新增：设置缩略图 hover 切换逻辑
+  #setupThumbnailHover() {
+    const { thumbnails } = this.refs;
+    if (!thumbnails?.length) return;
+
+    const handleMouseEnter = (event) => {
+      const index = Number(event.currentTarget.getAttribute('data-slide-index'));
+      if (isNaN(index)) return;
+      this.select(index, event, { animate: true });
+    };
+
+    // 绑定 mouseenter 事件到每个缩略图
+    thumbnails.forEach((thumb) => {
+      thumb.addEventListener('mouseenter', handleMouseEnter);
+    });
+
+    // 保存清理函数
+    this.#thumbnailHoverCleanup = () => {
+      thumbnails.forEach((thumb) => {
+        thumb.removeEventListener('mouseenter', handleMouseEnter);
+      });
+    };
   }
 }
 
