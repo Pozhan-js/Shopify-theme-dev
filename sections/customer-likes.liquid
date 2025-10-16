@@ -1,0 +1,324 @@
+<style>
+  .brand-carousel {
+    width: 100vw;
+    background-color: #ffffff;
+    padding: 40px 0;
+    overflow: hidden;
+    position: relative;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+  }
+
+  .brand-carousel__container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .brand-carousel__title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    padding: 0 20px;
+  }
+
+  .brand-carousel__wrapper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .brand-carousel__track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: scroll 20s linear infinite;
+  }
+
+  .brand-carousel__track:hover {
+    animation-play-state: paused;
+  }
+
+  .brand-carousel__slide {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    height: 200px;
+    min-width: auto;
+  }
+
+  .brand-carousel__slide img {
+    width: auto;
+    height: 200px;
+    max-width: none;
+    object-fit: contain;
+    object-position: center;
+    opacity: 1;
+    transition: all 0.3s ease;
+    filter: none;
+  }
+
+  .brand-carousel__slide:hover img {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .brand-carousel {
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+    }
+
+    .brand-carousel__title {
+      font-size: 28px;
+    }
+
+    .brand-carousel__slide {
+      padding: 0 20px;
+      height: 180px;
+    }
+
+    .brand-carousel__slide img {
+      width: auto;
+      height: 180px;
+      object-fit: contain;
+      opacity: 1;
+      filter: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .brand-carousel {
+      padding: 30px 0;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+    }
+
+    .brand-carousel__title {
+      font-size: 24px;
+      margin-bottom: 25px;
+    }
+
+    .brand-carousel__slide {
+      padding: 0 15px;
+      height: 150px;
+    }
+
+    .brand-carousel__slide img {
+      width: auto;
+      height: 150px;
+      object-fit: contain;
+      opacity: 1;
+      filter: none;
+    }
+
+    .brand-carousel__track {
+      animation-duration: 25s;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .brand-carousel {
+      padding: 25px 0;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
+    }
+
+    .brand-carousel__title {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .brand-carousel__slide {
+      padding: 0 10px;
+      height: 120px;
+    }
+
+    .brand-carousel__slide img {
+      width: auto;
+      height: 120px;
+      object-fit: contain;
+      opacity: 1;
+      filter: none;
+    }
+
+    .brand-carousel__track {
+      animation-duration: 20s;
+    }
+  }
+</style>
+
+<section class="brand-carousel">
+  <div class="brand-carousel__container">
+    {% if section.settings.title != blank %}
+      <h2 class="brand-carousel__title">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    <div class="brand-carousel__wrapper">
+      <div class="brand-carousel__track" id="brand-track">
+        {% for block in section.blocks %}
+          {% if block.settings.brand_image != blank %}
+            <div class="brand-carousel__slide">
+              {% if block.settings.brand_url != blank %}
+                <a href="{{ block.settings.brand_url }}" target="_blank" rel="noopener">
+                  <img
+                    src="{{ block.settings.brand_image | img_url: '300x' }}"
+                    alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                    loading="lazy"
+                  >
+                </a>
+              {% else %}
+                <img
+                  src="{{ block.settings.brand_image | img_url: '300x' }}"
+                  alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+
+        {% comment %} 重复品牌实现无缝循环 {% endcomment %}
+        {% for block in section.blocks %}
+          {% if block.settings.brand_image != blank %}
+            <div class="brand-carousel__slide" aria-hidden="true">
+              {% if block.settings.brand_url != blank %}
+                <a href="{{ block.settings.brand_url }}" target="_blank" rel="noopener">
+                  <img
+                    src="{{ block.settings.brand_image | img_url: '300x' }}"
+                    alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                    loading="lazy"
+                  >
+                </a>
+              {% else %}
+                <img
+                  src="{{ block.settings.brand_image | img_url: '300x' }}"
+                  alt="{{ block.settings.brand_name | default: 'Brand Logo' }}"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const track = document.getElementById('brand-track');
+    const originalSlides = track.querySelectorAll('.brand-carousel__slide:not([aria-hidden="true"])');
+    const duplicateSlides = track.querySelectorAll('.brand-carousel__slide[aria-hidden="true"]');
+
+    if (originalSlides.length > 0) {
+      // 计算原始内容总宽度
+      const originalWidth = Array.from(originalSlides).reduce((width, slide) => {
+        return width + slide.offsetWidth;
+      }, 0);
+
+      // 始终添加滚动动画实现循环效果
+      track.classList.add('scroll');
+
+      // 动态调整动画持续时间，基于内容宽度
+      const duration = Math.max(15, Math.min(40, originalWidth / 80));
+      track.style.animationDuration = duration + 's';
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Customer Like",
+  "tag": "section",
+  "class": "brand-carousel-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Our Trusted Brands"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "brand_image",
+          "label": "Brand Logo"
+        },
+        {
+          "type": "text",
+          "id": "brand_name",
+          "label": "Brand Name"
+        },
+        {
+          "type": "url",
+          "id": "brand_url",
+          "label": "Brand URL (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Like",
+      "blocks": [
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Kenworth"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Western Star"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Peterbilt"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Volvo"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "International"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Freightliner"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
