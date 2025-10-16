@@ -2,14 +2,14 @@
   Dynamic Equipment Mega Menu with Backend-Configurable Collections
 {% endcomment %}
 
-{% assign selected_collections = section.settings.equipment_collections %}
+{% assign collection_handles = section.settings.equipment_collections %}
 {% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
 {% assign collections_per_column = section.settings.collections_per_column | default: 2 %}
-{% assign total_collections = selected_collections.size %}
- <h1>33333333333</h1>
-{% if selected_collections.size > 0 %}
-    <h1>22222222</h1>
-  {% comment %} Calculate number of columns needed {% endcomment %}
+
+{% if collection_handles.size > 0 %}
+  {% assign total_collections = collection_handles.size %}
+  
+  {% comment %} Calculate columns {% endcomment %}
   {% assign columns_needed = total_collections | divided_by: collections_per_column %}
   {% assign remainder = total_collections | modulo: collections_per_column %}
   {% if remainder > 0 %}
@@ -33,7 +33,9 @@
           {% break %}
         {% endif %}
         
-        {% assign collection = selected_collections[i] %}
+        {% assign collection_handle = collection_handles[i] %}
+        {% assign collection = collections[collection_handle] %}
+        
         {% if collection %}
           <div class="mega-menu-category">
             <h3>{{ collection.title | escape }}</h3>
