@@ -1,0 +1,66 @@
+<div class="dropdown has-mega-menu">
+  <span class="nav-item dropdown-trigger" style="cursor: pointer;">
+    <span>{{ link.title | escape }}</span>
+    <span class="dropdown-arrow"></span>
+  </span>
+  <div class="mega-dropdown-menu">
+    <div class="mega-menu-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'mega_menu_category' %}
+          <div class="mega-menu-column">
+            <div class="mega-menu-category">
+              <h3>{{ block.settings.category_title }}</h3>
+              <ul>
+                {% for i in (1..6) %}
+                  {% assign item_title_key = 'item_' | append: i | append: '_title' %}
+                  {% assign item_url_key = 'item_' | append: i | append: '_url' %}
+                  {% assign item_title = block.settings[item_title_key] %}
+                  {% assign item_url = block.settings[item_url_key] %}
+                  {% if item_title != blank %}
+                    <li><a href="{{ item_url | default: '#' }}">{{ item_title }}</a></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+      
+      <!-- Default categories if no blocks are configured -->
+      {% if section.blocks.size == 0 %}
+        {% if menu_type == 'equipment' %}
+          {% render 'mega-menu-equipment-default' %}
+        {% elsif menu_type == 'resources' %}
+          {% render 'mega-menu-resources-default' %}
+        {% elsif menu_type == 'about' %}
+          {% render 'mega-menu-about-default' %}
+        {% endif %}
+      {% endif %}
+      
+      <!-- CTA Column -->
+      <div class="mega-menu-column">
+        <div class="mega-menu-cta">
+          {% if section.settings.mega_menu_image %}
+            <img src="{{ section.settings.mega_menu_image | image_url: width: 800 }}" alt="{{ section.settings.mega_menu_image_alt | default: 'Featured Image' }}" />
+          {% else %}
+            {% if menu_type == 'equipment' %}
+              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" />
+            {% elsif menu_type == 'resources' %}
+              <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Resources" />
+            {% elsif menu_type == 'about' %}
+              <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=1200&fit=crop&crop=center" alt="About XS Pilates" />
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="mega-menu-footer">
+      {% if section.settings.contactfootericon %}
+        <div class="mega-menu-footer-icon">
+          <img src="{{ section.settings.contactfootericon | image_url: width: 44 }}" alt="Contact Icon">
+        </div>
+      {% endif %}
+      <span>{{ section.settings.mega_menu_footer_text | default: 'CONTACT US' }}</span>
+    </div>
+  </div>
+</div>
