@@ -13,9 +13,122 @@
     <!-- 展品系列网格 -->
     <div class="series-grid">
       {% assign series_limit = section.settings.series_limit | default: 12 %}
-      {% for collection in collections limit: series_limit %}
-        {% unless collection.handle == 'all' %}
-          <div class="series-card">
+      
+      {% comment %} 创建自定义排序的系列数组 {% endcomment %}
+      {% assign custom_ordered_collections = '' %}
+      {% assign custom_handles_array = '' %}
+      
+      {% comment %} 获取所有自定义排序的系列 {% endcomment %}
+      {% for block in section.blocks %}
+        {% if block.type == 'custom_series_order' and block.settings.collection_handle != blank %}
+          {% assign custom_handles_array = custom_handles_array | append: block.settings.collection_handle %}
+          {% unless forloop.last %}
+            {% assign custom_handles_array = custom_handles_array | append: ',' %}
+          {% endunless %}
+        {% endif %}
+      {% endfor %}
+      
+      {% assign custom_handles = custom_handles_array | split: ',' %}
+      
+      {% comment %} 按自定义顺序显示系列 {% endcomment %}
+      {% if custom_handles.size > 0 %}
+        {% for handle in custom_handles limit: series_limit %}
+          {% assign collection = collections[handle] %}
+          {% if collection and collection.handle != 'all' %}
+            <div class="series-card">
+              <div class="series-image">
+                {% if collection.featured_image != blank %}
+                  <img
+                    src="{{ collection.featured_image | img_url: '400x400' }}"
+                    alt="{{ collection.title }}"
+                    loading="lazy"
+                  >
+                {% elsif collection.products.first.featured_image != blank %}
+                  <img
+                    src="{{ collection.products.first.featured_image | img_url: '400x400' }}"
+                    alt="{{ collection.title }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="placeholder-image">
+                    <svg
+                      width="100"
+                      height="100"
+                      viewBox="0 0 100 100"
+                      fill="none"
+                    >
+                      <rect
+                        width="100"
+                        height="100"
+                        fill="#f5f5f5" />
+                      <path d="M30 40h40v20H30z" fill="#ddd" />
+                      <circle cx="40" cy="30" r="5" fill="#ddd" />
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="series-content">
+                {% if collection.title != blank %}
+                  <h3 class="series-title">{{ collection.title }}</h3>
+                {% endif %}
+
+                {% if section.settings.show_description %}
+                  <p class="series-description">
+                    {% comment %} 查找自定义描述 {% endcomment %}
+                    {% assign custom_description = '' %}
+                    {% for block in section.blocks %}
+                      {% if block.type == 'custom_series_description' and block.settings.collection_handle == collection.handle %}
+                        {% assign custom_description = block.settings.custom_description %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    
+                    {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
+                    {% if custom_description != blank %}
+                      {{ custom_description | strip_html | truncate: section.settings.description_length }}
+                    {% elsif collection.description != blank %}
+                      {{ collection.description | strip_html | truncate: section.settings.description_length }}
+                    {% else %}
+                      {{ section.settings.default_description | default: '探索这个精彩的系列，发现更多优质产品。' | strip_html | truncate: section.settings.description_length }}
+                    {% endif %}
+                  </p>
+                {% endif %}
+
+                {% if section.settings.show_learn_more %}
+                  <div class="series-action">
+                    <a href="{{ collection.url }}" class="learn-more-btn">
+                      <svg
+                        class="btn-arrow"
+                        viewBox="0 0 7.10229 10.7302"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        width="7.102295"
+                        height="10.730225"
+                        fill="none"
+                        customFrame="#000000"
+                      >
+                        <path
+                          id="多边形 11"
+                          d="M-0.384728 5.68065L4.9804 -0.782841L10.3455 5.68065L9.57607 6.31935L4.59567 0.31935L4.9804 0L5.36513 0.31935L0.384728 6.31935L-0.384728 5.68065Z"
+                          fill="currentColor"
+                          fill-opacity="1"
+                          fill-rule="nonzero"
+                          transform="matrix(0,1,-1,0,6.31934,0.384705)" />
+                      </svg>
+                      {{ section.settings.learn_more_text | default: '查看系列' }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {% comment %} 如果没有自定义排序，使用默认排序 {% endcomment %}
+        {% for collection in collections limit: series_limit %}
+          {% unless collection.handle == 'all' %}
+            <div class="series-card">
             <div class="series-image">
               {% if collection.featured_image != blank %}
                 <img
@@ -102,8 +215,9 @@
               {% endif %}
             </div>
           </div>
-        {% endunless %}
-      {% endfor %}
+          {% endunless %}
+        {% endfor %}
+      {% endif %}
     </div>
 
     <!-- 如果没有展品系列时的提示 -->
@@ -784,6 +898,18 @@
     }
   ],
   "blocks": [
+    {
+      "type": "custom_series_order",
+      "name": "自定义系列排序",
+      "settings": [
+        {
+          "type": "text",
+          "id": "collection_handle",
+          "label": "系列标识符",
+          "info": "输入系列标识符（如：pilates-equipment）来设置显示顺序。添加多个块来控制排列顺序，第一个块的系列会排在最前面。"
+        }
+      ]
+    },
     {
       "type": "custom_series_description",
       "name": "自定义系列描述",
