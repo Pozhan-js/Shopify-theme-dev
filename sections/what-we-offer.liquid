@@ -11,15 +11,15 @@
         <div class="wwo-description">
           {{ section.settings.description | default: "We design and build studio-grade apparatus with over 30+ handcrafted steps, eco-minded finishes, and rigorous QC. From single prototypes to full private-label runs, XS Pilates delivers the quality your brand stands for." }}
         </div>
-        {% if section.settings.button_text != blank %}
+        {% if section.settings.buttontext != blank %}
           <div class="wwo-cta">
-            <a href="{{ section.settings.button_url | default: '#' }}" class="wwo-btn wwo-btn-consultation">
-              {% if section.settings.button_icon != blank %}
-                <img src="{{ section.settings.button_icon | img_url: '24x24' }}" alt="Icon" class="wwo-btn-icon">
+            <a href="{{ section.settings.buttonurl | default: '#' }}" class="wwo-btn wwo-btn-consultation">
+              {% if section.settings.buttonicon != blank %}
+                <img src="{{ section.settings.buttonicon | img_url: '24x24' }}" alt="Icon" class="wwo-btn-icon">
               {% else %}
                 <span class="wwo-btn-arrow">></span>
               {% endif %}
-              {{ section.settings.button_text }}
+              {{ section.settings.buttontext }}
             </a>
           </div>
         {% endif %}
@@ -28,37 +28,47 @@
       <div class="wwo-right">
         <div class="wwo-cards">
           <div class="wwo-card wwo-manufacturing-card">
-            {% if section.settings.manufacturing_image != blank %}
-              <img src="{{ section.settings.manufacturing_image | img_url: '680x400' }}" alt="Full-Line Manufacturing" class="wwo-card-image">
+            {% if section.settings.manufacturingimage != blank %}
+              <img src="{{ section.settings.manufacturingimage | img_url: '680x400' }}" alt="Full-Line Manufacturing" class="wwo-card-image">
             {% else %}
               <div class="wwo-card-image-placeholder wwo-manufacturing-bg"></div>
             {% endif %}
             <div class="wwo-card-content">
               <h3 class="wwo-card-title">
-                {{ section.settings.manufacturing_title | default: "Full-Line Manufacturing" }}
+                {{ section.settings.manufacturingtitle | default: "Full-Line Manufacturing" }}
               </h3>
+              <div class="wwo-card-expanded-content">
+                <ul class="wwo-card-features">
+                  <li class="wwo-feature-item">Studio-grade quality construction</li>
+                  <li class="wwo-feature-item">30+ handcrafted manufacturing steps</li>
+                  <li class="wwo-feature-item">Eco-minded finishes and materials</li>
+                  <li class="wwo-feature-item">Rigorous quality control process</li>
+                </ul>
+              </div>
             </div>
           </div>
           
           <div class="wwo-card wwo-solutions-card">
-            {% if section.settings.solutions_image != blank %}
-              <img src="{{ section.settings.solutions_image | img_url: '680x400' }}" alt="Comprehensive OEM Solutions" class="wwo-card-image">
+            {% if section.settings.solutionsimage != blank %}
+              <img src="{{ section.settings.solutionsimage | img_url: '680x400' }}" alt="Comprehensive OEM Solutions" class="wwo-card-image">
             {% else %}
               <div class="wwo-card-image-placeholder wwo-solutions-bg"></div>
             {% endif %}
             <div class="wwo-card-content">
               <h3 class="wwo-card-title">
-                {{ section.settings.solutions_title | default: "Comprehensive OEM Solutions" }}
+                {{ section.settings.solutionstitle | default: "Comprehensive OEM Solutions" }}
               </h3>
-              <ul class="wwo-card-features">
-                {% for block in section.blocks %}
-                  {% if block.type == 'feature' %}
-                    <li class="wwo-feature-item">
-                      {{ block.settings.feature_text }}
-                    </li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
+              <div class="wwo-card-expanded-content">
+                <ul class="wwo-card-features">
+                  {% for block in section.blocks %}
+                    {% if block.type == 'feature' %}
+                      <li class="wwo-feature-item">
+                        {{ block.settings.featuretext }}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -187,6 +197,12 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   width: 520px;
   height: 520px;
+  transition: all 0.3s ease;
+}
+
+.wwo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .wwo-card-image {
@@ -214,7 +230,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   padding: 24px;
   border-radius: 16px;
   margin: 16px;
@@ -222,22 +238,16 @@
   width: 488px;
   height: 96px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-.wwo-manufacturing-card .wwo-card-content {
-  width: 488px;
-  height: 96px;
-}
-
-.wwo-solutions-card .wwo-card-content {
-  width: 488px;
+.wwo-card:hover .wwo-card-content {
   height: 408px;
   margin-top: 96.46px;
-  margin-bottom: 16px;
-  display: flex;
-  flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   padding: 32px 16px;
@@ -250,15 +260,24 @@
   margin: 0;
   line-height: 1.3;
   text-align: center;
+  transition: all 0.3s ease;
 }
 
-.wwo-solutions-card .wwo-card-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #161616;
-  margin: 54px 0 24px 0;
-  line-height: 1.3;
+.wwo-card:hover .wwo-card-title {
   text-align: left;
+  margin: 54px 0 24px 0;
+}
+
+.wwo-card-expanded-content {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease 0.1s;
+  width: 100%;
+}
+
+.wwo-card:hover .wwo-card-expanded-content {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .wwo-card-features {
@@ -275,7 +294,20 @@
   margin-bottom: 28px;
   position: relative;
   padding-left: 24px;
+  transform: translateX(-10px);
+  opacity: 0;
+  transition: all 0.3s ease;
 }
+
+.wwo-card:hover .wwo-feature-item {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.wwo-card:hover .wwo-feature-item:nth-child(1) { transition-delay: 0.2s; }
+.wwo-card:hover .wwo-feature-item:nth-child(2) { transition-delay: 0.3s; }
+.wwo-card:hover .wwo-feature-item:nth-child(3) { transition-delay: 0.4s; }
+.wwo-card:hover .wwo-feature-item:nth-child(4) { transition-delay: 0.5s; }
 
 .wwo-feature-item:before {
   content: '';
@@ -322,12 +354,12 @@
     height: 520px;
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: 488px;
     height: 96px;
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: 488px;
     height: 408px;
     margin-top: 96.46px;
@@ -337,7 +369,7 @@
     padding-bottom: 16px;
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 28px;
     font-weight: 600;
     color: #161616;
@@ -394,12 +426,12 @@
     height: 437px; /* 520 * 0.84 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: 410px; /* 488 * 0.84 */
     height: 81px; /* 96 * 0.84 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: 410px; /* 488 * 0.84 */
     height: 343px; /* 408 * 0.84 */
     margin-top: 81px; /* 96.46 * 0.84 */
@@ -413,7 +445,7 @@
     font-size: 24px; /* 28 * 0.84 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 24px; /* 28 * 0.84 */
     margin: 0 0 20px 0; /* 24 * 0.84 */
   }
@@ -473,12 +505,12 @@
     height: 348px; /* 520 * 0.67 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: 327px; /* 488 * 0.67 */
     height: 64px; /* 96 * 0.67 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: 327px; /* 488 * 0.67 */
     height: 273px; /* 408 * 0.67 */
     margin-top: 65px; /* 96.46 * 0.67 */
@@ -492,7 +524,7 @@
     font-size: 19px; /* 28 * 0.67 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 19px; /* 28 * 0.67 */
     margin: 0 0 16px 0; /* 24 * 0.67 */
   }
@@ -556,14 +588,14 @@
     height: 260px; /* 520 * 0.5 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     padding: 12px; /* 24 * 0.5 */
     margin: 8px; /* 16 * 0.5 */
     width: calc(100% - 16px); /* 488 * 0.5 */
     height: 48px; /* 96 * 0.5 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     padding-top: 42px; /* 84.13 * 0.5 */
     padding-left: 8px; /* 16 * 0.5 */
     padding-right: 8px; /* 16 * 0.5 */
@@ -578,7 +610,7 @@
     font-size: 14px; /* 28 * 0.5 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 14px; /* 28 * 0.5 */
     margin: 0 0 12px 0; /* 24 * 0.5 */
   }
@@ -651,13 +683,13 @@
     height: 208px; /* 520 * 0.4 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: calc(100% - 13px); /* 488 * 0.4 */
     height: 38px; /* 96 * 0.4 */
     padding: 10px; /* 24 * 0.4 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: calc(100% - 13px); /* 488 * 0.4 */
     height: 163px; /* 408 * 0.4 */
     margin-top: 39px; /* 96.46 * 0.4 */
@@ -671,7 +703,7 @@
     font-size: 11px; /* 28 * 0.4 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 11px; /* 28 * 0.4 */
     margin: 0 0 10px 0; /* 24 * 0.4 */
   }
@@ -762,13 +794,13 @@
     height: 172px; /* 520 * 0.33 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: calc(100% - 11px); /* 488 * 0.33 */
     height: 32px; /* 96 * 0.33 */
     padding: 8px; /* 24 * 0.33 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: calc(100% - 11px); /* 488 * 0.33 */
     height: 135px; /* 408 * 0.33 */
     margin-top: 32px; /* 96.46 * 0.33 */
@@ -782,7 +814,7 @@
     font-size: 9px; /* 28 * 0.33 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 9px; /* 28 * 0.33 */
     margin: 0 0 8px 0; /* 24 * 0.33 */
   }
@@ -856,13 +888,13 @@
     height: 130px; /* 520 * 0.25 */
   }
   
-  .wwo-manufacturing-card .wwo-card-content {
+  .wwo-card-content {
     width: calc(100% - 8px); /* 488 * 0.25 */
     height: 24px; /* 96 * 0.25 */
     padding: 6px; /* 24 * 0.25 */
   }
   
-  .wwo-solutions-card .wwo-card-content {
+  .wwo-card:hover .wwo-card-content {
     width: calc(100% - 8px); /* 488 * 0.25 */
     height: 102px; /* 408 * 0.25 */
     margin-top: 24px; /* 96.46 * 0.25 */
@@ -876,7 +908,7 @@
     font-size: 7px; /* 28 * 0.25 */
   }
   
-  .wwo-solutions-card .wwo-card-title {
+  .wwo-card:hover .wwo-card-title {
     font-size: 7px; /* 28 * 0.25 */
     margin: 0 0 6px 0; /* 24 * 0.25 */
   }
@@ -923,18 +955,18 @@
     },
     {
       "type": "text",
-      "id": "button_text",
+      "id": "buttontext",
       "label": "Button Text",
       "default": "GET A FREE CONSULTATION"
     },
     {
       "type": "url",
-      "id": "button_url",
+      "id": "buttonurl",
       "label": "Button URL"
     },
     {
       "type": "image_picker",
-      "id": "button_icon",
+      "id": "buttonicon",
       "label": "Button Icon (optional)"
     },
     {
@@ -943,12 +975,12 @@
     },
     {
       "type": "image_picker",
-      "id": "manufacturing_image",
+      "id": "manufacturingimage",
       "label": "Manufacturing Image"
     },
     {
       "type": "text",
-      "id": "manufacturing_title",
+      "id": "manufacturingtitle",
       "label": "Manufacturing Title",
       "default": "Full-Line Manufacturing"
     },
@@ -958,12 +990,12 @@
     },
     {
       "type": "image_picker",
-      "id": "solutions_image",
+      "id": "solutionsimage",
       "label": "Solutions Image"
     },
     {
       "type": "text",
-      "id": "solutions_title",
+      "id": "solutionstitle",
       "label": "Solutions Title",
       "default": "Comprehensive OEM Solutions"
     }
@@ -975,7 +1007,7 @@
       "settings": [
         {
           "type": "text",
-          "id": "feature_text",
+          "id": "featuretext",
           "label": "Feature Text"
         }
       ]
@@ -987,33 +1019,33 @@
       "settings": {
         "title": "What We Offer",
         "description": "We design and build studio-grade apparatus with over 30+ handcrafted steps, eco-minded finishes, and rigorous QC. From single prototypes to full private-label runs, XS Pilates delivers the quality your brand stands for.",
-        "button_text": "GET A FREE CONSULTATION",
-        "manufacturing_title": "Full-Line Manufacturing",
-        "solutions_title": "Comprehensive OEM Solutions"
+        "buttontext": "GET A FREE CONSULTATION",
+        "manufacturingtitle": "Full-Line Manufacturing",
+        "solutionstitle": "Comprehensive OEM Solutions"
       },
       "blocks": [
         {
           "type": "feature",
           "settings": {
-            "feature_text": "Custom sizing, materials, and colors"
+            "featuretext": "Custom sizing, materials, and colors"
           }
         },
         {
           "type": "feature",
           "settings": {
-            "feature_text": "Logo branding and private labeling"
+            "featuretext": "Logo branding and private labeling"
           }
         },
         {
           "type": "feature",
           "settings": {
-            "feature_text": "Tailored packaging and manuals"
+            "featuretext": "Tailored packaging and manuals"
           }
         },
         {
           "type": "feature",
           "settings": {
-            "feature_text": "Product development based on your designs"
+            "featuretext": "Product development based on your designs"
           }
         }
       ]
