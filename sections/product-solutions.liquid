@@ -15,12 +15,11 @@
       {% assign series_limit = section.settings.series_limit | default: 12 %}
       
       {% comment %} 创建自定义排序的系列数组 {% endcomment %}
-      {% assign custom_ordered_collections = '' %}
       {% assign custom_handles_array = '' %}
       
-      {% comment %} 获取所有自定义排序的系列 {% endcomment %}
+      {% comment %} 获取所有自定义系列配置 {% endcomment %}
       {% for block in section.blocks %}
-        {% if block.type == 'custom_series_order' and block.settings.collection_handle != blank %}
+        {% if block.type == 'series_config' and block.settings.collection_handle != blank %}
           {% assign custom_handles_array = custom_handles_array | append: block.settings.collection_handle %}
           {% unless forloop.last %}
             {% assign custom_handles_array = custom_handles_array | append: ',' %}
@@ -75,10 +74,10 @@
 
                 {% if section.settings.show_description %}
                   <p class="series-description">
-                    {% comment %} 查找自定义描述 {% endcomment %}
+                    {% comment %} 查找当前系列的自定义配置 {% endcomment %}
                     {% assign custom_description = '' %}
                     {% for block in section.blocks %}
-                      {% if block.type == 'custom_series_description' and block.settings.collection_handle == collection.handle %}
+                      {% if block.type == 'series_config' and block.settings.collection_handle == collection.handle %}
                         {% assign custom_description = block.settings.custom_description %}
                         {% break %}
                       {% endif %}
@@ -168,10 +167,10 @@
 
               {% if section.settings.show_description %}
                 <p class="series-description">
-                  {% comment %} 查找自定义描述 {% endcomment %}
+                  {% comment %} 查找当前系列的自定义配置 {% endcomment %}
                   {% assign custom_description = '' %}
                   {% for block in section.blocks %}
-                    {% if block.type == 'custom_series_description' and block.settings.collection_handle == collection.handle %}
+                    {% if block.type == 'series_config' and block.settings.collection_handle == collection.handle %}
                       {% assign custom_description = block.settings.custom_description %}
                       {% break %}
                     {% endif %}
@@ -899,32 +898,20 @@
   ],
   "blocks": [
     {
-      "type": "custom_series_order",
-      "name": "自定义系列排序",
+      "type": "series_config",
+      "name": "系列配置",
       "settings": [
         {
           "type": "text",
           "id": "collection_handle",
           "label": "系列标识符",
-          "info": "输入系列标识符（如：pilates-equipment）来设置显示顺序。添加多个块来控制排列顺序，第一个块的系列会排在最前面。"
-        }
-      ]
-    },
-    {
-      "type": "custom_series_description",
-      "name": "自定义系列描述",
-      "settings": [
-        {
-          "type": "text",
-          "id": "collection_handle",
-          "label": "系列标识符",
-          "info": "输入要自定义描述的系列标识符（如：pilates-equipment）"
+          "info": "输入系列标识符（如：pilates-equipment）。添加多个块来控制排列顺序，第一个块的系列会排在最前面。"
         },
         {
           "type": "textarea",
           "id": "custom_description",
           "label": "自定义描述",
-          "info": "为指定系列设置的自定义描述文本"
+          "info": "为该系列设置自定义描述文本。如果留空，将使用系列原描述或默认描述。"
         }
       ]
     }
