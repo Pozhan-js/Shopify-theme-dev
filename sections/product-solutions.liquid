@@ -20,7 +20,9 @@
       {% comment %} 获取所有自定义系列配置 {% endcomment %}
       {% for block in section.blocks %}
         {% if block.type == 'series_config' and block.settings.collection_handle != blank %}
-          {% assign custom_handles_array = custom_handles_array | append: block.settings.collection_handle %}
+          {% comment %} 将输入的标识符转换为正确的handle格式 {% endcomment %}
+          {% assign input_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+          {% assign custom_handles_array = custom_handles_array | append: input_handle %}
           {% unless forloop.last %}
             {% assign custom_handles_array = custom_handles_array | append: ',' %}
           {% endunless %}
@@ -32,7 +34,19 @@
       {% comment %} 按自定义顺序显示系列 {% endcomment %}
       {% if custom_handles.size > 0 %}
         {% for handle in custom_handles limit: series_limit %}
+          {% comment %} 尝试多种方式匹配系列 {% endcomment %}
           {% assign collection = collections[handle] %}
+          {% unless collection %}
+            {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
+            {% for coll in collections %}
+              {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+              {% if coll_handle_from_title == handle %}
+                {% assign collection = coll %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+          {% endunless %}
+          
           {% if collection and collection.handle != 'all' %}
             <div class="series-card">
               <div class="series-image">
@@ -77,9 +91,13 @@
                     {% comment %} 查找当前系列的自定义配置 {% endcomment %}
                     {% assign custom_description = '' %}
                     {% for block in section.blocks %}
-                      {% if block.type == 'series_config' and block.settings.collection_handle == collection.handle %}
-                        {% assign custom_description = block.settings.custom_description %}
-                        {% break %}
+                      {% if block.type == 'series_config' %}
+                        {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                        {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                        {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                          {% assign custom_description = block.settings.custom_description %}
+                          {% break %}
+                        {% endif %}
                       {% endif %}
                     {% endfor %}
                     
@@ -170,9 +188,13 @@
                   {% comment %} 查找当前系列的自定义配置 {% endcomment %}
                   {% assign custom_description = '' %}
                   {% for block in section.blocks %}
-                    {% if block.type == 'series_config' and block.settings.collection_handle == collection.handle %}
-                      {% assign custom_description = block.settings.custom_description %}
-                      {% break %}
+                    {% if block.type == 'series_config' %}
+                      {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                      {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                      {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                        {% assign custom_description = block.settings.custom_description %}
+                        {% break %}
+                      {% endif %}
                     {% endif %}
                   {% endfor %}
                   
@@ -904,8 +926,8 @@
         {
           "type": "text",
           "id": "collection_handle",
-          "label": "系列标识符",
-          "info": "输入系列标识符（如：pilates-equipment）。添加多个块来控制排列顺序，第一个块的系列会排在最前面。"
+          "label": "系列标识符或标题",
+          "info": "输入系列标识符（如：pilates-equipment）或系列标题（如：LADDER BARREL）。系统会自动匹配。添加多个块来控制排列顺序，第一个块的系列会排在最前面。"
         },
         {
           "type": "textarea",
