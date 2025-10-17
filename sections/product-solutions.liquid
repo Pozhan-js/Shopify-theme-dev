@@ -82,25 +82,33 @@
               </div>
 
               <div class="series-content">
-                {% if collection.title != blank %}
-                  <h3 class="series-title">{{ collection.title }}</h3>
+                {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                {% assign custom_title = '' %}
+                {% assign custom_description = '' %}
+                {% for block in section.blocks %}
+                  {% if block.type == 'series_config' %}
+                    {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                      {% assign custom_title = block.settings.custom_title %}
+                      {% assign custom_description = block.settings.custom_description %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                {% assign display_title = custom_title %}
+                {% if display_title == blank %}
+                  {% assign display_title = collection.title %}
+                {% endif %}
+                
+                {% if display_title != blank %}
+                  <h3 class="series-title">{{ display_title }}</h3>
                 {% endif %}
 
                 {% if section.settings.show_description %}
                   <p class="series-description">
-                    {% comment %} 查找当前系列的自定义配置 {% endcomment %}
-                    {% assign custom_description = '' %}
-                    {% for block in section.blocks %}
-                      {% if block.type == 'series_config' %}
-                        {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                        {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                        {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
-                          {% assign custom_description = block.settings.custom_description %}
-                          {% break %}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-                    
                     {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
                     {% if custom_description != blank %}
                       {{ custom_description | strip_html | truncate: section.settings.description_length }}
@@ -179,43 +187,6 @@
             </div>
 
             <div class="series-content">
-              {% comment %} 查找当前系列的自定义配置 {% endcomment %}
-              {% assign custom_title = '' %}
-              {% assign custom_description = '' %}
-              {% for block in section.blocks %}
-                {% if block.type == 'series_config' %}
-                  {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                  {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                  {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
-                    {% assign custom_title = block.settings.custom_title %}
-                    {% assign custom_description = block.settings.custom_description %}
-                    {% break %}
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-
-              {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
-              {% assign display_title = custom_title %}
-              {% if display_title == blank %}
-                {% assign display_title = collection.title %}
-              {% endif %}
-              
-              {% if display_title != blank %}
-                <h3 class="series-title">{{ display_title }}</h3>
-              {% endif %}
-
-              {% if section.settings.show_description %}
-                <p class="series-description">
-                  {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
-                  {% if custom_description != blank %}
-                    {{ custom_description | strip_html | truncate: section.settings.description_length }}
-                  {% elsif collection.description != blank %}
-                    {{ collection.description | strip_html | truncate: section.settings.description_length }}
-                  {% else %}
-                    {{ section.settings.default_description | default: '探索这个精彩的系列，发现更多优质产品。' | strip_html | truncate: section.settings.description_length }}
-                  {% endif %}
-                </p>
-              {% endif %}
               {% comment %} 查找当前系列的自定义配置 {% endcomment %}
               {% assign custom_title = '' %}
               {% assign custom_description = '' %}
