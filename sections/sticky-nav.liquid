@@ -1,0 +1,149 @@
+{%- comment %}
+  可配置的左侧固定导航栏
+  支持多个导航项，每个项指向一个 section ID
+{%- endcomment %}
+
+{%- if section.blocks.size > 0 and request.page_type == 'page' %}
+  <div class="sticky-nav" data-sticky-nav>
+    {%- for block in section.blocks %}
+      {%- assign target_id = block.settings.section_id | strip | downcase | handleize %}
+      <a
+        href="#{{ target_id }}"
+        class="nav-link"
+        aria-label="{{ block.settings.label }}"
+        style="--delay: {{ forloop.index0 }}00ms;"
+      >
+        {{ block.settings.label }}
+      </a>
+    {%- endfor %}
+  </div>
+
+  <style>
+    .sticky-nav {
+      position: fixed;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .nav-link {
+      padding: 12px 16px;
+      background-color: #333;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      text-align: center;
+      width: 100px;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: fadeInRight 0.5s ease forwards;
+      animation-delay: var(--delay, 0s);
+    }
+
+    .nav-link:hover {
+      background-color: #007acc;
+      transform: scale(1.05);
+    }
+
+    @keyframes fadeInRight {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const navLinks = document.querySelectorAll('.nav-link');
+
+      navLinks.forEach((link) => {
+        link.addEventListener('click', function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetSection = document.querySelector(targetId);
+
+          if (targetSection) {
+            window.scrollTo({
+              top: targetSection.offsetTop - 10,
+              behavior: 'smooth',
+            });
+          }
+        });
+      });
+
+      // 【可选】激活当前可视区域的导航项
+      function activateNav() {
+        const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
+        let closest = null;
+        let closestDistance = Infinity;
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          const distance = Math.abs(rect.top - window.innerHeight * 0.3); // 视口 30%
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closest = section;
+          }
+        });
+
+        navLinks.forEach((link) => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + closest.id) {
+            link.classList.add('active');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', activateNav);
+      activateNav();
+    });
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "左侧固定导航栏",
+  "tag": "section",
+  "class": "sticky-nav-section",
+  "blocks": [
+    {
+      "type": "link",
+      "name": "导航项",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "按钮文字",
+          "default": "跳转到"
+        },
+        {
+          "type": "text",
+          "id": "section_id",
+          "label": "目标 Section ID",
+          "default": "about",
+          "info": "请输入目标 section 的 ID，如：section-about。注意要和实际 section 的 id 一致。"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "左侧导航栏",
+      "category": "Navigation"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
