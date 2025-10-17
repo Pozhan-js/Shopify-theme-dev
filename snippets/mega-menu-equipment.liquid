@@ -29,130 +29,345 @@
       {% comment %} 如果有自定义配置，使用自定义顺序；否则使用默认顺序 {% endcomment %}
       {% if collection_handles_array.size > 0 %}
         {% assign total_collections = collection_handles_array.size %}
-        {% assign columns_needed = total_collections | divided_by: collections_per_column | ceil %}
-        {% assign max_columns = 3 %}
-        {% if columns_needed > max_columns %}
-          {% assign columns_needed = max_columns %}
-        {% endif %}
+        
+        {% comment %} 第一列：显示前2个系列 {% endcomment %}
+        <div class="mega-menu-column equipment-menu-column">
+          {% for i in (0..1) %}
+            {% if i < total_collections %}
+              {% assign collection_handle = collection_handles_array[i] %}
+              
+              {% comment %} 尝试多种方式匹配系列 {% endcomment %}
+              {% assign collection = collections[collection_handle] %}
+              {% unless collection %}
+                {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
+                {% for coll in collections %}
+                  {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                  {% if coll_handle_from_title == collection_handle %}
+                    {% assign collection = coll %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endunless %}
+              
+              {% if collection and collection.handle != 'all' %}
+                {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                {% assign custom_title = '' %}
+                {% assign custom_product_handles = '' %}
+                {% assign custom_products_limit = products_per_collection %}
+                
+                {% for block in section.blocks %}
+                  {% if block.type == 'equipment_config' %}
+                    {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                      {% assign custom_title = block.settings.custom_title %}
+                      {% assign custom_product_handles = block.settings.product_handles %}
+                      {% assign custom_products_limit = block.settings.products_limit | default: products_per_collection %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
 
-        {% for column_index in (0..2) %}
-          {% assign column_start = column_index | times: collections_per_column %}
-          {% assign column_end = column_start | plus: collections_per_column | minus: 1 %}
-          
-          {% if column_start < total_collections %}
-            <div class="mega-menu-column equipment-menu-column">
-              {% for i in (column_start..column_end) %}
-                {% if i < total_collections %}
-                  {% assign collection_handle = collection_handles_array[i] %}
+                <div class="mega-menu-category equipment-menu-category">
+                  {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                  {% assign display_title = custom_title %}
+                  {% if display_title == blank %}
+                    {% assign display_title = collection.title %}
+                  {% endif %}
                   
-                  {% comment %} 尝试多种方式匹配系列 {% endcomment %}
-                  {% assign collection = collections[collection_handle] %}
-                  {% unless collection %}
-                    {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
-                    {% for coll in collections %}
-                      {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                      {% if coll_handle_from_title == collection_handle %}
-                        {% assign collection = coll %}
-                        {% break %}
-                      {% endif %}
-                    {% endfor %}
-                  {% endunless %}
-                  
-                  {% if collection and collection.handle != 'all' %}
-                    {% comment %} 查找当前系列的自定义配置 {% endcomment %}
-                    {% assign custom_title = '' %}
-                    {% assign custom_product_handles = '' %}
-                    {% assign custom_products_limit = products_per_collection %}
-                    
-                    {% for block in section.blocks %}
-                      {% if block.type == 'equipment_config' %}
-                        {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                        {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                        {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
-                          {% assign custom_title = block.settings.custom_title %}
-                          {% assign custom_product_handles = block.settings.product_handles %}
-                          {% assign custom_products_limit = block.settings.products_limit | default: products_per_collection %}
-                          {% break %}
-                        {% endif %}
-                      {% endif %}
-                    {% endfor %}
-
-                    <div class="mega-menu-category equipment-menu-category">
-                      {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
-                      {% assign display_title = custom_title %}
-                      {% if display_title == blank %}
-                        {% assign display_title = collection.title %}
-                      {% endif %}
-                      
-                      <h3><a href="{{ collection.url }}">{{ display_title | escape }}</a></h3>
-                      <ul>
-                        {% if collection.products.size > 0 %}
-                          {% comment %} 如果有自定义产品顺序，使用自定义顺序 {% endcomment %}
-                          {% if custom_product_handles != blank %}
-                            {% assign product_handles_list = custom_product_handles | strip | split: ',' %}
-                            {% assign products_displayed = 0 %}
+                  <h3><a href="{{ collection.url }}">{{ display_title | escape }}</a></h3>
+                  <ul>
+                    {% if collection.products.size > 0 %}
+                      {% comment %} 如果有自定义产品顺序，使用自定义顺序 {% endcomment %}
+                      {% if custom_product_handles != blank %}
+                        {% assign product_handles_list = custom_product_handles | strip | split: ',' %}
+                        {% assign products_displayed = 0 %}
+                        
+                        {% for product_handle_raw in product_handles_list %}
+                          {% if products_displayed >= custom_products_limit %}
+                            {% break %}
+                          {% endif %}
+                          
+                          {% assign product_handle = product_handle_raw | strip %}
+                          {% assign found_product = null %}
+                          
+                          {% comment %} 在当前系列中查找产品 {% endcomment %}
+                          {% for product in collection.products %}
+                            {% if product.handle == product_handle %}
+                              {% assign found_product = product %}
+                              {% break %}
+                            {% endif %}
+                          {% endfor %}
+                          
+                          {% if found_product %}
+                            <li><a href="{{ found_product.url }}">{{ found_product.title | escape }}</a></li>
+                            {% assign products_displayed = products_displayed | plus: 1 %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% comment %} 如果自定义产品不足，补充其他产品 {% endcomment %}
+                        {% if products_displayed < custom_products_limit %}
+                          {% for product in collection.products %}
+                            {% if products_displayed >= custom_products_limit %}
+                              {% break %}
+                            {% endif %}
                             
+                            {% assign is_already_displayed = false %}
                             {% for product_handle_raw in product_handles_list %}
-                              {% if products_displayed >= custom_products_limit %}
+                              {% assign product_handle = product_handle_raw | strip %}
+                              {% if product.handle == product_handle %}
+                                {% assign is_already_displayed = true %}
                                 {% break %}
                               {% endif %}
-                              
+                            {% endfor %}
+                            
+                            {% unless is_already_displayed %}
+                              <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                              {% assign products_displayed = products_displayed | plus: 1 %}
+                            {% endunless %}
+                          {% endfor %}
+                        {% endif %}
+                      {% else %}
+                        {% comment %} 使用默认产品顺序 {% endcomment %}
+                        {% for product in collection.products limit: custom_products_limit %}
+                          <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                        {% endfor %}
+                      {% endif %}
+                    {% else %}
+                      <li><a href="{{ collection.url }}">View {{ display_title }}</a></li>
+                    {% endif %}
+                  </ul>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {% comment %} 第二列：显示第3-5个系列（3个系列） {% endcomment %}
+        <div class="mega-menu-column equipment-menu-column">
+          {% for i in (2..4) %}
+            {% if i < total_collections %}
+              {% assign collection_handle = collection_handles_array[i] %}
+              
+              {% comment %} 尝试多种方式匹配系列 {% endcomment %}
+              {% assign collection = collections[collection_handle] %}
+              {% unless collection %}
+                {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
+                {% for coll in collections %}
+                  {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                  {% if coll_handle_from_title == collection_handle %}
+                    {% assign collection = coll %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endunless %}
+              
+              {% if collection and collection.handle != 'all' %}
+                {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                {% assign custom_title = '' %}
+                {% assign custom_product_handles = '' %}
+                {% assign custom_products_limit = products_per_collection %}
+                
+                {% for block in section.blocks %}
+                  {% if block.type == 'equipment_config' %}
+                    {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                      {% assign custom_title = block.settings.custom_title %}
+                      {% assign custom_product_handles = block.settings.product_handles %}
+                      {% assign custom_products_limit = block.settings.products_limit | default: products_per_collection %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                <div class="mega-menu-category equipment-menu-category">
+                  {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                  {% assign display_title = custom_title %}
+                  {% if display_title == blank %}
+                    {% assign display_title = collection.title %}
+                  {% endif %}
+                  
+                  <h3><a href="{{ collection.url }}">{{ display_title | escape }}</a></h3>
+                  <ul>
+                    {% if collection.products.size > 0 %}
+                      {% comment %} 如果有自定义产品顺序，使用自定义顺序 {% endcomment %}
+                      {% if custom_product_handles != blank %}
+                        {% assign product_handles_list = custom_product_handles | strip | split: ',' %}
+                        {% assign products_displayed = 0 %}
+                        
+                        {% for product_handle_raw in product_handles_list %}
+                          {% if products_displayed >= custom_products_limit %}
+                            {% break %}
+                          {% endif %}
+                          
+                          {% assign product_handle = product_handle_raw | strip %}
+                          {% assign found_product = null %}
+                          
+                          {% comment %} 在当前系列中查找产品 {% endcomment %}
+                          {% for product in collection.products %}
+                            {% if product.handle == product_handle %}
+                              {% assign found_product = product %}
+                              {% break %}
+                            {% endif %}
+                          {% endfor %}
+                          
+                          {% if found_product %}
+                            <li><a href="{{ found_product.url }}">{{ found_product.title | escape }}</a></li>
+                            {% assign products_displayed = products_displayed | plus: 1 %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% comment %} 如果自定义产品不足，补充其他产品 {% endcomment %}
+                        {% if products_displayed < custom_products_limit %}
+                          {% for product in collection.products %}
+                            {% if products_displayed >= custom_products_limit %}
+                              {% break %}
+                            {% endif %}
+                            
+                            {% assign is_already_displayed = false %}
+                            {% for product_handle_raw in product_handles_list %}
                               {% assign product_handle = product_handle_raw | strip %}
-                              {% assign found_product = null %}
-                              
-                              {% comment %} 在当前系列中查找产品 {% endcomment %}
-                              {% for product in collection.products %}
-                                {% if product.handle == product_handle %}
-                                  {% assign found_product = product %}
-                                  {% break %}
-                                {% endif %}
-                              {% endfor %}
-                              
-                              {% if found_product %}
-                                <li><a href="{{ found_product.url }}">{{ found_product.title | escape }}</a></li>
-                                {% assign products_displayed = products_displayed | plus: 1 %}
+                              {% if product.handle == product_handle %}
+                                {% assign is_already_displayed = true %}
+                                {% break %}
                               {% endif %}
                             {% endfor %}
                             
-                            {% comment %} 如果自定义产品不足，补充其他产品 {% endcomment %}
-                            {% if products_displayed < custom_products_limit %}
-                              {% for product in collection.products %}
-                                {% if products_displayed >= custom_products_limit %}
-                                  {% break %}
-                                {% endif %}
-                                
-                                {% assign is_already_displayed = false %}
-                                {% for product_handle_raw in product_handles_list %}
-                                  {% assign product_handle = product_handle_raw | strip %}
-                                  {% if product.handle == product_handle %}
-                                    {% assign is_already_displayed = true %}
-                                    {% break %}
-                                  {% endif %}
-                                {% endfor %}
-                                
-                                {% unless is_already_displayed %}
-                                  <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
-                                  {% assign products_displayed = products_displayed | plus: 1 %}
-                                {% endunless %}
-                              {% endfor %}
-                            {% endif %}
-                          {% else %}
-                            {% comment %} 使用默认产品顺序 {% endcomment %}
-                            {% for product in collection.products limit: custom_products_limit %}
+                            {% unless is_already_displayed %}
                               <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
-                            {% endfor %}
-                          {% endif %}
-                        {% else %}
-                          <li><a href="{{ collection.url }}">View {{ display_title }}</a></li>
+                              {% assign products_displayed = products_displayed | plus: 1 %}
+                            {% endunless %}
+                          {% endfor %}
                         {% endif %}
-                      </ul>
-                    </div>
+                      {% else %}
+                        {% comment %} 使用默认产品顺序 {% endcomment %}
+                        {% for product in collection.products limit: custom_products_limit %}
+                          <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                        {% endfor %}
+                      {% endif %}
+                    {% else %}
+                      <li><a href="{{ collection.url }}">View {{ display_title }}</a></li>
+                    {% endif %}
+                  </ul>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        {% comment %} 第三列：显示剩余系列 {% endcomment %}
+        <div class="mega-menu-column equipment-menu-column">
+          {% for i in (5..11) %}
+            {% if i < total_collections %}
+              {% assign collection_handle = collection_handles_array[i] %}
+              
+              {% comment %} 尝试多种方式匹配系列 {% endcomment %}
+              {% assign collection = collections[collection_handle] %}
+              {% unless collection %}
+                {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
+                {% for coll in collections %}
+                  {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                  {% if coll_handle_from_title == collection_handle %}
+                    {% assign collection = coll %}
+                    {% break %}
                   {% endif %}
-                {% endif %}
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endfor %}
+                {% endfor %}
+              {% endunless %}
+              
+              {% if collection and collection.handle != 'all' %}
+                {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                {% assign custom_title = '' %}
+                {% assign custom_product_handles = '' %}
+                {% assign custom_products_limit = products_per_collection %}
+                
+                {% for block in section.blocks %}
+                  {% if block.type == 'equipment_config' %}
+                    {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                      {% assign custom_title = block.settings.custom_title %}
+                      {% assign custom_product_handles = block.settings.product_handles %}
+                      {% assign custom_products_limit = block.settings.products_limit | default: products_per_collection %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                <div class="mega-menu-category equipment-menu-category">
+                  {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                  {% assign display_title = custom_title %}
+                  {% if display_title == blank %}
+                    {% assign display_title = collection.title %}
+                  {% endif %}
+                  
+                  <h3><a href="{{ collection.url }}">{{ display_title | escape }}</a></h3>
+                  <ul>
+                    {% if collection.products.size > 0 %}
+                      {% comment %} 如果有自定义产品顺序，使用自定义顺序 {% endcomment %}
+                      {% if custom_product_handles != blank %}
+                        {% assign product_handles_list = custom_product_handles | strip | split: ',' %}
+                        {% assign products_displayed = 0 %}
+                        
+                        {% for product_handle_raw in product_handles_list %}
+                          {% if products_displayed >= custom_products_limit %}
+                            {% break %}
+                          {% endif %}
+                          
+                          {% assign product_handle = product_handle_raw | strip %}
+                          {% assign found_product = null %}
+                          
+                          {% comment %} 在当前系列中查找产品 {% endcomment %}
+                          {% for product in collection.products %}
+                            {% if product.handle == product_handle %}
+                              {% assign found_product = product %}
+                              {% break %}
+                            {% endif %}
+                          {% endfor %}
+                          
+                          {% if found_product %}
+                            <li><a href="{{ found_product.url }}">{{ found_product.title | escape }}</a></li>
+                            {% assign products_displayed = products_displayed | plus: 1 %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% comment %} 如果自定义产品不足，补充其他产品 {% endcomment %}
+                        {% if products_displayed < custom_products_limit %}
+                          {% for product in collection.products %}
+                            {% if products_displayed >= custom_products_limit %}
+                              {% break %}
+                            {% endif %}
+                            
+                            {% assign is_already_displayed = false %}
+                            {% for product_handle_raw in product_handles_list %}
+                              {% assign product_handle = product_handle_raw | strip %}
+                              {% if product.handle == product_handle %}
+                                {% assign is_already_displayed = true %}
+                                {% break %}
+                              {% endif %}
+                            {% endfor %}
+                            
+                            {% unless is_already_displayed %}
+                              <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                              {% assign products_displayed = products_displayed | plus: 1 %}
+                            {% endunless %}
+                          {% endfor %}
+                        {% endif %}
+                      {% else %}
+                        {% comment %} 使用默认产品顺序 {% endcomment %}
+                        {% for product in collection.products limit: custom_products_limit %}
+                          <li><a href="{{ product.url }}">{{ product.title | escape }}</a></li>
+                        {% endfor %}
+                      {% endif %}
+                    {% else %}
+                      <li><a href="{{ collection.url }}">View {{ display_title }}</a></li>
+                    {% endif %}
+                  </ul>
+                </div>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
       {% else %}
         {% comment %} 如果没有自定义配置，使用默认系列顺序 {% endcomment %}
         {% assign column_count = 0 %}
