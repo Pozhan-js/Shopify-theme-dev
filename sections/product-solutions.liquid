@@ -46,7 +46,6 @@
                   </svg>
                 </div>
               {% endif %}
-              
             </div>
 
             <div class="series-content">
@@ -54,9 +53,25 @@
                 <h3 class="series-title">{{ collection.title }}</h3>
               {% endif %}
 
-              {% if collection.description != blank and section.settings.show_description %}
+              {% if section.settings.show_description %}
                 <p class="series-description">
-                  {{ collection.description | strip_html | truncate: section.settings.description_length }}
+                  {% comment %} 查找自定义描述 {% endcomment %}
+                  {% assign custom_description = '' %}
+                  {% for block in section.blocks %}
+                    {% if block.type == 'custom_series_description' and block.settings.collection_handle == collection.handle %}
+                      {% assign custom_description = block.settings.custom_description %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
+                  {% if custom_description != blank %}
+                    {{ custom_description | strip_html | truncate: section.settings.description_length }}
+                  {% elsif collection.description != blank %}
+                    {{ collection.description | strip_html | truncate: section.settings.description_length }}
+                  {% else %}
+                    {{ section.settings.default_description | default: '探索这个精彩的系列，发现更多优质产品。' | strip_html | truncate: section.settings.description_length }}
+                  {% endif %}
                 </p>
               {% endif %}
 
@@ -537,6 +552,13 @@
       "info": "系列描述的最大字符数"
     },
     {
+      "type": "textarea",
+      "id": "default_description",
+      "label": "默认系列描述",
+      "default": "探索这个精彩的系列，发现更多优质产品。",
+      "info": "当系列没有描述且未设置自定义描述时显示的默认文本"
+    },
+    {
       "type": "header",
       "content": "布局设置"
     },
@@ -759,6 +781,26 @@
       "id": "empty_description",
       "label": "空状态描述",
       "default": "请先创建展品系列以展示内容"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "custom_series_description",
+      "name": "自定义系列描述",
+      "settings": [
+        {
+          "type": "text",
+          "id": "collection_handle",
+          "label": "系列标识符",
+          "info": "输入要自定义描述的系列标识符（如：pilates-equipment）"
+        },
+        {
+          "type": "textarea",
+          "id": "custom_description",
+          "label": "自定义描述",
+          "info": "为指定系列设置的自定义描述文本"
+        }
+      ]
     }
   ],
   "presets": [
