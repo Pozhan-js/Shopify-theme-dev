@@ -39,10 +39,19 @@
               </h3>
               <div class="wwo-card-expanded-content">
                 <ul class="wwo-card-features">
-                  <li class="wwo-feature-item">Studio-grade quality construction</li>
-                  <li class="wwo-feature-item">30+ handcrafted manufacturing steps</li>
-                  <li class="wwo-feature-item">Eco-minded finishes and materials</li>
-                  <li class="wwo-feature-item">Rigorous quality control process</li>
+                  {% for block in section.blocks %}
+                    {% if block.type == 'manufacturing_feature' %}
+                      <li class="wwo-feature-item">
+                        {{ block.settings.featuretext }}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                  {% if section.blocks.size == 0 %}
+                    <li class="wwo-feature-item">Studio-grade quality construction</li>
+                    <li class="wwo-feature-item">30+ handcrafted manufacturing steps</li>
+                    <li class="wwo-feature-item">Eco-minded finishes and materials</li>
+                    <li class="wwo-feature-item">Rigorous quality control process</li>
+                  {% endif %}
                 </ul>
               </div>
             </div>
@@ -61,7 +70,7 @@
               <div class="wwo-card-expanded-content">
                 <ul class="wwo-card-features">
                   {% for block in section.blocks %}
-                    {% if block.type == 'feature' %}
+                    {% if block.type == 'solutions_feature' %}
                       <li class="wwo-feature-item">
                         {{ block.settings.featuretext }}
                       </li>
@@ -1026,13 +1035,24 @@
   ],
   "blocks": [
     {
-      "type": "feature",
-      "name": "Feature",
+      "type": "manufacturing_feature",
+      "name": "Manufacturing Feature",
       "settings": [
         {
           "type": "text",
           "id": "featuretext",
-          "label": "Feature Text"
+          "label": "Manufacturing Feature Text"
+        }
+      ]
+    },
+    {
+      "type": "solutions_feature",
+      "name": "Solutions Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "featuretext",
+          "label": "Solutions Feature Text"
         }
       ]
     }
@@ -1049,25 +1069,49 @@
       },
       "blocks": [
         {
-          "type": "feature",
+          "type": "manufacturing_feature",
+          "settings": {
+            "featuretext": "Studio-grade quality construction"
+          }
+        },
+        {
+          "type": "manufacturing_feature",
+          "settings": {
+            "featuretext": "30+ handcrafted manufacturing steps"
+          }
+        },
+        {
+          "type": "manufacturing_feature",
+          "settings": {
+            "featuretext": "Eco-minded finishes and materials"
+          }
+        },
+        {
+          "type": "manufacturing_feature",
+          "settings": {
+            "featuretext": "Rigorous quality control process"
+          }
+        },
+        {
+          "type": "solutions_feature",
           "settings": {
             "featuretext": "Custom sizing, materials, and colors"
           }
         },
         {
-          "type": "feature",
+          "type": "solutions_feature",
           "settings": {
             "featuretext": "Logo branding and private labeling"
           }
         },
         {
-          "type": "feature",
+          "type": "solutions_feature",
           "settings": {
             "featuretext": "Tailored packaging and manuals"
           }
         },
         {
-          "type": "feature",
+          "type": "solutions_feature",
           "settings": {
             "featuretext": "Product development based on your designs"
           }
