@@ -1,17 +1,17 @@
 <div class="exhibition-series-section">
-  <div class="container">
+  <div class="exhibition-series-container">
     <!-- 标题区域 -->
-    <div class="section-header">
+    <div class="exhibition-series-header">
       {% if section.settings.title != blank %}
-        <h2 class="section-title">{{ section.settings.title }}</h2>
+        <h2 class="exhibition-series-title">{{ section.settings.title }}</h2>
       {% endif %}
       {% if section.settings.description != blank %}
-        <p class="section-description">{{ section.settings.description }}</p>
+        <p class="exhibition-series-description">{{ section.settings.description }}</p>
       {% endif %}
     </div>
 
     <!-- 展品系列网格 -->
-    <div class="series-grid">
+    <div class="exhibition-series-grid">
       {% assign series_limit = section.settings.series_limit | default: 12 %}
       
       {% comment %} 创建自定义排序的系列数组 {% endcomment %}
@@ -48,8 +48,8 @@
           {% endunless %}
           
           {% if collection and collection.handle != 'all' %}
-            <div class="series-card">
-              <div class="series-image">
+            <div class="exhibition-series-card">
+              <div class="exhibition-series-image">
                 {% if collection.featured_image != blank %}
                   <img
                     src="{{ collection.featured_image | img_url: '400x400' }}"
@@ -63,7 +63,7 @@
                     loading="lazy"
                   >
                 {% else %}
-                  <div class="placeholder-image">
+                  <div class="exhibition-series-placeholder-image">
                     <svg
                       width="100"
                       height="100"
@@ -81,7 +81,7 @@
                 {% endif %}
               </div>
 
-              <div class="series-content">
+              <div class="exhibition-series-content">
                 {% comment %} 查找当前系列的自定义配置 {% endcomment %}
                 {% assign custom_title = '' %}
                 {% assign custom_description = '' %}
@@ -104,11 +104,11 @@
                 {% endif %}
                 
                 {% if display_title != blank %}
-                  <h3 class="series-title">{{ display_title }}</h3>
+                  <h3 class="exhibition-series-card-title">{{ display_title }}</h3>
                 {% endif %}
 
                 {% if section.settings.show_description %}
-                  <p class="series-description">
+                  <p class="exhibition-series-card-description">
                     {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
                     {% if custom_description != blank %}
                       {{ custom_description | strip_html | truncate: section.settings.description_length }}
@@ -121,10 +121,10 @@
                 {% endif %}
 
                 {% if section.settings.show_learn_more %}
-                  <div class="series-action">
-                    <a href="{{ collection.url }}" class="learn-more-btn">
+                  <div class="exhibition-series-action">
+                    <a href="{{ collection.url }}" class="exhibition-series-learn-more-btn">
                       <svg
-                        class="btn-arrow"
+                        class="exhibition-series-btn-arrow"
                         viewBox="0 0 7.10229 10.7302"
                         xmlns="http://www.w3.org/2000/svg"
                         xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -153,8 +153,8 @@
         {% comment %} 如果没有自定义排序，使用默认排序 {% endcomment %}
         {% for collection in collections limit: series_limit %}
           {% unless collection.handle == 'all' %}
-            <div class="series-card">
-            <div class="series-image">
+            <div class="exhibition-series-card">
+            <div class="exhibition-series-image">
               {% if collection.featured_image != blank %}
                 <img
                   src="{{ collection.featured_image | img_url: '400x400' }}"
@@ -168,7 +168,7 @@
                   loading="lazy"
                 >
               {% else %}
-                <div class="placeholder-image">
+                <div class="exhibition-series-placeholder-image">
                   <svg
                     width="100"
                     height="100"
@@ -186,7 +186,7 @@
               {% endif %}
             </div>
 
-            <div class="series-content">
+            <div class="exhibition-series-content">
               {% comment %} 查找当前系列的自定义配置 {% endcomment %}
               {% assign custom_title = '' %}
               {% assign custom_description = '' %}
@@ -209,11 +209,11 @@
               {% endif %}
               
               {% if display_title != blank %}
-                <h3 class="series-title">{{ display_title }}</h3>
+                <h3 class="exhibition-series-card-title">{{ display_title }}</h3>
               {% endif %}
 
               {% if section.settings.show_description %}
-                <p class="series-description">
+                <p class="exhibition-series-card-description">
                   {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
                   {% if custom_description != blank %}
                     {{ custom_description | strip_html | truncate: section.settings.description_length }}
@@ -226,10 +226,10 @@
               {% endif %}
 
               {% if section.settings.show_learn_more %}
-                <div class="series-action">
-                  <a href="{{ collection.url }}" class="learn-more-btn">
+                <div class="exhibition-series-action">
+                  <a href="{{ collection.url }}" class="exhibition-series-learn-more-btn">
                     <svg
-                      class="btn-arrow"
+                      class="exhibition-series-btn-arrow"
                       viewBox="0 0 7.10229 10.7302"
                       xmlns="http://www.w3.org/2000/svg"
                       xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -259,16 +259,16 @@
 
     <!-- 如果没有展品系列时的提示 -->
     {% if collections.size <= 1 %}
-      <div class="empty-state">
-        <div class="empty-icon">
+      <div class="exhibition-series-empty-state">
+        <div class="exhibition-series-empty-icon">
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
             <rect width="80" height="80" rx="40" fill="#f8f8f8"/>
             <path d="M25 35h30v10H25z" fill="#ddd"/>
             <circle cx="35" cy="25" r="3" fill="#ddd"/>
           </svg>
         </div>
-        <h3 class="empty-title">{{ section.settings.empty_title | default: '暂无展品系列' }}</h3>
-        <p class="empty-description">{{ section.settings.empty_description | default: '请先创建展品系列以展示内容' }}</p>
+        <h3 class="exhibition-series-empty-title">{{ section.settings.empty_title | default: '暂无展品系列' }}</h3>
+        <p class="exhibition-series-empty-description">{{ section.settings.empty_description | default: '请先创建展品系列以展示内容' }}</p>
       </div>
     {% endif %}
   </div>
@@ -282,31 +282,31 @@
     background-color: {{ section.settings.background_color }};
   }
 
-  .container {
+  .exhibition-series-container {
     max-width: 1320px;
     margin: 0 auto;
     padding: 0 20px;
   }
 
-  .section-header {
+  .exhibition-series-header {
     text-align: center;
     margin-bottom: 60px;
   }
 
-  .section-title {
-    font-size: {{ section.settings.title_size }}px;
-    font-weight: {{ section.settings.title_weight }};
-    color: {{ section.settings.title_color }};
+  .exhibition-series-title {
+    font-size: 48px;
+    font-weight: 500;
+    color: #161616;
     margin: 0 0 20px;
     line-height: 1.2;
   }
 
-  .section-description {
+  .exhibition-series-description {
     color: rgba(22, 22, 22, 0.5);
     font-family: Poppins;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 400;
-    line-height: 18px;
+    line-height: 36px;
     letter-spacing: 0px;
     text-align: center;
     max-width: 800px;
@@ -315,7 +315,7 @@
     width: 100%;
   }
 
-  .series-grid {
+  .exhibition-series-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: {{ section.settings.grid_gap }}px;
@@ -326,7 +326,7 @@
     margin-right: auto;
   }
 
-  .series-card {
+  .exhibition-series-card {
     background: {{ section.settings.card_background | default: '#F1F0ED' }};
     border-radius: {{ section.settings.card_border_radius }}px;
     padding: {{ section.settings.card_padding }}px;
@@ -341,12 +341,12 @@
     box-sizing: border-box;
   }
 
-  .series-card:hover {
+  .exhibition-series-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
   }
 
-  .series-image {
+  .exhibition-series-image {
     margin-bottom: 20px;
     height: 260px;
     display: flex;
@@ -358,18 +358,18 @@
     flex-shrink: 0;
   }
 
-  .series-image img {
+  .exhibition-series-image img {
     max-width: 100%;
     max-height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
   }
 
-  .series-card:hover .series-image img {
+  .exhibition-series-card:hover .exhibition-series-image img {
     transform: scale(1.05);
   }
 
-  .placeholder-image {
+  .exhibition-series-placeholder-image {
     width: 100%;
     height: 100%;
     display: flex;
@@ -379,14 +379,14 @@
     border-radius: 8px;
   }
 
-  .series-content {
+  .exhibition-series-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
 
-  .series-title {
+  .exhibition-series-card-title {
     font-size: {{ section.settings.series_title_size }}px;
     font-weight: {{ section.settings.series_title_weight }};
     color: {{ section.settings.series_title_color }};
@@ -402,7 +402,7 @@
     text-overflow: ellipsis;
   }
 
-  .series-description {
+  .exhibition-series-card-description {
     font-size: {{ section.settings.series_description_size }}px;
     color: {{ section.settings.series_description_color }};
     line-height: 1.5;
@@ -416,13 +416,13 @@
     flex-shrink: 0;
   }
 
-  .series-action {
+  .exhibition-series-action {
     margin-top: auto;
     flex-shrink: 0;
     padding-bottom: 5px;
   }
 
-  .learn-more-btn {
+  .exhibition-series-learn-more-btn {
     display: inline-flex;
     align-items: center;
     gap: 12px;
@@ -442,7 +442,7 @@
     border-radius: 4px;
   }
 
-  .learn-more-btn::after {
+  .exhibition-series-learn-more-btn::after {
     content: '';
     position: absolute;
     top: 0;
@@ -454,45 +454,45 @@
     z-index: -1;
   }
 
-  .btn-arrow {
+  .exhibition-series-btn-arrow {
     width: 12px;
     height: 12px;
     flex-shrink: 0;
     transition: transform 0.3s ease;
   }
 
-  .learn-more-btn:hover::after {
+  .exhibition-series-learn-more-btn:hover::after {
     left: 0;
   }
 
-  .learn-more-btn:hover {
+  .exhibition-series-learn-more-btn:hover {
     color: {{ section.settings.button_hover_text }};
     transform: translateY(-2px);
   }
 
-  .learn-more-btn:hover .btn-arrow {
+  .exhibition-series-learn-more-btn:hover .exhibition-series-btn-arrow {
     transform: translateX(3px);
   }
 
   /* 空状态样式 */
-  .empty-state {
+  .exhibition-series-empty-state {
     text-align: center;
     padding: 80px 20px;
     color: #666;
   }
 
-  .empty-icon {
+  .exhibition-series-empty-icon {
     margin-bottom: 24px;
   }
 
-  .empty-title {
+  .exhibition-series-empty-title {
     font-size: 24px;
     font-weight: 600;
     margin: 0 0 12px;
     color: #333;
   }
 
-  .empty-description {
+  .exhibition-series-empty-description {
     font-size: 16px;
     margin: 0;
     color: #666;
@@ -507,7 +507,7 @@
   }
 
   @media (max-width: 1024px) {
-    .series-grid {
+    .exhibition-series-grid {
       grid-template-columns: repeat(2, 1fr);
       max-width: 840px;
     }
@@ -519,30 +519,31 @@
       padding: {{ section.settings.padding_top | times: 0.6 | round }}px 0 {{ section.settings.padding_bottom | times: 0.6 | round }}px;
     }
 
-    .series-grid {
+    .exhibition-series-grid {
       grid-template-columns: 1fr;
       gap: 30px;
       max-width: 100%;
     }
 
-    .series-card {
+    .exhibition-series-card {
       height: auto;
       min-height: 400px;
     }
 
-    .series-image {
+    .exhibition-series-image {
       height: 200px;
     }
 
-    .section-title {
-      font-size: {{ section.settings.title_size | minus: 8 }}px;
+    .exhibition-series-title {
+      font-size: 36px;
     }
 
-    .section-description {
-      font-size: {{ section.settings.description_size | minus: 2 }}px;
+    .exhibition-series-description {
+      font-size: 16px;
+      line-height: 28px;
     }
 
-    .series-description {
+    .exhibition-series-card-description {
       text-align: center;
     }
   }
@@ -553,26 +554,35 @@
       padding: {{ section.settings.padding_top | times: 0.5 | round }}px 0 {{ section.settings.padding_bottom | times: 0.5 | round }}px;
     }
 
-    .container {
+    .exhibition-series-container {
       padding: 0 15px;
     }
 
-    .series-grid {
+    .exhibition-series-grid {
       grid-template-columns: 1fr;
       max-width: 100%;
     }
 
-    .series-card {
+    .exhibition-series-card {
       height: auto;
       min-height: 350px;
       padding: {{ section.settings.card_padding | minus: 10 }}px;
     }
 
-    .series-image {
+    .exhibition-series-image {
       height: 180px;
     }
 
-    .empty-state {
+    .exhibition-series-title {
+      font-size: 28px;
+    }
+
+    .exhibition-series-description {
+      font-size: 14px;
+      line-height: 24px;
+    }
+
+    .exhibition-series-empty-state {
       padding: 60px 20px;
     }
   }
