@@ -108,6 +108,22 @@
     overflow: hidden;
   }
 
+  .filtration-experts__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+  }
+
+  .filtration-experts__no-blog {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-style: italic;
+  }
+
   @media (max-width: 1024px) {
     .filtration-experts {
       padding: 50px 0;
@@ -235,48 +251,59 @@
       </h2>
     {% endif %}
 
-    <div class="filtration-experts__grid">
-      {% for block in section.blocks %}
-        {% if block.type == 'article' %}
-          <article class="filtration-experts__article">
-            <div class="filtration-experts__image-wrapper">
-              {% if block.settings.article_image %}
-                <img
-                  src="{{ block.settings.article_image | img_url: '400x' }}"
-                  alt="{{ block.settings.article_title | default: 'Article Image' }}"
-                  class="filtration-experts__image"
-                  loading="lazy"
-                >
-              {% endif %}
-            </div>
+    {% if section.settings.blog_handle != blank %}
+      {% assign selected_blog = blogs[section.settings.blog_handle] %}
+      {% if selected_blog.articles.size > 0 %}
+        <div class="filtration-experts__grid">
+          {% for article in selected_blog.articles limit: section.settings.articles_limit %}
+            <article class="filtration-experts__article">
+              <div class="filtration-experts__image-wrapper">
+                {% if article.image %}
+                  <img
+                    src="{{ article.image | img_url: '400x' }}"
+                    alt="{{ article.title }}"
+                    class="filtration-experts__image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="filtration-experts__placeholder">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#ccc"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
 
-            <div class="filtration-experts__content">
-              {% if block.settings.article_date != blank %}
-                <time class="filtration-experts__date" style="color: {{ block.settings.date_color }};">
-                  {{ block.settings.article_date }}
+              <div class="filtration-experts__content">
+                <time class="filtration-experts__date" style="color: {{ section.settings.date_color }};">
+                  {{ article.published_at | date: "%B %d, %Y" }}
                 </time>
-              {% endif %}
 
-              {% if block.settings.article_title != blank %}
-                <h3 class="filtration-experts__article-title" style="color: {{ block.settings.title_color }};">
-                  {% if block.settings.article_url != blank %}
-                    <a href="{{ block.settings.article_url }}">{{ block.settings.article_title }}</a>
-                  {% else %}
-                    {{ block.settings.article_title }}
-                  {% endif %}
+                <h3 class="filtration-experts__article-title" style="color: {{ section.settings.article_title_color }};">
+                  <a href="{{ article.url }}">{{ article.title }}</a>
                 </h3>
-              {% endif %}
 
-              {% if block.settings.article_excerpt != blank %}
-                <p class="filtration-experts__excerpt" style="color: {{ block.settings.excerpt_color }};">
-                  {{ block.settings.article_excerpt }}
+                <p class="filtration-experts__excerpt" style="color: {{ section.settings.excerpt_color }};">
+                  {% if article.excerpt != blank %}
+                    {{ article.excerpt | strip_html | truncate: 150 }}
+                  {% else %}
+                    {{ article.content | strip_html | truncate: 150 }}
+                  {% endif %}
                 </p>
-              {% endif %}
-            </div>
-          </article>
-        {% endif %}
-      {% endfor %}
-    </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="filtration-experts__no-blog">
+          <p>No articles found in the selected blog.</p>
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="filtration-experts__no-blog">
+        <p>Please select a blog to display articles.</p>
+      </div>
+    {% endif %}
   </div>
 </section>
 
@@ -307,89 +334,51 @@
       "id": "background_color",
       "label": "Background Color",
       "default": "#ffffff"
-    }
-  ],
-  "blocks": [
+    },
     {
-      "type": "article",
-      "name": "Article",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "article_image",
-          "label": "Article Image"
-        },
-        {
-          "type": "text",
-          "id": "article_date",
-          "label": "Article Date",
-          "placeholder": "August 25, 2025"
-        },
-        {
-          "type": "color",
-          "id": "date_color",
-          "label": "Date Color",
-          "default": "#666666"
-        },
-        {
-          "type": "text",
-          "id": "article_title",
-          "label": "Article Title"
-        },
-        {
-          "type": "color",
-          "id": "title_color",
-          "label": "Article Title Color",
-          "default": "#333333"
-        },
-        {
-          "type": "url",
-          "id": "article_url",
-          "label": "Article Link (optional)"
-        },
-        {
-          "type": "textarea",
-          "id": "article_excerpt",
-          "label": "Article Excerpt"
-        },
-        {
-          "type": "color",
-          "id": "excerpt_color",
-          "label": "Excerpt Color",
-          "default": "#666666"
-        }
-      ]
+      "type": "header",
+      "content": "Blog Settings"
+    },
+    {
+      "type": "blog",
+      "id": "blog_handle",
+      "label": "Select Blog"
+    },
+    {
+      "type": "range",
+      "id": "articles_limit",
+      "label": "Number of Articles",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Content Colors"
+    },
+    {
+      "type": "color",
+      "id": "date_color",
+      "label": "Date Color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "article_title_color",
+      "label": "Article Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "excerpt_color",
+      "label": "Excerpt Color",
+      "default": "#666666"
     }
   ],
   "presets": [
     {
-      "name": "Learn From Filtration Experts",
-      "blocks": [
-        {
-          "type": "article",
-          "settings": {
-            "article_date": "August 25, 2025",
-            "article_title": "15400-PLM-A02 Oil Filter Cross Reference Guide",
-            "article_excerpt": "The Honda 15400-PLM-A02 oil filter is one of the most popular choices for Honda and Acura vehicles, known for its..."
-          }
-        },
-        {
-          "type": "article",
-          "settings": {
-            "article_date": "August 20, 2025",
-            "article_title": "LF9009 Oil Filter Cross Reference Guide – Baldwin, Cummins, Donaldson, Fleetguard & More",
-            "article_excerpt": "The Getopauto LF9009 oil filter is a trusted heavy-duty filter designed for trucks, construction, and industrial equipment. This guide provides a..."
-          }
-        },
-        {
-          "type": "article",
-          "settings": {
-            "article_date": "August 17, 2025",
-            "article_title": "04152-YZZA1 Oil Filter Cross Reference Guide",
-            "article_excerpt": "The GETOPAUTO 04152-YZZA1 oil filter is an OEM-quality replacement for Toyota genuine parts 04152-YZZA1 and 04152-31090. This filter provides reliable..."
-          }
-        }
-      ]
+      "name": "Learn From Filtration Experts"
     }
   ]
 }
