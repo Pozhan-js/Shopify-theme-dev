@@ -1,0 +1,266 @@
+<!-- sections/three-column-boxes.liquid -->
+<div class="three-column-boxes-section">
+  <div class="container">
+    <div class="boxes-wrapper">
+      {% for block in section.blocks %}
+        <div class="box-item" {{ block.shopify_attributes }}>
+          <div class="box-content">
+            <!-- Image -->
+            {% if block.settings.image_upload != blank %}
+              <div class="image-wrapper">
+                <img
+                  src="{{ block.settings.image_upload | img_url: block.settings.image_width }}"
+                  alt="{{ block.settings.title | default: 'Box Image' }}"
+                  class="box-image"
+                  width="{{ block.settings.image_width }}"
+                  height="auto"
+                >
+              </div>
+            {% endif %}
+
+            <!-- Title -->
+            {% if block.settings.title != blank %}
+              <div class="box-title">{{ block.settings.title }}</div>
+            {% endif %}
+
+            <!-- Text Content -->
+            {% if block.settings.text_content != blank %}
+              <p class="box-text">{{ block.settings.text_content }}</p>
+            {% endif %}
+
+            <!-- Button -->
+            {% if block.settings.button_text != blank %}
+              <a href="{{ block.settings.button_link | default: '#' }}" class="box-button">
+                {{ block.settings.button_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .three-column-boxes-section {
+    padding: 60px 0;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .boxes-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* gap: 30px; */
+  }
+
+  .box-item {
+    border: 1px solid #000;
+    background: transparent;
+    padding: 40px 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .box-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .box-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .image-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+  }
+
+  .box-image {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .box-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+  }
+
+  .box-text {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    color: #666;
+  }
+
+  .box-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .box-item:nth-child(2) {
+    border-left: none;
+    border-right: none;
+  }
+
+  .box-button:hover {
+    background: #333;
+    transform: translateY(-2px);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 1024px) {
+    .boxes-wrapper {
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .boxes-wrapper {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .box-item {
+      padding: 30px 20px;
+    }
+
+    .box-title {
+      font-size: 20px;
+    }
+
+    .box-text {
+      font-size: 14px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "三列盒子展示",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "三列盒子设置"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "box",
+      "name": "盒子",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "header",
+          "content": "图片设置"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_upload",
+          "label": "上传图片"
+        },
+        {
+          "type": "range",
+          "id": "image_width",
+          "label": "图片宽度",
+          "min": 50,
+          "max": 200,
+          "step": 10,
+          "unit": "px",
+          "default": 80
+        },
+        {
+          "type": "header",
+          "content": "内容设置"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "标题文本"
+        },
+        {
+          "type": "textarea",
+          "id": "text_content",
+          "label": "文本内容",
+          "default": "这里是描述文本内容，可以详细介绍相关信息。"
+        },
+        {
+          "type": "header",
+          "content": "按钮设置"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文本",
+          "default": "了解更多"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "按钮链接",
+          "info": "选择按钮点击后跳转的页面"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "三列盒子展示",
+      "blocks": [
+        {
+          "type": "box",
+          "settings": {
+            "image_width": 80,
+            "title": "特色服务一",
+            "text_content": "这里是第一个盒子的描述内容，介绍相关的服务或产品特点。",
+            "button_text": "了解更多",
+            "button_link": ""
+          }
+        },
+        {
+          "type": "box",
+          "settings": {
+            "image_width": 80,
+            "title": "特色服务二",
+            "text_content": "这里是第二个盒子的描述内容，介绍另一个服务或产品特点。",
+            "button_text": "查看详情",
+            "button_link": ""
+          }
+        },
+        {
+          "type": "box",
+          "settings": {
+            "image_width": 80,
+            "title": "特色服务三",
+            "text_content": "这里是第三个盒子的描述内容，介绍第三个服务或产品特点。",
+            "button_text": "立即体验",
+            "button_link": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
