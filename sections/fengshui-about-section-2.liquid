@@ -15,6 +15,65 @@
       "default": "<p>在此输入风水布局内容</p>"
     },
     {
+      "type": "header",
+      "content": "展示图片设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "feature_image",
+      "label": "展示图片"
+    },
+    {
+      "type": "text",
+      "id": "feature_image_alt",
+      "label": "图片替代文本",
+      "default": "风水布局展示图片"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "图片位置",
+      "options": [
+        {
+          "value": "left",
+          "label": "左侧"
+        },
+        {
+          "value": "right",
+          "label": "右侧"
+        },
+        {
+          "value": "top",
+          "label": "上方"
+        },
+        {
+          "value": "bottom",
+          "label": "下方"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "图片宽度",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "header",
+      "content": "附加富文本"
+    },
+    {
+      "type": "richtext",
+      "id": "additional_content",
+      "label": "附加内容",
+      "default": "<p>在此输入附加内容</p>"
+    },
+    {
       "type": "color",
       "id": "bg_color",
       "label": "背景颜色",
@@ -203,8 +262,30 @@
     {% if section.settings.title != blank %}
       <h1 class="rich-text-title" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.h1_size }}px;">{{ section.settings.title }}</h1>
     {% endif %}
-    <div class="rich-text-content" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.base_font_size }}px; background-color: transparent;">
-      {{ section.settings.content }}
+    
+    <div class="content-wrapper {{ section.settings.image_position }}">
+      {% if section.settings.feature_image != blank %}
+        <div class="feature-image-container">
+          <img src="{{ section.settings.feature_image | image_url: width: section.settings.image_width }}" 
+               alt="{{ section.settings.feature_image_alt }}" 
+               class="feature-image"
+               width="{{ section.settings.image_width }}"
+               height="{{ section.settings.image_width | times: 0.75 }}"
+               loading="lazy">
+        </div>
+      {% endif %}
+      
+      <div class="text-content">
+        <div class="rich-text-content" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.base_font_size }}px; background-color: transparent;">
+          {{ section.settings.content }}
+        </div>
+        
+        {% if section.settings.additional_content != blank %}
+          <div class="additional-rich-text" style="color: {{ section.settings.text_color }}; font-size: {{ section.settings.base_font_size }}px; background-color: transparent; margin-top: 40px;">
+            {{ section.settings.additional_content }}
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>
@@ -288,10 +369,62 @@
     color: {{ section.settings.text_color }};
   }
 
+  .content-wrapper {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 30px;
+  }
 
+  .content-wrapper.left {
+    flex-direction: row;
+  }
+
+  .content-wrapper.right {
+    flex-direction: row-reverse;
+  }
+
+  .content-wrapper.top {
+    flex-direction: column;
+  }
+
+  .content-wrapper.bottom {
+    flex-direction: column-reverse;
+  }
+
+  .feature-image-container {
+    flex-shrink: 0;
+    max-width: {{ section.settings.image_width }}px;
+  }
+
+  .feature-image {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    height: auto;
+  }
+
+  .text-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .rich-text-content,
+  .additional-rich-text {
+    line-height: {{ section.settings.content_line_height }}em;
+    letter-spacing: {{ section.settings.content_letter_spacing }}px;
+    word-spacing: {{ section.settings.content_word_spacing }}px;
+    background-color: transparent;
+  }
+
+  .additional-rich-text {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 30px;
+  }
 
   /* Inline Quiz 滚动条样式覆盖 */
-
 
   @media (max-width: 768px) {
     .custom-rich-text-section {
@@ -303,21 +436,51 @@
       font-size: 28px;
     }
 
-    .rich-text-content {
+    .content-wrapper {
+      flex-direction: column !important;
+      gap: 30px;
       padding: 0 20px;
+    }
+
+    .feature-image-container {
+      text-align: center;
+    }
+
+    .feature-image {
+      width: 100% !important;
+      max-width: 350px;
+      height: auto;
+    }
+
+    .rich-text-content,
+    .additional-rich-text {
+      padding: 0;
       font-size: 14px;
     }
 
-    .rich-text-content h1 {
+    .rich-text-content h1,
+    .additional-rich-text h1 {
       font-size: 28px;
     }
 
-    .rich-text-content h2 {
+    .rich-text-content h2,
+    .additional-rich-text h2 {
       font-size: 24px;
     }
 
-    .rich-text-content h3 {
+    .rich-text-content h3,
+    .additional-rich-text h3 {
       font-size: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .content-wrapper {
+      gap: 20px;
+    }
+
+    .feature-image {
+      max-width: 280px;
     }
   }
 </style>
