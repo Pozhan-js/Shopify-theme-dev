@@ -1,0 +1,488 @@
+<!-- sections/two-column-boxes.liquid -->
+<div class="two-column-boxes-section">
+  <div class="container">
+    <div class="boxes-wrapper">
+      {% for block in section.blocks %}
+        <div class="box-item" {{ block.shopify_attributes }}>
+          <div class="box-content">
+            <!-- Icon -->
+            {% if block.settings.icon != 'none' or block.settings.image_upload != blank %}
+              <div class="icon-wrapper">
+                {% render 'icon-or-image',
+                  icon: block.settings.icon,
+                  image_upload: block.settings.image_upload,
+                  width: block.settings.icon_width,
+                  class_name: 'box-icon'
+                %}
+              </div>
+            {% endif %}
+
+            <!-- Title -->
+            {% if block.settings.title != blank %}
+              <div class="box-title">{{ block.settings.title }}</div>
+            {% endif %}
+
+            <!-- Text Content -->
+            {% if block.settings.text_content != blank %}
+              <p class="box-text">{{ block.settings.text_content }}</p>
+            {% endif %}
+
+            <!-- Button -->
+            {% if block.settings.button_text != blank %}
+              <a href="{{ block.settings.button_link | default: '#' }}" class="box-button">
+                {{ block.settings.button_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .two-column-boxes-section {
+    padding: 60px 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .boxes-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+  }
+
+  .box-item {
+    border: 1px solid #000;
+    background: transparent;
+    padding: 40px 30px;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .box-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .box-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+  }
+
+  .icon-wrapper .box-icon {
+    fill: currentColor;
+    color: #000;
+  }
+
+  .box-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    color: #000;
+  }
+
+  .box-text {
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    color: #666;
+  }
+
+  .box-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .box-button:hover {
+    background: #333;
+    transform: translateY(-2px);
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .boxes-wrapper {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .box-item {
+      padding: 30px 20px;
+    }
+
+    .box-title {
+      font-size: 20px;
+    }
+
+    .box-text {
+      font-size: 14px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "双列盒子展示",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "双列盒子设置"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "box",
+      "name": "盒子",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "header",
+          "content": "图标设置"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "t:settings.icon",
+          "options": [
+            {
+              "value": "none",
+              "label": "t:options.none"
+            },
+            {
+              "value": "apple",
+              "label": "t:options.apple"
+            },
+            {
+              "value": "arrow",
+              "label": "t:options.arrow"
+            },
+            {
+              "value": "banana",
+              "label": "t:options.banana"
+            },
+            {
+              "value": "bottle",
+              "label": "t:options.bottle"
+            },
+            {
+              "value": "box",
+              "label": "t:options.box"
+            },
+            {
+              "value": "carrot",
+              "label": "t:options.carrot"
+            },
+            {
+              "value": "chat_bubble",
+              "label": "t:options.chat_bubble"
+            },
+            {
+              "value": "check_box",
+              "label": "t:options.check_box"
+            },
+            {
+              "value": "clipboard",
+              "label": "t:options.clipboard"
+            },
+            {
+              "value": "dairy",
+              "label": "t:options.dairy"
+            },
+            {
+              "value": "dairy_free",
+              "label": "t:options.dairy_free"
+            },
+            {
+              "value": "dryer",
+              "label": "t:options.dryer"
+            },
+            {
+              "value": "eye",
+              "label": "t:options.eye"
+            },
+            {
+              "value": "fire",
+              "label": "t:options.fire"
+            },
+            {
+              "value": "gluten_free",
+              "label": "t:options.gluten_free"
+            },
+            {
+              "value": "heart",
+              "label": "t:options.heart"
+            },
+            {
+              "value": "iron",
+              "label": "t:options.iron"
+            },
+            {
+              "value": "leaf",
+              "label": "t:options.leaf"
+            },
+            {
+              "value": "leather",
+              "label": "t:options.leather"
+            },
+            {
+              "value": "lightning_bolt",
+              "label": "t:options.lightning_bolt"
+            },
+            {
+              "value": "lipstick",
+              "label": "t:options.lipstick"
+            },
+            {
+              "value": "lock",
+              "label": "t:options.lock"
+            },
+            {
+              "value": "map_pin",
+              "label": "t:options.map_pin"
+            },
+            {
+              "value": "nut_free",
+              "label": "t:options.nut_free"
+            },
+            {
+              "value": "pants",
+              "label": "t:options.pants"
+            },
+            {
+              "value": "paw_print",
+              "label": "t:options.paw_print"
+            },
+            {
+              "value": "pepper",
+              "label": "t:options.pepper"
+            },
+            {
+              "value": "perfume",
+              "label": "t:options.perfume"
+            },
+            {
+              "value": "plane",
+              "label": "t:options.plane"
+            },
+            {
+              "value": "plant",
+              "label": "t:options.plant"
+            },
+            {
+              "value": "price_tag",
+              "label": "t:options.price_tag"
+            },
+            {
+              "value": "question_mark",
+              "label": "t:options.question_mark"
+            },
+            {
+              "value": "recycle",
+              "label": "t:options.recycle"
+            },
+            {
+              "value": "return",
+              "label": "t:options.return"
+            },
+            {
+              "value": "ruler",
+              "label": "t:options.ruler"
+            },
+            {
+              "value": "serving_dish",
+              "label": "t:options.serving_dish"
+            },
+            {
+              "value": "shirt",
+              "label": "t:options.shirt"
+            },
+            {
+              "value": "shoe",
+              "label": "t:options.shoe"
+            },
+            {
+              "value": "silhouette",
+              "label": "t:options.silhouette"
+            },
+            {
+              "value": "bluesky",
+              "label": "t:options.social_bluesky"
+            },
+            {
+              "value": "facebook",
+              "label": "t:options.social_facebook"
+            },
+            {
+              "value": "instagram",
+              "label": "t:options.social_instagram"
+            },
+            {
+              "value": "linkedin",
+              "label": "t:options.social_linkedin"
+            },
+            {
+              "value": "pinterest",
+              "label": "t:options.social_pinterest"
+            },
+            {
+              "value": "snapchat",
+              "label": "t:options.social_snapchat"
+            },
+            {
+              "value": "spotify",
+              "label": "t:options.social_spotify"
+            },
+            {
+              "value": "threads",
+              "label": "t:options.social_threads"
+            },
+            {
+              "value": "tiktok",
+              "label": "t:options.social_tiktok"
+            },
+            {
+              "value": "tumblr",
+              "label": "t:options.social_tumblr"
+            },
+            {
+              "value": "twitter",
+              "label": "t:options.social_twitter"
+            },
+            {
+              "value": "vimeo",
+              "label": "t:options.social_vimeo"
+            },
+            {
+              "value": "youtube",
+              "label": "t:options.social_youtube"
+            },
+            {
+              "value": "whatsapp",
+              "label": "t:options.social_whatsapp"
+            },
+            {
+              "value": "snowflake",
+              "label": "t:options.snowflake"
+            },
+            {
+              "value": "star",
+              "label": "t:options.star"
+            },
+            {
+              "value": "stopwatch",
+              "label": "t:options.stopwatch"
+            },
+            {
+              "value": "truck",
+              "label": "t:options.truck"
+            },
+            {
+              "value": "washing",
+              "label": "t:options.washing"
+            }
+          ],
+          "default": "apple"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_upload",
+          "label": "t:settings.image_icon"
+        },
+        {
+          "type": "range",
+          "id": "icon_width",
+          "label": "t:settings.width",
+          "min": 24,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "default": 48
+        },
+        {
+          "type": "header",
+          "content": "内容设置"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题",
+          "default": "标题文本"
+        },
+        {
+          "type": "textarea",
+          "id": "text_content",
+          "label": "文本内容",
+          "default": "这里是描述文本内容，可以详细介绍相关信息。"
+        },
+        {
+          "type": "header",
+          "content": "按钮设置"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文本",
+          "default": "了解更多"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "按钮链接",
+          "info": "选择按钮点击后跳转的页面"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "双列盒子展示",
+      "blocks": [
+        {
+          "type": "box",
+          "settings": {
+            "icon": "star",
+            "icon_width": 48,
+            "title": "特色服务一",
+            "text_content": "这里是第一个盒子的描述内容，介绍相关的服务或产品特点。",
+            "button_text": "了解更多",
+            "button_link": ""
+          }
+        },
+        {
+          "type": "box",
+          "settings": {
+            "icon": "heart",
+            "icon_width": 48,
+            "title": "特色服务二",
+            "text_content": "这里是第二个盒子的描述内容，介绍另一个服务或产品特点。",
+            "button_text": "查看详情",
+            "button_link": ""
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
