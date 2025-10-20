@@ -236,46 +236,48 @@
     {% endif %}
 
     <div class="filtration-experts__grid">
-      {% for block in  blog.articles %}
-        {% if block.type == 'article' %}
-          <article class="filtration-experts__article">
-            <div class="filtration-experts__image-wrapper">
-              {% if block.settings.article_image %}
-                <img
-                  src="{{ block.settings.article_image | img_url: '400x' }}"
-                  alt="{{ block.settings.article_title | default: 'Article Image' }}"
-                  class="filtration-experts__image"
-                  loading="lazy"
-                >
-              {% endif %}
-            </div>
+      {%- paginate blog.articles by section.settings.posts_per_page -%}
+        {% for block in blog.articles %}
+          {% if block.type == 'article' %}
+            <article class="filtration-experts__article">
+              <div class="filtration-experts__image-wrapper">
+                {% if block.settings.article_image %}
+                  <img
+                    src="{{ block.settings.article_image | img_url: '400x' }}"
+                    alt="{{ block.settings.article_title | default: 'Article Image' }}"
+                    class="filtration-experts__image"
+                    loading="lazy"
+                  >
+                {% endif %}
+              </div>
 
-            <div class="filtration-experts__content">
-              {% if block.settings.article_date != blank %}
-                <time class="filtration-experts__date" style="color: {{ block.settings.date_color }};">
-                  {{ block.settings.article_date }}
-                </time>
-              {% endif %}
+              <div class="filtration-experts__content">
+                {% if block.settings.article_date != blank %}
+                  <time class="filtration-experts__date" style="color: {{ block.settings.date_color }};">
+                    {{ block.settings.article_date }}
+                  </time>
+                {% endif %}
 
-              {% if block.settings.article_title != blank %}
-                <h3 class="filtration-experts__article-title" style="color: {{ block.settings.title_color }};">
-                  {% if block.settings.article_url != blank %}
-                    <a href="{{ block.settings.article_url }}">{{ block.settings.article_title }}</a>
-                  {% else %}
-                    {{ block.settings.article_title }}
-                  {% endif %}
-                </h3>
-              {% endif %}
+                {% if block.settings.article_title != blank %}
+                  <h3 class="filtration-experts__article-title" style="color: {{ block.settings.title_color }};">
+                    {% if block.settings.article_url != blank %}
+                      <a href="{{ block.settings.article_url }}">{{ block.settings.article_title }}</a>
+                    {% else %}
+                      {{ block.settings.article_title }}
+                    {% endif %}
+                  </h3>
+                {% endif %}
 
-              {% if block.settings.article_excerpt != blank %}
-                <p class="filtration-experts__excerpt" style="color: {{ block.settings.excerpt_color }};">
-                  {{ block.settings.article_excerpt }}
-                </p>
-              {% endif %}
-            </div>
-          </article>
-        {% endif %}
-      {% endfor %}
+                {% if block.settings.article_excerpt != blank %}
+                  <p class="filtration-experts__excerpt" style="color: {{ block.settings.excerpt_color }};">
+                    {{ block.settings.article_excerpt }}
+                  </p>
+                {% endif %}
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      {%- endpaginate -%}
     </div>
   </div>
 </section>
