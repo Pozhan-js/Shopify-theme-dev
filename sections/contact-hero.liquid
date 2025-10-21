@@ -2,10 +2,10 @@
   <div class="contact-hero-container">
     <!-- 背景图片 -->
     <div class="contact-hero-background">
-      {% if section.settings.background_image != blank %}
+      {% if section.settings.backgroundimage != blank %}
         <img
-          src="{{ section.settings.background_image | img_url: '1920x' }}"
-          alt="{{ section.settings.background_alt | default: 'Contact Background' }}"
+          src="{{ section.settings.backgroundimage | img_url: '1920x' }}"
+          alt="{{ section.settings.backgroundalt | default: 'Contact Background' }}"
           class="background-image"
         >
       {% else %}
@@ -16,7 +16,7 @@
       {% endif %}
       <div
         class="background-overlay"
-        style="background-color: {{ section.settings.overlay_color }}; opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"
+        style="background-color: {{ section.settings.overlaycolor }}; opacity: {{ section.settings.overlayopacity | divided_by: 100.0 }};"
       ></div>
     </div>
 
@@ -35,16 +35,23 @@
           </div>
 
           <div class="button-content">
-            {% if section.settings.button_text != blank %}
+            {% if section.settings.buttontext != blank %}
               <a
-                href="{{ section.settings.button_url | default: '#' }}"
+                href="{{ section.settings.buttonurl | default: '#' }}"
                 class="contact-button"
-                {% if section.settings.open_new_tab %}
+                {% if section.settings.opennewtab %}
                   target="_blank"
                 {% endif %}
               >
-                {% if section.settings.contact_button_icon != blank %}
-                  <img src="{{ section.settings.contact_button_icon | img_url: '12x8' }}" alt="Contact Icon" class="cta-icon">
+                {% if section.settings.contactbuttonicon != blank %}
+                  <span class="cta-icon-wrapper">
+                    <img src="{{ section.settings.contactbuttonicon | img_url: '12x8' }}" alt="Contact Icon" class="cta-icon cta-icon-normal">
+                    {% if section.settings.contactbuttoniconhover != blank %}
+                      <img src="{{ section.settings.contactbuttoniconhover | img_url: '12x8' }}" alt="Contact Icon Hover" class="cta-icon cta-icon-hover">
+                    {% else %}
+                      <img src="{{ section.settings.contactbuttonicon | img_url: '12x8' }}" alt="Contact Icon Hover" class="cta-icon cta-icon-hover">
+                    {% endif %}
+                  </span>
                 {% else %}
                   <svg
                     class="cta-icon"
@@ -61,20 +68,20 @@
                       d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
                 {% endif %}
-                {{ section.settings.button_text }}
+                {{ section.settings.buttontext }}
               </a>
             {% endif %}
             
-            {% if section.settings.catalog_button_text != blank %}
+            {% if section.settings.catalogbuttontext != blank %}
               <a
-                href="{{ section.settings.catalog_button_url | default: '#' }}"
+                href="{{ section.settings.catalogbuttonurl | default: '#' }}"
                 class="catalog-button"
-                {% if section.settings.catalog_open_new_tab %}
+                {% if section.settings.catalogopennewtab %}
                   target="_blank"
                 {% endif %}
               >
-                {% if section.settings.catalog_button_icon != blank %}
-                  <img src="{{ section.settings.catalog_button_icon | img_url: '19x17' }}" alt="Catalog Icon" class="catalog-icon">
+                {% if section.settings.catalogbuttonicon != blank %}
+                  <img src="{{ section.settings.catalogbuttonicon | img_url: '19x17' }}" alt="Catalog Icon" class="catalog-icon">
                 {% else %}
                   <svg
                     class="catalog-icon"
@@ -91,7 +98,7 @@
                       d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
                 {% endif %}
-                {{ section.settings.catalog_button_text }}
+                {{ section.settings.catalogbuttontext }}
               </a>
             {% endif %}
           </div>
@@ -188,21 +195,21 @@
     font-family: 'Poppins', sans-serif;
     font-size: 48px;
     font-weight: 500;
-    color: {{ section.settings.heading_color }};
-    line-height: {{ section.settings.heading_line_height }};
-    margin: 0 0 {{ section.settings.text_spacing }}px;
-    text-transform: {{ section.settings.heading_transform }};
-    letter-spacing: {{ section.settings.heading_letter_spacing }}px;
+    color: {{ section.settings.headingcolor }};
+    line-height: {{ section.settings.headinglineheight }};
+    margin: 0 0 {{ section.settings.textspacing }}px;
+    text-transform: {{ section.settings.headingtransform }};
+    letter-spacing: {{ section.settings.headingletterspacing }}px;
   }
 
   .contact-description {
     font-family: 'Poppins', sans-serif;
     font-size: 15px;
     font-weight: 400;
-    color: {{ section.settings.description_color }};
+    color: {{ section.settings.descriptioncolor }};
     line-height: 30px;
     margin: 0;
-    max-width: {{ section.settings.description_max_width }}px;
+    max-width: {{ section.settings.descriptionmaxwidth }}px;
     white-space: nowrap;
   }
 
@@ -217,16 +224,16 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: {{ section.settings.button_padding_y }}px {{ section.settings.button_padding_x }}px;
+    padding: {{ section.settings.buttonpaddingy }}px {{ section.settings.buttonpaddingx }}px;
     background-color: white;
     color: #161616;
-    font-size: {{ section.settings.button_font_size }}px;
-    font-weight: {{ section.settings.button_font_weight }};
+    font-size: {{ section.settings.buttonfontsize }}px;
+    font-weight: {{ section.settings.buttonfontweight }};
     text-decoration: none;
-    text-transform: {{ section.settings.button_text_transform }};
-    letter-spacing: {{ section.settings.button_letter_spacing }}px;
+    text-transform: {{ section.settings.buttontexttransform }};
+    letter-spacing: {{ section.settings.buttonletterspacing }}px;
     border: 1px solid #c22e35;
-    border-radius: {{ section.settings.button_border_radius }}px;
+    border-radius: {{ section.settings.buttonborderradius }}px;
     transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
     cursor: pointer;
     white-space: nowrap;
@@ -302,16 +309,56 @@
     z-index: 2;
   }
 
+  /* 图标容器和切换效果 */
+  .cta-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 12px;
+    height: 8px;
+    flex-shrink: 0;
+  }
+
   .cta-icon {
     flex-shrink: 0;
     width: 12px;
     height: 8px;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
     position: relative;
     z-index: 2;
   }
 
-  .contact-button:hover .cta-icon {
+  .cta-icon-normal,
+  .cta-icon-hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 8px;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .cta-icon-normal {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .cta-icon-hover {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+
+  .contact-button:hover .cta-icon-normal {
+    opacity: 0;
+    transform: translateX(2px);
+  }
+
+  .contact-button:hover .cta-icon-hover {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+
+  /* SVG 图标的 hover 效果保持不变 */
+  .contact-button:hover .cta-icon:not(.cta-icon-normal):not(.cta-icon-hover) {
     transform: translateX(2px);
   }
 
@@ -415,7 +462,16 @@
       min-height: 10px;
     }
     
-    .cta-icon {
+    .cta-icon-wrapper {
+      width: calc(12px * (100vw / 1920px));
+      height: calc(8px * (100vw / 1920px));
+      min-width: 8px;
+      min-height: 5px;
+    }
+    
+    .cta-icon,
+    .cta-icon-normal,
+    .cta-icon-hover {
       width: calc(12px * (100vw / 1920px));
       height: calc(8px * (100vw / 1920px));
       min-width: 8px;
@@ -498,7 +554,16 @@
       min-height: 10px;
     }
     
-    .cta-icon {
+    .cta-icon-wrapper {
+      width: calc(12px * (100vw / 768px));
+      height: calc(8px * (100vw / 768px));
+      min-width: 8px;
+      min-height: 5px;
+    }
+    
+    .cta-icon,
+    .cta-icon-normal,
+    .cta-icon-hover {
       width: calc(12px * (100vw / 768px));
       height: calc(8px * (100vw / 768px));
       min-width: 8px;
@@ -605,7 +670,14 @@
       border-bottom: clamp(1px, 0.5vw, 2px) solid #C12E35;
     }
     
-    .cta-icon {
+    .cta-icon-wrapper {
+      width: clamp(8px, 2vw, 12px);
+      height: clamp(5px, 1.5vw, 8px);
+    }
+    
+    .cta-icon,
+    .cta-icon-normal,
+    .cta-icon-hover {
       width: clamp(8px, 2vw, 12px);
       height: clamp(5px, 1.5vw, 8px);
     }
@@ -624,24 +696,24 @@
     },
     {
       "type": "image_picker",
-      "id": "background_image",
+      "id": "backgroundimage",
       "label": "背景图片"
     },
     {
       "type": "text",
-      "id": "background_alt",
+      "id": "backgroundalt",
       "label": "背景图片描述",
       "default": "Contact Background"
     },
     {
       "type": "color",
-      "id": "overlay_color",
+      "id": "overlaycolor",
       "label": "遮罩颜色",
       "default": "#000000"
     },
     {
       "type": "range",
-      "id": "overlay_opacity",
+      "id": "overlayopacity",
       "label": "遮罩透明度",
       "min": 0,
       "max": 100,
@@ -661,13 +733,13 @@
     },
     {
       "type": "color",
-      "id": "heading_color",
+      "id": "headingcolor",
       "label": "标题颜色",
       "default": "#ffffff"
     },
     {
       "type": "range",
-      "id": "heading_line_height",
+      "id": "headinglineheight",
       "label": "标题行高",
       "min": 1.0,
       "max": 2.0,
@@ -677,7 +749,7 @@
     },
     {
       "type": "select",
-      "id": "heading_transform",
+      "id": "headingtransform",
       "label": "标题文本转换",
       "options": [
         { "value": "none", "label": "无" },
@@ -689,7 +761,7 @@
     },
     {
       "type": "range",
-      "id": "heading_letter_spacing",
+      "id": "headingletterspacing",
       "label": "标题字母间距",
       "min": -2,
       "max": 10,
@@ -709,13 +781,13 @@
     },
     {
       "type": "color",
-      "id": "description_color",
+      "id": "descriptioncolor",
       "label": "描述颜色",
       "default": "#ffffff"
     },
     {
       "type": "range",
-      "id": "description_max_width",
+      "id": "descriptionmaxwidth",
       "label": "描述最大宽度",
       "min": 300,
       "max": 800,
@@ -725,7 +797,7 @@
     },
     {
       "type": "range",
-      "id": "text_spacing",
+      "id": "textspacing",
       "label": "标题与描述间距",
       "min": 10,
       "max": 60,
@@ -739,24 +811,24 @@
     },
     {
       "type": "text",
-      "id": "button_text",
+      "id": "buttontext",
       "label": "按钮文本",
       "default": "CONTACT US"
     },
     {
       "type": "url",
-      "id": "button_url",
+      "id": "buttonurl",
       "label": "按钮链接"
     },
     {
       "type": "checkbox",
-      "id": "open_new_tab",
+      "id": "opennewtab",
       "label": "在新标签页打开",
       "default": false
     },
     {
       "type": "range",
-      "id": "button_font_size",
+      "id": "buttonfontsize",
       "label": "按钮字体大小",
       "min": 12,
       "max": 24,
@@ -766,7 +838,7 @@
     },
     {
       "type": "select",
-      "id": "button_font_weight",
+      "id": "buttonfontweight",
       "label": "按钮字体粗细",
       "options": [
         { "value": "400", "label": "正常" },
@@ -778,7 +850,7 @@
     },
     {
       "type": "range",
-      "id": "button_border_radius",
+      "id": "buttonborderradius",
       "label": "按钮圆角",
       "min": 0,
       "max": 50,
@@ -788,7 +860,7 @@
     },
     {
       "type": "range",
-      "id": "button_padding_x",
+      "id": "buttonpaddingx",
       "label": "按钮水平内边距",
       "min": 20,
       "max": 60,
@@ -798,7 +870,7 @@
     },
     {
       "type": "range",
-      "id": "button_padding_y",
+      "id": "buttonpaddingy",
       "label": "按钮垂直内边距",
       "min": 8,
       "max": 30,
@@ -808,7 +880,7 @@
     },
     {
       "type": "select",
-      "id": "button_text_transform",
+      "id": "buttontexttransform",
       "label": "按钮文本转换",
       "options": [
         { "value": "none", "label": "无" },
@@ -820,7 +892,7 @@
     },
     {
       "type": "range",
-      "id": "button_letter_spacing",
+      "id": "buttonletterspacing",
       "label": "按钮字母间距",
       "min": 0,
       "max": 5,
@@ -834,24 +906,24 @@
     },
     {
       "type": "text",
-      "id": "catalog_button_text",
+      "id": "catalogbuttontext",
       "label": "下载目录按钮文本",
       "default": "DOWNLOAD CATALOG"
     },
     {
       "type": "url",
-      "id": "catalog_button_url",
+      "id": "catalogbuttonurl",
       "label": "下载目录按钮链接"
     },
     {
       "type": "checkbox",
-      "id": "catalog_open_new_tab",
+      "id": "catalogopennewtab",
       "label": "在新标签页打开下载目录",
       "default": false
     },
     {
       "type": "image_picker",
-      "id": "catalog_button_icon",
+      "id": "catalogbuttonicon",
       "label": "下载目录按钮图标",
       "info": "推荐尺寸：19x17px，如不上传将使用默认下载图标"
     },
@@ -861,9 +933,15 @@
     },
     {
       "type": "image_picker",
-      "id": "contact_button_icon",
-      "label": "联系按钮图标",
+      "id": "contactbuttonicon",
+      "label": "联系按钮图标（正常状态）",
       "info": "推荐尺寸：12x8px，如不上传将使用默认箭头图标"
+    },
+    {
+      "type": "image_picker",
+      "id": "contactbuttoniconhover",
+      "label": "联系按钮图标（悬停状态）",
+      "info": "推荐尺寸：12x8px，悬停时显示的图标，如不上传将使用正常状态图标"
     }
   ],
   "presets": [
@@ -872,12 +950,12 @@
       "settings": {
         "heading": "GET IN TOUCH",
         "description": "Tell us your needs- we'll reply within 24 hours with customized support.",
-        "button_text": "CONTACT US",
-        "catalog_button_text": "DOWNLOAD CATALOG",
-        "heading_color": "#ffffff",
-        "description_color": "#ffffff",
-        "overlay_color": "#000000",
-        "overlay_opacity": 50
+        "buttontext": "CONTACT US",
+        "catalogbuttontext": "DOWNLOAD CATALOG",
+        "headingcolor": "#ffffff",
+        "descriptioncolor": "#ffffff",
+        "overlaycolor": "#000000",
+        "overlayopacity": 50
       }
     }
   ]
