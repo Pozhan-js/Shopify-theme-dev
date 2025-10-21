@@ -1,0 +1,535 @@
+{%- comment -%}
+------------------------------------------------------------------------------
+	Section: Image with text - New Vertical Layout
+	每张图片匹配一个文本框的上下布局设计
+------------------------------------------------------------------------------
+{%- endcomment -%}
+
+{%- assign image_position         = section.settings.image_position -%}
+{%- assign text_alignment         = section.settings.text_alignment -%}
+{%- assign content_vertical_alignment = section.settings.content_vertical_alignment -%}
+{%- assign heading                = section.settings.heading -%}
+{%- assign subheading             = section.settings.subheading -%}
+{%- assign text_content           = section.settings.text_content -%}
+{%- assign button_label           = section.settings.button_label -%}
+{%- assign button_aria_label      = section.settings.button_aria_label -%}
+{%- assign button_url             = section.settings.button_url -%}
+{%- assign button_style           = section.settings.button_style -%}
+
+{%- assign container              = section.settings.container_width -%}
+
+{% if container == 'inherit' %}
+	{% assign container_width = settings.container_width %}
+{% else %}
+	{% assign container_width = container %}
+{% endif %}
+
+{%- capture section_styles -%}
+	--text-alignment: {{ text_alignment | replace: "left", "start" | replace: "right", "end" }};
+	--content-vertical-alignment: {{ content_vertical_alignment }};
+	--container-width: {{ container_width }};
+{%- endcapture -%}
+
+{%- style -%}
+	#shopify-section-{{ section.id }} {
+		padding-top: {{ section.settings.offset_top_mobile }}px;
+		padding-bottom: {{ section.settings.offset_bottom_mobile }}px;
+	}
+
+	@media screen and (min-width: 992px) {
+		#shopify-section-{{ section.id }} {
+			padding-top: {{ section.settings.offset_top_desktop }}px;
+			padding-bottom: {{ section.settings.offset_bottom_desktop }}px;
+		}
+	}
+
+	/* 新的上下布局样式 */
+	.image-with-text-vertical {
+		padding: 2rem 1.5rem;
+	}
+
+	.image-with-text-vertical__container {
+		max-width: var(--container-width);
+		margin: 0 auto;
+	}
+
+	.image-with-text-vertical__header {
+		text-align: center;
+		margin-bottom: 3rem;
+	}
+
+	.image-with-text-vertical__heading {
+		font-size: 2.5rem;
+		font-weight: 300;
+		color: var(--color-text, #2d241b);
+		margin-bottom: 1rem;
+	}
+
+	.image-with-text-vertical__subheading {
+		font-size: 1.25rem;
+		color: var(--color-text-light, #8b7d68);
+		margin-bottom: 1.5rem;
+	}
+
+	.image-with-text-vertical__text-content {
+		color: var(--color-text-light, #8b7d68);
+		line-height: 1.6;
+		margin-bottom: 2rem;
+	}
+
+	.image-with-text-vertical__grid {
+		display: grid;
+		gap: 3rem;
+		margin-bottom: 3rem;
+	}
+
+	.image-text-pair {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		align-items: center;
+	}
+
+	.image-text-pair__image {
+		width: 100%;
+		border-radius: 0.5rem;
+		box-shadow: 0 4px 20px rgba(45, 36, 27, 0.1);
+		transition: transform 0.3s ease;
+	}
+
+	.image-text-pair__image:hover {
+		transform: translateY(-2px);
+	}
+
+	.image-text-pair__text-area {
+		width: 100%;
+		max-width: 600px;
+	}
+
+	.image-text-pair__label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text, #2d241b);
+		margin-bottom: 0.5rem;
+		display: block;
+	}
+
+	.image-text-pair__textarea {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		font-size: 1rem;
+		font-family: inherit;
+		color: var(--color-text, #2d241b);
+		background-color: #ffffff;
+		border: 1px solid var(--color-border, #d1c7b8);
+		border-radius: 0.5rem;
+		transition: all 0.3s ease;
+		box-shadow: 0 2px 4px rgba(45, 36, 27, 0.05);
+		resize: vertical;
+		min-height: 80px;
+		line-height: 1.5;
+	}
+
+	.image-text-pair__textarea:focus {
+		outline: none;
+		border-color: var(--color-accent, #5a7c5a);
+		box-shadow: 0 0 0 3px rgba(90, 124, 90, 0.1);
+	}
+
+	.image-text-pair__textarea::placeholder {
+		color: var(--color-text-light, #8b7d68);
+		opacity: 0.7;
+	}
+
+	.image-with-text-vertical__button {
+		margin-top: 2rem;
+	}
+
+	@media (min-width: 768px) {
+		.image-with-text-vertical__heading {
+			font-size: 3rem;
+		}
+		
+		.image-with-text-vertical__subheading {
+			font-size: 1.5rem;
+		}
+		
+		.image-text-pair__textarea {
+			padding: 0.875rem 1.125rem;
+			font-size: 1.0625rem;
+			min-height: 100px;
+		}
+	}
+
+	@media (min-width: 992px) {
+		.image-with-text-vertical {
+			padding: 3rem 2rem;
+		}
+		
+		.image-text-pair {
+			flex-direction: row;
+			align-items: flex-start;
+			gap: 2rem;
+		}
+		
+		.image-text-pair:nth-child(even) {
+			flex-direction: row-reverse;
+		}
+		
+		.image-text-pair__image {
+			flex: 1;
+			max-width: 50%;
+		}
+		
+		.image-text-pair__text-area {
+			flex: 1;
+			max-width: 50%;
+		}
+	}
+{%- endstyle -%}
+
+<section class="image-with-text-vertical js-animate {% if request.visual_preview_mode or section.index == 1 %}animated{% endif %}" style="{{ section_styles }}">
+	<div class="image-with-text-vertical__container">
+		{%- if heading != blank or subheading != blank or text_content != blank -%}
+			<div class="image-with-text-vertical__header">
+				{%- if heading != blank -%}
+					<h2 class="image-with-text-vertical__heading">
+						{{- heading -}}
+					</h2>
+				{%- endif -%}
+
+				{% if subheading != blank %}
+					<p class="image-with-text-vertical__subheading">{{ subheading }}</p>
+				{% endif %}
+
+				{%- if text_content != blank -%}
+					<div class="image-with-text-vertical__text-content rte">
+						{{- text_content -}}
+					</div>
+				{%- endif -%}
+			</div>
+		{%- endif -%}
+
+		<div class="image-with-text-vertical__grid">
+			{%- for i in (1..3) -%}
+				{%- assign desktop_image = section.settings['image_' | append: i | append: '_desktop'] -%}
+				{%- assign mobile_image = section.settings['image_' | append: i | append: '_mobile'] | default: desktop_image -%}
+				{%- assign text_label = section.settings['text_' | append: i | append: '_label'] -%}
+				{%- assign text_placeholder = section.settings['text_' | append: i | append: '_placeholder'] -%}
+				{%- assign text_default = section.settings['text_' | append: i | append: '_default'] -%}
+				{%- assign text_rows = section.settings['text_' | append: i | append: '_rows'] -%}
+				{%- assign image_alt = section.settings['image_' | append: i | append: '_alt'] -%}
+
+				{%- if desktop_image != blank -%}
+					<div class="image-text-pair">
+						<img 
+							src="{{ desktop_image | img_url: '600x' }}"
+							srcset="{{ desktop_image | img_url: '600x' }} 1x, {{ desktop_image | img_url: '1200x' }} 2x"
+							alt="{{ image_alt }}"
+							class="image-text-pair__image"
+							loading="lazy"
+						/>
+						<div class="image-text-pair__text-area">
+							<label for="image-text-{{ i }}-{{ section.id }}" class="image-text-pair__label">
+								{{ text_label | default: "Text " | append: i }}
+							</label>
+							<textarea 
+								id="image-text-{{ i }}-{{ section.id }}" 
+								class="image-text-pair__textarea" 
+								placeholder="{{ text_placeholder | default: "Enter your content here..." }}"
+								rows="{{ text_rows | default: 3 }}"
+							>{{ text_default }}</textarea>
+						</div>
+					</div>
+				{%- endif -%}
+			{%- endfor -%}
+		</div>
+
+		{%- if button_label != blank and button_url != blank -%}
+			<a
+				href="{{- button_url -}}"
+				{%- if button_aria_label != blank -%}aria-label="{{- button_aria_label | escape -}}"{%- endif -%}
+				class="image-with-text-vertical__button button button--{{- button_style -}}"
+			>
+				{{- button_label -}}
+			</a>
+		{%- endif -%}
+	</div>
+</section>
+
+{%- schema -%}
+	{
+		"name": "Image with text - Vertical Layout",
+		"disabled_on": {
+			"groups": ["header", "footer", "custom.popup"]
+		},
+		"settings": [
+			{
+				"id": "heading",
+				"type": "text",
+				"label": "Heading"
+			},
+			{
+				"id": "subheading",
+				"type": "textarea",
+				"label": "Subheading"
+			},
+			{
+				"id": "text_content",
+				"type": "richtext",
+				"label": "Text"
+			},
+			{
+				"id": "button_label",
+				"type": "text",
+				"label": "Button label"
+			},
+			{
+				"id": "button_aria_label",
+				"type": "text",
+				"label": "Button aria-label",
+				"info": "Need for good accessibility, e.g. 'All news about'."
+			},
+			{
+				"id": "button_url",
+				"type": "url",
+				"label": "Button link"
+			},
+			{
+				"id": "button_style",
+				"type": "select",
+				"label": "Button style",
+				"options": [
+					{
+						"value": "primary",
+						"label": "Primary"
+					},
+					{
+						"value": "secondary",
+						"label": "Secondary"
+					},
+					{
+						"value": "primary-border",
+						"label": "Primary with border"
+					},
+					{
+						"value": "secondary-border",
+						"label": "Secondary with border"
+					}
+				],
+				"default": "secondary-border"
+			},
+
+			{
+				"id": "image_1_desktop",
+				"type": "image_picker",
+				"label": "Image 1"
+			},
+			{
+				"id": "image_1_mobile",
+				"type": "image_picker",
+				"label": "Image 1 mobile"
+			},
+			{
+				"id": "image_1_alt",
+				"type": "text",
+				"label": "Image 1 alt text",
+				"default": "Image description"
+			},
+			{
+				"id": "text_1_label",
+				"type": "text",
+				"label": "Text 1 label",
+				"default": "Description 1"
+			},
+			{
+				"id": "text_1_placeholder",
+				"type": "text",
+				"label": "Text 1 placeholder",
+				"default": "Enter text for image 1..."
+			},
+			{
+				"id": "text_1_default",
+				"type": "textarea",
+				"label": "Text 1 default content"
+			},
+			{
+				"id": "text_1_rows",
+				"type": "range",
+				"label": "Text 1 rows",
+				"min": 2,
+				"max": 8,
+				"step": 1,
+				"default": 3
+			},
+
+			{
+				"id": "image_2_desktop",
+				"type": "image_picker",
+				"label": "Image 2"
+			},
+			{
+				"id": "image_2_mobile",
+				"type": "image_picker",
+				"label": "Image 2 mobile"
+			},
+			{
+				"id": "image_2_alt",
+				"type": "text",
+				"label": "Image 2 alt text",
+				"default": "Image description"
+			},
+			{
+				"id": "text_2_label",
+				"type": "text",
+				"label": "Text 2 label",
+				"default": "Description 2"
+			},
+			{
+				"id": "text_2_placeholder",
+				"type": "text",
+				"label": "Text 2 placeholder",
+				"default": "Enter text for image 2..."
+			},
+			{
+				"id": "text_2_default",
+				"type": "textarea",
+				"label": "Text 2 default content"
+			},
+			{
+				"id": "text_2_rows",
+				"type": "range",
+				"label": "Text 2 rows",
+				"min": 2,
+				"max": 8,
+				"step": 1,
+				"default": 3
+			},
+
+			{
+				"id": "image_3_desktop",
+				"type": "image_picker",
+				"label": "Image 3"
+			},
+			{
+				"id": "image_3_mobile",
+				"type": "image_picker",
+				"label": "Image 3 mobile"
+			},
+			{
+				"id": "image_3_alt",
+				"type": "text",
+				"label": "Image 3 alt text",
+				"default": "Image description"
+			},
+			{
+				"id": "text_3_label",
+				"type": "text",
+				"label": "Text 3 label",
+				"default": "Description 3"
+			},
+			{
+				"id": "text_3_placeholder",
+				"type": "text",
+				"label": "Text 3 placeholder",
+				"default": "Enter text for image 3..."
+			},
+			{
+				"id": "text_3_default",
+				"type": "textarea",
+				"label": "Text 3 default content"
+			},
+			{
+				"id": "text_3_rows",
+				"type": "range",
+				"label": "Text 3 rows",
+				"min": 2,
+				"max": 8,
+				"step": 1,
+				"default": 3
+			},
+
+			{
+				"type": "header",
+				"content": "Layout"
+			},
+			{
+				"type": "select",
+				"id": "container_width",
+				"label": "Container width",
+				"options": [
+					{
+						"value": "1432px",
+						"label": "Default - 1400px"
+					},
+					{
+						"value": "1952px",
+						"label": "Large - 1920px"
+					},
+					{
+						"value": "100%",
+						"label": "Full width"
+					},
+					{
+						"value": "inherit",
+						"label": "Inherit of general setting"
+					}
+				],
+				"default": "inherit",
+				"info": "if you select 'Inherit of general setting', then container width will be used from the Theme settings/Layout"
+			},
+			{
+				"type": "range",
+				"id": "offset_top_desktop",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Desktop offset top",
+				"default": 50
+			},
+			{
+				"type": "range",
+				"id": "offset_bottom_desktop",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Desktop offset bottom",
+				"default": 50
+			},
+			{
+				"type": "range",
+				"id": "offset_top_mobile",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Mobile offset top",
+				"default": 25
+			},
+			{
+				"type": "range",
+				"id": "offset_bottom_mobile",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Mobile offset bottom",
+				"default": 25
+			}
+		],
+		"presets": [
+			{
+				"name": "Image with text - Vertical",
+				"settings": {
+					"heading": "Our Story",
+					"subheading": "Each image tells a story",
+					"text_content": "<p>Share your journey with beautiful images and meaningful descriptions.</p>",
+					"button_label": "Learn more",
+					"button_url": "/"
+				}
+			}
+		]
+	}
+{%- endschema -%}
