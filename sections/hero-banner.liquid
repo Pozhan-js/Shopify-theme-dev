@@ -1,18 +1,41 @@
 <style>
   /* Hero Banner Styles */
   .hero-banner-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-    , url('{{ section.settings.herobackgroundimage | img_url: '2048x' }}');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     align-items: center;
     position: relative;
     border-radius: 16px;
     overflow: hidden;
+  }
+
+  .hero-banner-video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+
+  .hero-banner-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+    z-index: -1;
+  }
+
+  .hero-banner-section.hero-banner-image-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
+    , url('{{ section.settings.herobackgroundimage | imgurl: '2048x' }}');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
 
   .hero-banner-container {
@@ -109,7 +132,7 @@
     transform: translateX(4px);
   }
 
-  /* Default background if no image is set */
+  /* Default background if no video or image is set */
   .hero-banner-section.hero-banner-default-bg {
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
     , url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
@@ -118,11 +141,11 @@
     background-repeat: no-repeat;
   }
 
-  /* Ensure background image is responsive */
+  /* Ensure background image is responsive when using image fallback */
   @media (max-width: 768px) {
-    .hero-banner-section {
+    .hero-banner-section.hero-banner-image-bg {
       background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | img_url: '1024x' }}');
+      , url('{{ section.settings.herobackgroundimage | imgurl: '1024x' }}');
     }
 
     .hero-banner-section.hero-banner-default-bg {
@@ -132,9 +155,9 @@
   }
 
   @media (min-width: 769px) and (max-width: 1279px) {
-    .hero-banner-section {
+    .hero-banner-section.hero-banner-image-bg {
       background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | img_url: '1600x' }}');
+      , url('{{ section.settings.herobackgroundimage | imgurl: '1600x' }}');
     }
 
     .hero-banner-section.hero-banner-default-bg {
@@ -144,9 +167,9 @@
   }
 
   @media (min-width: 1280px) {
-    .hero-banner-section {
+    .hero-banner-section.hero-banner-image-bg {
       background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | img_url: '2048x' }}');
+      , url('{{ section.settings.herobackgroundimage | imgurl: '2048x' }}');
     }
 
     .hero-banner-section.hero-banner-default-bg {
@@ -514,12 +537,29 @@
   }
 </style>
 
-<section class="hero-banner-section {% if section.settings.herobackgroundimage == blank %}hero-banner-default-bg{% endif %}">
+<section class="hero-banner-section {% if section.settings.herobackgroundvideo == blank and section.settings.herobackgroundimage == blank %}hero-banner-default-bg{% elsif section.settings.herobackgroundvideo == blank and section.settings.herobackgroundimage != blank %}hero-banner-image-bg{% endif %}">
+  {% if section.settings.herobackgroundvideo != blank %}
+    <video 
+      class="hero-banner-video-background" 
+      autoplay 
+      muted 
+      loop 
+      playsinline
+      preload="metadata">
+      <source src="{{ section.settings.herobackgroundvideo }}" type="video/mp4">
+      {% if section.settings.herobackgroundimage != blank %}
+        <!-- Fallback image if video fails to load -->
+        <img src="{{ section.settings.herobackgroundimage | imgurl: '2048x' }}" alt="Hero background">
+      {% endif %}
+    </video>
+    <div class="hero-banner-video-overlay"></div>
+  {% endif %}
+  
   <div class="hero-banner-container">
     <div class="hero-banner-content">
       <h1 class="hero-banner-title">
         {% if section.settings.herotitle != blank %}
-          {{ section.settings.herotitle | newline_to_br }}
+          {{ section.settings.herotitle | newlinetobr }}
         {% else %}
           The Pilates Equipment<br>
           Manufacturer Behind Global<br>
@@ -528,12 +568,12 @@
       </h1>
 
       <div class="hero-banner-subtitle">
-        {% if section.settings.herosubtitle_line1 != blank or section.settings.herosubtitle_line2 != blank %}
-          {% if section.settings.herosubtitle_line1 != blank %}
-            <p class="hero-banner-subtitle-line">{{ section.settings.herosubtitle_line1 }}</p>
+        {% if section.settings.herosubtitleline1 != blank or section.settings.herosubtitleline2 != blank %}
+          {% if section.settings.herosubtitleline1 != blank %}
+            <p class="hero-banner-subtitle-line">{{ section.settings.herosubtitleline1 }}</p>
           {% endif %}
-          {% if section.settings.herosubtitle_line2 != blank %}
-            <p class="hero-banner-subtitle-line">{{ section.settings.herosubtitle_line2 }}</p>
+          {% if section.settings.herosubtitleline2 != blank %}
+            <p class="hero-banner-subtitle-line">{{ section.settings.herosubtitleline2 }}</p>
           {% endif %}
         {% else %}
           <p class="hero-banner-subtitle-line">Supplying 25%+ of the world's total pilates equipment production</p>
@@ -542,7 +582,7 @@
       </div>
 
       {% if section.settings.showctabutton %}
-        <a href="{{ section.settings.cta_link | default: '#quote' }}" class="hero-banner-cta-button">
+        <a href="{{ section.settings.ctalink | default: '#quote' }}" class="hero-banner-cta-button">
           <svg
             class="hero-banner-cta-icon"
             width="16"
@@ -568,10 +608,16 @@
     "name": "Hero Banner",
     "settings": [
       {
+        "type": "text",
+        "id": "herobackgroundvideo",
+        "label": "Background Video URL",
+        "info": "MP4 video URL for background. Video will autoplay, loop, and be muted."
+      },
+      {
         "type": "image_picker",
         "id": "herobackgroundimage",
-        "label": "Background Image",
-        "info": "Recommended size: 2048x1024px or larger"
+        "label": "Background Image (Fallback)",
+        "info": "Recommended size: 2048x1024px or larger. Used as fallback if no video is provided or video fails to load."
       },
       {
         "type": "textarea",
@@ -582,13 +628,13 @@
       },
       {
         "type": "text",
-        "id": "herosubtitle_line1",
+        "id": "herosubtitleline1",
         "label": "Hero Subtitle - Line 1",
         "default": "Supplying 25%+ of the world's total pilates equipment production"
       },
       {
         "type": "text",
-        "id": "herosubtitle_line2",
+        "id": "herosubtitleline2",
         "label": "Hero Subtitle - Line 2",
         "default": "with premium quality and innovative design solutions"
       },
@@ -606,7 +652,7 @@
       },
       {
         "type": "url",
-        "id": "cta_link",
+        "id": "ctalink",
         "label": "CTA Button Link",
         "info": "Where the button should link to"
       }
