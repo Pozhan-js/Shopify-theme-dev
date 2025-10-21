@@ -38,15 +38,6 @@
     z-index: -1;
   }
 
-  .hero-banner-section.hero-banner-image-bg {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-    , url('{{ section.settings.herobackgroundimage | imgurl: '2048x' }}');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-  }
-
   .hero-banner-container {
     max-width: 1600px;
     margin: 0 auto;
@@ -141,50 +132,9 @@
     transform: translateX(4px);
   }
 
-  /* Default background if no video or image is set */
+  /* Default background if no video is set */
   .hero-banner-section.hero-banner-default-bg {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-    , url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-
-  /* Ensure background image is responsive when using image fallback */
-  @media (max-width: 768px) {
-    .hero-banner-section.hero-banner-image-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | imgurl: '1024x' }}');
-    }
-
-    .hero-banner-section.hero-banner-default-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1024&q=80');
-    }
-  }
-
-  @media (min-width: 769px) and (max-width: 1279px) {
-    .hero-banner-section.hero-banner-image-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | imgurl: '1600x' }}');
-    }
-
-    .hero-banner-section.hero-banner-default-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .hero-banner-section.hero-banner-image-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('{{ section.settings.herobackgroundimage | imgurl: '2048x' }}');
-    }
-
-    .hero-banner-section.hero-banner-default-bg {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6))
-      , url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
-    }
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
   }
 
   /* Responsive styles */
@@ -546,7 +496,7 @@
   }
 </style>
 
-<section class="hero-banner-section {% if section.settings.herobackgroundvideo == blank and section.settings.herobackgroundimage == blank %}hero-banner-default-bg{% elsif section.settings.herobackgroundvideo == blank and section.settings.herobackgroundimage != blank %}hero-banner-image-bg{% endif %}">
+<section class="hero-banner-section {% if section.settings.herobackgroundvideo == blank %}hero-banner-default-bg{% endif %}">
   {% if section.settings.herobackgroundvideo != blank %}
     <video 
       class="hero-banner-video-background" 
@@ -554,27 +504,10 @@
       muted 
       loop 
       playsinline
-      preload="metadata"
-      onError="this.style.display='none';">
+      preload="metadata">
       <source src="{{ section.settings.herobackgroundvideo.sources[1].url }}" type="video/mp4">
     </video>
     <div class="hero-banner-video-overlay"></div>
-  {% endif %}
-  
-  {% comment %} Always include image background as fallback {% endcomment %}
-  {% if section.settings.herobackgroundimage != blank %}
-    <div class="hero-banner-image-fallback" style="
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('{{ section.settings.herobackgroundimage | image_url: width: 2048 }}');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: -3;
-    "></div>
   {% endif %}
   
   <div class="hero-banner-container">
@@ -634,12 +567,6 @@
         "id": "herobackgroundvideo",
         "label": "Background Video",
         "info": "Upload MP4 video for background. Video will autoplay, loop, and be muted."
-      },
-      {
-        "type": "image_picker",
-        "id": "herobackgroundimage",
-        "label": "Background Image (Fallback)",
-        "info": "Recommended size: 2048x1024px or larger. Used as fallback if no video is provided or video fails to load."
       },
       {
         "type": "textarea",
