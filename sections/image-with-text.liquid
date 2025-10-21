@@ -114,6 +114,72 @@
 			padding-bottom: {{- section.settings.offset_bottom_desktop -}}px;
 		}
 	}
+
+	/* 新增文本框样式 */
+	.image-with-text__text-areas {
+		margin-top: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.text-area-container {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.text-area-label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-text, #2d241b);
+		margin-bottom: 0.25rem;
+	}
+
+	.image-with-text-textarea {
+		width: 100%;
+		padding: 0.75rem 1rem;
+		font-size: 1rem;
+		font-family: inherit;
+		color: var(--color-text, #2d241b);
+		background-color: #ffffff;
+		border: 1px solid var(--color-border, #d1c7b8);
+		border-radius: 0.5rem;
+		transition: all 0.3s ease;
+		box-shadow: 0 2px 4px rgba(45, 36, 27, 0.05);
+		resize: vertical;
+		min-height: 80px;
+		line-height: 1.5;
+	}
+
+	.image-with-text-textarea:focus {
+		outline: none;
+		border-color: var(--color-accent, #5a7c5a);
+		box-shadow: 0 0 0 3px rgba(90, 124, 90, 0.1);
+	}
+
+	.image-with-text-textarea::placeholder {
+		color: var(--color-text-light, #8b7d68);
+		opacity: 0.7;
+	}
+
+	@media screen and (min-width: 768px) {
+		.image-with-text__text-areas {
+			margin-top: 2.5rem;
+		}
+		
+		.image-with-text-textarea {
+			padding: 0.875rem 1.125rem;
+			font-size: 1.0625rem;
+			min-height: 100px;
+		}
+	}
+
+	@media screen and (min-width: 992px) {
+		.image-with-text__text-areas {
+			margin-top: 3rem;
+		}
+	}
 {%- endstyle -%}
 
 {%- assign image_width    = "388x" -%}
@@ -177,16 +243,38 @@
 						%}
 					{% endif %}
 
-					{% if third_desktop_image != blank %}
-						{% render 'image-with-text-image',
-							desktop_image: third_desktop_image,
-							mobile_image: third_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.75
-						%}
-					{% endif %}
+				{% if third_desktop_image != blank %}
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: three_3_delay
+					%}
 				{% endif %}
+			{% endif %}
+			
+			<!-- 新增文本框区域 -->
+			<div class="image-with-text__text-areas">
+				<div class="text-area-container">
+					<label for="image-text-area-1" class="text-area-label">{{ section.settings.text_area_1_label | default: "First Text Box" }}</label>
+					<textarea 
+						id="image-text-area-1" 
+						class="image-with-text-textarea" 
+						placeholder="{{ section.settings.text_area_1_placeholder | default: "Enter your content here..." }}"
+						rows="{{ section.settings.text_area_1_rows | default: 3 }}"
+					>{{ section.settings.text_area_1_default }}</textarea>
+				</div>
+				<div class="text-area-container">
+					<label for="image-text-area-2" class="text-area-label">{{ section.settings.text_area_2_label | default: "Second Text Box" }}</label>
+					<textarea 
+						id="image-text-area-2" 
+						class="image-with-text-textarea" 
+						placeholder="{{ section.settings.text_area_2_placeholder | default: "Enter your content here..." }}"
+						rows="{{ section.settings.text_area_2_rows | default: 3 }}"
+					>{{ section.settings.text_area_2_default }}</textarea>
+				</div>
+			</div>
 			</div>
 
 			{{- content -}}
@@ -517,6 +605,62 @@
 				"unit": "px",
 				"label": "Mobile offset bottom",
 				"default": 25
+			},
+			{
+				"type": "header",
+				"content": "Text Box Settings"
+			},
+			{
+				"type": "text",
+				"id": "text_area_1_label",
+				"label": "First Text Box Label",
+				"default": "First Text Box"
+			},
+			{
+				"type": "text",
+				"id": "text_area_1_placeholder",
+				"label": "First Text Box Placeholder",
+				"default": "Enter your content here..."
+			},
+			{
+				"type": "textarea",
+				"id": "text_area_1_default",
+				"label": "First Text Box Default Content"
+			},
+			{
+				"type": "range",
+				"id": "text_area_1_rows",
+				"label": "First Text Box Rows",
+				"min": 2,
+				"max": 10,
+				"step": 1,
+				"default": 3
+			},
+			{
+				"type": "text",
+				"id": "text_area_2_label",
+				"label": "Second Text Box Label",
+				"default": "Second Text Box"
+			},
+			{
+				"type": "text",
+				"id": "text_area_2_placeholder",
+				"label": "Second Text Box Placeholder",
+				"default": "Enter your content here..."
+			},
+			{
+				"type": "textarea",
+				"id": "text_area_2_default",
+				"label": "Second Text Box Default Content"
+			},
+			{
+				"type": "range",
+				"id": "text_area_2_rows",
+				"label": "Second Text Box Rows",
+				"min": 2,
+				"max": 10,
+				"step": 1,
+				"default": 3
 			}
 		],
 		"presets": [
