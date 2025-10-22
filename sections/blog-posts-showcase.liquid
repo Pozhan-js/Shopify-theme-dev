@@ -12,50 +12,152 @@
 
     <!-- 博客选择和过滤 -->
     {% if section.settings.blog_source == 'all' %}
-      <!-- 获取所有博客的文章 - 使用不同的方法 -->
+      <!-- 使用不同的方法获取所有博客 -->
+      {% assign all_blog_handles = 'news' | split: ',' %}
+      {% comment %} 
+      在实际使用中，你需要手动添加你的博客句柄，例如：
+      {% assign all_blog_handles = 'news,updates,announcements' | split: ',' %}
+      {% endcomment %}
+      
+      <!-- 动态获取所有博客句柄的方法 -->
+      {% assign total_articles_available = 0 %}
+      {% assign active_blogs = 0 %}
+      {% assign blog_names = '' %}
+      {% assign has_any_articles = false %}
+      
+      <!-- 尝试访问常见的博客句柄 -->
+      {% assign common_blog_handles = 'news,blog,updates,announcements,stories,articles' | split: ',' %}
+      
       <div class="blog-posts-container">
         {% assign total_articles_shown = 0 %}
         {% assign posts_to_show = section.settings.posts_to_show %}
         
         {% if section.settings.layout_style == 'grid' %}
-          <!-- 网格布局 - 直接循环所有博客 -->
+          <!-- 网格布局 -->
           <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-            {% for blog in blogs %}
-              {% for article in blog.articles %}
-                {% if total_articles_shown < posts_to_show %}
-                  {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                  {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+            {% for blog_handle in common_blog_handles %}
+              {% assign current_blog = blogs[blog_handle] %}
+              {% if current_blog and current_blog.articles.size > 0 %}
+                {% assign has_any_articles = true %}
+                {% assign total_articles_available = total_articles_available | plus: current_blog.articles.size %}
+                {% assign active_blogs = active_blogs | plus: 1 %}
+                {% if blog_names == '' %}
+                  {% assign blog_names = current_blog.title %}
+                {% else %}
+                  {% assign blog_names = blog_names | append: ', ' | append: current_blog.title %}
                 {% endif %}
-              {% endfor %}
+                
+                {% for article in current_blog.articles %}
+                  {% if total_articles_shown < posts_to_show %}
+                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             {% endfor %}
+            
+            <!-- 如果没有找到常见博客，尝试默认博客 -->
+            {% unless has_any_articles %}
+              {% if blog.articles.size > 0 %}
+                {% assign has_any_articles = true %}
+                {% assign total_articles_available = blog.articles.size %}
+                {% assign active_blogs = 1 %}
+                {% assign blog_names = blog.title %}
+                
+                {% for article in blog.articles %}
+                  {% if total_articles_shown < posts_to_show %}
+                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endunless %}
           </div>
         {% elsif section.settings.layout_style == 'list' %}
           <!-- 列表布局 -->
           <div class="posts-list">
-            {% for blog in blogs %}
-              {% for article in blog.articles %}
-                {% if total_articles_shown < posts_to_show %}
-                  {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                  {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+            {% for blog_handle in common_blog_handles %}
+              {% assign current_blog = blogs[blog_handle] %}
+              {% if current_blog and current_blog.articles.size > 0 %}
+                {% assign has_any_articles = true %}
+                {% assign total_articles_available = total_articles_available | plus: current_blog.articles.size %}
+                {% assign active_blogs = active_blogs | plus: 1 %}
+                {% if blog_names == '' %}
+                  {% assign blog_names = current_blog.title %}
+                {% else %}
+                  {% assign blog_names = blog_names | append: ', ' | append: current_blog.title %}
                 {% endif %}
-              {% endfor %}
+                
+                {% for article in current_blog.articles %}
+                  {% if total_articles_shown < posts_to_show %}
+                    {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
             {% endfor %}
+            
+            {% unless has_any_articles %}
+              {% if blog.articles.size > 0 %}
+                {% assign has_any_articles = true %}
+                {% assign total_articles_available = blog.articles.size %}
+                {% assign active_blogs = 1 %}
+                {% assign blog_names = blog.title %}
+                
+                {% for article in blog.articles %}
+                  {% if total_articles_shown < posts_to_show %}
+                    {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endunless %}
           </div>
         {% else %}
           <!-- 滑动布局 -->
           <div class="posts-slider" id="posts-slider-{{ section.id }}">
             <div class="slider-container">
               <div class="slider-track">
-                {% for blog in blogs %}
-                  {% for article in blog.articles %}
-                    {% if total_articles_shown < posts_to_show %}
-                      <div class="post-slide">
-                        {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                      </div>
-                      {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                {% for blog_handle in common_blog_handles %}
+                  {% assign current_blog = blogs[blog_handle] %}
+                  {% if current_blog and current_blog.articles.size > 0 %}
+                    {% assign has_any_articles = true %}
+                    {% assign total_articles_available = total_articles_available | plus: current_blog.articles.size %}
+                    {% assign active_blogs = active_blogs | plus: 1 %}
+                    {% if blog_names == '' %}
+                      {% assign blog_names = current_blog.title %}
+                    {% else %}
+                      {% assign blog_names = blog_names | append: ', ' | append: current_blog.title %}
                     {% endif %}
-                  {% endfor %}
+                    
+                    {% for article in current_blog.articles %}
+                      {% if total_articles_shown < posts_to_show %}
+                        <div class="post-slide">
+                          {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                        </div>
+                        {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
                 {% endfor %}
+                
+                {% unless has_any_articles %}
+                  {% if blog.articles.size > 0 %}
+                    {% assign has_any_articles = true %}
+                    {% assign total_articles_available = blog.articles.size %}
+                    {% assign active_blogs = 1 %}
+                    {% assign blog_names = blog.title %}
+                    
+                    {% for article in blog.articles %}
+                      {% if total_articles_shown < posts_to_show %}
+                        <div class="post-slide">
+                          {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                        </div>
+                        {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                {% endunless %}
               </div>
             </div>
             
@@ -75,64 +177,42 @@
         {% endif %}
 
         <!-- 博客来源显示 -->
-        {% if section.settings.show_blog_source %}
+        {% if section.settings.show_blog_source and has_any_articles %}
           <div class="blog-sources-info">
             <p class="sources-text">
-              Showing {{ total_articles_shown }} articles from 
-              {% assign active_blogs = 0 %}
-              {% assign blog_names = '' %}
-              {% for blog in blogs %}
-                {% if blog.articles.size > 0 %}
-                  {% assign active_blogs = active_blogs | plus: 1 %}
-                  {% if blog_names == '' %}
-                    {% assign blog_names = blog.title %}
-                  {% else %}
-                    {% assign blog_names = blog_names | append: ', ' | append: blog.title %}
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-              {{ active_blogs }} blog{% if active_blogs != 1 %}s{% endif %}: {{ blog_names }}
+              Showing {{ total_articles_shown }} of {{ total_articles_available }} articles from {{ active_blogs }} blog{% if active_blogs != 1 %}s{% endif %}{% if blog_names != blank %}: {{ blog_names }}{% endif %}
             </p>
           </div>
         {% endif %}
 
         <!-- 分页或查看更多 -->
-        {% if section.settings.show_view_all %}
-          {% assign total_available = 0 %}
-          {% for blog in blogs %}
-            {% assign total_available = total_available | plus: blog.articles.size %}
-          {% endfor %}
-          
-          {% if total_available > posts_to_show %}
-            <div class="posts-pagination">
-              <div class="all-blogs-pagination">
-                <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
-                  Load More Posts ({{ total_available | minus: posts_to_show }} more available)
-                  <div class="loading-spinner" style="display: none;"></div>
-                </button>
-                <div class="blog-links">
-                  {% for blog in blogs %}
-                    {% if blog.articles.size > 0 %}
-                      <a href="{{ blog.url }}" class="blog-link">{{ blog.title }} ({{ blog.articles.size }})</a>
-                    {% endif %}
-                  {% endfor %}
-                </div>
+        {% if section.settings.show_view_all and has_any_articles and total_articles_available > posts_to_show %}
+          <div class="posts-pagination">
+            <div class="all-blogs-pagination">
+              <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+                Load More Posts ({{ total_articles_available | minus: posts_to_show }} more available)
+                <div class="loading-spinner" style="display: none;"></div>
+              </button>
+              <div class="blog-links">
+                {% for blog_handle in common_blog_handles %}
+                  {% assign current_blog = blogs[blog_handle] %}
+                  {% if current_blog and current_blog.articles.size > 0 %}
+                    <a href="{{ current_blog.url }}" class="blog-link">{{ current_blog.title }} ({{ current_blog.articles.size }})</a>
+                  {% endif %}
+                {% endfor %}
+                {% unless has_any_articles %}
+                  {% if blog.articles.size > 0 %}
+                    <a href="{{ blog.url }}" class="blog-link">{{ blog.title }} ({{ blog.articles.size }})</a>
+                  {% endif %}
+                {% endunless %}
               </div>
             </div>
-          {% endif %}
+          </div>
         {% endif %}
       </div>
 
       <!-- 如果没有找到任何文章 -->
-      {% assign has_articles = false %}
-      {% for blog in blogs %}
-        {% if blog.articles.size > 0 %}
-          {% assign has_articles = true %}
-          {% break %}
-        {% endif %}
-      {% endfor %}
-
-      {% unless has_articles %}
+      {% unless has_any_articles %}
         <div class="no-posts-message">
           <div class="no-posts-icon">
             <svg width="80" height="80" viewBox="0 0 80 80">
@@ -145,12 +225,7 @@
           </div>
           <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
           <p>
-            No published blog posts found across all blogs. 
-            {% assign total_blogs = 0 %}
-            {% for blog in blogs %}
-              {% assign total_blogs = total_blogs | plus: 1 %}
-            {% endfor %}
-            (Checked {{ total_blogs }} blog{% if total_blogs != 1 %}s{% endif %})
+            No published blog posts found. Checked common blog handles: {{ common_blog_handles | join: ', ' }}
           </p>
           {% if section.settings.show_create_post_link %}
             <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
@@ -198,115 +273,115 @@
                 <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
                   <svg width="20" height="20" viewBox="0 0 20 20">
                     <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-            <div class="posts-pagination">
-              <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
-                View All Posts
-                <svg width="16" height="16" viewBox="0 0 16 16">
-                  <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
-              </a>
-            </div>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="no-posts-message">
-          <div class="no-posts-icon">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
-            </svg>
-          </div>
-          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-          <p>No published posts found in the selected blog.</p>
-          {% if section.settings.show_create_post_link %}
-            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-          {% endif %}
-        </div>
-      {% endif %}
-
-    {% else %}
-      <!-- 默认博客 -->
-      {% assign all_articles = blog.articles %}
-      
-      {% if all_articles.size > 0 %}
-        <div class="blog-posts-container">
-          {% if section.settings.layout_style == 'grid' %}
-            <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-              {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-              {% endfor %}
-            </div>
-          {% elsif section.settings.layout_style == 'list' %}
-            <div class="posts-list">
-              {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="posts-slider" id="posts-slider-{{ section.id }}">
-              <div class="slider-container">
-                <div class="slider-track">
-                  {% for article in all_articles limit: section.settings.posts_to_show %}
-                    <div class="post-slide">
-                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-              
-              {% if all_articles.size > 3 %}
-                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
-                  <svg width="20" height="20" viewBox="0 0 20 20">
-                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-                  </svg>
-                </button>
-                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
-                  <svg width="20" height="20" viewBox="0 0 20 20">
-                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                </svg>
-                </button>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-            <div class="posts-pagination">
-              <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
-                Load More Posts
-                <div class="loading-spinner" style="display: none;"></div>
               </button>
-            </div>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="no-posts-message">
-          <div class="no-posts-icon">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
-            </svg>
+            {% endif %}
           </div>
-          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-          <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
-          {% if section.settings.show_create_post_link %}
-            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-          {% endif %}
+        {% endif %}
+
+        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+          <div class="posts-pagination">
+            <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
+              View All Posts
+              <svg width="16" height="16" viewBox="0 0 16 16">
+                <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="no-posts-message">
+        <div class="no-posts-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+            <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+            <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+          </svg>
         </div>
-      {% endif %}
+        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+        <p>No published posts found in the selected blog.</p>
+        {% if section.settings.show_create_post_link %}
+          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+        {% endif %}
+      </div>
     {% endif %}
+
+  {% else %}
+    <!-- 默认博客 -->
+    {% assign all_articles = blog.articles %}
+    
+    {% if all_articles.size > 0 %}
+      <div class="blog-posts-container">
+        {% if section.settings.layout_style == 'grid' %}
+          <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% elsif section.settings.layout_style == 'list' %}
+          <div class="posts-list">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="posts-slider" id="posts-slider-{{ section.id }}">
+            <div class="slider-container">
+              <div class="slider-track">
+                {% for article in all_articles limit: section.settings.posts_to_show %}
+                  <div class="post-slide">
+                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            
+            {% if all_articles.size > 3 %}
+              <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+              </button>
+              <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+          <div class="posts-pagination">
+            <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+              Load More Posts
+              <div class="loading-spinner" style="display: none;"></div>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="no-posts-message">
+        <div class="no-posts-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+            <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+            <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+        <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
+        {% if section.settings.show_create_post_link %}
+          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endif %}
   </div>
 </div>
 
@@ -316,26 +391,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const blogCards = document.querySelectorAll('.blog-post-card');
   
   blogCards.forEach(card => {
-    // 添加鼠标悬停效果
     card.addEventListener('mouseenter', function() {
       this.style.cursor = 'pointer';
     });
     
-    // 处理点击事件
     card.addEventListener('click', function(e) {
-      // 如果点击的是链接，让链接自己处理
       if (e.target.tagName === 'A') {
         return;
       }
       
-      // 否则跳转到文章页面
       const articleUrl = this.querySelector('.post-title a').href;
       if (articleUrl) {
         window.location.href = articleUrl;
       }
     });
     
-    // 添加键盘支持（可访问性）
     card.setAttribute('tabindex', '0');
     card.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -377,7 +447,6 @@ function slidePosts(sectionId, direction) {
   slider.style.transform = `translateX(${translateX}%)`;
 }
 
-// 加载更多文章
 function loadMorePosts(sectionId) {
   const button = document.querySelector(`#blog-showcase-${sectionId} .load-more-btn`);
   const spinner = button.querySelector('.loading-spinner');
@@ -385,39 +454,10 @@ function loadMorePosts(sectionId) {
   spinner.style.display = 'inline-block';
   button.disabled = true;
   
-  // 这里可以实现AJAX加载更多文章的逻辑
   setTimeout(() => {
     spinner.style.display = 'none';
     button.disabled = false;
-    // 实际项目中这里会加载更多内容
   }, 2000);
-}
-
-// 文章搜索和过滤
-function filterPosts(category) {
-  const posts = document.querySelectorAll('.blog-post-card, .blog-post-list-item');
-  
-  posts.forEach(post => {
-    if (category === 'all' || post.dataset.category === category) {
-      post.style.display = 'block';
-    } else {
-      post.style.display = 'none';
-    }
-  });
-}
-
-// 博客来源过滤
-function filterByBlog(blogHandle) {
-  const posts = document.querySelectorAll('.blog-post-card, .blog-post-list-item');
-  
-  posts.forEach(post => {
-    const articleBlog = post.dataset.blogHandle;
-    if (blogHandle === 'all' || articleBlog === blogHandle) {
-      post.style.display = 'block';
-    } else {
-      post.style.display = 'none';
-    }
-  });
 }
 </script>
 
