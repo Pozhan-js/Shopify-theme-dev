@@ -35,7 +35,8 @@
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(var(--grid-columns, 3), 1fr);
-  gap: 40px;
+  gap: 30px;
+  width: 100%;
 }
 
 /* 列表布局 */
@@ -61,8 +62,9 @@
 }
 
 .post-slide {
-  flex: 0 0 33.333%;
-  padding: 0 20px;
+  flex: 0 0 calc(100% / 3);
+  padding: 0 15px;
+  box-sizing: border-box;
 }
 
 /* 滑动按钮 */
@@ -98,7 +100,7 @@
   right: -25px;
 }
 
-/* 博客文章卡片 */
+/* 博客文章卡片 - 修改版本 */
 .blog-post-card {
   background: white;
   border-radius: 16px;
@@ -107,6 +109,8 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid #f0f0f0;
   height: 100%;
+  cursor: pointer;
+  position: relative;
 }
 
 .blog-post-card:hover {
@@ -120,12 +124,13 @@
   flex-direction: column;
 }
 
-/* 文章图片 */
+/* 文章图片 - 调整高度 */
 .post-image-wrapper {
   position: relative;
-  aspect-ratio: 16/10;
+  aspect-ratio: 16/9;
   overflow: hidden;
   background: #f8f9fa;
+  flex: 0 0 auto;
 }
 
 .post-image-link {
@@ -155,13 +160,14 @@
   color: #999;
 }
 
-/* 文章标签 */
+/* 文章标签 - 保持在图片上方 */
 .post-tags {
   position: absolute;
   top: 15px;
   left: 15px;
   display: flex;
   gap: 8px;
+  z-index: 2;
 }
 
 .post-tag {
@@ -175,21 +181,23 @@
   letter-spacing: 0.5px;
 }
 
-/* 文章内容 */
+/* 文章内容 - 显示在图片底部 */
 .post-content {
   padding: 25px;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  background: white;
 }
 
+/* 文章元信息 */
 .post-meta {
   display: flex;
   align-items: center;
   gap: 15px;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-  color: #666;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  color: #888;
   flex-wrap: wrap;
 }
 
@@ -203,17 +211,19 @@
 .post-author svg,
 .post-date svg {
   opacity: 0.7;
+  width: 12px;
+  height: 12px;
 }
 
+/* 文章标题 */
 .post-title {
-  margin: 0 0 15px 0;
-  flex-grow: 1;
+  margin: 0 0 12px 0;
 }
 
 .post-title a {
   color: #333;
   text-decoration: none;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.4;
   display: -webkit-box;
@@ -223,45 +233,25 @@
   transition: color 0.3s ease;
 }
 
-.post-title a:hover {
+.blog-post-card:hover .post-title a {
   color: #007bff;
 }
 
+/* 文章摘要 */
 .post-excerpt {
   color: #666;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
   flex-grow: 1;
 }
 
+/* 移除底部的阅读更多链接和评论 */
 .post-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-}
-
-.read-more-link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.3s ease;
-}
-
-.read-more-link:hover {
-  color: #0056b3;
-  transform: translateX(3px);
-}
-
-.comments-count {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #888;
-  font-size: 0.9rem;
+  display: none;
 }
 
 /* 列表项样式 */
@@ -317,6 +307,17 @@
 
 .post-list-content .post-excerpt {
   margin-bottom: 15px;
+}
+
+.read-more-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.read-more-link:hover {
+  color: #0056b3;
 }
 
 /* 分页 */
@@ -416,7 +417,7 @@
   
   .posts-grid {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 25px;
   }
   
   .post-slide {
@@ -435,6 +436,14 @@
   
   .post-content {
     padding: 20px;
+  }
+  
+  .post-title a {
+    font-size: 1.1rem;
+  }
+  
+  .post-excerpt {
+    font-size: 0.9rem;
   }
   
   .slider-btn {
@@ -460,10 +469,15 @@
     margin-bottom: 30px;
   }
   
+  .post-content {
+    padding: 18px;
+  }
+  
   .post-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    margin-bottom: 10px;
   }
   
   .no-posts-message {
