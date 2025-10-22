@@ -11,40 +11,34 @@
     {% endif %}
 
     <!-- 博客选择和过滤 -->
-    {% assign all_articles = '' %}
     {% if section.settings.blog_source == 'all' %}
-      <!-- 获取所有博客的文章 -->
-      {% assign all_articles_array = '' | split: ',' %}
-      {% for blog in blogs %}
-        {% for article in blog.articles %}
-          {% assign all_articles_array = all_articles_array | concat: article %}
-        {% endfor %}
-      {% endfor %}
-      <!-- 按发布日期排序 -->
-      {% assign all_articles = all_articles_array | sort: 'published_at' | reverse %}
-    {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
-      {% assign selected_blog = blogs[section.settings.specific_blog] %}
-      {% assign all_articles = selected_blog.articles %}
-    {% else %}
-      <!-- 默认使用主博客 -->
-      {% assign all_articles = blog.articles %}
-    {% endif %}
-
-    <!-- 文章列表 -->
-    {% if all_articles.size > 0 %}
+      <!-- 获取所有博客的文章 - 使用不同的方法 -->
       <div class="blog-posts-container">
+        {% assign total_articles_shown = 0 %}
+        {% assign posts_to_show = section.settings.posts_to_show %}
+        
         {% if section.settings.layout_style == 'grid' %}
-          <!-- 网格布局 -->
+          <!-- 网格布局 - 直接循环所有博客 -->
           <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-            {% for article in all_articles limit: section.settings.posts_to_show %}
-              {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% for blog in blogs %}
+              {% for article in blog.articles %}
+                {% if total_articles_shown < posts_to_show %}
+                  {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                  {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                {% endif %}
+              {% endfor %}
             {% endfor %}
           </div>
         {% elsif section.settings.layout_style == 'list' %}
           <!-- 列表布局 -->
           <div class="posts-list">
-            {% for article in all_articles limit: section.settings.posts_to_show %}
-              {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% for blog in blogs %}
+              {% for article in blog.articles %}
+                {% if total_articles_shown < posts_to_show %}
+                  {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                  {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                {% endif %}
+              {% endfor %}
             {% endfor %}
           </div>
         {% else %}
@@ -52,15 +46,20 @@
           <div class="posts-slider" id="posts-slider-{{ section.id }}">
             <div class="slider-container">
               <div class="slider-track">
-                {% for article in all_articles limit: section.settings.posts_to_show %}
-                  <div class="post-slide">
-                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                  </div>
+                {% for blog in blogs %}
+                  {% for article in blog.articles %}
+                    {% if total_articles_shown < posts_to_show %}
+                      <div class="post-slide">
+                        {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      </div>
+                      {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                    {% endif %}
+                  {% endfor %}
                 {% endfor %}
               </div>
             </div>
             
-            {% if all_articles.size > 3 %}
+            {% if total_articles_shown > 3 %}
               <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
                 <svg width="20" height="20" viewBox="0 0 20 20">
                   <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
@@ -76,79 +75,237 @@
         {% endif %}
 
         <!-- 博客来源显示 -->
-        {% if section.settings.show_blog_source and section.settings.blog_source == 'all' %}
+        {% if section.settings.show_blog_source %}
           <div class="blog-sources-info">
             <p class="sources-text">
-              Showing articles from 
-              {% assign blog_count = 0 %}
+              Showing {{ total_articles_shown }} articles from 
+              {% assign active_blogs = 0 %}
+              {% assign blog_names = '' %}
               {% for blog in blogs %}
                 {% if blog.articles.size > 0 %}
-                  {% assign blog_count = blog_count | plus: 1 %}
+                  {% assign active_blogs = active_blogs | plus: 1 %}
+                  {% if blog_names == '' %}
+                    {% assign blog_names = blog.title %}
+                  {% else %}
+                    {% assign blog_names = blog_names | append: ', ' | append: blog.title %}
+                  {% endif %}
                 {% endif %}
               {% endfor %}
-              {{ blog_count }} blog{% if blog_count != 1 %}s{% endif %}:
-              {% assign displayed_blogs = '' | split: ',' %}
-              {% for blog in blogs %}
-                {% if blog.articles.size > 0 %}
-                  {% assign displayed_blogs = displayed_blogs | concat: blog.title %}
-                {% endif %}
-              {% endfor %}
-              {{ displayed_blogs | join: ', ' }}
+              {{ active_blogs }} blog{% if active_blogs != 1 %}s{% endif %}: {{ blog_names }}
             </p>
           </div>
         {% endif %}
 
         <!-- 分页或查看更多 -->
-        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-          <div class="posts-pagination">
-            {% if section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
+        {% if section.settings.show_view_all %}
+          {% assign total_available = 0 %}
+          {% for blog in blogs %}
+            {% assign total_available = total_available | plus: blog.articles.size %}
+          {% endfor %}
+          
+          {% if total_available > posts_to_show %}
+            <div class="posts-pagination">
+              <div class="all-blogs-pagination">
+                <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+                  Load More Posts ({{ total_available | minus: posts_to_show }} more available)
+                  <div class="loading-spinner" style="display: none;"></div>
+                </button>
+                <div class="blog-links">
+                  {% for blog in blogs %}
+                    {% if blog.articles.size > 0 %}
+                      <a href="{{ blog.url }}" class="blog-link">{{ blog.title }} ({{ blog.articles.size }})</a>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- 如果没有找到任何文章 -->
+      {% assign has_articles = false %}
+      {% for blog in blogs %}
+        {% if blog.articles.size > 0 %}
+          {% assign has_articles = true %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
+
+      {% unless has_articles %}
+        <div class="no-posts-message">
+          <div class="no-posts-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+            </svg>
+          </div>
+          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+          <p>
+            No published blog posts found across all blogs. 
+            {% assign total_blogs = 0 %}
+            {% for blog in blogs %}
+              {% assign total_blogs = total_blogs | plus: 1 %}
+            {% endfor %}
+            (Checked {{ total_blogs }} blog{% if total_blogs != 1 %}s{% endif %})
+          </p>
+          {% if section.settings.show_create_post_link %}
+            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+          {% endif %}
+        </div>
+      {% endunless %}
+
+    {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
+      <!-- 特定博客 -->
+      {% assign selected_blog = blogs[section.settings.specific_blog] %}
+      {% assign all_articles = selected_blog.articles %}
+      
+      {% if all_articles.size > 0 %}
+        <div class="blog-posts-container">
+          {% if section.settings.layout_style == 'grid' %}
+            <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for article in all_articles limit: section.settings.posts_to_show %}
+                    <div class="post-slide">
+                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              {% if all_articles.size > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                  </svg>
+                </button>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+            <div class="posts-pagination">
               <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
                 View All Posts
                 <svg width="16" height="16" viewBox="0 0 16 16">
                   <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
               </a>
-            {% elsif section.settings.blog_source == 'all' %}
-              <div class="all-blogs-pagination">
-                <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
-                  Load More Posts
-                  <div class="loading-spinner" style="display: none;"></div>
-                </button>
-                <div class="blog-links">
-                  {% for blog in blogs %}
-                    {% if blog.articles.size > 0 %}
-                      <a href="{{ blog.url }}" class="blog-link">{{ blog.title }}</a>
-                    {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="no-posts-message">
+          <div class="no-posts-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+            </svg>
+          </div>
+          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+          <p>No published posts found in the selected blog.</p>
+          {% if section.settings.show_create_post_link %}
+            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    {% else %}
+      <!-- 默认博客 -->
+      {% assign all_articles = blog.articles %}
+      
+      {% if all_articles.size > 0 %}
+        <div class="blog-posts-container">
+          {% if section.settings.layout_style == 'grid' %}
+            <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for article in all_articles limit: section.settings.posts_to_show %}
+                    <div class="post-slide">
+                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    </div>
                   {% endfor %}
                 </div>
               </div>
-            {% else %}
+              
+              {% if all_articles.size > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+                </button>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+            <div class="posts-pagination">
               <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
                 Load More Posts
                 <div class="loading-spinner" style="display: none;"></div>
               </button>
-            {% endif %}
-          </div>
-        {% endif %}
-      </div>
-    {% else %}
-      <!-- 无文章时的显示 -->
-      <div class="no-posts-message">
-        <div class="no-posts-icon">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-            <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-            <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-            <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-            <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
-          </svg>
+            </div>
+          {% endif %}
         </div>
-        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-        <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
-        {% if section.settings.show_create_post_link %}
-          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-        {% endif %}
-      </div>
+      {% else %}
+        <div class="no-posts-message">
+          <div class="no-posts-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+            </svg>
+          </div>
+          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+          <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
+          {% if section.settings.show_create_post_link %}
+            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+          {% endif %}
+        </div>
+      {% endif %}
     {% endif %}
   </div>
 </div>
@@ -300,9 +457,13 @@ function filterByBlog(blogHandle) {
         {
           "value": "specific",
           "label": "Specific Blog"
+        },
+        {
+          "value": "default",
+          "label": "Default Blog"
         }
       ],
-      "default": "all"
+      "default": "default"
     },
     {
       "type": "blog",
