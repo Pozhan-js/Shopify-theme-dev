@@ -1,7 +1,7 @@
-<!-- 动态配色方案样式保持不变 -->
+<!-- Dynamic color scheme styles -->
 <style>
   #blog-showcase-{{ section.id }} {
-    /* CSS变量设置保持不变 */
+    /* Set CSS variables based on selected color scheme */
     {% case section.settings.color_scheme %}
       {% when 'scheme-1' %}
         --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
@@ -124,7 +124,7 @@
         --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
         
       {% else %}
-        /* 默认配色 */
+        /* Default colors */
         --primary-color: {{ section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
         --secondary-color: {{ section.settings.secondary_color | default: settings.colors_accent_2 | default: '#6c757d' }};
         --background-color: {{ section.settings.background_color | default: settings.colors_background_1 | default: '#ffffff' }};
@@ -149,22 +149,52 @@
         --tag-hover-text: {{ section.settings.tag_hover_text | default: '#ffffff' }};
     {% endcase %}
     
-    /* 通用颜色变量 */
+    /* Common color variables */
     --card-hover-shadow: {{ section.settings.card_hover_shadow | default: 'rgba(0, 123, 255, 0.15)' }};
     --card-border-hover: {{ section.settings.card_border_hover | default: 'var(--primary-color)' }};
     --meta-color: {{ section.settings.meta_color | default: 'var(--secondary-color)' }};
     --meta-icon-color: {{ section.settings.meta_icon_color | default: 'var(--secondary-color)' }};
     
-    /* 分页按钮样式变量 */
+    /* Pagination button style variables */
     --pagination-button-style: {{ section.settings.pagination_button_style | default: 'solid' }};
     --pagination-button-size: {{ section.settings.pagination_button_size | default: 'medium' }};
     --pagination-button-radius: {{ section.settings.pagination_button_radius | default: '30px' }};
   }
+
+  /* Section background image */
+  {% if section.settings.background_image %}
+    #blog-showcase-{{ section.id }} {
+      background-image: url('{{ section.settings.background_image | img_url: '1920x1080' }}');
+      background-size: {{ section.settings.background_size | default: 'cover' }};
+      background-position: {{ section.settings.background_position | default: 'center center' }};
+      background-repeat: no-repeat;
+      background-attachment: {{ section.settings.background_attachment | default: 'scroll' }};
+      position: relative;
+    }
+
+    {% if section.settings.background_overlay %}
+      #blog-showcase-{{ section.id }}::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: {{ section.settings.background_overlay_color | default: 'rgba(0,0,0,0.5)' }};
+        z-index: 1;
+      }
+
+      #blog-showcase-{{ section.id }} .container {
+        position: relative;
+        z-index: 2;
+      }
+    {% endif %}
+  {% endif %}
 </style>
 
 <div class="blog-posts-showcase color-scheme-{{ section.settings.color_scheme | default: 'default' }}" id="blog-showcase-{{ section.id }}">
   <div class="container">
-    <!-- Section标题 -->
+    <!-- Section header -->
     {% if section.settings.heading != blank %}
       <div class="section-header">
         <h2 class="section-title">{{ section.settings.heading }}</h2>
@@ -174,9 +204,9 @@
       </div>
     {% endif %}
 
-    <!-- 博客选择和过滤 -->
+    <!-- Blog selection and filtering -->
     {% if section.settings.blog_source == 'all' %}
-      {% assign common_blog_handles = 'news,blog,updates,Fresh,Reflections,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
+      {% assign common_blog_handles = 'news,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
       {% assign total_articles_available = 0 %}
       {% assign active_blogs = 0 %}
       {% assign blog_names = '' %}
@@ -217,7 +247,7 @@
                 {% if current_blog and current_blog.articles.size > 0 %}
                   {% for article in current_blog.articles %}
                     {% if total_articles_shown < posts_to_show %}
-                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                       {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                     {% else %}
                       {% break %}
@@ -232,7 +262,7 @@
               {% if total_articles_shown < posts_to_show %}
                 {% for article in blog.articles %}
                   {% if total_articles_shown < posts_to_show %}
-                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                     {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                   {% else %}
                     {% break %}
@@ -248,7 +278,7 @@
                 {% if current_blog and current_blog.articles.size > 0 %}
                   {% for article in current_blog.articles %}
                     {% if total_articles_shown < posts_to_show %}
-                      {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      {% render 'blog-post-list-item-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                       {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                     {% else %}
                       {% break %}
@@ -263,7 +293,7 @@
               {% if total_articles_shown < posts_to_show %}
                 {% for article in blog.articles %}
                   {% if total_articles_shown < posts_to_show %}
-                    {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% render 'blog-post-list-item-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                     {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                   {% else %}
                     {% break %}
@@ -282,7 +312,7 @@
                       {% for article in current_blog.articles %}
                         {% if total_articles_shown < posts_to_show %}
                           <div class="post-slide">
-                            {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                            {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                           </div>
                           {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                         {% else %}
@@ -299,7 +329,7 @@
                     {% for article in blog.articles %}
                       {% if total_articles_shown < posts_to_show %}
                         <div class="post-slide">
-                          {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                          {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                         </div>
                         {% assign total_articles_shown = total_articles_shown | plus: 1 %}
                       {% else %}
@@ -388,13 +418,13 @@
           {% if section.settings.layout_style == 'grid' %}
             <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
               {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
           {% elsif section.settings.layout_style == 'list' %}
             <div class="posts-list">
               {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                {% render 'blog-post-list-item-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
           {% else %}
@@ -403,7 +433,7 @@
                 <div class="slider-track">
                   {% for article in all_articles limit: section.settings.posts_to_show %}
                     <div class="post-slide">
-                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                     </div>
                   {% endfor %}
                 </div>
@@ -464,13 +494,13 @@
           {% if section.settings.layout_style == 'grid' %}
             <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
               {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
           {% elsif section.settings.layout_style == 'list' %}
             <div class="posts-list">
               {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                {% render 'blog-post-list-item-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
           {% else %}
@@ -479,7 +509,7 @@
                 <div class="slider-track">
                   {% for article in all_articles limit: section.settings.posts_to_show %}
                     <div class="post-slide">
-                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      {% render 'blog-post-card-new', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
                     </div>
                   {% endfor %}
                 </div>
@@ -536,10 +566,10 @@
   </div>
 </div>
 
-<!-- JavaScript代码保持不变 -->
+<!-- JavaScript remains the same -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const blogCards = document.querySelectorAll('.blog-post-card');
+  const blogCards = document.querySelectorAll('.blog-post-card-new');
   
   blogCards.forEach(card => {
     card.addEventListener('mouseenter', function() {
@@ -630,6 +660,91 @@ function loadMorePosts(sectionId) {
       "id": "description",
       "label": "Section Description",
       "info": "Optional description below the heading"
+    },
+    {
+      "type": "header",
+      "content": "Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "select",
+      "id": "background_size",
+      "label": "Background Size",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "contain",
+          "label": "Contain"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "background_position",
+      "label": "Background Position",
+      "options": [
+        {
+          "value": "center center",
+          "label": "Center"
+        },
+        {
+          "value": "top center",
+          "label": "Top"
+        },
+        {
+          "value": "bottom center",
+          "label": "Bottom"
+        },
+        {
+          "value": "left center",
+          "label": "Left"
+        },
+        {
+          "value": "right center",
+          "label": "Right"
+        }
+      ],
+      "default": "center center"
+    },
+    {
+      "type": "select",
+      "id": "background_attachment",
+      "label": "Background Attachment",
+      "options": [
+        {
+          "value": "scroll",
+          "label": "Scroll"
+        },
+        {
+          "value": "fixed",
+          "label": "Fixed"
+        }
+      ],
+      "default": "scroll"
+    },
+    {
+      "type": "checkbox",
+      "id": "background_overlay",
+      "label": "Add Background Overlay",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "background_overlay_color",
+      "label": "Overlay Color",
+      "default": "rgba(0,0,0,0.5)"
     },
     {
       "type": "header",
