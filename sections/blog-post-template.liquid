@@ -1,13 +1,14 @@
 {% comment %}
   ===================================================================
-  博客文章模板 - 作者信息固定在底部 40px
+  博客文章模板 - 纯净透明 + 内容居中 + 条件显示
   功能：
     - 背景图 = 文章特色图片（自动获取）
-    - 顶部显示日期 + 类型（移动端保持左右布局）
-    - 中部显示标题和内容
-    - 作者信息固定在页面底部上方 40px 处
-    - 去掉遮罩层，纯净背景
-    - 响应式适配手机
+    - 无类型时不显示“未分类”
+    - 去掉“作者：”前缀
+    - 日期不加粗
+    - 文章内容居中
+    - 所有背景颜色设为透明
+    - 作者信息固定在底部 40px
   ===================================================================
 {% endcomment %}
 
@@ -20,11 +21,11 @@
   {%- assign background_image = section.settings.fallback_image | img_url: '2048x' | prepend: 'https:' -%}
 {%- endif %}
 
-{%- comment %} 获取文章类型：取第一个标签，否则显示“未分类” {% endcomment %}
+{%- comment %} 获取文章类型：仅当存在标签时显示第一个 {% endcomment %}
 {%- if blog_post.tags.size > 0 %}
   {%- assign post_type = blog_post.tags.first -%}
 {%- else %}
-  {%- assign post_type = '未分类' -%}
+  {%- assign post_type = '' -%}
 {%- endif %}
 
 {%- assign author_name = blog_post.author -%}
@@ -34,7 +35,9 @@
     <!-- 上部：左右结构 -->
     <div class="blog-header">
       <div class="date">{{ blog_post.published_at | date: "%Y/%m/%d" }}</div>
-      <div class="type">{{ post_type }}</div>
+      {%- if post_type != blank -%}
+        <div class="type">{{ post_type }}</div>
+      {%- endif -%}
     </div>
 
     <!-- 中部：标题和内容 -->
@@ -61,13 +64,13 @@
     padding: 40px 16px;
     color: white;
     font-family: "Helvetica Neue", Arial, sans-serif;
-    position: relative; /* 确保子元素可绝对定位 */
+    position: relative;
   }
 
   .container {
     max-width: 960px;
     margin: 0 auto;
-    min-height: 100%; /* 容器撑满 */
+    min-height: 100%;
     display: flex;
     flex-direction: column;
   }
@@ -83,23 +86,22 @@
   }
 
   .blog-header .date {
-    font-weight: normal;
-    flex-shrink: 0;
+    font-weight: normal; /* 不加粗 */
   }
 
   .blog-header .type {
-    background: transparent;
+    font-size: 13px;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 13px;
+    background: rgba(255, 255, 255, 0.3); /* 轻微高亮，可选；如需完全透明请删除此行 */
     margin-left: auto;
     flex-shrink: 0;
   }
 
   /* 中部：标题和内容 */
   .blog-content {
-    flex: 1; /* 占据剩余空间 */
-    text-align: center;
+    flex: 1;
+    text-align: center; /* 标题和内容都居中 */
   }
 
   .blog-content .title {
@@ -111,37 +113,36 @@
   .blog-content .body {
     font-size: 16px;
     line-height: 1.8;
+    text-align: center; /* 内容居中 */
+    padding: 24px 16px;
+    margin-top: 16px;
+    /* 所有背景透明 */
     background: transparent;
-    padding: 24px;
-    border-radius: 10px;
-    text-align: center;
   }
 
-  /* 作者信息：固定在距离底部 40px 的位置 */
+  /* 下部：作者信息 */
   .blog-footer {
     position: absolute;
     bottom: 40px;
     left: 0;
     right: 0;
     text-align: center;
-    width: 100%;
   }
 
   .blog-footer .author {
     font-size: 18px;
     font-weight: 500;
-    display: inline-block;
-    background: transparent;
     color: white;
-    padding: 8px 20px;
-    border-radius: 30px;
+    /* 完全透明背景 */
+    background: transparent;
+    padding: 0;
+    margin: 0;
   }
 
   /* 移动端适配 */
   @media (max-width: 768px) {
     .blog-header {
       font-size: 13px;
-      padding: 0 4px;
     }
     .blog-header .date,
     .blog-header .type {
@@ -153,15 +154,13 @@
     }
     .blog-content .body {
       font-size: 15px;
-      padding: 20px;
+      padding: 20px 12px;
     }
     .blog-footer .author {
       font-size: 16px;
-      padding: 6px 16px;
     }
   }
 
-  /* 超小屏适配 */
   @media (max-width: 480px) {
     .blog-header .date,
     .blog-header .type {
@@ -174,11 +173,10 @@
     .blog-content .body {
       font-size: 14px;
       line-height: 1.6;
-      padding: 16px;
+      padding: 16px 10px;
     }
     .blog-footer .author {
       font-size: 15px;
-      padding: 6px 14px;
     }
   }
 </style>
@@ -203,7 +201,7 @@
   ],
   "presets": [
     {
-      "name": "固定作者底部模板",
+      "name": "纯净透明博客模板",
       "category": "博客"
     }
   ]
