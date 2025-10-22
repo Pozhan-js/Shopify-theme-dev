@@ -1,0 +1,332 @@
+<div class="blog-posts-showcase" id="blog-showcase-{{ section.id }}">
+  <div class="container">
+    <!-- Section标题 -->
+    {% if section.settings.heading != blank %}
+      <div class="section-header">
+        <h2 class="section-title">{{ section.settings.heading }}</h2>
+        {% if section.settings.description != blank %}
+          <p class="section-description">{{ section.settings.description }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- 博客选择和过滤 -->
+    {% if section.settings.blog_source == 'all' %}
+      {% assign selected_blogs = blog %}
+      {% assign all_articles = '' %}
+      {% for blog in blogs %}
+        {% assign all_articles = all_articles | concat: blog.articles %}
+      {% endfor %}
+    {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
+      {% assign selected_blog = blogs[section.settings.specific_blog] %}
+      {% assign all_articles = selected_blog.articles %}
+    {% else %}
+      {% assign all_articles = blog.articles %}
+    {% endif %}
+
+    <!-- 文章列表 -->
+    {% if all_articles.size > 0 %}
+      <div class="blog-posts-container">
+        {% if section.settings.layout_style == 'grid' %}
+          <!-- 网格布局 -->
+          <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% elsif section.settings.layout_style == 'list' %}
+          <!-- 列表布局 -->
+          <div class="posts-list">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <!-- 滑动布局 -->
+          <div class="posts-slider" id="posts-slider-{{ section.id }}">
+            <div class="slider-container">
+              <div class="slider-track">
+                {% for article in all_articles limit: section.settings.posts_to_show %}
+                  <div class="post-slide">
+                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            
+            {% if all_articles.size > 3 %}
+              <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+              </button>
+              <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <!-- 分页或查看更多 -->
+        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+          <div class="posts-pagination">
+            {% if section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
+              <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
+                View All Posts
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </a>
+            {% else %}
+              <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+                Load More Posts
+                <div class="loading-spinner" style="display: none;"></div>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <!-- 无文章时的显示 -->
+      <div class="no-posts-message">
+        <div class="no-posts-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+            <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
+            <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
+            <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+        <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
+        {% if section.settings.show_create_post_link %}
+          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+// 滑动功能
+let currentPostSlide = 0;
+
+function slidePosts(sectionId, direction) {
+  const slider = document.querySelector(`#posts-slider-${sectionId} .slider-track`);
+  const slides = slider.querySelectorAll('.post-slide');
+  const totalSlides = slides.length;
+  
+  const viewportWidth = window.innerWidth;
+  let slidesToShow = 3;
+  if (viewportWidth < 768) {
+    slidesToShow = 1;
+  } else if (viewportWidth < 1024) {
+    slidesToShow = 2;
+  }
+  
+  currentPostSlide += direction;
+  
+  if (currentPostSlide < 0) {
+    currentPostSlide = Math.max(0, totalSlides - slidesToShow);
+  } else if (currentPostSlide > totalSlides - slidesToShow) {
+    currentPostSlide = 0;
+  }
+  
+  const translateX = -(currentPostSlide * (100 / slidesToShow));
+  slider.style.transform = `translateX(${translateX}%)`;
+}
+
+// 加载更多文章
+function loadMorePosts(sectionId) {
+  const button = document.querySelector(`#blog-showcase-${sectionId} .load-more-btn`);
+  const spinner = button.querySelector('.loading-spinner');
+  
+  spinner.style.display = 'inline-block';
+  button.disabled = true;
+  
+  // 这里可以实现AJAX加载更多文章的逻辑
+  setTimeout(() => {
+    spinner.style.display = 'none';
+    button.disabled = false;
+    // 实际项目中这里会加载更多内容
+  }, 2000);
+}
+
+// 文章搜索和过滤
+function filterPosts(category) {
+  const posts = document.querySelectorAll('.blog-post-card, .blog-post-list-item');
+  
+  posts.forEach(post => {
+    if (category === 'all' || post.dataset.category === category) {
+      post.style.display = 'block';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
+</script>
+
+{% schema %}
+{
+  "name": "Blog Posts Showcase",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Latest Blog Posts"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Section Description",
+      "info": "Optional description below the heading"
+    },
+    {
+      "type": "header",
+      "content": "Blog Source"
+    },
+    {
+      "type": "select",
+      "id": "blog_source",
+      "label": "Blog Source",
+      "options": [
+        {
+          "value": "all",
+          "label": "All Blogs"
+        },
+        {
+          "value": "specific",
+          "label": "Specific Blog"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "type": "blog",
+      "id": "specific_blog",
+      "label": "Select Blog",
+      "info": "Only used when 'Specific Blog' is selected"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Layout Style",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid"
+        },
+        {
+          "value": "list",
+          "label": "List"
+        },
+        {
+          "value": "slider",
+          "label": "Slider"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "posts_to_show",
+      "min": 3,
+      "max": 24,
+      "step": 1,
+      "default": 9,
+      "label": "Posts to show"
+    },
+    {
+      "type": "range",
+      "id": "grid_columns",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3,
+      "label": "Grid columns (desktop)"
+    },
+    {
+      "type": "header",
+      "content": "Post Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show post excerpt",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "excerpt_length",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "default": 150,
+      "label": "Excerpt length (characters)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show publish date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show view all button",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "No Posts Content"
+    },
+    {
+      "type": "text",
+      "id": "no_posts_title",
+      "label": "No posts title",
+      "default": "No Blog Posts Found"
+    },
+    {
+      "type": "textarea",
+      "id": "no_posts_message",
+      "label": "No posts message",
+      "default": "There are no blog posts to display at the moment."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_create_post_link",
+      "label": "Show create post link",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Posts Showcase"
+    }
+  ]
+}
+{% endschema %}
