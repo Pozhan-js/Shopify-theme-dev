@@ -1,15 +1,14 @@
 {% comment %}
   ===================================================================
-  博客文章模板 Section - 全自动版本
+  博客文章模板 Section - 纯净背景无遮罩版本
   功能：
     - 背景图 = 文章特色图片（自动获取）
     - 文章类型 = 第一个标签
     - 作者 = article.author
     - 日期格式化为 YYYY/MM/DD
-    - 响应式全屏背景 + 遮罩层保护文字可读性
-    - 支持 fallback 备用图
-  使用方式：
-    在 Shopify 后台编辑文章时上传 "Featured Image" 即可自动生效
+    - 上中下布局，无任何遮罩或透明层
+    - 支持备用背景图
+  注意：请确保背景图亮度足够，避免文字看不清
   ===================================================================
 {% endcomment %}
 
@@ -56,32 +55,16 @@
 
 <style>
   .blog-post-section {
-    position: relative;
     min-height: 100vh;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     padding: 60px 20px;
-    color: white;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    color: white; /* 可根据需要改为黑色或其他颜色 */
     font-family: "Helvetica Neue", Arial, sans-serif;
   }
 
-  /* 遮罩层：防止文字与复杂背景冲突 */
-  .blog-post-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 0;
-  }
-
   .container {
-    position: relative;
-    z-index: 1;
     max-width: 960px;
     margin: 0 auto;
   }
@@ -100,7 +83,7 @@
   }
 
   .blog-header .type {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
     padding: 6px 12px;
     border-radius: 4px;
     font-size: 16px;
@@ -116,10 +99,9 @@
   .blog-content .body {
     font-size: 18px;
     line-height: 1.8;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2); /* 轻微背景提示，可选保留 */
     padding: 30px;
     border-radius: 10px;
-    backdrop-filter: blur(4px);
   }
 
   /* 下部：作者 */
@@ -154,25 +136,25 @@
 
 {% schema %}
 {
-  "name": "全自动博客文章模板",
+  "name": "博客模板 - 无遮罩纯净背景",
   "tag": "section",
   "settings": [
     {
       "type": "article",
       "id": "blog_post_override",
       "label": "【调试】指定文章",
-      "info": "留空时自动显示当前文章，用于预览测试"
+      "info": "留空时自动显示当前文章"
     },
     {
       "type": "image_picker",
       "id": "fallback_image",
       "label": "备用背景图",
-      "info": "当文章没有设置特色图片时显示此图"
+      "info": "当文章无图片时使用"
     }
   ],
   "presets": [
     {
-      "name": "全自动博客模板",
+      "name": "无遮罩博客模板",
       "category": "博客"
     }
   ]
