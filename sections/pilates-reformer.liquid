@@ -112,28 +112,31 @@
           <div class="prf-color-selection">
             <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
             <div class="prf-color-options">
-              {% if displayproduct %}
+              {% comment %} 优先显示区块配置的颜色选项，确保总是有内容显示 {% endcomment %}
+              {% assign has_colors = false %}
+              
+              {% comment %} 首先尝试从产品获取颜色选项 {% endcomment %}
+              {% if displayproduct and displayproduct.options_with_values.size > 0 %}
                 {% assign firstcolorprocessed = false %}
                 {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
                 
-                {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
-                {% for option in displayproduct.optionswithvalues %}
+                {% for option in displayproduct.options_with_values %}
                   {% assign optionnamelower = option.name | downcase %}
                   {% assign targetnamelower = coloroptionname | downcase %}
                   
                   {% if optionnamelower == targetnamelower or optionnamelower == '颜色' or optionnamelower == 'color' or optionnamelower == 'colour' or optionnamelower == 'upholstery' or optionnamelower == 'fabric' %}
+                    {% assign has_colors = true %}
                     {% for value in option.values %}
                       {% assign variantfound = false %}
                       {% assign variantid = '' %}
                       {% assign variantimage = '' %}
                       {% assign colorhex = '#CCCCCC' %}
                       
-                      {% comment %} 首先尝试使用 colorswatch.color 获取颜色 {% endcomment %}
+                      {% comment %} 尝试获取颜色值 {% endcomment %}
                       {% assign colorswatch = value.swatch %}
                       {% if colorswatch and colorswatch.color %}
                         {% assign colorhex = colorswatch.color %}
                       {% else %}
-                        {% comment %} 如果没有 colorswatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
                         {% assign valuelower = value | downcase %}
                         {% case valuelower %}
                           {% when 'black' %}
@@ -167,7 +170,6 @@
                       {% for variant in displayproduct.variants %}
                         {% assign valuematches = false %}
                         
-                        {% comment %} 检查变体的所有选项值 {% endcomment %}
                         {% if variant.option1 == value %}
                           {% assign valuematches = true %}
                         {% elsif variant.option2 == value %}
@@ -180,14 +182,12 @@
                           {% assign variantfound = true %}
                           {% assign variantid = variant.id %}
                           
-                          {% comment %} 获取变体图片 {% endcomment %}
                           {% if variant.image %}
                             {% assign variantimage = variant.image | image_url: width: 1200 %}
                           {% endif %}
                         {% endif %}
                       {% endfor %}
                       
-                      {% comment %} 确保颜色值格式正确 {% endcomment %}
                       {% unless colorhex contains '#' %}
                         {% if colorhex != '' %}
                           {% assign colorhex = '#' | append: colorhex %}
@@ -217,8 +217,10 @@
                     {% break %}
                   {% endif %}
                 {% endfor %}
-              {% else %}
-                {% comment %} 如果没有产品，使用区块配置的颜色 {% endcomment %}
+              {% endif %}
+              
+              {% comment %} 如果没有从产品获取到颜色，或者没有产品，使用区块配置的颜色 {% endcomment %}
+              {% unless has_colors %}
                 {% for block in section.blocks %}
                   {% if block.type == 'coloroption' %}
                     <div class="prf-color-option {% if block.settings.isselected %}prf-selected{% endif %}"
@@ -238,7 +240,7 @@
                     </div>
                   {% endif %}
                 {% endfor %}
-              {% endif %}
+              {% endunless %}
             </div>
           </div>
         {% endif %}
