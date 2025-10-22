@@ -1,0 +1,136 @@
+{% comment %}
+  Blog Post Template Section
+  自定义博客文章展示模板
+{% endcomment %}
+
+{%- assign blog_post = section.settings.blog_post | default: article -%}
+{%- assign background_image = section.settings.background_image | img_url: '2048x' | prepend: 'https:' -%}
+{%- assign post_type = section.settings.post_type -%}
+{%- assign author_name = section.settings.author_name -%}
+
+<div class="blog-post-section"
+     style="background-image: url('{{ background_image }}');">
+  <div class="container">
+    <!-- 上部：日期 + 类型 -->
+    <div class="blog-header">
+      <div class="date">{{ blog_post.published_at | date: "%Y/%m/%d" }}</div>
+      <div class="type">{{ post_type }}</div>
+    </div>
+
+    <!-- 中部：标题 + 内容 -->
+    <div class="blog-content">
+      <h1 class="title">{{ blog_post.title }}</h1>
+      <div class="body">
+        {{ blog_post.content }}
+      </div>
+    </div>
+
+    <!-- 下部：作者信息 -->
+    <div class="blog-footer">
+      <p class="author">作者：{{ author_name }}</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .blog-post-section {
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 60px 20px;
+    color: white; /* 背景图常为深色，文字建议设为白色 */
+    text-shadow: 0 2px 10px rgba(0,0,0,0.7); /* 提升文字可读性 */
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* 上部：左右布局 */
+  .blog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    font-size: 18px;
+  }
+
+  .blog-header .date {
+    font-weight: bold;
+  }
+
+  .blog-header .type {
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  /* 中部：标题和内容 */
+  .blog-content .title {
+    font-size: 36px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .blog-content .body {
+    font-size: 18px;
+    line-height: 1.8;
+    background: rgba(255,255,255,0.1);
+    padding: 30px;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* 下部：作者 */
+  .blog-footer {
+    margin-top: 50px;
+    text-align: center;
+  }
+
+  .blog-footer .author {
+    font-size: 20px;
+    font-weight: 500;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "博客文章模板",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "背景图片",
+      "info": "建议使用高清大图以获得更好视觉效果"
+    },
+    {
+      "type": "article",
+      "id": "blog_post",
+      "label": "选择博客文章",
+      "info": "留空则自动显示当前文章"
+    },
+    {
+      "type": "text",
+      "id": "post_type",
+      "label": "文章类型",
+      "default": "技术分享"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "作者名称",
+      "default": "匿名作者"
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客文章模板"
+    }
+  ]
+}
+{% endschema %}
