@@ -1,7 +1,7 @@
-<!-- 动态配色方案样式 -->
+<!-- 动态配色方案样式保持不变 -->
 <style>
   #blog-showcase-{{ section.id }} {
-    /* 根据选择的配色方案设置CSS变量 */
+    /* CSS变量设置保持不变 */
     {% case section.settings.color_scheme %}
       {% when 'scheme-1' %}
         --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
@@ -176,7 +176,7 @@
 
     <!-- 博客选择和过滤 -->
     {% if section.settings.blog_source == 'all' %}
-      {% assign common_blog_handles = 'news,Fresh,Reflections,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
+      {% assign common_blog_handles = 'news,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
       {% assign total_articles_available = 0 %}
       {% assign active_blogs = 0 %}
       {% assign blog_names = '' %}
@@ -238,6 +238,89 @@
                     {% break %}
                   {% endif %}
                 {% endfor %}
+              {% endif %}
+            </div>
+            
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for blog_handle in common_blog_handles %}
+                {% assign current_blog = blogs[blog_handle] %}
+                {% if current_blog and current_blog.articles.size > 0 %}
+                  {% for article in current_blog.articles %}
+                    {% if total_articles_shown < posts_to_show %}
+                      {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                      {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                    {% else %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                {% if total_articles_shown >= posts_to_show %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              
+              {% if total_articles_shown < posts_to_show %}
+                {% for article in blog.articles %}
+                  {% if total_articles_shown < posts_to_show %}
+                    {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                  {% else %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for blog_handle in common_blog_handles %}
+                    {% assign current_blog = blogs[blog_handle] %}
+                    {% if current_blog and current_blog.articles.size > 0 %}
+                      {% for article in current_blog.articles %}
+                        {% if total_articles_shown < posts_to_show %}
+                          <div class="post-slide">
+                            {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                          </div>
+                          {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                        {% else %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                    {% if total_articles_shown >= posts_to_show %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% if total_articles_shown < posts_to_show %}
+                    {% for article in blog.articles %}
+                      {% if total_articles_shown < posts_to_show %}
+                        <div class="post-slide">
+                          {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                        </div>
+                        {% assign total_articles_shown = total_articles_shown | plus: 1 %}
+                      {% else %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </div>
+              
+              {% if total_articles_shown > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                  </svg>
+                </button>
               {% endif %}
             </div>
           {% endif %}
@@ -308,6 +391,37 @@
                 {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for article in all_articles limit: section.settings.posts_to_show %}
+                    <div class="post-slide">
+                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              {% if all_articles.size > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                  </svg>
+                </button>
+              {% endif %}
+            </div>
           {% endif %}
 
           {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
@@ -353,6 +467,37 @@
                 {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
               {% endfor %}
             </div>
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for article in all_articles limit: section.settings.posts_to_show %}
+                    <div class="post-slide">
+                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              {% if all_articles.size > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                  </svg>
+                </button>
+              {% endif %}
+            </div>
           {% endif %}
 
           {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
@@ -391,6 +536,7 @@
   </div>
 </div>
 
+<!-- JavaScript代码保持不变 -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const blogCards = document.querySelectorAll('.blog-post-card');
