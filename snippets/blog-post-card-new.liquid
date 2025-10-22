@@ -1,0 +1,56 @@
+<!-- New blog post card with updated layout -->
+<article class="blog-post-card-new">
+  <a href="{{ article.url }}" class="post-card-link">
+    <div class="post-card-inner">
+      <!-- Top section: Date and Category -->
+      <div class="post-header">
+        <div class="post-date">
+          {% if show_date %}
+            {{ article.published_at | date: '%Y/%m/%d' }}
+          {% endif %}
+        </div>
+        <div class="post-category">
+          {% if show_tags and article.tags.size > 0 %}
+            <span class="post-tag">{{ article.tags.first }}</span>
+          {% else %}
+            <span class="post-tag">{{ article.blog.title }}</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Middle section: Title and Content -->
+      <div class="post-content-section">
+        <h3 class="post-title">{{ article.title }}</h3>
+        {% if show_excerpt and article.excerpt != blank %}
+          <div class="post-excerpt">
+            {% if excerpt_length %}
+              {{ article.excerpt | strip_html | truncate: excerpt_length }}
+            {% else %}
+              {{ article.excerpt | strip_html | truncate: 150 }}
+            {% endif %}
+          </div>
+        {% elsif show_excerpt and article.content != blank %}
+          <div class="post-excerpt">
+            {% if excerpt_length %}
+              {{ article.content | strip_html | truncate: excerpt_length }}
+            {% else %}
+              {{ article.content | strip_html | truncate: 150 }}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Bottom section: Author -->
+      <div class="post-footer">
+        {% if show_author and article.author != blank %}
+          <div class="post-author">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+              <path d="M7 7a3 3 0 100-6 3 3 0 000 6zM7 9a5 5 0 00-5 5h10a5 5 0 00-5-5z"/>
+            </svg>
+            <span>{{ article.author }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </a>
+</article>
