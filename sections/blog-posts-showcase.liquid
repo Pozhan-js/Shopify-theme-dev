@@ -1,15 +1,210 @@
-<!-- 配色方案样式 -->
+<!-- 动态配色方案样式 -->
 <style>
   #blog-showcase-{{ section.id }} {
-    --primary-color: {{ section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
-    --secondary-color: {{ section.settings.secondary_color | default: settings.colors_accent_2 | default: '#6c757d' }};
-    --background-color: {{ section.settings.background_color | default: settings.colors_background_1 | default: '#ffffff' }};
-    --text-color: {{ section.settings.text_color | default: settings.colors_text | default: '#333333' }};
-    --card-background: {{ section.settings.card_background | default: settings.colors_background_2 | default: '#ffffff' }};
-    --border-color: {{ section.settings.border_color | default: '#e0e0e0' }};
-    --hover-color: {{ section.settings.hover_color | default: '#0056b3' }};
-    --tag-background: {{ section.settings.tag_background | default: 'rgba(0, 123, 255, 0.1)' }};
-    --tag-text: {{ section.settings.tag_text | default: '#007bff' }};
+    /* 根据选择的配色方案设置CSS变量 */
+    {% case section.settings.color_scheme %}
+      {% when 'scheme-1' %}
+        --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --secondary-color: {{ settings.colors_accent_2 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_2 | default: '#f8f9fa' }};
+        --border-color: {{ settings.colors_outline_button_labels | default: '#e0e0e0' }};
+        
+        /* 按钮配色 */
+        --button-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-hover-border: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        /* 链接配色 */
+        --link-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --link-hover-color: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        /* 标签配色 */
+        --tag-background: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.1 | default: 'rgba(0, 123, 255, 0.1)' }};
+        --tag-text: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% when 'scheme-2' %}
+        --primary-color: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --secondary-color: {{ settings.colors_accent_1 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_background_2 | default: '#f8f9fa' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --border-color: {{ settings.colors_outline_button_labels | default: '#e0e0e0' }};
+        
+        --button-background: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --button-hover-border: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        
+        --link-color: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --link-hover-color: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        
+        --tag-background: {{ settings.colors_accent_2 | color_modify: 'alpha', 0.1 | default: 'rgba(40, 167, 69, 0.1)' }};
+        --tag-text: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-border: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-hover-background: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% when 'inverse' %}
+        --primary-color: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --secondary-color: {{ settings.colors_background_2 | default: '#f8f9fa' }};
+        --background-color: {{ settings.colors_text | default: '#333333' }};
+        --text-color: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --card-background: {{ settings.colors_text | color_lighten: 10 | default: '#404040' }};
+        --border-color: {{ settings.colors_text | color_lighten: 20 | default: '#555555' }};
+        
+        --button-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_accent_1 | color_lighten: 15 | default: '#4dabf7' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-hover-border: {{ settings.colors_accent_1 | color_lighten: 15 | default: '#4dabf7' }};
+        
+        --link-color: {{ settings.colors_accent_1 | color_lighten: 20 | default: '#66d9ef' }};
+        --link-hover-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        
+        --tag-background: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.2 | default: 'rgba(77, 171, 247, 0.2)' }};
+        --tag-text: {{ settings.colors_accent_1 | color_lighten: 20 | default: '#66d9ef' }};
+        --tag-border: {{ settings.colors_accent_1 | color_lighten: 20 | default: '#66d9ef' }};
+        --tag-hover-background: {{ settings.colors_accent_1 | color_lighten: 20 | default: '#66d9ef' }};
+        --tag-hover-text: {{ settings.colors_text | default: '#333333' }};
+        
+      {% when 'background-1' %}
+        --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --secondary-color: {{ settings.colors_accent_2 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --border-color: {{ settings.colors_outline_button_labels | default: '#e0e0e0' }};
+        
+        --button-background: {{ settings.colors_solid_button_labels | default: '#007bff' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_solid_button_labels | color_darken: 15 | default: '#0056b3' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_solid_button_labels | default: '#007bff' }};
+        --button-hover-border: {{ settings.colors_solid_button_labels | color_darken: 15 | default: '#0056b3' }};
+        
+        --link-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --link-hover-color: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        --tag-background: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.1 | default: 'rgba(0, 123, 255, 0.1)' }};
+        --tag-text: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% when 'background-2' %}
+        --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --secondary-color: {{ settings.colors_accent_2 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_background_2 | default: '#f8f9fa' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --border-color: {{ settings.colors_outline_button_labels | default: '#e0e0e0' }};
+        
+        --button-background: {{ settings.colors_solid_button_labels | default: '#007bff' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_solid_button_labels | color_darken: 15 | default: '#0056b3' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_solid_button_labels | default: '#007bff' }};
+        --button-hover-border: {{ settings.colors_solid_button_labels | color_darken: 15 | default: '#0056b3' }};
+        
+        --link-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --link-hover-color: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        --tag-background: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.1 | default: 'rgba(0, 123, 255, 0.1)' }};
+        --tag-text: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% when 'accent-1' %}
+        --primary-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --secondary-color: {{ settings.colors_accent_2 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.05 | default: 'rgba(0, 123, 255, 0.05)' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --border-color: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.2 | default: 'rgba(0, 123, 255, 0.2)' }};
+        
+        --button-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --button-hover-border: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        --link-color: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --link-hover-color: {{ settings.colors_accent_1 | color_darken: 15 | default: '#0056b3' }};
+        
+        --tag-background: {{ settings.colors_accent_1 | color_modify: 'alpha', 0.15 | default: 'rgba(0, 123, 255, 0.15)' }};
+        --tag-text: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-border: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-background: {{ settings.colors_accent_1 | default: '#007bff' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% when 'accent-2' %}
+        --primary-color: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --secondary-color: {{ settings.colors_accent_1 | default: '#6c757d' }};
+        --background-color: {{ settings.colors_accent_2 | color_modify: 'alpha', 0.05 | default: 'rgba(40, 167, 69, 0.05)' }};
+        --text-color: {{ settings.colors_text | default: '#333333' }};
+        --card-background: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --border-color: {{ settings.colors_accent_2 | color_modify: 'alpha', 0.2 | default: 'rgba(40, 167, 69, 0.2)' }};
+        
+        --button-background: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --button-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-hover-background: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        --button-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        --button-border: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --button-hover-border: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        
+        --link-color: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --link-hover-color: {{ settings.colors_accent_2 | color_darken: 15 | default: '#218838' }};
+        
+        --tag-background: {{ settings.colors_accent_2 | color_modify: 'alpha', 0.15 | default: 'rgba(40, 167, 69, 0.15)' }};
+        --tag-text: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-border: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-hover-background: {{ settings.colors_accent_2 | default: '#28a745' }};
+        --tag-hover-text: {{ settings.colors_background_1 | default: '#ffffff' }};
+        
+      {% else %}
+        /* 默认配色 */
+        --primary-color: {{ section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
+        --secondary-color: {{ section.settings.secondary_color | default: settings.colors_accent_2 | default: '#6c757d' }};
+        --background-color: {{ section.settings.background_color | default: settings.colors_background_1 | default: '#ffffff' }};
+        --text-color: {{ section.settings.text_color | default: settings.colors_text | default: '#333333' }};
+        --card-background: {{ section.settings.card_background | default: settings.colors_background_2 | default: '#ffffff' }};
+        --border-color: {{ section.settings.border_color | default: '#e0e0e0' }};
+        
+        --button-background: {{ section.settings.button_background | default: section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
+        --button-text: {{ section.settings.button_text | default: '#ffffff' }};
+        --button-hover-background: {{ section.settings.button_hover_background | default: '#0056b3' }};
+        --button-hover-text: {{ section.settings.button_hover_text | default: '#ffffff' }};
+        --button-border: {{ section.settings.button_border | default: 'transparent' }};
+        --button-hover-border: {{ section.settings.button_hover_border | default: 'transparent' }};
+        
+        --link-color: {{ section.settings.link_color | default: section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
+        --link-hover-color: {{ section.settings.link_hover_color | default: '#0056b3' }};
+        
+        --tag-background: {{ section.settings.tag_background | default: 'rgba(0, 123, 255, 0.1)' }};
+        --tag-text: {{ section.settings.tag_text | default: section.settings.primary_color | default: '#007bff' }};
+        --tag-border: {{ section.settings.tag_border | default: section.settings.primary_color | default: '#007bff' }};
+        --tag-hover-background: {{ section.settings.tag_hover_background | default: section.settings.primary_color | default: '#007bff' }};
+        --tag-hover-text: {{ section.settings.tag_hover_text | default: '#ffffff' }};
+    {% endcase %}
+    
+    /* 通用颜色变量 */
+    --card-hover-shadow: {{ section.settings.card_hover_shadow | default: 'rgba(0, 123, 255, 0.15)' }};
+    --card-border-hover: {{ section.settings.card_border_hover | default: 'var(--primary-color)' }};
+    --meta-color: {{ section.settings.meta_color | default: 'var(--secondary-color)' }};
+    --meta-icon-color: {{ section.settings.meta_icon_color | default: 'var(--secondary-color)' }};
   }
 </style>
 
@@ -25,9 +220,9 @@
       </div>
     {% endif %}
 
-    <!-- 博客选择和过滤 - 保持原有逻辑不变 -->
+    <!-- 博客选择和过滤 -->
     {% if section.settings.blog_source == 'all' %}
-      {% assign common_blog_handles = 'news,blog,Fresh,Reflections,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
+      {% assign common_blog_handles = 'news,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
       {% assign total_articles_available = 0 %}
       {% assign active_blogs = 0 %}
       {% assign blog_names = '' %}
@@ -226,7 +421,6 @@
       {% endif %}
 
     {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
-      <!-- 特定博客逻辑保持不变 -->
       {% assign selected_blog = blogs[section.settings.specific_blog] %}
       {% assign all_articles = selected_blog.articles %}
       
@@ -265,120 +459,118 @@
                 <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
                   <svg width="20" height="20" viewBox="0 0 20 20">
                     <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                </svg>
-              </button>
-            {% endif %}
-          </div>
-        {% endif %}
-
-        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-          <div class="posts-pagination">
-            <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
-              View All Posts
-              <svg width="16" height="16" viewBox="0 0 16 16">
-                <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
-              </svg>
-            </a>
-          </div>
-        {% endif %}
-      </div>
-    {% else %}
-      <div class="no-posts-message">
-        <div class="no-posts-icon">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
-            <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
-          </svg>
-        </div>
-        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-        <p>No published posts found in the selected blog.</p>
-        {% if section.settings.show_create_post_link %}
-          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-        {% endif %}
-      </div>
-    {% endif %}
-
-  {% else %}
-    <!-- 默认博客逻辑保持不变 -->
-    {% assign all_articles = blog.articles %}
-    
-    {% if all_articles.size > 0 %}
-      <div class="blog-posts-container">
-        {% if section.settings.layout_style == 'grid' %}
-          <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-            {% for article in all_articles limit: section.settings.posts_to_show %}
-              {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-            {% endfor %}
-          </div>
-        {% elsif section.settings.layout_style == 'list' %}
-          <div class="posts-list">
-            {% for article in all_articles limit: section.settings.posts_to_show %}
-              {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="posts-slider" id="posts-slider-{{ section.id }}">
-            <div class="slider-container">
-              <div class="slider-track">
-                {% for article in all_articles limit: section.settings.posts_to_show %}
-                  <div class="post-slide">
-                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                  </div>
-                {% endfor %}
-              </div>
+                  </svg>
+                </button>
+              {% endif %}
             </div>
-            
-            {% if all_articles.size > 3 %}
-              <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
-                <svg width="20" height="20" viewBox="0 0 20 20">
-                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-                </svg>
-              </button>
-              <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
-                <svg width="20" height="20" viewBox="0 0 20 20">
-                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                </svg>
-              </button>
-            {% endif %}
-          </div>
-        {% endif %}
+          {% endif %}
 
-        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-          <div class="posts-pagination">
-            <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
-              Load More Posts
-              <div class="loading-spinner" style="display: none;"></div>
-            </button>
-          </div>
-        {% endif %}
-      </div>
-    {% else %}
-      <div class="no-posts-message">
-        <div class="no-posts-icon">
-          <svg width="80" height="80" viewBox="0 0 80 80">
-            <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
-            <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
-            <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
-          </svg>
+          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+            <div class="posts-pagination">
+              <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
+                View All Posts
+                <svg width="16" height="16" viewBox="0 0 16 16">
+                  <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+              </a>
+            </div>
+          {% endif %}
         </div>
-        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-        <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
-        {% if section.settings.show_create_post_link %}
-          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-        {% endif %}
-      </div>
+      {% else %}
+        <div class="no-posts-message">
+          <div class="no-posts-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
+            </svg>
+          </div>
+          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+          <p>No published posts found in the selected blog.</p>
+          {% if section.settings.show_create_post_link %}
+            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    {% else %}
+      {% assign all_articles = blog.articles %}
+      
+      {% if all_articles.size > 0 %}
+        <div class="blog-posts-container">
+          {% if section.settings.layout_style == 'grid' %}
+            <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% elsif section.settings.layout_style == 'list' %}
+            <div class="posts-list">
+              {% for article in all_articles limit: section.settings.posts_to_show %}
+                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="posts-slider" id="posts-slider-{{ section.id }}">
+              <div class="slider-container">
+                <div class="slider-track">
+                  {% for article in all_articles limit: section.settings.posts_to_show %}
+                    <div class="post-slide">
+                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              
+              {% if all_articles.size > 3 %}
+                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                  </svg>
+                </button>
+                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                  <svg width="20" height="20" viewBox="0 0 20 20">
+                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                  </svg>
+                </button>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+            <div class="posts-pagination">
+              <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+                Load More Posts
+                <div class="loading-spinner" style="display: none;"></div>
+              </button>
+            </div>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="no-posts-message">
+          <div class="no-posts-icon">
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
+            </svg>
+          </div>
+          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+          <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
+          {% if section.settings.show_create_post_link %}
+            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+          {% endif %}
+        </div>
+      {% endif %}
     {% endif %}
-  {% endif %}
   </div>
 </div>
 
 <script>
-// JavaScript代码保持不变
 document.addEventListener('DOMContentLoaded', function() {
   const blogCards = document.querySelectorAll('.blog-post-card');
   
@@ -483,32 +675,49 @@ function loadMorePosts(sectionId) {
       "options": [
         {
           "value": "default",
-          "label": "Default"
+          "label": "Default (Custom Colors)"
         },
         {
-          "value": "light",
-          "label": "Light"
+          "value": "scheme-1",
+          "label": "Theme Scheme 1 (Accent 1)"
         },
         {
-          "value": "dark",
-          "label": "Dark"
+          "value": "scheme-2",
+          "label": "Theme Scheme 2 (Accent 2)"
         },
         {
-          "value": "accent",
-          "label": "Accent"
+          "value": "background-1",
+          "label": "Background 1 Theme"
         },
         {
-          "value": "custom",
-          "label": "Custom"
+          "value": "background-2",
+          "label": "Background 2 Theme"
+        },
+        {
+          "value": "accent-1",
+          "label": "Accent 1 Theme"
+        },
+        {
+          "value": "accent-2",
+          "label": "Accent 2 Theme"
+        },
+        {
+          "value": "inverse",
+          "label": "Inverse Theme"
         }
       ],
-      "default": "default"
+      "default": "scheme-1",
+      "info": "Choose a theme color scheme or use custom colors"
+    },
+    {
+      "type": "header",
+      "content": "Custom Colors"
     },
     {
       "type": "color",
       "id": "primary_color",
       "label": "Primary Color",
-      "info": "Used for buttons and links"
+      "info": "Main brand color (only for Default scheme)"
     },
     {
       "type": "color",
@@ -537,9 +746,62 @@ function loadMorePosts(sectionId) {
       "label": "Border Color"
     },
     {
+      "type": "header",
+      "content": "Button Colors"
+    },
+    {
       "type": "color",
-      "id": "hover_color",
-      "label": "Hover Color"
+      "id": "button_background",
+      "label": "Button Background",
+      "info": "Background color for buttons"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button Text Color",
+      "info": "Text color for buttons"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Button Hover Background",
+      "info": "Background color when hovering over buttons"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Button Hover Text Color",
+      "info": "Text color when hovering over buttons"
+    },
+    {
+      "type": "color",
+      "id": "button_border",
+      "label": "Button Border Color"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Button Hover Border Color"
+    },
+    {
+      "type": "header",
+      "content": "Link Colors"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link Color",
+      "info": "Color for links and titles"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link Hover Color",
+      "info": "Color when hovering over links"
+    },
+    {
+      "type": "header",
+      "content": "Tag Colors"
     },
     {
       "type": "color",
@@ -550,6 +812,52 @@ function loadMorePosts(sectionId) {
       "type": "color",
       "id": "tag_text",
       "label": "Tag Text Color"
+    },
+    {
+      "type": "color",
+      "id": "tag_border",
+      "label": "Tag Border Color"
+    },
+    {
+      "type": "color",
+      "id": "tag_hover_background",
+      "label": "Tag Hover Background"
+    },
+    {
+      "type": "color",
+      "id": "tag_hover_text",
+      "label": "Tag Hover Text Color"
+    },
+    {
+      "type": "header",
+      "content": "Card Effects"
+    },
+    {
+      "type": "color",
+      "id": "card_hover_shadow",
+      "label": "Card Hover Shadow Color",
+      "info": "Shadow color when hovering over cards"
+    },
+    {
+      "type": "color",
+      "id": "card_border_hover",
+      "label": "Card Border Hover Color"
+    },
+    {
+      "type": "header",
+      "content": "Meta Information"
+    },
+    {
+      "type": "color",
+      "id": "meta_color",
+      "label": "Meta Text Color",
+      "info": "Color for author, date, etc."
+    },
+    {
+      "type": "color",
+      "id": "meta_icon_color",
+      "label": "Meta Icon Color",
+      "info": "Color for icons in meta information"
     },
     {
       "type": "header",
