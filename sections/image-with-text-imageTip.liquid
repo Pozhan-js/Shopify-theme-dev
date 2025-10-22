@@ -21,8 +21,7 @@
 {%- assign button_aria_label       	  = section.settings.button_aria_label -%}
 {%- assign button_url              	  = section.settings.button_url -%}
 {%- assign button_style            	  = section.settings.button_style -%}
-{%- assign image_text_position        = section.settings.text_position -%}
-{%- assign image_text_alignment       = section.settings.image_text_alignment -%}
+
 
 {%- assign container 				  = section.settings.container_width -%}
 
@@ -199,69 +198,33 @@
 			{{- content -}}
 		{%- else -%}
 			<div class="image-with-text__image-container image-with-text__image-container--mobile {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-					{%- if section.settings.first_image_text != blank and image_text_position == 'above' -%}
-						<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-							{{- section.settings.first_image_text -}}
-						</div>
-					{%- endif -%}
-					{% render 'image-with-text-image',
-						desktop_image: first_desktop_image,
-						mobile_image: first_mobile_image,
-						image_width: first_image_width,
-						image_width_2x: first_image_width_2x,
-						delay_step: 0.25
-					%}
-					{%- if section.settings.first_image_text != blank and image_text_position == 'below' -%}
-						<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-							{{- section.settings.first_image_text -}}
-						</div>
-					{%- endif -%}
-				</div>
+				{% render 'image-with-text-image',
+					desktop_image: first_desktop_image,
+					mobile_image: first_mobile_image,
+					image_width: first_image_width,
+					image_width_2x: first_image_width_2x,
+					delay_step: 0.25
+				%}
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-						{%- if section.settings.second_image_text != blank and image_text_position == 'above' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.second_image_text -}}
-							</div>
-						{%- endif -%}
-						{% render 'image-with-text-image',
-							desktop_image: second_desktop_image,
-							mobile_image: second_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.5
-						%}
-						{%- if section.settings.second_image_text != blank and image_text_position == 'below' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.second_image_text -}}
-							</div>
-						{%- endif -%}
-					</div>
+					{% render 'image-with-text-image',
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.5
+					%}
 				{% endif %}
 
 				{% if third_desktop_image != blank %}
-					<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-						{%- if section.settings.third_image_text != blank and image_text_position == 'above' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.third_image_text -}}
-							</div>
-						{%- endif -%}
-						{% render 'image-with-text-image',
-							desktop_image: third_desktop_image,
-							mobile_image: third_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.25
-						%}
-						{%- if section.settings.third_image_text != blank and image_text_position == 'below' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.third_image_text -}}
-							</div>
-						{%- endif -%}
-					</div>
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.25
+					%}
 				{% endif %}
 			{% endif %}
 			</div>
@@ -269,82 +232,33 @@
 			{{- content -}}
 
 			<div class="image-with-text__image-container image-with-text__image-container--desktop {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-			{% if is_single_layout %}
-				{% assign delay_step = 0.25 %}
-			{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
-				{% assign delay_step = 0.75 %}
-				{% assign three_2_delay = 0.5 %}
-			{% elsif is_double_layout and two_images_layout != "double_with_small" %}
-				{% assign delay_step = 0.5 %}
-				{% assign three_2_delay = 0.25 %}
-			{% elsif is_double_layout and two_images_layout == "double_with_small" %}
-				{% assign delay_step = 0.25 %}
-				{% assign three_2_delay = 0.5 %}
-			{% endif %}
-
-			<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-				{%- if section.settings.first_image_text != blank and image_text_position == 'above' -%}
-					<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-						{{- section.settings.first_image_text -}}
-					</div>
-				{%- endif -%}
 				{% render 'image-with-text-image',
 					desktop_image: first_desktop_image,
 					mobile_image: first_mobile_image,
 					image_width: first_image_width,
 					image_width_2x: first_image_width_2x,
-					delay_step: delay_step
+					delay_step: 0.25
 				%}
-				{%- if section.settings.first_image_text != blank and image_text_position == 'below' -%}
-					<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-						{{- section.settings.first_image_text -}}
-					</div>
-				{%- endif -%}
-			</div>
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-						{%- if section.settings.second_image_text != blank and image_text_position == 'above' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.second_image_text -}}
-							</div>
-						{%- endif -%}
-						{% render 'image-with-text-image',
-							desktop_image: second_desktop_image,
-							mobile_image: second_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: three_2_delay
-						%}
-						{%- if section.settings.second_image_text != blank and image_text_position == 'below' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.second_image_text -}}
-							</div>
-						{%- endif -%}
-					</div>
+					{% render 'image-with-text-image',
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.5
+					%}
 				{% endif %}
 
 				{% if third_desktop_image != blank %}
-					<div class="image-with-text__image-wrapper image-with-text__image-wrapper--{{ image_text_position }} image-with-text__image-wrapper--align-{{ image_text_alignment }}">
-						{%- if section.settings.third_image_text != blank and image_text_position == 'above' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.third_image_text -}}
-							</div>
-						{%- endif -%}
-						{% render 'image-with-text-image',
-							desktop_image: third_desktop_image,
-							mobile_image: third_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.25
-						%}
-						{%- if section.settings.third_image_text != blank and image_text_position == 'below' -%}
-							<div class="image-with-text__image-text image-with-text__image-text--{{ image_text_position }} image-with-text__image-text--align-{{ image_text_alignment }} rte">
-								{{- section.settings.third_image_text -}}
-							</div>
-						{%- endif -%}
-					</div>
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.25
+					%}
 				{% endif %}
 			{% endif %}
 			</div>
