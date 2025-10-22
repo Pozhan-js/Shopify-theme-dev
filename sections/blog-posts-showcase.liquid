@@ -11,16 +11,22 @@
     {% endif %}
 
     <!-- 博客选择和过滤 -->
+    {% assign all_articles = '' %}
     {% if section.settings.blog_source == 'all' %}
-      {% assign selected_blogs = blog %}
-      {% assign all_articles = '' %}
+      <!-- 获取所有博客的文章 -->
+      {% assign all_articles_array = '' | split: ',' %}
       {% for blog in blogs %}
-        {% assign all_articles = all_articles | concat: blog.articles %}
+        {% for article in blog.articles %}
+          {% assign all_articles_array = all_articles_array | concat: article %}
+        {% endfor %}
       {% endfor %}
+      <!-- 按发布日期排序 -->
+      {% assign all_articles = all_articles_array | sort: 'published_at' | reverse %}
     {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
       {% assign selected_blog = blogs[section.settings.specific_blog] %}
       {% assign all_articles = selected_blog.articles %}
     {% else %}
+      <!-- 默认使用主博客 -->
       {% assign all_articles = blog.articles %}
     {% endif %}
 
@@ -69,6 +75,29 @@
           </div>
         {% endif %}
 
+        <!-- 博客来源显示 -->
+        {% if section.settings.show_blog_source and section.settings.blog_source == 'all' %}
+          <div class="blog-sources-info">
+            <p class="sources-text">
+              Showing articles from 
+              {% assign blog_count = 0 %}
+              {% for blog in blogs %}
+                {% if blog.articles.size > 0 %}
+                  {% assign blog_count = blog_count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
+              {{ blog_count }} blog{% if blog_count != 1 %}s{% endif %}:
+              {% assign displayed_blogs = '' | split: ',' %}
+              {% for blog in blogs %}
+                {% if blog.articles.size > 0 %}
+                  {% assign displayed_blogs = displayed_blogs | concat: blog.title %}
+                {% endif %}
+              {% endfor %}
+              {{ displayed_blogs | join: ', ' }}
+            </p>
+          </div>
+        {% endif %}
+
         <!-- 分页或查看更多 -->
         {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
           <div class="posts-pagination">
@@ -79,6 +108,20 @@
                   <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
               </a>
+            {% elsif section.settings.blog_source == 'all' %}
+              <div class="all-blogs-pagination">
+                <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+                  Load More Posts
+                  <div class="loading-spinner" style="display: none;"></div>
+                </button>
+                <div class="blog-links">
+                  {% for blog in blogs %}
+                    {% if blog.articles.size > 0 %}
+                      <a href="{{ blog.url }}" class="blog-link">{{ blog.title }}</a>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
             {% else %}
               <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
                 Load More Posts
@@ -205,6 +248,20 @@ function filterPosts(category) {
     }
   });
 }
+
+// 博客来源过滤
+function filterByBlog(blogHandle) {
+  const posts = document.querySelectorAll('.blog-post-card, .blog-post-list-item');
+  
+  posts.forEach(post => {
+    const articleBlog = post.dataset.blogHandle;
+    if (blogHandle === 'all' || articleBlog === blogHandle) {
+      post.style.display = 'block';
+    } else {
+      post.style.display = 'none';
+    }
+  });
+}
 </script>
 
 {% schema %}
@@ -252,6 +309,13 @@ function filterPosts(category) {
       "id": "specific_blog",
       "label": "Select Blog",
       "info": "Only used when 'Specific Blog' is selected"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_blog_source",
+      "label": "Show blog source info",
+      "default": true,
+      "info": "Display which blogs the articles are from"
     },
     {
       "type": "header",
