@@ -8,7 +8,6 @@
 {%- assign text_alignment        	  = section.settings.text_alignment -%}
 {%- assign content_vertical_alignment = section.settings.content_vertical_alignment -%}
 	{%- assign two_images_layout          = section.settings.two_images_layout -%}
-	{%- assign single_image_layout        = section.settings.single_image_layout -%}
 	{%- assign first_desktop_image        = section.settings.first_desktop_image -%}
 	{%- assign first_mobile_image         = section.settings.first_mobile_image | default: first_desktop_image -%}
 	{%- assign second_desktop_image       = section.settings.second_desktop_image -%}
@@ -31,18 +30,10 @@
 	{% assign container_width = container %}
 {% endif %}
 
-{% assign is_single_layout = false %}
 {% assign is_double_layout = false %}
 {% assign three_img_layout_class = '' %}
 
-{% if first_desktop_image != blank and second_desktop_image == blank and third_desktop_image == blank %}
-	{% assign is_single_layout = true %}
-	{% if single_image_layout == 'single_horizontal' %}
-		{% assign single_img_layout_class = 'image-with-text__image-container--single-horizontal' %}
-	{% else %}
-		{% assign single_img_layout_class = 'image-with-text__image-container--single-vertical' %}
-	{% endif %}
-{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image == blank %}
+{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image == blank %}
 	{% assign is_double_layout = true %}
 {% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 	{% assign three_img_layout_class = 'image-with-text__image-container--triple' %}
@@ -122,18 +113,10 @@
 	}
 {%- endstyle -%}
 
-	{%- assign image_width    = "388x" -%}
-	{%- assign image_width_2x = "776x" -%}
+{%- assign image_width    = "388x" -%}
+{%- assign image_width_2x = "776x" -%}
 
-{% if is_single_layout %}
-	{% if single_image_layout == 'single_horizontal' %}
-		{%- assign image_width    = "776x388" -%}
-		{%- assign image_width_2x = "1552x776" -%}
-	{% else %}
-		{%- assign image_width    = "390x650" -%}
-		{%- assign image_width_2x = "780x1300" -%}
-	{% endif %}
-{% elsif second_desktop_image != blank or third_desktop_image != blank %}
+{% if second_desktop_image != blank or third_desktop_image != blank %}
 	{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 		{%- assign image_width    = "190x287" -%}
 		{%- assign image_width_2x = "380x574" -%}
@@ -177,41 +160,6 @@
 					delay_step: 0.25
 				%}
 
-				{% if is_single_layout == false %}
-					{% if second_desktop_image != blank %}
-						{% render 'image-with-text-image',
-							desktop_image: second_desktop_image,
-							mobile_image: second_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.5
-						%}
-					{% endif %}
-
-					{% if third_desktop_image != blank %}
-						{% render 'image-with-text-image',
-							desktop_image: third_desktop_image,
-							mobile_image: third_mobile_image,
-							image_width: image_width,
-							image_width_2x: image_width_2x,
-							delay_step: 0.75
-						%}
-					{% endif %}
-				{% endif %}
-			</div>
-
-			{{- content -}}
-		{%- else -%}
-			<div class="image-with-text__image-container image-with-text__image-container--mobile {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				{% render 'image-with-text-image',
-					desktop_image: first_desktop_image,
-					mobile_image: first_mobile_image,
-					image_width: first_image_width,
-					image_width_2x: first_image_width_2x,
-					delay_step: 0.25
-				%}
-
-			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
 					{% render 'image-with-text-image',
 						desktop_image: second_desktop_image,
@@ -231,15 +179,44 @@
 						delay_step: 0.75
 					%}
 				{% endif %}
-			{% endif %}
+			</div>
+
+			{{- content -}}
+		{%- else -%}
+			<div class="image-with-text__image-container image-with-text__image-container--mobile {{ two_img_layout_class }} {{ three_img_layout_class }}">
+				{% render 'image-with-text-image',
+					desktop_image: first_desktop_image,
+					mobile_image: first_mobile_image,
+					image_width: first_image_width,
+					image_width_2x: first_image_width_2x,
+					delay_step: 0.25
+				%}
+
+				{% if second_desktop_image != blank %}
+					{% render 'image-with-text-image',
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.5
+					%}
+				{% endif %}
+
+				{% if third_desktop_image != blank %}
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.75
+					%}
+				{% endif %}
 			</div>
 
 			{{- content -}}
 
-			<div class="image-with-text__image-container image-with-text__image-container--desktop {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-			{% if is_single_layout %}
-				{% assign delay_step = 0.25 %}
-			{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
+			<div class="image-with-text__image-container image-with-text__image-container--desktop {{ two_img_layout_class }} {{ three_img_layout_class }}">
+			{% if first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
 				{% assign delay_step = 0.75 %}
 				{% assign three_2_delay = 0.5 %}
 				{% assign three_3_delay = 0.25 %}
@@ -249,6 +226,8 @@
 			{% elsif is_double_layout and two_images_layout == "double_with_small" %}
 				{% assign delay_step = 0.25 %}
 				{% assign three_2_delay = 0.5 %}
+			{% else %}
+				{% assign delay_step = 0.25 %}
 			{% endif %}
 
 			{% render 'image-with-text-image',
@@ -259,7 +238,6 @@
 				delay_step: delay_step
 			%}
 
-			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
 					{% render 'image-with-text-image',
 						desktop_image: second_desktop_image,
@@ -279,7 +257,6 @@
 						delay_step: three_3_delay
 					%}
 				{% endif %}
-			{% endif %}
 			</div>
 		{%- endif -%}
 	</div>
@@ -348,23 +325,7 @@
 				],
 				"default": "center"
 			},
-			{
-				"id": "single_image_layout",
-				"type": "select",
-				"label": "Single image layout",
-				"options": [
-					{
-						"value": "single_vertical",
-						"label": "Vertical"
-					},
-					{
-						"value": "single_horizontal",
-						"label": "Horizontal"
-					}
-				],
-				"default": "single_vertical",
-				"info": "This setting works only when you have one image."
-			},
+
 			{
 				"id": "two_images_layout",
 				"type": "select",
