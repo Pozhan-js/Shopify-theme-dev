@@ -1,4 +1,4 @@
-<div class="prf-pilates-reformer-section" {{ section.shopify_attributes }}>
+<div class="prf-pilates-reformer-section" {{ section.shopifyattributes }}>
   <div class="prf-container">
     <div class="prf-product-layout">
       <!-- 左侧产品图片区域 -->
@@ -6,21 +6,21 @@
         <!-- 主图 -->
         <div class="prf-main-image">
           {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品，最后是回退图片 {% endcomment %}
-          {% assign current_product = product %}
-          {% assign selected_product = all_products[section.settings.product_handle] %}
-          {% assign display_product = current_product | default: selected_product %}
+          {% assign currentproduct = product %}
+          {% assign selectedproduct = allproducts[section.settings.producthandle] %}
+          {% assign displayproduct = currentproduct | default: selectedproduct %}
 
-          {% if display_product and display_product.images.size > 0 %}
+          {% if displayproduct and displayproduct.images.size > 0 %}
             <img
-              src="{{ display_product.images.first | img_url: '1200x' }}"
-              alt="{{ display_product.title }}"
+              src="{{ displayproduct.images.first | imgurl: '1200x' }}"
+              alt="{{ displayproduct.title }}"
               class="prf-main-product-image"
               id="prf-main-product-image"
             >
-          {% elsif section.settings.fallback_image %}
+          {% elsif section.settings.fallbackimage %}
             <img
-              src="{{ section.settings.fallback_image | img_url: '1200x' }}"
-              alt="{{ section.settings.product_title }}"
+              src="{{ section.settings.fallbackimage | imgurl: '1200x' }}"
+              alt="{{ section.settings.producttitle }}"
               class="prf-main-product-image"
               id="prf-main-product-image"
             >
@@ -29,14 +29,14 @@
 
         <!-- 缩略图 -->
         <div class="prf-thumbnail-images">
-          {% if display_product and display_product.images.size > 0 %}
-            {% for image in display_product.images %}
+          {% if displayproduct and displayproduct.images.size > 0 %}
+            {% for image in displayproduct.images %}
               <div
                 class="prf-thumbnail-item {% if forloop.first %}prf-active{% endif %}"
-                data-image-url="{{ image | img_url: '1200x' }}"
+                data-image-url="{{ image | imgurl: '1200x' }}"
               >
                 <img
-                  src="{{ image | img_url: '150x' }}"
+                  src="{{ image | imgurl: '150x' }}"
                   alt="Product image {{ forloop.index }}"
                   class="prf-thumbnail-image"
                 >
@@ -47,12 +47,12 @@
               {% if block.type == 'thumbnail' %}
                 <div
                   class="prf-thumbnail-item"
-                  {{ block.shopify_attributes }}
-                  data-image-url="{{ block.settings.thumbnail_image | img_url: '1200x' }}"
+                  {{ block.shopifyattributes }}
+                  data-image-url="{{ block.settings.thumbnailimage | imgurl: '1200x' }}"
                 >
-                  {% if block.settings.thumbnail_image %}
+                  {% if block.settings.thumbnailimage %}
                     <img
-                      src="{{ block.settings.thumbnail_image | img_url: '150x' }}"
+                      src="{{ block.settings.thumbnailimage | imgurl: '150x' }}"
                       alt="Product thumbnail"
                       class="prf-thumbnail-image"
                     >
@@ -68,141 +68,147 @@
       <div class="prf-product-info">
         <!-- 产品标题和型号 -->
         <div class="prf-product-header">
-          {% if display_product %}
-            <h1 class="prf-product-title">{{ display_product.title }}</h1>
-            <div class="prf-model-info">
-              <span class="prf-model-number">
-                Model No: XSRF100
-              </span>
-            </div>
+          {% if displayproduct %}
+            <h1 class="prf-product-title">{{ displayproduct.title }}</h1>
+            {% assign model_tag = displayproduct.metafields.custom.tag %}
+            {% if model_tag and model_tag != blank %}
+              <div class="prf-model-info">
+                <span class="prf-model-number">
+                  Model No: {{ model_tag }}
+                </span>
+              </div>
+            {% endif %}
           {% else %}
-            <h1 class="prf-product-title">{{ section.settings.product_title }}</h1>
-            <div class="prf-model-info">
-              <span class="prf-model-number">Model No: XSRF100</span>
-            </div>
+            <h1 class="prf-product-title">{{ section.settings.producttitle }}</h1>
+            {% assign fallback_model = section.settings.modelnumber %}
+            {% if fallback_model and fallback_model != blank %}
+              <div class="prf-model-info">
+                <span class="prf-model-number">Model No: {{ fallback_model }}</span>
+              </div>
+            {% endif %}
           {% endif %}
         </div>
 
         <!-- 定制询问区域 -->
-        {% if section.settings.show_customization_section %}
+        {% if section.settings.showcustomizationsection %}
           <div class="prf-customization-section">
-            <h2 class="prf-customization-title">{{ section.settings.customization_title }}</h2>
-            <p class="prf-customization-description">{{ section.settings.customization_description }}</p>
+            <h2 class="prf-customization-title">{{ section.settings.customizationtitle }}</h2>
+            <p class="prf-customization-description">{{ section.settings.customizationdescription }}</p>
 
-            {% if section.settings.quote_button_text %}
-              {% assign quote_link = section.settings.quote_button_link %}
-              {% if quote_link == blank and display_product %}
-                {% assign quote_link = '/pages/contact?product=' | append: display_product.handle %}
+            {% if section.settings.quotebuttontext %}
+              {% assign quotelink = section.settings.quotebuttonlink %}
+              {% if quotelink == blank and displayproduct %}
+                {% assign quotelink = '/pages/contact?product=' | append: displayproduct.handle %}
               {% endif %}
-              <a href="{{ quote_link }}" class="prf-quote-button">
-                {{ section.settings.quote_button_text }}
+              <a href="{{ quotelink }}" class="prf-quote-button">
+                {{ section.settings.quotebuttontext }}
               </a>
             {% endif %}
           </div>
         {% endif %}
 
         <!-- 颜色选择区域 -->
-        {% if section.settings.show_color_selection %}
+        {% if section.settings.showcolorselection %}
           <div class="prf-color-selection">
-            <h3 class="prf-color-title">{{ section.settings.color_section_title }}</h3>
+            <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
             <div class="prf-color-options">
-              {% if display_product %}
-                {% assign first_color_processed = false %}
-                {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
+              {% if displayproduct %}
+                {% assign firstcolorprocessed = false %}
+                {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
                 
                 {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
-                {% for option in display_product.options_with_values %}
-                  {% assign option_name_lower = option.name | downcase %}
-                  {% assign target_name_lower = color_option_name | downcase %}
+                {% for option in displayproduct.optionswithvalues %}
+                  {% assign optionnamelower = option.name | downcase %}
+                  {% assign targetnamelower = coloroptionname | downcase %}
                   
-                  {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
+                  {% if optionnamelower == targetnamelower or optionnamelower == '颜色' or optionnamelower == 'color' or optionnamelower == 'colour' or optionnamelower == 'upholstery' or optionnamelower == 'fabric' %}
                     {% for value in option.values %}
-                      {% assign variant_found = false %}
-                      {% assign variant_id = '' %}
-                      {% assign variant_image = '' %}
-                      {% assign color_hex = '#CCCCCC' %}
+                      {% assign variantfound = false %}
+                      {% assign variantid = '' %}
+                      {% assign variantimage = '' %}
+                      {% assign colorhex = '#CCCCCC' %}
                       
-                      {% comment %} 首先尝试使用 color_swatch.color 获取颜色 {% endcomment %}
-                      {% assign color_swatch = value.swatch %}
-                      {% if color_swatch and color_swatch.color %}
-                        {% assign color_hex = color_swatch.color %}
+                      {% comment %} 首先尝试使用 colorswatch.color 获取颜色 {% endcomment %}
+                      {% assign colorswatch = value.swatch %}
+                      {% if colorswatch and colorswatch.color %}
+                        {% assign colorhex = colorswatch.color %}
                       {% else %}
-                        {% comment %} 如果没有 color_swatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
-                        {% assign value_lower = value | downcase %}
-                        {% case value_lower %}
+                        {% comment %} 如果没有 colorswatch，尝试基于颜色名称的预设颜色映射 {% endcomment %}
+                        {% assign valuelower = value | downcase %}
+                        {% case valuelower %}
                           {% when 'black' %}
-                            {% assign color_hex = '#000000' %}
+                            {% assign colorhex = '#000000' %}
                           {% when 'white' %}
-                            {% assign color_hex = '#FFFFFF' %}
+                            {% assign colorhex = '#FFFFFF' %}
                           {% when 'red' %}
-                            {% assign color_hex = '#FF0000' %}
+                            {% assign colorhex = '#FF0000' %}
                           {% when 'blue' %}
-                            {% assign color_hex = '#0000FF' %}
+                            {% assign colorhex = '#0000FF' %}
                           {% when 'green' %}
-                            {% assign color_hex = '#008000' %}
+                            {% assign colorhex = '#008000' %}
                           {% when 'gray', 'grey' %}
-                            {% assign color_hex = '#808080' %}
+                            {% assign colorhex = '#808080' %}
                           {% when 'steel gray', 'steel grey' %}
-                            {% assign color_hex = '#71797E' %}
+                            {% assign colorhex = '#71797E' %}
                           {% when 'brown' %}
-                            {% assign color_hex = '#8B4513' %}
+                            {% assign colorhex = '#8B4513' %}
                           {% when 'navy' %}
-                            {% assign color_hex = '#000080' %}
+                            {% assign colorhex = '#000080' %}
                           {% when 'beige' %}
-                            {% assign color_hex = '#F5F5DC' %}
+                            {% assign colorhex = '#F5F5DC' %}
                           {% when 'tan' %}
-                            {% assign color_hex = '#D2B48C' %}
+                            {% assign colorhex = '#D2B48C' %}
                           {% else %}
-                            {% assign color_hex = '#CCCCCC' %}
+                            {% assign colorhex = '#CCCCCC' %}
                         {% endcase %}
                       {% endif %}
                       
                       {% comment %} 查找对应的变体 {% endcomment %}
-                      {% for variant in display_product.variants %}
-                        {% assign value_matches = false %}
+                      {% for variant in displayproduct.variants %}
+                        {% assign valuematches = false %}
                         
                         {% comment %} 检查变体的所有选项值 {% endcomment %}
                         {% if variant.option1 == value %}
-                          {% assign value_matches = true %}
+                          {% assign valuematches = true %}
                         {% elsif variant.option2 == value %}
-                          {% assign value_matches = true %}
+                          {% assign valuematches = true %}
                         {% elsif variant.option3 == value %}
-                          {% assign value_matches = true %}
+                          {% assign valuematches = true %}
                         {% endif %}
                         
-                        {% if value_matches and variant_found == false %}
-                          {% assign variant_found = true %}
-                          {% assign variant_id = variant.id %}
+                        {% if valuematches and variantfound == false %}
+                          {% assign variantfound = true %}
+                          {% assign variantid = variant.id %}
                           
                           {% comment %} 获取变体图片 {% endcomment %}
                           {% if variant.image %}
-                            {% assign variant_image = variant.image | img_url: '1200x' %}
+                            {% assign variantimage = variant.image | imgurl: '1200x' %}
                           {% endif %}
                         {% endif %}
                       {% endfor %}
                       
                       {% comment %} 确保颜色值格式正确 {% endcomment %}
-                      {% unless color_hex contains '#' %}
-                        {% if color_hex != '' %}
-                          {% assign color_hex = '#' | append: color_hex %}
+                      {% unless colorhex contains '#' %}
+                        {% if colorhex != '' %}
+                          {% assign colorhex = '#' | append: colorhex %}
                         {% else %}
-                          {% assign color_hex = '#CCCCCC' %}
+                          {% assign colorhex = '#CCCCCC' %}
                         {% endif %}
                       {% endunless %}
                       
-                      <div class="prf-color-option {% unless first_color_processed %}prf-selected{% endunless %}" 
+                      <div class="prf-color-option {% unless firstcolorprocessed %}prf-selected{% endunless %}" 
                            data-color="{{ value }}"
-                           data-variant-id="{{ variant_id }}"
-                           data-variant-image="{{ variant_image }}"
-                           data-color-hex="{{ color_hex }}">
-                        <div class="prf-color-swatch" style="background-color: {{ color_hex }};">
-                          {% unless first_color_processed %}
+                           data-variant-id="{{ variantid }}"
+                           data-variant-image="{{ variantimage }}"
+                           data-color-hex="{{ colorhex }}">
+                        <div class="prf-color-swatch" style="background-color: {{ colorhex }};">
+                          {% unless firstcolorprocessed %}
                             <div class="prf-color-checkmark">
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
                               </svg>
                             </div>
-                            {% assign first_color_processed = true %}
+                            {% assign firstcolorprocessed = true %}
                           {% endunless %}
                         </div>
                         <span class="prf-color-name">{{ value }}</span>
@@ -214,13 +220,13 @@
               {% else %}
                 {% comment %} 如果没有产品，使用区块配置的颜色 {% endcomment %}
                 {% for block in section.blocks %}
-                  {% if block.type == 'color_option' %}
-                    <div class="prf-color-option {% if block.settings.is_selected %}prf-selected{% endif %}"
-                         {{ block.shopify_attributes }}
-                         data-color="{{ block.settings.color_name }}"
-                         data-color-hex="{{ block.settings.color_value }}">
-                      <div class="prf-color-swatch" style="background-color: {{ block.settings.color_value }};">
-                        {% if block.settings.is_selected %}
+                  {% if block.type == 'coloroption' %}
+                    <div class="prf-color-option {% if block.settings.isselected %}prf-selected{% endif %}"
+                         {{ block.shopifyattributes }}
+                         data-color="{{ block.settings.colorname }}"
+                         data-color-hex="{{ block.settings.colorvalue }}">
+                      <div class="prf-color-swatch" style="background-color: {{ block.settings.colorvalue }};">
+                        {% if block.settings.isselected %}
                           <div class="prf-color-checkmark">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
@@ -228,7 +234,7 @@
                           </div>
                         {% endif %}
                       </div>
-                      <span class="prf-color-name">{{ block.settings.color_name }}</span>
+                      <span class="prf-color-name">{{ block.settings.colorname }}</span>
                     </div>
                   {% endif %}
                 {% endfor %}
@@ -243,7 +249,7 @@
 
 <style>
   .prf-pilates-reformer-section {
-    padding: 0px 0 {{ section.settings.section_padding_bottom }}px 0;
+    padding: 0px 0 {{ section.settings.sectionpaddingbottom }}px 0;
     background-color: #fff;
   }
 
@@ -270,7 +276,7 @@
   .prf-main-image {
     border-radius: 8px;
     overflow: hidden;
-    background: {{ section.settings.main_image_background }};
+    background: {{ section.settings.mainimagebackground }};
     padding: 20px;
     width: 1234px;
     height: 702px;
@@ -339,9 +345,9 @@
   }
 
   .prf-product-title {
-    font-size: {{ section.settings.product_title_size }}px;
+    font-size: {{ section.settings.producttitlesize }}px;
     font-weight: 500;
-    color: {{ section.settings.product_title_color }};
+    color: {{ section.settings.producttitlecolor }};
     margin: 0 0 10px 0;
     line-height: 1.2;
   }
@@ -354,11 +360,11 @@
   }
 
   .prf-model-number {
-    border: 1px solid {{ section.settings.model_number_color }};
+    border: 1px solid {{ section.settings.modelnumbercolor }};
     padding: 4px 12px;
     border-radius: 4px;
     font-size: 14px;
-    color: {{ section.settings.model_number_color }};
+    color: {{ section.settings.modelnumbercolor }};
     background: transparent;
   }
 
@@ -368,17 +374,17 @@
   }
 
   .prf-customization-title {
-    font-size: {{ section.settings.customization_title_size }}px;
+    font-size: {{ section.settings.customizationtitlesize }}px;
     font-weight: 500;
-    color: {{ section.settings.customization_title_color }};
+    color: {{ section.settings.customizationtitlecolor }};
     margin: 0 0 15px 0;
   }
 
   .prf-customization-description {
-    color: {{ section.settings.description_color }};
+    color: {{ section.settings.descriptioncolor }};
     line-height: 1.6;
     margin: 0 0 20px 0;
-    font-size: {{ section.settings.description_font_size }}px;
+    font-size: {{ section.settings.descriptionfontsize }}px;
   }
 
   .prf-quote-button {
@@ -436,13 +442,13 @@
     color: #333;
     margin: 0 0 30px 0;
     padding-bottom: 10px;
-    border-bottom: 2px solid {{ section.settings.quote_button_color }};
+    border-bottom: 2px solid {{ section.settings.quotebuttoncolor }};
     display: inline-block;
   }
 
   .prf-color-options {
     display: grid;
-    grid-template-columns: repeat({{ section.settings.color_columns }}, 88px);
+    grid-template-columns: repeat({{ section.settings.colorcolumns }}, 88px);
     grid-auto-rows: 130px;
     gap: 24.8px;
     height: 480px;
@@ -501,8 +507,8 @@
   }
 
   /* 处理透明或未设置的颜色 */
-  .prf-color-swatch[style*="rgba(0,0,0,0)"],
-  .prf-color-swatch[style*="transparent"],
+  .prf-color-swatch[style="rgba(0,0,0,0)"],
+  .prf-color-swatch[style="transparent"],
   .prf-color-option[data-color-hex="#CCCCCC"] .prf-color-swatch {
     border: 1px solid #ddd;
     background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
@@ -622,7 +628,7 @@
     }
 
     .prf-color-options {
-      grid-template-columns: repeat({{ section.settings.color_columns }}, 70px);
+      grid-template-columns: repeat({{ section.settings.colorcolumns }}, 70px);
       grid-auto-rows: 108px;
       height: 220px;
       overflow-y: auto;
@@ -776,7 +782,7 @@
     }
 
     .prf-pilates-reformer-section {
-      padding-bottom: {{ section.settings.section_padding_top | divided_by: 2 }}px;
+      padding-bottom: {{ section.settings.sectionpaddingtop | dividedby: 2 }}px;
     }
 
     .prf-thumbnail-images {
@@ -944,7 +950,7 @@
       // 这里可以添加其他逻辑，比如更新购物车、价格等
       // 例如：更新产品变体选择
       if (event.detail.variantId) {
-        const productForm = document.querySelector('form[action*="/cart/add"]');
+        const productForm = document.querySelector('form[action="/cart/add"]');
         if (productForm) {
           const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
           if (variantInput) {
@@ -972,7 +978,7 @@
     },
     {
       "type": "range",
-      "id": "section_padding_top",
+      "id": "sectionpaddingtop",
       "min": 0,
       "max": 200,
       "step": 10,
@@ -982,7 +988,7 @@
     },
     {
       "type": "range",
-      "id": "section_padding_bottom",
+      "id": "sectionpaddingbottom",
       "min": 0,
       "max": 200,
       "step": 10,
@@ -992,7 +998,7 @@
     },
     {
       "type": "range",
-      "id": "section_margin_top",
+      "id": "sectionmargintop",
       "min": 0,
       "max": 200,
       "step": 10,
@@ -1002,7 +1008,7 @@
     },
     {
       "type": "color",
-      "id": "section_background_color",
+      "id": "sectionbackgroundcolor",
       "label": "Section Background Color",
       "default": "#fff"
     },
@@ -1016,25 +1022,25 @@
     },
     {
       "type": "product",
-      "id": "product_handle",
+      "id": "producthandle",
       "label": "Manual Product Selection (optional)",
       "info": "Leave empty to use current product on product pages"
     },
     {
       "type": "image_picker",
-      "id": "fallback_image",
+      "id": "fallbackimage",
       "label": "Fallback Image",
       "info": "Used when no product is available"
     },
     {
       "type": "text",
-      "id": "product_title",
+      "id": "producttitle",
       "label": "Fallback Product Title",
       "default": "PILATES REFORMER XSRF100"
     },
     {
       "type": "text",
-      "id": "model_number",
+      "id": "modelnumber",
       "label": "Fallback Model Number",
       "default": "XSRF100"
     },
@@ -1044,7 +1050,7 @@
     },
     {
       "type": "range",
-      "id": "main_image_height",
+      "id": "mainimageheight",
       "min": 300,
       "max": 800,
       "step": 50,
@@ -1054,13 +1060,13 @@
     },
     {
       "type": "color",
-      "id": "main_image_background",
+      "id": "mainimagebackground",
       "label": "Main Image Background Color",
       "default": "#F1EFEE"
     },
     {
       "type": "range",
-      "id": "thumbnail_columns",
+      "id": "thumbnailcolumns",
       "min": 3,
       "max": 6,
       "step": 1,
@@ -1073,43 +1079,43 @@
     },
     {
       "type": "checkbox",
-      "id": "show_customization_section",
+      "id": "showcustomizationsection",
       "label": "Show Customization Section",
       "default": true
     },
     {
       "type": "text",
-      "id": "customization_title",
+      "id": "customizationtitle",
       "label": "Customization Section Title",
       "default": "Ready to Customize This Product?"
     },
     {
       "type": "textarea",
-      "id": "customization_description",
+      "id": "customizationdescription",
       "label": "Customization Description",
       "default": "Send us your requirements — from size to surface finish, we'll help tailor the product to your needs. Fast response. Flexible MOQ. Global shipping available."
     },
     {
       "type": "text",
-      "id": "quote_button_text",
+      "id": "quotebuttontext",
       "label": "Quote Button Text",
       "default": "GET A QUOTE"
     },
     {
       "type": "url",
-      "id": "quote_button_link",
+      "id": "quotebuttonlink",
       "label": "Quote Button Link",
       "info": "Leave empty to auto-generate contact link with product info"
     },
     {
       "type": "color",
-      "id": "quote_button_color",
+      "id": "quotebuttoncolor",
       "label": "Quote Button Color",
       "default": "#d32f2f"
     },
     {
       "type": "color",
-      "id": "quote_button_hover_color",
+      "id": "quotebuttonhovercolor",
       "label": "Quote Button Hover Color",
       "default": "#b71c1c"
     },
@@ -1119,26 +1125,26 @@
     },
     {
       "type": "checkbox",
-      "id": "show_color_selection",
+      "id": "showcolorselection",
       "label": "Show Color Selection",
       "default": true
     },
     {
       "type": "text",
-      "id": "color_section_title",
+      "id": "colorsectiontitle",
       "label": "Color Section Title",
       "default": "Upholstery Colors"
     },
     {
       "type": "text",
-      "id": "color_option_name",
+      "id": "coloroptionname",
       "label": "Color Option Name",
       "default": "Color",
       "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric', '颜色')"
     },
     {
       "type": "range",
-      "id": "color_columns",
+      "id": "colorcolumns",
       "min": 2,
       "max": 4,
       "step": 1,
@@ -1151,7 +1157,7 @@
     },
     {
       "type": "range",
-      "id": "product_title_size",
+      "id": "producttitlesize",
       "min": 18,
       "max": 36,
       "step": 2,
@@ -1161,13 +1167,13 @@
     },
     {
       "type": "color",
-      "id": "product_title_color",
+      "id": "producttitlecolor",
       "label": "Product Title Color",
       "default": "#333"
     },
     {
       "type": "range",
-      "id": "customization_title_size",
+      "id": "customizationtitlesize",
       "min": 16,
       "max": 28,
       "step": 2,
@@ -1177,13 +1183,13 @@
     },
     {
       "type": "color",
-      "id": "customization_title_color",
+      "id": "customizationtitlecolor",
       "label": "Customization Title Color",
       "default": "#333"
     },
     {
       "type": "range",
-      "id": "description_font_size",
+      "id": "descriptionfontsize",
       "min": 12,
       "max": 18,
       "step": 1,
@@ -1193,13 +1199,13 @@
     },
     {
       "type": "color",
-      "id": "description_color",
+      "id": "descriptioncolor",
       "label": "Description Text Color",
       "default": "#16161680"
     },
     {
       "type": "color",
-      "id": "model_number_color",
+      "id": "modelnumbercolor",
       "label": "Model Number Color",
       "default": "#16161680"
     }
@@ -1211,40 +1217,40 @@
       "settings": [
         {
           "type": "image_picker",
-          "id": "thumbnail_image",
+          "id": "thumbnailimage",
           "label": "Thumbnail Image"
         },
         {
           "type": "text",
-          "id": "thumbnail_alt",
+          "id": "thumbnailalt",
           "label": "Thumbnail Alt Text",
           "info": "Describe the image for accessibility"
         }
       ]
     },
     {
-      "type": "color_option",
+      "type": "coloroption",
       "name": "Color Option",
       "settings": [
         {
           "type": "text",
-          "id": "color_name",
+          "id": "colorname",
           "label": "Color Name"
         },
         {
           "type": "color",
-          "id": "color_value",
+          "id": "colorvalue",
           "label": "Color Value"
         },
         {
           "type": "checkbox",
-          "id": "is_selected",
+          "id": "isselected",
           "label": "Selected by Default",
           "default": false
         },
         {
           "type": "text",
-          "id": "color_description",
+          "id": "colordescription",
           "label": "Color Description (optional)",
           "info": "Additional description for this color option"
         }
@@ -1256,67 +1262,67 @@
       "name": "Pilates Reformer Product",
       "blocks": [
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Black",
-            "color_value": "#2c2c2c",
-            "is_selected": true
+            "colorname": "Black",
+            "colorvalue": "#2c2c2c",
+            "isselected": true
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Steel Gray",
-            "color_value": "#6b7280"
+            "colorname": "Steel Gray",
+            "colorvalue": "#6b7280"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Mocha Brown",
-            "color_value": "#8b7355"
+            "colorname": "Mocha Brown",
+            "colorvalue": "#8b7355"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Espresso Brown",
-            "color_value": "#4a3728"
+            "colorname": "Espresso Brown",
+            "colorvalue": "#4a3728"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Pearl Pink",
-            "color_value": "#f8c8c8"
+            "colorname": "Pearl Pink",
+            "colorvalue": "#f8c8c8"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Ivory",
-            "color_value": "#f5f5dc"
+            "colorname": "Ivory",
+            "colorvalue": "#f5f5dc"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Vivid Red",
-            "color_value": "#dc2626"
+            "colorname": "Vivid Red",
+            "colorvalue": "#dc2626"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Magenta Pink",
-            "color_value": "#db2777"
+            "colorname": "Magenta Pink",
+            "colorvalue": "#db2777"
           }
         },
         {
-          "type": "color_option",
+          "type": "coloroption",
           "settings": {
-            "color_name": "Soft Pink",
-            "color_value": "#f3a8b6"
+            "colorname": "Soft Pink",
+            "colorvalue": "#f3a8b6"
           }
         }
       ]
