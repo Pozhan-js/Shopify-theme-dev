@@ -1,4 +1,19 @@
-<div class="blog-posts-showcase" id="blog-showcase-{{ section.id }}">
+<!-- 配色方案样式 -->
+<style>
+  #blog-showcase-{{ section.id }} {
+    --primary-color: {{ section.settings.primary_color | default: settings.colors_accent_1 | default: '#007bff' }};
+    --secondary-color: {{ section.settings.secondary_color | default: settings.colors_accent_2 | default: '#6c757d' }};
+    --background-color: {{ section.settings.background_color | default: settings.colors_background_1 | default: '#ffffff' }};
+    --text-color: {{ section.settings.text_color | default: settings.colors_text | default: '#333333' }};
+    --card-background: {{ section.settings.card_background | default: settings.colors_background_2 | default: '#ffffff' }};
+    --border-color: {{ section.settings.border_color | default: '#e0e0e0' }};
+    --hover-color: {{ section.settings.hover_color | default: '#0056b3' }};
+    --tag-background: {{ section.settings.tag_background | default: 'rgba(0, 123, 255, 0.1)' }};
+    --tag-text: {{ section.settings.tag_text | default: '#007bff' }};
+  }
+</style>
+
+<div class="blog-posts-showcase color-scheme-{{ section.settings.color_scheme | default: 'default' }}" id="blog-showcase-{{ section.id }}">
   <div class="container">
     <!-- Section标题 -->
     {% if section.settings.heading != blank %}
@@ -10,16 +25,14 @@
       </div>
     {% endif %}
 
-    <!-- 博客选择和过滤 -->
+    <!-- 博客选择和过滤 - 保持原有逻辑不变 -->
     {% if section.settings.blog_source == 'all' %}
-      <!-- 支持多个单词的博客句柄 -->
-      {% assign common_blog_handles = 'news,Fresh,Reflections,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
+      {% assign common_blog_handles = 'news,blog,updates,announcements,stories,articles,company-news,product-updates,tech-blog,customer-stories,press-releases,industry-insights,how-to-guides,case-studies,behind-the-scenes' | split: ',' %}
       {% assign total_articles_available = 0 %}
       {% assign active_blogs = 0 %}
       {% assign blog_names = '' %}
       {% assign has_any_articles = false %}
       
-      <!-- 第一遍循环：计算统计信息 -->
       {% for blog_handle in common_blog_handles %}
         {% assign current_blog = blogs[blog_handle] %}
         {% if current_blog and current_blog.articles.size > 0 %}
@@ -34,7 +47,6 @@
         {% endif %}
       {% endfor %}
       
-      <!-- 如果没有找到常见博客，检查默认博客 -->
       {% unless has_any_articles %}
         {% if blog.articles.size > 0 %}
           {% assign has_any_articles = true %}
@@ -50,9 +62,7 @@
           {% assign posts_to_show = section.settings.posts_to_show %}
           
           {% if section.settings.layout_style == 'grid' %}
-            <!-- 网格布局 -->
             <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-              <!-- 第二遍循环：渲染文章 -->
               {% for blog_handle in common_blog_handles %}
                 {% assign current_blog = blogs[blog_handle] %}
                 {% if current_blog and current_blog.articles.size > 0 %}
@@ -70,7 +80,6 @@
                 {% endif %}
               {% endfor %}
               
-              <!-- 如果还没达到显示数量且没有其他博客，使用默认博客 -->
               {% if total_articles_shown < posts_to_show %}
                 {% for article in blog.articles %}
                   {% if total_articles_shown < posts_to_show %}
@@ -84,7 +93,6 @@
             </div>
             
           {% elsif section.settings.layout_style == 'list' %}
-            <!-- 列表布局 -->
             <div class="posts-list">
               {% for blog_handle in common_blog_handles %}
                 {% assign current_blog = blogs[blog_handle] %}
@@ -116,7 +124,6 @@
             </div>
             
           {% else %}
-            <!-- 滑动布局 -->
             <div class="posts-slider" id="posts-slider-{{ section.id }}">
               <div class="slider-container">
                 <div class="slider-track">
@@ -169,7 +176,6 @@
             </div>
           {% endif %}
 
-          <!-- 博客来源显示 -->
           {% if section.settings.show_blog_source %}
             <div class="blog-sources-info">
               <p class="sources-text">
@@ -178,7 +184,6 @@
             </div>
           {% endif %}
 
-          <!-- 分页或查看更多 -->
           {% if section.settings.show_view_all and total_articles_available > posts_to_show %}
             <div class="posts-pagination">
               <div class="all-blogs-pagination">
@@ -202,21 +207,18 @@
           {% endif %}
         </div>
       {% else %}
-        <!-- 没有找到任何文章 -->
         <div class="no-posts-message">
           <div class="no-posts-icon">
             <svg width="80" height="80" viewBox="0 0 80 80">
-              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
+              <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
+              <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
+              <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
             </svg>
           </div>
           <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-          <p>
-            No published blog posts found. Checked blog handles: {{ common_blog_handles | join: ', ' }}
-          </p>
+          <p>No published blog posts found. Checked blog handles: {{ common_blog_handles | join: ', ' }}</p>
           {% if section.settings.show_create_post_link %}
             <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
           {% endif %}
@@ -224,7 +226,7 @@
       {% endif %}
 
     {% elsif section.settings.blog_source == 'specific' and section.settings.specific_blog != blank %}
-      <!-- 特定博客代码保持不变 -->
+      <!-- 特定博客逻辑保持不变 -->
       {% assign selected_blog = blogs[section.settings.specific_blog] %}
       {% assign all_articles = selected_blog.articles %}
       
@@ -263,115 +265,115 @@
                 <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
                   <svg width="20" height="20" viewBox="0 0 20 20">
                     <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-            <div class="posts-pagination">
-              <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
-                View All Posts
-                <svg width="16" height="16" viewBox="0 0 16 16">
-                  <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
-              </a>
-            </div>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="no-posts-message">
-          <div class="no-posts-icon">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
-            </svg>
-          </div>
-          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-          <p>No published posts found in the selected blog.</p>
-          {% if section.settings.show_create_post_link %}
-            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-          {% endif %}
-        </div>
-      {% endif %}
-
-    {% else %}
-      <!-- 默认博客代码保持不变 -->
-      {% assign all_articles = blog.articles %}
-      
-      {% if all_articles.size > 0 %}
-        <div class="blog-posts-container">
-          {% if section.settings.layout_style == 'grid' %}
-            <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
-              {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-              {% endfor %}
-            </div>
-          {% elsif section.settings.layout_style == 'list' %}
-            <div class="posts-list">
-              {% for article in all_articles limit: section.settings.posts_to_show %}
-                {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="posts-slider" id="posts-slider-{{ section.id }}">
-              <div class="slider-container">
-                <div class="slider-track">
-                  {% for article in all_articles limit: section.settings.posts_to_show %}
-                    <div class="post-slide">
-                      {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-              
-              {% if all_articles.size > 3 %}
-                <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
-                  <svg width="20" height="20" viewBox="0 0 20 20">
-                    <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
-                  </svg>
-                </button>
-                <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
-                  <svg width="20" height="20" viewBox="0 0 20 20">
-                    <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
-            <div class="posts-pagination">
-              <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
-                Load More Posts
-                <div class="loading-spinner" style="display: none;"></div>
               </button>
-            </div>
-          {% endif %}
-        </div>
-      {% else %}
-        <div class="no-posts-message">
-          <div class="no-posts-icon">
-            <svg width="80" height="80" viewBox="0 0 80 80">
-              <rect x="10" y="15" width="60" height="50" rx="4" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
-              <line x1="20" y1="25" x2="60" y2="25" stroke="#ccc" stroke-width="2"/>
-              <line x1="20" y1="35" x2="50" y2="35" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="45" x2="55" y2="45" stroke="#ccc" stroke-width="1"/>
-              <line x1="20" y1="55" x2="45" y2="55" stroke="#ccc" stroke-width="1"/>
-            </svg>
+            {% endif %}
           </div>
-          <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
-          <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
-          {% if section.settings.show_create_post_link %}
-            <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
-          {% endif %}
+        {% endif %}
+
+        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+          <div class="posts-pagination">
+            <a href="/blogs/{{ section.settings.specific_blog }}" class="view-all-btn">
+              View All Posts
+              <svg width="16" height="16" viewBox="0 0 16 16">
+                <path d="M8.146 4.646a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.793 8 8.146 5.354a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="no-posts-message">
+        <div class="no-posts-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
+            <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
+          </svg>
         </div>
-      {% endif %}
+        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+        <p>No published posts found in the selected blog.</p>
+        {% if section.settings.show_create_post_link %}
+          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+        {% endif %}
+      </div>
     {% endif %}
+
+  {% else %}
+    <!-- 默认博客逻辑保持不变 -->
+    {% assign all_articles = blog.articles %}
+    
+    {% if all_articles.size > 0 %}
+      <div class="blog-posts-container">
+        {% if section.settings.layout_style == 'grid' %}
+          <div class="posts-grid" style="--grid-columns: {{ section.settings.grid_columns }};">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% elsif section.settings.layout_style == 'list' %}
+          <div class="posts-list">
+            {% for article in all_articles limit: section.settings.posts_to_show %}
+              {% render 'blog-post-list-item', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="posts-slider" id="posts-slider-{{ section.id }}">
+            <div class="slider-container">
+              <div class="slider-track">
+                {% for article in all_articles limit: section.settings.posts_to_show %}
+                  <div class="post-slide">
+                    {% render 'blog-post-card', article: article, show_excerpt: section.settings.show_excerpt, show_author: section.settings.show_author, show_date: section.settings.show_date, show_tags: section.settings.show_tags, excerpt_length: section.settings.excerpt_length %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+            
+            {% if all_articles.size > 3 %}
+              <button class="slider-btn slider-prev" onclick="slidePosts('{{ section.id }}', -1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
+                </svg>
+              </button>
+              <button class="slider-btn slider-next" onclick="slidePosts('{{ section.id }}', 1)">
+                <svg width="20" height="20" viewBox="0 0 20 20">
+                  <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"/>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if section.settings.show_view_all and all_articles.size > section.settings.posts_to_show %}
+          <div class="posts-pagination">
+            <button class="load-more-btn" onclick="loadMorePosts('{{ section.id }}')">
+              Load More Posts
+              <div class="loading-spinner" style="display: none;"></div>
+            </button>
+          </div>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="no-posts-message">
+        <div class="no-posts-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <rect x="10" y="15" width="60" height="50" rx="4" fill="currentColor" opacity="0.1"/>
+            <line x1="20" y1="25" x2="60" y2="25" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="35" x2="50" y2="35" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="45" x2="55" y2="45" stroke="currentColor" opacity="0.3"/>
+            <line x1="20" y1="55" x2="45" y2="55" stroke="currentColor" opacity="0.3"/>
+          </svg>
+        </div>
+        <h3>{{ section.settings.no_posts_title | default: "No Blog Posts Found" }}</h3>
+        <p>{{ section.settings.no_posts_message | default: "There are no blog posts to display at the moment." }}</p>
+        {% if section.settings.show_create_post_link %}
+          <a href="/admin/articles/new" class="create-post-btn">Create First Post</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endif %}
   </div>
 </div>
 
@@ -469,6 +471,85 @@ function loadMorePosts(sectionId) {
       "id": "description",
       "label": "Section Description",
       "info": "Optional description below the heading"
+    },
+    {
+      "type": "header",
+      "content": "Color Scheme"
+    },
+    {
+      "type": "select",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "options": [
+        {
+          "value": "default",
+          "label": "Default"
+        },
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "dark",
+          "label": "Dark"
+        },
+        {
+          "value": "accent",
+          "label": "Accent"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "default"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Color",
+      "info": "Used for buttons and links"
+    },
+    {
+      "type": "color",
+      "id": "secondary_color",
+      "label": "Secondary Color",
+      "info": "Used for meta information"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card Background Color"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color"
+    },
+    {
+      "type": "color",
+      "id": "hover_color",
+      "label": "Hover Color"
+    },
+    {
+      "type": "color",
+      "id": "tag_background",
+      "label": "Tag Background Color"
+    },
+    {
+      "type": "color",
+      "id": "tag_text",
+      "label": "Tag Text Color"
     },
     {
       "type": "header",
