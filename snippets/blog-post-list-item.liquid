@@ -1,0 +1,55 @@
+<article class="blog-post-list-item" data-article-id="{{ article.id }}">
+  <div class="post-list-inner">
+    <!-- 文章图片 -->
+    {% if article.image %}
+      <div class="post-list-image">
+        <a href="{{ article.url }}">
+          <img src="{{ article.image | image_url: width: 300 }}" 
+               alt="{{ article.title | escape }}"
+               loading="lazy">
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- 文章内容 -->
+    <div class="post-list-content">
+      <!-- 文章元信息 -->
+      <div class="post-meta">
+        {% if show_date %}
+          <span class="post-date">{{ article.published_at | date: "%B %d, %Y" }}</span>
+        {% endif %}
+        
+        {% if show_author and article.author %}
+          <span class="post-author">by {{ article.author }}</span>
+        {% endif %}
+        
+        {% if show_tags and article.tags.size > 0 %}
+          <div class="post-tags">
+            {% for tag in article.tags limit: 3 %}
+              <span class="post-tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- 文章标题 -->
+      <h3 class="post-title">
+        <a href="{{ article.url }}">{{ article.title }}</a>
+      </h3>
+
+      <!-- 文章摘要 -->
+      {% if show_excerpt %}
+        <div class="post-excerpt">
+          {% if article.excerpt != blank %}
+            {{ article.excerpt | truncate: excerpt_length | strip_html }}
+          {% else %}
+            {{ article.content | strip_html | truncate: excerpt_length }}
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- 阅读更多 -->
+      <a href="{{ article.url }}" class="read-more-link">Read Full Article →</a>
+    </div>
+  </div>
+</article>
