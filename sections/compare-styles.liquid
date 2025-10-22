@@ -92,9 +92,38 @@
     letter-spacing: 0.025em;
   }
 
+  .style-title-link {
+    text-decoration: underline;
+    text-decoration-color: #d1d5db;
+    text-underline-offset: 0.25rem;
+    text-decoration-thickness: 2px;
+    color: inherit;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .style-title-link:hover {
+    color: #374151;
+    text-decoration-color: #9ca3af;
+  }
+
+  .style-title-link .style-title {
+    margin-bottom: 0.75rem;
+  }
+
   @media (min-width: 640px) {
     .style-title {
       font-size: 1.125rem;
+      margin-bottom: 1rem;
+    }
+
+    .style-title-link {
+      text-underline-offset: 0.375rem;
+    }
+
+    .style-title-link .style-title {
       margin-bottom: 1rem;
     }
   }
@@ -190,6 +219,10 @@
       margin-bottom: 0.5rem;
     }
 
+    .style-title-link {
+      text-underline-offset: 0.2rem;
+    }
+
     .style-section {
       margin-bottom: 0.5rem;
     }
@@ -225,7 +258,13 @@
           {% endif %}
 
           <div class="style-content">
-            <h3 class="style-title">{{ block.settings.style_name }}</h3>
+            {% if block.settings.product_url %}
+              <a href="{{ block.settings.product_url }}" class="style-title-link">
+                <h3 class="style-title">{{ block.settings.style_name }}</h3>
+              </a>
+            {% else %}
+              <h3 class="style-title">{{ block.settings.style_name }}</h3>
+            {% endif %}
 
             <div class="style-section">
               <div class="style-label">{{ block.settings.look_label }}</div>
@@ -342,6 +381,12 @@
           "id": "style_name",
           "label": "风格名称",
           "default": "ALO SOFTSCULPT"
+        },
+        {
+          "type": "url",
+          "id": "product_url",
+          "label": "产品链接",
+          "info": "点击风格名称时跳转到的产品详情页"
         },
         {
           "type": "text",
