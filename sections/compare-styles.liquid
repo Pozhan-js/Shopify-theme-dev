@@ -1,0 +1,487 @@
+{% comment %}
+  产品风格对比 Section
+  所有文字和图片都可以在主题编辑器中编辑
+{% endcomment %}
+
+<style>
+  .compare-styles-section {
+    background-color: {{ section.settings.background_color | default: '#f8fafc' }};
+    padding: 3rem 1rem;
+  }
+
+  .compare-styles-container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .compare-styles-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .compare-styles-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .compare-styles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .compare-styles-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .compare-styles-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  .style-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .style-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+  }
+
+  .style-image {
+    width: 100%;
+    height: 10rem;
+    object-fit: cover;
+  }
+
+  @media (min-width: 640px) {
+    .style-image {
+      height: 12rem;
+    }
+  }
+
+  .style-content {
+    padding: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .style-content {
+      padding: 1.5rem;
+    }
+  }
+
+  .style-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.025em;
+  }
+
+  @media (min-width: 640px) {
+    .style-title {
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .style-section {
+    margin-bottom: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .style-section {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .style-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .style-label {
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .style-description {
+    font-size: 0.75rem;
+    color: #374151;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .style-description {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .feel-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: #4b5563;
+  }
+
+  @media (min-width: 640px) {
+    .feel-item {
+      font-size: 0.875rem;
+    }
+  }
+
+  .feel-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    color: #9ca3af;
+  }
+
+  @media (min-width: 640px) {
+    .feel-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  /* 移动端优化 */
+  @media (max-width: 640px) {
+    .compare-styles-section {
+      padding: 2rem 1rem;
+    }
+
+    .compare-styles-title {
+      font-size: 2rem;
+    }
+
+    .style-card {
+      margin: 0 0.5rem;
+    }
+
+    .style-content {
+      padding: 1rem;
+    }
+
+    .style-title {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .style-section {
+      margin-bottom: 0.5rem;
+    }
+
+    .style-description {
+      font-size: 0.75rem;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .feel-item {
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<div class="compare-styles-section">
+  <div class="compare-styles-container">
+    <div class="compare-styles-header">
+      <h1 class="compare-styles-title">{{ section.settings.section_title }}</h1>
+    </div>
+
+    <div class="compare-styles-grid">
+      {% for block in section.blocks %}
+        <div class="style-card" {{ block.shopify_attributes }}>
+          {% if block.settings.image %}
+            <img
+              src="{{ block.settings.image | img_url: '400x300' }}"
+              alt="{{ block.settings.style_name }}"
+              class="style-image"
+              loading="lazy"
+            >
+          {% endif %}
+
+          <div class="style-content">
+            <h3 class="style-title">{{ block.settings.style_name }}</h3>
+
+            <div class="style-section">
+              <div class="style-label">{{ block.settings.look_label }}</div>
+              <p class="style-description">{{ block.settings.look_description }}</p>
+            </div>
+
+            <div class="style-section">
+              <div class="style-label">{{ block.settings.feel_label }}</div>
+              <div class="feel-item">
+                {% if block.settings.custom_icon %}
+                  <img src="{{ block.settings.custom_icon | img_url: '24x24' }}" alt="Custom Icon" class="feel-icon">
+                {% else %}
+                  {% case block.settings.feel_type %}
+                    {% when 'ultra-soft' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.002 4.002 0 003 15z" />
+                      </svg>
+                    {% when 'sleek' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    {% when 'soft-cottony' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    {% when 'buttery-soft' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.002 4.002 0 003 15z" />
+                      </svg>
+                    {% when 'smooth' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    {% when 'textured' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                      </svg>
+                    {% when 'breathable' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                      </svg>
+                    {% when 'stretchy' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                      </svg>
+                    {% when 'moisture-wicking' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.002 4.002 0 003 15z" />
+                      </svg>
+                    {% when 'cooling' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                      </svg>
+                    {% when 'warming' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                      </svg>
+                    {% when 'luxurious' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    {% when 'durable' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    {% when 'lightweight' %}
+                      <svg class="feel-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-9 5 9M12 2v20" />
+                      </svg>
+                  {% endcase %}
+                {% endif %}
+                <span>{{ block.settings.feel_description }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "产品风格对比",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "标题",
+      "default": "COMPARE STYLES"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#f8fafc"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "style_item",
+      "name": "风格项目",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "产品图片"
+        },
+        {
+          "type": "text",
+          "id": "style_name",
+          "label": "风格名称",
+          "default": "ALO SOFTSCULPT"
+        },
+        {
+          "type": "text",
+          "id": "look_label",
+          "label": "外观标签",
+          "default": "LOOK"
+        },
+        {
+          "type": "textarea",
+          "id": "look_description",
+          "label": "外观描述",
+          "default": "Naturally breathable with a soft, subtle sheen."
+        },
+        {
+          "type": "text",
+          "id": "feel_label",
+          "label": "触感标签",
+          "default": "FEEL"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_icon",
+          "label": "自定义图标 (可选)"
+        },
+        {
+          "type": "select",
+          "id": "feel_type",
+          "label": "触感类型图标",
+          "info": "如果上传了自定义图标，将优先使用自定义图标",
+          "options": [
+            {
+              "value": "ultra-soft",
+              "label": "超柔软 (云朵)"
+            },
+            {
+              "value": "sleek",
+              "label": "光滑 (闪电)"
+            },
+            {
+              "value": "soft-cottony",
+              "label": "柔软棉质 (爱心)"
+            },
+            {
+              "value": "buttery-soft",
+              "label": "丝滑柔软 (云朵)"
+            },
+            {
+              "value": "smooth",
+              "label": "顺滑 (对勾)"
+            },
+            {
+              "value": "textured",
+              "label": "有纹理 (方块)"
+            },
+            {
+              "value": "breathable",
+              "label": "透气 (信号)"
+            },
+            {
+              "value": "stretchy",
+              "label": "弹性 (拉伸)"
+            },
+            {
+              "value": "moisture-wicking",
+              "label": "吸湿排汗 (水滴)"
+            },
+            {
+              "value": "cooling",
+              "label": "凉感 (扇形)"
+            },
+            {
+              "value": "warming",
+              "label": "保暖 (火焰)"
+            },
+            {
+              "value": "luxurious",
+              "label": "奢华 (星星)"
+            },
+            {
+              "value": "durable",
+              "label": "耐用 (盾牌)"
+            },
+            {
+              "value": "lightweight",
+              "label": "轻盈 (羽毛)"
+            }
+          ],
+          "default": "ultra-soft"
+        },
+        {
+          "type": "text",
+          "id": "feel_description",
+          "label": "触感描述",
+          "default": "Ultra-Soft Feel"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品风格对比",
+      "blocks": [
+        {
+          "type": "style_item",
+          "settings": {
+            "style_name": "ALO SOFTSCULPT",
+            "look_description": "Naturally breathable with a soft, subtle sheen.",
+            "feel_type": "ultra-soft",
+            "feel_description": "Ultra-Soft Feel"
+          }
+        },
+        {
+          "type": "style_item",
+          "settings": {
+            "style_name": "AIRLIFT",
+            "look_description": "Sleek & sculpting with a subtle sheen.",
+            "feel_type": "sleek",
+            "feel_description": "Sleek Feel"
+          }
+        },
+        {
+          "type": "style_item",
+          "settings": {
+            "style_name": "AIRBRUSH",
+            "look_description": "Soft and stretchy fabric with a matte finish.",
+            "feel_type": "soft-cottony",
+            "feel_description": "Soft Cottony Feel"
+          }
+        },
+        {
+          "type": "style_item",
+          "settings": {
+            "style_name": "ALOSOFT",
+            "look_description": "Buttery-soft and lightweight fabric with a brushed finish.",
+            "feel_type": "buttery-soft",
+            "feel_description": "Buttery Soft Feel"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
