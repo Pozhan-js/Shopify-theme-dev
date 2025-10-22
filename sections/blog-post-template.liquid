@@ -1,23 +1,45 @@
 {% comment %}
-  Blog Post Template Section
-  自定义博客文章展示模板
+  ===================================================================
+  博客文章模板 Section - 全自动版本
+  功能：
+    - 背景图 = 文章特色图片（自动获取）
+    - 文章类型 = 第一个标签
+    - 作者 = article.author
+    - 日期格式化为 YYYY/MM/DD
+    - 响应式全屏背景 + 遮罩层保护文字可读性
+    - 支持 fallback 备用图
+  使用方式：
+    在 Shopify 后台编辑文章时上传 "Featured Image" 即可自动生效
+  ===================================================================
 {% endcomment %}
 
-{%- assign blog_post = section.settings.blog_post | default: article -%}
-{%- assign background_image = section.settings.background_image | img_url: '2048x' | prepend: 'https:' -%}
-{%- assign post_type = section.settings.post_type -%}
-{%- assign author_name = section.settings.author_name -%}
+{%- assign blog_post = section.settings.blog_post_override | default: article -%}
 
-<div class="blog-post-section"
-     style="background-image: url('{{ background_image }}');">
+{%- comment %} 获取文章特色图片作为背景，若无则使用备用图 {% endcomment %}
+{%- if blog_post.image %}
+  {%- assign background_image = blog_post.image | img_url: '2048x' | prepend: 'https:' -%}
+{%- else %}
+  {%- assign background_image = section.settings.fallback_image | img_url: '2048x' | prepend: 'https:' -%}
+{%- endif %}
+
+{%- comment %} 获取文章类型：取第一个标签，否则显示“未分类” {% endcomment %}
+{%- if blog_post.tags.size > 0 %}
+  {%- assign post_type = blog_post.tags.first -%}
+{%- else %}
+  {%- assign post_type = '未分类' -%}
+{%- endif %}
+
+{%- assign author_name = blog_post.author -%}
+
+<div class="blog-post-section" style="background-image: url('{{ background_image }}');">
   <div class="container">
-    <!-- 上部：日期 + 类型 -->
+    <!-- 上部：左右结构 -->
     <div class="blog-header">
       <div class="date">{{ blog_post.published_at | date: "%Y/%m/%d" }}</div>
       <div class="type">{{ post_type }}</div>
     </div>
 
-    <!-- 中部：标题 + 内容 -->
+    <!-- 中部：标题和内容 -->
     <div class="blog-content">
       <h1 class="title">{{ blog_post.title }}</h1>
       <div class="body">
@@ -34,22 +56,37 @@
 
 <style>
   .blog-post-section {
+    position: relative;
     min-height: 100vh;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     padding: 60px 20px;
-    color: white; /* 背景图常为深色，文字建议设为白色 */
-    text-shadow: 0 2px 10px rgba(0,0,0,0.7); /* 提升文字可读性 */
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
     font-family: "Helvetica Neue", Arial, sans-serif;
   }
 
+  /* 遮罩层：防止文字与复杂背景冲突 */
+  .blog-post-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 0;
+  }
+
   .container {
+    position: relative;
+    z-index: 1;
     max-width: 960px;
     margin: 0 auto;
   }
 
-  /* 上部：左右布局 */
+  /* 上部：日期 + 类型 */
   .blog-header {
     display: flex;
     justify-content: space-between;
@@ -63,7 +100,7 @@
   }
 
   .blog-header .type {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     padding: 6px 12px;
     border-radius: 4px;
     font-size: 16px;
@@ -79,7 +116,7 @@
   .blog-content .body {
     font-size: 18px;
     line-height: 1.8;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     padding: 30px;
     border-radius: 10px;
     backdrop-filter: blur(4px);
@@ -95,41 +132,48 @@
     font-size: 20px;
     font-weight: 500;
   }
+
+  /* 响应式适配 */
+  @media (max-width: 768px) {
+    .blog-header {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .blog-content .title {
+      font-size: 28px;
+    }
+    .blog-content .body {
+      font-size: 16px;
+      padding: 20px;
+    }
+    .blog-footer .author {
+      font-size: 18px;
+    }
+  }
 </style>
 
 {% schema %}
 {
-  "name": "博客文章模板",
+  "name": "全自动博客文章模板",
   "tag": "section",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "background_image",
-      "label": "背景图片",
-      "info": "建议使用高清大图以获得更好视觉效果"
-    },
-    {
       "type": "article",
-      "id": "blog_post",
-      "label": "选择博客文章",
-      "info": "留空则自动显示当前文章"
+      "id": "blog_post_override",
+      "label": "【调试】指定文章",
+      "info": "留空时自动显示当前文章，用于预览测试"
     },
     {
-      "type": "text",
-      "id": "post_type",
-      "label": "文章类型",
-      "default": "技术分享"
-    },
-    {
-      "type": "text",
-      "id": "author_name",
-      "label": "作者名称",
-      "default": "匿名作者"
+      "type": "image_picker",
+      "id": "fallback_image",
+      "label": "备用背景图",
+      "info": "当文章没有设置特色图片时显示此图"
     }
   ],
   "presets": [
     {
-      "name": "博客文章模板"
+      "name": "全自动博客模板",
+      "category": "博客"
     }
   ]
 }
