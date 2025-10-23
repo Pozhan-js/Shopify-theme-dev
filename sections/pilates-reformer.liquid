@@ -6,14 +6,14 @@
         <!-- 主图 -->
         <div class="prf-main-image">
           {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品，最后是回退图片 {% endcomment %}
-          {% assign current_product = product %}
-          {% assign selected_product = all_products[section.settings.producthandle] %}
-          {% assign display_product = current_product | default: selected_product %}
+          {% assign currentproduct = product %}
+          {% assign selectedproduct = allproducts[section.settings.producthandle] %}
+          {% assign displayproduct = currentproduct | default: selectedproduct %}
 
-          {% if display_product and display_product.images.size > 0 %}
+          {% if displayproduct and displayproduct.images.size > 0 %}
             <img
-              src="{{ display_product.images.first | image_url: width: 1200 }}"
-              alt="{{ display_product.title }}"
+              src="{{ displayproduct.images.first | image_url: width: 1200 }}"
+              alt="{{ displayproduct.title }}"
               class="prf-main-product-image"
               id="prf-main-product-image"
             >
@@ -29,8 +29,8 @@
 
         <!-- 缩略图 -->
         <div class="prf-thumbnail-images">
-          {% if display_product and display_product.images.size > 0 %}
-            {% for image in display_product.images %}
+          {% if displayproduct and displayproduct.images.size > 0 %}
+            {% for image in displayproduct.images %}
               <div
                 class="prf-thumbnail-item {% if forloop.first %}prf-active{% endif %}"
                 data-image-url="{{ image | image_url: width: 1200 }}"
@@ -68,12 +68,13 @@
       <div class="prf-product-info">
         <!-- 产品标题和型号 -->
         <div class="prf-product-header">
-          {% if display_product %}
-            <h1 class="prf-product-title">{{ display_product.title }}</h1>
-            {% if display_product.metafields.custom.tag %}
+          {% if displayproduct %}
+            <h1 class="prf-product-title">{{ displayproduct.title }}</h1>
+            {% assign model_tag = displayproduct.metafields.custom.tag %}
+            {% if model_tag and model_tag != blank %}
               <div class="prf-model-info">
                 <span class="prf-model-number">
-                  Model No: {{ display_product.metafields.custom.tag }}
+                  Model No: {{ model_tag }}
                 </span>
               </div>
             {% endif %}
@@ -90,14 +91,11 @@
 
         <!-- 定制询问区域 -->
         {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
-        {% if display_product and display_product.metafields.custom.color_show != blank %}
-          {% if display_product.metafields.custom.color_show == false %}
-            {% assign show_customization = false %}
-          {% else %}
-            {% assign show_customization = true %}
-          {% endif %}
-        {% else %}
-          {% assign show_customization = product.metafields.custom.color_show  %}
+        {% assign show_customization = false %}
+        {% if displayproduct and displayproduct.metafields.custom.color_show %}
+          {% assign show_customization = displayproduct.metafields.custom.color_show %}
+        {% elsif section.settings.showcustomizationsection %}
+          {% assign show_customization = true %}
         {% endif %}
         
         {% if show_customization %}
@@ -107,8 +105,8 @@
 
             {% if section.settings.quotebuttontext %}
               {% assign quotelink = section.settings.quotebuttonlink %}
-              {% if quotelink == blank and display_product %}
-                {% assign quotelink = '/pages/contact?product=' | append: display_product.handle %}
+              {% if quotelink == blank and displayproduct %}
+                {% assign quotelink = '/pages/contact?product=' | append: displayproduct.handle %}
               {% endif %}
               <a href="{{ quotelink }}" class="prf-quote-button">
                 {{ section.settings.quotebuttontext }}
@@ -119,14 +117,11 @@
 
         <!-- 颜色选择区域 -->
         {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
-        {% if display_product and display_product.metafields.custom.color_show != blank %}
-          {% if display_product.metafields.custom.color_show == false %}
-            {% assign show_color_selection = false %}
-          {% else %}
-            {% assign show_color_selection = true %}
-          {% endif %}
-        {% else %}
-          {% assign show_color_selection = section.settings.showcolorselection %}
+        {% assign show_color_selection = false %}
+        {% if displayproduct and displayproduct.metafields.custom.color_show %}
+          {% assign show_color_selection = displayproduct.metafields.custom.color_show %}
+        {% elsif section.settings.showcolorselection %}
+          {% assign show_color_selection = true %}
         {% endif %}
         
         {% if show_color_selection %}
@@ -137,11 +132,11 @@
               {% assign has_colors = false %}
               
               {% comment %} 首先尝试从产品获取颜色选项 {% endcomment %}
-              {% if display_product and display_product.options_with_values.size > 0 %}
+              {% if displayproduct and displayproduct.options_with_values.size > 0 %}
                 {% assign firstcolorprocessed = false %}
                 {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
                 
-                {% for option in display_product.options_with_values %}
+                {% for option in displayproduct.options_with_values %}
                   {% assign optionnamelower = option.name | downcase %}
                   {% assign targetnamelower = coloroptionname | downcase %}
                   
@@ -188,7 +183,7 @@
                       {% endif %}
                       
                       {% comment %} 查找对应的变体 {% endcomment %}
-                      {% for variant in display_product.variants %}
+                      {% for variant in displayproduct.variants %}
                         {% assign valuematches = false %}
                         
                         {% if variant.option1 == value %}
