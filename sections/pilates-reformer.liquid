@@ -90,7 +90,15 @@
         </div>
 
         <!-- 定制询问区域 -->
-        {% if section.settings.showcustomizationsection %}
+        {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
+        {% assign show_customization = false %}
+        {% if displayproduct and displayproduct.metafields.custom.color_show %}
+          {% assign show_customization = displayproduct.metafields.custom.color_show %}
+        {% elsif section.settings.showcustomizationsection %}
+          {% assign show_customization = true %}
+        {% endif %}
+        
+        {% if show_customization %}
           <div class="prf-customization-section">
             <h2 class="prf-customization-title">{{ section.settings.customizationtitle }}</h2>
             <p class="prf-customization-description">{{ section.settings.customizationdescription }}</p>
@@ -108,7 +116,15 @@
         {% endif %}
 
         <!-- 颜色选择区域 -->
-        {% if section.settings.showcolorselection %}
+        {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
+        {% assign show_color_selection = false %}
+        {% if displayproduct and displayproduct.metafields.custom.color_show %}
+          {% assign show_color_selection = displayproduct.metafields.custom.color_show %}
+        {% elsif section.settings.showcolorselection %}
+          {% assign show_color_selection = true %}
+        {% endif %}
+        
+        {% if show_color_selection %}
           <div class="prf-color-selection">
             <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
             <div class="prf-color-options">
