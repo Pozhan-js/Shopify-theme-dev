@@ -1,0 +1,278 @@
+{% comment %}
+  ===================================================================
+  博客文章列表 Section - 支持网格与轮播模式
+  卡片布局：上中下结构
+    - 上部：左=日期 右=类型
+    - 中部：标题 + 摘要
+    - 下部：作者（居中）
+  背景图 = 文章特色图，点击卡片跳转详情页
+  ===================================================================
+{% endcomment %}
+
+{%- assign blog_handle = section.settings.blog_handle -%}
+{%- assign blog = blogs[blog_handle] -%}
+{%- assign limit = section.settings.post_limit -%}
+{%- assign layout_mode = section.settings.layout_mode -%}
+
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'flickity.css' | asset_url | stylesheet_tag }}
+
+<style>
+  .blog-post-list-container {
+    padding: {{ section.settings.padding_top }}px {{ section.settings.padding_sides }}px;
+    background-color: {{ section.settings.bg_color }};
+  }
+
+  .blog-posts-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  /* 卡片容器 */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+  }
+
+  /* 卡片整体样式 */
+  .blog-card {
+    position: relative;
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .blog-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .blog-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
+    z-index: 1;
+  }
+
+  .blog-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  /* 上部：左右结构 */
+  .blog-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .blog-header .date {
+    font-weight: normal;
+  }
+
+  .blog-header .type {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  /* 中部：标题 + 摘要 */
+  .blog-content .title {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 8px 0;
+  }
+
+  .blog-content .excerpt {
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0.9;
+    margin-bottom: 12px;
+  }
+
+  /* 下部：作者 */
+  .blog-footer {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* 轮播模式专用 */
+  .flickity-enabled {
+    margin-top: 20px;
+  }
+
+  .flickity-slider {
+    height: 400px;
+  }
+
+  .flickity-button {
+    z-index: 3;
+  }
+
+  @media (max-width: 768px) {
+    .blog-grid {
+      grid-template-columns: 1fr;
+    }
+    .blog-card {
+      height: 360px;
+    }
+    .blog-content .title {
+      font-size: 18px;
+    }
+  }
+</style>
+
+<div class="blog-post-list-container">
+  <div class="blog-posts-wrapper">
+
+    {%- if layout_mode == 'carousel' -%}
+      <div class="flickity-carousel" data-flickity='{ "wrapAround": true, "autoPlay": false, "pageDots": true, "prevNextButtons": true }'>
+    {%- else -%}
+      <div class="blog-grid">
+    {%- endif -%}
+
+      {%- for article in blog.articles limit: limit -%}
+        {%- assign background_image = article.image | img_url: '1024x' | prepend: 'https:' -%}
+        {%- assign post_type = article.tags.first -%}
+        {%- assign excerpt = article.content | strip_html | truncate: 180 -%}
+
+        <a href="{{ article.url }}" class="blog-card" style="background-image: url('{{ background_image }}');">
+          <div class="blog-card-content">
+            <!-- 上部：日期 + 类型 -->
+            <div class="blog-header">
+              <div class="date">{{ article.published_at | date: "%Y/%m/%d" }}</div>
+              {%- if post_type -%}
+                <div class="type">{{ post_type }}</div>
+              {%- endif -%}
+            </div>
+
+            <!-- 中部：标题 + 摘要 -->
+            <div class="blog-content">
+              <h3 class="title">{{ article.title }}</h3>
+              <p class="excerpt">{{ excerpt }}</p>
+            </div>
+
+            <!-- 下部：作者 -->
+            <div class="blog-footer">
+              <span class="author">{{ article.author }}</span>
+            </div>
+          </div>
+        </a>
+      {%- endfor -%}
+
+      {%- if layout_mode == 'carousel' -%}
+        </div>
+      {%- else -%}
+        </div>
+      {%- endif -%}
+
+  </div>
+</div>
+
+<script src="{{ 'flickity.pkgd.min.js' | asset_url }}" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    {%- if layout_mode == 'carousel' -%}
+      const carousel = document.querySelector('.flickity-carousel');
+      if (carousel) {
+        new Flickity(carousel, {
+          wrapAround: true,
+          autoPlay: false,
+          pageDots: true,
+          prevNextButtons: true,
+          cellAlign: 'left'
+        });
+      }
+    {%- endif -%}
+  });
+</script>
+
+{% schema %}
+{
+  "name": "博客文章列表",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "blog_handle",
+      "label": "博客句柄",
+      "default": "news",
+      "info": "例如：news, articles, blog。可在博客设置中查看"
+    },
+    {
+      "type": "range",
+      "id": "post_limit",
+      "label": "显示文章数量",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "layout_mode",
+      "label": "布局模式",
+      "options": [
+        {
+          "value": "grid",
+          "label": "网格模式"
+        },
+        {
+          "value": "carousel",
+          "label": "轮播图模式"
+        }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "顶部内边距",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_sides",
+      "label": "左右内边距",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "博客文章列表",
+      "category": "博客"
+    }
+  ]
+}
+{% endschema %}
