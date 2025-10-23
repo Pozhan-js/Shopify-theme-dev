@@ -119,7 +119,7 @@
 		}
 	}
 
-	/* Standard image-with-text height reference */
+	/* Module height-based image sizing */
 	.image-with-text__container {
 		display: flex;
 		align-items: stretch;
@@ -137,9 +137,12 @@
 		flex-direction: column;
 		height: 100%;
 		width: 100%;
+		position: relative;
 	}
 
 	.image-with-text__image-wrapper .image-with-text__image-container {
+		flex: 1;
+		min-height: 0;
 		position: relative;
 		overflow: hidden;
 	}
@@ -163,12 +166,7 @@
 		flex-shrink: 0;
 	}
 
-	/* Standard aspect ratios matching image-with-text */
-	.image-with-text__image-wrapper .image-with-text__image-container {
-		position: relative;
-		width: 100%;
-	}
-
+	/* Ensure images use available space */
 	.image-with-text__image-wrapper .image-with-text__image-container img {
 		width: 100%;
 		height: 100%;
@@ -176,57 +174,90 @@
 		border-radius: 4px 4px 0 0;
 	}
 
-	/* Standard ratios from image-with-text */
-	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 388 / 523;
-	}
-
-	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 190 / 287;
-	}
-
-	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 388 / 139;
-	}
-
-	.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 192 / 285;
-	}
-
-	.image-with-text__image-container--double-with-small .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 133 / 195;
-	}
-
-	.image-with-text__image-container--triple .image-with-text__image-wrapper .image-with-text__image-container {
-		aspect-ratio: 190 / 287;
-	}
-
-	/* Special cases for first image */
-	.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:first-child .image-with-text__image-container {
-		aspect-ratio: 221 / 285;
-	}
-
-	.image-with-text__image-container--double-with-small .image-with-text__image-wrapper:first-child .image-with-text__image-container {
-		aspect-ratio: 323 / 235;
-	}
-
-	/* Ensure proper sizing with text */
+	/* Height calculation based on module content */
 	.image-with-text__image-wrapper {
-		display: flex;
-		flex-direction: column;
+		height: 100%;
 	}
 
 	.image-with-text__image-wrapper .image-with-text__image-container {
-		flex: 0 0 auto;
+		height: calc(100% - 48px);
 	}
 
-	/* Responsive adjustments */
+	/* Desktop specific - ensure full height */
+	@media screen and (min-width: 992px) {
+		.image-with-text__container {
+			min-height: 400px;
+		}
+		
+		.image-with-text__image-wrapper {
+			height: 100%;
+		}
+		
+		.image-with-text__image-wrapper .image-with-text__image-container {
+			height: calc(100% - 48px);
+		}
+		
+		.image-with-text__image-text {
+			min-height: 48px;
+		}
+	}
+
+	/* Mobile specific */
 	@media screen and (max-width: 991px) {
+		.image-with-text__container {
+			min-height: 250px;
+		}
+		
 		.image-with-text__image-text {
 			font-size: 12px;
 			padding: 8px 12px;
 			min-height: 40px;
 		}
+		
+		.image-with-text__image-wrapper .image-with-text__image-container {
+			height: calc(100% - 40px);
+		}
+	}
+
+	/* Layout specific height management */
+	.image-with-text__image-container--single-vertical,
+	.image-with-text__image-container--double-vertical,
+	.image-with-text__image-container--double-horizontal,
+	.image-with-text__image-container--triple {
+		height: 100%;
+	}
+
+	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper,
+	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper,
+	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper,
+	.image-with-text__image-container--triple .image-with-text__image-wrapper {
+		height: 100%;
+	}
+
+	/* Ensure proper aspect ratios */
+	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-with-small .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--triple .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
 	}
 
 	/* Ensure consistent sizing */
