@@ -30,14 +30,14 @@
     margin: 0 auto;
   }
 
-  /* Grid Layout */
+  /* Grid Layout - 4 columns on desktop */
   .articles-grid {
     display: grid;
-    grid-template-columns: repeat({{ section.settings.grid_columns | default: 3 }}, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 30px;
   }
 
-  /* Carousel Layout */
+  /* Carousel Layout - 4 slides on desktop */
   .articles-carousel {
     position: relative;
     overflow: hidden;
@@ -53,7 +53,7 @@
   }
 
   .carousel-slide {
-    flex: 0 0 calc(100% / 3);
+    flex: 0 0 25%;
     padding: 0 15px;
     box-sizing: border-box;
   }
@@ -65,7 +65,7 @@
     width: 50px;
     height: 50px;
     background: {{ section.settings.carousel_button_bg | default: '#ffffff' }};
-    border: 2px solid {{ section.settings.carousel_button_border | default: '#e0e0e0' }};
+    border: none;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -90,7 +90,7 @@
     right: -25px;
   }
 
-  /* Article Card */
+  /* Article Card - No borders */
   .article-card {
     background-size: cover;
     background-position: center;
@@ -136,44 +136,51 @@
     color: white;
   }
 
-  /* Top Section: Date and Category */
+  /* Top Section: Date and Category - Smaller text */
   .article-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    gap: 10px;
   }
 
   .article-date {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: {{ section.settings.date_color | default: '#ffffff' }};
     font-family: 'Courier New', monospace;
-    background: rgba(255,255,255,0.1);
-    padding: 6px 12px;
-    border-radius: 20px;
+    background: transparent;
+    padding: 4px 8px;
+    border-radius: 15px;
     backdrop-filter: blur(10px);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .article-category {
-    background: {{ section.settings.category_bg | default: 'rgba(255,255,255,0.2)' }};
+    background: transparent;
     color: {{ section.settings.category_color | default: '#ffffff' }};
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: right;
   }
 
-  /* Middle Section: Title and Excerpt */
+  /* Middle Section: Title and Excerpt - Centered */
   .article-main {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;
+    text-align: center;
+    justify-content: center;
   }
 
   .article-title {
@@ -199,13 +206,12 @@
     flex-grow: 1;
   }
 
-  /* Bottom Section: Author */
+  /* Bottom Section: Author - No border */
   .article-footer {
     display: flex;
     justify-content: center;
     align-items: center;
     padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.2);
   }
 
   .article-author {
@@ -215,7 +221,7 @@
     font-size: 0.9rem;
     color: {{ section.settings.author_color | default: '#ffffff' }};
     font-weight: 500;
-    background: rgba(255,255,255,0.1);
+    background: transparent;
     padding: 8px 16px;
     border-radius: 25px;
     backdrop-filter: blur(10px);
@@ -234,6 +240,16 @@
 
   /* Responsive Design */
   @media (max-width: 1200px) {
+    .articles-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .carousel-slide {
+      flex: 0 0 33.333%;
+    }
+  }
+
+  @media (max-width: 900px) {
     .articles-grid {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -266,13 +282,25 @@
     }
     
     .article-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .article-date {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+    }
+
+    .article-category {
+      font-size: 0.65rem;
+      padding: 3px 6px;
     }
     
     .article-title {
       font-size: 1.2rem;
+    }
+
+    .article-excerpt {
+      font-size: 0.9rem;
     }
     
     .carousel-btn {
@@ -296,6 +324,24 @@
     
     .article-card {
       min-height: 350px;
+    }
+
+    .article-date {
+      font-size: 0.65rem;
+      padding: 2px 4px;
+    }
+
+    .article-category {
+      font-size: 0.6rem;
+      padding: 2px 4px;
+    }
+
+    .article-title {
+      font-size: 1.1rem;
+    }
+
+    .article-excerpt {
+      font-size: 0.85rem;
     }
   }
 </style>
@@ -436,7 +482,7 @@
             </div>
           </div>
           
-          {% if articles.size > 3 %}
+          {% if articles.size > 4 %}
             <button class="carousel-btn carousel-prev" onclick="slideCarousel('{{ section.id }}', -1)">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"/>
@@ -489,11 +535,13 @@ function slideCarousel(sectionId, direction) {
   const totalSlides = slides.length;
   
   const viewportWidth = window.innerWidth;
-  let slidesToShow = 3;
+  let slidesToShow = 4;
   if (viewportWidth < 768) {
     slidesToShow = 1;
-  } else if (viewportWidth < 1200) {
+  } else if (viewportWidth < 900) {
     slidesToShow = 2;
+  } else if (viewportWidth < 1200) {
+    slidesToShow = 3;
   }
   
   currentSlide[sectionId] += direction;
@@ -575,11 +623,11 @@ window.addEventListener('resize', function() {
     {
       "type": "range",
       "id": "articles_to_show",
-      "min": 3,
-      "max": 12,
+      "min": 4,
+      "max": 16,
       "step": 1,
       "label": "Number of articles to show",
-      "default": 6
+      "default": 8
     },
     {
       "type": "header",
@@ -600,15 +648,6 @@ window.addEventListener('resize', function() {
         }
       ],
       "default": "grid"
-    },
-    {
-      "type": "range",
-      "id": "grid_columns",
-      "min": 1,
-      "max": 4,
-      "step": 1,
-      "label": "Grid columns (desktop)",
-      "default": 3
     },
     {
       "type": "header",
@@ -726,12 +765,6 @@ window.addEventListener('resize', function() {
       "id": "carousel_button_color",
       "label": "Carousel button color",
       "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "carousel_button_border",
-      "label": "Carousel button border",
-      "default": "#e0e0e0"
     },
     {
       "type": "header",
