@@ -18,7 +18,22 @@
           {{ section.settings.details_tab_title }}
         </button>
       {% endif %}
+      
+      {% comment %} 检查是否显示保修标签 {% endcomment %}
+      {% assign current_product = product %}
+      {% assign selected_product = all_products[section.settings.product_handle] %}
+      {% assign display_product = current_product | default: selected_product %}
+      {% assign show_warranty = false %}
+      
       {% if section.settings.show_warranty_tab %}
+        {% if display_product and display_product.metafields.custom.product_warranty != blank %}
+          {% assign show_warranty = true %}
+        {% elsif display_product == blank and section.settings.warranty_content != blank %}
+          {% assign show_warranty = true %}
+        {% endif %}
+      {% endif %}
+      
+      {% if show_warranty %}
         <button
           class="pdt-tab-button {% if section.settings.default_active_tab == 'warranty' %}pdt-active{% endif %}"
           data-tab="warranty"
@@ -145,18 +160,13 @@
         </div>
       {% endif %}
 
-      <!-- Warranty Tab -->
-      {% if section.settings.show_warranty_tab %}
+      <!-- Warranty Tab - 只有在有保修信息时才显示 -->
+      {% if show_warranty %}
         <div
           class="pdt-tab-content {% if section.settings.default_active_tab == 'warranty' %}pdt-active{% endif %}"
           id="pdt-warranty-content"
         >
           <div class="pdt-warranty-content">
-            {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
-            {% assign current_product = product %}
-            {% assign selected_product = all_products[section.settings.product_handle] %}
-            {% assign display_product = current_product | default: selected_product %}
-            
             {% if display_product and display_product.metafields.custom.product_warranty != blank %}
               {{ display_product.metafields.custom.product_warranty | metafield_tag }}
             {% else %}
@@ -615,7 +625,8 @@
       "type": "checkbox",
       "id": "show_warranty_tab",
       "label": "Show Warranty Tab",
-      "default": true
+      "default": true,
+      "info": "Warranty tab will only show if product has warranty metafield or fallback content is provided"
     },
     {
       "type": "text",
@@ -744,7 +755,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Product specifications will be automatically loaded from product metafields. The following metafields are expected: custom.size, custom.weight, custom.material, custom.load_bearing, custom.drag, custom.standard_accessories"
+      "content": "Product specifications will be automatically loaded from product metafields. The following metafields are expected: custom.size, custom.weight, custom.material, custom.load_bearing, custom.drag, custom.standard_accessories, custom.product_warranty"
     },
     {
       "type": "header",
@@ -846,8 +857,9 @@
     {
       "type": "richtext",
       "id": "warranty_content",
-      "label": "Warranty Content",
-      "default": "<p>This is the warranty information. You can add warranty terms and conditions here.</p>"
+      "label": "Warranty Content (Fallback)",
+      "default": "<p>This is the warranty information. You can add warranty terms and conditions here.</p>",
+      "info": "This content will be used when no product warranty metafield is available"
     },
     {
       "type": "color",
