@@ -119,30 +119,33 @@
 		}
 	}
 
-	/* Image text container styles */
-	.image-with-text__image-wrapper {
+	/* Module height-based image sizing */
+	.image-with-text__container {
 		display: flex;
-		flex-direction: column;
-		height: 100%;
-		width: 100%;
+		align-items: stretch;
+		min-height: 300px;
 	}
 
 	.image-with-text__image-container {
 		display: flex;
 		flex-direction: column;
-		height: 100%;
 		gap: 0;
+		height: 100%;
 	}
 
-	.image-with-text__image-container .image-with-text__image-wrapper {
+	.image-with-text__image-wrapper {
+		display: flex;
+		flex-direction: column;
 		height: 100%;
+		width: 100%;
+		position: relative;
 	}
 
 	.image-with-text__image-wrapper .image-with-text__image-container {
 		flex: 1;
 		min-height: 0;
-		height: calc(100% - 48px);
 		position: relative;
+		overflow: hidden;
 	}
 
 	.image-with-text__image-text {
@@ -161,10 +164,19 @@
 		border-top: none;
 		width: 100%;
 		box-sizing: border-box;
+		flex-shrink: 0;
 	}
 
-	/* Ensure proper height calculation */
-	.image-with-text__image-container .image-with-text__image-wrapper {
+	/* Ensure images use available space */
+	.image-with-text__image-wrapper .image-with-text__image-container img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 4px 4px 0 0;
+	}
+
+	/* Height calculation based on module content */
+	.image-with-text__image-wrapper {
 		height: 100%;
 	}
 
@@ -172,12 +184,10 @@
 		height: calc(100% - 48px);
 	}
 
-	/* Desktop specific styles */
+	/* Desktop specific - ensure full height */
 	@media screen and (min-width: 992px) {
-		.image-with-text__image-container {
-			display: flex;
-			flex-direction: column;
-			height: 100%;
+		.image-with-text__container {
+			min-height: 400px;
 		}
 		
 		.image-with-text__image-wrapper {
@@ -187,10 +197,18 @@
 		.image-with-text__image-wrapper .image-with-text__image-container {
 			height: calc(100% - 48px);
 		}
+		
+		.image-with-text__image-text {
+			min-height: 48px;
+		}
 	}
 
-	/* Mobile specific styles */
+	/* Mobile specific */
 	@media screen and (max-width: 991px) {
+		.image-with-text__container {
+			min-height: 250px;
+		}
+		
 		.image-with-text__image-text {
 			font-size: 12px;
 			padding: 8px 12px;
@@ -202,23 +220,36 @@
 		}
 	}
 
-	/* Ensure images fill the container properly */
-	.image-with-text__image-container img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 4px 4px 0 0;
-	}
-
-	/* Layout specific adjustments */
-	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper {
+	/* Layout specific height management */
+	.image-with-text__image-container--single-vertical,
+	.image-with-text__image-container--double-vertical,
+	.image-with-text__image-container--double-horizontal,
+	.image-with-text__image-container--triple {
 		height: 100%;
 	}
 
+	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper,
 	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper,
 	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper,
 	.image-with-text__image-container--triple .image-with-text__image-wrapper {
 		height: 100%;
+	}
+
+	/* Ensure proper aspect ratios */
+	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	.image-with-text__image-container--triple .image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
 	}
 
 {%- endstyle -%}
