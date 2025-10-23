@@ -1,9 +1,28 @@
-/* Image with text imageTip section styles - 对齐image-with-text.liquid */
+/* Image with text imageTip section styles - 支持文本框功能 */
 
-/* Base container styles */
-.image-with-text__image-container {
+/* 新的图片包装器结构 */
+.image-with-text__image-wrapper {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* 文本位置控制 */
+.image-with-text__image-wrapper--below {
+    flex-direction: column;
+}
+
+.image-with-text__image-wrapper--above {
+    flex-direction: column-reverse;
+}
+
+/* 图片容器 - 占据剩余空间 */
+.image-with-text__image-container {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
     height: 100%;
 }
 
@@ -14,7 +33,76 @@
     display: block;
 }
 
-/* Layout-specific sizing */
+/* 文本框样式 */
+.image-with-text__image-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-foreground, #000);
+    text-align: center;
+    max-width: 100%;
+    word-wrap: break-word;
+    padding: 8px 12px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 4px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+/* 文本框居中 */
+.image-with-text__image-text--center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 90%;
+}
+
+/* 布局特定的文本框高度调整 */
+.image-with-text__image-container--single-vertical .image-with-text__image-text {
+    min-height: 40px;
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.image-with-text__image-container--double-horizontal .image-with-text__image-text {
+    min-height: 30px;
+    max-height: 45px;
+    overflow: hidden;
+}
+
+.image-with-text__image-container--double-vertical .image-with-text__image-text,
+.image-with-text__image-container--triple .image-with-text__image-text {
+    min-height: 35px;
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.image-with-text__image-container--double-vertical-offset .image-with-text__image-text {
+    min-height: 35px;
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.image-with-text__image-container--double-with-small .image-with-text__image-text {
+    min-height: 30px;
+    max-height: 40px;
+    overflow: hidden;
+}
+
+/* 响应式文本框 */
+@media screen and (max-width: 991px) {
+    .image-with-text__image-text {
+        font-size: 13px;
+        padding: 6px 10px;
+        margin: 6px 0;
+    }
+    
+    .image-with-text__image-text--center {
+        max-width: 95%;
+    }
+}
+
+/* 布局特定的容器样式 */
 .image-with-text__image-container--single-vertical {
     aspect-ratio: 388/523;
 }
@@ -47,7 +135,7 @@
     aspect-ratio: 190/287;
 }
 
-/* Responsive layout */
+/* 响应式布局 */
 @media screen and (max-width: 991px) {
     .image-with-text__image-container--mobile {
         display: flex;
@@ -98,7 +186,7 @@
     }
 }
 
-/* Spacing */
+/* 间距控制 */
 .image-with-text__image-container .image-with-text__image-wrapper {
     margin-bottom: 20px;
 }
@@ -107,37 +195,31 @@
     margin-bottom: 0;
 }
 
+.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper,
+.image-with-text__image-container--triple .image-with-text__image-wrapper {
+    margin-bottom: 15px;
+}
+
+.image-with-text__image-container--double-vertical .image-with-text__image-wrapper,
+.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper {
+    margin-bottom: 20px;
+}
+
 @media screen and (max-width: 991px) {
     .image-with-text__image-container .image-with-text__image-wrapper {
         margin-bottom: 15px;
     }
+    
+    .image-with-text__image-container .image-with-text__image-wrapper:last-child {
+        margin-bottom: 0;
+    }
 }
 
-/* Text styling */
-.image-with-text__image-text {
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--color-foreground, #000);
-    max-width: 100%;
-    word-wrap: break-word;
-}
-
+/* 文本样式 */
 .image-with-text__image-text p {
     margin: 0;
 }
 
 .image-with-text__image-text * {
     max-width: 100%;
-}
-
-/* Text position */
-.image-with-text__image-text {
-    margin-top: 16px;
-}
-
-@media screen and (max-width: 991px) {
-    .image-with-text__image-text {
-        margin-top: 12px;
-        font-size: 13px;
-    }
 }
