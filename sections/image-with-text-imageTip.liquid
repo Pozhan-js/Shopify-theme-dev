@@ -119,35 +119,106 @@
 		}
 	}
 
+	/* Image text container styles */
 	.image-with-text__image-wrapper {
-		position: relative;
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		width: 100%;
 	}
 
 	.image-with-text__image-container {
-		position: relative;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		gap: 0;
+	}
+
+	.image-with-text__image-container .image-with-text__image-wrapper {
+		height: 100%;
+	}
+
+	.image-with-text__image-wrapper .image-with-text__image-container {
 		flex: 1;
 		min-height: 0;
+		height: calc(100% - 48px);
+		position: relative;
 	}
 
 	.image-with-text__image-text {
-		background: rgba(0, 0, 0, 0.8);
-		color: white;
+		background: rgba(var(--color-foreground), 0.1);
+		color: rgb(var(--color-foreground));
 		padding: 12px 16px;
 		text-align: center;
 		font-size: 14px;
 		line-height: 1.4;
-		margin-top: 0;
 		border-radius: 0 0 4px 4px;
+		min-height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid rgba(var(--color-foreground), 0.2);
+		border-top: none;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
+	/* Ensure proper height calculation */
+	.image-with-text__image-container .image-with-text__image-wrapper {
+		height: 100%;
+	}
+
+	.image-with-text__image-wrapper .image-with-text__image-container {
+		height: calc(100% - 48px);
+	}
+
+	/* Desktop specific styles */
+	@media screen and (min-width: 992px) {
+		.image-with-text__image-container {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+		
+		.image-with-text__image-wrapper {
+			height: 100%;
+		}
+		
+		.image-with-text__image-wrapper .image-with-text__image-container {
+			height: calc(100% - 48px);
+		}
+	}
+
+	/* Mobile specific styles */
 	@media screen and (max-width: 991px) {
 		.image-with-text__image-text {
 			font-size: 12px;
 			padding: 8px 12px;
+			min-height: 40px;
 		}
+		
+		.image-with-text__image-wrapper .image-with-text__image-container {
+			height: calc(100% - 40px);
+		}
+	}
+
+	/* Ensure images fill the container properly */
+	.image-with-text__image-container img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 4px 4px 0 0;
+	}
+
+	/* Layout specific adjustments */
+	.image-with-text__image-container--single-vertical .image-with-text__image-wrapper {
+		height: 100%;
+	}
+
+	.image-with-text__image-container--double-vertical .image-with-text__image-wrapper,
+	.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper,
+	.image-with-text__image-container--triple .image-with-text__image-wrapper {
+		height: 100%;
 	}
 
 {%- endstyle -%}
@@ -194,33 +265,48 @@
 	<div class="image-with-text__container">
 		{%- if image_position == 'left' -%}
 			<div class="image-with-text__image-container {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				{% render 'image-with-text-image',
-					desktop_image: first_desktop_image,
-					mobile_image: first_mobile_image,
-					image_width: first_image_width,
-					image_width_2x: first_image_width_2x,
-					delay_step: 0.25
-				%}
+				<div class="image-with-text__image-wrapper">
+					{% render 'image-with-text-image',
+						desktop_image: first_desktop_image,
+						mobile_image: first_mobile_image,
+						image_width: first_image_width,
+						image_width_2x: first_image_width_2x,
+						delay_step: 0.25
+					%}
+					{%- if first_image_text != blank -%}
+						<div class="image-with-text__image-text">{{ first_image_text }}</div>
+					{%- endif -%}
+				</div>
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					{% render 'image-with-text-image',
-						desktop_image: second_desktop_image,
-						mobile_image: second_mobile_image,
-						image_width: image_width,
-						image_width_2x: image_width_2x,
-						delay_step: 0.5
-					%}
+					<div class="image-with-text__image-wrapper">
+						{% render 'image-with-text-image',
+							desktop_image: second_desktop_image,
+							mobile_image: second_mobile_image,
+							image_width: image_width,
+							image_width_2x: image_width_2x,
+							delay_step: 0.5
+						%}
+						{%- if second_image_text != blank -%}
+							<div class="image-with-text__image-text">{{ second_image_text }}</div>
+						{%- endif -%}
+					</div>
 				{% endif %}
 
 			{% if third_desktop_image != blank %}
-				{% render 'image-with-text-image',
-					desktop_image: third_desktop_image,
-					mobile_image: third_mobile_image,
-					image_width: image_width,
-					image_width_2x: image_width_2x,
-					delay_step: 0.75
-				%}
+				<div class="image-with-text__image-wrapper">
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.75
+					%}
+					{%- if third_image_text != blank -%}
+						<div class="image-with-text__image-text">{{ third_image_text }}</div>
+					{%- endif -%}
+				</div>
 			{% endif %}
 			{% endif %}
 			</div>
@@ -340,284 +426,284 @@
 	</div>
 </section>
 
-{%- schema -%}
-	{
-		"name": "Image with text-imageTip",
-		"disabled_on": {
-			"groups": ["header", "footer", "custom.popup"]
-		},
-		"settings": [
-			{
-				"id": "image_position",
-				"type": "select",
-				"label": "Image position",
-				"options": [
-					{
-						"value": "left",
-						"label": "Left"
-					},
-					{
-						"value": "right",
-						"label": "Right"
-					}
-				],
-				"default": "left"
-			},
-			{
-				"id": "text_alignment",
-				"type": "select",
-				"label": "Text alignment",
-				"options": [
-					{
-						"value": "left",
-						"label": "Left"
-					},
-					{
-						"value": "center",
-						"label": "Center"
-					},
-					{
-						"value": "right",
-						"label": "Right"
-					}
-				],
-				"default": "left"
-			},
-			{
-				"id": "content_vertical_alignment",
-				"type": "select",
-				"label": "Content vertical alignment",
-				"options": [
-					{
-						"value": "start",
-						"label": "Top"
-					},
-					{
-						"value": "center",
-						"label": "Center"
-					},
-					{
-						"value": "end",
-						"label": "Bottom"
-					}
-				],
-				"default": "center"
-			},
-
-			{
-				"id": "two_images_layout",
-				"type": "select",
-				"label": "Two images layout",
-				"options": [
-					{
-						"value": "double_vertical",
-						"label": "Double vertical"
-					},
-					{
-						"value": "double_horizontal",
-						"label": "Double horizontal"
-					},
-					{
-						"value": "double_vertical_offset",
-						"label": "Double vertical with offset"
-					},
-					{
-						"value": "double_with_small",
-						"label": "Double with small"
-					}
-				],
-				"default": "double_with_small",
-				"info": "This setting works only when you have two images."
-			},
-			{
-				"id": "first_desktop_image",
-				"type": "image_picker",
-				"label": "First image desktop"
-			},
-			{
-				"id": "first_mobile_image",
-				"type": "image_picker",
-				"label": "First image mobile"
-			},
-			{
-				"id": "second_desktop_image",
-				"type": "image_picker",
-				"label": "Second image desktop"
-			},
-			{
-				"id": "second_mobile_image",
-				"type": "image_picker",
-				"label": "Second image mobile"
-			},
-			{
-				"id": "third_desktop_image",
-				"type": "image_picker",
-				"label": "Third image desktop"
-			},
-			{
-				"id": "third_mobile_image",
-				"type": "image_picker",
-				"label": "Third image mobile"
-			},
-			{
-				"type": "header",
-				"content": "Image Texts"
-			},
-			{
-				"id": "first_image_text",
-				"type": "text",
-				"label": "First image text",
-				"default": "Image 1"
-			},
-			{
-				"id": "second_image_text",
-				"type": "text",
-				"label": "Second image text",
-				"default": "Image 2"
-			},
-			{
-				"id": "third_image_text",
-				"type": "text",
-				"label": "Third image text",
-				"default": "Image 3"
-			},
-			{
-				"id": "heading",
-				"type": "text",
-				"label": "Heading"
-			},
-			{
-				"id": "subheading",
-				"type": "textarea",
-				"label": "Subheading"
-			},
-			{
-				"id": "text_content",
-				"type": "richtext",
-				"label": "Text"
-			},
-			{
-				"id": "button_label",
-				"type": "text",
-				"label": "Button label"
-			},
-			{
-				"id": "button_aria_label",
-				"type": "text",
-				"label": "Button aria-label",
-				"info": "Need for good accessibility, e.g. 'All news about'."
-			},
-			{
-				"id": "button_url",
-				"type": "url",
-				"label": "Button link"
-			},
-			{
-				"id": "button_style",
-				"type": "select",
-				"label": "Button style",
-				"options": [
-					{
-						"value": "primary",
-						"label": "Primary"
-					},
-					{
-						"value": "secondary",
-						"label": "Secondary"
-					},
-					{
-						"value": "primary-border",
-						"label": "Primary with border"
-					},
-					{
-						"value": "secondary-border",
-						"label": "Secondary with border"
-					}
-				],
-				"default": "secondary-border"
-			},
-			{
-				"type": "header",
-				"content": "Layout"
-			},
-			{
-				"type": "select",
-				"id": "container_width",
-				"label": "Container width",
-				"options": [
-					{
-						"value": "1432px",
-						"label": "Default - 1400px"
-					},
-					{
-						"value": "1952px",
-						"label": "Large - 1920px"
-					},
-					{
-						"value": "100%",
-						"label": "Full width"
-					},
-					{
-						"value": "inherit",
-						"label": "Inherit of general setting"
-					}
-				],
-				"default": "inherit",
-				"info": "if you select 'Inherit of general setting', then container width will be used from the Theme settings/Layout"
-			},
-			{
-				"type": "range",
-				"id": "offset_top_desktop",
-				"min": 0,
-				"max": 100,
-				"step": 1,
-				"unit": "px",
-				"label": "Desktop offset top",
-				"default": 50
-			},
-			{
-				"type": "range",
-				"id": "offset_bottom_desktop",
-				"min": 0,
-				"max": 100,
-				"step": 1,
-				"unit": "px",
-				"label": "Desktop offset bottom",
-				"default": 50
-			},
-			{
-				"type": "range",
-				"id": "offset_top_mobile",
-				"min": 0,
-				"max": 100,
-				"step": 1,
-				"unit": "px",
-				"label": "Mobile offset top",
-				"default": 25
-			},
-			{
-				"type": "range",
-				"id": "offset_bottom_mobile",
-				"min": 0,
-				"max": 100,
-				"step": 1,
-				"unit": "px",
-				"label": "Mobile offset bottom",
-				"default": 25
-			}
-
-		],
-		"presets": [
-			{
-				"name": "Image with text-imageTip",
-				"settings": {
-					"heading": "Text heading",
-					"subheading": "Subheading",
-					"text_content": "<p>Combine an image with text to highlight a specific product, collection, or blog post of your choice. Enhance the content by including information on its availability, style, or possibly a review.</p>",
-					"button_label": "Button label",
-					"button_url": "/"
+{% schema %}
+{
+	"name": "Image with text-imageTip",
+	"class": "section",
+	"disabled_on": {
+		"groups": ["header", "footer", "custom.popup"]
+	},
+	"settings": [
+		{
+			"id": "image_position",
+			"type": "select",
+			"label": "Image position",
+			"options": [
+				{
+					"value": "left",
+					"label": "Left"
+				},
+				{
+					"value": "right",
+					"label": "Right"
 				}
+			],
+			"default": "left"
+		},
+		{
+			"id": "text_alignment",
+			"type": "select",
+			"label": "Text alignment",
+			"options": [
+				{
+					"value": "left",
+					"label": "Left"
+				},
+				{
+					"value": "center",
+					"label": "Center"
+				},
+				{
+					"value": "right",
+					"label": "Right"
+				}
+			],
+			"default": "left"
+		},
+		{
+			"id": "content_vertical_alignment",
+			"type": "select",
+			"label": "Content vertical alignment",
+			"options": [
+				{
+					"value": "start",
+					"label": "Top"
+				},
+				{
+					"value": "center",
+					"label": "Center"
+				},
+				{
+					"value": "end",
+					"label": "Bottom"
+				}
+			],
+			"default": "center"
+		},
+		{
+			"id": "two_images_layout",
+			"type": "select",
+			"label": "Two images layout",
+			"options": [
+				{
+					"value": "double_vertical",
+					"label": "Double vertical"
+				},
+				{
+					"value": "double_horizontal",
+					"label": "Double horizontal"
+				},
+				{
+					"value": "double_vertical_offset",
+					"label": "Double vertical with offset"
+				},
+				{
+					"value": "double_with_small",
+					"label": "Double with small"
+				}
+			],
+			"default": "double_with_small",
+			"info": "This setting works only when you have two images."
+		},
+		{
+			"id": "first_desktop_image",
+			"type": "image_picker",
+			"label": "First image desktop"
+		},
+		{
+			"id": "first_mobile_image",
+			"type": "image_picker",
+			"label": "First image mobile"
+		},
+		{
+			"id": "second_desktop_image",
+			"type": "image_picker",
+			"label": "Second image desktop"
+		},
+		{
+			"id": "second_mobile_image",
+			"type": "image_picker",
+			"label": "Second image mobile"
+		},
+		{
+			"id": "third_desktop_image",
+			"type": "image_picker",
+			"label": "Third image desktop"
+		},
+		{
+			"id": "third_mobile_image",
+			"type": "image_picker",
+			"label": "Third image mobile"
+		},
+		{
+			"type": "header",
+			"content": "Image Texts"
+		},
+		{
+			"id": "first_image_text",
+			"type": "text",
+			"label": "First image text",
+			"default": "Image 1"
+		},
+		{
+			"id": "second_image_text",
+			"type": "text",
+			"label": "Second image text",
+			"default": "Image 2"
+		},
+		{
+			"id": "third_image_text",
+			"type": "text",
+			"label": "Third image text",
+			"default": "Image 3"
+		},
+		{
+			"id": "heading",
+			"type": "text",
+			"label": "Heading"
+		},
+		{
+			"id": "subheading",
+			"type": "textarea",
+			"label": "Subheading"
+		},
+		{
+			"id": "text_content",
+			"type": "richtext",
+			"label": "Text"
+		},
+		{
+			"id": "button_label",
+			"type": "text",
+			"label": "Button label"
+		},
+		{
+			"id": "button_aria_label",
+			"type": "text",
+			"label": "Button aria-label",
+			"info": "Need for good accessibility, e.g. 'All news about'."
+		},
+		{
+			"id": "button_url",
+			"type": "url",
+			"label": "Button link"
+		},
+		{
+			"id": "button_style",
+			"type": "select",
+			"label": "Button style",
+			"options": [
+				{
+					"value": "primary",
+					"label": "Primary"
+				},
+				{
+					"value": "secondary",
+					"label": "Secondary"
+				},
+				{
+					"value": "primary-border",
+					"label": "Primary with border"
+				},
+				{
+					"value": "secondary-border",
+					"label": "Secondary with border"
+				}
+			],
+			"default": "secondary-border"
+		},
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "select",
+			"id": "container_width",
+			"label": "Container width",
+			"options": [
+				{
+					"value": "1432px",
+					"label": "Default - 1400px"
+				},
+				{
+					"value": "1952px",
+					"label": "Large - 1920px"
+				},
+				{
+					"value": "100%",
+					"label": "Full width"
+				},
+				{
+					"value": "inherit",
+					"label": "Inherit of general setting"
+				}
+			],
+			"default": "inherit",
+			"info": "if you select 'Inherit of general setting', then container width will be used from the Theme settings/Layout"
+		},
+		{
+			"type": "range",
+			"id": "offset_top_desktop",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"unit": "px",
+			"label": "Desktop offset top",
+			"default": 50
+		},
+		{
+			"type": "range",
+			"id": "offset_bottom_desktop",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"unit": "px",
+			"label": "Desktop offset bottom",
+			"default": 50
+		},
+		{
+			"type": "range",
+			"id": "offset_top_mobile",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"unit": "px",
+			"label": "Mobile offset top",
+			"default": 25
+		},
+		{
+			"type": "range",
+			"id": "offset_bottom_mobile",
+			"min": 0,
+			"max": 100,
+			"step": 1,
+			"unit": "px",
+			"label": "Mobile offset bottom",
+			"default": 25
+		}
+
+	],
+	"presets": [
+		{
+			"name": "Image with text-imageTip",
+			"settings": {
+				"heading": "Text heading",
+				"subheading": "Subheading",
+				"text_content": "<p>Combine an image with text to highlight a specific product, collection, or blog post of your choice. Enhance the content by including information on its availability, style, or possibly a review.</p>",
+				"button_label": "Button label",
+				"button_url": "/"
 			}
-		]
-	}
-{%- endschema -%}
+		}
+	]
+}
+{% endschema %}
