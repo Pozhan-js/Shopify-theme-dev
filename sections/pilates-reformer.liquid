@@ -90,11 +90,14 @@
 
         <!-- 定制询问区域 -->
         {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
-        {% assign show_customization = false %}
-        {% if display_product and display_product.metafields.custom.color_show %}
-          {% assign show_customization = display_product.metafields.custom.color_show %}
-        {% elsif section.settings.showcustomizationsection %}
-          {% assign show_customization = true %}
+        {% assign show_customization = section.settings.showcustomizationsection %}
+        {% if display_product and display_product.metafields.custom.color_show != blank %}
+          {% assign color_show_value = display_product.metafields.custom.color_show %}
+          {% if color_show_value == true or color_show_value == 'true' or color_show_value == '1' %}
+            {% assign show_customization = true %}
+          {% elsif color_show_value == false or color_show_value == 'false' or color_show_value == '0' %}
+            {% assign show_customization = false %}
+          {% endif %}
         {% endif %}
         
         <!-- 调试信息 -->
@@ -103,8 +106,9 @@
           display_product存在: {{ display_product | default: 'false' }}<br>
           {% if display_product %}
             产品标题: {{ display_product.title }}<br>
-            color_show元字段值: {{ display_product.metafields.custom.color_show | default: '未设置' }}<br>
-            color_show类型: {{ display_product.metafields.custom.color_show | type_of }}<br>
+            color_show元字段原始值: "{{ display_product.metafields.custom.color_show }}"<br>
+            color_show元字段类型: {{ display_product.metafields.custom.color_show | type_of }}<br>
+            color_show是否为空: {{ display_product.metafields.custom.color_show | blank }}<br>
           {% endif %}
           section设置值: {{ section.settings.showcustomizationsection }}<br>
           最终show_customization: {{ show_customization }}<br>
@@ -129,19 +133,23 @@
 
         <!-- 颜色选择区域 -->
         {% comment %} 根据产品元字段custom.color_show来判断显示隐藏 {% endcomment %}
-        {% assign show_color_selection = false %}
-        {% if display_product and display_product.metafields.custom.color_show %}
-          {% assign show_color_selection = display_product.metafields.custom.color_show %}
-        {% elsif section.settings.showcolorselection %}
-          {% assign show_color_selection = true %}
+        {% assign show_color_selection = section.settings.showcolorselection %}
+        {% if display_product and display_product.metafields.custom.color_show != blank %}
+          {% assign color_show_value = display_product.metafields.custom.color_show %}
+          {% if color_show_value == true or color_show_value == 'true' or color_show_value == '1' %}
+            {% assign show_color_selection = true %}
+          {% elsif color_show_value == false or color_show_value == 'false' or color_show_value == '0' %}
+            {% assign show_color_selection = false %}
+          {% endif %}
         {% endif %}
         
         <!-- 调试信息 -->
         <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; font-size: 12px; border: 1px solid #ccc;">
           <strong>颜色选择调试信息:</strong><br>
           {% if display_product %}
-            color_show元字段值: {{ display_product.metafields.custom.color_show | default: '未设置' }}<br>
-            color_show类型: {{ display_product.metafields.custom.color_show | type_of }}<br>
+            color_show元字段原始值: "{{ display_product.metafields.custom.color_show }}"<br>
+            color_show元字段类型: {{ display_product.metafields.custom.color_show | type_of }}<br>
+            color_show是否为空: {{ display_product.metafields.custom.color_show | blank }}<br>
           {% endif %}
           section颜色设置值: {{ section.settings.showcolorselection }}<br>
           最终show_color_selection: {{ show_color_selection }}<br>
