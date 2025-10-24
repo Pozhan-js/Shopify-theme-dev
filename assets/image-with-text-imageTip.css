@@ -1,269 +1,60 @@
-/* Image with text imageTip section styles - Updated to match image-with-text-one.liquid */
+/* Fix for Double Vertical layout image display issues */
 
-/* Base container styles */
-.image-with-text__container {
-    display: flex;
-    align-items: stretch;
-    gap: 0;
+/* Ensure parent container has proper height for double vertical layout */
+.image-with-text .image-with-text__container {
+  align-items: stretch; /* Ensure children can take full height */
 }
 
-.image-with-text__image-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
+.image-with-text .image-with-text__image-container--double-vertical {
+  min-height: 500px; /* Ensure minimum height for vertical layout */
+  height: auto; /* Allow natural height based on content */
 }
 
-/* Image wrapper styles */
-.image-with-text__image-wrapper {
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
+@media screen and (min-width: 992px) {
+  .image-with-text .image-with-text__image-container--double-vertical {
+    min-height: 600px; /* Larger min-height for desktop */
+    height: 100%; /* Take full available height */
+  }
+  
+  .image-with-text .image-with-text__image-container--double-vertical .image-with-text__image-wrapper {
+    height: calc(50% - 8px);
+    min-height: 280px; /* Ensure each image has minimum height */
+  }
 }
 
-.image-with-text__image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+/* Ensure images are visible in double vertical layout */
+.image-with-text .image-with-text__image-container--double-vertical .image-with-text__image-wrapper {
+  position: relative;
+  overflow: hidden;
 }
 
-/* Layout-specific styles */
-
-/* Single vertical layout */
-.image-with-text__image-container--single-vertical {
-    height: 100%;
+.image-with-text .image-with-text__image-container--double-vertical .image-with-text__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.image-with-text__image-container--single-vertical .image-with-text__image-wrapper {
-    aspect-ratio: 388/523;
-    height: 100%;
-}
-
-/* Double horizontal layout */
-.image-with-text__image-container--double-horizontal {
-    flex-direction: row;
-    gap: 15px;
-    height: 100%;
-}
-
-.image-with-text__image-container--double-horizontal .image-with-text__image-wrapper {
-    aspect-ratio: 388/139;
-    flex: 1;
-    height: 100%;
-}
-
-/* Double vertical layout */
-.image-with-text__image-container--double-vertical {
-    flex-direction: column;
-    gap: 20px;
-    height: 100%;
-}
-
-.image-with-text__image-container--double-vertical .image-with-text__image-wrapper {
-    aspect-ratio: 388/523;
-    flex: 1;
-    height: calc(50% - 10px);
-    min-height: 280px;
-}
-
-/* Double vertical offset layout */
-.image-with-text__image-container--double-vertical-offset {
-    flex-direction: column;
-    gap: 20px;
-    height: 100%;
-}
-
-.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper {
-    aspect-ratio: 192/285;
-    height: calc(50% - 10px);
-    min-height: 200px;
-}
-
-.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:first-child {
-    aspect-ratio: 221/285;
-    align-self: flex-start;
-    width: 85%;
-}
-
-.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:last-child {
-    align-self: flex-end;
-    width: 85%;
-    margin-top: -40px;
-}
-
-/* Double with small layout */
-.image-with-text__image-container--double-with-small {
-    display: grid;
-    gap: 15px;
-    height: 100%;
-}
-
-.image-with-text__image-container--double-with-small-left {
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1fr;
-}
-
-.image-with-text__image-container--double-with-small-right {
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: 1fr;
-}
-
-.image-with-text__image-container--double-with-small .image-with-text__image-wrapper {
-    aspect-ratio: 133/195;
-    height: 100%;
-}
-
-.image-with-text__image-container--double-with-small .image-with-text__image-wrapper:first-child {
-    aspect-ratio: 323/235;
-}
-
-/* Triple layout */
-.image-with-text__image-container--triple {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 15px;
-    height: 100%;
-}
-
-.image-with-text__image-container--triple .image-with-text__image-wrapper {
-    aspect-ratio: 190/287;
-    height: 100%;
-}
-
-.image-with-text__image-container--triple .image-with-text__image-wrapper:first-child {
-    grid-column: 1 / 2;
-    grid-row: 1 / 3;
-    aspect-ratio: 190/287;
-}
-
-/* Text styling for image tips */
-.image-with-text__image-text {
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--color-foreground, #000);
-    margin-top: 16px;
-    max-width: 100%;
-    word-wrap: break-word;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-/* Responsive adjustments */
+/* Fix for mobile double vertical layout */
 @media screen and (max-width: 991px) {
-    .image-with-text__container {
-        flex-direction: column;
-    }
-    
-    .image-with-text__image-container {
-        width: 100%;
-    }
-    
-    .image-with-text__image-wrapper {
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    /* Mobile single vertical */
-    .image-with-text__image-container--single-vertical .image-with-text__image-wrapper {
-        aspect-ratio: 388/523;
-        height: auto;
-    }
-    
-    /* Mobile double layouts */
-    .image-with-text__image-container--double-horizontal {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .image-with-text__image-container--double-horizontal .image-with-text__image-wrapper {
-        aspect-ratio: 388/139;
-        height: auto;
-    }
-    
-    .image-with-text__image-container--double-vertical {
-        gap: 15px;
-    }
-    
-    .image-with-text__image-container--double-vertical .image-with-text__image-wrapper {
-        aspect-ratio: 388/523;
-        height: auto;
-        min-height: 200px;
-    }
-    
-    .image-with-text__image-container--double-vertical-offset {
-        gap: 15px;
-    }
-    
-    .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper {
-        aspect-ratio: 192/285;
-        height: auto;
-        width: 100%;
-    }
-    
-    .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:first-child,
-    .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:last-child {
-        align-self: stretch;
-        width: 100%;
-        margin-top: 0;
-    }
-    
-    /* Mobile double with small */
-    .image-with-text__image-container--double-with-small {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto;
-    }
-    
-    .image-with-text__image-container--double-with-small .image-with-text__image-wrapper {
-        aspect-ratio: 133/195;
-        height: auto;
-    }
-    
-    .image-with-text__image-container--double-with-small .image-with-text__image-wrapper:first-child {
-        aspect-ratio: 323/235;
-    }
-    
-    /* Mobile triple */
-    .image-with-text__image-container--triple {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
-        gap: 15px;
-    }
-    
-    .image-with-text__image-container--triple .image-with-text__image-wrapper {
-        aspect-ratio: 190/287;
-        height: auto;
-    }
-    
-    .image-with-text__image-container--triple .image-with-text__image-wrapper:first-child {
-        grid-column: 1 / 2;
-        grid-row: 1 / 3;
-    }
-    
-    /* Mobile text styling */
-    .image-with-text__image-text {
-        margin-top: 12px;
-        font-size: 13px;
-    }
+  .image-with-text .image-with-text__image-container--double-vertical {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .image-with-text .image-with-text__image-container--double-vertical .image-with-text__image-wrapper {
+    height: auto;
+    min-height: 200px;
+    padding-top: 73.53%; /* Maintain aspect ratio */
+  }
 }
 
-/* Spacing and layout fixes */
-.image-with-text__image-container .image-with-text__image-wrapper {
-    margin-bottom: 0;
+/* Debug styles for testing */
+.image-with-text__image-container--double-vertical.debug {
+  border: 2px solid red;
+  background-color: rgba(255, 0, 0, 0.1);
 }
 
-.image-with-text__image-container--double-vertical .image-with-text__image-wrapper,
-.image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper {
-    margin-bottom: 0;
-}
-
-/* Ensure text doesn't overflow */
-.image-with-text__image-text p {
-    margin: 0;
-}
-
-.image-with-text__image-text * {
-    max-width: 100%;
+.image-with-text__image-container--double-vertical.debug .image-with-text__image-wrapper {
+  border: 1px solid blue;
+  background-color: rgba(0, 0, 255, 0.1);
 }
