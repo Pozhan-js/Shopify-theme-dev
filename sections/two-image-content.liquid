@@ -1,0 +1,298 @@
+{% comment %}
+  ===================================================================
+  Section: 图文模块（图片在标题下方）
+  结构：
+    - 大标题
+    - 标题1
+      图片1（下方）
+    - 标题2
+      内容
+      图片2（下方）
+  支持：desktop + mobile 双图上传
+  ===================================================================
+{% endcomment %}
+
+<div class="image-below-title-section"
+     style="padding: {{ section.settings.padding_top }}px {{ section.settings.padding_sides }}px {{ section.settings.padding_bottom }}px;
+            background-color: {{ section.settings.bg_color }};
+            font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
+  <div class="container" style="max-width: 1200px; margin: 0 auto;">
+
+    <!-- 大标题 -->
+    {%- if section.settings.main_title != blank -%}
+      <h1 class="main-title"
+          style="text-align: {{ section.settings.title_align }};
+                 font-size: 36px; margin-bottom: 50px; color: {{ section.settings.title_color }};
+                 line-height: 1.3;">
+        {{ section.settings.main_title }}
+      </h1>
+    {%- endif -%}
+
+    <!-- 第一部分：标题1 + 图片1 -->
+    <div class="content-block">
+      <h2 class="section-title"
+          style="font-size: 28px; margin-bottom: 20px; color: #222;">
+        {{ section.settings.title_1 }}
+      </h2>
+
+      <div class="image-wrapper">
+        <!-- Desktop 图片 -->
+        <img src="{{ section.settings.image1_desktop | img_url: '1024x' }}"
+             alt="{{ section.settings.image1_alt }}"
+             class="image-desktop"
+             style="width: 100%; height: auto; display: block; border-radius: 8px;"
+             {% if section.settings.image1_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
+
+        <!-- Mobile 图片 -->
+        <img src="{{ section.settings.image1_mobile | img_url: '600x' }}"
+             alt="{{ section.settings.image1_alt }}"
+             class="image-mobile"
+             style="width: 100%; height: auto; display: none; border-radius: 8px;"
+             {% if section.settings.image1_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
+      </div>
+    </div>
+
+    <!-- 分隔间距 -->
+    <div style="height: 40px;"></div>
+
+    <!-- 第二部分：标题2 + 内容 + 图片2 -->
+    <div class="content-block">
+      <h2 class="section-title"
+          style="font-size: 28px; margin-bottom: 16px; color: #222;">
+        {{ section.settings.title_2 }}
+      </h2>
+
+      <div class="content-text"
+           style="font-size: 16px; line-height: 1.7; color: #555; margin-bottom: 20px;">
+        {{ section.settings.content_text }}
+      </div>
+
+      <div class="image-wrapper">
+        <!-- Desktop 图片 -->
+        <img src="{{ section.settings.image2_desktop | img_url: '1024x' }}"
+             alt="{{ section.settings.image2_alt }}"
+             class="image-desktop"
+             style="width: 100%; height: auto; display: block; border-radius: 8px;"
+             {% if section.settings.image2_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
+
+        <!-- Mobile 图片 -->
+        <img src="{{ section.settings.image2_mobile | img_url: '600x' }}"
+             alt="{{ section.settings.image2_alt }}"
+             class="image-mobile"
+             style="width: 100%; height: auto; display: none; border-radius: 8px;"
+             {% if section.settings.image2_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  /* 默认显示 desktop 图 */
+  .image-desktop {
+    display: block;
+  }
+  .image-mobile {
+    display: none;
+  }
+
+  /* 移动端：隐藏 desktop，显示 mobile */
+  @media (max-width: 768px) {
+    .main-title {
+      font-size: 30px;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 24px;
+    }
+
+    .image-desktop {
+      display: none;
+    }
+
+    .image-mobile {
+      display: block;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Two Image Content",
+  "tag": "section",
+  "class": "index-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "main_title",
+      "label": "大标题",
+      "default": "探索我们的品牌故事"
+    },
+    {
+      "type": "select",
+      "id": "title_align",
+      "label": "大标题对齐方式",
+      "options": [
+        { "value": "left", "label": "左对齐" },
+        { "value": "center", "label": "居中" },
+        { "value": "right", "label": "右对齐" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "大标题颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+
+    {
+      "type": "header",
+      "content": "第一部分：标题1 + 图片1"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "标题1",
+      "default": "设计源于生活"
+    },
+    {
+      "type": "image_picker",
+      "id": "image1_desktop",
+      "label": "图片1 - 桌面端"
+    },
+    {
+      "type": "image_picker",
+      "id": "image1_mobile",
+      "label": "图片1 - 手机端"
+    },
+    {
+      "type": "text",
+      "id": "image1_alt",
+      "label": "图片1 替代文本",
+      "default": "设计场景图"
+    },
+    {
+      "type": "select",
+      "id": "image1_desktop_loading",
+      "label": "桌面端图片加载方式",
+      "options": [
+        { "value": "eager", "label": "立即加载" },
+        { "value": "lazy", "label": "懒加载" }
+      ],
+      "default": "lazy"
+    },
+    {
+      "type": "select",
+      "id": "image1_mobile_loading",
+      "label": "移动端图片加载方式",
+      "options": [
+        { "value": "eager", "label": "立即加载" },
+        { "value": "lazy", "label": "懒加载" }
+      ],
+      "default": "lazy"
+    },
+
+    {
+      "type": "header",
+      "content": "第二部分：标题2 + 内容 + 图片2"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "标题2",
+      "default": "工艺成就品质"
+    },
+    {
+      "type": "richtext",
+      "id": "content_text",
+      "label": "内容文字",
+      "default": "<p>我们坚持使用传统工艺与现代技术结合，打造每一件精品。</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image2_desktop",
+      "label": "图片2 - 桌面端"
+    },
+    {
+      "type": "image_picker",
+      "id": "image2_mobile",
+      "label": "图片2 - 手机端"
+    },
+    {
+      "type": "text",
+      "id": "image2_alt",
+      "label": "图片2 替代文本",
+      "default": "生产工艺图"
+    },
+    {
+      "type": "select",
+      "id": "image2_desktop_loading",
+      "label": "桌面端图片加载方式",
+      "options": [
+        { "value": "eager", "label": "立即加载" },
+        { "value": "lazy", "label": "懒加载" }
+      ],
+      "default": "lazy"
+    },
+    {
+      "type": "select",
+      "id": "image2_mobile_loading",
+      "label": "移动端图片加载方式",
+      "options": [
+        { "value": "eager", "label": "立即加载" },
+        { "value": "lazy", "label": "懒加载" }
+      ],
+      "default": "lazy"
+    },
+
+    {
+      "type": "header",
+      "content": "间距设置"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "顶部内边距",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_sides",
+      "label": "左右内边距",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "底部内边距",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "图片在标题下方",
+      "category": "内容"
+    }
+  ]
+}
+{% endschema %}
