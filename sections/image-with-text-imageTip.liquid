@@ -4,8 +4,8 @@
 ------------------------------------------------------------------------------
 {%- endcomment -%}
 
-{%- assign image_position         	  = section.settings.image_position -%}
-{%- assign text_alignment         	  = section.settings.text_alignment -%}
+{%- assign image_position        	  = section.settings.image_position -%}
+{%- assign text_alignment        	  = section.settings.text_alignment -%}
 {%- assign content_vertical_alignment = section.settings.content_vertical_alignment -%}
 {%- assign two_images_layout          = section.settings.two_images_layout -%}
 {%- assign first_desktop_image        = section.settings.first_desktop_image -%}
@@ -14,17 +14,13 @@
 {%- assign second_mobile_image        = section.settings.second_mobile_image | default: second_desktop_image -%}
 {%- assign third_desktop_image        = section.settings.third_desktop_image -%}
 {%- assign third_mobile_image         = section.settings.third_mobile_image | default: third_desktop_image -%}
-{%- assign heading                  	  = section.settings.heading -%}
+{%- assign heading                 	  = section.settings.heading -%}
 {%- assign subheading                 = section.settings.subheading -%}
 {%- assign text_content               = section.settings.text_content -%}
-{%- assign button_label             	  = section.settings.button_label -%}
-{%- assign button_aria_label        	  = section.settings.button_aria_label -%}
-{%- assign button_url               	  = section.settings.button_url -%}
-{%- assign button_style             	  = section.settings.button_style -%}
-
-{%- assign first_image_caption        = section.settings.first_image_caption -%}
-{%- assign second_image_caption       = section.settings.second_image_caption -%}
-{%- assign third_image_caption        = section.settings.third_image_caption -%}
+{%- assign button_label            	  = section.settings.button_label -%}
+{%- assign button_aria_label       	  = section.settings.button_aria_label -%}
+{%- assign button_url              	  = section.settings.button_url -%}
+{%- assign button_style            	  = section.settings.button_style -%}
 
 {%- assign container 				  = section.settings.container_width -%}
 
@@ -104,8 +100,7 @@
 {%- endcapture -%}
 
 {%- render 'adastra' with '/src/styles/image-with-text.scss' -%}
-{%- render 'adastra' with '/assets/image-with-text-imageTip.css' -%}
-{%- render 'adastra' with '/assets/image-with-text-caption.css' -%}
+{%- render 'adastra' with '/assets/image-with-text-one-fix.css' -%}
 {% comment %} {%- render 'adastra' with '/assets/image-with-text-full-width.css' -%} {% endcomment %}
 
 {%- style -%}
@@ -120,6 +115,7 @@
 			padding-bottom: {{- section.settings.offset_bottom_desktop -}}px;
 		}
 	}
+
 
 {%- endstyle -%}
 
@@ -165,71 +161,67 @@
 	<div class="image-with-text__container">
 		{%- if image_position == 'left' -%}
 			<div class="image-with-text__image-container {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				{% render 'image-with-text-caption',
+				{% render 'image-with-text-image',
 					desktop_image: first_desktop_image,
 					mobile_image: first_mobile_image,
 					image_width: first_image_width,
 					image_width_2x: first_image_width_2x,
-					caption: first_image_caption,
 					delay_step: 0.25
 				%}
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					{% render 'image-with-text-caption',
+					{% render 'image-with-text-image',
 						desktop_image: second_desktop_image,
 						mobile_image: second_mobile_image,
 						image_width: image_width,
 						image_width_2x: image_width_2x,
-						caption: second_image_caption,
 						delay_step: 0.5
 					%}
 				{% endif %}
 
 			{% if third_desktop_image != blank %}
-				{% render 'image-with-text-caption',
+				{% render 'image-with-text-image',
 					desktop_image: third_desktop_image,
 					mobile_image: third_mobile_image,
 					image_width: image_width,
 					image_width_2x: image_width_2x,
-					caption: third_image_caption,
 					delay_step: 0.25
 				%}
 			{% endif %}
 			{% endif %}
 			</div>
 
+
+
 			{{- content -}}
 		{%- else -%}
 			<div class="image-with-text__image-container image-with-text__image-container--mobile {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				{% render 'image-with-text-caption',
+				{% render 'image-with-text-image',
 					desktop_image: first_desktop_image,
 					mobile_image: first_mobile_image,
 					image_width: first_image_width,
 					image_width_2x: first_image_width_2x,
-					caption: first_image_caption,
 					delay_step: 0.25
 				%}
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					{% render 'image-with-text-caption',
+					{% render 'image-with-text-image',
 						desktop_image: second_desktop_image,
 						mobile_image: second_mobile_image,
 						image_width: image_width,
 						image_width_2x: image_width_2x,
-						caption: second_image_caption,
 						delay_step: 0.5
 					%}
 				{% endif %}
 
 				{% if third_desktop_image != blank %}
-					{% render 'image-with-text-caption',
+					{% render 'image-with-text-image',
 						desktop_image: third_desktop_image,
 						mobile_image: third_mobile_image,
 						image_width: image_width,
 						image_width_2x: image_width_2x,
-						caption: third_image_caption,
 						delay_step: 0.75
 					%}
 				{% endif %}
@@ -252,34 +244,31 @@
 				{% assign three_2_delay = 0.5 %}
 			{% endif %}
 
-			{% render 'image-with-text-caption',
+			{% render 'image-with-text-image',
 				desktop_image: first_desktop_image,
 				mobile_image: first_mobile_image,
 				image_width: first_image_width,
 				image_width_2x: first_image_width_2x,
-				caption: first_image_caption,
 				delay_step: delay_step
 			%}
 
 			{% if is_single_layout == false %}
 				{% if second_desktop_image != blank %}
-					{% render 'image-with-text-caption',
+					{% render 'image-with-text-image',
 						desktop_image: second_desktop_image,
 						mobile_image: second_mobile_image,
 						image_width: image_width,
 						image_width_2x: image_width_2x,
-						caption: second_image_caption,
 						delay_step: three_2_delay
 					%}
 				{% endif %}
 
 				{% if third_desktop_image != blank %}
-					{% render 'image-with-text-caption',
+					{% render 'image-with-text-image',
 						desktop_image: third_desktop_image,
 						mobile_image: third_mobile_image,
 						image_width: image_width,
 						image_width_2x: image_width_2x,
-						caption: third_image_caption,
 						delay_step: 0.25
 					%}
 				{% endif %}
@@ -391,12 +380,6 @@
 				"label": "First image mobile"
 			},
 			{
-				"id": "first_image_caption",
-				"type": "text",
-				"label": "First image caption",
-				"info": "Caption text displayed below the first image"
-			},
-			{
 				"id": "second_desktop_image",
 				"type": "image_picker",
 				"label": "Second image desktop"
@@ -407,12 +390,6 @@
 				"label": "Second image mobile"
 			},
 			{
-				"id": "second_image_caption",
-				"type": "text",
-				"label": "Second image caption",
-				"info": "Caption text displayed below the second image"
-			},
-			{
 				"id": "third_desktop_image",
 				"type": "image_picker",
 				"label": "Third image desktop"
@@ -421,12 +398,6 @@
 				"id": "third_mobile_image",
 				"type": "image_picker",
 				"label": "Third image mobile"
-			},
-			{
-				"id": "third_image_caption",
-				"type": "text",
-				"label": "Third image caption",
-				"info": "Caption text displayed below the third image"
 			},
 			{
 				"id": "heading",
