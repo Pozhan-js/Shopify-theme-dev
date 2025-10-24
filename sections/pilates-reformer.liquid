@@ -284,7 +284,8 @@
     overflow: hidden;
     background: {{ section.settings.mainimagebackground }};
     padding: 20px;
-    width: 1234px;
+    width: 100%;
+    max-width: 1234px;
     height: 702px;
     display: flex;
     align-items: center;
@@ -293,17 +294,20 @@
   }
 
   .prf-main-product-image {
-    width: 1139px;
-    height: 527px;
+    width: 100%;
+    max-width: 1139px;
+    height: auto;
+    max-height: 527px;
     display: block;
     object-fit: contain;
   }
 
   .prf-thumbnail-images {
     display: grid;
-    grid-template-columns: repeat(6, 190px);
+    grid-template-columns: repeat(6, 1fr);
     gap: 12px;
-    width: 1234px;
+    width: 100%;
+    max-width: 1234px;
     justify-content: flex-start;
   }
 
@@ -315,8 +319,7 @@
     padding: 0;
     cursor: pointer;
     transition: transform 0.3s ease;
-    width: 190px;
-    height: 156px;
+    aspect-ratio: 190/156;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,9 +335,8 @@
   }
 
   .prf-thumbnail-image {
-    width: 186px;
-    height: auto;
-    max-height: 156px;
+    width: 100%;
+    height: 100%;
     display: block;
     object-fit: contain;
   }
@@ -436,7 +438,7 @@
     z-index: 2;
   }
 
-  /* 颜色选择区域 - 参考 upholstery-color-section.liquid */
+  /* 颜色选择区域 */
   .prf-color-selection {
     text-align: left;
     margin-top: 60px;
@@ -580,17 +582,12 @@
     height: 49px;
   }
 
-  /* 响应式设计 */
-  /* 大屏幕 (1920px+) */
-  @media (min-width: 1920px) {
+  /* 响应式设计 - 移动端优化 */
+  
+  /* 平板设备 (768px - 1023px) */
+  @media (max-width: 1023px) and (min-width: 768px) {
     .prf-container {
-      max-width: 1750px;
-    }
-  }
-
-  @media (max-width: 1919px) and (min-width: 1366px) {
-    .prf-container {
-      max-width: 1470px; /* 1750 * 0.84 */
+      padding: 0 20px;
     }
 
     .prf-product-layout {
@@ -599,62 +596,30 @@
     }
 
     .prf-main-image {
-      width: 100%;
-      max-width: 1234px;
-      height: 590px; /* 702 * 0.84 */
-    }
-
-    .prf-main-product-image {
-      width: 957px; /* 1139 * 0.84 */
-      height: 443px; /* 527 * 0.84 */
+      height: 400px;
+      padding: 15px;
     }
 
     .prf-thumbnail-images {
-      width: 1037px; /* 1234 * 0.84 */
-      grid-template-columns: repeat(6, 160px); /* 190 * 0.84 */
-      gap: 10px; /* 12 * 0.84 */
-    }
-
-    .prf-thumbnail-item {
-      width: 160px; /* 190 * 0.84 */
-      height: 131px; /* 156 * 0.84 */
-    }
-
-    .prf-thumbnail-image {
-      width: 156px; /* 186 * 0.84 */
-      max-height: 131px; /* 156 * 0.84 */
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
     }
 
     .prf-color-selection {
-      margin-top: 102px; /* 121 * 0.84 */
-    }
-
-    .prf-color-title {
-      margin-bottom: 25px;
+      margin-top: 40px;
     }
 
     .prf-color-options {
-      grid-template-columns: repeat({{ section.settings.colorcolumns }}, 70px);
-      grid-auto-rows: 108px;
-      height: 220px;
-      overflow-y: auto;
-      overflow-x: visible;
-      padding: 15px 25px 15px 15px;
-      margin: -8px -15px;
+      grid-template-columns: repeat(4, 70px);
+      grid-auto-rows: 110px;
+      height: 300px;
+      gap: 15px;
+      padding: 15px 20px 15px 15px;
     }
 
     .prf-color-swatch {
       width: 70px;
       height: 70px;
-      flex-shrink: 0;
-    }
-
-    .prf-color-option.prf-selected .prf-color-swatch {
-      transform: scale(1.3);
-    }
-
-    .prf-color-option.prf-selected .prf-color-name {
-      margin-top: 6px;
     }
 
     .prf-color-checkmark {
@@ -666,92 +631,72 @@
       width: 35px;
       height: 35px;
     }
-
-    .prf-color-name {
-      font-size: 10px;
-      max-width: 100px;
-    }
   }
 
-  @media (max-width: 1365px) and (min-width: 1024px) {
+  /* 移动设备 (481px - 767px) */
+  @media (max-width: 767px) and (min-width: 481px) {
     .prf-container {
-      max-width: 1173px; /* 1750 * 0.67 */
-      padding: 0 30px;
+      padding: 0 15px;
     }
 
     .prf-product-layout {
       grid-template-columns: 1fr;
       gap: 30px;
-    }
-  }
-
-  @media (max-width: 1023px) and (min-width: 768px) {
-    .prf-container {
-      max-width: 875px; /* 1750 * 0.5 */
-    }
-
-    .prf-product-layout {
-      grid-template-columns: 1fr;
-      gap: 30px;
-    }
-
-    .prf-thumbnail-images {
-      width: 617px; /* 1234 * 0.5 */
-      grid-template-columns: repeat(3, 95px); /* 190 * 0.5 */
-      gap: 6px; /* 12 * 0.5 */
-    }
-
-    .prf-thumbnail-item {
-      width: 95px; /* 190 * 0.5 */
-      height: 78px; /* 156 * 0.5 */
-    }
-
-    .prf-thumbnail-image {
-      width: 93px; /* 186 * 0.5 */
-      max-height: 78px; /* 156 * 0.5 */
     }
 
     .prf-main-image {
-      width: 100%;
-      max-width: 617px; /* 1234 * 0.5 */
-      height: 351px; /* 702 * 0.5 */
+      height: 300px;
+      padding: 10px;
     }
 
-    .prf-main-product-image {
-      width: 570px; /* 1139 * 0.5 */
-      height: 264px; /* 527 * 0.5 */
+    .prf-thumbnail-images {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .prf-product-title {
+      font-size: 20px;
+    }
+
+    .prf-customization-title {
+      font-size: 18px;
+    }
+
+    .prf-customization-description {
+      font-size: 14px;
+    }
+
+    .prf-quote-button {
+      width: 100%;
+      text-align: center;
+      padding: 15px 20px;
     }
 
     .prf-color-selection {
-      margin-top: 61px; /* 121 * 0.5 */
+      margin-top: 30px;
     }
 
     .prf-color-title {
+      font-size: 16px;
       margin-bottom: 20px;
     }
 
     .prf-color-options {
-      grid-template-columns: repeat(2, 60px);
-      grid-auto-rows: 98px;
-      height: 180px;
-      overflow-y: auto;
-      overflow-x: visible;
-      padding: 12px 20px 12px 12px;
-      margin: -6px -12px;
+      grid-template-columns: repeat(3, 60px);
+      grid-auto-rows: 95px;
+      height: 250px;
+      gap: 12px;
+      padding: 10px 15px 10px 10px;
     }
 
     .prf-color-swatch {
       width: 60px;
       height: 60px;
-      flex-shrink: 0;
     }
 
-    .prf-color-option.prf-selected .prf-color-swatch {
-      transform: scale(1.3);
-    }
-
-    .prf-color-option.prf-selected .prf-color-name {
-      margin-top: 5px;
+    .prf-color-name {
+      font-size: 10px;
+      max-width: 80px;
     }
 
     .prf-color-checkmark {
@@ -763,87 +708,95 @@
       width: 30px;
       height: 30px;
     }
-
-    .prf-color-name {
-      font-size: 9px;
-      max-width: 90px;
-    }
   }
 
-  @media (max-width: 767px) and (min-width: 481px) {
+  /* 小屏移动设备 (320px - 480px) */
+  @media (max-width: 480px) {
     .prf-container {
-      max-width: 700px; /* 1750 * 0.4 */
+      padding: 0 10px;
+    }
+
+    .prf-pilates-reformer-section {
+      padding-bottom: {{ section.settings.sectionpaddingbottom | divided_by: 2 }}px;
     }
 
     .prf-product-layout {
       grid-template-columns: 1fr;
-      gap: 25px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .prf-container {
-      max-width: 578px; /* 1750 * 0.33 */
-      padding: 0 15px;
-    }
-
-    .prf-pilates-reformer-section {
-      padding-bottom: {{ section.settings.sectionpaddingtop | dividedby: 2 }}px;
-    }
-
-    .prf-thumbnail-images {
-      width: 407px; /* 1234 * 0.33 */
-      grid-template-columns: repeat(2, 63px); /* 190 * 0.33 */
-      gap: 4px; /* 12 * 0.33 */
-    }
-
-    .prf-thumbnail-item {
-      width: 63px; /* 190 * 0.33 */
-      height: 51px; /* 156 * 0.33 */
-    }
-
-    .prf-thumbnail-image {
-      width: 61px; /* 186 * 0.33 */
-      max-height: 51px; /* 156 * 0.33 */
+      gap: 20px;
     }
 
     .prf-main-image {
-      width: 100%;
-      max-width: 407px; /* 1234 * 0.33 */
-      height: 232px; /* 702 * 0.33 */
+      height: 250px;
+      padding: 8px;
+      border-radius: 6px;
     }
 
-    .prf-main-product-image {
-      width: 376px; /* 1139 * 0.33 */
-      height: 174px; /* 527 * 0.33 */
+    .prf-thumbnail-images {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .prf-thumbnail-item {
+      border-radius: 6px;
+    }
+
+    .prf-product-title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .prf-model-number {
+      font-size: 12px;
+      padding: 3px 8px;
+    }
+
+    .prf-customization-title {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .prf-customization-description {
+      font-size: 13px;
+      margin-bottom: 15px;
+    }
+
+    .prf-quote-button {
+      width: 100%;
+      text-align: center;
+      padding: 12px 16px;
+      font-size: 13px;
     }
 
     .prf-color-selection {
-      margin-top: 40px; /* 121 * 0.33 */
+      margin-top: 25px;
     }
 
     .prf-color-title {
+      font-size: 14px;
       margin-bottom: 15px;
     }
 
     .prf-color-options {
-      grid-template-columns: repeat(2, 50px);
-      grid-auto-rows: 88px;
-      height: 160px;
-      overflow-y: auto;
-      overflow-x: visible;
-      padding: 10px 15px 10px 10px;
-      margin: -5px -10px;
+      grid-template-columns: repeat(3, 50px);
+      grid-auto-rows: 80px;
+      height: 200px;
+      gap: 10px;
+      padding: 8px 12px 8px 8px;
     }
 
     .prf-color-swatch {
       width: 50px;
       height: 50px;
-      flex-shrink: 0;
+      border-radius: 6px;
+    }
+
+    .prf-color-name {
+      font-size: 9px;
+      max-width: 60px;
     }
 
     .prf-color-option.prf-selected .prf-color-swatch {
-      transform: scale(1.3);
+      transform: scale(1.2);
     }
 
     .prf-color-option.prf-selected .prf-color-name {
@@ -859,16 +812,65 @@
       width: 25px;
       height: 25px;
     }
+  }
+
+  /* 超小屏设备 (< 320px) */
+  @media (max-width: 319px) {
+    .prf-container {
+      padding: 0 8px;
+    }
+
+    .prf-main-image {
+      height: 200px;
+      padding: 5px;
+    }
+
+    .prf-product-title {
+      font-size: 16px;
+    }
+
+    .prf-color-options {
+      grid-template-columns: repeat(2, 45px);
+      grid-auto-rows: 75px;
+      height: 180px;
+      gap: 8px;
+    }
+
+    .prf-color-swatch {
+      width: 45px;
+      height: 45px;
+    }
 
     .prf-color-name {
       font-size: 8px;
-      max-width: 80px;
+      max-width: 50px;
     }
   }
 
-  @media (max-width: 320px) {
-    .prf-container {
-      max-width: 438px; /* 1750 * 0.25 */
+  /* 大屏幕保持原有样式 */
+  @media (min-width: 1024px) {
+    .prf-main-image {
+      width: 1234px;
+    }
+
+    .prf-main-product-image {
+      width: 1139px;
+      height: 527px;
+    }
+
+    .prf-thumbnail-images {
+      width: 1234px;
+      grid-template-columns: repeat(6, 190px);
+    }
+
+    .prf-thumbnail-item {
+      width: 190px;
+      height: 156px;
+    }
+
+    .prf-thumbnail-image {
+      width: 186px;
+      max-height: 156px;
     }
   }
 </style>
@@ -898,7 +900,7 @@
       });
     });
 
-    // 颜色选择功能 - 参考 upholstery-color-section.liquid
+    // 颜色选择功能
     const prfColorOptions = document.querySelectorAll('.prf-color-option');
 
     prfColorOptions.forEach(function (option) {
@@ -969,6 +971,39 @@
         }
       }
     });
+
+    // 移动端触摸优化
+    if ('ontouchstart' in window) {
+      // 为颜色选项添加触摸反馈
+      prfColorOptions.forEach(function(option) {
+        option.addEventListener('touchstart', function() {
+          this.style.opacity = '0.7';
+        });
+        
+        option.addEventListener('touchend', function() {
+          this.style.opacity = '1';
+        });
+        
+        option.addEventListener('touchcancel', function() {
+          this.style.opacity = '1';
+        });
+      });
+
+      // 为缩略图添加触摸反馈
+      prfThumbnailItems.forEach(function(item) {
+        item.addEventListener('touchstart', function() {
+          this.style.opacity = '0.7';
+        });
+        
+        item.addEventListener('touchend', function() {
+          this.style.opacity = '1';
+        });
+        
+        item.addEventListener('touchcancel', function() {
+          this.style.opacity = '1';
+        });
+      });
+    }
   });
 </script>
 
