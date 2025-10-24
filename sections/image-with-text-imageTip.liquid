@@ -1,6 +1,6 @@
 {%- comment -%}
 ------------------------------------------------------------------------------
-	Section: Image with text - Image Tip
+	Section: Image with text imageTip
 ------------------------------------------------------------------------------
 {%- endcomment -%}
 
@@ -21,9 +21,6 @@
 {%- assign button_aria_label       	  = section.settings.button_aria_label -%}
 {%- assign button_url              	  = section.settings.button_url -%}
 {%- assign button_style            	  = section.settings.button_style -%}
-{%- assign first_image_text          = section.settings.first_image_text -%}
-{%- assign second_image_text         = section.settings.second_image_text -%}
-{%- assign third_image_text          = section.settings.third_image_text -%}
 
 {%- assign container 				  = section.settings.container_width -%}
 
@@ -104,6 +101,7 @@
 
 {%- render 'adastra' with '/src/styles/image-with-text.scss' -%}
 {%- render 'adastra' with '/assets/image-with-text-imageTip.css' -%}
+{% comment %} {%- render 'adastra' with '/assets/image-with-text-full-width.css' -%} {% endcomment %}
 
 {%- style -%}
 	#shopify-section-{{- section.id -}} {
@@ -117,6 +115,8 @@
 			padding-bottom: {{- section.settings.offset_bottom_desktop -}}px;
 		}
 	}
+
+
 {%- endstyle -%}
 
 {%- assign image_width    = "388x" -%}
@@ -161,445 +161,381 @@
 	<div class="image-with-text__container">
 		{%- if image_position == 'left' -%}
 			<div class="image-with-text__image-container {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				<div class="image-with-text__image-wrapper">
+				{% render 'image-with-text-image',
+					desktop_image: first_desktop_image,
+					mobile_image: first_mobile_image,
+					image_width: first_image_width,
+					image_width_2x: first_image_width_2x,
+					delay_step: 0.25
+				%}
+
+			{% if is_single_layout == false %}
+				{% if second_desktop_image != blank %}
 					{% render 'image-with-text-image',
-						desktop_image: first_desktop_image,
-						mobile_image: first_mobile_image,
-						image_width: first_image_width,
-						image_width_2x: first_image_width_2x,
-						delay_step: 0.25
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.5
 					%}
-					{%- if first_image_text != blank -%}
-						<div class="image-with-text__image-text">{{ first_image_text }}</div>
-					{%- endif -%}
-				</div>
-
-				{% if is_single_layout == false %}
-					{% if second_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: second_desktop_image,
-								mobile_image: second_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: 0.5
-							%}
-							{%- if second_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ second_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
-
-					{% if third_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: third_desktop_image,
-								mobile_image: third_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: 0.75
-							%}
-							{%- if third_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ third_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
 				{% endif %}
+
+			{% if third_desktop_image != blank %}
+				{% render 'image-with-text-image',
+					desktop_image: third_desktop_image,
+					mobile_image: third_mobile_image,
+					image_width: image_width,
+					image_width_2x: image_width_2x,
+					delay_step: 0.25
+				%}
+			{% endif %}
+			{% endif %}
 			</div>
+
+
 
 			{{- content -}}
 		{%- else -%}
 			<div class="image-with-text__image-container image-with-text__image-container--mobile {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				<div class="image-with-text__image-wrapper">
+				{% render 'image-with-text-image',
+					desktop_image: first_desktop_image,
+					mobile_image: first_mobile_image,
+					image_width: first_image_width,
+					image_width_2x: first_image_width_2x,
+					delay_step: 0.25
+				%}
+
+			{% if is_single_layout == false %}
+				{% if second_desktop_image != blank %}
 					{% render 'image-with-text-image',
-						desktop_image: first_desktop_image,
-						mobile_image: first_mobile_image,
-						image_width: first_image_width,
-						image_width_2x: first_image_width_2x,
-						delay_step: 0.25
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.5
 					%}
-					{%- if first_image_text != blank -%}
-						<div class="image-with-text__image-text">{{ first_image_text }}</div>
-					{%- endif -%}
-				</div>
-
-				{% if is_single_layout == false %}
-					{% if second_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: second_desktop_image,
-								mobile_image: second_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: 0.5
-							%}
-							{%- if second_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ second_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
-
-					{% if third_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: third_desktop_image,
-								mobile_image: third_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: 0.75
-							%}
-							{%- if third_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ third_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
 				{% endif %}
+
+				{% if third_desktop_image != blank %}
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.75
+					%}
+				{% endif %}
+			{% endif %}
 			</div>
 
 			{{- content -}}
 
 			<div class="image-with-text__image-container image-with-text__image-container--desktop {{ single_img_layout_class }} {{ two_img_layout_class }} {{ three_img_layout_class }}">
-				{% if is_single_layout %}
-					{% assign delay_step = 0.25 %}
-				{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
-					{% assign delay_step = 0.75 %}
-					{% assign three_2_delay = 0.5 %}
-				{% elsif is_double_layout and two_images_layout != "double_with_small" %}
-					{% assign delay_step = 0.5 %}
-					{% assign three_2_delay = 0.25 %}
-				{% elsif is_double_layout and two_images_layout == "double_with_small" %}
-					{% assign delay_step = 0.25 %}
-					{% assign three_2_delay = 0.5 %}
-				{% endif %}
+			{% if is_single_layout %}
+				{% assign delay_step = 0.25 %}
+			{% elsif first_desktop_image != blank and second_desktop_image != blank and third_desktop_image != blank %}
+				{% assign delay_step = 0.75 %}
+				{% assign three_2_delay = 0.5 %}
+			{% elsif is_double_layout and two_images_layout != "double_with_small" %}
+				{% assign delay_step = 0.5 %}
+				{% assign three_2_delay = 0.25 %}
+			{% elsif is_double_layout and two_images_layout == "double_with_small" %}
+				{% assign delay_step = 0.25 %}
+				{% assign three_2_delay = 0.5 %}
+			{% endif %}
 
-				<div class="image-with-text__image-wrapper">
+			{% render 'image-with-text-image',
+				desktop_image: first_desktop_image,
+				mobile_image: first_mobile_image,
+				image_width: first_image_width,
+				image_width_2x: first_image_width_2x,
+				delay_step: delay_step
+			%}
+
+			{% if is_single_layout == false %}
+				{% if second_desktop_image != blank %}
 					{% render 'image-with-text-image',
-						desktop_image: first_desktop_image,
-						mobile_image: first_mobile_image,
-						image_width: first_image_width,
-						image_width_2x: first_image_width_2x,
-						delay_step: delay_step
+						desktop_image: second_desktop_image,
+						mobile_image: second_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: three_2_delay
 					%}
-					{%- if first_image_text != blank -%}
-						<div class="image-with-text__image-text">{{ first_image_text }}</div>
-					{%- endif -%}
-				</div>
-
-				{% if is_single_layout == false %}
-					{% if second_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: second_desktop_image,
-								mobile_image: second_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: three_2_delay
-							%}
-							{%- if second_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ second_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
-
-					{% if third_desktop_image != blank %}
-						<div class="image-with-text__image-wrapper">
-							{% render 'image-with-text-image',
-								desktop_image: third_desktop_image,
-								mobile_image: third_mobile_image,
-								image_width: image_width,
-								image_width_2x: image_width_2x,
-								delay_step: 0.25
-							%}
-							{%- if third_image_text != blank -%}
-								<div class="image-with-text__image-text">{{ third_image_text }}</div>
-							{%- endif -%}
-						</div>
-					{% endif %}
 				{% endif %}
+
+				{% if third_desktop_image != blank %}
+					{% render 'image-with-text-image',
+						desktop_image: third_desktop_image,
+						mobile_image: third_mobile_image,
+						image_width: image_width,
+						image_width_2x: image_width_2x,
+						delay_step: 0.25
+					%}
+				{% endif %}
+			{% endif %}
 			</div>
 		{%- endif -%}
 
 	</div>
 </section>
 
-{% schema %}
-{
-	"name": "Image with text-imageTip",
-	"class": "section",
-	"disabled_on": {
-		"groups": ["header", "footer", "custom.popup"]
-	},
-	"settings": [
-		{
-			"id": "image_position",
-			"type": "select",
-			"label": "Image position",
-			"options": [
-				{
-					"value": "left",
-					"label": "Left"
-				},
-				{
-					"value": "right",
-					"label": "Right"
-				}
-			],
-			"default": "left"
+{%- schema -%}
+	{
+		"name": "Image with text imageTip",
+		"disabled_on": {
+			"groups": ["header", "footer", "custom.popup"]
 		},
-		{
-			"id": "text_alignment",
-			"type": "select",
-			"label": "Text alignment",
-			"options": [
-				{
-					"value": "left",
-					"label": "Left"
-				},
-				{
-					"value": "center",
-					"label": "Center"
-				},
-				{
-					"value": "right",
-					"label": "Right"
-				}
-			],
-			"default": "left"
-		},
-		{
-			"id": "content_vertical_alignment",
-			"type": "select",
-			"label": "Content vertical alignment",
-			"options": [
-				{
-					"value": "start",
-					"label": "Top"
-				},
-				{
-					"value": "center",
-					"label": "Center"
-				},
-				{
-					"value": "end",
-					"label": "Bottom"
-				}
-			],
-			"default": "center"
-		},
-		{
-			"id": "two_images_layout",
-			"type": "select",
-			"label": "Two images layout",
-			"options": [
-				{
-					"value": "double_vertical",
-					"label": "Double vertical"
-				},
-				{
-					"value": "double_horizontal",
-					"label": "Double horizontal"
-				},
-				{
-					"value": "double_vertical_offset",
-					"label": "Double vertical with offset"
-				},
-				{
-					"value": "double_with_small",
-					"label": "Double with small"
-				}
-			],
-			"default": "double_with_small",
-			"info": "This setting works only when you have two images."
-		},
-		{
-			"id": "first_desktop_image",
-			"type": "image_picker",
-			"label": "First image desktop"
-		},
-		{
-			"id": "first_mobile_image",
-			"type": "image_picker",
-			"label": "First image mobile"
-		},
-		{
-			"id": "second_desktop_image",
-			"type": "image_picker",
-			"label": "Second image desktop"
-		},
-		{
-			"id": "second_mobile_image",
-			"type": "image_picker",
-			"label": "Second image mobile"
-		},
-		{
-			"id": "third_desktop_image",
-			"type": "image_picker",
-			"label": "Third image desktop"
-		},
-		{
-			"id": "third_mobile_image",
-			"type": "image_picker",
-			"label": "Third image mobile"
-		},
-		{
-			"type": "header",
-			"content": "Image Texts"
-		},
-		{
-			"id": "first_image_text",
-			"type": "text",
-			"label": "First image text",
-			"default": "Image 1"
-		},
-		{
-			"id": "second_image_text",
-			"type": "text",
-			"label": "Second image text",
-			"default": "Image 2"
-		},
-		{
-			"id": "third_image_text",
-			"type": "text",
-			"label": "Third image text",
-			"default": "Image 3"
-		},
-		{
-			"id": "heading",
-			"type": "text",
-			"label": "Heading"
-		},
-		{
-			"id": "subheading",
-			"type": "textarea",
-			"label": "Subheading"
-		},
-		{
-			"id": "text_content",
-			"type": "richtext",
-			"label": "Text"
-		},
-		{
-			"id": "button_label",
-			"type": "text",
-			"label": "Button label"
-		},
-		{
-			"id": "button_aria_label",
-			"type": "text",
-			"label": "Button aria-label",
-			"info": "Need for good accessibility, e.g. 'All news about'."
-		},
-		{
-			"id": "button_url",
-			"type": "url",
-			"label": "Button link"
-		},
-		{
-			"id": "button_style",
-			"type": "select",
-			"label": "Button style",
-			"options": [
-				{
-					"value": "primary",
-					"label": "Primary"
-				},
-				{
-					"value": "secondary",
-					"label": "Secondary"
-				},
-				{
-					"value": "primary-border",
-					"label": "Primary with border"
-				},
-				{
-					"value": "secondary-border",
-					"label": "Secondary with border"
-				}
-			],
-			"default": "secondary-border"
-		},
-		{
-			"type": "header",
-			"content": "Layout"
-		},
-		{
-			"type": "select",
-			"id": "container_width",
-			"label": "Container width",
-			"options": [
-				{
-					"value": "1432px",
-					"label": "Default - 1400px"
-				},
-				{
-					"value": "1952px",
-					"label": "Large - 1920px"
-				},
-				{
-					"value": "100%",
-					"label": "Full width"
-				},
-				{
-					"value": "inherit",
-					"label": "Inherit of general setting"
-				}
-			],
-			"default": "inherit",
-			"info": "if you select 'Inherit of general setting', then container width will be used from the Theme settings/Layout"
-		},
-		{
-			"type": "range",
-			"id": "offset_top_desktop",
-			"min": 0,
-			"max": 100,
-			"step": 1,
-			"unit": "px",
-			"label": "Desktop offset top",
-			"default": 50
-		},
-		{
-			"type": "range",
-			"id": "offset_bottom_desktop",
-			"min": 0,
-			"max": 100,
-			"step": 1,
-			"unit": "px",
-			"label": "Desktop offset bottom",
-			"default": 50
-		},
-		{
-			"type": "range",
-			"id": "offset_top_mobile",
-			"min": 0,
-			"max": 100,
-			"step": 1,
-			"unit": "px",
-			"label": "Mobile offset top",
-			"default": 25
-		},
-		{
-			"type": "range",
-			"id": "offset_bottom_mobile",
-			"min": 0,
-			"max": 100,
-			"step": 1,
-			"unit": "px",
-			"label": "Mobile offset bottom",
-			"default": 25
-		}
+		"settings": [
+			{
+				"id": "image_position",
+				"type": "select",
+				"label": "Image position",
+				"options": [
+					{
+						"value": "left",
+						"label": "Left"
+					},
+					{
+						"value": "right",
+						"label": "Right"
+					}
+				],
+				"default": "left"
+			},
+			{
+				"id": "text_alignment",
+				"type": "select",
+				"label": "Text alignment",
+				"options": [
+					{
+						"value": "left",
+						"label": "Left"
+					},
+					{
+						"value": "center",
+						"label": "Center"
+					},
+					{
+						"value": "right",
+						"label": "Right"
+					}
+				],
+				"default": "left"
+			},
+			{
+				"id": "content_vertical_alignment",
+				"type": "select",
+				"label": "Content vertical alignment",
+				"options": [
+					{
+						"value": "start",
+						"label": "Top"
+					},
+					{
+						"value": "center",
+						"label": "Center"
+					},
+					{
+						"value": "end",
+						"label": "Bottom"
+					}
+				],
+				"default": "center"
+			},
 
-	],
-	"presets": [
-		{
-			"name": "Image with text-imageTip",
-			"settings": {
-				"heading": "Text heading",
-				"subheading": "Subheading",
-				"text_content": "<p>Combine an image with text to highlight a specific product, collection, or blog post of your choice. Enhance the content by including information on its availability, style, or possibly a review.</p>",
-				"button_label": "Button label",
-				"button_url": "/"
+
+			{
+				"id": "two_images_layout",
+				"type": "select",
+				"label": "Two images layout",
+				"options": [
+					{
+						"value": "double_vertical",
+						"label": "Double vertical"
+					},
+					{
+						"value": "double_horizontal",
+						"label": "Double horizontal"
+					},
+					{
+						"value": "double_vertical_offset",
+						"label": "Double vertical with offset"
+					},
+					{
+						"value": "double_with_small",
+						"label": "Double with small"
+					}
+				],
+				"default": "double_with_small",
+				"info": "This setting works only when you have two images."
+			},
+			{
+				"id": "first_desktop_image",
+				"type": "image_picker",
+				"label": "First image desktop"
+			},
+			{
+				"id": "first_mobile_image",
+				"type": "image_picker",
+				"label": "First image mobile"
+			},
+			{
+				"id": "second_desktop_image",
+				"type": "image_picker",
+				"label": "Second image desktop"
+			},
+			{
+				"id": "second_mobile_image",
+				"type": "image_picker",
+				"label": "Second image mobile"
+			},
+			{
+				"id": "third_desktop_image",
+				"type": "image_picker",
+				"label": "Third image desktop"
+			},
+			{
+				"id": "third_mobile_image",
+				"type": "image_picker",
+				"label": "Third image mobile"
+			},
+			{
+				"id": "heading",
+				"type": "text",
+				"label": "Heading"
+			},
+			{
+				"id": "subheading",
+				"type": "textarea",
+				"label": "Subheading"
+			},
+			{
+				"id": "text_content",
+				"type": "richtext",
+				"label": "Text"
+			},
+			{
+				"id": "button_label",
+				"type": "text",
+				"label": "Button label"
+			},
+			{
+				"id": "button_aria_label",
+				"type": "text",
+				"label": "Button aria-label",
+				"info": "Need for good accessibility, e.g. 'All news about'."
+			},
+			{
+				"id": "button_url",
+				"type": "url",
+				"label": "Button link"
+			},
+			{
+				"id": "button_style",
+				"type": "select",
+				"label": "Button style",
+				"options": [
+					{
+						"value": "primary",
+						"label": "Primary"
+					},
+					{
+						"value": "secondary",
+						"label": "Secondary"
+					},
+					{
+						"value": "primary-border",
+						"label": "Primary with border"
+					},
+					{
+						"value": "secondary-border",
+						"label": "Secondary with border"
+					}
+				],
+				"default": "secondary-border"
+			},
+			{
+				"type": "header",
+				"content": "Layout"
+			},
+			{
+				"type": "select",
+				"id": "container_width",
+				"label": "Container width",
+				"options": [
+					{
+						"value": "1432px",
+						"label": "Default - 1400px"
+					},
+					{
+						"value": "1952px",
+						"label": "Large - 1920px"
+					},
+					{
+						"value": "100%",
+						"label": "Full width"
+					},
+					{
+						"value": "inherit",
+						"label": "Inherit of general setting"
+					}
+				],
+				"default": "inherit",
+				"info": "if you select 'Inherit of general setting', then container width will be used from the Theme settings/Layout"
+			},
+			{
+				"type": "range",
+				"id": "offset_top_desktop",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Desktop offset top",
+				"default": 50
+			},
+			{
+				"type": "range",
+				"id": "offset_bottom_desktop",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Desktop offset bottom",
+				"default": 50
+			},
+			{
+				"type": "range",
+				"id": "offset_top_mobile",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Mobile offset top",
+				"default": 25
+			},
+			{
+				"type": "range",
+				"id": "offset_bottom_mobile",
+				"min": 0,
+				"max": 100,
+				"step": 1,
+				"unit": "px",
+				"label": "Mobile offset bottom",
+				"default": 25
+			},
+
+		],
+		"presets": [
+			{
+				"name": "Image with text imageTip",
+				"settings": {
+					"heading": "Text heading",
+					"subheading": "Subheading",
+					"text_content": "<p>Combine an image with text to highlight a specific product, collection, or blog post of your choice. Enhance the content by including information on its availability, style, or possibly a review.</p>",
+					"button_label": "Button label",
+					"button_url": "/"
+				}
 			}
-		}
-	]
-}
-{% endschema %}
+		]
+	}
+{%- endschema -%}
