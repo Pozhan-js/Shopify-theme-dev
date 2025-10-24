@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizontal Offset Layout Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 40px;
+        }
+        
+        .test-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .demo-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+        
+        /* 模拟 image-with-text 样式 */
+        .image-with-text {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .image-with-text__container {
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+        }
+        
+        .image-with-text__image-container--double-vertical-offset {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 0;
+            overflow: visible;
+            position: relative;
+        }
+        
+        .image-with-text__image-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:first-child {
+            z-index: 2;
+            width: 65%;
+            margin-right: -20%;
+        }
+        
+        .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:last-child {
+            z-index: 1;
+            width: 65%;
+            margin-left: -20%;
+            margin-top: 40px;
+            align-self: flex-start;
+        }
+        
+        .demo-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        
+        .demo-image:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        @media (max-width: 991px) {
+            .image-with-text__container {
+                flex-direction: column;
+            }
+            
+            .image-with-text__image-container--double-vertical-offset {
+                flex-direction: column;
+            }
+            
+            .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper {
+                width: 100% !important;
+                margin: 0 0 16px 0 !important;
+            }
+            
+            .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:first-child {
+                margin-bottom: -30px;
+            }
+            
+            .image-with-text__image-container--double-vertical-offset .image-with-text__image-wrapper:last-child {
+                width: 90% !important;
+                margin-left: 10% !important;
+            }
+        }
+        
+        .responsive-note {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #1976d2;
+        }
+        
+        .layout-info {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Horizontal Offset Layout Test</h1>
+        
+        <div class="layout-info">
+            <strong>Layout Description:</strong> Double vertical with offset now displays as horizontal layout with overlapping images and vertical offset for dynamic effect.
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Desktop View (Horizontal Overlap)</h2>
+            <div class="demo-container">
+                <div class="image-with-text">
+                    <div class="image-with-text__container">
+                        <div class="image-with-text__image-container--double-vertical-offset">
+                            <div class="image-with-text__image-wrapper">
+                                <div class="demo-image">Image 1 (Left)</div>
+                            </div>
+                            <div class="image-with-text__image-wrapper">
+                                <div class="demo-image">Image 2 (Right + Offset)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="responsive-note">
+                    Desktop: Images arranged horizontally with -20% overlap and 40px vertical offset
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2 class="test-title">Mobile View (Vertical Stack)</h2>
+            <div class="demo-container">
+                <div class="image-with-text">
+                    <div class="image-with-text__container" style="flex-direction: column;">
+                        <div class="image-with-text__image-container--double-vertical-offset" style="flex-direction: column;">
+                            <div class="image-with-text__image-wrapper" style="width: 100%; margin: 0 0 -30px 0;">
+                                <div class="demo-image">Image 1 (Top)</div>
+                            </div>
+                            <div class="image-with-text__image-wrapper" style="width: 90%; margin: 0 0 0 10%;">
+                                <div class="demo-image">Image 2 (Bottom + Offset)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="responsive-note">
+                    Mobile: Images stack vertically with -30px overlap and 10% horizontal offset
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Features Implemented:</h3>
+            <ul>
+                <li>✅ <strong>Horizontal Layout</strong>: Images arranged side-by-side on desktop</li>
+                <li>✅ <strong>Overlap Effect</strong>: -20% horizontal overlap between images</li>
+                <li>✅ <strong>Vertical Offset</strong>: Second image offset by 40px vertically</li>
+                <li>✅ <strong>Responsive Design</strong>: Switches to vertical stack on mobile</li>
+                <li>✅ <strong>Dynamic Composition</strong>: Creates visual depth and interest</li>
+                <li>✅ <strong>Smooth Transitions</strong>: Hover effects for enhanced interaction</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3>CSS Implementation Details:</h3>
+            <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; font-size: 12px; overflow-x: auto;">
+/* Desktop Horizontal Layout */
+.image-with-text__image-container--double-vertical-offset {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.image-with-text__image-wrapper:first-child {
+  width: 65%;
+  margin-right: -20%;
+  z-index: 2;
+}
+
+.image-with-text__image-wrapper:last-child {
+  width: 65%;
+  margin-left: -20%;
+  margin-top: 40px;
+  z-index: 1;
+}
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
