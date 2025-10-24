@@ -1,0 +1,546 @@
+{% comment %}
+  Instagram图片展示 - 带轮播功能
+  1. 主标题展示（左上角，字体较小）
+  2. 副标题展示（右上角）
+  3. 直接展示配置的图片
+  4. 图片下方显示标题和文本内容
+  5. 可配置背景颜色
+{% endcomment %}
+
+<div
+  class="gallery-showcase-section"
+  id="{{ section.settings.main_title }}"
+  data-section-id="{{ section.id }}"
+  style="background-color: {{ section.settings.background_color | default: 'transparent' }};"
+>
+  <div class="gallery-container">
+    <!-- 标题区域 - 左右布局 -->
+    {% if section.settings.main_title != blank or section.settings.sub_title != blank %}
+      <div class="gallery-header-wrapper">
+        {% if section.settings.main_title != blank %}
+          <h2 class="gallery-main-title">{{ section.settings.main_title }}</h2>
+        {% endif %}
+        {% if section.settings.sub_title != blank %}
+          <h3 class="gallery-sub-title">{{ section.settings.sub_title }}</h3>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- 图片轮播部分 -->
+    <div class="gallery-carousel-wrapper">
+      <div class="gallery-carousel-content active">
+        <div class="gallery-carousel-track" data-section-id="{{ section.id }}">
+          {% for block in section.blocks %}
+            {% if block.type == 'image_item' %}
+              <div class="gallery-card-container gallery-small-card">
+                <!-- 卡片内容保持不变 -->
+                <div class="gallery-card-inner">
+                  <div class="gallery-image-container">
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x500' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="gallery-card-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="gallery-placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if block.settings.card_title != blank or block.settings.card_text != blank %}
+                    <div class="gallery-card-content">
+                      {% if block.settings.card_title != blank %}
+                        <h3 class="gallery-card-title">{{ block.settings.card_title }}</h3>
+                      {% endif %}
+                      {% if block.settings.card_text != blank %}
+                        <p class="gallery-card-text">{{ block.settings.card_text }}</p>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- 使用 data-section-id 区分不同实例 -->
+      <button
+        class="gallery-nav-button gallery-prev-button"
+        data-section-id="{{ section.id }}"
+      >
+        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        class="gallery-nav-button gallery-next-button"
+        data-section-id="{{ section.id }}"
+      >
+        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Variables CSS */
+  :root {
+    --gallery-cream: #f5f1eb;
+    --gallery-warm-beige: #e8ddd4;
+    --gallery-soft-brown: #c4a484;
+    --gallery-pearl-white: #fff8f0;
+    --gallery-gray-50: #f9fafb;
+    --gallery-gray-100: #f3f4f6;
+    --gallery-gray-200: #e5e7eb;
+    --gallery-gray-400: #9ca3af;
+    --gallery-gray-500: #6b7280;
+    --gallery-gray-600: #4b5563;
+    --gallery-gray-700: #374151;
+    --gallery-gray-900: #111827;
+    --gallery-white: #ffffff;
+    --gallery-amber-400: #fbbf24;
+    --gallery-orange-400: #fb923c;
+  }
+
+  /* Section principale */
+  .gallery-showcase-section {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 50vh;
+    padding: 1rem 0;
+  }
+
+  /* Container principal - 最大宽度设置为1200px */
+  .gallery-container {
+    margin: 0 auto;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+
+  /* 标题区域 - 左右布局 */
+  .gallery-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
+  }
+
+  .gallery-main-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: -0.025em;
+    flex-shrink: 0;
+  }
+
+  .gallery-sub-title {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--gallery-gray-600);
+    margin: 0;
+    line-height: 1.4;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Carousel wrapper */
+  .gallery-carousel-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gallery-carousel-content {
+    display: none;
+  }
+
+  .gallery-carousel-content.active {
+    display: block;
+  }
+
+  .gallery-carousel-track {
+    display: flex;
+    gap: 1rem;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    user-select: none;
+  }
+
+  /* Cards containers */
+  .gallery-card-container {
+    flex-shrink: 0;
+  }
+
+  .gallery-small-card {
+    width: 18rem;
+  }
+
+  .gallery-card-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Image containers */
+  .gallery-image-container {
+    position: relative;
+    background-color: var(--gallery-white);
+    overflow: hidden;
+  }
+
+  .gallery-small-card .gallery-image-container {
+    height: 20rem;
+    border-radius: 8px;
+  }
+
+  .gallery-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease;
+  }
+
+  .gallery-placeholder-image {
+    width: 100%;
+    height: 100%;
+    background-color: var(--gallery-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gallery-gray-400);
+    font-size: 0.875rem;
+  }
+
+  /* 图片下方内容区域 */
+  .gallery-card-content {
+    padding: 1rem 0.5rem 0;
+    text-align: center;
+  }
+
+  .gallery-card-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
+  }
+
+  .gallery-card-text {
+    font-size: 0.875rem;
+    color: var(--gallery-gray-600);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Boutons de navigation */
+  .gallery-nav-button {
+    position: absolute;
+    top: 10.5rem !important;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    background: var(--gallery-white);
+    border: 1px solid var(--gallery-gray-200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gallery-nav-button:hover {
+    background-color: var(--gallery-gray-50);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .gallery-nav-button.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .gallery-prev-button {
+    left: 1rem;
+  }
+
+  .gallery-next-button {
+    right: 1rem;
+  }
+
+  .gallery-nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--gallery-gray-600);
+  }
+
+  /* PC端优化 - 在1200px以上屏幕的额外优化 */
+  @media (min-width: 1201px) {
+    .gallery-container {
+      padding: 0 2rem;
+    }
+
+    .gallery-carousel-track {
+      gap: 1.5rem;
+    }
+
+    .gallery-small-card {
+      width: 20rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 22rem;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .gallery-container {
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .gallery-container {
+      padding: 0 0.5rem;
+    }
+
+    .gallery-header-wrapper {
+      margin-bottom: 1.5rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .gallery-main-title {
+      font-size: 1.125rem;
+    }
+
+    .gallery-sub-title {
+      font-size: 0.875rem;
+      text-align: left;
+    }
+
+    .gallery-carousel-track {
+      gap: 1rem;
+    }
+
+    .gallery-small-card {
+      width: 16rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 22rem;
+    }
+
+    .gallery-card-title {
+      font-size: 1rem;
+    }
+
+    .gallery-card-text {
+      font-size: 0.8rem;
+    }
+
+    .gallery-nav-button {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .gallery-nav-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-header-wrapper {
+      margin-bottom: 1rem;
+    }
+
+    .gallery-main-title {
+      font-size: 1rem;
+    }
+
+    .gallery-sub-title {
+      font-size: 0.8rem;
+    }
+
+    .gallery-small-card {
+      width: 14rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 20rem;
+    }
+
+    .gallery-card-content {
+      padding: 0.75rem 0.25rem 0;
+    }
+
+    .gallery-card-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .gallery-card-text {
+      font-size: 0.75rem;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tracks = document.querySelectorAll('.gallery-carousel-track[data-section-id]');
+
+    tracks.forEach((track) => {
+      const sectionId = track.dataset.sectionId;
+      const prevButton = document.querySelector(`.gallery-prev-button[data-section-id="${sectionId}"]`);
+      const nextButton = document.querySelector(`.gallery-next-button[data-section-id="${sectionId}"]`);
+      const wrapper = track.closest('.gallery-carousel-wrapper');
+
+      if (!prevButton || !nextButton || !wrapper) return;
+
+      let currentSlide = 0;
+
+      function updateCarousel() {
+        const cards = track.querySelectorAll('.gallery-card-container');
+        if (cards.length === 0) return;
+
+        const cardWidth = cards[0].offsetWidth + 16; // 包含 gap
+        const offset = currentSlide * cardWidth;
+        track.style.transform = `translateX(-${offset}px)`;
+
+        // 实际可滚动的最大距离
+        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
+
+        // 当前已滚动的距离
+        const currentOffset = currentSlide * cardWidth;
+
+        // 显示/隐藏按钮：只要有空间就能点
+        prevButton.classList.toggle('visible', currentOffset > 0);
+        nextButton.classList.toggle('visible', currentOffset < maxScroll);
+      }
+
+      prevButton.addEventListener('click', () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateCarousel();
+        }
+      });
+
+      nextButton.addEventListener('click', () => {
+        const cards = track.querySelectorAll('.gallery-card-container');
+        if (cards.length === 0) return;
+
+        const cardWidth = cards[0].offsetWidth + 16;
+        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
+        const currentOffset = currentSlide * cardWidth;
+
+        if (currentOffset < maxScroll) {
+          currentSlide++;
+          updateCarousel();
+        }
+      });
+
+      // 初始更新
+      updateCarousel();
+
+      // 响应窗口大小变化
+      window.addEventListener('resize', updateCarousel);
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "步骤图片展示",
+  "tag": "section",
+  "class": "gallery-showcase-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "main_title",
+      "label": "主标题",
+      "default": "精选图片展示"
+    },
+    {
+      "type": "text",
+      "id": "sub_title",
+      "label": "副标题",
+      "default": "查看更多精彩内容"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "transparent"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_item",
+      "name": "图片项",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
+        },
+        {
+          "type": "text",
+          "id": "card_title",
+          "label": "卡片标题",
+          "default": "图片标题"
+        },
+        {
+          "type": "textarea",
+          "id": "card_text",
+          "label": "卡片描述",
+          "default": "这里是图片的描述文本内容"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "abuot图片展示",
+      "settings": {
+        "main_title": "精选图片展示",
+        "sub_title": "查看更多精彩内容",
+        "background_color": "transparent"
+      },
+      "blocks": [
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 1",
+            "card_text": "这里是第一张图片的描述文本"
+          }
+        },
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 2",
+            "card_text": "这里是第二张图片的描述文本"
+          }
+        },
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 3",
+            "card_text": "这里是第三张图片的描述文本"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
