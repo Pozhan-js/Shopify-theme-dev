@@ -1,0 +1,390 @@
+{%- liquid
+  assign bg_color = section.settings.background_color | default: '#ffffff'
+  assign text_color = section.settings.text_color | default: '#000000'
+-%}
+
+<style>
+  .interactive-section-{{ section.id }} {
+
+    color: {{ text_color }};
+    min-height: 90vh;
+    display: flex;
+    padding: 0 1rem;
+
+  }
+
+  .interactive-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .image-section {
+    position: relative;
+    height: 90vh;
+    overflow: hidden;
+  }
+
+  .image-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .image-item.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .content-section {
+    display: flex;
+    background-color: {{ bg_color }};
+    flex-direction: column;
+    height: 90vh;
+    padding: 60px 40px;
+    border-radius: 12px;
+  }
+
+  .content-area {
+    flex: 1;
+    padding-bottom: 60px;
+    position: relative;
+    min-height: 0;
+  }
+
+  .content-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    transition: all 0.5s ease;
+  }
+
+  .content-item.active {
+    opacity: 1;
+  }
+
+  .content-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+
+  .content-description {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    opacity: 0.8;
+  }
+
+  .content-description p {
+    margin-bottom: 20px;
+  }
+
+  .content-description p:last-child {
+    margin-bottom: 0;
+  }
+
+  .menu-section {
+    border-top: 1px solid rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+
+  .menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .menu-item {
+    cursor: pointer;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .menu-item:hover {
+    background-color: rgba(0,0,0,0.02);
+    padding-left: 15px;
+  }
+
+  .menu-item.active {
+    background-color: rgba(0,0,0,0.05);
+    padding-left: 20px;
+  }
+
+  .menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: {{ text_color }};
+  }
+
+  .menu-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 1024px) {
+    .interactive-container {
+      grid-template-columns: 1fr;
+    }
+
+    .image-section {
+      height: 50vh;
+    }
+
+    .content-section {
+      height: auto;
+      min-height: 50vh;
+      padding: 40px 30px;
+    }
+
+    .content-area {
+      position: static;
+      flex: none;
+      padding-bottom: 40px;
+    }
+
+    .content-item {
+      position: static;
+      opacity: 0;
+      display: none;
+    }
+
+    .content-item.active {
+      opacity: 1;
+      display: block;
+    }
+
+    .content-title {
+      font-size: 2rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .content-section {
+      padding: 30px 20px;
+    }
+
+    .content-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+    }
+
+    .content-description {
+      font-size: 1.1rem;
+    }
+
+    .menu-title {
+      font-size: 1.2rem;
+    }
+
+    .menu-section {
+      padding-top: 30px;
+    }
+  }
+</style>
+
+<section class="interactive-section-{{ section.id }}">
+  <div class="interactive-container">
+    <!-- 左侧图片区域 -->
+    <div class="image-section">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'menu_item' -%}
+          <div class="image-item{% if forloop.first %} active{% endif %}" data-index="{{ forloop.index0 }}">
+            {%- if block.settings.image != blank -%}
+              <img
+                src="{{ block.settings.image | img_url: '1200x800' }}"
+                alt="{{ block.settings.title | escape }}"
+                loading="lazy"
+              >
+            {%- else -%}
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; text-align: center; padding: 20px;">
+                {{ block.settings.title | default: 'Image Placeholder' }}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <!-- 右侧内容区域 -->
+    <div class="content-section">
+      <!-- 上部分：标题和内容区域 -->
+      <div class="content-area">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'menu_item' -%}
+            <div class="content-item{% if forloop.first %} active{% endif %}" data-index="{{ forloop.index0 }}">
+              {%- if block.settings.content_title != blank -%}
+                <h2 class="content-title">{{ block.settings.content_title }}</h2>
+              {%- endif -%}
+
+              {%- if block.settings.content_description != blank -%}
+                <div class="content-description">
+                  {{ block.settings.content_description }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <!-- 下部分：菜单区域 -->
+      <div class="menu-section">
+        <ul class="menu-list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'menu_item' -%}
+              <li
+                class="menu-item{% if forloop.first %} active{% endif %}"
+                data-index="{{ forloop.index0 }}"
+                {{ block.shopify_attributes }}
+              >
+                <div class="menu-title">{{ block.settings.title }}</div>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sectionId = '{{ section.id }}';
+    const menuItems = document.querySelectorAll('.interactive-section-' + sectionId + ' .menu-item');
+    const imageItems = document.querySelectorAll('.interactive-section-' + sectionId + ' .image-item');
+    const contentItems = document.querySelectorAll('.interactive-section-' + sectionId + ' .content-item');
+
+    menuItems.forEach(function (menuItem) {
+      menuItem.addEventListener('mouseenter', function () {
+        const index = parseInt(this.getAttribute('data-index'));
+
+        // 移除所有活动状态
+        menuItems.forEach(function (item) {
+          item.classList.remove('active');
+        });
+        imageItems.forEach(function (item) {
+          item.classList.remove('active');
+        });
+        contentItems.forEach(function (item) {
+          item.classList.remove('active');
+        });
+
+        // 添加活动状态
+        this.classList.add('active');
+        if (imageItems[index]) {
+          imageItems[index].classList.add('active');
+        }
+        if (contentItems[index]) {
+          contentItems[index].classList.add('active');
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Interactive Image Content",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu_item",
+      "name": "Menu Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu Title",
+          "default": "our values 我们的价值观"
+        },
+        {
+          "type": "text",
+          "id": "content_title",
+          "label": "Content Title",
+          "default": "our values 我们的价值观"
+        },
+        {
+          "type": "richtext",
+          "id": "content_description",
+          "label": "Content Description",
+          "default": "<p>It was important to us to build a value driven business. At rhode, we believe in: Simplicity. Affordability. Authenticity. Quality. Transparency.</p><p>建立价值驱动的业务对我们来说很重要。在罗德，我们相信：简单。负担能力。真实性。质量。透明度。</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Interactive Image Content",
+      "blocks": [
+        {
+          "type": "menu_item",
+          "settings": {
+            "title": "our values 我们的价值观",
+            "content_title": "our values 我们的价值观",
+            "content_description": "<p>It was important to us to build a value driven business. At rhode, we believe in: Simplicity. Affordability. Authenticity. Quality. Transparency.</p><p>建立价值驱动的业务对我们来说很重要。在罗德，我们相信：简单。负担能力。真实性。质量。透明度。</p>"
+          }
+        },
+        {
+          "type": "menu_item",
+          "settings": {
+            "title": "scientifically proven formulas",
+            "content_title": "scientifically proven formulas",
+            "content_description": "<p>Our formulas are backed by extensive research and clinical testing to ensure maximum effectiveness and safety.</p><p>我们的配方得到广泛研究和临床测试的支持，以确保最大的有效性和安全性。</p>"
+          }
+        },
+        {
+          "type": "menu_item",
+          "settings": {
+            "title": "our minimal footprint 我们的最小占地面积",
+            "content_title": "our minimal footprint 我们的最小占地面积",
+            "content_description": "<p>We are committed to sustainable practices and minimizing our environmental impact through responsible sourcing and packaging.</p><p>我们致力于可持续发展实践，通过负责任的采购和包装来最大限度地减少对环境的影响。</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
