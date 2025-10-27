@@ -1,78 +1,162 @@
-<div class="dropdown has-mega-menu">
-  <span class="nav-item dropdown-trigger" style="cursor: pointer;">
-    <span>{{ link.title | escape }}</span>
-    <span class="dropdown-arrow"></span>
-  </span>
-  <div class="mega-dropdown-menu">
-    <div class="mega-menu-grid">
-      {% for block in section.blocks %}
-        {% if block.type == 'mega_menu_category' %}
-          <div class="mega-menu-column">
-            <div class="mega-menu-category">
-              <h3>{{ block.settings.category_title }}</h3>
-              <ul>
-                {% for i in (1..6) %}
-                  {% assign item_title_key = 'item_' | append: i | append: '_title' %}
-                  {% assign item_url_key = 'item_' | append: i | append: '_url' %}
-                  {% assign item_title = block.settings[item_title_key] %}
-                  {% assign item_url = block.settings[item_url_key] %}
-                  {% if item_title != blank %}
-                    <li><a href="{{ item_url | default: '#' }}">{{ item_title }}</a></li>
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-content">
+    {% assign mainmenu = linklists[section.settings.mainmenu] %}
+    {% if mainmenu and mainmenu.links.size > 0 %}
+      {% for link in mainmenu.links %}
+        {% assign linkhandle = link.title | handleize %}
+        
+        {% if linkhandle == 'pilates-equipment' or linkhandle == 'products' or linkhandle == 'equipment' %}
+          <!-- Mobile Equipment Menu with Collections -->
+          <div>
+            <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+              {{ link.title | escape }}
+            </button>
+            <div class="mobile-submenu mobile-equipment-submenu" id="submenu{{ forloop.index }}" style="display: none;">
+              {% comment %} 获取产品系列配置 {% endcomment %}
+              {% assign products_per_collection = section.settings.products_per_collection | default: 6 %}
+              
+              {% comment %} 创建自定义排序的系列数组 {% endcomment %}
+              {% assign custom_collection_handles = '' %}
+              
+              {% comment %} 获取所有自定义系列配置 {% endcomment %}
+              {% for block in section.blocks %}
+                {% if block.type == 'equipment_config' and block.settings.collection_handle != blank %}
+                  {% comment %} 将输入的标识符转换为正确的handle格式 {% endcomment %}
+                  {% assign input_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                  {% assign custom_collection_handles = custom_collection_handles | append: input_handle %}
+                  {% unless forloop.last %}
+                    {% assign custom_collection_handles = custom_collection_handles | append: ',' %}
+                  {% endunless %}
+                {% endif %}
+              {% endfor %}
+              
+              {% assign collection_handles_array = custom_collection_handles | split: ',' %}
+              
+              {% comment %} 如果有自定义配置，使用自定义顺序；否则使用默认顺序 {% endcomment %}
+              {% if collection_handles_array.size > 0 %}
+                {% for collection_handle in collection_handles_array %}
+                  {% comment %} 尝试多种方式匹配系列 {% endcomment %}
+                  {% assign collection = collections[collection_handle] %}
+                  {% unless collection %}
+                    {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
+                    {% for coll in collections %}
+                      {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                      {% if coll_handle_from_title == collection_handle %}
+                        {% assign collection = coll %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endunless %}
+                  
+                  {% if collection and collection.handle != 'all' %}
+                    {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                    {% assign custom_title = '' %}
+                    {% assign custom_products_limit = products_per_collection %}
+                    
+                    {% for block in section.blocks %}
+                      {% if block.type == 'equipment_config' %}
+                        {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                        {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                        {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                          {% assign custom_title = block.settings.custom_title %}
+                          {% assign custom_products_limit = block.settings.products_limit | default: products_per_collection %}
+                          {% break %}
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+
+                    {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                    {% assign display_title = custom_title %}
+                    {% if display_title == blank %}
+                      {% assign display_title = collection.title %}
+                    {% endif %}
+                    
+                    <div class="mobile-collection-group">
+                      <a href="{{ collection.url }}" class="mobile-collection-title">{{ display_title | escape }}</a>
+                      {% if collection.products.size > 0 %}
+                        {% for product in collection.products limit: 3 %}
+                          <a href="{{ product.url }}" class="mobile-submenu-item mobile-product-item">{{ product.title | escape }}</a>
+                        {% endfor %}
+                        {% if collection.products.size > 3 %}
+                          <a href="{{ collection.url }}" class="mobile-submenu-item mobile-view-all">查看全部 {{ display_title }}</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
                   {% endif %}
                 {% endfor %}
-              </ul>
+              {% else %}
+                {% comment %} 如果没有自定义配置，使用默认系列顺序 {% endcomment %}
+                {% for collection in collections limit: 8 %}
+                  {% unless collection.handle == 'all' %}
+                    <div class="mobile-collection-group">
+                      <a href="{{ collection.url }}" class="mobile-collection-title">{{ collection.title | escape }}</a>
+                      {% if collection.products.size > 0 %}
+                        {% for product in collection.products limit: 3 %}
+                          <a href="{{ product.url }}" class="mobile-submenu-item mobile-product-item">{{ product.title | escape }}</a>
+                        {% endfor %}
+                        {% if collection.products.size > 3 %}
+                          <a href="{{ collection.url }}" class="mobile-submenu-item mobile-view-all">查看全部 {{ collection.title }}</a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  {% endunless %}
+                {% endfor %}
+              {% endif %}
             </div>
           </div>
+        {% elsif link.links.size > 0 %}
+          <!-- Mobile Dropdown Items -->
+          <div>
+            <button class="mobile-menu-item" onclick="toggleSubmenu('submenu{{ forloop.index }}')">
+              {{ link.title | escape }}
+            </button>
+            <div class="mobile-submenu" id="submenu{{ forloop.index }}" style="display: none;">
+              {% for childlink in link.links %}
+                {% if childlink.links.size > 0 %}
+                  {% for grandchildlink in childlink.links %}
+                    <a href="{{ grandchildlink.url }}" class="mobile-submenu-item">{{ grandchildlink.title | escape }}</a>
+                  {% endfor %}
+                {% else %}
+                  <a href="{{ childlink.url }}" class="mobile-submenu-item">{{ childlink.title | escape }}</a>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <!-- Simple Link -->
+          <a href="{{ link.url }}" class="mobile-menu-item">
+            {{ link.title | escape }}
+          </a>
         {% endif %}
       {% endfor %}
-      
-      <!-- 如果没有配置 blocks，显示空白，不显示默认内容 -->
-      
-      <!-- CTA Column -->
-      <div class="mega-menu-column">
-        <div class="nav-mega-cta-container">
-          {% if section.settings.nav_cta_image %}
-            <img src="{{ section.settings.nav_cta_image | image_url: width: 800 }}" alt="{{ section.settings.nav_cta_image_alt | default: 'Premium Equipment' }}" class="nav-mega-cta-image" />
-          {% elsif section.settings.mega_menu_image %}
-            <img src="{{ section.settings.mega_menu_image | image_url: width: 800 }}" alt="{{ section.settings.mega_menu_image_alt | default: 'Featured Image' }}" class="nav-mega-cta-image" />
-          {% else %}
-            {% if menu_type == 'equipment' %}
-              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Equipment" class="nav-mega-cta-image" />
-            {% elsif menu_type == 'resources' %}
-              <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=1200&fit=crop&crop=center" alt="Pilates Resources" class="nav-mega-cta-image" />
-            {% elsif menu_type == 'about' %}
-              <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=1200&fit=crop&crop=center" alt="About XS Pilates" class="nav-mega-cta-image" />
-            {% endif %}
-          {% endif %}
-          <div class="nav-mega-cta-bottom-overlay">
-            <div class="nav-mega-cta-overlay-title">{{ section.settings.cta_title | default: 'Premium Equipment' }}</div>
-            <div class="nav-mega-cta-bottom-row">
-              <div class="nav-mega-cta-overlay-subtitle">{{ section.settings.cta_subtitle | default: 'Discover our professional-grade Pilates equipment' }}</div>
-              <a href="{{ section.settings.download_file_url | default: '#' }}" class="nav-mega-cta-download-btn" download>
-                <div class="nav-mega-cta-download-icon">
-                  {% if section.settings.download_icon %}
-                    <img src="{{ section.settings.download_icon | image_url: width: 32 }}" alt="Download">
-                  {% else %}
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7,10 12,15 17,10"></polyline>
-                      <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                  {% endif %}
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
+    {% endif %}
+
+    <a href="{{ section.settings.contactlink }}" class="mobile-contact-badge">
+      <span>{{ section.settings.contacttext | default: 'Contact Us' | escape }}</span>
+      <div class="contact-arrow-icon">
+        <svg
+          viewBox="0 0 10.417 10.3762"
+          xmlns="http://www.w3.org/2000/svg"
+          width="10.416992"
+          height="10.376221"
+          fill="none">
+          <g>
+            <path
+              d="M-0.353553 3.26282L3.61638 -0.707107L7.58631 3.26282L6.8792 3.96993L3.26282 0.353553L3.61638 0L3.96993 0.353553L0.353553 3.96993L-0.353553 3.26282Z"
+              fill="rgb(255,255,255)"
+              fill-rule="nonzero"
+              transform="matrix(0.708494,0.705717,-0.708494,0.705716,5.29272,0)" />
+            <line
+              x1="0"
+              x2="7.23275518"
+              y1="0"
+              y2="0"
+              stroke="rgb(255,255,255)"
+              stroke-width="1"
+              transform="matrix(-0.708494,0.705716,-0.708494,-0.705717,7.73047,2.76355)" />
+          </g>
+        </svg>
       </div>
-    </div>
-    <a href="{{ section.settings.mega_menu_footer_link | default: section.settings.contactlink | default: '/pages/contact' }}" class="mega-menu-footer">
-      {% if section.settings.contactfootericon %}
-        <div class="mega-menu-footer-icon">
-          <img src="{{ section.settings.contactfootericon | image_url: width: 44 }}" alt="Contact Icon">
-        </div>
-      {% endif %}
-      <span>{{ section.settings.mega_menu_footer_text | default: 'CONTACT US' }}</span>
     </a>
   </div>
 </div>
