@@ -41,6 +41,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     margin: 0 auto 2rem;
+    position: relative;
   }
 
   .almazen-mission .header-image-container:hover {
@@ -52,7 +53,8 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
   }
 
   /* 响应式图片显示 */
@@ -313,6 +315,7 @@
               alt="{{ section.settings.header_image_alt | default: 'Our Mission' }}"
               class="header-image header-image-desktop"
               loading="lazy"
+              style="transform: scale({{ section.settings.header_image_scale | divided_by: 100.0 }});"
             >
           {% endif %}
           
@@ -323,6 +326,7 @@
               alt="{{ section.settings.header_image_mobile_alt | default: section.settings.header_image_alt | default: 'Our Mission' }}"
               class="header-image header-image-mobile"
               loading="lazy"
+              style="transform: scale({{ section.settings.header_image_mobile_scale | default: section.settings.header_image_scale | divided_by: 100.0 }});"
             >
           {% endif %}
         </div>
@@ -428,23 +432,46 @@
     {
       "type": "range",
       "id": "header_image_width",
-      "label": "Header Image Width (%)",
+      "label": "Image Container Width (%)",
       "min": 10,
       "max": 100,
       "step": 5,
       "default": 80,
-      "unit": "%"
+      "unit": "%",
+      "info": "Container width as percentage of parent"
     },
     {
       "type": "range",
       "id": "header_image_height",
-      "label": "Header Image Height (vh)",
+      "label": "Image Container Height (vh)",
       "min": 10,
       "max": 100,
       "step": 5,
       "default": 40,
       "unit": "vh",
-      "info": "Viewport height percentage"
+      "info": "Container height as viewport percentage"
+    },
+    {
+      "type": "range",
+      "id": "header_image_scale",
+      "label": "Desktop Image Scale (%)",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "default": 100,
+      "unit": "%",
+      "info": "Scale the image within its container (100% = original size)"
+    },
+    {
+      "type": "range",
+      "id": "header_image_mobile_scale",
+      "label": "Mobile Image Scale (%)",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "default": 100,
+      "unit": "%",
+      "info": "Scale for mobile image (leave at 100% to use desktop scale)"
     },
     {
       "type": "header",
