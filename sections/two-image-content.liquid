@@ -1,14 +1,15 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 图片智能回退（PC/移动端互备）
+  Section: 图文模块 - 全分辨率智能图片适配
   功能：
     - 大标题 + 装饰横线
     - 标题1 → 图片1（高度可调 30%-100%）
     - 标题2 → 内容 → 图片2（+20px 上边距，高度可调）
     - 外层 padding: 5rem 3rem
     - 所有图片高度可设置（30%-100%）
-    - 图片 fallback：若某一端未上传，自动使用另一端图片
-    - 文字带动画入场
+    - 支持 fallback：任一端未上传，自动使用另一端
+    - 任何分辨率下均显示图片（PC/平板/手机）
+    - 使用 <picture> 原生响应式方案
   ===================================================================
 {% endcomment %}
 
@@ -71,44 +72,48 @@
              overflow: hidden;
              text-align: center;">
         
-        <!-- Desktop 图片（含 fallback） -->
-        <img src="
-          {%- if section.settings.image1_desktop -%}
-            {{ section.settings.image1_desktop | img_url: '1024x' }}
-          {%- elsif section.settings.image1_mobile -%}
-            {{ section.settings.image1_mobile | img_url: '1024x' }}
-          {%- else -%}
-            {{ 'lifestyle-1.jpg' | asset_img_url: '1024x' }}
-          {%- endif -%}"
-             alt="{{ section.settings.image1_alt }}"
-             class="image-desktop"
-             style="
-               position: absolute;
-               top: 0; left: 0; right: 0; bottom: 0;
-               width: 100%; height: 100%;
-               object-fit: cover;
-               border-radius: 8px;"
-             loading="lazy">
-
-        <!-- Mobile 图片（含 fallback） -->
-        <img src="
-          {%- if section.settings.image1_mobile -%}
-            {{ section.settings.image1_mobile | img_url: '600x' }}
-          {%- elsif section.settings.image1_desktop -%}
-            {{ section.settings.image1_desktop | img_url: '600x' }}
-          {%- else -%}
-            {{ 'lifestyle-1.jpg' | asset_img_url: '600x' }}
-          {%- endif -%}"
-             alt="{{ section.settings.image1_alt }}"
-             class="image-mobile"
-             style="
-               position: absolute;
-               top: 0; left: 0; right: 0; bottom: 0;
-               width: 100%; height: 100%;
-               object-fit: cover;
-               border-radius: 8px;
-               display: none;"
-             loading="lazy">
+        <!-- 使用 <picture> 实现全分辨率适配 -->
+        <picture>
+          <!-- Desktop 图（中大屏） -->
+          <source media="(min-width: 769px)"
+                  srcset="
+                    {%- if section.settings.image1_desktop -%}
+                      {{ section.settings.image1_desktop | img_url: '1024x' }}
+                    {%- elsif section.settings.image1_mobile -%}
+                      {{ section.settings.image1_mobile | img_url: '1024x' }}
+                    {%- else -%}
+                      {{ 'placeholder.jpg' | asset_img_url: '1024x' }}
+                    {%- endif -%}">
+          
+          <!-- Mobile 图（小屏） -->
+          <source media="(max-width: 768px)"
+                  srcset="
+                    {%- if section.settings.image1_mobile -%}
+                      {{ section.settings.image1_mobile | img_url: '600x' }}
+                    {%- elsif section.settings.image1_desktop -%}
+                      {{ section.settings.image1_desktop | img_url: '600x' }}
+                    {%- else -%}
+                      {{ 'placeholder.jpg' | asset_img_url: '600x' }}
+                    {%- endif -%}">
+          
+          <!-- 默认 img（兜底） -->
+          <img src="
+            {%- if section.settings.image1_desktop -%}
+              {{ section.settings.image1_desktop | img_url: '800x' }}
+            {%- elsif section.settings.image1_mobile -%}
+              {{ section.settings.image1_mobile | img_url: '800x' }}
+            {%- else -%}
+              {{ 'placeholder.jpg' | asset_img_url: '800x' }}
+            {%- endif -%}"
+               alt="{{ section.settings.image1_alt }}"
+               style="
+                 position: absolute;
+                 top: 0; left: 0; right: 0; bottom: 0;
+                 width: 100%; height: 100%;
+                 object-fit: cover;
+                 border-radius: 8px;"
+               loading="lazy">
+        </picture>
       </div>
     </div>
 
@@ -151,44 +156,48 @@
              overflow: hidden;
              text-align: center;">
         
-        <!-- Desktop 图片（含 fallback） -->
-        <img src="
-          {%- if section.settings.image2_desktop -%}
-            {{ section.settings.image2_desktop | img_url: '1024x' }}
-          {%- elsif section.settings.image2_mobile -%}
-            {{ section.settings.image2_mobile | img_url: '1024x' }}
-          {%- else -%}
-            {{ 'lifestyle-2.jpg' | asset_img_url: '1024x' }}
-          {%- endif -%}"
-             alt="{{ section.settings.image2_alt }}"
-             class="image-desktop"
-             style="
-               position: absolute;
-               top: 0; left: 0; right: 0; bottom: 0;
-               width: 100%; height: 100%;
-               object-fit: cover;
-               border-radius: 8px;"
-             loading="lazy">
-
-        <!-- Mobile 图片（含 fallback） -->
-        <img src="
-          {%- if section.settings.image2_mobile -%}
-            {{ section.settings.image2_mobile | img_url: '600x' }}
-          {%- elsif section.settings.image2_desktop -%}
-            {{ section.settings.image2_desktop | img_url: '600x' }}
-          {%- else -%}
-            {{ 'lifestyle-2.jpg' | asset_img_url: '600x' }}
-          {%- endif -%}"
-             alt="{{ section.settings.image2_alt }}"
-             class="image-mobile"
-             style="
-               position: absolute;
-               top: 0; left: 0; right: 0; bottom: 0;
-               width: 100%; height: 100%;
-               object-fit: cover;
-               border-radius: 8px;
-               display: none;"
-             loading="lazy">
+        <!-- 使用 <picture> 实现全分辨率适配 -->
+        <picture>
+          <!-- Desktop 图 -->
+          <source media="(min-width: 769px)"
+                  srcset="
+                    {%- if section.settings.image2_desktop -%}
+                      {{ section.settings.image2_desktop | img_url: '1024x' }}
+                    {%- elsif section.settings.image2_mobile -%}
+                      {{ section.settings.image2_mobile | img_url: '1024x' }}
+                    {%- else -%}
+                      {{ 'placeholder-2.jpg' | asset_img_url: '1024x' }}
+                    {%- endif -%}">
+          
+          <!-- Mobile 图 -->
+          <source media="(max-width: 768px)"
+                  srcset="
+                    {%- if section.settings.image2_mobile -%}
+                      {{ section.settings.image2_mobile | img_url: '600x' }}
+                    {%- elsif section.settings.image2_desktop -%}
+                      {{ section.settings.image2_desktop | img_url: '600x' }}
+                    {%- else -%}
+                      {{ 'placeholder-2.jpg' | asset_img_url: '600x' }}
+                    {%- endif -%}">
+          
+          <!-- 默认 img -->
+          <img src="
+            {%- if section.settings.image2_desktop -%}
+              {{ section.settings.image2_desktop | img_url: '800x' }}
+            {%- elsif section.settings.image2_mobile -%}
+              {{ section.settings.image2_mobile | img_url: '800x' }}
+            {%- else -%}
+              {{ 'placeholder-2.jpg' | asset_img_url: '800x' }}
+            {%- endif -%}"
+               alt="{{ section.settings.image2_alt }}"
+               style="
+                 position: absolute;
+                 top: 0; left: 0; right: 0; bottom: 0;
+                 width: 100%; height: 100%;
+                 object-fit: cover;
+                 border-radius: 8px;"
+               loading="lazy">
+        </picture>
       </div>
     </div>
 
@@ -208,28 +217,16 @@
     }
   }
 
-  /* 默认显示 desktop 图 */
-  .image-desktop {
+  .image-wrapper img {
     display: block;
   }
-  .image-mobile {
-    display: none;
-  }
 
-  /* 移动端切换 */
-  @media (max-width: 768px) {
-    .image-desktop {
-      display: none;
-    }
-    .image-mobile {
-      display: block;
-    }
-  }
+  /* 移除旧的 display 控制 */
 </style>
 
 {% schema %}
 {
-  "name": "图文模块 - 图片智能回退",
+  "name": "图文模块 - 全分辨率适配",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -372,7 +369,7 @@
   ],
   "presets": [
     {
-      "name": "图片智能回退",
+      "name": "全分辨率图片适配",
       "category": "内容"
     }
   ]
