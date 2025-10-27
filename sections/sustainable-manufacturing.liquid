@@ -545,10 +545,11 @@
     if (!carousel || items.length === 0) return;
     
     let currentIndex = 0;
-    const totalItems = items.length;
+    const originalItemsCount = items.length;
     let itemsPerView = 3;
-    let maxIndex = Math.max(0, totalItems - itemsPerView);
     let isMobile = window.innerWidth <= 768;
+    let isTransitioning = false;
+    let clonedItems = [];
     
     function getItemsPerView() {
       const width = window.innerWidth;
@@ -558,36 +559,56 @@
       return 3;
     }
     
+    function cloneItemsForLoop() {
+      if (isMobile || clonedItems.length > 0) return;
+      
+      for (let i = 0; i < itemsPerView; i++) {
+        const clone = items[i].cloneNode(true);
+        clone.classList.add('cloned-item');
+        carousel.appendChild(clone);
+        clonedItems.push(clone);
+      }
+    }
+    
+    function removeClonedItems() {
+      clonedItems.forEach(item => {
+        if (item.parentNode) {
+          item.parentNode.removeChild(item);
+        }
+      });
+      clonedItems = [];
+    }
+    
     function setupCarousel() {
       isMobile = window.innerWidth <= 768;
       itemsPerView = getItemsPerView();
-      maxIndex = Math.max(0, totalItems - itemsPerView);
       
       if (isMobile) {
-        // 手机端：移除所有transform，让原生滚动接管
+        removeClonedItems();
         carousel.style.transform = 'none';
+        carousel.style.transition = '';
         return;
       }
       
-      // 桌面端：正常计算宽度
+      cloneItemsForLoop();
+      
       const wrapperWidth = carouselWrapper.offsetWidth;
       const totalGap = 30 * (itemsPerView - 1);
       const itemWidth = (wrapperWidth - totalGap) / itemsPerView;
       
-      items.forEach(item => {
+      const allItems = carousel.querySelectorAll('.sustainable-manufacturing-statistic-item');
+      allItems.forEach(item => {
         item.style.width = itemWidth + 'px';
         item.style.minWidth = itemWidth + 'px';
       });
       
-      // 重置当前索引如果超出范围
-      if (currentIndex > maxIndex) {
-        currentIndex = maxIndex;
+      if (currentIndex >= originalItemsCount) {
+        currentIndex = 0;
       }
     }
     
-    function updateCarousel() {
+    function updateCarousel(immediate = false) {
       if (isMobile) {
-        // 手机端不需要更新transform
         return;
       }
       
@@ -596,31 +617,70 @@
       const itemWidth = (wrapperWidth - totalGap) / itemsPerView;
       const moveDistance = currentIndex * (itemWidth + 30);
       
+      if (immediate) {
+        carousel.style.transition = 'none';
+      } else {
+        carousel.style.transition = 'transform 0.5s ease';
+      }
+      
       carousel.style.transform = `translateX(-${moveDistance}px)`;
       
+      const indicatorIndex = currentIndex % originalItemsCount;
       indicators.forEach((indicator, index) => {
-        indicator.classList.toggle('active', index === currentIndex);
+        indicator.classList.toggle('active', index === indicatorIndex);
       });
     }
     
     function nextSlide() {
-      if (isMobile) return; // 手机端禁用按钮控制
-      currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
+      if (isMobile || isTransitioning) return;
+      
+      isTransitioning = true;
+      currentIndex++;
       updateCarousel();
+      
+      if (currentIndex >= originalItemsCount) {
+        setTimeout(() => {
+          currentIndex = 0;
+          updateCarousel(true);
+          isTransitioning = false;
+        }, 500);
+      } else {
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 500);
+      }
     }
     
     function prevSlide() {
-      if (isMobile) return; // 手机端禁用按钮控制
-      currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
-      updateCarousel();
+      if (isMobile || isTransitioning) return;
+      
+      isTransitioning = true;
+      
+      if (currentIndex === 0) {
+        currentIndex = originalItemsCount;
+        updateCarousel(true);
+        
+        setTimeout(() => {
+          currentIndex = originalItemsCount - 1;
+          updateCarousel();
+          setTimeout(() => {
+            isTransitioning = false;
+          }, 500);
+        }, 50);
+      } else {
+        currentIndex--;
+        updateCarousel();
+        setTimeout(() => {
+          isTransitioning = false;
+        }, 500);
+      }
     }
     
-    // 手机端滚动指示器更新
     function updateIndicatorsOnScroll() {
       if (!isMobile) return;
       
       const scrollLeft = carouselWrapper.scrollLeft;
-      const itemWidth = items[0].offsetWidth + 20; // 包含margin
+      const itemWidth = items[0].offsetWidth + 20;
       const activeIndex = Math.round(scrollLeft / itemWidth);
       
       indicators.forEach((indicator, index) => {
@@ -628,53 +688,51 @@
       });
     }
     
-    // 按钮事件（仅桌面端）
     if (nextBtn) nextBtn.addEventListener('click', nextSlide);
     if (prevBtn) prevBtn.addEventListener('click', prevSlide);
     
-    // 指示器事件
     indicators.forEach((indicator, index) => {
       indicator.addEventListener('click', () => {
         if (isMobile) {
-          // 手机端：滚动到对应位置
           const itemWidth = items[0].offsetWidth + 20;
           carouselWrapper.scrollTo({
             left: index * itemWidth,
             behavior: 'smooth'
           });
         } else {
-          // 桌面端：正常轮播
-          currentIndex = Math.min(index, maxIndex);
-          updateCarousel();
+          if (!isTransitioning) {
+            currentIndex = index;
+            updateCarousel();
+          }
         }
       });
     });
     
-    // 手机端滚动事件监听
     if (carouselWrapper) {
       carouselWrapper.addEventListener('scroll', updateIndicatorsOnScroll);
     }
     
-    // 自动播放（仅桌面端）
     {% if section.settings.autoplay %}
       if (!isMobile) {
-        setInterval(nextSlide, {{ section.settings.autoplayspeed | times: 1000 }});
+        setInterval(nextSlide, {{ section.settings.autoplay_speed | times: 1000 }});
       }
     {% endif %}
     
-    // 窗口大小改变时重新计算
     let resizeTimeout;
     window.addEventListener('resize', function() {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(function() {
+        const wasMobile = isMobile;
         setupCarousel();
-        updateCarousel();
+        if (wasMobile !== isMobile) {
+          currentIndex = 0;
+        }
+        updateCarousel(true);
       }, 100);
     });
     
-    // 初始化轮播
     setupCarousel();
-    updateCarousel();
+    updateCarousel(true);
   });
 </script>
 
