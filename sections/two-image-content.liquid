@@ -1,13 +1,15 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 图片高度为父元素100%
+  Section: 图文模块 - 全分辨率智能图片适配
   功能：
     - 大标题 + 装饰横线
-    - 标题1 → 图片1（图片高度 = 父容器高度的 100%）
-    - 标题2 → 内容 → 图片2（同上 + 20px 上边距）
+    - 标题1 → 图片1（高度可调 30%-100%）
+    - 标题2 → 内容 → 图片2（+20px 上边距，高度可调）
     - 外层 padding: 5rem 3rem
-    - 图片完整显示（contain），不裁剪
-    - 支持 fallback & 全设备适配
+    - 所有图片高度可设置（30%-100%）
+    - 支持 fallback：任一端未上传，自动使用另一端
+    - 任何分辨率下均显示图片（PC/平板/手机）
+    - 使用 <picture> 原生响应式方案
   ===================================================================
 {% endcomment %}
 
@@ -58,23 +60,21 @@
         {{ section.settings.title_1 }}
       </h2>
 
-      <!-- 图片父容器：设置固定高度（作为基准） -->
+      <!-- 图片容器：图片1 -->
       <div class="image-wrapper"
            style="
              position: relative;
              width: {{ section.settings.image1_width }}%;
-             height: {{ section.settings.image1_container_height }}px;
+             height: {{ section.settings.image1_height }}vh;
+             min-height: 100px;
+             max-height: 600px;
              margin: 0 auto;
              overflow: hidden;
-             display: flex;
-             justify-content: center;
-             align-items: center;
-             background: transparent;
-             border-radius: 8px;">
+             text-align: center;">
         
-        <!-- 使用 <picture> 实现响应式源切换 -->
+        <!-- 使用 <picture> 实现全分辨率适配 -->
         <picture>
-          <!-- Desktop 图 -->
+          <!-- Desktop 图（中大屏） -->
           <source media="(min-width: 769px)"
                   srcset="
                     {%- if section.settings.image1_desktop -%}
@@ -82,10 +82,10 @@
                     {%- elsif section.settings.image1_mobile -%}
                       {{ section.settings.image1_mobile | img_url: '1024x' }}
                     {%- else -%}
-                      {{ 'placeholder.png' | asset_img_url: '1024x' }}
+                      {{ 'placeholder.jpg' | asset_img_url: '1024x' }}
                     {%- endif -%}">
           
-          <!-- Mobile 图 -->
+          <!-- Mobile 图（小屏） -->
           <source media="(max-width: 768px)"
                   srcset="
                     {%- if section.settings.image1_mobile -%}
@@ -93,26 +93,25 @@
                     {%- elsif section.settings.image1_desktop -%}
                       {{ section.settings.image1_desktop | img_url: '600x' }}
                     {%- else -%}
-                      {{ 'placeholder.png' | asset_img_url: '600x' }}
+                      {{ 'placeholder.jpg' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
-          <!-- 默认 img：高度为父元素 100% -->
+          <!-- 默认 img（兜底） -->
           <img src="
             {%- if section.settings.image1_desktop -%}
               {{ section.settings.image1_desktop | img_url: '800x' }}
             {%- elsif section.settings.image1_mobile -%}
               {{ section.settings.image1_mobile | img_url: '800x' }}
             {%- else -%}
-              {{ 'placeholder.png' | asset_img_url: '800x' }}
+              {{ 'placeholder.jpg' | asset_img_url: '800x' }}
             {%- endif -%}"
                alt="{{ section.settings.image1_alt }}"
                style="
-                 height: 100%;
-                 width: auto;
-                 max-width: 100%;
-                 object-fit: contain;
-                 object-position: center;
-                 display: block;"
+                 position: absolute;
+                 top: 0; left: 0; right: 0; bottom: 0;
+                 width: 100%; height: 100%;
+                 object-fit: cover;
+                 border-radius: 8px;"
                loading="lazy">
         </picture>
       </div>
@@ -150,15 +149,14 @@
            style="
              position: relative;
              width: {{ section.settings.image2_width }}%;
-             height: {{ section.settings.image2_container_height }}px;
+             height: {{ section.settings.image2_height }}vh;
+             min-height: 100px;
+             max-height: 600px;
              margin: 20px auto 0;
              overflow: hidden;
-             display: flex;
-             justify-content: center;
-             align-items: center;
-             background: transparent;
-             border-radius: 8px;">
+             text-align: center;">
         
+        <!-- 使用 <picture> 实现全分辨率适配 -->
         <picture>
           <!-- Desktop 图 -->
           <source media="(min-width: 769px)"
@@ -168,7 +166,7 @@
                     {%- elsif section.settings.image2_mobile -%}
                       {{ section.settings.image2_mobile | img_url: '1024x' }}
                     {%- else -%}
-                      {{ 'placeholder-2.png' | asset_img_url: '1024x' }}
+                      {{ 'placeholder-2.jpg' | asset_img_url: '1024x' }}
                     {%- endif -%}">
           
           <!-- Mobile 图 -->
@@ -179,7 +177,7 @@
                     {%- elsif section.settings.image2_desktop -%}
                       {{ section.settings.image2_desktop | img_url: '600x' }}
                     {%- else -%}
-                      {{ 'placeholder-2.png' | asset_img_url: '600x' }}
+                      {{ 'placeholder-2.jpg' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
           <!-- 默认 img -->
@@ -189,16 +187,15 @@
             {%- elsif section.settings.image2_mobile -%}
               {{ section.settings.image2_mobile | img_url: '800x' }}
             {%- else -%}
-              {{ 'placeholder-2.png' | asset_img_url: '800x' }}
+              {{ 'placeholder-2.jpg' | asset_img_url: '800x' }}
             {%- endif -%}"
                alt="{{ section.settings.image2_alt }}"
                style="
-                 height: 100%;
-                 width: auto;
-                 max-width: 100%;
-                 object-fit: contain;
-                 object-position: center;
-                 display: block;"
+                 position: absolute;
+                 top: 0; left: 0; right: 0; bottom: 0;
+                 width: 100%; height: 100%;
+                 object-fit: cover;
+                 border-radius: 8px;"
                loading="lazy">
         </picture>
       </div>
@@ -220,14 +217,16 @@
     }
   }
 
-  .animated {
-    opacity: 0;
+  .image-wrapper img {
+    display: block;
   }
+
+  /* 移除旧的 display 控制 */
 </style>
 
 {% schema %}
 {
-  "name": "图片高度 = 父元素 100%",
+  "name": "图文模块 - 全分辨率适配",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -268,22 +267,23 @@
     {
       "type": "range",
       "id": "image1_width",
-      "label": "图片1 容器宽度",
+      "label": "图片1 显示宽度",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image1_height",
+      "label": "图片1 显示高度",
       "min": 30,
       "max": 100,
       "step": 5,
       "unit": "%",
-      "default": 90
-    },
-    {
-      "type": "range",
-      "id": "image1_container_height",
-      "label": "图片1 容器高度 (px)",
-      "min": 100,
-      "max": 600,
-      "step": 10,
-      "unit": "px",
-      "default": 300
+      "default": 80,
+      "info": "设置图片占视口高度的百分比（30%～100%）"
     },
     {
       "type": "image_picker",
@@ -332,22 +332,23 @@
     {
       "type": "range",
       "id": "image2_width",
-      "label": "图片2 容器宽度",
+      "label": "图片2 显示宽度",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image2_height",
+      "label": "图片2 显示高度",
       "min": 30,
       "max": 100,
       "step": 5,
       "unit": "%",
-      "default": 90
-    },
-    {
-      "type": "range",
-      "id": "image2_container_height",
-      "label": "图片2 容器高度 (px)",
-      "min": 100,
-      "max": 600,
-      "step": 10,
-      "unit": "px",
-      "default": 300
+      "default": 80,
+      "info": "设置图片占视口高度的百分比（30%～100%）"
     },
     {
       "type": "image_picker",
@@ -368,7 +369,7 @@
   ],
   "presets": [
     {
-      "name": "图片高度=父元素100%",
+      "name": "全分辨率图片适配",
       "category": "内容"
     }
   ]
