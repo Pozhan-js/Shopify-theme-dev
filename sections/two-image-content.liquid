@@ -1,12 +1,12 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 精确间距版
+  Section: 图文模块 - 所有图片高度可设置（30%-100%）
   功能：
     - 大标题 + 装饰横线
-    - 标题1 → 图片1（下方）
-    - 标题2 → 内容 → 图片2（下方，带 20px 上边距）
-    - 容器 padding: 5rem 3rem
-    - 图片宽高可调，居中显示
+    - 标题1 → 图片1（下方，高度可调）
+    - 标题2 → 内容 → 图片2（下方，上边距 20px，高度可调）
+    - 外层 padding: 5rem 3rem
+    - 所有图片高度支持 30%~100% 设置
     - 文字带动画入场
   ===================================================================
 {% endcomment %}
@@ -58,12 +58,14 @@
         {{ section.settings.title_1 }}
       </h2>
 
-      <!-- 图片容器 -->
+      <!-- 图片容器：高度由设置控制 -->
       <div class="image-wrapper"
            style="
              position: relative;
              width: {{ section.settings.image1_width }}%;
-             min-height: 200px;
+             height: {{ section.settings.image1_height }}vh;
+             min-height: 100px;
+             max-height: 600px;
              margin: 0 auto;
              overflow: hidden;
              text-align: center;">
@@ -122,13 +124,15 @@
         {{ section.settings.content_text }}
       </div>
 
-      <!-- 图片容器：带 20px 上边距 -->
+      <!-- 图片容器：带 20px 上边距 + 高度可调 -->
       <div class="image-wrapper"
            style="
              position: relative;
              width: {{ section.settings.image2_width }}%;
-             min-height: 200px;
-             margin: 20px auto 0; /* 上边距 20px */
+             height: {{ section.settings.image2_height }}vh;
+             min-height: 100px;
+             max-height: 600px;
+             margin: 20px auto 0;
              overflow: hidden;
              text-align: center;">
         
@@ -175,27 +179,6 @@
     }
   }
 
-  /* 图片容器通用样式 */
-  .image-wrapper {
-    position: relative;
-    width: 100%;
-    min-height: 200px;
-    margin: 0 auto;
-    overflow: hidden;
-  }
-
-  .image-wrapper img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-  }
-
   /* 桌面端 / 手机端切换 */
   .image-desktop {
     display: block;
@@ -216,7 +199,7 @@
 
 {% schema %}
 {
-  "name": "图文模块 - 精确间距版",
+  "name": "图文模块 - 所有图片高度可调（30%-100%）",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -263,6 +246,17 @@
       "step": 5,
       "unit": "%",
       "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image1_height",
+      "label": "图片1 显示高度",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80,
+      "info": "设置图片占视口高度的百分比（30%～100%）"
     },
     {
       "type": "image_picker",
@@ -339,6 +333,17 @@
       "default": 100
     },
     {
+      "type": "range",
+      "id": "image2_height",
+      "label": "图片2 显示高度",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80,
+      "info": "设置图片占视口高度的百分比（30%～100%）"
+    },
+    {
       "type": "image_picker",
       "id": "image2_desktop",
       "label": "图片2 - 桌面端"
@@ -377,7 +382,7 @@
   ],
   "presets": [
     {
-      "name": "精确间距图文模块",
+      "name": "所有图片高度可调（30%-100%）",
       "category": "内容"
     }
   ]
