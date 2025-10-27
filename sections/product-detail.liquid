@@ -22,24 +22,28 @@
         <h1 class="product-title">{{ product.title }}</h1>
         
         <!-- 商品副标题 -->
-        <p class="product-subtitle">{{ product.metafields.custom.subtitle | default: "THE NOURISHING LIP LAYER" }}</p>
+        {% if section.settings.show_subtitle %}
+          <p class="product-subtitle">{{ section.settings.subtitle | default: product.metafields.custom.subtitle | default: "THE NOURISHING LIP LAYER" }}</p>
+        {% endif %}
         
         <!-- 评分 -->
-        <div class="product-rating">
-          <div class="stars">
-            <span class="star filled">★</span>
-            <span class="star filled">★</span>
-            <span class="star filled">★</span>
-            <span class="star filled">★</span>
-            <span class="star filled">★</span>
+        {% if section.settings.show_rating %}
+          <div class="product-rating">
+            <div class="stars">
+              {% for i in (1..5) %}
+                <span class="star {% if i <= section.settings.rating %}filled{% endif %}">★</span>
+              {% endfor %}
+            </div>
+            <span class="rating-count">({{ section.settings.rating_count }})</span>
           </div>
-          <span class="rating-count">(1)</span>
-        </div>
+        {% endif %}
 
         <!-- 商品描述 -->
-        <div class="product-description">
-          {{ product.description }}
-        </div>
+        {% if section.settings.show_description %}
+          <div class="product-description">
+            {{ product.description }}
+          </div>
+        {% endif %}
 
         <!-- 商品表单 -->
         <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form">
@@ -77,32 +81,38 @@
           {% endfor %}
 
           <!-- 数量选择 -->
-          <div class="quantity-selector">
-            <label class="quantity-label">数量:</label>
-            <div class="quantity-input">
-              <button type="button" class="quantity-btn minus">-</button>
-              <input type="number" name="quantity" value="1" min="1" class="quantity-field">
-              <button type="button" class="quantity-btn plus">+</button>
+          {% if section.settings.show_quantity %}
+            <div class="quantity-selector">
+              <label class="quantity-label">{{ section.settings.quantity_label }}:</label>
+              <div class="quantity-input">
+                <button type="button" class="quantity-btn minus">-</button>
+                <input type="number" name="quantity" value="1" min="1" class="quantity-field">
+                <button type="button" class="quantity-btn plus">+</button>
+              </div>
             </div>
-          </div>
+          {% endif %}
 
           <!-- 价格 -->
-          <div class="product-price">
-            <span class="price">{{ product.price | money }}</span>
-            {% if product.compare_at_price > product.price %}
-              <span class="compare-price">{{ product.compare_at_price | money }}</span>
-            {% endif %}
-          </div>
+          {% if section.settings.show_price %}
+            <div class="product-price">
+              <span class="price">{{ product.price | money }}</span>
+              {% if product.compare_at_price > product.price %}
+                <span class="compare-price">{{ product.compare_at_price | money }}</span>
+              {% endif %}
+            </div>
+          {% endif %}
 
           <!-- 购买按钮 -->
-          <button type="submit" class="add-to-cart-btn">
-            <span class="btn-text">加入购物车</span>
+          <button type="submit" class="add-to-cart-btn" style="background-color: {{ section.settings.button_color }};">
+            <span class="btn-text">{{ section.settings.add_to_cart_text }}</span>
           </button>
 
           <!-- 立即购买按钮 -->
-          <button type="button" class="buy-now-btn">
-            立即购买
-          </button>
+          {% if section.settings.show_buy_now %}
+            <button type="button" class="buy-now-btn" style="border-color: {{ section.settings.button_color }}; color: {{ section.settings.button_color }};">
+              {{ section.settings.buy_now_text }}
+            </button>
+          {% endif %}
         </form>
       </div>
     </div>
@@ -111,15 +121,16 @@
 
 <style>
 .product-detail-section {
-  padding: 40px 20px;
-  max-width: 1200px;
+  padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px 20px;
+  max-width: {{ section.settings.container_width }}px;
   margin: 0 auto;
+  background-color: {{ section.settings.background_color }};
 }
 
 .product-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  gap: {{ section.settings.content_gap }}px;
   align-items: start;
 }
 
@@ -132,7 +143,7 @@
 .main-image {
   width: 100%;
   margin-bottom: 20px;
-  border-radius: 12px;
+  border-radius: {{ section.settings.image_border_radius }}px;
   overflow: hidden;
   background: #f8f8f8;
 }
@@ -152,7 +163,7 @@
 .thumbnail {
   width: 80px;
   height: 80px;
-  border-radius: 8px;
+  border-radius: {{ section.settings.thumbnail_border_radius }}px;
   overflow: hidden;
   cursor: pointer;
   border: 2px solid transparent;
@@ -160,7 +171,7 @@
 }
 
 .thumbnail.active {
-  border-color: #333;
+  border-color: {{ section.settings.accent_color }};
 }
 
 .thumbnail img {
@@ -191,17 +202,17 @@
 }
 
 .product-title {
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: #333;
+  font-size: {{ section.settings.title_font_size }}px;
+  font-weight: {{ section.settings.title_font_weight }};
+  color: {{ section.settings.title_color }};
   margin: 0 0 10px 0;
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
 
 .product-subtitle {
-  font-size: 0.9rem;
-  color: #666;
+  font-size: {{ section.settings.subtitle_font_size }}px;
+  color: {{ section.settings.subtitle_color }};
   margin: 0 0 15px 0;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -216,20 +227,20 @@
 }
 
 .stars {
-  color: #ffd700;
+  color: {{ section.settings.star_color }};
   font-size: 1.1rem;
 }
 
 .rating-count {
-  color: #666;
+  color: {{ section.settings.text_color }};
   font-size: 0.9rem;
 }
 
 .product-description {
-  color: #666;
+  color: {{ section.settings.text_color }};
   line-height: 1.6;
   margin-bottom: 30px;
-  font-size: 0.95rem;
+  font-size: {{ section.settings.description_font_size }}px;
 }
 
 /* 商品选项 */
@@ -241,7 +252,7 @@
   display: block;
   font-weight: 500;
   margin-bottom: 10px;
-  color: #333;
+  color: {{ section.settings.label_color }};
   font-size: 0.9rem;
 }
 
@@ -285,13 +296,13 @@
 }
 
 .color-selector input[type="radio"]:checked + .color-option .color-circle {
-  border-color: #333;
+  border-color: {{ section.settings.accent_color }};
   box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
 }
 
 .color-selector input[type="radio"]:checked + .color-option .color-circle::after {
   opacity: 1;
-  background: #333;
+  background: {{ section.settings.accent_color }};
 }
 
 /* 颜色定义 */
@@ -320,7 +331,7 @@
   display: block;
   font-weight: 500;
   margin-bottom: 10px;
-  color: #333;
+  color: {{ section.settings.label_color }};
   font-size: 0.9rem;
 }
 
@@ -362,13 +373,13 @@
 }
 
 .price {
-  font-size: 1.5rem;
+  font-size: {{ section.settings.price_font_size }}px;
   font-weight: 600;
-  color: #333;
+  color: {{ section.settings.price_color }};
 }
 
 .compare-price {
-  font-size: 1.2rem;
+  font-size: {{ section.settings.compare_price_font_size }}px;
   color: #999;
   text-decoration: line-through;
   margin-left: 10px;
@@ -380,32 +391,26 @@
   width: 100%;
   padding: 16px 24px;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: {{ section.settings.button_border_radius }}px;
+  font-size: {{ section.settings.button_font_size }}px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 12px;
 }
 
-.add-to-cart-btn {
-  background: #333;
-  color: white;
-}
-
 .add-to-cart-btn:hover {
-  background: #555;
+  opacity: 0.9;
 }
 
 .buy-now-btn {
   background: transparent;
-  color: #333;
-  border: 2px solid #333;
+  border: 2px solid;
 }
 
 .buy-now-btn:hover {
-  background: #333;
-  color: white;
+  background: {{ section.settings.button_color }};
+  color: white !important;
 }
 
 /* 响应式设计 */
@@ -425,7 +430,7 @@
   }
   
   .product-title {
-    font-size: 2rem;
+    font-size: {{ section.settings.title_font_size | minus: 8 }}px;
   }
   
   .thumbnail-images {
@@ -455,37 +460,381 @@ document.addEventListener('DOMContentLoaded', function() {
   const plusBtn = document.querySelector('.quantity-btn.plus');
   const quantityField = document.querySelector('.quantity-field');
   
-  minusBtn.addEventListener('click', function() {
-    const currentValue = parseInt(quantityField.value);
-    if (currentValue > 1) {
-      quantityField.value = currentValue - 1;
-    }
-  });
-  
-  plusBtn.addEventListener('click', function() {
-    const currentValue = parseInt(quantityField.value);
-    quantityField.value = currentValue + 1;
-  });
+  if (minusBtn && plusBtn && quantityField) {
+    minusBtn.addEventListener('click', function() {
+      const currentValue = parseInt(quantityField.value);
+      if (currentValue > 1) {
+        quantityField.value = currentValue - 1;
+      }
+    });
+    
+    plusBtn.addEventListener('click', function() {
+      const currentValue = parseInt(quantityField.value);
+      quantityField.value = currentValue + 1;
+    });
+  }
   
   // 立即购买功能
   const buyNowBtn = document.querySelector('.buy-now-btn');
-  buyNowBtn.addEventListener('click', function() {
-    // 这里可以添加立即购买的逻辑
-    const form = document.querySelector('.product-form');
-    const formData = new FormData(form);
-    
-    // 添加到购物车后跳转到结账页面
-    fetch('/cart/add.js', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-      window.location.href = '/checkout';
-    })
-    .catch(error => {
-      console.error('Error:', error);
+  if (buyNowBtn) {
+    buyNowBtn.addEventListener('click', function() {
+      const form = document.querySelector('.product-form');
+      const formData = new FormData(form);
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        window.location.href = '/checkout';
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
     });
-  });
+  }
 });
 </script>
+
+{% schema %}
+{
+  "name": "商品详情页",
+  "tag": "section",
+  "class": "product-detail-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 1000,
+      "max": 1400,
+      "step": 50,
+      "unit": "px",
+      "label": "容器最大宽度",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "min": 30,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "左右内容间距",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "顶部内边距",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "底部内边距",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "颜色设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "强调色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "副标题颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文本颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "标签颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "价格颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "星级颜色",
+      "default": "#ffd700"
+    },
+    {
+      "type": "header",
+      "content": "图片设置"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "主图片圆角",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "thumbnail_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "缩略图圆角",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "标题字体大小",
+      "default": 40
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "标题字体粗细",
+      "options": [
+        {
+          "value": "300",
+          "label": "细体"
+        },
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        }
+      ],
+      "default": "300"
+    },
+    {
+      "type": "header",
+      "content": "副标题设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subtitle",
+      "label": "显示副标题",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "自定义副标题",
+      "info": "留空则使用产品的metafield或默认值"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "副标题字体大小",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "评分设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "显示评分",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "rating",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "label": "评分星级",
+      "default": 5
+    },
+    {
+      "type": "number",
+      "id": "rating_count",
+      "label": "评价数量",
+      "default": 1
+    },
+    {
+      "type": "header",
+      "content": "描述设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "显示商品描述",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "描述字体大小",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "数量选择器"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity",
+      "label": "显示数量选择器",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "quantity_label",
+      "label": "数量标签文本",
+      "default": "数量"
+    },
+    {
+      "type": "header",
+      "content": "价格设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price",
+      "label": "显示价格",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "min": 18,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "价格字体大小",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "compare_price_font_size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "对比价格字体大小",
+      "default": 19
+    },
+    {
+      "type": "header",
+      "content": "按钮设置"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "按钮颜色",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "按钮字体大小",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "按钮圆角",
+      "default": 6
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "加入购物车按钮文本",
+      "default": "加入购物车"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "label": "显示立即购买按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "buy_now_text",
+      "label": "立即购买按钮文本",
+      "default": "立即购买"
+    }
+  ],
+  "presets": [
+    {
+      "name": "商品详情页"
+    }
+  ]
+}
+{% endschema %}
