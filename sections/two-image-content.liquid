@@ -1,15 +1,13 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 稳定版（已撤回高度基于父元素的修改）
+  Section: 图文模块 - 图片高度为父元素100%
   功能：
     - 大标题 + 装饰横线
-    - 标题1 → 图片1（完整显示）
-    - 标题2 → 内容 → 图片2（+20px 上边距）
+    - 标题1 → 图片1（图片高度 = 父容器高度的 100%）
+    - 标题2 → 内容 → 图片2（同上 + 20px 上边距）
     - 外层 padding: 5rem 3rem
-    - 支持 fallback：任一端未上传，自动使用另一端
-    - 任何分辨率下均显示图片
-    - 使用 <picture> 原生响应式方案
     - 图片完整显示（contain），不裁剪
+    - 支持 fallback & 全设备适配
   ===================================================================
 {% endcomment %}
 
@@ -60,18 +58,19 @@
         {{ section.settings.title_1 }}
       </h2>
 
-      <!-- 图片容器 -->
+      <!-- 图片父容器：设置固定高度（作为基准） -->
       <div class="image-wrapper"
            style="
+             position: relative;
              width: {{ section.settings.image1_width }}%;
-             height: {{ section.settings.image1_height }}vh;
-             min-height: 100px;
+             height: {{ section.settings.image1_container_height }}px;
              margin: 0 auto;
              overflow: hidden;
              display: flex;
              justify-content: center;
              align-items: center;
-             background: transparent;">
+             background: transparent;
+             border-radius: 8px;">
         
         <!-- 使用 <picture> 实现响应式源切换 -->
         <picture>
@@ -97,7 +96,7 @@
                       {{ 'placeholder.png' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
-          <!-- 默认 img -->
+          <!-- 默认 img：高度为父元素 100% -->
           <img src="
             {%- if section.settings.image1_desktop -%}
               {{ section.settings.image1_desktop | img_url: '800x' }}
@@ -108,8 +107,9 @@
             {%- endif -%}"
                alt="{{ section.settings.image1_alt }}"
                style="
+                 height: 100%;
+                 width: auto;
                  max-width: 100%;
-                 max-height: 100%;
                  object-fit: contain;
                  object-position: center;
                  display: block;"
@@ -148,15 +148,16 @@
       <!-- 图片容器：图片2 -->
       <div class="image-wrapper"
            style="
+             position: relative;
              width: {{ section.settings.image2_width }}%;
-             height: {{ section.settings.image2_height }}vh;
-             min-height: 100px;
+             height: {{ section.settings.image2_container_height }}px;
              margin: 20px auto 0;
              overflow: hidden;
              display: flex;
              justify-content: center;
              align-items: center;
-             background: transparent;">
+             background: transparent;
+             border-radius: 8px;">
         
         <picture>
           <!-- Desktop 图 -->
@@ -192,8 +193,9 @@
             {%- endif -%}"
                alt="{{ section.settings.image2_alt }}"
                style="
+                 height: 100%;
+                 width: auto;
                  max-width: 100%;
-                 max-height: 100%;
                  object-fit: contain;
                  object-position: center;
                  display: block;"
@@ -225,7 +227,7 @@
 
 {% schema %}
 {
-  "name": "图文模块 - 稳定版",
+  "name": "图片高度 = 父元素 100%",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -266,7 +268,7 @@
     {
       "type": "range",
       "id": "image1_width",
-      "label": "图片1 显示宽度",
+      "label": "图片1 容器宽度",
       "min": 30,
       "max": 100,
       "step": 5,
@@ -275,13 +277,13 @@
     },
     {
       "type": "range",
-      "id": "image1_height",
-      "label": "图片1 显示高度 (vh)",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 70
+      "id": "image1_container_height",
+      "label": "图片1 容器高度 (px)",
+      "min": 100,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 300
     },
     {
       "type": "image_picker",
@@ -330,7 +332,7 @@
     {
       "type": "range",
       "id": "image2_width",
-      "label": "图片2 显示宽度",
+      "label": "图片2 容器宽度",
       "min": 30,
       "max": 100,
       "step": 5,
@@ -339,13 +341,13 @@
     },
     {
       "type": "range",
-      "id": "image2_height",
-      "label": "图片2 显示高度 (vh)",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 70
+      "id": "image2_container_height",
+      "label": "图片2 容器高度 (px)",
+      "min": 100,
+      "max": 600,
+      "step": 10,
+      "unit": "px",
+      "default": 300
     },
     {
       "type": "image_picker",
@@ -366,7 +368,7 @@
   ],
   "presets": [
     {
-      "name": "图文模块 - 稳定版",
+      "name": "图片高度=父元素100%",
       "category": "内容"
     }
   ]
