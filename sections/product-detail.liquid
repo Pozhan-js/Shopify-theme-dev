@@ -19,7 +19,7 @@
     </div>
 
     <!-- 右侧商品详情区域 -->
-    <div class="product-info">
+    <div class="product-info" style="background-color: {{ section.settings.info_background_color }};">
       <div class="product-info-content">
         <!-- 商品标题 -->
         <h1 class="product-title">{{ product.title }}</h1>
@@ -85,12 +85,20 @@
                   {% endfor %}
                 </div>
               {% else %}
-                <!-- 下拉选择器 -->
-                <select name="options[{{ option.name }}]" class="option-select">
+                <!-- 圆角按钮选择器 -->
+                <div class="button-selector">
                   {% for value in option.values %}
-                    <option value="{{ value }}">{{ value }}</option>
+                    <input type="radio" 
+                           name="options[{{ option.name }}]" 
+                           value="{{ value }}" 
+                           id="option-{{ option.name | handleize }}-{{ value | handleize }}"
+                           {% if forloop.first %}checked{% endif %}>
+                    <label for="option-{{ option.name | handleize }}-{{ value | handleize }}" 
+                           class="button-option">
+                      {{ value }}
+                    </label>
                   {% endfor %}
-                </select>
+                </div>
               {% endif %}
             </div>
           {% endfor %}
@@ -132,9 +140,9 @@
 <style>
 .product-detail-section {
   padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px 20px;
-  max-width: {{ section.settings.container_width }}px;
+  width: 100%;
   margin: 0 auto;
-  background-color: {{ section.settings.background_color }};
+  background: transparent;
 }
 
 .product-container {
@@ -214,7 +222,8 @@
 .product-info {
   height: 80vh;
   overflow-y: auto;
-  padding-right: 10px;
+  padding: 40px;
+  border-radius: {{ section.settings.info_border_radius }}px;
 }
 
 .product-info::-webkit-scrollbar {
@@ -295,6 +304,7 @@
   font-size: 0.9rem;
 }
 
+/* 颜色选择器 */
 .color-selector {
   display: flex;
   gap: 12px;
@@ -351,14 +361,41 @@
 .color-clear { background: #ffffff; border-color: #ccc; }
 .color-lavender { background: #e6e6fa; }
 
-.option-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  background: white;
+/* 圆角按钮选择器 */
+.button-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button-selector input[type="radio"] {
+  display: none;
+}
+
+.button-option {
+  padding: 10px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: {{ section.settings.option_button_border_radius }}px;
+  background: transparent;
+  color: {{ section.settings.text_color }};
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+  display: inline-block;
+}
+
+.button-option:hover {
+  border-color: {{ section.settings.accent_color }};
+  background: rgba({{ section.settings.accent_color | color_extract: 'red' }}, {{ section.settings.accent_color | color_extract: 'green' }}, {{ section.settings.accent_color | color_extract: 'blue' }}, 0.1);
+}
+
+.button-selector input[type="radio"]:checked + .button-option {
+  border-color: {{ section.settings.accent_color }};
+  background: {{ section.settings.accent_color }};
+  color: white;
 }
 
 /* 数量选择器 */
@@ -466,7 +503,7 @@
   .product-info {
     height: auto;
     overflow-y: visible;
-    padding-right: 0;
+    padding: 20px;
     order: 2;
   }
   
@@ -502,7 +539,7 @@
     display: block;
     margin-bottom: 20px;
     padding: 15px;
-    background: #f8f8f8;
+    background: rgba(248, 248, 248, 0.8);
     border-radius: 8px;
     text-align: center;
   }
@@ -546,6 +583,17 @@
     height: 16px;
   }
   
+  /* 按钮选择器适配 */
+  .button-selector {
+    gap: 8px;
+  }
+  
+  .button-option {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    min-width: 50px;
+  }
+  
   /* 按钮适配 */
   .buy-now-btn {
     padding: 18px 24px;
@@ -573,12 +621,6 @@
   .quantity-field {
     width: 60px;
     height: 45px;
-    font-size: 1rem;
-  }
-  
-  /* 选择器适配 */
-  .option-select {
-    padding: 15px 16px;
     font-size: 1rem;
   }
 }
@@ -754,16 +796,6 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "range",
-      "id": "container_width",
-      "min": 1000,
-      "max": 1400,
-      "step": 50,
-      "unit": "px",
-      "label": "容器最大宽度",
-      "default": 1200
-    },
-    {
-      "type": "range",
       "id": "content_gap",
       "min": 30,
       "max": 100,
@@ -798,8 +830,8 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "color",
-      "id": "background_color",
-      "label": "背景颜色",
+      "id": "info_background_color",
+      "label": "右侧内容区域背景颜色",
       "default": "#ffffff"
     },
     {
@@ -867,6 +899,20 @@ document.addEventListener('DOMContentLoaded', function() {
       "unit": "px",
       "label": "缩略图圆角",
       "default": 8
+    },
+    {
+      "type": "header",
+      "content": "右侧内容区域设置"
+    },
+    {
+      "type": "range",
+      "id": "info_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "内容区域圆角",
+      "default": 12
     },
     {
       "type": "header",
@@ -980,6 +1026,20 @@ document.addEventListener('DOMContentLoaded', function() {
       "unit": "px",
       "label": "描述字体大小",
       "default": 15
+    },
+    {
+      "type": "header",
+      "content": "选项按钮设置"
+    },
+    {
+      "type": "range",
+      "id": "option_button_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "选项按钮圆角",
+      "default": 8
     },
     {
       "type": "header",
