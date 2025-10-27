@@ -38,8 +38,53 @@
     font-size: 1.125rem;
     color: #8b7d68;
     max-width: 48rem;
-    margin: 0 auto;
+    margin: 0 auto 2rem;
     line-height: 1.6;
+  }
+
+  /* 新增的文本框和图片样式 */
+  .almazen-philosophy .intro-content {
+    max-width: 48rem;
+    margin: 0 auto 2rem;
+  }
+
+  .almazen-philosophy .intro-text {
+    background: #faf9f7;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .almazen-philosophy .intro-text:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(45, 36, 27, 0.1);
+  }
+
+  .almazen-philosophy .intro-text-content {
+    color: #8b7d68;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
+  .almazen-philosophy .intro-image-container {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  .almazen-philosophy .intro-image-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .almazen-philosophy .intro-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
   }
   
   .almazen-philosophy .principles-grid {
@@ -234,6 +279,15 @@
     object-fit: cover;
     display: block;
   }
+
+  /* 响应式图片显示 */
+  .almazen-philosophy .bottom-image-desktop {
+    display: block;
+  }
+
+  .almazen-philosophy .bottom-image-mobile {
+    display: none;
+  }
   
   .almazen-philosophy .bottom-image-overlay {
     position: absolute;
@@ -266,6 +320,18 @@
     .almazen-philosophy .highlight-bg {
       background-attachment: scroll;
     }
+    .almazen-philosophy .intro-text {
+      padding: 1.5rem;
+    }
+    
+    /* 移动端显示移动端图片 */
+    .almazen-philosophy .bottom-image-desktop {
+      display: none;
+    }
+
+    .almazen-philosophy .bottom-image-mobile {
+      display: block;
+    }
   }
   
   @media (min-width: 769px) and (max-width: 1024px) {
@@ -290,6 +356,30 @@
       <p class="section-intro">
         {{ section.settings.philosophy_intro }}
       </p>
+      
+      <!-- 新增的文本框和图片 -->
+      <div class="intro-content">
+        {% if section.settings.intro_text_content != blank %}
+          <div class="intro-text">
+            <div class="intro-text-content">
+              {{ section.settings.intro_text_content }}
+            </div>
+          </div>
+        {% endif %}
+        
+        {% if section.settings.intro_image %}
+          <div class="intro-image-container" style="{% if section.settings.intro_image_height %}height: {{ section.settings.intro_image_height }}px;{% endif %}">
+            <img 
+              src="{{ section.settings.intro_image | image_url: width: 1200 }}" 
+              alt="{{ section.settings.intro_image_alt | default: 'Philosophy Introduction' }}"
+              class="intro-image"
+              loading="lazy"
+              width="1200"
+              {% if section.settings.intro_image_height %}height="{{ section.settings.intro_image_height }}"{% endif %}
+            >
+          </div>
+        {% endif %}
+      </div>
     </div>
 
     <div class="principles-grid">
@@ -343,17 +433,33 @@
       </div>
     {% endif %}
     
-    {% if section.settings.bottom_image %}
+    {% if section.settings.bottom_image_desktop or section.settings.bottom_image_mobile %}
       <div class="bottom-image-section">
         <div class="bottom-image-container" style="height: {{ section.settings.bottom_image_height }}px;">
-          <img 
-            src="{{ section.settings.bottom_image | image_url: width: 2048 }}" 
-            alt="{{ section.settings.bottom_image_alt }}"
-            class="bottom-image"
-            loading="lazy"
-            width="2048"
-            height="{{ section.settings.bottom_image_height }}"
-          >
+          <!-- PC端图片 -->
+          {% if section.settings.bottom_image_desktop %}
+            <img 
+              src="{{ section.settings.bottom_image_desktop | image_url: width: 2048 }}" 
+              alt="{{ section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
+              class="bottom-image bottom-image-desktop"
+              loading="lazy"
+              width="2048"
+              height="{{ section.settings.bottom_image_height }}"
+            >
+          {% endif %}
+          
+          <!-- 移动端图片 -->
+          {% if section.settings.bottom_image_mobile %}
+            <img 
+              src="{{ section.settings.bottom_image_mobile | image_url: width: 768 }}" 
+              alt="{{ section.settings.bottom_image_mobile_alt | default: section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
+              class="bottom-image bottom-image-mobile"
+              loading="lazy"
+              width="768"
+              height="{{ section.settings.bottom_image_mobile_height | default: section.settings.bottom_image_height }}"
+            >
+          {% endif %}
+          
           <div class="bottom-image-overlay"></div>
         </div>
       </div>
@@ -388,6 +494,46 @@
       "default": "Deeply rooted in Zen principles, our philosophy guides every aspect of AlmaZen, from product creation to community building."
     },
     {
+      "type": "header",
+      "content": "Introduction Content"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text_content",
+      "label": "Introduction Text Box",
+      "info": "Additional text content below the introduction"
+    },
+    {
+      "type": "image_picker",
+      "id": "intro_image",
+      "label": "Introduction Image"
+    },
+    {
+      "type": "text",
+      "id": "intro_image_alt",
+      "label": "Introduction Image Alt Text",
+      "default": "Philosophy Introduction"
+    },
+    {
+      "type": "range",
+      "id": "intro_image_height",
+      "label": "Introduction Image Height (px)",
+      "min": 200,
+      "max": 600,
+      "step": 50,
+      "default": 300,
+      "info": "Leave empty for auto height"
+    },
+    {
+      "type": "header",
+      "content": "Highlight Section"
+    },
+    {
+      "type": "image_picker",
+      "id": "philosophy_bg_image",
+      "label": "Background Image"
+    },
+    {
       "type": "text",
       "id": "philosophy_highlight_title",
       "label": "Highlight Title",
@@ -400,24 +546,55 @@
       "default": "Our philosophy isn't just words—it's woven into every thread, carved into every surface, and blessed into every creation."
     },
     {
+      "type": "header",
+      "content": "Bottom Images"
+    },
+    {
       "type": "image_picker",
-      "id": "bottom_image",
-      "label": "Bottom Image"
+      "id": "bottom_image_desktop",
+      "label": "Bottom Image (Desktop)",
+      "info": "Image displayed on desktop and tablet devices"
+    },
+    {
+      "type": "image_picker",
+      "id": "bottom_image_mobile",
+      "label": "Bottom Image (Mobile)",
+      "info": "Image displayed on mobile devices"
     },
     {
       "type": "text",
       "id": "bottom_image_alt",
-      "label": "Bottom Image Alt Text",
+      "label": "Desktop Image Alt Text",
       "default": "Our Philosophy"
+    },
+    {
+      "type": "text",
+      "id": "bottom_image_mobile_alt",
+      "label": "Mobile Image Alt Text",
+      "info": "Leave empty to use desktop alt text"
     },
     {
       "type": "range",
       "id": "bottom_image_height",
-      "label": "Bottom Image Height (px)",
+      "label": "Desktop Image Height (px)",
       "min": 200,
       "max": 800,
       "step": 50,
       "default": 400
+    },
+    {
+      "type": "range",
+      "id": "bottom_image_mobile_height",
+      "label": "Mobile Image Height (px)",
+      "min": 200,
+      "max": 600,
+      "step": 50,
+      "default": 300,
+      "info": "Leave empty to use desktop height"
+    },
+    {
+      "type": "header",
+      "content": "Text Content Section"
     },
     {
       "type": "text",
@@ -465,5 +642,10 @@
       ]
     }
   ],
+  "presets": [
+    {
+      "name": "Our Philosophy"
+    }
+  ]
 }
 {% endschema %}
