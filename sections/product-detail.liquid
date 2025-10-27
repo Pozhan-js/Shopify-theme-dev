@@ -5,13 +5,14 @@
     <div class="product-images">
       <div class="main-image">
         <img src="{{ product.featured_image | img_url: '800x800' }}" alt="{{ product.title }}" id="main-product-image">
-      </div>
-      <div class="thumbnail-images">
-        {% for image in product.images limit: 4 %}
-          <div class="thumbnail {% if forloop.first %}active{% endif %}" data-image="{{ image | img_url: '800x800' }}">
-            <img src="{{ image | img_url: '100x100' }}" alt="{{ product.title }}">
-          </div>
-        {% endfor %}
+        <!-- 缩略图移到左下角 -->
+        <div class="thumbnail-images">
+          {% for image in product.images limit: 4 %}
+            <div class="thumbnail {% if forloop.first %}active{% endif %}" data-image="{{ image | img_url: '800x800' }}">
+              <img src="{{ image | img_url: '100x100' }}" alt="{{ product.title }}">
+            </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
 
@@ -46,7 +47,9 @@
         {% endif %}
 
         <!-- 商品表单 -->
-        <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form">
+        <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form" id="product-form">
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          
           <!-- 多属性选择 -->
           {% for option in product.options_with_values %}
             <div class="product-option">
@@ -102,11 +105,6 @@
             </div>
           {% endif %}
 
-          <!-- 购买按钮 -->
-          <button type="submit" class="add-to-cart-btn" style="background-color: {{ section.settings.button_color }};">
-            <span class="btn-text">{{ section.settings.add_to_cart_text }}</span>
-          </button>
-
           <!-- 立即购买按钮 -->
           {% if section.settings.show_buy_now %}
             <button type="button" class="buy-now-btn" style="border-color: {{ section.settings.button_color }}; color: {{ section.settings.button_color }};">
@@ -142,36 +140,49 @@
 
 .main-image {
   width: 100%;
-  margin-bottom: 20px;
   border-radius: {{ section.settings.image_border_radius }}px;
   overflow: hidden;
   background: #f8f8f8;
+  position: relative;
 }
 
 .main-image img {
   width: 100%;
   height: auto;
   display: block;
+  transition: opacity 0.3s ease;
 }
 
+/* 缩略图移到左下角 */
 .thumbnail-images {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-direction: column;
 }
 
 .thumbnail {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: {{ section.settings.thumbnail_border_radius }}px;
   overflow: hidden;
   cursor: pointer;
-  border: 2px solid transparent;
-  transition: border-color 0.3s ease;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.thumbnail:hover {
+  opacity: 1;
+  border-color: {{ section.settings.accent_color }};
+  transform: scale(1.05);
 }
 
 .thumbnail.active {
   border-color: {{ section.settings.accent_color }};
+  opacity: 1;
 }
 
 .thumbnail img {
@@ -385,27 +396,17 @@
   margin-left: 10px;
 }
 
-/* 按钮 */
-.add-to-cart-btn,
+/* 立即购买按钮 */
 .buy-now-btn {
   width: 100%;
   padding: 16px 24px;
-  border: none;
+  border: 2px solid;
   border-radius: {{ section.settings.button_border_radius }}px;
   font-size: {{ section.settings.button_font_size }}px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 12px;
-}
-
-.add-to-cart-btn:hover {
-  opacity: 0.9;
-}
-
-.buy-now-btn {
   background: transparent;
-  border: 2px solid;
 }
 
 .buy-now-btn:hover {
@@ -434,19 +435,28 @@
   }
   
   .thumbnail-images {
+    position: static;
+    flex-direction: row;
     justify-content: center;
+    margin-top: 15px;
+  }
+  
+  .thumbnail {
+    width: 70px;
+    height: 70px;
   }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // 缩略图切换功能
+  // 缩略图悬停切换功能
   const thumbnails = document.querySelectorAll('.thumbnail');
   const mainImage = document.getElementById('main-product-image');
   
   thumbnails.forEach(thumbnail => {
-    thumbnail.addEventListener('click', function() {
+    // 鼠标移入时切换图片
+    thumbnail.addEventListener('mouseenter', function() {
       const newImageSrc = this.dataset.image;
       mainImage.src = newImageSrc;
       
@@ -474,25 +484,66 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // 立即购买功能
+  // 立即购买功能 - 修复跳转问题
   const buyNowBtn = document.querySelector('.buy-now-btn');
   if (buyNowBtn) {
-    buyNowBtn.addEventListener('click', function() {
-      const form = document.querySelector('.product-form');
+    buyNowBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const form = document.getElementById('product-form');
       const formData = new FormData(form);
       
+      // 先添加到购物车
       fetch('/cart/add.js', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: formData.get('id'),
+          quantity: parseInt(formData.get('quantity')) || 1
+        })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('添加到购物车失败');
+      })
       .then(data => {
+        // 成功添加后跳转到结账页面
         window.location.href = '/checkout';
       })
       .catch(error => {
         console.error('Error:', error);
+        alert('添加到购物车时出现错误，请重试');
       });
     });
+  }
+  
+  // 变体选择功能
+  const variantSelectors = document.querySelectorAll('input[name^="options"], select[name^="options"]');
+  const productForm = document.getElementById('product-form');
+  
+  if (variantSelectors.length > 0 && productForm) {
+    variantSelectors.forEach(selector => {
+      selector.addEventListener('change', updateVariant);
+    });
+  }
+  
+  function updateVariant() {
+    const selectedOptions = [];
+    variantSelectors.forEach(selector => {
+      if (selector.type === 'radio' && selector.checked) {
+        selectedOptions.push(selector.value);
+      } else if (selector.type === 'select-one') {
+        selectedOptions.push(selector.value);
+      }
+    });
+    
+    // 这里需要根据选择的选项找到对应的变体ID
+    // 由于这需要产品的变体数据，建议在模板中输出变体数据供JavaScript使用
+    console.log('Selected options:', selectedOptions);
   }
 });
 </script>
@@ -811,12 +862,6 @@ document.addEventListener('DOMContentLoaded', function() {
       "unit": "px",
       "label": "按钮圆角",
       "default": 6
-    },
-    {
-      "type": "text",
-      "id": "add_to_cart_text",
-      "label": "加入购物车按钮文本",
-      "default": "加入购物车"
     },
     {
       "type": "checkbox",
