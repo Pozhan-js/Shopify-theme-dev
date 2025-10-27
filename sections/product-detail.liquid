@@ -142,15 +142,21 @@
 
 .main-image {
   width: 100%;
+  /* 固定高度，防止图片切换时高度变化 */
+  height: 600px;
   border-radius: {{ section.settings.image_border_radius }}px;
   overflow: hidden;
   background: #f8f8f8;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .main-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
   transition: opacity 0.3s ease;
 }
@@ -429,6 +435,10 @@
     position: static;
   }
   
+  .main-image {
+    height: 400px; /* 移动端较小的固定高度 */
+  }
+  
   .product-info {
     height: auto;
     overflow-y: visible;
@@ -450,6 +460,11 @@
     height: 70px;
   }
 }
+
+/* 可选：如果希望图片适应容器而不是裁剪，可以使用 object-fit: contain */
+.main-image.contain img {
+  object-fit: contain;
+}
 </style>
 
 <script>
@@ -458,18 +473,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const thumbnails = document.querySelectorAll('.thumbnail');
   const mainImage = document.getElementById('main-product-image');
   
-  console.log('找到缩略图数量:', thumbnails.length);
-  console.log('主图片元素:', mainImage);
-  
   thumbnails.forEach((thumbnail, index) => {
-    console.log(`缩略图 ${index}:`, thumbnail.dataset.image);
-    
     // 鼠标移入时切换图片
     thumbnail.addEventListener('mouseenter', function() {
       const newImageSrc = this.dataset.image;
       const newImageAlt = this.dataset.imageAlt;
-      
-      console.log('切换到图片:', newImageSrc);
       
       if (newImageSrc && mainImage) {
         mainImage.src = newImageSrc;
@@ -485,8 +493,6 @@ document.addEventListener('DOMContentLoaded', function() {
     thumbnail.addEventListener('click', function() {
       const newImageSrc = this.dataset.image;
       const newImageAlt = this.dataset.imageAlt;
-      
-      console.log('点击切换到图片:', newImageSrc);
       
       if (newImageSrc && mainImage) {
         mainImage.src = newImageSrc;
