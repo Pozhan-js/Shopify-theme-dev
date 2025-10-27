@@ -1,14 +1,17 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 图片在标题下方（增强版）
-  新增功能：
-    - 标题、内容文字大小可调
-    - 对齐方式可设置
-    - 支持 desktop/mobile 双图上传
+  Section: 图文模块 - 图片在标题下方（精简定制版）
+  功能：
+    - 大标题 + 装饰横线
+    - 标题1 → 图片1（下方）
+    - 标题2 → 内容 → 图片2（下方）
+    - 支持 desktop / mobile 双图上传
+    - 图片展示宽度可设置百分比
+    - 不提供字体大小设置
   ===================================================================
 {% endcomment %}
 
-<div class="image-below-title-section" id="story"
+<div class="image-below-title-section"
      style="padding: {{ section.settings.padding_top }}px {{ section.settings.padding_sides }}px {{ section.settings.padding_bottom }}px;
             background-color: {{ section.settings.bg_color }};
             font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
@@ -17,38 +20,46 @@
     <!-- 大标题 -->
     {%- if section.settings.main_title != blank -%}
       <h1 class="main-title"
-          style="text-align: {{ section.settings.main_title_align }};
-                 font-size: {{ section.settings.main_title_size }}px;
-                 margin-bottom: 50px;
+          style="text-align: {{ section.settings.title_align }};
+                 font-size: 36px;
+                 margin-bottom: 20px;
                  color: {{ section.settings.title_color }};
                  line-height: 1.3;">
         {{ section.settings.main_title }}
       </h1>
     {%- endif -%}
 
+    <!-- 装饰性横线 -->
+    <div style="
+      width: 4rem;
+      height: 2px;
+      background: #5a7c5a;
+      margin: 0 auto 2rem;
+    "></div>
+
     <!-- 第一部分：标题1 + 图片1 -->
     <div class="content-block"
          style="text-align: {{ section.settings.content_align }};">
       <h2 class="section-title"
-          style="font-size: {{ section.settings.title1_size }}px;
+          style="font-size: 28px;
                  margin-bottom: 20px;
                  color: #222;">
         {{ section.settings.title_1 }}
       </h2>
 
-      <div class="image-wrapper">
+      <div class="image-wrapper" style="margin: 0 auto;">
         <!-- Desktop 图片 -->
         <img src="{{ section.settings.image1_desktop | img_url: '1024x' }}"
              alt="{{ section.settings.image1_alt }}"
              class="image-desktop"
-             style="width: 100%; height: auto; display: block; border-radius: 8px;"
+             style="width: {{ section.settings.image1_width }}%; max-width: 100%; height: auto; display: block; border-radius: 8px;"
              {% if section.settings.image1_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
 
         <!-- Mobile 图片 -->
         <img src="{{ section.settings.image1_mobile | img_url: '600x' }}"
              alt="{{ section.settings.image1_alt }}"
              class="image-mobile"
-             style="width: 100%; height: auto; display: none; border-radius: 8px;"
+             style="width: {{ section.settings.image1_width }}%; max-width: 100%; height: auto; display: none; border-radius: 8px;"
              {% if section.settings.image1_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
       </div>
     </div>
@@ -60,33 +71,33 @@
     <div class="content-block"
          style="text-align: {{ section.settings.content_align }};">
       <h2 class="section-title"
-          style="font-size: {{ section.settings.title2_size }}px;
+          style="font-size: 28px;
                  margin-bottom: 16px;
                  color: #222;">
         {{ section.settings.title_2 }}
       </h2>
 
       <div class="content-text"
-           style="font-size: {{ section.settings.body_text_size }}px;
+           style="font-size: 16px;
                   line-height: 1.7;
                   color: #555;
                   margin-bottom: 20px;">
         {{ section.settings.content_text }}
       </div>
 
-      <div class="image-wrapper">
+      <div class="image-wrapper" style="margin: 0 auto;">
         <!-- Desktop 图片 -->
         <img src="{{ section.settings.image2_desktop | img_url: '1024x' }}"
              alt="{{ section.settings.image2_alt }}"
              class="image-desktop"
-             style="width: 100%; height: auto; display: block; border-radius: 8px;"
+             style="width: {{ section.settings.image2_width }}%; max-width: 100%; height: auto; display: block; border-radius: 8px;"
              {% if section.settings.image2_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
 
         <!-- Mobile 图片 -->
         <img src="{{ section.settings.image2_mobile | img_url: '600x' }}"
              alt="{{ section.settings.image2_alt }}"
              class="image-mobile"
-             style="width: 100%; height: auto; display: none; border-radius: 8px;"
+             style="width: {{ section.settings.image2_width }}%; max-width: 100%; height: auto; display: none; border-radius: 8px;"
              {% if section.settings.image2_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
       </div>
     </div>
@@ -105,45 +116,18 @@
 
   /* 移动端：隐藏 desktop，显示 mobile */
   @media (max-width: 768px) {
-    .main-title {
-      {% comment %} font-size: {{ section.settings.main_title_size | minus: 6 }}px !important; {% endcomment %}
-    }
-    .section-title {
-      font-size: {{ section.settings.title1_size | minus: 4 }}px !important;
-    }
-    .content-text {
-      font-size: {{ section.settings.body_text_size | minus: 2 }}px !important;
-    }
     .image-desktop {
       display: none;
     }
     .image-mobile {
       display: block;
     }
-
-    .main-title{
-        font-size: 3rem;
-        font-family: 'Noto Serif', serif;
-        font-weight: 300;
-        color: #4a3f32;
-        margin-bottom: 1.5rem;xs
-    }
   }
-@media (min-width: 1200px) {
-    .main-title{
-        font-size: 3rem;
-        font-family: 'Noto Serif', serif;
-        font-weight: 300;
-        color: #4a3f32;
-        margin-bottom: 1.5rem;
-    }
-}
-
 </style>
 
 {% schema %}
 {
-  "name": "图文模块 - 图片在标题下方（增强版）",
+  "name": "图文模块 - 精简定制版",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -155,7 +139,7 @@
     },
     {
       "type": "select",
-      "id": "main_title_align",
+      "id": "title_align",
       "label": "大标题对齐方式",
       "options": [
         { "value": "left", "label": "左对齐" },
@@ -164,17 +148,6 @@
       ],
       "default": "center"
     },
-    {
-      "type": "range",
-      "id": "main_title_size",
-      "label": "大标题字体大小",
-      "min": 24,
-      "max": 60,
-      "step": 2,
-      "unit": "px",
-      "default": 36
-    },
-
     {
       "type": "color",
       "id": "title_color",
@@ -201,13 +174,13 @@
     },
     {
       "type": "range",
-      "id": "title1_size",
-      "label": "标题1 字体大小",
-      "min": 18,
-      "max": 40,
-      "step": 1,
-      "unit": "px",
-      "default": 28
+      "id": "image1_width",
+      "label": "图片1 显示宽度",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
     },
     {
       "type": "image_picker",
@@ -257,30 +230,10 @@
       "default": "工艺成就品质"
     },
     {
-      "type": "range",
-      "id": "title2_size",
-      "label": "标题2 字体大小",
-      "min": 18,
-      "max": 40,
-      "step": 1,
-      "unit": "px",
-      "default": 28
-    },
-    {
       "type": "richtext",
       "id": "content_text",
       "label": "内容文字",
       "default": "<p>我们坚持使用传统工艺与现代技术结合，打造每一件精品。</p>"
-    },
-    {
-      "type": "range",
-      "id": "body_text_size",
-      "label": "内容文字大小",
-      "min": 12,
-      "max": 24,
-      "step": 1,
-      "unit": "px",
-      "default": 16
     },
     {
       "type": "select",
@@ -292,6 +245,16 @@
         { "value": "right", "label": "右对齐" }
       ],
       "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "image2_width",
+      "label": "图片2 显示宽度",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
     },
     {
       "type": "image_picker",
@@ -367,7 +330,7 @@
   ],
   "presets": [
     {
-      "name": "增强版图文模块",
+      "name": "精简图文模块",
       "category": "内容"
     }
   ]
