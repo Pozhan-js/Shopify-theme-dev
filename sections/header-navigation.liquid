@@ -1466,6 +1466,8 @@
       object-fit: contain;
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
+      image-rendering: pixelated;
+      -ms-interpolation-mode: nearest-neighbor;
     }
 
     .nav-item {
@@ -1553,12 +1555,15 @@
               <div class="logo-image">
                 {% comment %} 使用更高分辨率的图片以确保清晰度 {% endcomment %}
                 {% assign logosize_display = section.settings.logosize | default: 48 %}
-                {% assign logosize_2x = logosize_display | times: 2 %}
-                {% assign logosize_3x = logosize_display | times: 3 %}
+                {% assign logosize_4x = logosize_display | times: 4 %}
+                {% assign logosize_6x = logosize_display | times: 6 %}
                 <img
-                  src="{{ section.settings.logoimage | image_url: width: logosize_3x }}"
+                  src="{{ section.settings.logoimage | image_url: width: logosize_6x }}"
                   alt="{{ section.settings.sitename | default: shop.name }}"
-                  style="object-fit: contain;">
+                  style="object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+                  srcset="{{ section.settings.logoimage | image_url: width: logosize_display }} 1x, 
+                          {{ section.settings.logoimage | image_url: width: logosize_4x }} 2x, 
+                          {{ section.settings.logoimage | image_url: width: logosize_6x }} 3x">
               </div>
             {% else %}
               <div class="logo-bg">
@@ -2160,4 +2165,3 @@ function toggleSearch() {
   ]
 }
 {% endschema %}
-  
