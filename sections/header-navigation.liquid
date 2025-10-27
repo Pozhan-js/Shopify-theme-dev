@@ -1309,108 +1309,6 @@
     }
   }
 
-  @media (max-width: 480px) {
-    .dropdown-menu {
-      width: 150px;
-      border-radius: 6px;
-      margin-top: 6px;
-    }
-
-    .dropdown-item {
-      padding: 6px 12px;
-      font-size: 14px;
-    }
-
-    .mega-dropdown-menu {
-      width: 100%;
-      padding: 16px 16px 0 16px;
-      border-radius: 8px;
-      margin-top: 6px;
-    }
-  }
-
-  @media (min-width: 481px) and (max-width: 768px) {
-    .dropdown-menu {
-      width: 170px;
-      border-radius: 7px;
-      margin-top: 7px;
-    }
-
-    .dropdown-item {
-      padding: 7px 14px;
-      font-size: 15px;
-    }
-
-    .mega-dropdown-menu {
-      width: 95%;
-      padding: 18px 18px 0 18px;
-      border-radius: 10px;
-      margin-top: 7px;
-    }
-  }
-
-  @media (min-width: 769px) and (max-width: 1023px) {
-    .dropdown-menu {
-      width: 180px;
-      border-radius: 7px;
-      margin-top: 7px;
-    }
-
-    .dropdown-item {
-      padding: 7px 15px;
-      font-size: 15px;
-    }
-
-    .mega-dropdown-menu {
-      width: 95%;
-      max-width: 1200px;
-      padding: 20px 20px 0 20px;
-      border-radius: 10px;
-      margin-top: 7px;
-    }
-  }
-
-  @media (min-width: 1024px) and (max-width: 1279px) {
-    .dropdown-menu {
-      width: 190px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    .dropdown-item {
-      padding: 8px 16px;
-      font-size: 16px;
-    }
-
-    .mega-dropdown-menu {
-      width: 95%;
-      max-width: 1300px;
-      padding: 24px 24px 0 24px;
-      border-radius: 11px;
-      margin-top: 8px;
-    }
-  }
-
-  @media (min-width: 1280px) and (max-width: 1919px) {
-    .dropdown-menu {
-      width: 192px;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-
-    .dropdown-item {
-      padding: 8px 16px;
-      font-size: 16px;
-    }
-
-    .mega-dropdown-menu {
-      width: 95%;
-      padding: 28px 28px 0 28px;
-      border-radius: 12px;
-      margin-top: 8px;
-    }
-  }
-
   @media (min-width: 1920px) {
     .nav-blur {
       border-radius: 16px;
@@ -1468,6 +1366,11 @@
       image-rendering: crisp-edges;
       image-rendering: pixelated;
       -ms-interpolation-mode: nearest-neighbor;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      will-change: transform;
     }
 
     .nav-item {
@@ -1553,17 +1456,23 @@
           <a href="{{ routes.root_url }}">
             {% if section.settings.logoimage %}
               <div class="logo-image">
-                {% comment %} 使用更高分辨率的图片以确保清晰度 {% endcomment %}
+                {% comment %} 使用超高分辨率的图片以确保在1920px下清晰显示 {% endcomment %}
                 {% assign logosize_display = section.settings.logosize | default: 48 %}
+                {% assign logosize_2x = logosize_display | times: 2 %}
+                {% assign logosize_3x = logosize_display | times: 3 %}
                 {% assign logosize_4x = logosize_display | times: 4 %}
                 {% assign logosize_6x = logosize_display | times: 6 %}
+                {% assign logosize_8x = logosize_display | times: 8 %}
                 <img
-                  src="{{ section.settings.logoimage | image_url: width: logosize_6x }}"
+                  src="{{ section.settings.logoimage | image_url: width: logosize_8x }}"
                   alt="{{ section.settings.sitename | default: shop.name }}"
-                  style="object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+                  style="object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; image-rendering: pixelated; -ms-interpolation-mode: nearest-neighbor;"
                   srcset="{{ section.settings.logoimage | image_url: width: logosize_display }} 1x, 
-                          {{ section.settings.logoimage | image_url: width: logosize_4x }} 2x, 
-                          {{ section.settings.logoimage | image_url: width: logosize_6x }} 3x">
+                          {{ section.settings.logoimage | image_url: width: logosize_2x }} 1.5x,
+                          {{ section.settings.logoimage | image_url: width: logosize_3x }} 2x, 
+                          {{ section.settings.logoimage | image_url: width: logosize_4x }} 2.5x,
+                          {{ section.settings.logoimage | image_url: width: logosize_6x }} 3x,
+                          {{ section.settings.logoimage | image_url: width: logosize_8x }} 4x">
               </div>
             {% else %}
               <div class="logo-bg">
