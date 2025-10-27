@@ -1,1138 +1,715 @@
-<!-- sections/product-detail.liquid -->
-<div class="product-detail-section">
-  <div class="product-container">
-    <!-- 左侧图片展示区域 -->
-    <div class="product-images">
-      <div class="main-image">
-        <img src="{{ product.featured_image | img_url: '800x800' }}" alt="{{ product.title }}" id="main-product-image">
-        <!-- 缩略图移到左下角 -->
-        <div class="thumbnail-images">
-          {% for image in product.images limit: 4 %}
-            <div class="thumbnail {% if forloop.first %}active{% endif %}" 
-                 data-image="{{ image | img_url: '800x800' }}"
-                 data-image-alt="{{ product.title }}">
-              <img src="{{ image | img_url: '100x100' }}" alt="{{ product.title }}">
-            </div>
+{% comment %}
+  Instagram图片展示 - 带轮播功能
+  1. 主标题展示（左上角，字体较小）
+  2. 副标题展示（右上角）
+  3. 直接展示配置的图片
+  4. 图片下方显示标题和文本内容
+  5. 可配置背景颜色
+{% endcomment %}
+
+<div
+  class="gallery-showcase-section"
+  id="{{ section.settings.main_title }}"
+  data-section-id="{{ section.id }}"
+  style="background-color: {{ section.settings.background_color | default: 'transparent' }};"
+>
+  <div class="gallery-container">
+    <!-- 标题区域 - 左右布局 -->
+    {% if section.settings.main_title != blank or section.settings.sub_title != blank %}
+      <div class="gallery-header-wrapper">
+        {% if section.settings.main_title != blank %}
+          <h2 class="gallery-main-title">{{ section.settings.main_title }}</h2>
+        {% endif %}
+        {% if section.settings.sub_title != blank %}
+          <h3 class="gallery-sub-title">{{ section.settings.sub_title }}</h3>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <!-- 图片轮播部分 -->
+    <div class="gallery-carousel-wrapper">
+      <div class="gallery-carousel-content active">
+        <div class="gallery-carousel-track" data-section-id="{{ section.id }}">
+          {% for block in section.blocks %}
+            {% if block.type == 'image_item' %}
+              <div class="gallery-card-container gallery-small-card">
+                <!-- 卡片内容保持不变 -->
+                <div class="gallery-card-inner">
+                  <div class="gallery-image-container">
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x500' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="gallery-card-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="gallery-placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  {% if block.settings.card_title != blank or block.settings.card_text != blank %}
+                    <div class="gallery-card-content">
+                      {% if block.settings.card_title != blank %}
+                        <h3 class="gallery-card-title">{{ block.settings.card_title }}</h3>
+                      {% endif %}
+                      {% if block.settings.card_text != blank %}
+                        <p class="gallery-card-text">{{ block.settings.card_text }}</p>
+                      {% endif %}
+                      
+                      <!-- 产品信息区域 -->
+                      <div class="gallery-product-info">
+                        <!-- 数量选择器 -->
+                        <div class="gallery-quantity-selector">
+                          <button class="gallery-quantity-btn gallery-quantity-minus">-</button>
+                          <input type="number" class="gallery-quantity-input" value="1" min="1" max="99">
+                          <button class="gallery-quantity-btn gallery-quantity-plus">+</button>
+                        </div>
+                        
+                        <!-- 购买按钮（包含价格） -->
+                        <button class="gallery-buy-button">
+                          <span class="gallery-buy-text">立即购买</span>
+                          <span class="gallery-price">¥99.00</span>
+                        </button>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
       </div>
-    </div>
 
-    <!-- 右侧商品详情区域 -->
-    <div class="product-info" style="background-color: {{ section.settings.info_background_color }};">
-      <div class="product-info-content">
-        <!-- 商品标题 -->
-        <h1 class="product-title">{{ product.title }}</h1>
-        
-        <!-- 商品副标题 -->
-        {% if section.settings.show_subtitle %}
-          <p class="product-subtitle">{{ section.settings.subtitle | default: product.metafields.custom.subtitle | default: "THE NOURISHING LIP LAYER" }}</p>
-        {% endif %}
-        
-        <!-- 评分 -->
-        {% if section.settings.show_rating %}
-          <div class="product-rating">
-            <div class="stars">
-              {% for i in (1..5) %}
-                <span class="star {% if i <= section.settings.rating %}filled{% endif %}">★</span>
-              {% endfor %}
-            </div>
-            <span class="rating-count">({{ section.settings.rating_count }})</span>
-          </div>
-        {% endif %}
-
-        <!-- 价格 - 移动端提前显示 -->
-        {% if section.settings.show_price %}
-          <div class="product-price mobile-price">
-            <span class="price">{{ product.price | money }}</span>
-            {% if product.compare_at_price > product.price %}
-              <span class="compare-price">{{ product.compare_at_price | money }}</span>
-            {% endif %}
-          </div>
-        {% endif %}
-
-        <!-- 商品描述 -->
-        {% if section.settings.show_description %}
-          <div class="product-description">
-            {{ product.description }}
-          </div>
-        {% endif %}
-
-        <!-- 商品表单 -->
-        <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form" id="product-form">
-          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
-          
-          <!-- 多属性选择 -->
-          {% for option in product.options_with_values %}
-            <div class="product-option">
-              <label class="option-label">{{ option.name }}:</label>
-              
-              {% if option.name == 'Color' or option.name == '颜色' %}
-                <!-- 颜色选择器 -->
-                <div class="color-selector">
-                  {% for value in option.values %}
-                    <input type="radio" 
-                           name="options[{{ option.name }}]" 
-                           value="{{ value }}" 
-                           id="option-{{ option.name | handleize }}-{{ value | handleize }}"
-                           {% if forloop.first %}checked{% endif %}>
-                    <label for="option-{{ option.name | handleize }}-{{ value | handleize }}" 
-                           class="color-option" 
-                           data-color="{{ value | handleize }}"
-                           title="{{ value }}">
-                      <span class="color-circle color-{{ value | handleize }}"></span>
-                    </label>
-                  {% endfor %}
-                </div>
-              {% else %}
-                <!-- 圆角按钮选择器 -->
-                <div class="button-selector">
-                  {% for value in option.values %}
-                    <input type="radio" 
-                           name="options[{{ option.name }}]" 
-                           value="{{ value }}" 
-                           id="option-{{ option.name | handleize }}-{{ value | handleize }}"
-                           {% if forloop.first %}checked{% endif %}>
-                    <label for="option-{{ option.name | handleize }}-{{ value | handleize }}" 
-                           class="button-option">
-                      {{ value }}
-                    </label>
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </div>
-          {% endfor %}
-
-          <!-- 数量选择 -->
-          {% if section.settings.show_quantity %}
-            <div class="quantity-selector">
-              <label class="quantity-label">{{ section.settings.quantity_label }}:</label>
-              <div class="quantity-input">
-                <button type="button" class="quantity-btn minus">-</button>
-                <input type="number" name="quantity" value="1" min="1" class="quantity-field">
-                <button type="button" class="quantity-btn plus">+</button>
-              </div>
-            </div>
-          {% endif %}
-
-          <!-- 价格 - 桌面端显示 -->
-          {% if section.settings.show_price %}
-            <div class="product-price desktop-price">
-              <span class="price">{{ product.price | money }}</span>
-              {% if product.compare_at_price > product.price %}
-                <span class="compare-price">{{ product.compare_at_price | money }}</span>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          <!-- 立即购买按钮 -->
-          {% if section.settings.show_buy_now %}
-            <button type="button" class="buy-now-btn" style="border-color: {{ section.settings.button_color }}; color: {{ section.settings.button_color }};">
-              {{ section.settings.buy_now_text }}
-            </button>
-          {% endif %}
-        </form>
-      </div>
+      <!-- 使用 data-section-id 区分不同实例 -->
+      <button
+        class="gallery-nav-button gallery-prev-button"
+        data-section-id="{{ section.id }}"
+      >
+        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button
+        class="gallery-nav-button gallery-next-button"
+        data-section-id="{{ section.id }}"
+      >
+        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
   </div>
 </div>
 
 <style>
-.product-detail-section {
-  padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px 20px;
-  width: 100%;
-  margin: 0 auto;
-  background: transparent;
-}
-
-.product-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: {{ section.settings.content_gap }}px;
-  align-items: start;
-}
-
-/* 左侧图片区域 */
-.product-images {
-  position: sticky;
-  top: 20px;
-}
-
-.main-image {
-  width: 100%;
-  height: 600px;
-  border-radius: {{ section.settings.image_border_radius }}px;
-  overflow: hidden;
-  background: #f8f8f8;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.main-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: opacity 0.3s ease;
-}
-
-/* 缩略图移到左下角 */
-.thumbnail-images {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  gap: 8px;
-  flex-direction: column;
-  z-index: 10;
-}
-
-.thumbnail {
-  width: 60px;
-  height: 60px;
-  border-radius: {{ section.settings.thumbnail_border_radius }}px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
-  opacity: 0.7;
-  background: white;
-}
-
-.thumbnail:hover {
-  opacity: 1;
-  border-color: {{ section.settings.accent_color }};
-  transform: scale(1.05);
-}
-
-.thumbnail.active {
-  border-color: {{ section.settings.accent_color }};
-  opacity: 1;
-}
-
-.thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 右侧商品信息区域 */
-.product-info {
-  height: 70vh;
-  overflow-y: auto;
-  padding: 40px;
-  border-radius: {{ section.settings.info_border_radius }}px;
-}
-
-.product-info::-webkit-scrollbar {
-  width: 6px;
-}
-
-.product-info::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.product-info::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.product-title {
-  font-size: {{ section.settings.title_font_size }}px;
-  font-weight: {{ section.settings.title_font_weight }};
-  color: {{ section.settings.title_color }};
-  margin: 0 0 10px 0;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.product-subtitle {
-  font-size: {{ section.settings.subtitle_font_size }}px;
-  color: {{ section.settings.subtitle_color }};
-  margin: 0 0 15px 0;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.product-rating {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 25px;
-}
-
-.stars {
-  color: {{ section.settings.star_color }};
-  font-size: 1.1rem;
-}
-
-.rating-count {
-  color: {{ section.settings.text_color }};
-  font-size: 0.9rem;
-}
-
-.product-description {
-  color: {{ section.settings.text_color }};
-  line-height: 1.6;
-  margin-bottom: 30px;
-  font-size: {{ section.settings.description_font_size }}px;
-}
-
-/* 价格显示控制 */
-.mobile-price {
-  display: none;
-}
-
-.desktop-price {
-  display: block;
-}
-
-/* 商品选项 */
-.product-option {
-  margin-bottom: 25px;
-}
-
-.option-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 10px;
-  color: {{ section.settings.label_color }};
-  font-size: 0.9rem;
-}
-
-/* 颜色选择器 */
-.color-selector {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.color-selector input[type="radio"] {
-  display: none;
-}
-
-.color-option {
-  cursor: pointer;
-  display: block;
-  position: relative;
-}
-
-.color-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid #e0e0e0;
-  display: block;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.color-circle::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.color-selector input[type="radio"]:checked + .color-option .color-circle {
-  border-color: {{ section.settings.accent_color }};
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
-}
-
-.color-selector input[type="radio"]:checked + .color-option .color-circle::after {
-  opacity: 1;
-  background: {{ section.settings.accent_color }};
-}
-
-/* 颜色定义 */
-.color-strawberry-glaze { background: #d63384; }
-.color-pink { background: #ff69b4; }
-.color-nude { background: #deb887; }
-.color-clear { background: #ffffff; border-color: #ccc; }
-.color-lavender { background: #e6e6fa; }
-
-/* 圆角按钮选择器 */
-.button-selector {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.button-selector input[type="radio"] {
-  display: none;
-}
-
-.button-option {
-  padding: 10px 20px;
-  border: 2px solid #e0e0e0;
-  border-radius: {{ section.settings.option_button_border_radius }}px;
-  background: transparent;
-  color: {{ section.settings.text_color }};
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  font-weight: 500;
-  min-width: 60px;
-  text-align: center;
-  display: inline-block;
-}
-
-.button-option:hover {
-  border-color: {{ section.settings.accent_color }};
-  background: rgba({{ section.settings.accent_color | color_extract: 'red' }}, {{ section.settings.accent_color | color_extract: 'green' }}, {{ section.settings.accent_color | color_extract: 'blue' }}, 0.1);
-}
-
-.button-selector input[type="radio"]:checked + .button-option {
-  border-color: {{ section.settings.accent_color }};
-  background: {{ section.settings.accent_color }};
-  color: white;
-}
-
-/* 数量选择器 */
-.quantity-selector {
-  margin-bottom: 25px;
-}
-
-.quantity-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 10px;
-  color: {{ section.settings.label_color }};
-  font-size: 0.9rem;
-}
-
-.quantity-input {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.quantity-btn {
-  background: #f8f8f8;
-  border: none;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  transition: background-color 0.3s ease;
-}
-
-.quantity-btn:hover {
-  background: #e8e8e8;
-}
-
-.quantity-field {
-  border: none;
-  width: 60px;
-  height: 40px;
-  text-align: center;
-  font-size: 0.9rem;
-  background: white;
-}
-
-/* 价格 */
-.product-price {
-  margin-bottom: 30px;
-}
-
-.price {
-  font-size: {{ section.settings.price_font_size }}px;
-  font-weight: 600;
-  color: {{ section.settings.price_color }};
-}
-
-.compare-price {
-  font-size: {{ section.settings.compare_price_font_size }}px;
-  color: #999;
-  text-decoration: line-through;
-  margin-left: 10px;
-}
-
-/* 立即购买按钮 */
-.buy-now-btn {
-  width: 100%;
-  padding: 16px 24px;
-  border: 2px solid;
-  border-radius: {{ section.settings.button_border_radius }}px;
-  font-size: {{ section.settings.button_font_size }}px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: transparent;
-}
-
-.buy-now-btn:hover {
-  background: {{ section.settings.button_color }};
-  color: white !important;
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .product-detail-section {
-    padding: 20px 15px;
+  /* Variables CSS */
+  :root {
+    --gallery-cream: #f5f1eb;
+    --gallery-warm-beige: #e8ddd4;
+    --gallery-soft-brown: #c4a484;
+    --gallery-pearl-white: #fff8f0;
+    --gallery-gray-50: #f9fafb;
+    --gallery-gray-100: #f3f4f6;
+    --gallery-gray-200: #e5e7eb;
+    --gallery-gray-400: #9ca3af;
+    --gallery-gray-500: #6b7280;
+    --gallery-gray-600: #4b5563;
+    --gallery-gray-700: #374151;
+    --gallery-gray-900: #111827;
+    --gallery-white: #ffffff;
+    --gallery-amber-400: #fbbf24;
+    --gallery-orange-400: #fb923c;
   }
-  
-  .product-container {
-    grid-template-columns: 1fr;
-    gap: 20px;
+
+  /* Section principale */
+  .gallery-showcase-section {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 50vh;
+    padding: 1rem 1rem;
+    border-radius: 12px;
   }
-  
-  .product-images {
-    position: static;
-    order: 1;
+
+  /* Container principal - 最大宽度设置为1200px */
+  .gallery-container {
+    margin: 0 auto;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
   }
-  
-  .main-image {
-    height: 350px;
-    border-radius: 8px;
+
+  /* 标题区域 - 左右布局 */
+  .gallery-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 1rem;
   }
-  
-  .product-info {
-    height: auto;
-    overflow-y: visible;
-    padding: 20px;
-    order: 2;
+
+  .gallery-main-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0;
+    line-height: 1.4;
+    letter-spacing: -0.025em;
+    flex-shrink: 0;
   }
-  
-  .product-title {
-    font-size: {{ section.settings.title_font_size | minus: 12 }}px;
-    margin-bottom: 8px;
+
+  .gallery-sub-title {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--gallery-gray-600);
+    margin: 0;
+    line-height: 1.4;
+    text-align: right;
+    flex-shrink: 0;
   }
-  
-  .product-subtitle {
-    font-size: {{ section.settings.subtitle_font_size | minus: 1 }}px;
-    margin-bottom: 12px;
+
+  /* Carousel wrapper */
+  .gallery-carousel-wrapper {
+    position: relative;
+    overflow: hidden;
   }
-  
-  .product-rating {
-    margin-bottom: 15px;
-  }
-  
-  .product-description {
-    font-size: {{ section.settings.description_font_size | minus: 1 }}px;
-    margin-bottom: 20px;
-  }
-  
-  .product-option {
-    margin-bottom: 20px;
-  }
-  
-  .quantity-selector {
-    margin-bottom: 20px;
-  }
-  
-  /* 价格显示控制 - 移动端 */
-  .mobile-price {
-    display: block;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: rgba(248, 248, 248, 0.8);
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .desktop-price {
+
+  .gallery-carousel-content {
     display: none;
   }
-  
-  .mobile-price .price {
-    font-size: {{ section.settings.price_font_size | plus: 4 }}px;
+
+  .gallery-carousel-content.active {
+    display: block;
   }
-  
-  /* 缩略图适配 */
-  .thumbnail-images {
-    position: static;
-    flex-direction: row;
-    justify-content: center;
-    margin-top: 15px;
-    gap: 10px;
+
+  .gallery-carousel-track {
+    display: flex;
+    gap: 1rem;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    user-select: none;
+    align-items: stretch; /* 确保所有卡片高度一致 */
   }
-  
-  .thumbnail {
-    width: 50px;
-    height: 50px;
-    border-radius: 6px;
+
+  /* Cards containers */
+  .gallery-card-container {
+    flex-shrink: 0;
+    display: flex; /* 使卡片容器也是flex */
   }
-  
-  /* 颜色选择器适配 */
-  .color-selector {
-    gap: 10px;
-    justify-content: center;
+
+  .gallery-small-card {
+    width: 18rem;
   }
-  
-  .color-circle {
-    width: 35px;
-    height: 35px;
+
+  .gallery-card-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* 让内容区域填满整个卡片高度 */
   }
-  
-  .color-circle::after {
-    width: 16px;
-    height: 16px;
+
+  /* Image containers */
+  .gallery-image-container {
+    position: relative;
+    background-color: var(--gallery-white);
+    overflow: hidden;
+    flex-shrink: 0; /* 防止图片区域被压缩 */
   }
-  
-  /* 按钮选择器适配 */
-  .button-selector {
-    gap: 8px;
+
+  .gallery-small-card .gallery-image-container {
+    height: 20rem;
+    border-radius: 8px;
   }
-  
-  .button-option {
-    padding: 8px 16px;
-    font-size: 0.85rem;
-    min-width: 50px;
-  }
-  
-  /* 按钮适配 */
-  .buy-now-btn {
-    padding: 18px 24px;
-    font-size: {{ section.settings.button_font_size | plus: 2 }}px;
-    font-weight: 600;
-    position: sticky;
-    bottom: 20px;
-    z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  }
-  
-  /* 数量选择器适配 */
-  .quantity-input {
+
+  .gallery-card-image {
     width: 100%;
-    max-width: 150px;
-    margin: 0 auto;
+    height: 100%;
+    object-fit: cover; /* 确保图片完整显示且不变形 */
+    object-position: center; /* 居中显示 */
+    transition: opacity 0.5s ease;
   }
-  
-  .quantity-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 1.4rem;
-  }
-  
-  .quantity-field {
-    width: 60px;
-    height: 45px;
-    font-size: 1rem;
-  }
-}
 
-/* 超小屏幕适配 */
-@media (max-width: 480px) {
-  .product-detail-section {
-    padding: 15px 10px;
+  .gallery-placeholder-image {
+    width: 100%;
+    height: 100%;
+    background-color: var(--gallery-gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gallery-gray-400);
+    font-size: 0.875rem;
   }
-  
-  .main-image {
-    height: 300px;
+
+  /* 图片下方内容区域 */
+  .gallery-card-content {
+    padding: 1rem 0.5rem 0;
+    flex: 1; /* 让内容区域填满剩余空间 */
+    display: flex;
+    flex-direction: column;
   }
-  
-  .product-title {
-    font-size: {{ section.settings.title_font_size | minus: 16 }}px;
+
+  .gallery-card-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.4;
   }
-  
-  .thumbnail {
-    width: 45px;
-    height: 45px;
+
+  .gallery-card-text {
+    font-size: 0.875rem;
+    color: var(--gallery-gray-600);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+    flex: 1; /* 让文本区域占据剩余空间 */
   }
-  
-  .color-circle {
-    width: 32px;
+
+  /* 产品信息区域 */
+  .gallery-product-info {
+    margin-top: auto; /* 推到底部 */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  /* 数量选择器 */
+  .gallery-quantity-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--gallery-gray-200);
+    border-radius: 6px;
+    background: var(--gallery-white);
+    overflow: hidden;
+    height: 32px; /* 缩小高度 */
+  }
+
+  .gallery-quantity-btn {
+    width: 28px; /* 缩小宽度 */
     height: 32px;
+    border: none;
+    background: var(--gallery-white);
+    color: var(--gallery-gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px; /* 缩小字体 */
+    font-weight: 500;
+    transition: all 0.2s ease;
   }
-  
-  .buy-now-btn {
-    bottom: 10px;
-    margin: 0 -10px;
-    border-radius: 0;
-  }
-}
 
-/* 横屏适配 */
-@media (max-width: 768px) and (orientation: landscape) {
-  .main-image {
-    height: 250px;
+  .gallery-quantity-btn:hover {
+    background: var(--gallery-gray-50);
+    color: var(--gallery-gray-900);
   }
-  
-  .buy-now-btn {
-    position: static;
-    margin-top: 20px;
+
+  .gallery-quantity-input {
+    width: 36px; /* 缩小宽度 */
+    height: 32px;
+    border: none;
+    text-align: center;
+    font-size: 13px; /* 缩小字体 */
+    font-weight: 500;
+    color: var(--gallery-gray-900);
+    background: var(--gallery-white);
+    outline: none;
+    -moz-appearance: textfield;
   }
-}
+
+  .gallery-quantity-input::-webkit-outer-spin-button,
+  .gallery-quantity-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* 购买按钮 */
+  .gallery-buy-button {
+    flex: 1;
+    height: 32px; /* 与数量选择器同高 */
+    background: linear-gradient(135deg, var(--gallery-gray-900) 0%, var(--gallery-gray-700) 100%);
+    color: var(--gallery-white);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.75rem;
+    font-size: 13px; /* 缩小字体 */
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 0; /* 允许按钮收缩 */
+  }
+
+  .gallery-buy-button:hover {
+    background: linear-gradient(135deg, var(--gallery-gray-800) 0%, var(--gallery-gray-600) 100%);
+    transform: translateY(-1px);
+  }
+
+  .gallery-buy-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gallery-price {
+    font-weight: 600;
+    color: var(--gallery-amber-400);
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  /* Boutons de navigation */
+  .gallery-nav-button {
+    position: absolute;
+    top: 10.5rem !important;
+    transform: translateY(-50%);
+    width: 3rem;
+    height: 3rem;
+    background: var(--gallery-white);
+    border: 1px solid var(--gallery-gray-200);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gallery-nav-button:hover {
+    background-color: var(--gallery-gray-50);
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  .gallery-nav-button.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .gallery-prev-button {
+    left: 1rem;
+  }
+
+  .gallery-next-button {
+    right: 1rem;
+  }
+
+  .gallery-nav-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--gallery-gray-600);
+  }
+
+  /* PC端优化 - 在1200px以上屏幕的额外优化 */
+  @media (min-width: 1201px) {
+    .gallery-container {
+      padding: 0 2rem;
+    }
+
+    .gallery-carousel-track {
+      gap: 1.5rem;
+    }
+
+    .gallery-small-card {
+      width: 20rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 22rem;
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .gallery-container {
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .gallery-container {
+      padding: 0 0.5rem;
+    }
+
+    .gallery-header-wrapper {
+      margin-bottom: 1.5rem;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .gallery-main-title {
+      font-size: 1.125rem;
+    }
+
+    .gallery-sub-title {
+      font-size: 0.875rem;
+      text-align: left;
+    }
+
+    .gallery-carousel-track {
+      gap: 1rem;
+    }
+
+    .gallery-small-card {
+      width: 16rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 22rem;
+    }
+
+    .gallery-card-title {
+      font-size: 1rem;
+    }
+
+    .gallery-card-text {
+      font-size: 0.8rem;
+    }
+
+    .gallery-nav-button {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .gallery-nav-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* 移动端产品信息调整 */
+    .gallery-product-info {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .gallery-quantity-selector {
+      align-self: flex-start;
+    }
+
+    .gallery-buy-button {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-header-wrapper {
+      margin-bottom: 1rem;
+    }
+
+    .gallery-main-title {
+      font-size: 1rem;
+    }
+
+    .gallery-sub-title {
+      font-size: 0.8rem;
+    }
+
+    .gallery-small-card {
+      width: 14rem;
+    }
+
+    .gallery-small-card .gallery-image-container {
+      height: 20rem;
+    }
+
+    .gallery-card-content {
+      padding: 0.75rem 0.25rem 0;
+    }
+
+    .gallery-card-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .gallery-card-text {
+      font-size: 0.75rem;
+    }
+  }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // 缩略图悬停切换功能
-  const thumbnails = document.querySelectorAll('.thumbnail');
-  const mainImage = document.getElementById('main-product-image');
-  
-  thumbnails.forEach((thumbnail, index) => {
-    // 移动端使用点击，桌面端使用悬停
-    const isMobile = window.innerWidth <= 768;
-    const eventType = isMobile ? 'click' : 'mouseenter';
-    
-    thumbnail.addEventListener(eventType, function() {
-      const newImageSrc = this.dataset.image;
-      const newImageAlt = this.dataset.imageAlt;
-      
-      if (newImageSrc && mainImage) {
-        mainImage.src = newImageSrc;
-        mainImage.alt = newImageAlt;
-        
-        // 更新活跃状态
-        thumbnails.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
+  document.addEventListener('DOMContentLoaded', function () {
+    const tracks = document.querySelectorAll('.gallery-carousel-track[data-section-id]');
+
+    tracks.forEach((track) => {
+      const sectionId = track.dataset.sectionId;
+      const prevButton = document.querySelector(`.gallery-prev-button[data-section-id="${sectionId}"]`);
+      const nextButton = document.querySelector(`.gallery-next-button[data-section-id="${sectionId}"]`);
+      const wrapper = track.closest('.gallery-carousel-wrapper');
+
+      if (!prevButton || !nextButton || !wrapper) return;
+
+      let currentSlide = 0;
+
+      function updateCarousel() {
+        const cards = track.querySelectorAll('.gallery-card-container');
+        if (cards.length === 0) return;
+
+        const cardWidth = cards[0].offsetWidth + 16; // 包含 gap
+        const offset = currentSlide * cardWidth;
+        track.style.transform = `translateX(-${offset}px)`;
+
+        // 实际可滚动的最大距离
+        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
+
+        // 当前已滚动的距离
+        const currentOffset = currentSlide * cardWidth;
+
+        // 显示/隐藏按钮：只要有空间就能点
+        prevButton.classList.toggle('visible', currentOffset > 0);
+        nextButton.classList.toggle('visible', currentOffset < maxScroll);
       }
-    });
-    
-    // 移动端也保留点击事件
-    if (!isMobile) {
-      thumbnail.addEventListener('click', function() {
-        const newImageSrc = this.dataset.image;
-        const newImageAlt = this.dataset.imageAlt;
-        
-        if (newImageSrc && mainImage) {
-          mainImage.src = newImageSrc;
-          mainImage.alt = newImageAlt;
-          
-          thumbnails.forEach(t => t.classList.remove('active'));
-          this.classList.add('active');
+
+      prevButton.addEventListener('click', () => {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updateCarousel();
         }
       });
-    }
-  });
-  
-  // 数量选择器功能
-  const minusBtn = document.querySelector('.quantity-btn.minus');
-  const plusBtn = document.querySelector('.quantity-btn.plus');
-  const quantityField = document.querySelector('.quantity-field');
-  
-  if (minusBtn && plusBtn && quantityField) {
-    minusBtn.addEventListener('click', function() {
-      const currentValue = parseInt(quantityField.value);
-      if (currentValue > 1) {
-        quantityField.value = currentValue - 1;
+
+      nextButton.addEventListener('click', () => {
+        const cards = track.querySelectorAll('.gallery-card-container');
+        if (cards.length === 0) return;
+
+        const cardWidth = cards[0].offsetWidth + 16;
+        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
+        const currentOffset = currentSlide * cardWidth;
+
+        if (currentOffset < maxScroll) {
+          currentSlide++;
+          updateCarousel();
+        }
+      });
+
+      // 初始更新
+      updateCarousel();
+
+      // 响应窗口大小变化
+      window.addEventListener('resize', updateCarousel);
+    });
+
+    // 数量选择器功能
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('gallery-quantity-plus')) {
+        const input = e.target.previousElementSibling;
+        const currentValue = parseInt(input.value);
+        const maxValue = parseInt(input.getAttribute('max'));
+        if (currentValue < maxValue) {
+          input.value = currentValue + 1;
+        }
+      }
+      
+      if (e.target.classList.contains('gallery-quantity-minus')) {
+        const input = e.target.nextElementSibling;
+        const currentValue = parseInt(input.value);
+        const minValue = parseInt(input.getAttribute('min'));
+        if (currentValue > minValue) {
+          input.value = currentValue - 1;
+        }
       }
     });
-    
-    plusBtn.addEventListener('click', function() {
-      const currentValue = parseInt(quantityField.value);
-      quantityField.value = currentValue + 1;
+
+    // 购买按钮点击事件
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.gallery-buy-button')) {
+        const button = e.target.closest('.gallery-buy-button');
+        const card = button.closest('.gallery-card-container');
+        const quantityInput = card.querySelector('.gallery-quantity-input');
+        const quantity = quantityInput ? quantityInput.value : 1;
+        
+        console.log('购买商品，数量：', quantity);
+        // 这里可以添加购买逻辑
+      }
     });
-  }
-  
-  // 立即购买功能
-  const buyNowBtn = document.querySelector('.buy-now-btn');
-  if (buyNowBtn) {
-    buyNowBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      const form = document.getElementById('product-form');
-      const formData = new FormData(form);
-      
-      // 添加加载状态
-      this.textContent = '处理中...';
-      this.disabled = true;
-      
-      // 先添加到购物车
-      fetch('/cart/add.js', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: formData.get('id'),
-          quantity: parseInt(formData.get('quantity')) || 1
-        })
-      })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        throw new Error('添加到购物车失败');
-      })
-      .then(data => {
-        // 成功添加后跳转到结账页面
-        window.location.href = '/checkout';
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('添加到购物车时出现错误，请重试');
-        // 恢复按钮状态
-        this.textContent = '{{ section.settings.buy_now_text }}';
-        this.disabled = false;
-      });
-    });
-  }
-  
-  // 监听屏幕旋转
-  window.addEventListener('orientationchange', function() {
-    setTimeout(function() {
-      // 重新计算布局
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
   });
-});
 </script>
 
 {% schema %}
 {
-  "name": "商品详情页",
+  "name": "步骤图片展示",
   "tag": "section",
-  "class": "product-detail-section",
+  "class": "gallery-showcase-section",
   "settings": [
     {
-      "type": "header",
-      "content": "布局设置"
+      "type": "text",
+      "id": "main_title",
+      "label": "主标题",
+      "default": "精选图片展示"
     },
     {
-      "type": "range",
-      "id": "content_gap",
-      "min": 30,
-      "max": 100,
-      "step": 10,
-      "unit": "px",
-      "label": "左右内容间距",
-      "default": 60
-    },
-    {
-      "type": "range",
-      "id": "section_padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "px",
-      "label": "顶部内边距",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "section_padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "px",
-      "label": "底部内边距",
-      "default": 40
-    },
-    {
-      "type": "header",
-      "content": "颜色设置"
+      "type": "text",
+      "id": "sub_title",
+      "label": "副标题",
+      "default": "查看更多精彩内容"
     },
     {
       "type": "color",
-      "id": "info_background_color",
-      "label": "右侧内容区域背景颜色",
-      "default": "#ffffff"
-    },
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "transparent"
+    }
+  ],
+  "blocks": [
     {
-      "type": "color",
-      "id": "accent_color",
-      "label": "强调色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "title_color",
-      "label": "标题颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "subtitle_color",
-      "label": "副标题颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "文本颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "label_color",
-      "label": "标签颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "price_color",
-      "label": "价格颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "star_color",
-      "label": "星级颜色",
-      "default": "#ffd700"
-    },
-    {
-      "type": "header",
-      "content": "图片设置"
-    },
-    {
-      "type": "range",
-      "id": "image_border_radius",
-      "min": 0,
-      "max": 30,
-      "step": 2,
-      "unit": "px",
-      "label": "主图片圆角",
-      "default": 12
-    },
-    {
-      "type": "range",
-      "id": "thumbnail_border_radius",
-      "min": 0,
-      "max": 20,
-      "step": 2,
-      "unit": "px",
-      "label": "缩略图圆角",
-      "default": 8
-    },
-    {
-      "type": "header",
-      "content": "右侧内容区域设置"
-    },
-    {
-      "type": "range",
-      "id": "info_border_radius",
-      "min": 0,
-      "max": 30,
-      "step": 2,
-      "unit": "px",
-      "label": "内容区域圆角",
-      "default": 12
-    },
-    {
-      "type": "header",
-      "content": "标题设置"
-    },
-    {
-      "type": "range",
-      "id": "title_font_size",
-      "min": 24,
-      "max": 48,
-      "step": 2,
-      "unit": "px",
-      "label": "标题字体大小",
-      "default": 40
-    },
-    {
-      "type": "select",
-      "id": "title_font_weight",
-      "label": "标题字体粗细",
-      "options": [
+      "type": "image_item",
+      "name": "图片项",
+      "settings": [
         {
-          "value": "300",
-          "label": "细体"
+          "type": "image_picker",
+          "id": "image",
+          "label": "图片"
         },
         {
-          "value": "400",
-          "label": "正常"
+          "type": "text",
+          "id": "card_title",
+          "label": "卡片标题",
+          "default": "图片标题"
         },
         {
-          "value": "500",
-          "label": "中等"
-        },
-        {
-          "value": "600",
-          "label": "半粗"
-        },
-        {
-          "value": "700",
-          "label": "粗体"
+          "type": "textarea",
+          "id": "card_text",
+          "label": "卡片描述",
+          "default": "这里是图片的描述文本内容"
         }
-      ],
-      "default": "300"
-    },
-    {
-      "type": "header",
-      "content": "副标题设置"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_subtitle",
-      "label": "显示副标题",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "subtitle",
-      "label": "自定义副标题",
-      "info": "留空则使用产品的metafield或默认值"
-    },
-    {
-      "type": "range",
-      "id": "subtitle_font_size",
-      "min": 12,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "label": "副标题字体大小",
-      "default": 14
-    },
-    {
-      "type": "header",
-      "content": "评分设置"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_rating",
-      "label": "显示评分",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "rating",
-      "min": 1,
-      "max": 5,
-      "step": 1,
-      "label": "评分星级",
-      "default": 5
-    },
-    {
-      "type": "number",
-      "id": "rating_count",
-      "label": "评价数量",
-      "default": 1
-    },
-    {
-      "type": "header",
-      "content": "描述设置"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_description",
-      "label": "显示商品描述",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "description_font_size",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "unit": "px",
-      "label": "描述字体大小",
-      "default": 15
-    },
-    {
-      "type": "header",
-      "content": "选项按钮设置"
-    },
-    {
-      "type": "range",
-      "id": "option_button_border_radius",
-      "min": 0,
-      "max": 30,
-      "step": 2,
-      "unit": "px",
-      "label": "选项按钮圆角",
-      "default": 8
-    },
-    {
-      "type": "header",
-      "content": "数量选择器"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_quantity",
-      "label": "显示数量选择器",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "quantity_label",
-      "label": "数量标签文本",
-      "default": "数量"
-    },
-    {
-      "type": "header",
-      "content": "价格设置"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_price",
-      "label": "显示价格",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "price_font_size",
-      "min": 18,
-      "max": 32,
-      "step": 2,
-      "unit": "px",
-      "label": "价格字体大小",
-      "default": 24
-    },
-    {
-      "type": "range",
-      "id": "compare_price_font_size",
-      "min": 14,
-      "max": 24,
-      "step": 1,
-      "unit": "px",
-      "label": "对比价格字体大小",
-      "default": 19
-    },
-    {
-      "type": "header",
-      "content": "按钮设置"
-    },
-    {
-      "type": "color",
-      "id": "button_color",
-      "label": "按钮颜色",
-      "default": "#333333"
-    },
-    {
-      "type": "range",
-      "id": "button_font_size",
-      "min": 14,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "label": "按钮字体大小",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "button_border_radius",
-      "min": 0,
-      "max": 20,
-      "step": 2,
-      "unit": "px",
-      "label": "按钮圆角",
-      "default": 6
-    },
-    {
-      "type": "checkbox",
-      "id": "show_buy_now",
-      "label": "显示立即购买按钮",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "buy_now_text",
-      "label": "立即购买按钮文本",
-      "default": "立即购买"
+      ]
     }
   ],
   "presets": [
     {
-      "name": "商品详情页"
+      "name": "abuot图片展示",
+      "settings": {
+        "main_title": "精选图片展示",
+        "sub_title": "查看更多精彩内容",
+        "background_color": "transparent"
+      },
+      "blocks": [
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 1",
+            "card_text": "这里是第一张图片的描述文本"
+          }
+        },
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 2",
+            "card_text": "这里是第二张图片的描述文本"
+          }
+        },
+        {
+          "type": "image_item",
+          "settings": {
+            "card_title": "图片标题 3",
+            "card_text": "这里是第三张图片的描述文本"
+          }
+        }
+      ]
     }
   ]
 }
