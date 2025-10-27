@@ -33,6 +33,36 @@
     background: #5a7c5a;
     margin: 0 auto 2rem;
   }
+
+  /* 新增的图片样式 */
+  .almazen-mission .header-image-container {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    margin: 0 auto 2rem;
+  }
+
+  .almazen-mission .header-image-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .almazen-mission .header-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* 响应式图片显示 */
+  .almazen-mission .header-image-desktop {
+    display: block;
+  }
+
+  .almazen-mission .header-image-mobile {
+    display: none;
+  }
   
   .almazen-mission .section-intro {
     font-size: 1.125rem;
@@ -247,6 +277,17 @@
     }
   }
   
+  @media (max-width: 768px) {
+    /* 移动端显示移动端图片 */
+    .almazen-mission .header-image-desktop {
+      display: none;
+    }
+
+    .almazen-mission .header-image-mobile {
+      display: block;
+    }
+  }
+  
   @keyframes slideUp {
     0% { transform: translateY(30px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
@@ -260,6 +301,33 @@
         {{ section.settings.mission_title | default: 'Our Mission' }}
       </h2>
       <div class="section-divider"></div>
+      
+      <!-- 新增的头部图片 -->
+      {% if section.settings.header_image_desktop or section.settings.header_image_mobile %}
+        <div class="header-image-container" 
+             style="width: {{ section.settings.header_image_width }}%; height: {{ section.settings.header_image_height }}vh;">
+          <!-- PC端图片 -->
+          {% if section.settings.header_image_desktop %}
+            <img 
+              src="{{ section.settings.header_image_desktop | image_url: width: 1200 }}" 
+              alt="{{ section.settings.header_image_alt | default: 'Our Mission' }}"
+              class="header-image header-image-desktop"
+              loading="lazy"
+            >
+          {% endif %}
+          
+          <!-- 移动端图片 -->
+          {% if section.settings.header_image_mobile %}
+            <img 
+              src="{{ section.settings.header_image_mobile | image_url: width: 768 }}" 
+              alt="{{ section.settings.header_image_mobile_alt | default: section.settings.header_image_alt | default: 'Our Mission' }}"
+              class="header-image header-image-mobile"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+      {% endif %}
+      
       <p class="section-intro">
         {{ section.settings.mission_intro }}
       </p>
@@ -330,12 +398,64 @@
       "default": "Our Mission"
     },
     {
+      "type": "header",
+      "content": "Header Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "header_image_desktop",
+      "label": "Header Image (Desktop)",
+      "info": "Image displayed on desktop and tablet devices"
+    },
+    {
+      "type": "image_picker",
+      "id": "header_image_mobile",
+      "label": "Header Image (Mobile)",
+      "info": "Image displayed on mobile devices"
+    },
+    {
+      "type": "text",
+      "id": "header_image_alt",
+      "label": "Desktop Image Alt Text",
+      "default": "Our Mission"
+    },
+    {
+      "type": "text",
+      "id": "header_image_mobile_alt",
+      "label": "Mobile Image Alt Text",
+      "info": "Leave empty to use desktop alt text"
+    },
+    {
+      "type": "range",
+      "id": "header_image_width",
+      "label": "Header Image Width (%)",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "default": 80,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "header_image_height",
+      "label": "Header Image Height (vh)",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "default": 40,
+      "unit": "vh",
+      "info": "Viewport height percentage"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
       "type": "textarea",
       "id": "mission_intro",
       "label": "Introduction Text",
       "default": "We are committed to nurturing a mindful and meaningful connection with body, mind, and nature for every individual who joins our community."
     },
-
     {
       "type": "text",
       "id": "text_module_title",
@@ -405,7 +525,7 @@
           "settings": {
             "mission_number": "01",
             "mission_title": "Mindful Living",
-            "mission_description": "Inspire individuals to embrace mindfulness in their daily routines, creating moments of peace and reflection.",
+            "mission_description": "Inspire individuals to embrace mindfulness in their daily routines, creating moments of peace and reflection."
           }
         },
         {
@@ -413,8 +533,7 @@
           "settings": {
             "mission_number": "02",
             "mission_title": "Wellness Community",
-            "mission_description": "Build a supportive community where people can share their wellness journey and learn from each other.",
-
+            "mission_description": "Build a supportive community where people can share their wellness journey and learn from each other."
           }
         },
         {
@@ -422,8 +541,7 @@
           "settings": {
             "mission_number": "03",
             "mission_title": "Cultural Bridge",
-            "mission_description": "Connect ancient Chinese Zen wisdom with modern lifestyle needs, making timeless teachings accessible.",
-
+            "mission_description": "Connect ancient Chinese Zen wisdom with modern lifestyle needs, making timeless teachings accessible."
           }
         },
         {
@@ -431,8 +549,7 @@
           "settings": {
             "mission_number": "04",
             "mission_title": "Sustainable Future",
-            "mission_description": "Promote environmental consciousness through sustainable practices and eco-friendly product creation.",
-
+            "mission_description": "Promote environmental consciousness through sustainable practices and eco-friendly product creation."
           }
         },
         {
