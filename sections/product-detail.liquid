@@ -41,6 +41,16 @@
           </div>
         {% endif %}
 
+        <!-- 价格 - 移动端提前显示 -->
+        {% if section.settings.show_price %}
+          <div class="product-price mobile-price">
+            <span class="price">{{ product.price | money }}</span>
+            {% if product.compare_at_price > product.price %}
+              <span class="compare-price">{{ product.compare_at_price | money }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
         <!-- 商品描述 -->
         {% if section.settings.show_description %}
           <div class="product-description">
@@ -97,9 +107,9 @@
             </div>
           {% endif %}
 
-          <!-- 价格 -->
+          <!-- 价格 - 桌面端显示 -->
           {% if section.settings.show_price %}
-            <div class="product-price">
+            <div class="product-price desktop-price">
               <span class="price">{{ product.price | money }}</span>
               {% if product.compare_at_price > product.price %}
                 <span class="compare-price">{{ product.compare_at_price | money }}</span>
@@ -142,7 +152,6 @@
 
 .main-image {
   width: 100%;
-  /* 固定高度，防止图片切换时高度变化 */
   height: 600px;
   border-radius: {{ section.settings.image_border_radius }}px;
   overflow: hidden;
@@ -262,6 +271,15 @@
   line-height: 1.6;
   margin-bottom: 30px;
   font-size: {{ section.settings.description_font_size }}px;
+}
+
+/* 价格显示控制 */
+.mobile-price {
+  display: none;
+}
+
+.desktop-price {
+  display: block;
 }
 
 /* 商品选项 */
@@ -424,46 +442,188 @@
   color: white !important;
 }
 
-/* 响应式设计 */
+/* 移动端适配 */
 @media (max-width: 768px) {
+  .product-detail-section {
+    padding: 20px 15px;
+  }
+  
   .product-container {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 20px;
   }
   
   .product-images {
     position: static;
+    order: 1;
   }
   
   .main-image {
-    height: 400px; /* 移动端较小的固定高度 */
+    height: 350px;
+    border-radius: 8px;
   }
   
   .product-info {
     height: auto;
     overflow-y: visible;
+    padding-right: 0;
+    order: 2;
   }
   
   .product-title {
-    font-size: {{ section.settings.title_font_size | minus: 8 }}px;
+    font-size: {{ section.settings.title_font_size | minus: 12 }}px;
+    margin-bottom: 8px;
   }
   
+  .product-subtitle {
+    font-size: {{ section.settings.subtitle_font_size | minus: 1 }}px;
+    margin-bottom: 12px;
+  }
+  
+  .product-rating {
+    margin-bottom: 15px;
+  }
+  
+  .product-description {
+    font-size: {{ section.settings.description_font_size | minus: 1 }}px;
+    margin-bottom: 20px;
+  }
+  
+  .product-option {
+    margin-bottom: 20px;
+  }
+  
+  .quantity-selector {
+    margin-bottom: 20px;
+  }
+  
+  /* 价格显示控制 - 移动端 */
+  .mobile-price {
+    display: block;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .desktop-price {
+    display: none;
+  }
+  
+  .mobile-price .price {
+    font-size: {{ section.settings.price_font_size | plus: 4 }}px;
+  }
+  
+  /* 缩略图适配 */
   .thumbnail-images {
     position: static;
     flex-direction: row;
     justify-content: center;
     margin-top: 15px;
+    gap: 10px;
   }
   
   .thumbnail {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+  }
+  
+  /* 颜色选择器适配 */
+  .color-selector {
+    gap: 10px;
+    justify-content: center;
+  }
+  
+  .color-circle {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .color-circle::after {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* 按钮适配 */
+  .buy-now-btn {
+    padding: 18px 24px;
+    font-size: {{ section.settings.button_font_size | plus: 2 }}px;
+    font-weight: 600;
+    position: sticky;
+    bottom: 20px;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  
+  /* 数量选择器适配 */
+  .quantity-input {
+    width: 100%;
+    max-width: 150px;
+    margin: 0 auto;
+  }
+  
+  .quantity-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.4rem;
+  }
+  
+  .quantity-field {
+    width: 60px;
+    height: 45px;
+    font-size: 1rem;
+  }
+  
+  /* 选择器适配 */
+  .option-select {
+    padding: 15px 16px;
+    font-size: 1rem;
   }
 }
 
-/* 可选：如果希望图片适应容器而不是裁剪，可以使用 object-fit: contain */
-.main-image.contain img {
-  object-fit: contain;
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+  .product-detail-section {
+    padding: 15px 10px;
+  }
+  
+  .main-image {
+    height: 300px;
+  }
+  
+  .product-title {
+    font-size: {{ section.settings.title_font_size | minus: 16 }}px;
+  }
+  
+  .thumbnail {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .color-circle {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .buy-now-btn {
+    bottom: 10px;
+    margin: 0 -10px;
+    border-radius: 0;
+  }
+}
+
+/* 横屏适配 */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-image {
+    height: 250px;
+  }
+  
+  .buy-now-btn {
+    position: static;
+    margin-top: 20px;
+  }
 }
 </style>
 
@@ -474,8 +634,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const mainImage = document.getElementById('main-product-image');
   
   thumbnails.forEach((thumbnail, index) => {
-    // 鼠标移入时切换图片
-    thumbnail.addEventListener('mouseenter', function() {
+    // 移动端使用点击，桌面端使用悬停
+    const isMobile = window.innerWidth <= 768;
+    const eventType = isMobile ? 'click' : 'mouseenter';
+    
+    thumbnail.addEventListener(eventType, function() {
       const newImageSrc = this.dataset.image;
       const newImageAlt = this.dataset.imageAlt;
       
@@ -489,20 +652,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // 添加点击事件作为备选
-    thumbnail.addEventListener('click', function() {
-      const newImageSrc = this.dataset.image;
-      const newImageAlt = this.dataset.imageAlt;
-      
-      if (newImageSrc && mainImage) {
-        mainImage.src = newImageSrc;
-        mainImage.alt = newImageAlt;
+    // 移动端也保留点击事件
+    if (!isMobile) {
+      thumbnail.addEventListener('click', function() {
+        const newImageSrc = this.dataset.image;
+        const newImageAlt = this.dataset.imageAlt;
         
-        // 更新活跃状态
-        thumbnails.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-      }
-    });
+        if (newImageSrc && mainImage) {
+          mainImage.src = newImageSrc;
+          mainImage.alt = newImageAlt;
+          
+          thumbnails.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    }
   });
   
   // 数量选择器功能
@@ -533,6 +697,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const form = document.getElementById('product-form');
       const formData = new FormData(form);
       
+      // 添加加载状态
+      this.textContent = '处理中...';
+      this.disabled = true;
+      
       // 先添加到购物车
       fetch('/cart/add.js', {
         method: 'POST',
@@ -557,9 +725,20 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(error => {
         console.error('Error:', error);
         alert('添加到购物车时出现错误，请重试');
+        // 恢复按钮状态
+        this.textContent = '{{ section.settings.buy_now_text }}';
+        this.disabled = false;
       });
     });
   }
+  
+  // 监听屏幕旋转
+  window.addEventListener('orientationchange', function() {
+    setTimeout(function() {
+      // 重新计算布局
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
+  });
 });
 </script>
 
