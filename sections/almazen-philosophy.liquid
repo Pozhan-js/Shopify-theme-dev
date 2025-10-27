@@ -261,26 +261,6 @@
     margin-bottom: 1rem;
     font-family: 'Noto Serif', serif;
   }
-  
-  .almazen-philosophy .bottom-image-section {
-    margin-top: 4rem;
-    text-align: center;
-  }
-  
-  .almazen-philosophy .bottom-image-container {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    height: 400px;
-  }
-  
-  .almazen-philosophy .bottom-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
 
   /* 响应式图片显示 */
   .almazen-philosophy .bottom-image-desktop {
@@ -290,13 +270,22 @@
   .almazen-philosophy .bottom-image-mobile {
     display: none;
   }
-  
-  .almazen-philosophy .bottom-image-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+
+  /* 底部图片样式 - 显示原始高度 */
+  .almazen-philosophy .bottom-image {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
   }
-  
+
+  .almazen-philosophy .bottom-image:hover {
+    transform: scale(1.02);
+  }
+
   @media (min-width: 768px) {
     .almazen-philosophy .section-title {
       font-size: 3rem;
@@ -325,7 +314,7 @@
     .almazen-philosophy .intro-text {
       padding: 1.5rem;
     }
-    
+
     /* 移动端显示移动端图片 */
     .almazen-philosophy .bottom-image-desktop {
       display: none;
@@ -387,9 +376,6 @@
       {% for block in section.blocks %}
         {% if block.type == 'philosophy_principle' %}
           <div class="principle-card">
-            {% comment %} <div class="principle-icon">
-              <i class="fas {{ block.settings.principle_icon }}" style="color: white; font-size: 1.25rem;"></i>
-            </div> {% endcomment %}
             <h3 class="principle-title">{{ block.settings.principle_title }}</h3>
             <p class="principle-description">{{ block.settings.principle_description }}</p>
           </div>
@@ -434,31 +420,28 @@
       </div>
     {% endif %}
     
+    <!-- 底部图片：显示原始高度，不拉伸 -->
     {% if section.settings.bottom_image_desktop or section.settings.bottom_image_mobile %}
       <div class="bottom-image-section">
-        <div class="bottom-image-container">
-          <!-- PC端图片 -->
-          {% if section.settings.bottom_image_desktop %}
-            <img 
-              src="{{ section.settings.bottom_image_desktop | image_url: width: 2048 }}" 
-              alt="{{ section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
-              class="bottom-image bottom-image-desktop"
-              loading="lazy"
-            >
-          {% endif %}
-          
-          <!-- 移动端图片 -->
-          {% if section.settings.bottom_image_mobile %}
-            <img 
-              src="{{ section.settings.bottom_image_mobile | image_url: width: 768 }}" 
-              alt="{{ section.settings.bottom_image_mobile_alt | default: section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
-              class="bottom-image bottom-image-mobile"
-              loading="lazy"
-            >
-          {% endif %}
-          
-          <div class="bottom-image-overlay"></div>
-        </div>
+        <!-- PC端图片 -->
+        {% if section.settings.bottom_image_desktop %}
+          <img 
+            src="{{ section.settings.bottom_image_desktop | image_url: 'original' }}" 
+            alt="{{ section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
+            class="bottom-image bottom-image-desktop"
+            loading="lazy"
+          >
+        {% endif %}
+        
+        <!-- 移动端图片 -->
+        {% if section.settings.bottom_image_mobile %}
+          <img 
+            src="{{ section.settings.bottom_image_mobile | image_url: 'original' }}" 
+            alt="{{ section.settings.bottom_image_mobile_alt | default: section.settings.bottom_image_alt | default: 'Our Philosophy' }}"
+            class="bottom-image bottom-image-mobile"
+            loading="lazy"
+          >
+        {% endif %}
       </div>
     {% endif %}
   </div>
