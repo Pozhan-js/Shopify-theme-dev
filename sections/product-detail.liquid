@@ -8,7 +8,9 @@
         <!-- 缩略图移到左下角 -->
         <div class="thumbnail-images">
           {% for image in product.images limit: 4 %}
-            <div class="thumbnail {% if forloop.first %}active{% endif %}" data-image="{{ image | img_url: '800x800' }}">
+            <div class="thumbnail {% if forloop.first %}active{% endif %}" 
+                 data-image="{{ image | img_url: '800x800' }}"
+                 data-image-alt="{{ product.title }}">
               <img src="{{ image | img_url: '100x100' }}" alt="{{ product.title }}">
             </div>
           {% endfor %}
@@ -161,6 +163,7 @@
   display: flex;
   gap: 8px;
   flex-direction: column;
+  z-index: 10;
 }
 
 .thumbnail {
@@ -172,6 +175,7 @@
   border: 2px solid rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
   opacity: 0.7;
+  background: white;
 }
 
 .thumbnail:hover {
@@ -454,14 +458,44 @@ document.addEventListener('DOMContentLoaded', function() {
   const thumbnails = document.querySelectorAll('.thumbnail');
   const mainImage = document.getElementById('main-product-image');
   
-  thumbnails.forEach(thumbnail => {
+  console.log('找到缩略图数量:', thumbnails.length);
+  console.log('主图片元素:', mainImage);
+  
+  thumbnails.forEach((thumbnail, index) => {
+    console.log(`缩略图 ${index}:`, thumbnail.dataset.image);
+    
     // 鼠标移入时切换图片
     thumbnail.addEventListener('mouseenter', function() {
       const newImageSrc = this.dataset.image;
-      mainImage.src = newImageSrc;
+      const newImageAlt = this.dataset.imageAlt;
       
-      thumbnails.forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
+      console.log('切换到图片:', newImageSrc);
+      
+      if (newImageSrc && mainImage) {
+        mainImage.src = newImageSrc;
+        mainImage.alt = newImageAlt;
+        
+        // 更新活跃状态
+        thumbnails.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+    
+    // 添加点击事件作为备选
+    thumbnail.addEventListener('click', function() {
+      const newImageSrc = this.dataset.image;
+      const newImageAlt = this.dataset.imageAlt;
+      
+      console.log('点击切换到图片:', newImageSrc);
+      
+      if (newImageSrc && mainImage) {
+        mainImage.src = newImageSrc;
+        mainImage.alt = newImageAlt;
+        
+        // 更新活跃状态
+        thumbnails.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      }
     });
   });
   
@@ -484,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // 立即购买功能 - 修复跳转问题
+  // 立即购买功能
   const buyNowBtn = document.querySelector('.buy-now-btn');
   if (buyNowBtn) {
     buyNowBtn.addEventListener('click', function(e) {
@@ -519,31 +553,6 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('添加到购物车时出现错误，请重试');
       });
     });
-  }
-  
-  // 变体选择功能
-  const variantSelectors = document.querySelectorAll('input[name^="options"], select[name^="options"]');
-  const productForm = document.getElementById('product-form');
-  
-  if (variantSelectors.length > 0 && productForm) {
-    variantSelectors.forEach(selector => {
-      selector.addEventListener('change', updateVariant);
-    });
-  }
-  
-  function updateVariant() {
-    const selectedOptions = [];
-    variantSelectors.forEach(selector => {
-      if (selector.type === 'radio' && selector.checked) {
-        selectedOptions.push(selector.value);
-      } else if (selector.type === 'select-one') {
-        selectedOptions.push(selector.value);
-      }
-    });
-    
-    // 这里需要根据选择的选项找到对应的变体ID
-    // 由于这需要产品的变体数据，建议在模板中输出变体数据供JavaScript使用
-    console.log('Selected options:', selectedOptions);
   }
 });
 </script>
