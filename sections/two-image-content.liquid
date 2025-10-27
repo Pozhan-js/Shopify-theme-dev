@@ -1,13 +1,13 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 显示图片原始高度（不拉伸）
+  Section: 图文模块 - 显示图片原始高度 + 默认居中显示
   功能：
     - 大标题 + 装饰横线
-    - 标题1 → 图片1（显示原始高度，不拉伸）
+    - 标题1 → 图片1（显示原始高度，不拉伸，居中）
     - 标题2 → 内容 → 图片2（同上 + 20px 上边距）
     - 外层 padding: 5rem 3rem
     - 支持 fallback & 全设备适配（<picture>）
-    - 图片按原始尺寸显示，仅在超出时等比缩小
+    - 图片按原始尺寸显示，居中对齐
   ===================================================================
 {% endcomment %}
 
@@ -58,13 +58,17 @@
         {{ section.settings.title_1 }}
       </h2>
 
-      <!-- 图片容器 -->
+      <!-- 图片容器：使用 flex 居中 -->
       <div class="image-wrapper"
            style="
              width: {{ section.settings.image1_width }}%;
              margin: 0 auto;
              overflow: hidden;
-             text-align: center;">
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             background: transparent;
+             min-height: 100px;">
         
         <!-- 使用 <picture> 实现响应式源切换 -->
         <picture>
@@ -90,7 +94,7 @@
                       {{ 'placeholder.png' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
-          <!-- 默认 img：显示原始高度，不拉伸 -->
+          <!-- 默认 img：显示原始高度，不拉伸，居中 -->
           <img src="
             {%- if section.settings.image1_desktop -%}
               {{ section.settings.image1_desktop | img_url: 'original' }}
@@ -144,7 +148,11 @@
              width: {{ section.settings.image2_width }}%;
              margin: 20px auto 0;
              overflow: hidden;
-             text-align: center;">
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             background: transparent;
+             min-height: 100px;">
         
         <picture>
           <!-- Desktop 图 -->
@@ -213,7 +221,7 @@
 
 {% schema %}
 {
-  "name": "显示图片原始高度",
+  "name": "显示图片原始高度 + 居中",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -334,7 +342,7 @@
   ],
   "presets": [
     {
-      "name": "显示图片原始高度",
+      "name": "显示图片原始高度 + 居中",
       "category": "内容"
     }
   ]
