@@ -1,0 +1,566 @@
+{% comment %}
+  Text and Image Section
+{% endcomment %}
+
+<style>
+  .text-image-section {
+    padding: 5rem 1.5rem;
+    background: white;
+  }
+  
+  .text-image-section .container {
+    max-width: 80rem;
+    margin: 0 auto;
+  }
+  
+  .text-image-section .content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+  }
+  
+  .text-image-section .content-wrapper.text-left {
+    flex-direction: row;
+  }
+  
+  .text-image-section .content-wrapper.text-right {
+    flex-direction: row-reverse;
+  }
+  
+  .text-image-section .text-module {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .text-image-section .image-module {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .text-image-section .super-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #7d9a7d;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .text-image-section .main-title {
+    font-size: 2.5rem;
+    font-family: 'Noto Serif', serif;
+    font-weight: 300;
+    color: #4a3f32;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+  }
+  
+  .text-image-section .content-text {
+    font-size: 1.125rem;
+    color: #8b7d68;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+  
+  .text-image-section .content-text p {
+    margin-bottom: 1rem;
+  }
+  
+  .text-image-section .content-text p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .text-image-section .cta-button {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    background: #7d9a7d;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid #7d9a7d;
+  }
+  
+  .text-image-section .cta-button:hover {
+    background: transparent;
+    color: #7d9a7d;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(125, 154, 125, 0.3);
+  }
+  
+  /* 图片布局样式 */
+  .text-image-section .image-container {
+    position: relative;
+  }
+  
+  /* 单张图片 */
+  .text-image-section .layout-single .single-image {
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-single .single-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 双图片垂直布局 */
+  .text-image-section .layout-double-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .text-image-section .layout-double-vertical .image-item {
+    position: relative;
+  }
+  
+  .text-image-section .layout-double-vertical .double-image {
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-double-vertical .double-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  .text-image-section .layout-double-vertical .image-caption {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+    text-align: center;
+    color: #8b7d68;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+  
+  /* 双图片水平布局 */
+  .text-image-section .layout-double-horizontal {
+    display: flex;
+    gap: 1.5rem;
+  }
+  
+  .text-image-section .layout-double-horizontal .double-image {
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-double-horizontal .double-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 双图片垂直偏移布局 */
+  .text-image-section .layout-double-vertical-offset {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  
+  .text-image-section .layout-double-vertical-offset .image-item:first-child {
+    margin-top: 0;
+  }
+  
+  .text-image-section .layout-double-vertical-offset .image-item:last-child {
+    margin-top: 3rem;
+  }
+  
+  .text-image-section .layout-double-vertical-offset .double-image {
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-double-vertical-offset .double-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 双图片大小布局 */
+  .text-image-section .layout-double-with-small {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  
+  .text-image-section .layout-double-with-small .image-item:first-child {
+    flex: 2;
+  }
+  
+  .text-image-section .layout-double-with-small .image-item:last-child {
+    flex: 1;
+    margin-top: 2rem;
+  }
+  
+  .text-image-section .layout-double-with-small .double-image {
+    width: 100%;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-double-with-small .double-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 三张图片布局 */
+  .text-image-section .layout-triple {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  .text-image-section .layout-triple .image-item:first-child {
+    grid-row: 1 / 3;
+  }
+  
+  .text-image-section .layout-triple .triple-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .text-image-section .layout-triple .triple-image:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 1024px) {
+    .text-image-section .content-wrapper {
+      flex-direction: column;
+      gap: 2rem;
+    }
+    
+    .text-image-section .text-module,
+    .text-image-section .image-module {
+      max-width: 100%;
+    }
+    
+    .text-image-section .main-title {
+      font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .text-image-section {
+      padding: 3rem 1rem;
+    }
+    
+    .text-image-section .content-wrapper {
+      gap: 1.5rem;
+    }
+    
+    .text-image-section .main-title {
+      font-size: 1.75rem;
+    }
+    
+    .text-image-section .content-text {
+      font-size: 1rem;
+    }
+    
+    .text-image-section .layout-double-horizontal,
+    .text-image-section .layout-double-vertical-offset,
+    .text-image-section .layout-double-with-small {
+      flex-direction: column;
+    }
+    
+    .text-image-section .layout-double-vertical-offset .image-item:last-child,
+    .text-image-section .layout-double-with-small .image-item:last-child {
+      margin-top: 0;
+    }
+    
+    .text-image-section .layout-triple {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    
+    .text-image-section .layout-triple .image-item:first-child {
+      grid-row: auto;
+    }
+  }
+</style>
+
+<section class="text-image-section">
+  <div class="container">
+    <div class="content-wrapper {{ section.settings.text_position }}">
+      <!-- 文本模块 -->
+      <div class="text-module">
+        {% if section.settings.super_title != blank %}
+          <div class="super-title">{{ section.settings.super_title }}</div>
+        {% endif %}
+        
+        {% if section.settings.main_title != blank %}
+          <h2 class="main-title">{{ section.settings.main_title }}</h2>
+        {% endif %}
+        
+        {% if section.settings.content_text != blank %}
+          <div class="content-text">
+            {{ section.settings.content_text }}
+          </div>
+        {% endif %}
+        
+        {% if section.settings.button_text != blank and section.settings.button_url != blank %}
+          <a href="{{ section.settings.button_url }}" class="cta-button">
+            {{ section.settings.button_text }}
+          </a>
+        {% endif %}
+      </div>
+      
+      <!-- 图片模块 -->
+      <div class="image-module">
+        <div class="image-container">
+          {% assign image_count = 0 %}
+          {% if section.settings.image_1 %}
+            {% assign image_count = image_count | plus: 1 %}
+          {% endif %}
+          {% if section.settings.image_2 %}
+            {% assign image_count = image_count | plus: 1 %}
+          {% endif %}
+          {% if section.settings.image_3 %}
+            {% assign image_count = image_count | plus: 1 %}
+          {% endif %}
+          
+          {% if image_count == 1 %}
+            <!-- 单张图片 -->
+            <div class="layout-single">
+              {% if section.settings.image_1 %}
+                <img 
+                  src="{{ section.settings.image_1 | image_url: width: 800 }}" 
+                  alt="{{ section.settings.image_1_alt | default: 'Image' }}"
+                  class="single-image"
+                  loading="lazy"
+                >
+              {% endif %}
+            </div>
+            
+          {% elsif image_count == 2 %}
+            <!-- 双张图片 -->
+            <div class="layout-{{ section.settings.double_layout }}">
+              <div class="image-item">
+                <img 
+                  src="{{ section.settings.image_1 | image_url: width: 600 }}" 
+                  alt="{{ section.settings.image_1_alt | default: 'Image 1' }}"
+                  class="double-image"
+                  loading="lazy"
+                >
+                {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
+                  <div class="image-caption">{{ section.settings.image_1_caption }}</div>
+                {% endif %}
+              </div>
+              
+              <div class="image-item">
+                <img 
+                  src="{{ section.settings.image_2 | image_url: width: 600 }}" 
+                  alt="{{ section.settings.image_2_alt | default: 'Image 2' }}"
+                  class="double-image"
+                  loading="lazy"
+                >
+                {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
+                  <div class="image-caption">{{ section.settings.image_2_caption }}</div>
+                {% endif %}
+              </div>
+            </div>
+            
+          {% elsif image_count == 3 %}
+            <!-- 三张图片 -->
+            <div class="layout-triple">
+              <div class="image-item">
+                <img 
+                  src="{{ section.settings.image_1 | image_url: width: 600 }}" 
+                  alt="{{ section.settings.image_1_alt | default: 'Image 1' }}"
+                  class="triple-image"
+                  loading="lazy"
+                >
+              </div>
+              
+              <div class="image-item">
+                <img 
+                  src="{{ section.settings.image_2 | image_url: width: 400 }}" 
+                  alt="{{ section.settings.image_2_alt | default: 'Image 2' }}"
+                  class="triple-image"
+                  loading="lazy"
+                >
+              </div>
+              
+              <div class="image-item">
+                <img 
+                  src="{{ section.settings.image_3 | image_url: width: 400 }}" 
+                  alt="{{ section.settings.image_3_alt | default: 'Image 3' }}"
+                  class="triple-image"
+                  loading="lazy"
+                >
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Text and Image Section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text Position",
+      "options": [
+        {
+          "value": "text-left",
+          "label": "Text Left, Image Right"
+        },
+        {
+          "value": "text-right",
+          "label": "Text Right, Image Left"
+        }
+      ],
+      "default": "text-left"
+    },
+    {
+      "type": "header",
+      "content": "Text Content"
+    },
+    {
+      "type": "text",
+      "id": "super_title",
+      "label": "Super Title",
+      "info": "Small text above main title"
+    },
+    {
+      "type": "text",
+      "id": "main_title",
+      "label": "Main Title"
+    },
+    {
+      "type": "richtext",
+      "id": "content_text",
+      "label": "Content Text"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "text",
+      "id": "image_1_alt",
+      "label": "Image 1 Alt Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "text",
+      "id": "image_2_alt",
+      "label": "Image 2 Alt Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "text",
+      "id": "image_3_alt",
+      "label": "Image 3 Alt Text"
+    },
+    {
+      "type": "header",
+      "content": "Double Image Layout (when 2 images uploaded)"
+    },
+    {
+      "type": "select",
+      "id": "double_layout",
+      "label": "Double Image Layout",
+      "options": [
+        {
+          "value": "double_vertical",
+          "label": "Vertical Stack"
+        },
+        {
+          "value": "double_horizontal",
+          "label": "Horizontal Side by Side"
+        },
+        {
+          "value": "double_vertical_offset",
+          "label": "Vertical Offset"
+        },
+        {
+          "value": "double_with_small",
+          "label": "Large + Small"
+        }
+      ],
+      "default": "double_vertical",
+      "info": "Layout style when exactly 2 images are uploaded"
+    },
+    {
+      "type": "header",
+      "content": "Image Captions (for Vertical Layout only)"
+    },
+    {
+      "type": "text",
+      "id": "image_1_caption",
+      "label": "Image 1 Caption",
+      "info": "Only shown in vertical layout"
+    },
+    {
+      "type": "text",
+      "id": "image_2_caption",
+      "label": "Image 2 Caption",
+      "info": "Only shown in vertical layout"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text and Image Section",
+      "settings": {
+        "super_title": "About Us",
+        "main_title": "Crafting Mindful Experiences",
+        "content_text": "<p>We believe in creating products that bring peace and mindfulness to your daily life. Every piece is carefully crafted with attention to detail and respect for traditional techniques.</p>",
+        "button_text": "Learn More",
+        "text_position": "text-left",
+        "double_layout": "double_vertical"
+      }
+    }
+  ]
+}
+{% endschema %}
