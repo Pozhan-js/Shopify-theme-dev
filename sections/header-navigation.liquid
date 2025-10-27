@@ -1362,15 +1362,7 @@
       width: 201px;
       height: 57px;
       object-fit: contain;
-      image-rendering: -webkit-optimize-contrast;
-      image-rendering: crisp-edges;
-      image-rendering: pixelated;
-      -ms-interpolation-mode: nearest-neighbor;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-      will-change: transform;
+      image-rendering: auto;
     }
 
     .nav-item {
@@ -1456,23 +1448,11 @@
           <a href="{{ routes.root_url }}">
             {% if section.settings.logoimage %}
               <div class="logo-image">
-                {% comment %} 使用超高分辨率的图片以确保在1920px下清晰显示 {% endcomment %}
-                {% assign logosize_display = section.settings.logosize | default: 48 %}
-                {% assign logosize_2x = logosize_display | times: 2 %}
-                {% assign logosize_3x = logosize_display | times: 3 %}
-                {% assign logosize_4x = logosize_display | times: 4 %}
-                {% assign logosize_6x = logosize_display | times: 6 %}
-                {% assign logosize_8x = logosize_display | times: 8 %}
+                {% comment %} 使用原始尺寸图片确保最佳清晰度 {% endcomment %}
                 <img
-                  src="{{ section.settings.logoimage | image_url: width: logosize_8x }}"
+                  src="{{ section.settings.logoimage | image_url }}"
                   alt="{{ section.settings.sitename | default: shop.name }}"
-                  style="object-fit: contain; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; image-rendering: pixelated; -ms-interpolation-mode: nearest-neighbor;"
-                  srcset="{{ section.settings.logoimage | image_url: width: logosize_display }} 1x, 
-                          {{ section.settings.logoimage | image_url: width: logosize_2x }} 1.5x,
-                          {{ section.settings.logoimage | image_url: width: logosize_3x }} 2x, 
-                          {{ section.settings.logoimage | image_url: width: logosize_4x }} 2.5x,
-                          {{ section.settings.logoimage | image_url: width: logosize_6x }} 3x,
-                          {{ section.settings.logoimage | image_url: width: logosize_8x }} 4x">
+                  style="object-fit: contain;">
               </div>
             {% else %}
               <div class="logo-bg">
