@@ -1,21 +1,24 @@
 {% comment %}
   ===================================================================
-  Section: 图文模块 - 图片在标题下方（精简定制版）
+  Section: 图文模块 - 精简纯净版
   功能：
     - 大标题 + 装饰横线
     - 标题1 → 图片1（下方）
     - 标题2 → 内容 → 图片2（下方）
     - 支持 desktop / mobile 双图上传
-    - 图片展示宽度可设置百分比
-    - 不提供字体大小设置
+    - 图片宽度 & 高度可设百分比
+    - 图片自动居中
+    - 容器最大宽度 80rem
+    - 无背景颜色配置
   ===================================================================
 {% endcomment %}
 
 <div class="image-below-title-section"
      style="padding: {{ section.settings.padding_top }}px {{ section.settings.padding_sides }}px {{ section.settings.padding_bottom }}px;
-            background-color: {{ section.settings.bg_color }};
             font-family: 'Helvetica Neue', Arial, sans-serif; color: #333;">
-  <div class="container" style="max-width: 1200px; margin: 0 auto;">
+  
+  <!-- 主容器：最大宽度 80rem，居中 -->
+  <div class="container" style="max-width: 80rem; margin: 0 auto; padding: 0 20px;">
 
     <!-- 大标题 -->
     {%- if section.settings.main_title != blank -%}
@@ -47,19 +50,33 @@
         {{ section.settings.title_1 }}
       </h2>
 
-      <div class="image-wrapper" style="margin: 0 auto;">
+      <div class="image-wrapper" style="text-align: center;">
         <!-- Desktop 图片 -->
         <img src="{{ section.settings.image1_desktop | img_url: '1024x' }}"
              alt="{{ section.settings.image1_alt }}"
              class="image-desktop"
-             style="width: {{ section.settings.image1_width }}%; max-width: 100%; height: auto; display: block; border-radius: 8px;"
+             style="
+               width: {{ section.settings.image1_width }}%;
+               height: {{ section.settings.image1_height }}%;
+               max-width: 100%;
+               object-fit: cover;
+               display: block;
+               border-radius: 8px;
+               margin: 0 auto;"
              {% if section.settings.image1_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
 
         <!-- Mobile 图片 -->
         <img src="{{ section.settings.image1_mobile | img_url: '600x' }}"
              alt="{{ section.settings.image1_alt }}"
              class="image-mobile"
-             style="width: {{ section.settings.image1_width }}%; max-width: 100%; height: auto; display: none; border-radius: 8px;"
+             style="
+               width: {{ section.settings.image1_width }}%;
+               height: {{ section.settings.image1_height }}%;
+               max-width: 100%;
+               object-fit: cover;
+               display: none;
+               border-radius: 8px;
+               margin: 0 auto;"
              {% if section.settings.image1_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
       </div>
     </div>
@@ -85,19 +102,33 @@
         {{ section.settings.content_text }}
       </div>
 
-      <div class="image-wrapper" style="margin: 0 auto;">
+      <div class="image-wrapper" style="text-align: center;">
         <!-- Desktop 图片 -->
         <img src="{{ section.settings.image2_desktop | img_url: '1024x' }}"
              alt="{{ section.settings.image2_alt }}"
              class="image-desktop"
-             style="width: {{ section.settings.image2_width }}%; max-width: 100%; height: auto; display: block; border-radius: 8px;"
+             style="
+               width: {{ section.settings.image2_width }}%;
+               height: {{ section.settings.image2_height }}%;
+               max-width: 100%;
+               object-fit: cover;
+               display: block;
+               border-radius: 8px;
+               margin: 0 auto;"
              {% if section.settings.image2_desktop_loading == 'lazy' %}loading="lazy"{% endif %}>
 
         <!-- Mobile 图片 -->
         <img src="{{ section.settings.image2_mobile | img_url: '600x' }}"
              alt="{{ section.settings.image2_alt }}"
              class="image-mobile"
-             style="width: {{ section.settings.image2_width }}%; max-width: 100%; height: auto; display: none; border-radius: 8px;"
+             style="
+               width: {{ section.settings.image2_width }}%;
+               height: {{ section.settings.image2_height }}%;
+               max-width: 100%;
+               object-fit: cover;
+               display: none;
+               border-radius: 8px;
+               margin: 0 auto;"
              {% if section.settings.image2_mobile_loading == 'lazy' %}loading="lazy"{% endif %}>
       </div>
     </div>
@@ -127,7 +158,7 @@
 
 {% schema %}
 {
-  "name": "图文模块 - 精简定制版",
+  "name": "图文模块 - 纯净版",
   "tag": "section",
   "class": "index-section",
   "settings": [
@@ -156,13 +187,6 @@
     },
 
     {
-      "type": "color",
-      "id": "bg_color",
-      "label": "背景颜色",
-      "default": "#ffffff"
-    },
-
-    {
       "type": "header",
       "content": "第一部分：标题1 + 图片1"
     },
@@ -179,6 +203,16 @@
       "min": 50,
       "max": 100,
       "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "image1_height",
+      "label": "图片1 显示高度",
+      "min": 50,
+      "max": 200,
+      "step": 10,
       "unit": "%",
       "default": 100
     },
@@ -257,6 +291,16 @@
       "default": 100
     },
     {
+      "type": "range",
+      "id": "image2_height",
+      "label": "图片2 显示高度",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "%",
+      "default": 100
+    },
+    {
       "type": "image_picker",
       "id": "image2_desktop",
       "label": "图片2 - 桌面端"
@@ -330,7 +374,7 @@
   ],
   "presets": [
     {
-      "name": "精简图文模块",
+      "name": "纯净图文模块",
       "category": "内容"
     }
   ]
