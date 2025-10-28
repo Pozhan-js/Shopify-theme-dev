@@ -1,0 +1,354 @@
+{% schema %}
+{
+  "name": "Product Detail",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Detail"
+    }
+  ]
+}
+{% endschema %}
+
+{% assign product = section.settings.product %}
+
+<style>
+  .product-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+
+  .product-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .product-image {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    background: #f5f5f5;
+  }
+
+  .product-info {
+    padding: 20px 0;
+  }
+
+  .product-title {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .product-price {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+
+  .product-description {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .description-more {
+    color: #999;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .size-selector {
+    margin: 30px 0;
+  }
+
+  .size-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .size-button {
+    padding: 12px 24px;
+    border: 2px solid #000;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .size-button.selected {
+    background: #000;
+    color: #fff;
+  }
+
+  .size-button:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  .add-to-cart-btn {
+    width: 100%;
+    max-width: 200px;
+    padding: 16px 32px;
+    background: #000;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    transition: background 0.3s;
+  }
+
+  .add-to-cart-btn:hover {
+    background: #333;
+  }
+
+  .product-details-section {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+
+  .detail-item {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 0;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .detail-toggle {
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .detail-content {
+    padding-top: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  .detail-content p {
+    margin-bottom: 10px;
+  }
+
+  .delivery-option {
+    margin-bottom: 15px;
+  }
+
+  .delivery-option strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .more-links {
+    margin-top: 30px;
+  }
+
+  .more-links p {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .more-links a {
+    color: #00b300;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .more-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 968px) {
+    .product-detail-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .product-gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .product-title {
+      font-size: 20px;
+    }
+
+    .product-price {
+      font-size: 24px;
+    }
+
+    .size-buttons {
+      gap: 8px;
+    }
+
+    .size-button {
+      padding: 10px 20px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<div class="product-detail-container">
+  <div class="product-gallery">
+    {% if product.images.size > 0 %}
+      {% for image in product.images limit: 4 %}
+        <img src="{{ image | img_url: '800x' }}" alt="{{ product.title }}" class="product-image">
+      {% endfor %}
+    {% else %}
+      <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800" alt="Product" class="product-image">
+      <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800" alt="Product" class="product-image">
+      <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800" alt="Product" class="product-image">
+      <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800" alt="Product" class="product-image">
+    {% endif %}
+  </div>
+
+  <div class="product-info">
+    <h1 class="product-title">{{ product.title | default: "TRÈS BIEN X CHAMPION REVERSE WEAVE ARCH LOGO HOODIE BLACK" }}</h1>
+    
+    <div class="product-price">€{{ product.price | money_without_currency | default: "112" }}</div>
+
+    <div class="product-description">
+      {{ product.description | default: "Hooded sweatshirt from Champion in collaboration with TRÈS BIEN. Made from soft, durable cotton jersey with a relaxed fit and dropped shoulders. Features a" }}
+      <span class="description-more">More</span>
+    </div>
+
+    <div class="size-selector">
+      <div class="size-buttons">
+        {% if product.variants.size > 0 %}
+          {% for variant in product.variants %}
+            <button class="size-button" data-variant-id="{{ variant.id }}">
+              {{ variant.title }}
+            </button>
+          {% endfor %}
+        {% else %}
+          <button class="size-button selected">SMALL</button>
+          <button class="size-button">MEDIUM</button>
+          <button class="size-button">LARGE</button>
+          <button class="size-button">X-LARGE</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <button class="add-to-cart-btn">ADD TO CART</button>
+
+    <div class="product-details-section">
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Details</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          <p>Navy hoodie with purple print. Made from 100% cotton.</p>
+          <p><strong>ART. NO:</strong> 220705-KK001-TB</p>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Size & fit</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          <p>Relaxed fit. Model wears a size M and measures 184 cm with a 79 cm chest.</p>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Delivery</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          <div class="delivery-option">
+            <strong>UPS Standard - €18 - €35</strong>
+            <p>5-10 days</p>
+          </div>
+          <div class="delivery-option">
+            <strong>UPS Express - €35 - €50</strong>
+            <p>2-4 working days</p>
+          </div>
+          <p>Orders shipped outside the EU might have import duties, VAT, or handling fees added when they arrive. These are set locally and not included in your purchase price. See details <a href="#">here</a>.</p>
+          <p>Goods will be dispatched and shipped on and during regular working days.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="more-links">
+      <p>More from <a href="#">Champion</a></p>
+      <p>More <a href="#">Hooded sweatshirts</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Size selection
+    const sizeButtons = document.querySelectorAll('.size-button');
+    sizeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        sizeButtons.forEach(btn => btn.classList.remove('selected'));
+        this.classList.add('selected');
+      });
+    });
+
+    // Detail toggles
+    const detailHeaders = document.querySelectorAll('.detail-header');
+    detailHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const toggle = this.querySelector('.detail-toggle');
+        
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          toggle.textContent = '−';
+        } else {
+          content.style.display = 'none';
+          toggle.textContent = '+';
+        }
+      });
+    });
+
+    // Add to cart
+    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+    addToCartBtn.addEventListener('click', function() {
+      const selectedSize = document.querySelector('.size-button.selected');
+      if (selectedSize) {
+        const variantId = selectedSize.dataset.variantId;
+        // Add to cart logic here
+        console.log('Adding to cart:', variantId);
+      }
+    });
+  });
+</script>
