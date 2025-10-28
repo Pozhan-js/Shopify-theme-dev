@@ -316,23 +316,23 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // 从URL获取产品信息
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('product_id');
+    // 从URL获取产品信息 - 支持产品句柄
+    const path = window.location.pathname;
+    const productHandle = path.split('/').pop();
     
-    if (productId) {
-      fetchProductData(productId);
+    if (productHandle && productHandle !== 'products') {
+      fetchProductByHandle(productHandle);
     }
 
-    // 获取产品数据
-    function fetchProductData(productId) {
-      fetch(`/products/${productId}.js`)
+    // 通过产品句柄获取产品数据
+    function fetchProductByHandle(handle) {
+      fetch(`/products/${handle}.js`)
         .then(response => response.json())
         .then(product => {
           updateProductDisplay(product);
         })
         .catch(error => {
-          console.error('Error fetching product:', error);
+          console.error('Error fetching product by handle:', error);
         });
     }
 
