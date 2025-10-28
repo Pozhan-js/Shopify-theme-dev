@@ -48,7 +48,7 @@
   {% endfor %}
 
   .liquid-code-generator-section-{{ section.id }} .liquid-code-generator-module-card:hover {
-    transform: scale({{ section.settings.hover_scale | default: '1.05' }});
+    /* 移除整体模块放大效果，只保留图片放大 */
   }
 
   .liquid-code-generator-section-{{ section.id }}
@@ -198,22 +198,24 @@
               class="liquid-code-generator-module-card"
               onclick="handleModuleClick('{{ block.settings.title | escape }}', '{{ block.id }}')"
               data-module-id="{{ block.id }}"
-              data-module-title="{{ block.settings.title | escape }}">
-
+              data-module-title="{{ block.settings.title | escape }}"
+            >
               <!-- 图片容器 -->
               {% if block.settings.image != blank %}
                 <div class="liquid-code-generator-module-image">
                   <img
                     src="{{ block.settings.image | img_url: '400x400' }}"
                     alt="{{ block.settings.title | escape }}"
-                    loading="lazy" />
+                    loading="lazy"
+                  >
                 </div>
               {% elsif block.settings.placeholder_image != blank %}
                 <div class="liquid-code-generator-module-image">
                   <img
                     src="{{ block.settings.placeholder_image }}"
                     alt="{{ block.settings.title | escape }}"
-                    loading="lazy" />
+                    loading="lazy"
+                  >
                 </div>
               {% endif %}
 
@@ -279,299 +281,299 @@
 </script>
 
 {% schema %}
-  {
-    "name": "Liquid 代码生成模块",
-    "tag": "section",
-    "class": "liquid-code-generator-section",
-    "settings": [
-      {
-        "type": "header",
-        "content": "布局设置"
-      },
-      {
-        "type": "color",
-        "id": "background_color",
-        "label": "背景颜色",
-        "default": "#F1F0EE"
-      },
-      {
-        "type": "text",
-        "id": "container_width",
-        "label": "容器最大宽度",
-        "default": "1200px",
-        "info": "支持px、%、rem等单位"
-      },
-      {
-        "type": "text",
-        "id": "section_padding",
-        "label": "区块内边距",
-        "default": "55px 0",
-        "info": "格式：上下 左右"
-      },
-      {
-        "type": "text",
-        "id": "module_gap",
-        "label": "模块间距",
-        "default": "24px"
-      },
-      {
-        "type": "text",
-        "id": "mobile_gap",
-        "label": "移动端模块间距",
-        "default": "16px"
-      },
-      {
-        "type": "header",
-        "content": "头部设置"
-      },
-      {
-        "type": "checkbox",
-        "id": "show_header",
-        "label": "显示头部",
-        "default": false
-      },
-      {
-        "type": "text",
-        "id": "header_title",
-        "label": "头部标题"
-      },
-      {
-        "type": "text",
-        "id": "header_subtitle",
-        "label": "头部副标题"
-      },
-      {
-        "type": "text",
-        "id": "header_title_size",
-        "label": "标题字体大小",
-        "default": "32px"
-      },
-      {
-        "type": "color",
-        "id": "header_title_color",
-        "label": "标题颜色",
-        "default": "#1f2937"
-      },
-      {
-        "type": "text",
-        "id": "header_subtitle_size",
-        "label": "副标题字体大小",
-        "default": "16px"
-      },
-      {
-        "type": "color",
-        "id": "header_subtitle_color",
-        "label": "副标题颜色",
-        "default": "#6b7280"
-      },
-      {
-        "type": "text",
-        "id": "header_padding",
-        "label": "头部内边距",
-        "default": "32px 0"
-      },
-      {
-        "type": "header",
-        "content": "样式设置"
-      },
-      {
-        "type": "text",
-        "id": "title_font_size",
-        "label": "模块标题字体大小",
-        "default": "36px"
-      },
-      {
-        "type": "select",
-        "id": "title_font_weight",
-        "label": "模块标题字体粗细",
-        "options": [
-          {
-            "value": "400",
-            "label": "正常"
-          },
-          {
-            "value": "500",
-            "label": "中等"
-          },
-          {
-            "value": "600",
-            "label": "半粗"
-          },
-          {
-            "value": "700",
-            "label": "粗体"
+{
+  "name": "Liquid 代码生成模块",
+  "tag": "section",
+  "class": "liquid-code-generator-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#F1F0EE"
+    },
+    {
+      "type": "text",
+      "id": "container_width",
+      "label": "容器最大宽度",
+      "default": "1200px",
+      "info": "支持px、%、rem等单位"
+    },
+    {
+      "type": "text",
+      "id": "section_padding",
+      "label": "区块内边距",
+      "default": "55px 0",
+      "info": "格式：上下 左右"
+    },
+    {
+      "type": "text",
+      "id": "module_gap",
+      "label": "模块间距",
+      "default": "24px"
+    },
+    {
+      "type": "text",
+      "id": "mobile_gap",
+      "label": "移动端模块间距",
+      "default": "16px"
+    },
+    {
+      "type": "header",
+      "content": "头部设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_header",
+      "label": "显示头部",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "header_title",
+      "label": "头部标题"
+    },
+    {
+      "type": "text",
+      "id": "header_subtitle",
+      "label": "头部副标题"
+    },
+    {
+      "type": "text",
+      "id": "header_title_size",
+      "label": "标题字体大小",
+      "default": "32px"
+    },
+    {
+      "type": "color",
+      "id": "header_title_color",
+      "label": "标题颜色",
+      "default": "#1f2937"
+    },
+    {
+      "type": "text",
+      "id": "header_subtitle_size",
+      "label": "副标题字体大小",
+      "default": "16px"
+    },
+    {
+      "type": "color",
+      "id": "header_subtitle_color",
+      "label": "副标题颜色",
+      "default": "#6b7280"
+    },
+    {
+      "type": "text",
+      "id": "header_padding",
+      "label": "头部内边距",
+      "default": "32px 0"
+    },
+    {
+      "type": "header",
+      "content": "样式设置"
+    },
+    {
+      "type": "text",
+      "id": "title_font_size",
+      "label": "模块标题字体大小",
+      "default": "36px"
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "模块标题字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "正常"
+        },
+        {
+          "value": "500",
+          "label": "中等"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "粗体"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "模块标题颜色",
+      "default": "#161616"
+    },
+    {
+      "type": "text",
+      "id": "description_font_size",
+      "label": "描述字体大小",
+      "default": "16px"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "描述文字颜色",
+      "default": "rgba(22, 22, 22, 0.5)"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "图标颜色",
+      "default": "#4b5563"
+    },
+    {
+      "type": "text",
+      "id": "icon_size",
+      "label": "图标大小",
+      "default": "18px"
+    },
+    {
+      "type": "text",
+      "id": "title_fixed_height",
+      "label": "标题区域固定高度",
+      "default": "56px",
+      "info": "确保所有模块标题高度一致"
+    },
+    {
+      "type": "header",
+      "content": "交互效果"
+    },
+    {
+      "type": "text",
+      "id": "hover_scale",
+      "label": "悬停放大比例",
+      "default": "1.05",
+      "info": "1.0为不放大，1.1为放大10%"
+    },
+    {
+      "type": "text",
+      "id": "image_hover_scale",
+      "label": "图片悬停放大比例",
+      "default": "1.1"
+    },
+    {
+      "type": "text",
+      "id": "image_container_hover_scale",
+      "label": "图片容器悬停放大比例",
+      "default": "1.02",
+      "info": "图片容器整体的轻微放大效果"
+    },
+    {
+      "type": "text",
+      "id": "image_border_radius",
+      "label": "图片圆角大小",
+      "default": "16px"
+    },
+    {
+      "type": "range",
+      "id": "animation_delay",
+      "label": "动画延迟间隔(毫秒)",
+      "min": 0,
+      "max": 300,
+      "step": 50,
+      "default": 100
+    }
+  ],
+  "blocks": [
+    {
+      "type": "module_card",
+      "name": "模块卡片",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "模块标题",
+          "default": "模块标题"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "模块描述",
+          "default": "模块描述内容"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "模块图片"
+        },
+        {
+          "type": "url",
+          "id": "placeholder_image",
+          "label": "占位图片URL",
+          "info": "当未上传图片时使用"
+        },
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "FontAwesome 图标类名",
+          "placeholder": "fas fa-code",
+          "info": "例如：fas fa-code, fas fa-database"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "点击跳转链接"
+        },
+        {
+          "type": "checkbox",
+          "id": "open_in_new_tab",
+          "label": "新窗口打开",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Liquid 代码生成模块",
+      "blocks": [
+        {
+          "type": "module_card",
+          "settings": {
+            "title": "模板解析器",
+            "description": "智能解析Liquid模板语法，支持变量、过滤器、标签等完整语法结构，提供语法高亮和错误检测功能。",
+            "placeholder_image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+            "icon": "fas fa-code"
           }
-        ],
-        "default": "500"
-      },
-      {
-        "type": "color",
-        "id": "title_color",
-        "label": "模块标题颜色",
-        "default": "#161616"
-      },
-      {
-        "type": "text",
-        "id": "description_font_size",
-        "label": "描述字体大小",
-        "default": "16px"
-      },
-      {
-        "type": "color",
-        "id": "description_color",
-        "label": "描述文字颜色",
-        "default": "rgba(22, 22, 22, 0.5)"
-      },
-      {
-        "type": "color",
-        "id": "icon_color",
-        "label": "图标颜色",
-        "default": "#4b5563"
-      },
-      {
-        "type": "text",
-        "id": "icon_size",
-        "label": "图标大小",
-        "default": "18px"
-      },
-      {
-        "type": "text",
-        "id": "title_fixed_height",
-        "label": "标题区域固定高度",
-        "default": "56px",
-        "info": "确保所有模块标题高度一致"
-      },
-      {
-        "type": "header",
-        "content": "交互效果"
-      },
-      {
-        "type": "text",
-        "id": "hover_scale",
-        "label": "悬停放大比例",
-        "default": "1.05",
-        "info": "1.0为不放大，1.1为放大10%"
-      },
-      {
-        "type": "text",
-        "id": "image_hover_scale",
-        "label": "图片悬停放大比例",
-        "default": "1.1"
-      },
-      {
-        "type": "text",
-        "id": "image_container_hover_scale",
-        "label": "图片容器悬停放大比例",
-        "default": "1.02",
-        "info": "图片容器整体的轻微放大效果"
-      },
-      {
-        "type": "text",
-        "id": "image_border_radius",
-        "label": "图片圆角大小",
-        "default": "16px"
-      },
-      {
-        "type": "range",
-        "id": "animation_delay",
-        "label": "动画延迟间隔(毫秒)",
-        "min": 0,
-        "max": 300,
-        "step": 50,
-        "default": 100
-      }
-    ],
-    "blocks": [
-      {
-        "type": "module_card",
-        "name": "模块卡片",
-        "settings": [
-          {
-            "type": "text",
-            "id": "title",
-            "label": "模块标题",
-            "default": "模块标题"
-          },
-          {
-            "type": "textarea",
-            "id": "description",
-            "label": "模块描述",
-            "default": "模块描述内容"
-          },
-          {
-            "type": "image_picker",
-            "id": "image",
-            "label": "模块图片"
-          },
-          {
-            "type": "url",
-            "id": "placeholder_image",
-            "label": "占位图片URL",
-            "info": "当未上传图片时使用"
-          },
-          {
-            "type": "text",
-            "id": "icon",
-            "label": "FontAwesome 图标类名",
-            "placeholder": "fas fa-code",
-            "info": "例如：fas fa-code, fas fa-database"
-          },
-          {
-            "type": "url",
-            "id": "link_url",
-            "label": "点击跳转链接"
-          },
-          {
-            "type": "checkbox",
-            "id": "open_in_new_tab",
-            "label": "新窗口打开",
-            "default": false
+        },
+        {
+          "type": "module_card",
+          "settings": {
+            "title": "数据绑定引擎",
+            "description": "高效的数据绑定机制，支持复杂对象、数组操作，实时数据更新，让模板与数据无缝对接。",
+            "placeholder_image": "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop&crop=center",
+            "icon": "fas fa-database"
           }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "Liquid 代码生成模块",
-        "blocks": [
-          {
-            "type": "module_card",
-            "settings": {
-              "title": "模板解析器",
-              "description": "智能解析Liquid模板语法，支持变量、过滤器、标签等完整语法结构，提供语法高亮和错误检测功能。",
-              "placeholder_image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
-              "icon": "fas fa-code"
-            }
-          },
-          {
-            "type": "module_card",
-            "settings": {
-              "title": "数据绑定引擎",
-              "description": "高效的数据绑定机制，支持复杂对象、数组操作，实时数据更新，让模板与数据无缝对接。",
-              "placeholder_image": "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=300&fit=crop&crop=center",
-              "icon": "fas fa-database"
-            }
-          },
-          {
-            "type": "module_card",
-            "settings": {
-              "title": "组件生成器",
-              "description": "基于模板快速生成可复用组件，支持自定义属性、事件绑定，大幅提升开发效率和代码质量。",
-              "placeholder_image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center",
-              "icon": "fas fa-puzzle-piece"
-            }
-          },
-          {
-            "type": "module_card",
-            "settings": {
-              "title": "输出优化器",
-              "description": "智能代码优化和压缩，移除冗余代码，优化性能，生成生产就绪的高质量代码输出。",
-              "placeholder_image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=300&fit=crop&crop=center",
-              "icon": "fas fa-rocket"
-            }
+        },
+        {
+          "type": "module_card",
+          "settings": {
+            "title": "组件生成器",
+            "description": "基于模板快速生成可复用组件，支持自定义属性、事件绑定，大幅提升开发效率和代码质量。",
+            "placeholder_image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center",
+            "icon": "fas fa-puzzle-piece"
           }
-        ]
-      }
-    ]
-  }
+        },
+        {
+          "type": "module_card",
+          "settings": {
+            "title": "输出优化器",
+            "description": "智能代码优化和压缩，移除冗余代码，优化性能，生成生产就绪的高质量代码输出。",
+            "placeholder_image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=300&fit=crop&crop=center",
+            "icon": "fas fa-rocket"
+          }
+        }
+      ]
+    }
+  ]
+}
 {% endschema %}
