@@ -120,6 +120,17 @@
   flex-direction: column;
   gap: 0;
 }
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: opacity 0.3s ease;
+}
+.product-link:hover {
+  opacity: 0.8;
+}
 .product-image-container {
   position: relative;
 }
@@ -223,16 +234,18 @@ h3.product-title {
 <div class="product-grid">
   {% for product in selected_collection.products %}
     <div class="product-card">
-      <div class="product-image-container">
-        {% for image in product.images %}
-          <img class="product-image" src="{{ image | img_url: '400x' }}" alt="{{ product.title }}" width="400" height="400" loading="lazy" {% unless forloop.first %}style="display:none"{% endunless %}>
-        {% endfor %}
-        <button class="image-nav prev" onclick="prevImage(this)">❮</button>
-        <button class="image-nav next" onclick="nextImage(this)">❯</button>
-      </div>
+      <a href="{{ product.url }}" class="product-link">
+        <div class="product-image-container">
+          {% for image in product.images %}
+            <img class="product-image" src="{{ image | img_url: '400x' }}" alt="{{ product.title }}" width="400" height="400" loading="lazy" {% unless forloop.first %}style="display:none"{% endunless %}>
+          {% endfor %}
+          <button class="image-nav prev" onclick="prevImage(event, this)">❮</button>
+          <button class="image-nav next" onclick="nextImage(event, this)">❯</button>
+        </div>
 
-      <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
-      <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
+        <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
+        <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
+      </a>
     </div>
   {% endfor %}
 
@@ -258,7 +271,10 @@ h3.product-title {
     sidebar.classList.toggle('active');
   }
 
-  function prevImage(button) {
+  function prevImage(event, button) {
+    event.preventDefault();
+    event.stopPropagation();
+    
     const container = button.parentNode;
     const images = container.querySelectorAll('img');
     const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
@@ -268,7 +284,10 @@ h3.product-title {
     images[prevIndex].style.display = 'block';
   }
 
-  function nextImage(button) {
+  function nextImage(event, button) {
+    event.preventDefault();
+    event.stopPropagation();
+    
     const container = button.parentNode;
     const images = container.querySelectorAll('img');
     const currentIndex = Array.from(images).findIndex(img => img.style.display !== 'none');
