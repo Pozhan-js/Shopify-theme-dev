@@ -1,0 +1,119 @@
+{%- liquid
+  assign title = block.settings.title | default: 'GET THE SET'
+  assign products = block.settings.products
+  assign price = block.settings.price | default: '$90.00'
+-%}
+
+<div class="product-set-container" data-product-set>
+  <h2 class="product-set-title">{{ title }}</h2>
+
+  <div class="product-set-grid">
+    {% for product in products %}
+      <div class="product-set-item" data-product-id="{{ product.id }}">
+        {% render 'product-card', product: product %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="product-set-footer">
+    <span class="product-set-price">{{ price }}</span>
+    <button class="product-set-button">GET THE SET</button>
+  </div>
+</div>
+
+<style>
+  .product-set-container {
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .product-set-title {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text);
+  }
+
+  .product-set-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .product-set-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .product-set-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .product-set-button {
+    padding: 0.75rem 1.5rem;
+    background: var(--color-button);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .product-set-button:hover {
+    opacity: 0.9;
+  }
+</style>
+
+<script>
+  class ProductSetSwitcher extends HTMLElement {
+    connectedCallback() {
+      this.items = this.querySelectorAll('.product-set-item');
+      this.button = this.querySelector('.product-set-button');
+
+      this.items.forEach((item) => {
+        item.addEventListener('click', () => this.selectProduct(item));
+      });
+    }
+
+    selectProduct(selectedItem) {
+      this.items.forEach((item) => {
+        item.classList.toggle('active', item === selectedItem);
+      });
+    }
+  }
+
+  customElements.define('product-set-switcher', ProductSetSwitcher);
+</script>
+
+{% schema %}
+{
+  "name": "产品套装切换器",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "标题",
+      "default": "GET THE SET"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "产品列表"
+    },
+    {
+      "type": "text",
+      "id": "price",
+      "label": "套装价格",
+      "default": "$90.00" 
+    }
+  ]
+}
+{% endschema %}
