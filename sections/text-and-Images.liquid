@@ -47,6 +47,7 @@
   .text-image-section .image-module {
     flex: 1;
     max-width: 50%;
+    display: flex;
   }
   
   .text-image-section .super-title {
@@ -84,6 +85,8 @@
   /* 图片布局样式 */
   .text-image-section .image-container {
     position: relative;
+    width: 100%;
+    height: 100%;
   }
   
   /* 响应式图片显示 */
@@ -95,125 +98,132 @@
     display: none;
   }
   
-  /* 单张图片 */
-  .text-image-section .layout-single .single-image {
-    width: 100%;
-    border-radius: 0.75rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  /* 所有图片通用样式 */
+  .text-image-section img {
+    border-radius: var(--global-border-radius);
     transition: all 0.3s ease;
   }
   
-  .text-image-section .layout-single .single-image:hover {
+  .text-image-section img:hover {
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
   
-  /* 双图片垂直布局 */
+  /* 单张图片 */
+  .text-image-section .layout-single {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .text-image-section .layout-single .single-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* 双图片垂直布局 - 左右排列 */
   .text-image-section .layout-double-vertical {
     display: flex;
-    flex-direction: column;
     gap: 1.5rem;
+    width: 100%;
+    height: 100%;
   }
   
   .text-image-section .layout-double-vertical .image-item {
-    position: relative;
+    flex: 1;
+    height: 100%;
   }
   
   .text-image-section .layout-double-vertical .double-image {
     width: 100%;
-    border-radius: 0.75rem;
+    height: 100%;
+    object-fit: cover;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
   }
   
-  .text-image-section .layout-double-vertical .double-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  }
-  
-  .text-image-section .layout-double-vertical .image-caption {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 1rem;
-    text-align: center;
-    color: #8b7d68;
-    font-size: 0.875rem;
-    line-height: 1.4;
-  }
-  
-  /* 双图片水平布局 */
+  /* 双图片水平布局 - 上下排列 */
   .text-image-section .layout-double-horizontal {
     display: flex;
+    flex-direction: column;
     gap: 1.5rem;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .text-image-section .layout-double-horizontal .image-item {
+    flex: 1;
+    width: 100%;
   }
   
   .text-image-section .layout-double-horizontal .double-image {
     width: 100%;
-    border-radius: 0.75rem;
+    height: 100%;
+    object-fit: cover;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
   }
   
-  .text-image-section .layout-double-horizontal .double-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* 双图片垂直偏移布局 */
+  /* 双图片垂直偏移布局 - 重叠效果 */
   .text-image-section .layout-double-vertical-offset {
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .text-image-section .layout-double-vertical-offset .image-item {
+    position: absolute;
+    width: 60%;
+    height: 100%;
   }
   
   .text-image-section .layout-double-vertical-offset .image-item:first-child {
-    margin-top: 0;
+    left: 0;
+    z-index: 1;
   }
   
   .text-image-section .layout-double-vertical-offset .image-item:last-child {
-    margin-top: 3rem;
+    right: 0;
+    top: -20px;
+    z-index: 2;
   }
   
   .text-image-section .layout-double-vertical-offset .double-image {
     width: 100%;
-    border-radius: 0.75rem;
+    height: 100%;
+    object-fit: cover;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
   }
   
-  .text-image-section .layout-double-vertical-offset .double-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* 双图片大小布局 */
+  /* 双图片大小布局 - 大小图重叠 */
   .text-image-section .layout-double-with-small {
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
   
   .text-image-section .layout-double-with-small .image-item:first-child {
-    flex: 2;
+    position: absolute;
+    width: 83.33333%;
+    height: 100%;
+    right: 0;
+    z-index: 1;
   }
   
   .text-image-section .layout-double-with-small .image-item:last-child {
-    flex: 1;
-    margin-top: 2rem;
+    position: absolute;
+    width: 34.2986111%;
+    height: 50%;
+    left: calc(83.33333% - 34.2986111% * 0.5);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
   }
   
   .text-image-section .layout-double-with-small .double-image {
     width: 100%;
-    border-radius: 0.75rem;
+    height: 100%;
+    object-fit: cover;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .text-image-section .layout-double-with-small .double-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
   
   /* 三张图片布局 */
@@ -222,6 +232,8 @@
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 1.5rem;
+    width: 100%;
+    height: 100%;
   }
   
   .text-image-section .layout-triple .image-item:first-child {
@@ -232,14 +244,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 0.75rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .text-image-section .layout-triple .triple-image:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
   
   /* 响应式设计 */
@@ -391,9 +396,6 @@
                     class="double-image"
                     loading="lazy"
                   >
-                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
-                    <div class="image-caption">{{ section.settings.image_1_caption }}</div>
-                  {% endif %}
                 </div>
                 
                 <div class="image-item">
@@ -402,9 +404,6 @@
                     class="double-image"
                     loading="lazy"
                   >
-                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
-                    <div class="image-caption">{{ section.settings.image_2_caption }}</div>
-                  {% endif %}
                 </div>
               </div>
               
@@ -464,7 +463,7 @@
               </div>
               
             {% elsif display_mobile_count == 2 %}
-              <!-- 双张图片 - 使用与desktop相同的布局 -->
+              <!-- 双张图片 -->
               <div class="layout-{{ section.settings.double_layout }}">
                 <div class="image-item">
                   {% if section.settings.mobile_image_1 %}
@@ -479,9 +478,6 @@
                       class="double-image"
                       loading="lazy"
                     >
-                  {% endif %}
-                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
-                    <div class="image-caption">{{ section.settings.image_1_caption }}</div>
                   {% endif %}
                 </div>
                 
@@ -499,14 +495,11 @@
                       loading="lazy"
                     >
                   {% endif %}
-                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
-                    <div class="image-caption">{{ section.settings.image_2_caption }}</div>
-                  {% endif %}
                 </div>
               </div>
               
             {% elsif display_mobile_count == 3 %}
-              <!-- 三张图片 - 使用与desktop相同的布局 -->
+              <!-- 三张图片 -->
               <div class="layout-triple">
                 <div class="image-item">
                   {% if section.settings.mobile_image_1 %}
@@ -691,39 +684,23 @@
       "options": [
         {
           "value": "double_vertical",
-          "label": "Vertical Stack"
+          "label": "Side by Side"
         },
         {
           "value": "double_horizontal",
-          "label": "Horizontal Side by Side"
+          "label": "Stacked"
         },
         {
           "value": "double_vertical_offset",
-          "label": "Vertical Offset"
+          "label": "Overlapped"
         },
         {
           "value": "double_with_small",
-          "label": "Large + Small"
+          "label": "Large with Small"
         }
       ],
       "default": "double_vertical",
       "info": "Layout style when exactly 2 images are uploaded"
-    },
-    {
-      "type": "header",
-      "content": "Image Captions (for Vertical Layout only)"
-    },
-    {
-      "type": "text",
-      "id": "image_1_caption",
-      "label": "Image 1 Caption",
-      "info": "Only shown in vertical layout"
-    },
-    {
-      "type": "text",
-      "id": "image_2_caption",
-      "label": "Image 2 Caption",
-      "info": "Only shown in vertical layout"
     }
   ],
   "presets": [
