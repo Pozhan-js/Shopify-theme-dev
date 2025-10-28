@@ -13,24 +13,29 @@
     <!-- 展品系列网格 -->
     <div class="exhibition-series-grid">
       {% assign series_limit = section.settings.series_limit | default: 12 %}
-      
+
       {% comment %} 创建自定义排序的系列数组 {% endcomment %}
       {% assign custom_handles_array = '' %}
-      
+
       {% comment %} 获取所有自定义系列配置 {% endcomment %}
       {% for block in section.blocks %}
         {% if block.type == 'series_config' and block.settings.collection_handle != blank %}
           {% comment %} 将输入的标识符转换为正确的handle格式 {% endcomment %}
-          {% assign input_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+          {% assign input_handle = block.settings.collection_handle
+            | strip
+            | downcase
+            | replace: ' ', '-'
+            | replace: '&', 'and'
+          %}
           {% assign custom_handles_array = custom_handles_array | append: input_handle %}
           {% unless forloop.last %}
             {% assign custom_handles_array = custom_handles_array | append: ',' %}
           {% endunless %}
         {% endif %}
       {% endfor %}
-      
+
       {% assign custom_handles = custom_handles_array | split: ',' %}
-      
+
       {% comment %} 按自定义顺序显示系列 {% endcomment %}
       {% if custom_handles.size > 0 %}
         {% for handle in custom_handles limit: series_limit %}
@@ -39,14 +44,19 @@
           {% unless collection %}
             {% comment %} 如果直接匹配失败，尝试通过标题匹配 {% endcomment %}
             {% for coll in collections %}
-              {% assign coll_handle_from_title = coll.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+              {% assign coll_handle_from_title = coll.title
+                | strip
+                | downcase
+                | replace: ' ', '-'
+                | replace: '&', 'and'
+              %}
               {% if coll_handle_from_title == handle %}
                 {% assign collection = coll %}
                 {% break %}
               {% endif %}
             {% endfor %}
           {% endunless %}
-          
+
           {% if collection and collection.handle != 'all' %}
             <div class="exhibition-series-card">
               <div class="exhibition-series-image">
@@ -87,8 +97,18 @@
                 {% assign custom_description = '' %}
                 {% for block in section.blocks %}
                   {% if block.type == 'series_config' %}
-                    {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                    {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
+                    {% assign block_handle = block.settings.collection_handle
+                      | strip
+                      | downcase
+                      | replace: ' ', '-'
+                      | replace: '&', 'and'
+                    %}
+                    {% assign collection_handle_from_title = collection.title
+                      | strip
+                      | downcase
+                      | replace: ' ', '-'
+                      | replace: '&', 'and'
+                    %}
                     {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
                       {% assign custom_title = block.settings.custom_title %}
                       {% assign custom_description = block.settings.custom_description %}
@@ -102,7 +122,7 @@
                 {% if display_title == blank %}
                   {% assign display_title = collection.title %}
                 {% endif %}
-                
+
                 {% if display_title != blank %}
                   <h3 class="exhibition-series-card-title">{{ display_title }}</h3>
                 {% endif %}
@@ -115,7 +135,12 @@
                     {% elsif collection.description != blank %}
                       {{ collection.description | strip_html | truncate: section.settings.description_length }}
                     {% else %}
-                      {{ section.settings.default_description | default: '探索这个精彩的系列，发现更多优质产品。' | strip_html | truncate: section.settings.description_length }}
+                      {{
+                        section.settings.default_description
+                        | default: '探索这个精彩的系列，发现更多优质产品。'
+                        | strip_html
+                        | truncate: section.settings.description_length
+                      }}
                     {% endif %}
                   </p>
                 {% endif %}
@@ -154,104 +179,119 @@
         {% for collection in collections limit: series_limit %}
           {% unless collection.handle == 'all' %}
             <div class="exhibition-series-card">
-            <div class="exhibition-series-image">
-              {% if collection.featured_image != blank %}
-                <img
-                  src="{{ collection.featured_image | img_url: '400x400' }}"
-                  alt="{{ collection.title }}"
-                  loading="lazy"
-                >
-              {% elsif collection.products.first.featured_image != blank %}
-                <img
-                  src="{{ collection.products.first.featured_image | img_url: '400x400' }}"
-                  alt="{{ collection.title }}"
-                  loading="lazy"
-                >
-              {% else %}
-                <div class="exhibition-series-placeholder-image">
-                  <svg
-                    width="100"
-                    height="100"
-                    viewBox="0 0 100 100"
-                    fill="none"
+              <div class="exhibition-series-image">
+                {% if collection.featured_image != blank %}
+                  <img
+                    src="{{ collection.featured_image | img_url: '400x400' }}"
+                    alt="{{ collection.title }}"
+                    loading="lazy"
                   >
-                    <rect
+                {% elsif collection.products.first.featured_image != blank %}
+                  <img
+                    src="{{ collection.products.first.featured_image | img_url: '400x400' }}"
+                    alt="{{ collection.title }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="exhibition-series-placeholder-image">
+                    <svg
                       width="100"
                       height="100"
-                      fill="#f5f5f5" />
-                    <path d="M30 40h40v20H30z" fill="#ddd" />
-                    <circle cx="40" cy="30" r="5" fill="#ddd" />
-                  </svg>
-                </div>
-              {% endif %}
-            </div>
-
-            <div class="exhibition-series-content">
-              {% comment %} 查找当前系列的自定义配置 {% endcomment %}
-              {% assign custom_title = '' %}
-              {% assign custom_description = '' %}
-              {% for block in section.blocks %}
-                {% if block.type == 'series_config' %}
-                  {% assign block_handle = block.settings.collection_handle | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                  {% assign collection_handle_from_title = collection.title | strip | downcase | replace: ' ', '-' | replace: '&', 'and' %}
-                  {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
-                    {% assign custom_title = block.settings.custom_title %}
-                    {% assign custom_description = block.settings.custom_description %}
-                    {% break %}
-                  {% endif %}
-                {% endif %}
-              {% endfor %}
-
-              {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
-              {% assign display_title = custom_title %}
-              {% if display_title == blank %}
-                {% assign display_title = collection.title %}
-              {% endif %}
-              
-              {% if display_title != blank %}
-                <h3 class="exhibition-series-card-title">{{ display_title }}</h3>
-              {% endif %}
-
-              {% if section.settings.show_description %}
-                <p class="exhibition-series-card-description">
-                  {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
-                  {% if custom_description != blank %}
-                    {{ custom_description | strip_html | truncate: section.settings.description_length }}
-                  {% elsif collection.description != blank %}
-                    {{ collection.description | strip_html | truncate: section.settings.description_length }}
-                  {% else %}
-                    {{ section.settings.default_description | default: '探索这个精彩的系列，发现更多优质产品。' | strip_html | truncate: section.settings.description_length }}
-                  {% endif %}
-                </p>
-              {% endif %}
-
-              {% if section.settings.show_learn_more %}
-                <div class="exhibition-series-action">
-                  <a href="{{ collection.url }}" class="exhibition-series-learn-more-btn">
-                    <svg
-                      class="exhibition-series-btn-arrow"
-                      viewBox="0 0 7.10229 10.7302"
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink"
-                      width="7.102295"
-                      height="10.730225"
+                      viewBox="0 0 100 100"
                       fill="none"
-                      customFrame="#000000"
                     >
-                      <path
-                        id="多边形 11"
-                        d="M-0.384728 5.68065L4.9804 -0.782841L10.3455 5.68065L9.57607 6.31935L4.59567 0.31935L4.9804 0L5.36513 0.31935L0.384728 6.31935L-0.384728 5.68065Z"
-                        fill="currentColor"
-                        fill-opacity="1"
-                        fill-rule="nonzero"
-                        transform="matrix(0,1,-1,0,6.31934,0.384705)" />
+                      <rect
+                        width="100"
+                        height="100"
+                        fill="#f5f5f5" />
+                      <path d="M30 40h40v20H30z" fill="#ddd" />
+                      <circle cx="40" cy="30" r="5" fill="#ddd" />
                     </svg>
-                    {{ section.settings.learn_more_text | default: '查看系列' }}
-                  </a>
-                </div>
-              {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="exhibition-series-content">
+                {% comment %} 查找当前系列的自定义配置 {% endcomment %}
+                {% assign custom_title = '' %}
+                {% assign custom_description = '' %}
+                {% for block in section.blocks %}
+                  {% if block.type == 'series_config' %}
+                    {% assign block_handle = block.settings.collection_handle
+                      | strip
+                      | downcase
+                      | replace: ' ', '-'
+                      | replace: '&', 'and'
+                    %}
+                    {% assign collection_handle_from_title = collection.title
+                      | strip
+                      | downcase
+                      | replace: ' ', '-'
+                      | replace: '&', 'and'
+                    %}
+                    {% if block_handle == collection.handle or block_handle == collection_handle_from_title %}
+                      {% assign custom_title = block.settings.custom_title %}
+                      {% assign custom_description = block.settings.custom_description %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+
+                {% comment %} 显示标题的优先级：自定义标题 > 系列标题 {% endcomment %}
+                {% assign display_title = custom_title %}
+                {% if display_title == blank %}
+                  {% assign display_title = collection.title %}
+                {% endif %}
+
+                {% if display_title != blank %}
+                  <h3 class="exhibition-series-card-title">{{ display_title }}</h3>
+                {% endif %}
+
+                {% if section.settings.show_description %}
+                  <p class="exhibition-series-card-description">
+                    {% comment %} 显示描述的优先级：自定义描述 > 系列描述 > 默认描述 {% endcomment %}
+                    {% if custom_description != blank %}
+                      {{ custom_description | strip_html | truncate: section.settings.description_length }}
+                    {% elsif collection.description != blank %}
+                      {{ collection.description | strip_html | truncate: section.settings.description_length }}
+                    {% else %}
+                      {{
+                        section.settings.default_description
+                        | default: '探索这个精彩的系列，发现更多优质产品。'
+                        | strip_html
+                        | truncate: section.settings.description_length
+                      }}
+                    {% endif %}
+                  </p>
+                {% endif %}
+
+                {% if section.settings.show_learn_more %}
+                  <div class="exhibition-series-action">
+                    <a href="{{ collection.url }}" class="exhibition-series-learn-more-btn">
+                      <svg
+                        class="exhibition-series-btn-arrow"
+                        viewBox="0 0 7.10229 10.7302"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        width="7.102295"
+                        height="10.730225"
+                        fill="none"
+                        customFrame="#000000"
+                      >
+                        <path
+                          id="多边形 11"
+                          d="M-0.384728 5.68065L4.9804 -0.782841L10.3455 5.68065L9.57607 6.31935L4.59567 0.31935L4.9804 0L5.36513 0.31935L0.384728 6.31935L-0.384728 5.68065Z"
+                          fill="currentColor"
+                          fill-opacity="1"
+                          fill-rule="nonzero"
+                          transform="matrix(0,1,-1,0,6.31934,0.384705)" />
+                      </svg>
+                      {{ section.settings.learn_more_text | default: '查看系列' }}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
             </div>
-          </div>
           {% endunless %}
         {% endfor %}
       {% endif %}
@@ -268,7 +308,9 @@
           </svg>
         </div>
         <h3 class="exhibition-series-empty-title">{{ section.settings.empty_title | default: '暂无展品系列' }}</h3>
-        <p class="exhibition-series-empty-description">{{ section.settings.empty_description | default: '请先创建展品系列以展示内容' }}</p>
+        <p class="exhibition-series-empty-description">
+          {{ section.settings.empty_description | default: '请先创建展品系列以展示内容' }}
+        </p>
       </div>
     {% endif %}
   </div>
@@ -348,7 +390,6 @@
   }
 
   .exhibition-series-card:hover {
-    transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
   }
 
