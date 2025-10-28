@@ -19,17 +19,29 @@
     gap: 3rem;
   }
   
-  .text-image-section .content-wrapper.text-left {
-    flex-direction: row;
+  .text-image-section .content-wrapper.image-left {
+    flex-direction: row-reverse;
   }
   
-  .text-image-section .content-wrapper.text-right {
-    flex-direction: row-reverse;
+  .text-image-section .content-wrapper.image-right {
+    flex-direction: row;
   }
   
   .text-image-section .text-module {
     flex: 1;
     max-width: 50%;
+  }
+  
+  .text-image-section .text-module.text-left {
+    text-align: left;
+  }
+  
+  .text-image-section .text-module.text-center {
+    text-align: center;
+  }
+  
+  .text-image-section .text-module.text-right {
+    text-align: right;
   }
   
   .text-image-section .image-module {
@@ -44,6 +56,13 @@
     color: #4a3f32;
     margin-bottom: 1.5rem;
     line-height: 1.2;
+  }
+  
+  .text-image-section .image-with-text__subheading {
+    margin-top: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    word-break: break-word;
   }
   
   .text-image-section .content-text {
@@ -272,9 +291,9 @@
 
 <section class="text-image-section">
   <div class="container">
-    <div class="content-wrapper {{ section.settings.text_position }}">
+    <div class="content-wrapper image-{{ section.settings.image_position }}">
       <!-- 文本模块 -->
-      <div class="text-module">
+      <div class="text-module text-{{ section.settings.text_alignment }}">
         {% if section.settings.super_title != blank %}
           <h2 class="super-title">{{ section.settings.super_title }}</h2>
         {% endif %}
@@ -392,19 +411,39 @@
     },
     {
       "type": "select",
-      "id": "text_position",
-      "label": "Text Position",
+      "id": "image_position",
+      "label": "Image Position",
       "options": [
         {
-          "value": "text-left",
-          "label": "Text Left, Image Right"
+          "value": "left",
+          "label": "Left"
         },
         {
-          "value": "text-right",
-          "label": "Text Right, Image Left"
+          "value": "right",
+          "label": "Right"
         }
       ],
-      "default": "text-left"
+      "default": "right"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
     },
     {
       "type": "header",
@@ -510,7 +549,8 @@
         "main_title": "About Us",
         "content_text": "<p>We believe in creating products that bring peace and mindfulness to your daily life. Every piece is carefully crafted with attention to detail and respect for traditional techniques.</p>",
         "button_text": "Learn More",
-        "text_position": "text-left",
+        "image_position": "right",
+        "text_alignment": "left",
         "double_layout": "double_vertical"
       }
     }
