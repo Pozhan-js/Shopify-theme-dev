@@ -146,13 +146,41 @@
   .text-image-section .layout-double_vertical .image-item {
     flex: 1;
     width: calc(50% - 0.5rem);
+    position: relative;
+  }
+  
+  .text-image-section .layout-double_vertical .image-wrapper {
     height: 68.17vh;
+    position: relative;
   }
   
   .text-image-section .layout-double_vertical .double-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  
+  /* 图片下方文本框样式 */
+  .text-image-section .layout-double_vertical .image-text-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    min-width: 200px;
+    max-width: 80%;
+    backdrop-filter: blur(10px);
+  }
+  
+  .text-image-section .layout-double_vertical .image-text-overlay p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #666;
+    line-height: 1.4;
   }
   
   /* 双图片水平布局 - 上下排列 */
@@ -425,13 +453,24 @@
     }
     
     /* Mobile端 image-item 高度调整 */
-    .text-image-section .layout-double_vertical .image-item,
+    .text-image-section .layout-double_vertical .image-wrapper,
     .text-image-section .layout-double-vertical .image-item,
     .text-image-section .layout-double_horizontal .image-item,
     .text-image-section .layout-double_vertical_offset .image-item,
     .text-image-section .layout-double_with_small .image-item:first-child,
     .text-image-section .layout-triple .image-item {
       height: 38.8vh;
+    }
+    
+    /* Mobile端文本框样式调整 */
+    .text-image-section .layout-double_vertical .image-text-overlay {
+      bottom: 10px;
+      padding: 12px 16px;
+      min-width: 150px;
+    }
+    
+    .text-image-section .layout-double_vertical .image-text-overlay p {
+      font-size: 0.85rem;
     }
     
     .text-image-section .layout-double-horizontal,
@@ -550,19 +589,49 @@
               <!-- 双张图片 -->
               <div class="layout-{{ section.settings.double_layout }}">
                 <div class="image-item">
-                  <img 
-                    src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
-                    class="double-image"
-                    loading="lazy"
-                  >
+                  {% if section.settings.double_layout == 'double_vertical' %}
+                    <div class="image-wrapper">
+                      <img 
+                        src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                      {% if section.settings.image_1_text != blank %}
+                        <div class="image-text-overlay">
+                          <p>{{ section.settings.image_1_text }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <img 
+                      src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
                 </div>
                 
                 <div class="image-item">
-                  <img 
-                    src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
-                    class="double-image"
-                    loading="lazy"
-                  >
+                  {% if section.settings.double_layout == 'double_vertical' %}
+                    <div class="image-wrapper">
+                      <img 
+                        src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                      {% if section.settings.image_2_text != blank %}
+                        <div class="image-text-overlay">
+                          <p>{{ section.settings.image_2_text }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    <img 
+                      src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
                 </div>
               </div>
               
@@ -625,34 +694,80 @@
               <!-- 双张图片 -->
               <div class="layout-{{ section.settings.double_layout }}">
                 <div class="image-item">
-                  {% if section.settings.mobile_image_1 %}
-                    <img 
-                      src="{{ section.settings.mobile_image_1 | image_url: width: 600 }}" 
-                      class="double-image"
-                      loading="lazy"
-                    >
-                  {% elsif section.settings.desktop_image_1 %}
-                    <img 
-                      src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
-                      class="double-image"
-                      loading="lazy"
-                    >
+                  {% if section.settings.double_layout == 'double_vertical' %}
+                    <div class="image-wrapper">
+                      {% if section.settings.mobile_image_1 %}
+                        <img 
+                          src="{{ section.settings.mobile_image_1 | image_url: width: 600 }}" 
+                          class="double-image"
+                          loading="lazy"
+                        >
+                      {% elsif section.settings.desktop_image_1 %}
+                        <img 
+                          src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                          class="double-image"
+                          loading="lazy"
+                        >
+                      {% endif %}
+                      {% if section.settings.image_1_text != blank %}
+                        <div class="image-text-overlay">
+                          <p>{{ section.settings.image_1_text }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    {% if section.settings.mobile_image_1 %}
+                      <img 
+                        src="{{ section.settings.mobile_image_1 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                    {% elsif section.settings.desktop_image_1 %}
+                      <img 
+                        src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                    {% endif %}
                   {% endif %}
                 </div>
                 
                 <div class="image-item">
-                  {% if section.settings.mobile_image_2 %}
-                    <img 
-                      src="{{ section.settings.mobile_image_2 | image_url: width: 600 }}" 
-                      class="double-image"
-                      loading="lazy"
-                    >
-                  {% elsif section.settings.desktop_image_2 %}
-                    <img 
-                      src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
-                      class="double-image"
-                      loading="lazy"
-                    >
+                  {% if section.settings.double_layout == 'double_vertical' %}
+                    <div class="image-wrapper">
+                      {% if section.settings.mobile_image_2 %}
+                        <img 
+                          src="{{ section.settings.mobile_image_2 | image_url: width: 600 }}" 
+                          class="double-image"
+                          loading="lazy"
+                        >
+                      {% elsif section.settings.desktop_image_2 %}
+                        <img 
+                          src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                          class="double-image"
+                          loading="lazy"
+                        >
+                      {% endif %}
+                      {% if section.settings.image_2_text != blank %}
+                        <div class="image-text-overlay">
+                          <p>{{ section.settings.image_2_text }}</p>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% else %}
+                    {% if section.settings.mobile_image_2 %}
+                      <img 
+                        src="{{ section.settings.mobile_image_2 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                    {% elsif section.settings.desktop_image_2 %}
+                      <img 
+                        src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                        class="double-image"
+                        loading="lazy"
+                      >
+                    {% endif %}
                   {% endif %}
                 </div>
               </div>
@@ -860,6 +975,22 @@
       ],
       "default": "double_vertical",
       "info": "Layout style when exactly 2 images are uploaded"
+    },
+    {
+      "type": "header",
+      "content": "Image Text Overlays (for double_vertical layout)"
+    },
+    {
+      "type": "text",
+      "id": "image_1_text",
+      "label": "Image 1 Description",
+      "info": "Description text for first image overlay"
+    },
+    {
+      "type": "text",
+      "id": "image_2_text",
+      "label": "Image 2 Description",
+      "info": "Description text for second image overlay"
     }
   ],
   "presets": [
@@ -872,7 +1003,9 @@
         "button_text": "Learn More",
         "image_position": "right",
         "text_alignment": "left",
-        "double_layout": "double_vertical"
+        "double_layout": "double_vertical",
+        "image_1_text": "Each piece is carefully made by skilled artisans",
+        "image_2_text": "Using eco-friendly materials and processes"
       }
     }
   ]
