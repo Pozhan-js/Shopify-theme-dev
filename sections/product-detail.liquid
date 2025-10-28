@@ -31,7 +31,7 @@
   .product-gallery {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    gap: 10px;
   }
 
   .product-image {
@@ -314,16 +314,92 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Size selection
-    const sizeButtons = document.querySelectorAll('.size-button');
-    sizeButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        sizeButtons.forEach(btn => btn.classList.remove('selected'));
-        this.classList.add('selected');
-      });
-    });
+    // 从URL获取产品信息
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('product_id');
+    
+    if (productId) {
+      fetchProductData(productId);
+    }
 
-    // Detail toggles
+    // 获取产品数据
+    function fetchProductData(productId) {
+      fetch(`/products/${productId}.js`)
+        .then(response => response.json())
+        .then(product => {
+          updateProductDisplay(product);
+        })
+        .catch(error => {
+          console.error('Error fetching product:', error);
+        });
+    }
+
+    // 更新产品展示
+    function updateProductDisplay(product) {
+      // 更新标题
+      const titleElement = document.querySelector('.product-title');
+      if (titleElement && product.title) {
+        titleElement.textContent = product.title;
+      }
+
+      // 更新价格
+      const priceElement = document.querySelector('.product-price');
+      if (priceElement && product.price) {
+        priceElement.textContent = `€${(product.price / 100).toFixed(2)}`;
+      }
+
+      // 更新描述
+      const descElement = document.querySelector('.product-description');
+      if (descElement && product.description) {
+        const shortDesc = product.description.substring(0, 150);
+        descElement.innerHTML = `${shortDesc}... <span class="description-more">More</span>`;
+      }
+
+      // 更新图片
+      const gallery = document.querySelector('.product-gallery');
+      if (gallery && product.images && product.images.length > 0) {
+        gallery.innerHTML = '';
+        product.images.slice(0, 4).forEach(image => {
+          const img = document.createElement('img');
+          img.src = image;
+          img.alt = product.title;
+          img.className = 'product-image';
+          gallery.appendChild(img);
+        });
+      }
+
+      // 更新尺码选项
+      const sizeContainer = document.querySelector('.size-buttons');
+      if (sizeContainer && product.variants && product.variants.length > 0) {
+        sizeContainer.innerHTML = '';
+        product.variants.forEach((variant, index) => {
+          const button = document.createElement('button');
+          button.className = `size-button ${index === 0 ? 'selected' : ''}`;
+          button.dataset.variantId = variant.id;
+          button.textContent = variant.title;
+          sizeContainer.appendChild(button);
+        });
+        
+        // 重新绑定尺码选择事件
+        bindSizeSelection();
+      }
+    }
+
+    // 尺码选择
+    function bindSizeSelection() {
+      const sizeButtons = document.querySelectorAll('.size-button');
+      sizeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          sizeButtons.forEach(btn => btn.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    }
+
+    // 初始化尺码选择
+    bindSizeSelection();
+
+    // 详情折叠
     const detailHeaders = document.querySelectorAll('.detail-header');
     detailHeaders.forEach(header => {
       header.addEventListener('click', function() {
@@ -340,15 +416,60 @@
       });
     });
 
-    // Add to cart
+    // 添加到购物车
     const addToCartBtn = document.querySelector('.add-to-cart-btn');
     addToCartBtn.addEventListener('click', function() {
       const selectedSize = document.querySelector('.size-button.selected');
-      if (selectedSize) {
-        const variantId = selectedSize.dataset.variantId;
-        // Add to cart logic here
-        console.log('Adding to cart:', variantId);
+      if (!selectedSize) {
+        alert('Please select a size');
+        return;
       }
+
+      const variantId = selectedSize.dataset.variantId;
+      
+      // 调用Shopify Cart API添加商品
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: 1
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // 添加成功提示
+        addToCartBtn.textContent = 'ADDED!';
+        addToCartBtn.style.background = '#00b300';
+        
+        setTimeout(() => {
+          addToCartBtn.textContent = 'ADD TO CART';
+          addToCartBtn.style.background = '#000';
+        }, 2000);
+
+        // 更新购物车数量
+        updateCartCount();
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        alert('Failed to add to cart. Please try again.');
+      });
     });
+
+    // 更新购物车数量
+    function updateCartCount() {
+      fetch('/cart.js')
+        .then(response => response.json())
+        .then(cart => {
+          const cartCount = cart.item_count;
+          // 更新页面上的购物车数量显示
+          const cartCountElements = document.querySelectorAll('.cart-count');
+          cartCountElements.forEach(element => {
+            element.textContent = cartCount;
+          });
+        });
+    }
   });
 </script>
