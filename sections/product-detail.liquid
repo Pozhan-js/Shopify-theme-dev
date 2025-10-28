@@ -410,38 +410,6 @@
       border-radius: 8px;
     }
 
-    /* 修复缩略图布局 - 移动端 */
-    .thumbnail-images {
-      position: static;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
-      margin-top: 15px;
-      gap: 10px;
-      bottom: auto;
-      left: auto;
-      z-index: auto;
-    }
-
-    .thumbnail {
-      width: 60px;
-      height: 60px;
-      border-radius: 8px;
-      border: 2px solid #e0e0e0;
-      opacity: 0.8;
-    }
-
-    .thumbnail:hover {
-      opacity: 1;
-      border-color: {{ section.settings.accent_color }};
-      transform: none;
-    }
-
-    .thumbnail.active {
-      border-color: {{ section.settings.accent_color }};
-      opacity: 1;
-    }
-
     .product-info {
       height: auto;
       overflow-y: visible;
@@ -492,6 +460,11 @@
 
     .mobile-price .price {
       font-size: {{ section.settings.price_font_size | plus: 4 }}px;
+    }
+
+    /* 移动端隐藏缩略图 */
+    .thumbnail-images {
+      display: none;
     }
 
     /* 颜色选择器适配 */
@@ -566,15 +539,9 @@
       font-size: {{ section.settings.title_font_size | minus: 16 }}px;
     }
 
-    /* 超小屏幕缩略图调整 */
     .thumbnail {
-      width: 50px;
-      height: 50px;
-    }
-
-    .thumbnail-images {
-      gap: 8px;
-      flex-wrap: wrap;
+      width: 45px;
+      height: 45px;
     }
 
     .color-circle {
@@ -604,45 +571,69 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // 缩略图悬停切换功能
-    const thumbnails = document.querySelectorAll('.thumbnail');
     const mainImage = document.getElementById('main-product-image');
+    const productImages = document.querySelector('.product-images');
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let currentImageIndex = 0;
+    const images = Array.from(document.querySelectorAll('.thumbnail')).map((thumb) => ({
+      src: thumb.dataset.image,
+      alt: thumb.dataset.imageAlt,
+    }));
 
-    thumbnails.forEach((thumbnail, index) => {
-      // 移动端使用点击，桌面端使用悬停
-      const isMobile = window.innerWidth <= 768;
-      const eventType = isMobile ? 'click' : 'mouseenter';
+    // 移动端滑动切换功能
+    if (window.innerWidth <= 768) {
+      productImages.addEventListener(
+        'touchstart',
+        function (e) {
+          touchStartX = e.changedTouches[0].screenX;
+        },
+        false
+      );
 
-      thumbnail.addEventListener(eventType, function () {
-        const newImageSrc = this.dataset.image;
-        const newImageAlt = this.dataset.imageAlt;
+      productImages.addEventListener(
+        'touchend',
+        function (e) {
+          touchEndX = e.changedTouches[0].screenX;
+          handleSwipe();
+        },
+        false
+      );
 
-        if (newImageSrc && mainImage) {
-          mainImage.src = newImageSrc;
-          mainImage.alt = newImageAlt;
-
-          // 更新活跃状态
-          thumbnails.forEach((t) => t.classList.remove('active'));
-          this.classList.add('active');
+      function handleSwipe() {
+        if (touchEndX < touchStartX && currentImageIndex < images.length - 1) {
+          // 向左滑动 - 下一张
+          currentImageIndex++;
+          changeImage(currentImageIndex);
+        } else if (touchEndX > touchStartX && currentImageIndex > 0) {
+          // 向右滑动 - 上一张
+          currentImageIndex--;
+          changeImage(currentImageIndex);
         }
-      });
+      }
 
-      // 移动端也保留点击事件
-      if (!isMobile) {
-        thumbnail.addEventListener('click', function () {
+      function changeImage(index) {
+        if (mainImage && images[index]) {
+          mainImage.src = images[index].src;
+          mainImage.alt = images[index].alt;
+        }
+      }
+    } else {
+      // 桌面端保留缩略图悬停切换功能
+      const thumbnails = document.querySelectorAll('.thumbnail');
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener('mouseenter', function () {
           const newImageSrc = this.dataset.image;
           const newImageAlt = this.dataset.imageAlt;
-
           if (newImageSrc && mainImage) {
             mainImage.src = newImageSrc;
             mainImage.alt = newImageAlt;
-
             thumbnails.forEach((t) => t.classList.remove('active'));
             this.classList.add('active');
           }
         });
-      }
-    });
+      });
+    }
 
     // 数量选择器功能
     const minusBtn = document.querySelector('.quantity-btn.minus');
