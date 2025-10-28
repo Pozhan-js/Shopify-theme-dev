@@ -86,6 +86,15 @@
     position: relative;
   }
   
+  /* 响应式图片显示 */
+  .text-image-section .desktop-image {
+    display: block;
+  }
+  
+  .text-image-section .mobile-image {
+    display: none;
+  }
+  
   /* 单张图片 */
   .text-image-section .layout-single .single-image {
     width: 100%;
@@ -256,7 +265,16 @@
     }
     
     .text-image-section .content-wrapper {
+      flex-direction: column !important;
       gap: 1.5rem;
+    }
+    
+    .text-image-section .desktop-image {
+      display: none;
+    }
+    
+    .text-image-section .mobile-image {
+      display: block;
     }
     
     .text-image-section .super-title {
@@ -318,83 +336,219 @@
       <!-- 图片模块 -->
       <div class="image-module">
         <div class="image-container">
-          {% assign image_count = 0 %}
-          {% if section.settings.image_1 %}
-            {% assign image_count = image_count | plus: 1 %}
+          {% assign desktop_image_count = 0 %}
+          {% assign mobile_image_count = 0 %}
+          
+          {% if section.settings.desktop_image_1 %}
+            {% assign desktop_image_count = desktop_image_count | plus: 1 %}
           {% endif %}
-          {% if section.settings.image_2 %}
-            {% assign image_count = image_count | plus: 1 %}
+          {% if section.settings.desktop_image_2 %}
+            {% assign desktop_image_count = desktop_image_count | plus: 1 %}
           {% endif %}
-          {% if section.settings.image_3 %}
-            {% assign image_count = image_count | plus: 1 %}
+          {% if section.settings.desktop_image_3 %}
+            {% assign desktop_image_count = desktop_image_count | plus: 1 %}
           {% endif %}
           
-          {% if image_count == 1 %}
-            <!-- 单张图片 -->
-            <div class="layout-single">
-              {% if section.settings.image_1 %}
-                <img 
-                  src="{{ section.settings.image_1 | image_url: width: 800 }}" 
-                  class="single-image"
-                  loading="lazy"
-                >
-              {% endif %}
-            </div>
-            
-          {% elsif image_count == 2 %}
-            <!-- 双张图片 -->
-            <div class="layout-{{ section.settings.double_layout }}">
-              <div class="image-item">
-                <img 
-                  src="{{ section.settings.image_1 | image_url: width: 600 }}" 
-                  class="double-image"
-                  loading="lazy"
-                >
-                {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
-                  <div class="image-caption">{{ section.settings.image_1_caption }}</div>
-                {% endif %}
-              </div>
-              
-              <div class="image-item">
-                <img 
-                  src="{{ section.settings.image_2 | image_url: width: 600 }}" 
-                  class="double-image"
-                  loading="lazy"
-                >
-                {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
-                  <div class="image-caption">{{ section.settings.image_2_caption }}</div>
-                {% endif %}
-              </div>
-            </div>
-            
-          {% elsif image_count == 3 %}
-            <!-- 三张图片 -->
-            <div class="layout-triple">
-              <div class="image-item">
-                <img 
-                  src="{{ section.settings.image_1 | image_url: width: 600 }}" 
-                  class="triple-image"
-                  loading="lazy"
-                >
-              </div>
-              
-              <div class="image-item">
-                <img 
-                  src="{{ section.settings.image_2 | image_url: width: 400 }}" 
-                  class="triple-image"
-                  loading="lazy"
-                >
-              </div>
-              
-              <div class="image-item">
-                <img 
-                  src="{{ section.settings.image_3 | image_url: width: 400 }}" 
-                  class="triple-image"
-                  loading="lazy"
-                >
-              </div>
-            </div>
+          {% if section.settings.mobile_image_1 %}
+            {% assign mobile_image_count = mobile_image_count | plus: 1 %}
           {% endif %}
+          {% if section.settings.mobile_image_2 %}
+            {% assign mobile_image_count = mobile_image_count | plus: 1 %}
+          {% endif %}
+          {% if section.settings.mobile_image_3 %}
+            {% assign mobile_image_count = mobile_image_count | plus: 1 %}
+          {% endif %}
+          
+          <!-- Desktop Images -->
+          <div class="desktop-image">
+            {% if desktop_image_count == 1 %}
+              <!-- 单张图片 -->
+              <div class="layout-single">
+                {% if section.settings.desktop_image_1 %}
+                  <img 
+                    src="{{ section.settings.desktop_image_1 | image_url: width: 800 }}" 
+                    class="single-image"
+                    loading="lazy"
+                  >
+                {% endif %}
+              </div>
+              
+            {% elsif desktop_image_count == 2 %}
+              <!-- 双张图片 -->
+              <div class="layout-{{ section.settings.double_layout }}">
+                <div class="image-item">
+                  <img 
+                    src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                    class="double-image"
+                    loading="lazy"
+                  >
+                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
+                    <div class="image-caption">{{ section.settings.image_1_caption }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="image-item">
+                  <img 
+                    src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                    class="double-image"
+                    loading="lazy"
+                  >
+                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
+                    <div class="image-caption">{{ section.settings.image_2_caption }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              
+            {% elsif desktop_image_count == 3 %}
+              <!-- 三张图片 -->
+              <div class="layout-triple">
+                <div class="image-item">
+                  <img 
+                    src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                    class="triple-image"
+                    loading="lazy"
+                  >
+                </div>
+                
+                <div class="image-item">
+                  <img 
+                    src="{{ section.settings.desktop_image_2 | image_url: width: 400 }}" 
+                    class="triple-image"
+                    loading="lazy"
+                  >
+                </div>
+                
+                <div class="image-item">
+                  <img 
+                    src="{{ section.settings.desktop_image_3 | image_url: width: 400 }}" 
+                    class="triple-image"
+                    loading="lazy"
+                  >
+                </div>
+              </div>
+            {% endif %}
+          </div>
+          
+          <!-- Mobile Images -->
+          <div class="mobile-image">
+            {% assign display_mobile_count = mobile_image_count %}
+            {% if mobile_image_count == 0 %}
+              {% assign display_mobile_count = desktop_image_count %}
+            {% endif %}
+            
+            {% if display_mobile_count == 1 %}
+              <!-- 单张图片 -->
+              <div class="layout-single">
+                {% if section.settings.mobile_image_1 %}
+                  <img 
+                    src="{{ section.settings.mobile_image_1 | image_url: width: 800 }}" 
+                    class="single-image"
+                    loading="lazy"
+                  >
+                {% elsif section.settings.desktop_image_1 %}
+                  <img 
+                    src="{{ section.settings.desktop_image_1 | image_url: width: 800 }}" 
+                    class="single-image"
+                    loading="lazy"
+                  >
+                {% endif %}
+              </div>
+              
+            {% elsif display_mobile_count == 2 %}
+              <!-- 双张图片 - 使用与desktop相同的布局 -->
+              <div class="layout-{{ section.settings.double_layout }}">
+                <div class="image-item">
+                  {% if section.settings.mobile_image_1 %}
+                    <img 
+                      src="{{ section.settings.mobile_image_1 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% elsif section.settings.desktop_image_1 %}
+                    <img 
+                      src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_1_caption != blank %}
+                    <div class="image-caption">{{ section.settings.image_1_caption }}</div>
+                  {% endif %}
+                </div>
+                
+                <div class="image-item">
+                  {% if section.settings.mobile_image_2 %}
+                    <img 
+                      src="{{ section.settings.mobile_image_2 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% elsif section.settings.desktop_image_2 %}
+                    <img 
+                      src="{{ section.settings.desktop_image_2 | image_url: width: 600 }}" 
+                      class="double-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                  {% if section.settings.double_layout == 'double_vertical' and section.settings.image_2_caption != blank %}
+                    <div class="image-caption">{{ section.settings.image_2_caption }}</div>
+                  {% endif %}
+                </div>
+              </div>
+              
+            {% elsif display_mobile_count == 3 %}
+              <!-- 三张图片 - 使用与desktop相同的布局 -->
+              <div class="layout-triple">
+                <div class="image-item">
+                  {% if section.settings.mobile_image_1 %}
+                    <img 
+                      src="{{ section.settings.mobile_image_1 | image_url: width: 600 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% elsif section.settings.desktop_image_1 %}
+                    <img 
+                      src="{{ section.settings.desktop_image_1 | image_url: width: 600 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                </div>
+                
+                <div class="image-item">
+                  {% if section.settings.mobile_image_2 %}
+                    <img 
+                      src="{{ section.settings.mobile_image_2 | image_url: width: 400 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% elsif section.settings.desktop_image_2 %}
+                    <img 
+                      src="{{ section.settings.desktop_image_2 | image_url: width: 400 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                </div>
+                
+                <div class="image-item">
+                  {% if section.settings.mobile_image_3 %}
+                    <img 
+                      src="{{ section.settings.mobile_image_3 | image_url: width: 400 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% elsif section.settings.desktop_image_3 %}
+                    <img 
+                      src="{{ section.settings.desktop_image_3 | image_url: width: 400 }}" 
+                      class="triple-image"
+                      loading="lazy"
+                    >
+                  {% endif %}
+                </div>
+              </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
@@ -478,22 +632,44 @@
     },
     {
       "type": "header",
-      "content": "Images"
+      "content": "Desktop Images"
     },
     {
       "type": "image_picker",
-      "id": "image_1",
-      "label": "Image 1"
+      "id": "desktop_image_1",
+      "label": "Desktop Image 1"
     },
     {
       "type": "image_picker",
-      "id": "image_2",
-      "label": "Image 2"
+      "id": "desktop_image_2",
+      "label": "Desktop Image 2"
     },
     {
       "type": "image_picker",
-      "id": "image_3",
-      "label": "Image 3"
+      "id": "desktop_image_3",
+      "label": "Desktop Image 3"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_1",
+      "label": "Mobile Image 1",
+      "info": "If not uploaded, desktop image will be used"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_2",
+      "label": "Mobile Image 2",
+      "info": "If not uploaded, desktop image will be used"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_3",
+      "label": "Mobile Image 3",
+      "info": "If not uploaded, desktop image will be used"
     },
     {
       "type": "header",
