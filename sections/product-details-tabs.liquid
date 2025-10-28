@@ -1,960 +1,478 @@
-<div class="pdt-section" {{ section.shopify_attributes }}>
-  <div class="pdt-container">
-    <!-- 标签导航 -->
-    <div class="pdt-tabs-navigation">
-      {% if section.settings.show_description_tab %}
-        <button
-          class="pdt-tab-button {% if section.settings.default_active_tab == 'description' %}pdt-active{% endif %}"
-          data-tab="description"
-        >
-          {{ section.settings.description_tab_title }}
-        </button>
-      {% endif %}
-      {% if section.settings.show_details_tab %}
-        <button
-          class="pdt-tab-button {% if section.settings.default_active_tab == 'details' %}pdt-active{% endif %}"
-          data-tab="details"
-        >
-          {{ section.settings.details_tab_title }}
-        </button>
-      {% endif %}
-      
-      {% comment %} 检查是否显示保修标签 {% endcomment %}
-      {% assign current_product = product %}
-      {% assign selected_product = all_products[section.settings.product_handle] %}
-      {% assign display_product = current_product | default: selected_product %}
-      {% assign show_warranty = false %}
-      
-      {% if section.settings.show_warranty_tab %}
-        {% if display_product and display_product.metafields.custom.product_warranty != blank %}
-          {% assign show_warranty = true %}
-        {% elsif display_product == blank and section.settings.warranty_content != blank %}
-          {% assign show_warranty = true %}
-        {% endif %}
-      {% endif %}
-      
-      {% if show_warranty %}
-        <button
-          class="pdt-tab-button {% if section.settings.default_active_tab == 'warranty' %}pdt-active{% endif %}"
-          data-tab="warranty"
-        >
-          {{ section.settings.warranty_tab_title }}
-        </button>
-      {% endif %}
-    </div>
-
-    <!-- 标签内容 -->
-    <div class="pdt-tabs-content">
-      <!-- Description Tab -->
-      {% if section.settings.show_description_tab %}
-        <div
-          class="pdt-tab-content {% if section.settings.default_active_tab == 'description' %}pdt-active{% endif %}"
-          id="pdt-description-content"
-        >
-          <div class="pdt-description-content">
-            {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
-            {% assign current_product = product %}
-            {% assign selected_product = all_products[section.settings.product_handle] %}
-            {% assign display_product = current_product | default: selected_product %}
-            
-            {% if display_product and display_product.metafields.custom.description != blank %}
-              {{ display_product.metafields.custom.description | metafield_tag }}
-            {% else %}
-              {{ section.settings.description_content }}
-            {% endif %}
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- Product Details Tab -->
-      {% if section.settings.show_details_tab %}
-        <div
-          class="pdt-tab-content {% if section.settings.default_active_tab == 'details' %}pdt-active{% endif %}"
-          id="pdt-details-content"
-        >
-          <div class="pdt-product-details">
-            <!-- 产品型号 -->
-            {% if section.settings.show_model_section %}
-              <div class="pdt-model-section">
-                {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
-                {% assign current_product = product %}
-                {% assign selected_product = all_products[section.settings.product_handle] %}
-                {% assign display_product = current_product | default: selected_product %}
-                
-                {% if display_product %}
-                  <h3 class="pdt-model-title">Model No. {{ display_product.variants.first.sku | default: display_product.handle | upcase }}</h3>
-                {% else %}
-                  <h3 class="pdt-model-title">{{ section.settings.model_title }}</h3>
-                {% endif %}
-              </div>
-            {% endif %}
-
-            <!-- 产品规格表格 - 从产品元字段获取数据 -->
-            <div class="pdt-specifications-table">
-              {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
-              {% assign current_product = product %}
-              {% assign selected_product = all_products[section.settings.product_handle] %}
-              {% assign display_product = current_product | default: selected_product %}
-              
-              {% if display_product %}
-                <!-- Size -->
-                {% if display_product.metafields.custom.size %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Size</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.size }}</div>
-                  </div>
-                {% endif %}
-                
-                <!-- Weight -->
-                {% if display_product.metafields.custom.weight %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Weight</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.weight }}</div>
-                  </div>
-                {% endif %}
-                
-                <!-- Material -->
-                {% if display_product.metafields.custom.material %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Material</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.material }}</div>
-                  </div>
-                {% endif %}
-                
-                <!-- Load-bearing -->
-                {% if display_product.metafields.custom.load_bearing %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Load-bearing</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.load_bearing }}</div>
-                  </div>
-                {% endif %}
-                
-                <!-- Drag (N) -->
-                {% if display_product.metafields.custom.drag %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Drag (N)</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.drag }}</div>
-                  </div>
-                {% endif %}
-                
-                <!-- Standard Accessories -->
-                {% if display_product.metafields.custom.standard_accessories %}
-                  <div class="pdt-spec-row">
-                    <div class="pdt-spec-label">Standard Accessories</div>
-                    <div class="pdt-spec-value">{{ display_product.metafields.custom.standard_accessories }}</div>
-                  </div>
-                {% endif %}
-              {% else %}
-                <!-- 如果没有产品，使用区块配置的规格 -->
-                {% for block in section.blocks %}
-                  {% if block.type == 'specification' %}
-                    <div class="pdt-spec-row" {{ block.shopify_attributes }}>
-                      <div class="pdt-spec-label">{{ block.settings.spec_label }}</div>
-                      <div class="pdt-spec-value">{{ block.settings.spec_value }}</div>
-                    </div>
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- Warranty Tab - 只有在有保修信息时才显示 -->
-      {% if show_warranty %}
-        <div
-          class="pdt-tab-content {% if section.settings.default_active_tab == 'warranty' %}pdt-active{% endif %}"
-          id="pdt-warranty-content"
-        >
-          <div class="pdt-warranty-content">
-            {% if display_product and display_product.metafields.custom.product_warranty != blank %}
-              {{ display_product.metafields.custom.product_warranty | metafield_tag }}
-            {% else %}
-              {{ section.settings.warranty_content }}
-            {% endif %}
-          </div>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-</div>
-
-<style>
-  .pdt-section {
-    padding: {{ section.settings.section_padding_top }}px 0 {{ section.settings.section_padding_bottom }}px 0;
-    background-color: {{ section.settings.section_background_color }};
-  }
-
-  .pdt-container {
-    max-width: 1520px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  /* 标签导航 */
-  .pdt-tabs-navigation {
-    display: flex;
-    justify-content: space-around;
-    border-top: 0.5px solid rgba(22, 22, 22, 0.5);
-    border-bottom: 0.5px solid rgba(22, 22, 22, 0.5);
-    margin-bottom: {{ section.settings.content_margin_top }}px;
-    gap: {{ section.settings.tab_spacing }}px;
-    width: 100%;
-  }
-
-  .pdt-tab-button {
-    background: none;
-    border: none;
-    padding: 32px 0;
-    font-size: 28px;
-    color: rgba(22, 22, 22, 0.5);
-    cursor: pointer;
-    position: relative;
-    transition: color 0.3s ease;
-    border-bottom: 2px solid transparent;
-    margin-right: 0;
-    font-weight: 500;
-    flex: none;
-    text-align: center;
-    white-space: nowrap;
-  }
-
-  .pdt-tab-button:hover {
-    color: #161616;
-  }
-
-  .pdt-tab-button.pdt-active {
-    color: #161616;
-    border-bottom-color: {{ section.settings.tab_active_border_color }};
-    font-weight: 500;
-  }
-
-  /* 标签内容 */
-  .pdt-tabs-content {
-    min-height: 400px;
-    padding-top: 40px;
-  }
-
-  .pdt-tab-content {
-    display: none;
-    animation: pdtFadeIn 0.3s ease-in-out;
-  }
-
-  .pdt-tab-content.pdt-active {
-    display: block;
-  }
-
-  @keyframes pdtFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* 产品详情内容 */
-
-  .pdt-model-section {
-    margin-bottom: 40px;
-  }
-
-  .pdt-model-title {
-    font-size: {{ section.settings.model_title_size }}px;
-    font-weight: 600;
-    color: #161616;
-    margin: 0;
-  }
-
-  /* 规格表格 */
-  .pdt-specifications-table {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .pdt-spec-row {
-    display: grid;
-    grid-template-columns: {{ section.settings.spec_label_width }}px 1fr;
-    gap: 89px;
-    padding: {{ section.settings.spec_row_padding }}px 0;
-    border-bottom: 1px solid {{ section.settings.spec_border_color }};
-    align-items: flex-start;
-  }
-
-  .pdt-spec-row:last-child {
-    border-bottom: none;
-  }
-
-  .pdt-spec-label {
-    font-size: 18px;
-    color: rgba(22, 22, 22, 0.5);
-    font-weight: 300;
-    line-height: 1.5;
-  }
-
-  .pdt-spec-value {
-    font-size: 18px;
-    color: rgba(22, 22, 22, 0.5);
-    font-weight: 300;
-    line-height: 1.5;
-  }
-
-  /* Description 和 Warranty 内容 */
-  .pdt-description-content {
-    font-size: 18px;
-    color: rgba(22, 22, 22, 0.5);
-    line-height: {{ section.settings.description_line_height }};
-    max-width: 800px;
-  }
-
-  .pdt-warranty-content {
-    font-size: 18px;
-    color: rgba(22, 22, 22, 0.5);
-    line-height: {{ section.settings.warranty_line_height }};
-    max-width: 800px;
-  }
-
-  .pdt-description-content p,
-  .pdt-warranty-content p {
-    margin: 0 0 16px 0;
-  }
-
-  .pdt-description-content p:last-child,
-  .pdt-warranty-content p:last-child {
-    margin-bottom: 0;
-  }
-
-  /* 响应式设计 - 基于1920px设计图按比例缩放 */
-
-  /* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
-  @media (min-width: 1920px) {
-    .pdt-container {
-      max-width: 1520px;
-    }
-    
-    .pdt-tabs-navigation {
-      margin-bottom: {{ section.settings.content_margin_top }}px;
-    }
-    
-    .pdt-tab-button {
-      padding: 32px 0;
-      font-size: 28px;
-      margin-right: 0;
-    }
-    
-    .pdt-tabs-content {
-      min-height: 400px;
-      padding-top: 40px;
-    }
-    
-    .pdt-model-section {
-      margin-bottom: 40px;
-    }
-    
-    .pdt-model-title {
-      font-size: {{ section.settings.model_title_size }}px;
-    }
-    
-    .pdt-spec-row {
-      grid-template-columns: {{ section.settings.spec_label_width }}px 1fr;
-      gap: 89px;
-      padding: {{ section.settings.spec_row_padding }}px 0;
-    }
-    
-    .pdt-spec-label,
-    .pdt-spec-value {
-      font-size: 18px;
-    }
-    
-    .pdt-description-content {
-      font-size: 18px;
-    }
-    
-    .pdt-warranty-content {
-      font-size: 18px;
-    }
-  }
-
-  /* 其余尺寸自适应 - 基于视口宽度动态计算 */
-  @media (max-width: 1919px) {
-    .pdt-container {
-      max-width: calc(1520px * (100vw / 1920px));
-      min-max-width: 320px;
-    }
-    
-    .pdt-tabs-navigation {
-      margin-bottom: calc({{ section.settings.content_margin_top }}px * (100vw / 1920px));
-      min-margin-bottom: 20px;
-    }
-    
-    .pdt-tab-button {
-      padding: calc(32px * (100vw / 1920px)) 0;
-      font-size: calc(28px * (100vw / 1920px));
-      margin-right: 0;
-      min-padding: 16px 0;
-      min-font-size: 12px;
-      flex: none;
-      text-align: center;
-      white-space: nowrap;
-      color: rgba(22, 22, 22, 0.5);
-      font-weight: 500;
-    }
-    
-    .pdt-tabs-content {
-      min-height: calc(400px * (100vw / 1920px));
-      padding-top: calc(40px * (100vw / 1920px));
-      min-min-height: 200px;
-      min-padding-top: 20px;
-    }
-    
-    .pdt-model-section {
-      margin-bottom: calc(40px * (100vw / 1920px));
-      min-margin-bottom: 20px;
-    }
-    
-    .pdt-model-title {
-      font-size: calc({{ section.settings.model_title_size }}px * (100vw / 1920px));
-      color: #161616;
-      min-font-size: 14px;
-    }
-    
-    .pdt-spec-row {
-      grid-template-columns: calc({{ section.settings.spec_label_width }}px * (100vw / 1920px)) 1fr;
-      gap: calc(89px * (100vw / 1920px));
-      padding: calc({{ section.settings.spec_row_padding }}px * (100vw / 1920px)) 0;
-      min-gap: 20px;
-      min-padding: 10px 0;
-    }
-    
-    .pdt-spec-label,
-    .pdt-spec-value {
-      font-size: calc(18px * (100vw / 1920px));
-      min-font-size: 12px;
-    }
-    
-    .pdt-description-content {
-      font-size: calc(18px * (100vw / 1920px));
-      min-font-size: 12px;
-    }
-    
-    .pdt-warranty-content {
-      font-size: calc(18px * (100vw / 1920px));
-      min-font-size: 12px;
-    }
-  }
-
-  /* 平板和手机端 - 单栏布局 */
-  @media (max-width: 768px) {
-    .pdt-tabs-navigation {
-      flex-wrap: nowrap;
-      gap: calc({{ section.settings.tab_spacing }}px * 0.5);
-      min-gap: 20px;
-      border-top: 0.5px solid rgba(22, 22, 22, 0.5);
-      border-bottom: 0.5px solid rgba(22, 22, 22, 0.5);
-    }
-
-    .pdt-tab-button {
-      margin-right: 0;
-      padding: 20px 0;
-      font-size: 14px;
-      flex: none;
-      text-align: center;
-      white-space: nowrap;
-      color: rgba(22, 22, 22, 0.5);
-      font-weight: 500;
-    }
-
-    .pdt-spec-row {
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .pdt-spec-label {
-      font-weight: 600;
-    }
-
-    .pdt-model-title {
-      font-size: {{ section.settings.model_title_size }}px;
-      color: #161616;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .pdt-container {
-      padding: 0 15px;
-    }
-
-    .pdt-section {
-      padding: 30px 0;
-    }
-
-    .pdt-tab-button {
-      font-size: 14px;
-      margin-right: 0;
-      padding: 18px 0;
-      flex: none;
-      text-align: center;
-      white-space: nowrap;
-      color: rgba(22, 22, 22, 0.5);
-      font-weight: 500;
-    }
-
-    .pdt-tab-button.pdt-active {
-      color: #161616;
-    }
-
-    .pdt-tab-button:hover {
-      color: #161616;
-    }
-
-    .pdt-tabs-content {
-      padding-top: 30px;
-    }
-  }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const tabButtons = document.querySelectorAll('.pdt-tab-button');
-    const tabContents = document.querySelectorAll('.pdt-tab-content');
-
-    tabButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        const targetTab = this.getAttribute('data-tab');
-
-        // 移除所有活动状态
-        tabButtons.forEach(function (btn) {
-          btn.classList.remove('pdt-active');
-        });
-
-        tabContents.forEach(function (content) {
-          content.classList.remove('pdt-active');
-        });
-
-        // 添加活动状态到当前标签
-        this.classList.add('pdt-active');
-
-        // 显示对应内容
-        const targetContent = document.getElementById('pdt-' + targetTab + '-content');
-        if (targetContent) {
-          targetContent.classList.add('pdt-active');
-        }
-      });
-    });
-  });
-</script>
-
 {% schema %}
 {
-  "name": "Product Details Tabs",
-  "tag": "section",
-  "class": "product-details-tabs-section",
+  "name": "Product Detail",
   "settings": [
     {
-      "type": "header",
-      "content": "Section Layout"
-    },
-    {
-      "type": "range",
-      "id": "section_padding_top",
-      "min": 0,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "label": "Top Padding",
-      "default": 60
-    },
-    {
-      "type": "range",
-      "id": "section_padding_bottom",
-      "min": 0,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "label": "Bottom Padding",
-      "default": 60
-    },
-    {
-      "type": "color",
-      "id": "section_background_color",
-      "label": "Section Background Color",
-      "default": "#F1F0EE"
-    },
-    {
-      "type": "range",
-      "id": "content_margin_top",
-      "min": 0,
-      "max": 80,
-      "step": 5,
-      "unit": "px",
-      "label": "Content Top Margin",
-      "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Tab Navigation"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_description_tab",
-      "label": "Show Description Tab",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "description_tab_title",
-      "label": "Description Tab Title",
-      "default": "Description"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_details_tab",
-      "label": "Show Details Tab",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "details_tab_title",
-      "label": "Details Tab Title",
-      "default": "Product Details"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_warranty_tab",
-      "label": "Show Warranty Tab",
-      "default": true,
-      "info": "Warranty tab will only show if product has warranty metafield or fallback content is provided"
-    },
-    {
-      "type": "text",
-      "id": "warranty_tab_title",
-      "label": "Warranty Tab Title",
-      "default": "Warranty"
-    },
-    {
-      "type": "select",
-      "id": "default_active_tab",
-      "label": "Default Active Tab",
-      "options": [
-        {
-          "value": "description",
-          "label": "Description"
-        },
-        {
-          "value": "details",
-          "label": "Product Details"
-        },
-        {
-          "value": "warranty",
-          "label": "Warranty"
-        }
-      ],
-      "default": "details"
-    },
-    {
-      "type": "header",
-      "content": "Tab Styling"
-    },
-    {
-      "type": "color",
-      "id": "tab_text_color",
-      "label": "Tab Text Color",
-      "default": "#999999"
-    },
-    {
-      "type": "color",
-      "id": "tab_active_color",
-      "label": "Tab Active Color",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "tab_border_color",
-      "label": "Tab Border Color",
-      "default": "#e5e5e5"
-    },
-    {
-      "type": "color",
-      "id": "tab_active_border_color",
-      "label": "Tab Active Border Color",
-      "default": "#d32f2f"
-    },
-    {
-      "type": "range",
-      "id": "tab_font_size",
-      "min": 12,
-      "max": 20,
-      "step": 1,
-      "unit": "px",
-      "label": "Tab Font Size",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "tab_spacing",
-      "min": 20,
-      "max": 100,
-      "step": 10,
-      "unit": "px",
-      "label": "Tab Spacing",
-      "default": 60
-    },
-    {
-      "type": "header",
-      "content": "Product Settings"
-    },
-    {
-      "type": "paragraph",
-      "content": "This section will automatically use the current product when placed on a product page. You can also manually select a product for other pages."
-    },
-    {
       "type": "product",
-      "id": "product_handle",
-      "label": "Manual Product Selection (optional)",
-      "info": "Leave empty to use current product on product pages"
-    },
-    {
-      "type": "header",
-      "content": "Model Section"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_model_section",
-      "label": "Show Model Section",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "model_title",
-      "label": "Fallback Model Title",
-      "default": "Model No. XSRF100",
-      "info": "Used when no product is available"
-    },
-    {
-      "type": "color",
-      "id": "model_title_color",
-      "label": "Model Title Color",
-      "default": "#333333"
-    },
-    {
-      "type": "range",
-      "id": "model_title_size",
-      "min": 14,
-      "max": 24,
-      "step": 1,
-      "unit": "px",
-      "label": "Model Title Font Size",
-      "default": 18
-    },
-    {
-      "type": "header",
-      "content": "Product Metafields"
-    },
-    {
-      "type": "paragraph",
-      "content": "Product specifications will be automatically loaded from product metafields. The following metafields are expected: custom.size, custom.weight, custom.material, custom.load_bearing, custom.drag, custom.standard_accessories, custom.product_warranty"
-    },
-    {
-      "type": "header",
-      "content": "Specifications Table"
-    },
-    {
-      "type": "color",
-      "id": "spec_label_color",
-      "label": "Specification Label Color",
-      "default": "#333333"
-    },
-    {
-      "type": "color",
-      "id": "spec_value_color",
-      "label": "Specification Value Color",
-      "default": "#999999"
-    },
-    {
-      "type": "range",
-      "id": "spec_font_size",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "unit": "px",
-      "label": "Specification Font Size",
-      "default": 14
-    },
-    {
-      "type": "color",
-      "id": "spec_border_color",
-      "label": "Specification Border Color",
-      "default": "#f0f0f0"
-    },
-    {
-      "type": "range",
-      "id": "spec_row_padding",
-      "min": 10,
-      "max": 30,
-      "step": 2,
-      "unit": "px",
-      "label": "Specification Row Padding",
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "spec_label_width",
-      "min": 150,
-      "max": 300,
-      "step": 10,
-      "unit": "px",
-      "label": "Specification Label Width",
-      "default": 200
-    },
-    {
-      "type": "range",
-      "id": "spec_gap",
-      "min": 20,
-      "max": 80,
-      "step": 5,
-      "unit": "px",
-      "label": "Specification Gap",
-      "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Content Areas"
-    },
-    {
-      "type": "richtext",
-      "id": "description_content",
-      "label": "Description Content",
-      "default": "<p>This is the product description content. You can add detailed information about the product here.</p>"
-    },
-    {
-      "type": "color",
-      "id": "description_text_color",
-      "label": "Description Text Color",
-      "default": "#666666"
-    },
-    {
-      "type": "range",
-      "id": "description_font_size",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "unit": "px",
-      "label": "Description Font Size",
-      "default": 14
-    },
-    {
-      "type": "range",
-      "id": "description_line_height",
-      "min": 1.2,
-      "max": 2.0,
-      "step": 0.1,
-      "label": "Description Line Height",
-      "default": 1.6
-    },
-    {
-      "type": "richtext",
-      "id": "warranty_content",
-      "label": "Warranty Content (Fallback)",
-      "default": "<p>This is the warranty information. You can add warranty terms and conditions here.</p>",
-      "info": "This content will be used when no product warranty metafield is available"
-    },
-    {
-      "type": "color",
-      "id": "warranty_text_color",
-      "label": "Warranty Text Color",
-      "default": "#666666"
-    },
-    {
-      "type": "range",
-      "id": "warranty_font_size",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "unit": "px",
-      "label": "Warranty Font Size",
-      "default": 14
-    },
-    {
-      "type": "range",
-      "id": "warranty_line_height",
-      "min": 1.2,
-      "max": 2.0,
-      "step": 0.1,
-      "label": "Warranty Line Height",
-      "default": 1.6
-    }
-  ],
-  "blocks": [
-    {
-      "type": "specification",
-      "name": "Specification Row",
-      "settings": [
-        {
-          "type": "text",
-          "id": "spec_label",
-          "label": "Specification Label",
-          "default": "Size"
-        },
-        {
-          "type": "text",
-          "id": "spec_value",
-          "label": "Specification Value",
-          "default": "228cm × 69cm × 39cm (width × depth × height)"
-        }
-      ]
+      "id": "product",
+      "label": "Product"
     }
   ],
   "presets": [
     {
-      "name": "Product Details Tabs",
-      "blocks": [
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Size",
-            "spec_value": "228cm × 69cm × 39cm (width × depth × height)"
-          }
-        },
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Weight",
-            "spec_value": "Net weight (85 kg), Gross weight (130 kg)"
-          }
-        },
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Material",
-            "spec_value": "White maple & fiber leather"
-          }
-        },
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Load-bearing",
-            "spec_value": "120kg"
-          }
-        },
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Drag (N)",
-            "spec_value": "6 Korean Springs"
-          }
-        },
-        {
-          "type": "specification",
-          "settings": {
-            "spec_label": "Standard Accessories",
-            "spec_value": "with box, jump board, soft platform, double straps, rope, D-type straps, foot strap, toolkit"
-          }
-        }
-      ]
+      "name": "Product Detail"
     }
   ]
 }
 {% endschema %}
+
+{% assign product = section.settings.product %}
+
+<style>
+  .product-detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+
+  .product-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    align-content: start;
+    height: fit-content;
+  }
+
+  .product-image {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+    background: #f5f5f5;
+  }
+
+  .product-info {
+    padding: 20px 0;
+  }
+
+  .product-title {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .product-price {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+
+  .product-description {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .description-more {
+    color: #999;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .size-selector {
+    margin: 30px 0;
+  }
+
+  .size-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .size-button {
+    padding: 12px 24px;
+    border: 2px solid #000;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transform: translateZ(0);
+    will-change: transform, background-color, color;
+  }
+
+  .size-button.selected {
+    background: #000;
+    color: #fff;
+  }
+
+  .size-button:hover {
+    background: #000;
+    color: #fff;
+  }
+
+  .size-button:active {
+    transform: scale(0.95);
+  }
+
+  .add-to-cart-btn {
+    width: 100%;
+    max-width: 200px;
+    padding: 16px 32px;
+    background: #000;
+    color: #fff;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    transition: background 0.3s;
+  }
+
+  .add-to-cart-btn:hover {
+    background: #333;
+  }
+
+  .product-details-section {
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+
+  .detail-item {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 0;
+  }
+
+  .detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .detail-toggle {
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .detail-content {
+    padding-top: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #333;
+  }
+
+  .detail-content p {
+    margin-bottom: 10px;
+  }
+
+  .delivery-option {
+    margin-bottom: 15px;
+  }
+
+  .delivery-option strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .more-links {
+    margin-top: 30px;
+  }
+
+  .more-links p {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .more-links a {
+    color: #00b300;
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .more-links a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 968px) {
+    .product-detail-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    .product-gallery {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .product-title {
+      font-size: 20px;
+    }
+
+    .product-price {
+      font-size: 24px;
+    }
+
+    .size-buttons {
+      gap: 8px;
+    }
+
+    .size-button {
+      padding: 10px 20px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<div class="product-detail-container">
+  <div class="product-gallery">
+    {% if product.images.size > 0 %}
+      {% for image in product.images limit: 4 %}
+        <img src="{{ image | img_url: '800x' }}" alt="{{ product.title }}" class="product-image">
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div class="product-info">
+    <h1 class="product-title">{{ product.title }}</h1>
+    
+    <div class="product-price">€{{ product.price | money_without_currency }}</div>
+
+    <div class="product-description">
+      {{ product.description }}
+      <span class="description-more">More</span>
+    </div>
+
+    <div class="size-selector">
+      <div class="size-buttons">
+        {% if product.variants.size > 0 %}
+          {% for variant in product.variants %}
+            <button class="size-button" data-variant-id="{{ variant.id }}">
+              {{ variant.title }}
+            </button>
+          {% endfor %}
+        {% else %}
+          <button class="size-button selected">SMALL</button>
+          <button class="size-button">MEDIUM</button>
+          <button class="size-button">LARGE</button>
+          <button class="size-button">X-LARGE</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <button class="add-to-cart-btn">ADD TO CART</button>
+
+    <div class="product-details-section">
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Details</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          <p>{{ product.metafields.custom.details | default: "No details available" }}</p>
+          <p><strong>ART. NO:</strong> {{ product.metafields.custom.art_no | default: "N/A" }}</p>
+          <div style="background:#f5f5f5;padding:10px;margin:10px 0;border-left:3px solid #ccc;">
+            <small><strong>调试信息:</strong><br>
+            details: {{ product.metafields.custom.details | json }}<br>
+            art_no: {{ product.metafields.custom.art_no | json }}<br>
+            size: {{ product.metafields.custom.size | json }}<br>
+            delivery: {{ product.metafields.custom.delivery | json }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Size & fit</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          <p>{{ product.metafields.custom.size | default: "No size information available" }}</p>
+        </div>
+      </div>
+
+      <div class="detail-item">
+        <div class="detail-header">
+          <span>Delivery</span>
+          <span class="detail-toggle">−</span>
+        </div>
+        <div class="detail-content">
+          {{ product.metafields.custom.delivery | default: "No delivery information available" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="more-links">
+      <p>More from <a href="#">Champion</a></p>
+      <p>More <a href="#">Hooded sweatshirts</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 从URL获取产品信息 - 支持产品句柄
+    const path = window.location.pathname;
+    const productHandle = path.split('/').pop();
+    
+    if (productHandle && productHandle !== 'products') {
+      fetchProductByHandle(productHandle);
+    }
+
+    // 通过产品句柄获取产品数据
+    function fetchProductByHandle(handle) {
+      fetch(`/products/${handle}.js`)
+        .then(response => response.json())
+        .then(product => {
+          updateProductDisplay(product);
+        })
+        .catch(error => {
+          console.error('Error fetching product by handle:', error);
+        });
+    }
+
+    // 更新产品展示
+    function updateProductDisplay(product) {
+      // 更新标题
+      const titleElement = document.querySelector('.product-title');
+      if (titleElement && product.title) {
+        titleElement.textContent = product.title;
+      }
+
+      // 更新价格
+      const priceElement = document.querySelector('.product-price');
+      if (priceElement && product.price) {
+        priceElement.textContent = `€${(product.price / 100).toFixed(2)}`;
+      }
+
+      // 更新描述
+      const descElement = document.querySelector('.product-description');
+      if (descElement && product.description) {
+        const shortDesc = product.description.substring(0, 150);
+        descElement.innerHTML = `${shortDesc}... <span class="description-more">More</span>`;
+      }
+
+      // 更新图片
+      const gallery = document.querySelector('.product-gallery');
+      if (gallery && product.images && product.images.length > 0) {
+        gallery.innerHTML = '';
+        product.images.slice(0, 4).forEach(image => {
+          const img = document.createElement('img');
+          img.src = image;
+          img.alt = product.title;
+          img.className = 'product-image';
+          gallery.appendChild(img);
+        });
+      }
+
+      // 更新尺码选项
+      const sizeContainer = document.querySelector('.size-buttons');
+      if (sizeContainer && product.variants && product.variants.length > 0) {
+        sizeContainer.innerHTML = '';
+        product.variants.forEach((variant, index) => {
+          const button = document.createElement('button');
+          button.className = `size-button ${index === 0 ? 'selected' : ''}`;
+          button.dataset.variantId = variant.id;
+          button.textContent = variant.title;
+          sizeContainer.appendChild(button);
+        });
+        
+        // 重新绑定尺码选择事件
+        bindSizeSelection();
+      }
+    }
+
+    // 尺码选择
+    function bindSizeSelection() {
+      const sizeButtons = document.querySelectorAll('.size-button');
+      sizeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          sizeButtons.forEach(btn => btn.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+    }
+
+    // 初始化尺码选择
+    bindSizeSelection();
+
+    // 详情折叠
+    const detailHeaders = document.querySelectorAll('.detail-header');
+    detailHeaders.forEach(header => {
+      header.addEventListener('click', function() {
+        const content = this.nextElementSibling;
+        const toggle = this.querySelector('.detail-toggle');
+        
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          toggle.textContent = '−';
+        } else {
+          content.style.display = 'none';
+          toggle.textContent = '+';
+        }
+      });
+    });
+
+    // 添加到购物车
+    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+    addToCartBtn.addEventListener('click', function() {
+      const selectedSize = document.querySelector('.size-button.selected');
+      if (!selectedSize) {
+        alert('Please select a size');
+        return;
+      }
+
+      const variantId = selectedSize.dataset.variantId;
+      
+      // 调用Shopify Cart API添加商品
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: 1
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // 添加成功提示
+        addToCartBtn.textContent = 'ADDED!';
+        addToCartBtn.style.background = '#00b300';
+        
+        setTimeout(() => {
+          addToCartBtn.textContent = 'ADD TO CART';
+          addToCartBtn.style.background = '#000';
+        }, 2000);
+
+        // 更新购物车数量
+        updateCartCount();
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+        alert('Failed to add to cart. Please try again.');
+      });
+    });
+
+    // 更新购物车数量
+    function updateCartCount() {
+      fetch('/cart.js')
+        .then(response => response.json())
+        .then(cart => {
+          const cartCount = cart.item_count;
+          // 更新页面上的购物车数量显示
+          const cartCountElements = document.querySelectorAll('.cart-count');
+          cartCountElements.forEach(element => {
+            element.textContent = cartCount;
+          });
+        });
+    }
+  });
+</script>
