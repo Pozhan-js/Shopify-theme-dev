@@ -104,13 +104,18 @@
     width: 100%;
   }
   
-  /* 所有图片通用样式 */
+  /* 所有图片通用样式 - 添加出现动画效果 */
   .text-image-section img {
     border-radius: var(--global-border-radius);
-    opacity: 1;
+    opacity: 0;
     transition-property: opacity;
     transition-duration: .5s;
     transition-delay: 0.5s;
+  }
+  
+  /* 图片加载完成后显示 */
+  .text-image-section img.loaded {
+    opacity: 1;
   }
   
   /* 单张图片 */
@@ -438,6 +443,25 @@
     }
   }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 为所有图片添加加载完成后的动画效果
+    const images = document.querySelectorAll('.text-image-section img');
+    
+    images.forEach(function(img) {
+      if (img.complete) {
+        // 图片已经加载完成
+        img.classList.add('loaded');
+      } else {
+        // 图片还在加载中，监听加载完成事件
+        img.addEventListener('load', function() {
+          img.classList.add('loaded');
+        });
+      }
+    });
+  });
+</script>
 
 <section class="text-image-section">
   <div class="container">
