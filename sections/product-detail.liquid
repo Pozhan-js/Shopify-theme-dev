@@ -16,7 +16,25 @@
 }
 {% endschema %}
 
-{% assign product = section.settings.product %}
+{% comment %} 从URL获取产品信息 - 参考test_product.liquid的方法 {% endcomment %}
+{% assign url_parts = request.path | split: '/' %}
+{% assign product_handle = '' %}
+
+{% for part in url_parts %}
+  {% if part contains 'products' %}
+    {% assign product_index = forloop.index %}
+    {% if url_parts.size > product_index %}
+      {% assign product_handle = url_parts[product_index] %}
+    {% endif %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% if product_handle == blank %}
+  {% assign product_handle = section.settings.product.handle %}
+{% endif %}
+
+{% assign current_product = all_products[product_handle] %}
 
 <style>
   .product-detail-container {
@@ -230,28 +248,34 @@
 </style>
 
 <div class="product-detail-container">
+  {% comment %} 使用当前产品或从URL获取的产品 {% endcomment %}
+  {% assign product_to_use = current_product %}
+  {% if product_to_use == blank %}
+    {% assign product_to_use = product %}
+  {% endif %}
+
   <div class="product-gallery">
-    {% if product.images.size > 0 %}
-      {% for image in product.images limit: 4 %}
-        <img src="{{ image | img_url: '800x' }}" alt="{{ product.title }}" class="product-image">
+    {% if product_to_use.images.size > 0 %}
+      {% for image in product_to_use.images limit: 4 %}
+        <img src="{{ image | img_url: '800x' }}" alt="{{ product_to_use.title }}" class="product-image">
       {% endfor %}
     {% endif %}
   </div>
 
   <div class="product-info">
-    <h1 class="product-title">{{ product.title }}</h1>
+    <h1 class="product-title">{{ product_to_use.title }}</h1>
     
-    <div class="product-price">€{{ product.price | money_without_currency }}</div>
+    <div class="product-price">€{{ product_to_use.price | money_without_currency }}</div>
 
     <div class="product-description">
-      {{ product.description }}
+      {{ product_to_use.description }}
       <span class="description-more">More</span>
     </div>
 
     <div class="size-selector">
       <div class="size-buttons">
-        {% if product.variants.size > 0 %}
-          {% for variant in product.variants %}
+        {% if product_to_use.variants.size > 0 %}
+          {% for variant in product_to_use.variants %}
             <button class="size-button" data-variant-id="{{ variant.id }}">
               {{ variant.title }}
             </button>
@@ -275,16 +299,16 @@
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-          {% if product.metafields.custom.details %}
-            <p>{{ product.metafields.custom.details }}</p>
+          {% if product_to_use.metafields.custom.details %}
+            <p>{{ product_to_use.metafields.custom.details }}</p>
           {% else %}
             <p>Premium quality materials with attention to detail. Designed for comfort and durability.</p>
           {% endif %}
           
-          {% if product.metafields.custom.art_no %}
-            <p><strong>ART. NO:</strong> {{ product.metafields.custom.art_no }}</p>
+          {% if product_to_use.metafields.custom.art_no %}
+            <p><strong>ART. NO:</strong> {{ product_to_use.metafields.custom.art_no }}</p>
           {% else %}
-            <p><strong>ART. NO:</strong> {{ product.id }}</p>
+            <p><strong>ART. NO:</strong> {{ product_to_use.id }}</p>
           {% endif %}
         </div>
       </div>
@@ -295,8 +319,8 @@
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-          {% if product.metafields.custom.size %}
-            <p>{{ product.metafields.custom.size }}</p>
+          {% if product_to_use.metafields.custom.size %}
+            <p>{{ product_to_use.metafields.custom.size }}</p>
           {% else %}
             <p>Model is 185cm/6'1" and wears size M</p>
             <p>Regular fit - true to size</p>
@@ -316,8 +340,8 @@
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-          {% if product.metafields.custom.delivery %}
-            {{ product.metafields.custom.delivery }}
+          {% if product_to_use.metafields.custom.delivery %}
+            {{ product_to_use.metafields.custom.delivery }}
           {% else %}
             <div class="delivery-option">
               <strong>Standard Delivery (3-5 business days)</strong>
