@@ -112,141 +112,143 @@
         {% endif %}
 
         <!-- 颜色选择区域 -->
-        {% if section.settings.showcolorselection %}
-          <div class="prf-color-selection">
-            <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
-            <div class="prf-color-options">
-              {% comment %} 优先显示区块配置的颜色选项，确保总是有内容显示 {% endcomment %}
-              {% assign has_colors = false %}
-              
-              {% comment %} 首先尝试从产品获取颜色选项 {% endcomment %}
-              {% if displayproduct and displayproduct.options_with_values.size > 0 %}
-                {% assign firstcolorprocessed = false %}
-                {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
+        {% if product.metafields.custom.color_show %}
+          {% if section.settings.showcolorselection %}
+            <div class="prf-color-selection">
+              <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
+              <div class="prf-color-options">
+                {% comment %} 优先显示区块配置的颜色选项，确保总是有内容显示 {% endcomment %}
+                {% assign has_colors = false %}
                 
-                {% for option in displayproduct.options_with_values %}
-                  {% assign optionnamelower = option.name | downcase %}
-                  {% assign targetnamelower = coloroptionname | downcase %}
+                {% comment %} 首先尝试从产品获取颜色选项 {% endcomment %}
+                {% if displayproduct and displayproduct.options_with_values.size > 0 %}
+                  {% assign firstcolorprocessed = false %}
+                  {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
                   
-                  {% if optionnamelower == targetnamelower or optionnamelower == '颜色' or optionnamelower == 'color' or optionnamelower == 'colour' or optionnamelower == 'upholstery' or optionnamelower == 'fabric' %}
-                    {% assign has_colors = true %}
-                    {% for value in option.values %}
-                      {% assign variantfound = false %}
-                      {% assign variantid = '' %}
-                      {% assign variantimage = '' %}
-                      {% assign colorhex = '#CCCCCC' %}
-                      
-                      {% comment %} 尝试获取颜色值 {% endcomment %}
-                      {% assign colorswatch = value.swatch %}
-                      {% if colorswatch and colorswatch.color %}
-                        {% assign colorhex = colorswatch.color %}
-                      {% else %}
-                        {% assign valuelower = value | downcase %}
-                        {% case valuelower %}
-                          {% when 'black' %}
-                            {% assign colorhex = '#000000' %}
-                          {% when 'white' %}
-                            {% assign colorhex = '#FFFFFF' %}
-                          {% when 'red' %}
-                            {% assign colorhex = '#FF0000' %}
-                          {% when 'blue' %}
-                            {% assign colorhex = '#0000FF' %}
-                          {% when 'green' %}
-                            {% assign colorhex = '#008000' %}
-                          {% when 'gray', 'grey' %}
-                            {% assign colorhex = '#808080' %}
-                          {% when 'steel gray', 'steel grey' %}
-                            {% assign colorhex = '#71797E' %}
-                          {% when 'brown' %}
-                            {% assign colorhex = '#8B4513' %}
-                          {% when 'navy' %}
-                            {% assign colorhex = '#000080' %}
-                          {% when 'beige' %}
-                            {% assign colorhex = '#F5F5DC' %}
-                          {% when 'tan' %}
-                            {% assign colorhex = '#D2B48C' %}
+                  {% for option in displayproduct.options_with_values %}
+                    {% assign optionnamelower = option.name | downcase %}
+                    {% assign targetnamelower = coloroptionname | downcase %}
+                    
+                    {% if optionnamelower == targetnamelower or optionnamelower == '颜色' or optionnamelower == 'color' or optionnamelower == 'colour' or optionnamelower == 'upholstery' or optionnamelower == 'fabric' %}
+                      {% assign has_colors = true %}
+                      {% for value in option.values %}
+                        {% assign variantfound = false %}
+                        {% assign variantid = '' %}
+                        {% assign variantimage = '' %}
+                        {% assign colorhex = '#CCCCCC' %}
+                        
+                        {% comment %} 尝试获取颜色值 {% endcomment %}
+                        {% assign colorswatch = value.swatch %}
+                        {% if colorswatch and colorswatch.color %}
+                          {% assign colorhex = colorswatch.color %}
+                        {% else %}
+                          {% assign valuelower = value | downcase %}
+                          {% case valuelower %}
+                            {% when 'black' %}
+                              {% assign colorhex = '#000000' %}
+                            {% when 'white' %}
+                              {% assign colorhex = '#FFFFFF' %}
+                            {% when 'red' %}
+                              {% assign colorhex = '#FF0000' %}
+                            {% when 'blue' %}
+                              {% assign colorhex = '#0000FF' %}
+                            {% when 'green' %}
+                              {% assign colorhex = '#008000' %}
+                            {% when 'gray', 'grey' %}
+                              {% assign colorhex = '#808080' %}
+                            {% when 'steel gray', 'steel grey' %}
+                              {% assign colorhex = '#71797E' %}
+                            {% when 'brown' %}
+                              {% assign colorhex = '#8B4513' %}
+                            {% when 'navy' %}
+                              {% assign colorhex = '#000080' %}
+                            {% when 'beige' %}
+                              {% assign colorhex = '#F5F5DC' %}
+                            {% when 'tan' %}
+                              {% assign colorhex = '#D2B48C' %}
+                            {% else %}
+                              {% assign colorhex = '#CCCCCC' %}
+                          {% endcase %}
+                        {% endif %}
+                        
+                        {% comment %} 查找对应的变体 {% endcomment %}
+                        {% for variant in displayproduct.variants %}
+                          {% assign valuematches = false %}
+                          
+                          {% if variant.option1 == value %}
+                            {% assign valuematches = true %}
+                          {% elsif variant.option2 == value %}
+                            {% assign valuematches = true %}
+                          {% elsif variant.option3 == value %}
+                            {% assign valuematches = true %}
+                          {% endif %}
+                          
+                          {% if valuematches and variantfound == false %}
+                            {% assign variantfound = true %}
+                            {% assign variantid = variant.id %}
+                            
+                            {% if variant.image %}
+                              {% assign variantimage = variant.image | image_url: width: 1200 %}
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% unless colorhex contains '#' %}
+                          {% if colorhex != '' %}
+                            {% assign colorhex = '#' | append: colorhex %}
                           {% else %}
                             {% assign colorhex = '#CCCCCC' %}
-                        {% endcase %}
-                      {% endif %}
-                      
-                      {% comment %} 查找对应的变体 {% endcomment %}
-                      {% for variant in displayproduct.variants %}
-                        {% assign valuematches = false %}
-                        
-                        {% if variant.option1 == value %}
-                          {% assign valuematches = true %}
-                        {% elsif variant.option2 == value %}
-                          {% assign valuematches = true %}
-                        {% elsif variant.option3 == value %}
-                          {% assign valuematches = true %}
-                        {% endif %}
-                        
-                        {% if valuematches and variantfound == false %}
-                          {% assign variantfound = true %}
-                          {% assign variantid = variant.id %}
-                          
-                          {% if variant.image %}
-                            {% assign variantimage = variant.image | image_url: width: 1200 %}
                           {% endif %}
-                        {% endif %}
+                        {% endunless %}
+                        
+                        <div class="prf-color-option {% unless firstcolorprocessed %}prf-selected{% endunless %}" 
+                            data-color="{{ value }}"
+                            data-variant-id="{{ variantid }}"
+                            data-variant-image="{{ variantimage }}"
+                            data-color-hex="{{ colorhex }}">
+                          <div class="prf-color-swatch" style="background-color: {{ colorhex }};">
+                            {% unless firstcolorprocessed %}
+                              <div class="prf-color-checkmark">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
+                                </svg>
+                              </div>
+                              {% assign firstcolorprocessed = true %}
+                            {% endunless %}
+                          </div>
+                          <span class="prf-color-name">{{ value }}</span>
+                        </div>
                       {% endfor %}
-                      
-                      {% unless colorhex contains '#' %}
-                        {% if colorhex != '' %}
-                          {% assign colorhex = '#' | append: colorhex %}
-                        {% else %}
-                          {% assign colorhex = '#CCCCCC' %}
-                        {% endif %}
-                      {% endunless %}
-                      
-                      <div class="prf-color-option {% unless firstcolorprocessed %}prf-selected{% endunless %}" 
-                           data-color="{{ value }}"
-                           data-variant-id="{{ variantid }}"
-                           data-variant-image="{{ variantimage }}"
-                           data-color-hex="{{ colorhex }}">
-                        <div class="prf-color-swatch" style="background-color: {{ colorhex }};">
-                          {% unless firstcolorprocessed %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                
+                {% comment %} 如果没有从产品获取到颜色，或者没有产品，使用区块配置的颜色 {% endcomment %}
+                {% unless has_colors %}
+                  {% for block in section.blocks %}
+                    {% if block.type == 'coloroption' %}
+                      <div class="prf-color-option {% if block.settings.isselected %}prf-selected{% endif %}"
+                          {{ block.shopifyattributes }}
+                          data-color="{{ block.settings.colorname }}"
+                          data-color-hex="{{ block.settings.colorvalue }}">
+                        <div class="prf-color-swatch" style="background-color: {{ block.settings.colorvalue }};">
+                          {% if block.settings.isselected %}
                             <div class="prf-color-checkmark">
                               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
                               </svg>
                             </div>
-                            {% assign firstcolorprocessed = true %}
-                          {% endunless %}
+                          {% endif %}
                         </div>
-                        <span class="prf-color-name">{{ value }}</span>
+                        <span class="prf-color-name">{{ block.settings.colorname }}</span>
                       </div>
-                    {% endfor %}
-                    {% break %}
-                  {% endif %}
-                {% endfor %}
-              {% endif %}
-              
-              {% comment %} 如果没有从产品获取到颜色，或者没有产品，使用区块配置的颜色 {% endcomment %}
-              {% unless has_colors %}
-                {% for block in section.blocks %}
-                  {% if block.type == 'coloroption' %}
-                    <div class="prf-color-option {% if block.settings.isselected %}prf-selected{% endif %}"
-                         {{ block.shopifyattributes }}
-                         data-color="{{ block.settings.colorname }}"
-                         data-color-hex="{{ block.settings.colorvalue }}">
-                      <div class="prf-color-swatch" style="background-color: {{ block.settings.colorvalue }};">
-                        {% if block.settings.isselected %}
-                          <div class="prf-color-checkmark">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                            </svg>
-                          </div>
-                        {% endif %}
-                      </div>
-                      <span class="prf-color-name">{{ block.settings.colorname }}</span>
-                    </div>
-                  {% endif %}
-                {% endfor %}
-              {% endunless %}
+                    {% endif %}
+                  {% endfor %}
+                {% endunless %}
+              </div>
             </div>
-          </div>
+          {% endif %}
         {% endif %}
       </div>
     </div>
