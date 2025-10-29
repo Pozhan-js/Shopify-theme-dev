@@ -136,19 +136,24 @@
     width: 100%;
     max-width: 200px;
     padding: 16px 32px;
-    background: #000;
+    background: #aaa;
     color: #fff;
     border: none;
     font-size: 14px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: not-allowed;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 40px;
     transition: background 0.3s;
   }
 
-  .add-to-cart-btn:hover {
+  .add-to-cart-btn:not(:disabled) {
+    background: #000;
+    cursor: pointer;
+  }
+
+  .add-to-cart-btn:not(:disabled):hover {
     background: #333;
   }
 
@@ -376,8 +381,10 @@
     const sizeButtons = document.querySelectorAll('.size-button');
     const addToCartBtn = document.querySelector('.add-to-cart-btn');
     
+    // 确保按钮可点击
     sizeButtons.forEach(button => {
       button.addEventListener('click', function() {
+        console.log('Size button clicked:', this.textContent);
         sizeButtons.forEach(btn => btn.classList.remove('selected'));
         this.classList.add('selected');
         
@@ -385,6 +392,7 @@
         addToCartBtn.disabled = false;
         addToCartBtn.textContent = 'ADD TO CART';
         addToCartBtn.style.background = '#000';
+        addToCartBtn.style.cursor = 'pointer';
       });
     });
 
@@ -406,7 +414,6 @@
     });
 
     // 添加到购物车
-    const addToCartBtn = document.querySelector('.add-to-cart-btn');
     addToCartBtn.addEventListener('click', function() {
       const selectedSize = document.querySelector('.size-button.selected');
       if (!selectedSize) {
