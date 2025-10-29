@@ -1,90 +1,29 @@
 {%- comment -%}
-Delivery Renderer for Shopify Metafields - 处理JSON格式的富文本
+Delivery Renderer for Shopify Metafields - 使用metafield_tag正确渲染富文本
 Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.delivery %}
 {%- endcomment -%}
 
 {%- assign delivery_content = delivery_text | default: '' -%}
 
-{%- comment -%} 处理JSON格式的delivery信息 {%- endcomment -%}
-<div class="delivery-content">
-  {%- if delivery_content contains '"type":"root"' -%}
-    {%- comment -%} 解析UPS Standard信息 {%- endcomment -%}
+{%- if delivery_content != blank -%}
+  {{ delivery_content | metafield_tag }}
+{%- else -%}
+  {%- comment -%} 回退显示 {%- endcomment -%}
+  <div class="delivery-options">
     <div class="delivery-option">
-      <strong>UPS Standard</strong>
-      <p>€18 - €35<br>5-10 days</p>
+      <strong>Standard Delivery (3-5 business days)</strong>
+      <p>Free on orders over €50</p>
     </div>
-    
-    {%- comment -%} 解析UPS Express信息 {%- endcomment -%}
     <div class="delivery-option">
-      <strong>UPS Express</strong>
-      <p>€35 - €50<br>2-4 working days</p>
+      <strong>Express Delivery (1-2 business days)</strong>
+      <p>€9.95</p>
     </div>
-    
-    {%- comment -%} 国际订单说明 {%- endcomment -%}
-    <div class="delivery-note">
-      <p>Orders shipped outside the EU might have import duties, VAT, or handling fees added when they arrive. These are set locally and not included in your purchase price. See details <a href="https://tres-bien.com/pages/help">here</a>.</p>
+    <div class="delivery-option">
+      <strong>Click & Collect</strong>
+      <p>Free - Pick up in store within 2 hours</p>
     </div>
-    
-    {%- comment -%} 发货时间说明 {%- endcomment -%}
-    <div class="delivery-note">
-      <p>Goods will be dispatched and shipped on and during regular working days.</p>
-    </div>
-    
-  {%- else -%}
-    {%- comment -%} 回退到普通文本显示 {%- endcomment -%}
-    {{ delivery_content | newline_to_br }}
-  {%- endif -%}
-</div>
-
-<style>
-.delivery-content {
-  margin: 20px 0;
-}
-
-.delivery-option {
-  margin-bottom: 15px;
-  padding: 15px;
-  border-left: 3px solid #C89F73;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-}
-
-.delivery-option strong {
-  display: block;
-  margin-bottom: 5px;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.delivery-option p {
-  margin: 0;
-  color: #666;
-  line-height: 1.5;
-}
-
-.delivery-note {
-  margin: 15px 0;
-  padding: 12px;
-  background-color: #fff8e1;
-  border-left: 3px solid #ffa726;
-  border-radius: 4px;
-}
-
-.delivery-note p {
-  margin: 0;
-  color: #555;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.delivery-note a {
-  color: #C89F73;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.delivery-note a:hover {
-  text-decoration: underline;
-}
-</style>
+    <p style="margin-top:15px;">
+      <a href="/pages/shipping-info" style="color:#00b300;text-decoration:underline;">View full delivery information</a>
+    </p>
+  </div>
+{%- endif -%}
