@@ -8,69 +8,68 @@
 <nav class="header__inline-menu vertical-menu">
   <ul class="list-menu vertical-menu__list" role="list">
     {%- for link in section.settings.menu.links -%}
-      <li>
+      <li class="menu-item-wrapper">
         {%- if link.links != blank -%}
-          <header-menu>
-            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
-              <summary
-                id="HeaderMenu-{{ link.handle }}"
-                class="header__menu-item list-menu__item link focus-inset"
-                style="padding: 0.8rem 1rem; display: flex; align-items: center; gap: 5px;"
+          <div class="menu-item-with-submenu">
+            <a
+              id="HeaderMenu-{{ link.handle }}"
+              href="{{ link.url }}"
+              class="header__menu-item list-menu__item link focus-inset"
+              style="padding: 0.8rem 1rem; display: flex; align-items: center; gap: 5px;"
+            >
+              <span
+                {%- if link.child_active %}
+                  class="header__active-menu-item"
+                {% endif %}
               >
-                <span
-                  {%- if link.child_active %}
-                    class="header__active-menu-item"
-                  {% endif %}
-                >
-                  {{- link.title | escape -}}
-                </span>
-                <span class="custom-arrow">></span>
-              </summary>
-              <div
-                id="MegaMenu-Content-{{ forloop.index }}"
-                class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
-                tabindex="-1"
+                {{- link.title | escape -}}
+              </span>
+              <span class="custom-arrow">></span>
+            </a>
+            <div
+              id="MegaMenu-Content-{{ forloop.index }}"
+              class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
+              tabindex="-1"
+            >
+              <ul
+                class="mega-menu__list {% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
+                role="list"
               >
-                <ul
-                  class="mega-menu__list {% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
-                  role="list"
-                >
-                  {%- for childlink in link.links -%}
-                    <li>
-                      <a
-                        id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
-                        href="{{ childlink.url }}"
-                        class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
-                        {% if childlink.current %}
-                          aria-current="page"
-                        {% endif %}
-                      >
-                        {{ childlink.title | escape }}
-                      </a>
-                      {%- if childlink.links != blank -%}
-                        <ul class="list-unstyled" role="list">
-                          {%- for grandchildlink in childlink.links -%}
-                            <li>
-                              <a
-                                id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
-                                href="{{ grandchildlink.url }}"
-                                class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
-                                {% if grandchildlink.current %}
-                                  aria-current="page"
-                                {% endif %}
-                              >
-                                {{ grandchildlink.title | escape }}
-                              </a>
-                            </li>
-                          {%- endfor -%}
-                        </ul>
-                      {%- endif -%}
-                    </li>
-                  {%- endfor -%}
-                </ul>
-              </div>
-            </details>
-          </header-menu>
+                {%- for childlink in link.links -%}
+                  <li>
+                    <a
+                      id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                      href="{{ childlink.url }}"
+                      class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
+                      {% if childlink.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{ childlink.title | escape }}
+                    </a>
+                    {%- if childlink.links != blank -%}
+                      <ul class="list-unstyled" role="list">
+                        {%- for grandchildlink in childlink.links -%}
+                          <li>
+                            <a
+                              id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                              href="{{ grandchildlink.url }}"
+                              class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
+                              {% if grandchildlink.current %}
+                                aria-current="page"
+                              {% endif %}
+                            >
+                              {{ grandchildlink.title | escape }}
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          </div>
         {%- else -%}
           <a
             id="HeaderMenu-{{ link.handle }}"
@@ -158,7 +157,17 @@
     height: 100vh;
   }
 
-  /* 二级菜单样式 */
+  /* 二级菜单样式 - hover时显示 */
+  .menu-item-with-submenu {
+    position: relative;
+  }
+
+  .menu-item-with-submenu:hover .mega-menu__content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
+
   .mega-menu__content {
     position: absolute;
     left: 280px; /* 一级菜单宽度 */
@@ -170,6 +179,10 @@
     overflow-y: auto;
     z-index: 998;
     padding-bottom: 66px!important;
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
   
   .mega-menu__content .mega-menu__list {
@@ -205,8 +218,8 @@
     padding: 1rem;
   }
 
-  .mega-menu,.mega-menu {
-    position: static;
+  .menu-item-wrapper {
+    position: relative;
   }
 
   @media screen and (max-width: 768px) {
@@ -219,6 +232,9 @@
       position: relative;
       left: 0;
       width: 100%;
+      display: block;
+      opacity: 1;
+      visibility: visible;
     }
   }
 </style>
