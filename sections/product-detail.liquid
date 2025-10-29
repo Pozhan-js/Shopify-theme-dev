@@ -268,24 +268,21 @@
     <button class="add-to-cart-btn">ADD TO CART</button>
 
     <div class="product-details-section">
-      {% comment %} 元字段数据获取 - 支持多种访问方式 {% endcomment %}
-      {% assign details_value = product.metafields.custom.details.value | default: product.metafields.custom.details %}
-      {% assign art_no_value = product.metafields.custom.art_no.value | default: product.metafields.custom.art_no %}
-      {% assign size_value = product.metafields.custom.size.value | default: product.metafields.custom.size %}
-      {% assign delivery_value = product.metafields.custom.delivery.value | default: product.metafields.custom.delivery %}
-
+      {% comment %} 使用Liquid直接获取产品元字段 {% endcomment %}
       <div class="detail-item">
         <div class="detail-header">
           <span>Details</span>
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-            <p>{{ product.title }}</p>
+          {% if product.metafields.custom.details %}
             <p>{{ product.metafields.custom.details }}</p>
-           <p>{{ details_value }}</p>
+          {% else %}
+            <p>Premium quality materials with attention to detail. Designed for comfort and durability.</p>
+          {% endif %}
           
-          {% if art_no_value != blank %}
-            <p><strong>ART. NO:</strong> {{ art_no_value }}</p>
+          {% if product.metafields.custom.art_no %}
+            <p><strong>ART. NO:</strong> {{ product.metafields.custom.art_no }}</p>
           {% else %}
             <p><strong>ART. NO:</strong> {{ product.id }}</p>
           {% endif %}
@@ -298,8 +295,8 @@
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-          {% if size_value != blank %}
-            <p>{{ size_value }}</p>
+          {% if product.metafields.custom.size %}
+            <p>{{ product.metafields.custom.size }}</p>
           {% else %}
             <p>Model is 185cm/6'1" and wears size M</p>
             <p>Regular fit - true to size</p>
@@ -319,8 +316,8 @@
           <span class="detail-toggle">−</span>
         </div>
         <div class="detail-content">
-          {% if delivery_value != blank %}
-            {{ delivery_value }}
+          {% if product.metafields.custom.delivery %}
+            {{ product.metafields.custom.delivery }}
           {% else %}
             <div class="delivery-option">
               <strong>Standard Delivery (3-5 business days)</strong>
@@ -351,90 +348,14 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // 从URL获取产品信息 - 支持产品句柄
-    const path = window.location.pathname;
-    const productHandle = path.split('/').pop();
-    
-    if (productHandle && productHandle !== 'products') {
-      fetchProductByHandle(productHandle);
-    }
-
-    // 通过产品句柄获取产品数据
-    function fetchProductByHandle(handle) {
-      fetch(`/products/${handle}.js`)
-        .then(response => response.json())
-        .then(product => {
-          updateProductDisplay(product);
-        })
-        .catch(error => {
-          console.error('Error fetching product by handle:', error);
-        });
-    }
-
-    // 更新产品展示
-    function updateProductDisplay(product) {
-      // 更新标题
-      const titleElement = document.querySelector('.product-title');
-      if (titleElement && product.title) {
-        {% comment %} titleElement.textContent = product.title; {% endcomment %}
-      }
-
-      // 更新价格
-      const priceElement = document.querySelector('.product-price');
-      if (priceElement && product.price) {
-        priceElement.textContent = `€${(product.price / 100).toFixed(2)}`;
-      }
-
-      // 更新描述
-      const descElement = document.querySelector('.product-description');
-      if (descElement && product.description) {
-        const shortDesc = product.description.substring(0, 150);
-        descElement.innerHTML = `${shortDesc}... <span class="description-more">More</span>`;
-      }
-
-      // 更新图片
-      const gallery = document.querySelector('.product-gallery');
-      if (gallery && product.images && product.images.length > 0) {
-        gallery.innerHTML = '';
-        product.images.slice(0, 4).forEach(image => {
-          const img = document.createElement('img');
-          img.src = image;
-          img.alt = product.title;
-          img.className = 'product-image';
-          gallery.appendChild(img);
-        });
-      }
-
-      // 更新尺码选项
-      const sizeContainer = document.querySelector('.size-buttons');
-      if (sizeContainer && product.variants && product.variants.length > 0) {
-        sizeContainer.innerHTML = '';
-        product.variants.forEach((variant, index) => {
-          const button = document.createElement('button');
-          button.className = `size-button ${index === 0 ? 'selected' : ''}`;
-          button.dataset.variantId = variant.id;
-          button.textContent = variant.title;
-          sizeContainer.appendChild(button);
-        });
-        
-        // 重新绑定尺码选择事件
-        bindSizeSelection();
-      }
-    }
-
     // 尺码选择
-    function bindSizeSelection() {
-      const sizeButtons = document.querySelectorAll('.size-button');
-      sizeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-          sizeButtons.forEach(btn => btn.classList.remove('selected'));
-          this.classList.add('selected');
-        });
+    const sizeButtons = document.querySelectorAll('.size-button');
+    sizeButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        sizeButtons.forEach(btn => btn.classList.remove('selected'));
+        this.classList.add('selected');
       });
-    }
-
-    // 初始化尺码选择
-    bindSizeSelection();
+    });
 
     // 详情折叠
     const detailHeaders = document.querySelectorAll('.detail-header');
