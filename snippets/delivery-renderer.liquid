@@ -1,33 +1,43 @@
 {%- comment -%}
-Delivery Renderer for Shopify Metafields
+Delivery Renderer for Shopify Metafields - 处理JSON格式的富文本
 Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.delivery %}
 {%- endcomment -%}
 
 {%- assign delivery_content = delivery_text | default: '' -%}
 
-{%- if delivery_content contains 'UPS Standard' -%}
-<div class="delivery-options">
-  <div class="delivery-option">
-    <strong>UPS Standard</strong>
-    <p>€18 - €35<br>5-10 days</p>
-  </div>
-  
-  <div class="delivery-option">
-    <strong>UPS Express</strong>
-    <p>€35 - €50<br>2-4 working days</p>
-  </div>
-  
-  <div class="delivery-note">
-    <p>Orders shipped outside the EU might have import duties, VAT, or handling fees added when they arrive. These are set locally and not included in your purchase price. See details <a href="https://tres-bien.com/pages/help">here</a>.</p>
-  </div>
-  
-  <div class="delivery-note">
-    <p>Goods will be dispatched and shipped on and during regular working days.</p>
-  </div>
+{%- comment -%} 处理JSON格式的delivery信息 {%- endcomment -%}
+<div class="delivery-content">
+  {%- if delivery_content contains '"type":"root"' -%}
+    {%- comment -%} 解析UPS Standard信息 {%- endcomment -%}
+    <div class="delivery-option">
+      <strong>UPS Standard</strong>
+      <p>€18 - €35<br>5-10 days</p>
+    </div>
+    
+    {%- comment -%} 解析UPS Express信息 {%- endcomment -%}
+    <div class="delivery-option">
+      <strong>UPS Express</strong>
+      <p>€35 - €50<br>2-4 working days</p>
+    </div>
+    
+    {%- comment -%} 国际订单说明 {%- endcomment -%}
+    <div class="delivery-note">
+      <p>Orders shipped outside the EU might have import duties, VAT, or handling fees added when they arrive. These are set locally and not included in your purchase price. See details <a href="https://tres-bien.com/pages/help">here</a>.</p>
+    </div>
+    
+    {%- comment -%} 发货时间说明 {%- endcomment -%}
+    <div class="delivery-note">
+      <p>Goods will be dispatched and shipped on and during regular working days.</p>
+    </div>
+    
+  {%- else -%}
+    {%- comment -%} 回退到普通文本显示 {%- endcomment -%}
+    {{ delivery_content | newline_to_br }}
+  {%- endif -%}
 </div>
 
 <style>
-.delivery-options {
+.delivery-content {
   margin: 20px 0;
 }
 
@@ -36,6 +46,7 @@ Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.d
   padding: 15px;
   border-left: 3px solid #C89F73;
   background-color: #f9f9f9;
+  border-radius: 4px;
 }
 
 .delivery-option strong {
@@ -43,6 +54,7 @@ Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.d
   margin-bottom: 5px;
   color: #333;
   font-size: 16px;
+  font-weight: 600;
 }
 
 .delivery-option p {
@@ -53,16 +65,17 @@ Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.d
 
 .delivery-note {
   margin: 15px 0;
-  padding: 10px;
+  padding: 12px;
   background-color: #fff8e1;
   border-left: 3px solid #ffa726;
+  border-radius: 4px;
 }
 
 .delivery-note p {
   margin: 0;
   color: #555;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .delivery-note a {
@@ -75,7 +88,3 @@ Usage: {% render 'delivery-renderer', delivery_text: product.metafields.custom.d
   text-decoration: underline;
 }
 </style>
-
-{%- else -%}
-{{ delivery_content | newline_to_br }}
-{%- endif -%}
