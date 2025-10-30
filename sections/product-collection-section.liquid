@@ -4,7 +4,6 @@
     <div class="collection-header">
       {% comment %} 优先使用产品系列的标题和描述 {% endcomment %}
       {% if target_collection %}
- 
         <h2 class="collection-title">{{ target_collection.title | default: section.settings.collection_title }}</h2>
         
         {% if target_collection.description != blank %}
@@ -115,10 +114,18 @@
                   <a href="{{ product.url }}">{{ product.title }}</a>
                 </h3>
                 
+                {% comment %} 获取产品型号 - 从产品标签或自定义字段中获取 {% endcomment %}
+                {% assign model_number = '' %}
+                {% for tag in product.tags %}
+                  {% if tag contains 'model:' %}
+                    {% assign model_number = tag | remove: 'model:' %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
                 
                 {% comment %} 如果没有从标签获取到型号，尝试从产品元字段获取 {% endcomment %}
-                {% if product.metafields.custom.tag %}
-                  {% assign model_number = product.metafields.custom.tag %}
+                {% if model_number == blank and product.metafields.custom.model_number %}
+                  {% assign model_number = product.metafields.custom.model_number %}
                 {% endif %}
                 
                 {% comment %} 如果还是没有，使用默认格式 {% endcomment %}
