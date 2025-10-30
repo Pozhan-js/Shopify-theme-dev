@@ -1,96 +1,88 @@
+{%- liquid
+  assign target_collection = null
+
+  if request.page_type == 'collection'
+    assign target_collection = collection
+  elsif request.page_type == 'page'
+    assign page_url_parts = page.url | split: '/'
+    for part in page_url_parts
+      if collections[part]
+        assign target_collection = collections[part]
+        break
+      endif
+    endfor
+
+    if target_collection == null
+      assign url_params = request.url | split: '?'
+      if url_params.size > 1
+        assign query_string = url_params[1]
+        assign query_params = query_string | split: '&'
+        for param in query_params
+          assign param_parts = param | split: '='
+          if param_parts[0] == 'collection' or param_parts[0] == 'c'
+            assign collection_handle = param_parts[1]
+            assign target_collection = collections[collection_handle]
+            break
+          endif
+        endfor
+      endif
+    endif
+  endif
+-%}
+
 <div class="product-collection-section" {{ section.shopify_attributes }}>
   <div class="product-collection-container">
     <!-- 标题和描述区域 -->
     <div class="collection-header">
-      {% comment %} 优先使用产品系列的标题和描述 {% endcomment %}
-      {% if target_collection %}
-        <h2 class="collection-title">{{ target_collection.title | default: section.settings.collection_title }}</h2>
+      {% comment %} 获取产品系列对象 {% endcomment %}
+      {% assign current_collection = target_collection %}
 
-        {% if target_collection.description != blank %}
-          <div class="collection-description">
-            <div class="description-paragraph">{{ target_collection.description }}</div>
-          </div>
-        {% elsif section.settings.collection_description_1 != blank
-          or section.settings.collection_description_2 != blank
-        %}
-          <div class="collection-description">
-            {% if section.settings.collection_description_1 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
-            {% endif %}
-            {% if section.settings.collection_description_2 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
-            {% endif %}
-          </div>
-        {% endif %}
-      {% else %}
-        {% comment %} 如果没有找到产品系列，使用后台设置的标题和描述 {% endcomment %}
-        {% if section.settings.collection_title != blank %}
-          <h2 class="collection-title">{{ section.settings.collection_title }}</h2>
-        {% endif %}
+      {% comment %} 如果URL中没有指定系列，使用后台设置的系列 {% endcomment %}
+      {% if current_collection == blank and section.settings.collection_handle != blank %}
+        {% assign current_collection = collections[section.settings.collection_handle] %}
+      {% endif %}
 
-        {% if section.settings.collection_description_1 != blank
-          or section.settings.collection_description_2 != blank
-        %}
-          <div class="collection-description">
-            {% if section.settings.collection_description_1 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
-            {% endif %}
-            {% if section.settings.collection_description_2 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
-            {% endif %}
-          </div>
+      {% comment %} 显示系列标题 {% endcomment %}
+      <h2 class="collection-title">
+        {% if current_collection != blank %}
+          {{ current_collection.title }}
+        {% else %}
+          {{ section.settings.collection_title }}
         {% endif %}
+      </h2>
+
+      {% comment %} 显示系列描述 {% endcomment %}
+      {% if current_collection != blank and current_collection.description != blank %}
+        <div class="collection-description">
+          <div class="description-paragraph">{{ current_collection.description }}</div>
+        </div>
+      {% elsif section.settings.collection_description_1 != blank
+        or section.settings.collection_description_2 != blank
+      %}
+        <div class="collection-description">
+          {% if section.settings.collection_description_1 != blank %}
+            <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
+          {% endif %}
+          {% if section.settings.collection_description_2 != blank %}
+            <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
+          {% endif %}
+        </div>
       {% endif %}
     </div>
 
     <!-- 产品网格 -->
     <div class="products-grid">
-      {% comment %} 从URL获取产品系列参数 {% endcomment %}
-      {% assign url_collection_handle = '' %}
+      {% comment %} 统一获取产品系列对象，与collection-header保持一致 {% endcomment %}
+      {% assign current_collection = target_collection %}
 
-      {% comment %} 尝试从不同的URL参数获取产品系列 {% endcomment %}
-      {% if request.page_type == 'collection' %}
-        {% assign url_collection_handle = collection.handle %}
-      {% elsif request.page_type == 'page' %}
-        {% comment %} 从页面URL路径中提取系列名称 {% endcomment %}
-        {% assign page_url_parts = page.url | split: '/' %}
-        {% for part in page_url_parts %}
-          {% if collections[part] %}
-            {% assign url_collection_handle = part %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-
-      {% comment %} 如果URL中没有找到，尝试从查询参数获取 {% endcomment %}
-      {% if url_collection_handle == blank %}
-        {% assign url_params = request.url | split: '?' %}
-        {% if url_params.size > 1 %}
-          {% assign query_string = url_params[1] %}
-          {% assign query_params = query_string | split: '&' %}
-          {% for param in query_params %}
-            {% assign param_parts = param | split: '=' %}
-            {% if param_parts[0] == 'collection' or param_parts[0] == 'c' %}
-              {% assign url_collection_handle = param_parts[1] %}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      {% endif %}
-
-      {% comment %} 如果URL中没有指定系列，使用后台设置的系列作为备选 {% endcomment %}
-      {% if url_collection_handle == blank and section.settings.collection_handle != blank %}
-        {% assign url_collection_handle = section.settings.collection_handle %}
-      {% endif %}
-
-      {% comment %} 获取指定的产品系列 {% endcomment %}
-      {% if url_collection_handle != blank %}
-        {% assign target_collection = collections[url_collection_handle] %}
+      {% comment %} 如果URL中没有指定系列，使用后台设置的系列 {% endcomment %}
+      {% if current_collection == blank and section.settings.collection_handle != blank %}
+        {% assign current_collection = collections[section.settings.collection_handle] %}
       {% endif %}
 
       {% comment %} 显示产品 {% endcomment %}
-      {% if target_collection and target_collection.products.size > 0 %}
-        {% for product in target_collection.products limit: section.settings.products_limit %}
+      {% if current_collection and current_collection.products.size > 0 %}
+        {% for product in current_collection.products limit: section.settings.products_limit %}
           <div class="product-card">
             <!-- 产品图片 -->
             <div class="product-image-wrapper">
@@ -100,6 +92,8 @@
                   alt="{{ product.featured_image.alt | default: product.title | escape }}"
                   class="product-image"
                   loading="lazy"
+                  width="697"
+                  height="396"
                 >
               {% else %}
                 <div class="product-image-placeholder">
@@ -143,7 +137,7 @@
             </div>
           </div>
         {% endfor %}
-      {% elsif target_collection and target_collection.products.size == 0 %}
+      {% elsif current_collection and current_collection.products.size == 0 %}
         {% comment %} 如果指定的系列没有产品，显示提示信息 {% endcomment %}
         <div class="no-products-message">
           <p>{{ section.settings.no_products_message | default: 'No products found in this collection.' }}</p>
@@ -161,6 +155,8 @@
                     alt="{{ block.settings.product_image.alt | default: block.settings.product_title | escape }}"
                     class="product-image"
                     loading="lazy"
+                    width="697"
+                    height="396"
                   >
                 {% else %}
                   <div class="product-image-placeholder">
