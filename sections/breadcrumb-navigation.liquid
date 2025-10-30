@@ -95,83 +95,30 @@
             </span>
           </li>
 
-          {% comment %} 检查多级集合路径 {% endcomment %}
-          {% assign url_parts = request.path | split: '/' %}
-          {% assign collections_in_path = '' %}
-          {% assign current_collection_index = 0 %}
+          {% comment %} 统一处理集合别名显示 {% endcomment %}
+          {% assign target_collection = null %}
 
-          {% for part in url_parts %}
-            {% if part == 'collections' and forloop.index < url_parts.size %}
-              {% assign current_collection_index = forloop.index %}
-            {% endif %}
-          {% endfor %}
-
-          {% comment %} 处理多级集合路径 {% endcomment %}
-          {% if current_collection_index > 0 %}
-            {% assign collection_path = '' %}
-            {% assign path_parts = url_parts | slice: current_collection_index, 2 %}
-
-            {% for part in path_parts %}
-              {% unless part == 'collections' or part == blank %}
-                {% assign collection_path = part %}
-              {% endunless %}
-            {% endfor %}
-
-            {% if collection_path != blank %}
-              {% assign target_collection = collections[collection_path] %}
-              {% if target_collection %}
-                {% assign display_collection_name = target_collection.title %}
-
-                {% comment %} 检查是否有配置的别名 {% endcomment %}
-                {% for block in section.blocks %}
-                  {% if block.type == 'collection_alias' and block.settings.original_name == target_collection.title %}
-                    {% assign display_collection_name = block.settings.display_name %}
-                    {% break %}
-                  {% endif %}
-                {% endfor %}
-
-                <li class="breadcrumb-item">
-                  <a href="{{ target_collection.url }}" class="breadcrumb-link">
-                    {{ display_collection_name }}
-                  </a>
-                  <span class="breadcrumb-separator">
-                    {% if section.settings.separator_icon %}
-                      <img
-                        src="{{ section.settings.separator_icon | img_url: '12x12' }}"
-                        alt=">"
-                        class="breadcrumb-separator-icon"
-                      >
-                    {% else %}
-                      <svg
-                        class="breadcrumb-separator-icon"
-                        width="8"
-                        height="12"
-                        viewBox="0 0 8 12"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    {% endif %}
-                  </span>
-                </li>
-              {% endif %}
-            {% endif %}
+          {% comment %} 优先使用URL中的集合 {% endcomment %}
+          {% if collection_handle_from_url != blank %}
+            {% assign target_collection = collections[collection_handle_from_url] %}
           {% elsif display_product.collections.size > 0 %}
-            <!-- 使用产品的第一个集合 -->
-            {% assign main_collection = display_product.collections.first %}
-            {% assign display_collection_name = main_collection.title %}
+            {% comment %} 回退到产品的第一个集合 {% endcomment %}
+            {% assign target_collection = display_product.collections.first %}
+          {% endif %}
 
-            <!-- 检查是否有配置的别名 -->
+          {% if target_collection %}
+            {% assign display_collection_name = target_collection.title %}
+
+            {% comment %} 检查是否有配置的别名 {% endcomment %}
             {% for block in section.blocks %}
-              {% if block.type == 'collection_alias' and block.settings.original_name == main_collection.title %}
+              {% if block.type == 'collection_alias' and block.settings.original_name == target_collection.title %}
                 {% assign display_collection_name = block.settings.display_name %}
                 {% break %}
               {% endif %}
             {% endfor %}
 
             <li class="breadcrumb-item">
-              <a href="{{ main_collection.url }}" class="breadcrumb-link">
+              <a href="{{ target_collection.url }}" class="breadcrumb-link">
                 {{ display_collection_name }}
               </a>
               <span class="breadcrumb-separator">
