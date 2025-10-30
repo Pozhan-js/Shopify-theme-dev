@@ -1,57 +1,26 @@
 <div class="product-collection-section" {{ section.shopify_attributes }}>
   <div class="product-collection-container">
-    {% comment %} 获取产品系列 - 从URL中获取具体产品系列 {% endcomment %}
-    {% assign target_collection = null %}
-
-    {% comment %} 方法1: 从URL路径直接获取系列名称 {% endcomment %}
-    {% assign url_parts = request.path | split: '/' %}
-    {% for part in url_parts %}
-      {% if part != blank and collections[part] %}
-        {% assign target_collection = collections[part] %}
-        {% break %}
-      {% endif %}
-    {% endfor %}
-
-    {% comment %} 方法2: 如果是系列页面 {% endcomment %}
-    {% if target_collection == null and request.page_type == 'collection' %}
-      {% assign target_collection = collection %}
-    {% endif %}
-
-    {% comment %} 方法3: 从查询参数获取 {% endcomment %}
-    {% if target_collection == null %}
-      {% assign collection_param = request.params.collection | default: request.params.c %}
-      {% if collection_param != blank %}
-        {% assign target_collection = collections[collection_param] %}
-      {% endif %}
-    {% endif %}
-
-    {% comment %} 方法4: 使用后台设置的系列作为备选 {% endcomment %}
-    {% if target_collection == null and section.settings.collection_handle != blank %}
-      {% assign target_collection = collections[section.settings.collection_handle] %}
-    {% endif %}
-
     <!-- 标题和描述区域 -->
     <div class="collection-header">
+      {% comment %} 优先使用产品系列的标题和描述 {% endcomment %}
       {% if target_collection %}
-        <h2 class="collection-title">{{ target_collection.title }}</h2>
+        <h2 class="collection-title">{{ target_collection.title | default: section.settings.collection_title }}</h2>
 
         {% if target_collection.description != blank %}
           <div class="collection-description">
             <div class="description-paragraph">{{ target_collection.description }}</div>
           </div>
-        {% else %}
-          {% if section.settings.collection_description_1 != blank
-            or section.settings.collection_description_2 != blank
-          %}
-            <div class="collection-description">
-              {% if section.settings.collection_description_1 != blank %}
-                <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
-              {% endif %}
-              {% if section.settings.collection_description_2 != blank %}
-                <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
-              {% endif %}
-            </div>
-          {% endif %}
+        {% elsif section.settings.collection_description_1 != blank
+          or section.settings.collection_description_2 != blank
+        %}
+          <div class="collection-description">
+            {% if section.settings.collection_description_1 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
+            {% endif %}
+            {% if section.settings.collection_description_2 != blank %}
+              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
+            {% endif %}
+          </div>
         {% endif %}
       {% else %}
         {% comment %} 如果没有找到产品系列，使用后台设置的标题和描述 {% endcomment %}
@@ -76,6 +45,49 @@
 
     <!-- 产品网格 -->
     <div class="products-grid">
+      {% comment %} 从URL获取产品系列参数 {% endcomment %}
+      {% assign url_collection_handle = '' %}
+
+      {% comment %} 尝试从不同的URL参数获取产品系列 {% endcomment %}
+      {% if request.page_type == 'collection' %}
+        {% assign url_collection_handle = collection.handle %}
+      {% elsif request.page_type == 'page' %}
+        {% comment %} 从页面URL路径中提取系列名称 {% endcomment %}
+        {% assign page_url_parts = page.url | split: '/' %}
+        {% for part in page_url_parts %}
+          {% if collections[part] %}
+            {% assign url_collection_handle = part %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      {% comment %} 如果URL中没有找到，尝试从查询参数获取 {% endcomment %}
+      {% if url_collection_handle == blank %}
+        {% assign url_params = request.url | split: '?' %}
+        {% if url_params.size > 1 %}
+          {% assign query_string = url_params[1] %}
+          {% assign query_params = query_string | split: '&' %}
+          {% for param in query_params %}
+            {% assign param_parts = param | split: '=' %}
+            {% if param_parts[0] == 'collection' or param_parts[0] == 'c' %}
+              {% assign url_collection_handle = param_parts[1] %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+
+      {% comment %} 如果URL中没有指定系列，使用后台设置的系列作为备选 {% endcomment %}
+      {% if url_collection_handle == blank and section.settings.collection_handle != blank %}
+        {% assign url_collection_handle = section.settings.collection_handle %}
+      {% endif %}
+
+      {% comment %} 获取指定的产品系列 {% endcomment %}
+      {% if url_collection_handle != blank %}
+        {% assign target_collection = collections[url_collection_handle] %}
+      {% endif %}
+
       {% comment %} 显示产品 {% endcomment %}
       {% if target_collection and target_collection.products.size > 0 %}
         {% for product in target_collection.products limit: section.settings.products_limit %}
