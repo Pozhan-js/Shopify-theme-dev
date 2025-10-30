@@ -41,57 +41,42 @@
 
     <!-- 产品网格 -->
     <div class="products-grid">
-      {% comment %} 从URL获取产品系列参数 - 优先级顺序 {% endcomment %}
+      {% comment %} 从URL获取产品系列参数 {% endcomment %}
       {% assign url_collection_handle = '' %}
-      {% assign target_collection = null %}
       
-      {% comment %} 1. 优先从查询参数获取 (支持 ?collection=xxx 或 ?c=xxx) {% endcomment %}
-      {% assign query_collection = request.path | append: '?' | append: 'collection' %}
-      {% if request.url contains '?collection=' %}
-        {% assign url_params = request.url | split: '?collection=' %}
-        {% if url_params.size > 1 %}
-          {% assign param_value = url_params[1] | split: '&' | first %}
-          {% assign url_collection_handle = param_value %}
-        {% endif %}
-      {% elsif request.url contains '?c=' %}
-        {% assign url_params = request.url | split: '?c=' %}
-        {% if url_params.size > 1 %}
-          {% assign param_value = url_params[1] | split: '&' | first %}
-          {% assign url_collection_handle = param_value %}
-        {% endif %}
-      {% elsif request.url contains '&collection=' %}
-        {% assign url_params = request.url | split: '&collection=' %}
-        {% if url_params.size > 1 %}
-          {% assign param_value = url_params[1] | split: '&' | first %}
-          {% assign url_collection_handle = param_value %}
-        {% endif %}
-      {% elsif request.url contains '&c=' %}
-        {% assign url_params = request.url | split: '&c=' %}
-        {% if url_params.size > 1 %}
-          {% assign param_value = url_params[1] | split: '&' | first %}
-          {% assign url_collection_handle = param_value %}
-        {% endif %}
-      {% endif %}
-      
-      {% comment %} 2. 如果是产品系列页面,直接使用当前系列 {% endcomment %}
-      {% if url_collection_handle == blank and request.page_type == 'collection' %}
+      {% comment %} 尝试从不同的URL参数获取产品系列 {% endcomment %}
+      {% if request.page_type == 'collection' %}
         {% assign url_collection_handle = collection.handle %}
-      {% endif %}
-      
-      {% comment %} 3. 从页面URL路径中提取系列名称 {% endcomment %}
-      {% if url_collection_handle == blank and request.page_type == 'page' %}
+      {% elsif request.page_type == 'page' %}
+        {% comment %} 从页面URL路径中提取系列名称 {% endcomment %}
         {% assign page_url_parts = page.url | split: '/' %}
         {% for part in page_url_parts %}
-          {% if part != blank and collections[part] %}
+          {% if collections[part] %}
             {% assign url_collection_handle = part %}
             {% break %}
           {% endif %}
         {% endfor %}
       {% endif %}
       
-      {% comment %} 4. 使用后台设置的备选系列 {% endcomment %}
+      {% comment %} 如果URL中没有找到，尝试从查询参数获取 {% endcomment %}
+      {% if url_collection_handle == blank %}
+        {% assign url_params = request.url | split: '?' %}
+        {% if url_params.size > 1 %}
+          {% assign query_string = url_params[1] %}
+          {% assign query_params = query_string | split: '&' %}
+          {% for param in query_params %}
+            {% assign param_parts = param | split: '=' %}
+            {% if param_parts[0] == 'collection' or param_parts[0] == 'c' %}
+              {% assign url_collection_handle = param_parts[1] %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+      
+      {% comment %} 如果URL中没有指定系列，使用后台设置的系列作为备选 {% endcomment %}
       {% if url_collection_handle == blank and section.settings.collection_handle != blank %}
-        {% assign url_collection_handle = section.settings.collection_handle.handle %}
+        {% assign url_collection_handle = section.settings.collection_handle %}
       {% endif %}
       
       {% comment %} 获取指定的产品系列 {% endcomment %}
