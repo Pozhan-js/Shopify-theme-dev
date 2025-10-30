@@ -95,43 +95,68 @@
             </span>
           </li>
 
-          {% if collection_from_url %}
-            <!-- 从URL获取的集合 -->
-            {% assign display_collection_name = collection_from_url.title %}
+          {% comment %} 检查多级集合路径 {% endcomment %}
+          {% assign url_parts = request.path | split: '/' %}
+          {% assign collections_in_path = '' %}
+          {% assign current_collection_index = 0 %}
 
-            <!-- 检查是否有配置的别名 -->
-            {% for block in section.blocks %}
-              {% if block.type == 'collection_alias' and block.settings.original_name == collection_from_url.title %}
-                {% assign display_collection_name = block.settings.display_name %}
-                {% break %}
-              {% endif %}
+          {% for part in url_parts %}
+            {% if part == 'collections' and forloop.index < url_parts.size %}
+              {% assign current_collection_index = forloop.index %}
+            {% endif %}
+          {% endfor %}
+
+          {% comment %} 处理多级集合路径 {% endcomment %}
+          {% if current_collection_index > 0 %}
+            {% assign collection_path = '' %}
+            {% assign path_parts = url_parts | slice: current_collection_index, 2 %}
+
+            {% for part in path_parts %}
+              {% unless part == 'collections' or part == blank %}
+                {% assign collection_path = part %}
+              {% endunless %}
             {% endfor %}
 
-            <li class="breadcrumb-item">
-              <a href="{{ collection_from_url.url }}" class="breadcrumb-link">
-                {{ display_collection_name }}
-              </a>
-              <span class="breadcrumb-separator">
-                {% if section.settings.separator_icon %}
-                  <img
-                    src="{{ section.settings.separator_icon | img_url: '12x12' }}"
-                    alt=">"
-                    class="breadcrumb-separator-icon"
-                  >
-                {% else %}
-                  <svg
-                    class="breadcrumb-separator-icon"
-                    width="8"
-                    height="12"
-                    viewBox="0 0 8 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                {% endif %}
-              </span>
-            </li>
+            {% if collection_path != blank %}
+              {% assign target_collection = collections[collection_path] %}
+              {% if target_collection %}
+                {% assign display_collection_name = target_collection.title %}
+
+                {% comment %} 检查是否有配置的别名 {% endcomment %}
+                {% for block in section.blocks %}
+                  {% if block.type == 'collection_alias' and block.settings.original_name == target_collection.title %}
+                    {% assign display_collection_name = block.settings.display_name %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+
+                <li class="breadcrumb-item">
+                  <a href="{{ target_collection.url }}" class="breadcrumb-link">
+                    {{ display_collection_name }}
+                  </a>
+                  <span class="breadcrumb-separator">
+                    {% if section.settings.separator_icon %}
+                      <img
+                        src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                        alt=">"
+                        class="breadcrumb-separator-icon"
+                      >
+                    {% else %}
+                      <svg
+                        class="breadcrumb-separator-icon"
+                        width="8"
+                        height="12"
+                        viewBox="0 0 8 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    {% endif %}
+                  </span>
+                </li>
+              {% endif %}
+            {% endif %}
           {% elsif display_product.collections.size > 0 %}
             <!-- 使用产品的第一个集合 -->
             {% assign main_collection = display_product.collections.first %}
