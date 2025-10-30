@@ -6,9 +6,20 @@
         <li class="breadcrumb-item breadcrumb-home">
           <a href="{{ routes.root_url }}" class="breadcrumb-link" aria-label="Home">
             {% if section.settings.home_icon %}
-              <img src="{{ section.settings.home_icon | img_url: '16x16' }}" alt="Home" class="breadcrumb-home-icon breadcrumb-home-icon-image">
+              <img
+                src="{{ section.settings.home_icon | img_url: '16x16' }}"
+                alt="Home"
+                class="breadcrumb-home-icon breadcrumb-home-icon-image"
+              >
             {% else %}
-              <svg class="breadcrumb-home-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                class="breadcrumb-home-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -16,9 +27,20 @@
           </a>
           <span class="breadcrumb-separator">
             {% if section.settings.separator_icon %}
-              <img src="{{ section.settings.separator_icon | img_url: '12x12' }}" alt=">" class="breadcrumb-separator-icon">
+              <img
+                src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                alt=">"
+                class="breadcrumb-separator-icon"
+              >
             {% else %}
-              <svg class="breadcrumb-separator-icon" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                class="breadcrumb-separator-icon"
+                width="8"
+                height="12"
+                viewBox="0 0 8 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             {% endif %}
@@ -26,27 +48,85 @@
         </li>
 
         <!-- Dynamic Breadcrumb Items -->
-        {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品 {% endcomment %}
+        {% comment %} 从URL中获取产品系列名 {% endcomment %}
         {% assign current_product = product %}
         {% assign selected_product = all_products[section.settings.product_handle] %}
         {% assign display_product = current_product | default: selected_product %}
 
+        {% comment %} 从URL中获取集合信息 {% endcomment %}
+        {% assign current_collection = collection %}
+        {% assign url_parts = request.path | split: '/' %}
+        {% assign collection_handle_from_url = '' %}
+
+        {% for part in url_parts %}
+          {% if part == 'collections' and forloop.index < url_parts.size %}
+            {% assign collection_handle_from_url = url_parts[forloop.index] %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+
+        {% if collection_handle_from_url != blank %}
+          {% assign collection_from_url = collections[collection_handle_from_url] %}
+        {% endif %}
+
         {% if display_product %}
           <!-- 产品集合面包屑 -->
-          {% if display_product.collections.size > 0 %}
+          {% if collection_from_url %}
+            <!-- 从URL获取的集合 -->
+            <li class="breadcrumb-item">
+              <a href="{{ collection_from_url.url }}" class="breadcrumb-link">
+                {{ collection_from_url.title }}
+              </a>
+              <span class="breadcrumb-separator">
+                {% if section.settings.separator_icon %}
+                  <img
+                    src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                    alt=">"
+                    class="breadcrumb-separator-icon"
+                  >
+                {% else %}
+                  <svg
+                    class="breadcrumb-separator-icon"
+                    width="8"
+                    height="12"
+                    viewBox="0 0 8 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                {% endif %}
+              </span>
+            </li>
+          {% elsif display_product.collections.size > 0 %}
+            <!-- 使用产品的第一个集合 -->
             {% assign main_collection = display_product.collections.first %}
-            
+
             <!-- 父级集合 (如果存在) -->
             {% if section.settings.parent_collection_title %}
               <li class="breadcrumb-item">
-                <a href="{{ section.settings.parent_collection_url | default: '/collections' }}" class="breadcrumb-link">
+                <a
+                  href="{{ section.settings.parent_collection_url | default: '/collections' }}"
+                  class="breadcrumb-link"
+                >
                   {{ section.settings.parent_collection_title }}
                 </a>
                 <span class="breadcrumb-separator">
                   {% if section.settings.separator_icon %}
-                    <img src="{{ section.settings.separator_icon | img_url: '12x12' }}" alt=">" class="breadcrumb-separator-icon">
+                    <img
+                      src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                      alt=">"
+                      class="breadcrumb-separator-icon"
+                    >
                   {% else %}
-                    <svg class="breadcrumb-separator-icon" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg
+                      class="breadcrumb-separator-icon"
+                      width="8"
+                      height="12"
+                      viewBox="0 0 8 12"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
                       <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                   {% endif %}
@@ -61,9 +141,20 @@
               </a>
               <span class="breadcrumb-separator">
                 {% if section.settings.separator_icon %}
-                  <img src="{{ section.settings.separator_icon | img_url: '12x12' }}" alt=">" class="breadcrumb-separator-icon">
+                  <img
+                    src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                    alt=">"
+                    class="breadcrumb-separator-icon"
+                  >
                 {% else %}
-                  <svg class="breadcrumb-separator-icon" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg
+                    class="breadcrumb-separator-icon"
+                    width="8"
+                    height="12"
+                    viewBox="0 0 8 12"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
                     <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 {% endif %}
@@ -84,9 +175,20 @@
                   {% unless forloop.last %}
                     <span class="breadcrumb-separator">
                       {% if section.settings.separator_icon %}
-                        <img src="{{ section.settings.separator_icon | img_url: '12x12' }}" alt=">" class="breadcrumb-separator-icon">
+                        <img
+                          src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                          alt=">"
+                          class="breadcrumb-separator-icon"
+                        >
                       {% else %}
-                        <svg class="breadcrumb-separator-icon" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                          class="breadcrumb-separator-icon"
+                          width="8"
+                          height="12"
+                          viewBox="0 0 8 12"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
                           <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                       {% endif %}
@@ -118,9 +220,20 @@
                 {% unless forloop.last %}
                   <span class="breadcrumb-separator">
                     {% if section.settings.separator_icon %}
-                      <img src="{{ section.settings.separator_icon | img_url: '12x12' }}" alt=">" class="breadcrumb-separator-icon">
+                      <img
+                        src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                        alt=">"
+                        class="breadcrumb-separator-icon"
+                      >
                     {% else %}
-                      <svg class="breadcrumb-separator-icon" width="8" height="12" viewBox="0 0 8 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <svg
+                        class="breadcrumb-separator-icon"
+                        width="8"
+                        height="12"
+                        viewBox="0 0 8 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
                         <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     {% endif %}
@@ -225,21 +338,21 @@
     .breadcrumb-container {
       max-width: 1520px;
     }
-    
+
     .breadcrumb-list {
       gap: {{ section.settings.item_spacing }}px;
     }
-    
+
     .breadcrumb-item {
       gap: {{ section.settings.separator_spacing }}px;
       font-size: {{ section.settings.font_size }}px;
     }
-    
+
     .breadcrumb-home-icon {
       width: 16px;
       height: 16px;
     }
-    
+
     .breadcrumb-separator-icon {
       width: 8px;
       height: 12px;
@@ -252,19 +365,19 @@
       max-width: calc(1520px * (100vw / 1920px));
       min-max-width: 320px;
     }
-    
+
     .breadcrumb-list {
       gap: calc({{ section.settings.item_spacing }}px * (100vw / 1920px));
       min-gap: 4px;
     }
-    
+
     .breadcrumb-item {
       gap: calc({{ section.settings.separator_spacing }}px * (100vw / 1920px));
       font-size: calc(12px * (100vw / 1920px));
       min-gap: 4px;
       min-font-size: 10px;
     }
-    
+
     .breadcrumb-home-icon {
       width: calc(16px * (100vw / 1920px));
       height: calc(16px * (100vw / 1920px));
@@ -276,7 +389,7 @@
       object-fit: contain;
       object-position: center;
     }
-    
+
     .breadcrumb-separator-icon {
       width: calc(8px * (100vw / 1920px));
       height: calc(12px * (100vw / 1920px));
@@ -290,24 +403,24 @@
     .breadcrumb-container {
       padding: 0 15px;
     }
-    
+
     .breadcrumb-list {
       gap: calc({{ section.settings.item_spacing }}px * 0.5);
       min-gap: 4px;
     }
-    
+
     .breadcrumb-item {
       gap: calc({{ section.settings.separator_spacing }}px * 0.5);
       font-size: calc(12px * 0.75);
       min-gap: 4px;
       min-font-size: 10px;
     }
-    
+
     .breadcrumb-home-icon {
       width: 14px;
       height: 14px;
     }
-    
+
     .breadcrumb-separator-icon {
       width: 6px;
       height: 10px;
@@ -319,25 +432,25 @@
     .breadcrumb-navigation-section {
       padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0;
     }
-    
+
     .breadcrumb-container {
       padding: 0 10px;
     }
-    
+
     .breadcrumb-list {
       gap: clamp(4px, 1vw, 8px);
     }
-    
+
     .breadcrumb-item {
       gap: clamp(4px, 1vw, 6px);
       font-size: clamp(10px, 2.5vw, 12px);
     }
-    
+
     .breadcrumb-home-icon {
       width: clamp(12px, 3vw, 16px);
       height: clamp(12px, 3vw, 16px);
     }
-    
+
     .breadcrumb-separator-icon {
       width: clamp(6px, 1.5vw, 8px);
       height: clamp(8px, 2vw, 12px);
