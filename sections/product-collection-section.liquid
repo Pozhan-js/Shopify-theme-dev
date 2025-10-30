@@ -1,32 +1,67 @@
 <div class="product-collection-section" {{ section.shopify_attributes }}>
   <div class="product-collection-container">
+    {% comment %} 获取产品系列 - 从URL中获取具体产品系列 {% endcomment %}
+    {% assign target_collection = null %}
+
+    {% comment %} 方法1: 从URL路径直接获取系列名称 {% endcomment %}
+    {% assign url_parts = request.path | split: '/' %}
+    {% for part in url_parts %}
+      {% if part != blank and collections[part] %}
+        {% assign target_collection = collections[part] %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+
+    {% comment %} 方法2: 如果是系列页面 {% endcomment %}
+    {% if target_collection == null and request.page_type == 'collection' %}
+      {% assign target_collection = collection %}
+    {% endif %}
+
+    {% comment %} 方法3: 从查询参数获取 {% endcomment %}
+    {% if target_collection == null %}
+      {% assign collection_param = request.params.collection | default: request.params.c %}
+      {% if collection_param != blank %}
+        {% assign target_collection = collections[collection_param] %}
+      {% endif %}
+    {% endif %}
+
+    {% comment %} 方法4: 使用后台设置的系列作为备选 {% endcomment %}
+    {% if target_collection == null and section.settings.collection_handle != blank %}
+      {% assign target_collection = collections[section.settings.collection_handle] %}
+    {% endif %}
+
     <!-- 标题和描述区域 -->
     <div class="collection-header">
-      {% comment %} 优先使用产品系列的标题和描述 {% endcomment %}
       {% if target_collection %}
-        <h2 class="collection-title">{{ target_collection.title | default: section.settings.collection_title }}</h2>
-        
+        <h2 class="collection-title">{{ target_collection.title }}</h2>
+
         {% if target_collection.description != blank %}
           <div class="collection-description">
             <div class="description-paragraph">{{ target_collection.description }}</div>
           </div>
-        {% elsif section.settings.collection_description_1 != blank or section.settings.collection_description_2 != blank %}
-          <div class="collection-description">
-            {% if section.settings.collection_description_1 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
-            {% endif %}
-            {% if section.settings.collection_description_2 != blank %}
-              <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
-            {% endif %}
-          </div>
+        {% else %}
+          {% if section.settings.collection_description_1 != blank
+            or section.settings.collection_description_2 != blank
+          %}
+            <div class="collection-description">
+              {% if section.settings.collection_description_1 != blank %}
+                <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
+              {% endif %}
+              {% if section.settings.collection_description_2 != blank %}
+                <p class="description-paragraph">{{ section.settings.collection_description_2 }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
         {% endif %}
       {% else %}
         {% comment %} 如果没有找到产品系列，使用后台设置的标题和描述 {% endcomment %}
         {% if section.settings.collection_title != blank %}
           <h2 class="collection-title">{{ section.settings.collection_title }}</h2>
         {% endif %}
-        
-        {% if section.settings.collection_description_1 != blank or section.settings.collection_description_2 != blank %}
+
+        {% if section.settings.collection_description_1 != blank
+          or section.settings.collection_description_2 != blank
+        %}
           <div class="collection-description">
             {% if section.settings.collection_description_1 != blank %}
               <p class="description-paragraph">{{ section.settings.collection_description_1 }}</p>
@@ -41,104 +76,61 @@
 
     <!-- 产品网格 -->
     <div class="products-grid">
-      {% comment %} 从URL获取产品系列参数 {% endcomment %}
-      {% assign url_collection_handle = '' %}
-      
-      {% comment %} 尝试从不同的URL参数获取产品系列 {% endcomment %}
-      {% if request.page_type == 'collection' %}
-        {% assign url_collection_handle = collection.handle %}
-      {% elsif request.page_type == 'page' %}
-        {% comment %} 从页面URL路径中提取系列名称 {% endcomment %}
-        {% assign page_url_parts = page.url | split: '/' %}
-        {% for part in page_url_parts %}
-          {% if collections[part] %}
-            {% assign url_collection_handle = part %}
-            {% break %}
-          {% endif %}
-        {% endfor %}
-      {% endif %}
-      
-      {% comment %} 如果URL中没有找到，尝试从查询参数获取 {% endcomment %}
-      {% if url_collection_handle == blank %}
-        {% assign url_params = request.url | split: '?' %}
-        {% if url_params.size > 1 %}
-          {% assign query_string = url_params[1] %}
-          {% assign query_params = query_string | split: '&' %}
-          {% for param in query_params %}
-            {% assign param_parts = param | split: '=' %}
-            {% if param_parts[0] == 'collection' or param_parts[0] == 'c' %}
-              {% assign url_collection_handle = param_parts[1] %}
-              {% break %}
-            {% endif %}
-          {% endfor %}
-        {% endif %}
-      {% endif %}
-      
-      {% comment %} 如果URL中没有指定系列，使用后台设置的系列作为备选 {% endcomment %}
-      {% if url_collection_handle == blank and section.settings.collection_handle != blank %}
-        {% assign url_collection_handle = section.settings.collection_handle %}
-      {% endif %}
-      
-      {% comment %} 获取指定的产品系列 {% endcomment %}
-      {% if url_collection_handle != blank %}
-        {% assign target_collection = collections[url_collection_handle] %}
-      {% endif %}
-      
       {% comment %} 显示产品 {% endcomment %}
-          {% if target_collection and target_collection.products.size > 0 %}
-              {% for product in target_collection.products limit: section.settings.products_limit %}
-                <div class="product-card">
-                  <!-- 产品图片 -->
-                  <div class="product-image-wrapper">
-                    {% if product.featured_image %}
-                      <img
-                        src="{{ product.featured_image | img_url: '697x396' }}"
-                        alt="{{ product.featured_image.alt | default: product.title | escape }}"
-                        class="product-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="product-image-placeholder">
-                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="100" height="100" fill="#E5E5E5"/>
-                          <path d="M30 70L50 50L70 70" stroke="#999" stroke-width="2" fill="none"/>
-                          <circle cx="40" cy="35" r="5" fill="#999"/>
-                        </svg>
-                      </div>
-                    {% endif %}
-                  </div>
+      {% if target_collection and target_collection.products.size > 0 %}
+        {% for product in target_collection.products limit: section.settings.products_limit %}
+          <div class="product-card">
+            <!-- 产品图片 -->
+            <div class="product-image-wrapper">
+              {% if product.featured_image %}
+                <img
+                  src="{{ product.featured_image | img_url: '697x396' }}"
+                  alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                  class="product-image"
+                  loading="lazy"
+                >
+              {% else %}
+                <div class="product-image-placeholder">
+                  <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" fill="#E5E5E5"/>
+                    <path d="M30 70L50 50L70 70" stroke="#999" stroke-width="2" fill="none"/>
+                    <circle cx="40" cy="35" r="5" fill="#999"/>
+                  </svg>
+                </div>
+              {% endif %}
+            </div>
 
-              <!-- 产品信息 -->
-              <div class="product-info">
-                <h3 class="product-title">
-                  <a href="{{ product.url }}">{{ product.title }}</a>
-                </h3>
-                
-                {% comment %} 获取产品型号 - 从产品标签或自定义字段中获取 {% endcomment %}
-                {% assign model_number = '' %}
+            <!-- 产品信息 -->
+            <div class="product-info">
+              <h3 class="product-title">
+                <a href="{{ product.url }}">{{ product.title }}</a>
+              </h3>
+
+              {% comment %} 获取产品型号 {% endcomment %}
+              {% assign model_number = '' %}
+              {% if product.tags.size > 0 %}
                 {% for tag in product.tags %}
-                  {% if tag contains 'model:' %}
-                    {% assign model_number = tag | remove: 'model:' %}
+                  {% if tag contains 'Model:' %}
+                    {% assign model_number = tag | remove: 'Model:' | strip %}
                     {% break %}
                   {% endif %}
                 {% endfor %}
-                
-                {% comment %} 如果没有从标签获取到型号，尝试从产品元字段获取 {% endcomment %}
-                {% if model_number == blank and product.metafields.custom.model_number %}
-                  {% assign model_number = product.metafields.custom.model_number %}
-                {% endif %}
-                
-                {% comment %} 如果还是没有，使用默认格式 {% endcomment %}
-                {% if model_number == blank %}
-                  {% assign model_number = 'XS' | append: forloop.index | append: '0' | append: forloop.index %}
-                {% endif %}
-                
-                <div class="product-model">
-                  <span class="model-number">{{ model_number }}</span>
-                </div>
+              {% endif %}
+
+              {% if model_number == blank and product.metafields.custom.tag %}
+                {% assign model_number = product.metafields.custom.tag %}
+              {% endif %}
+
+              {% if model_number == blank %}
+                {% assign model_number = 'XS' | append: forloop.index | append: '0' | append: forloop.index %}
+              {% endif %}
+
+              <div class="product-model">
+                <span class="model-number">{{ model_number }}</span>
               </div>
             </div>
-          {% endfor %}
+          </div>
+        {% endfor %}
       {% elsif target_collection and target_collection.products.size == 0 %}
         {% comment %} 如果指定的系列没有产品，显示提示信息 {% endcomment %}
         <div class="no-products-message">
@@ -150,31 +142,31 @@
           {% if block.type == 'product_card' %}
             <div class="product-card" {{ block.shopify_attributes }}>
               <!-- 产品图片 -->
-                  <div class="product-image-wrapper">
-                    {% if block.settings.product_image %}
-                      <img
-                        src="{{ block.settings.product_image | img_url: '697x396' }}"
-                        alt="{{ block.settings.product_image.alt | default: block.settings.product_title | escape }}"
-                        class="product-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="product-image-placeholder">
-                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="100" height="100" fill="#E5E5E5"/>
-                          <path d="M30 70L50 50L70 70" stroke="#999" stroke-width="2" fill="none"/>
-                          <circle cx="40" cy="35" r="5" fill="#999"/>
-                        </svg>
-                      </div>
-                    {% endif %}
+              <div class="product-image-wrapper">
+                {% if block.settings.product_image %}
+                  <img
+                    src="{{ block.settings.product_image | img_url: '697x396' }}"
+                    alt="{{ block.settings.product_image.alt | default: block.settings.product_title | escape }}"
+                    class="product-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="product-image-placeholder">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="100" height="100" fill="#E5E5E5"/>
+                      <path d="M30 70L50 50L70 70" stroke="#999" stroke-width="2" fill="none"/>
+                      <circle cx="40" cy="35" r="5" fill="#999"/>
+                    </svg>
                   </div>
+                {% endif %}
+              </div>
 
               <!-- 产品信息 -->
               <div class="product-info">
                 <h3 class="product-title">
                   <a href="{{ block.settings.product_url | default: '#' }}">{{ block.settings.product_title }}</a>
                 </h3>
-                
+
                 <div class="product-model">
                   <span class="model-number">{{ block.settings.model_number }}</span>
                 </div>
@@ -188,318 +180,318 @@
 </div>
 
 <style>
-  .product-collection-section {
-    background-color: {{ section.settings.background_color }};
-    padding: 10px 0;
-    margin: 10px;
-  }
-
-  .product-collection-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  /* 标题和描述区域 */
-  .collection-header {
-    margin-bottom: 60px;
-    text-align: left;
-  }
-
-  .collection-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: 48px;
-    font-weight: 500;
-    color: {{ section.settings.title_color }};
-    margin: 0 0 30px 0;
-    line-height: 1.2;
-  }
-
-  .collection-description {
-    max-width: 900px;
-  }
-
-  .description-paragraph {
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    font-weight: 400;
-    color: {{ section.settings.description_color }};
-    line-height: 1.6;
-    margin: 0 0 20px 0;
-  }
-
-  .description-paragraph:last-child {
-    margin-bottom: 0;
-  }
-
-  /* 产品网格 */
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
-  }
-
-  .product-card {
-    display: flex;
-    flex-direction: column;
-    background-color: transparent;
-    transition: transform 0.3s ease;
-  }
-
-  .product-card:hover {
-    transform: translateY(-5px);
-  }
-
-  /* 产品图片 */
-  .product-image-wrapper {
-    width: 697px;
-    height: 396px;
-    background-color: #F1EFEE;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .product-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-
-  .product-card:hover .product-image {
-    transform: scale(1.05);
-  }
-
-  .product-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #F1EFEE;
-  }
-
-  /* 产品信息 */
-  .product-info {
-    text-align: left;
-  }
-
-  .product-title {
-    font-family: 'Poppins', sans-serif;
-    font-size: 24px;
-    font-weight: 500;
-    color: #161616;
-    margin: 0 0 12px 0;
-    line-height: 1.3;
-  }
-
-  .product-title a {
-    color: inherit;
-    text-decoration: none;
-    transition: color 0.3s ease;
-  }
-
-  .product-title a:hover {
-    color: {{ section.settings.product_title_hover_color }};
-  }
-
-  .product-model {
-    display: flex;
-    align-items: center;
-  }
-
-  .model-number {
-    font-family: 'Poppins', sans-serif;
-    font-size: 12px;
-    font-weight: 400;
-    color: rgba(22, 22, 22, 0.5);
-    border: 1px solid {{ section.settings.model_number_border_color }};
-    padding: 4px 12px;
-    border-radius: 4px;
-    background-color: transparent;
-  }
-
-  /* 响应式设计 */
-
-  /* 大屏幕 (1920px+) */
-  @media (min-width: 1920px) {
-    .product-collection-container {
-      max-width: 1400px;
-    }
-    
-    .products-grid {
-      gap: 60px;
-    }
-    
-    .collection-title {
-      font-size: 50px;
-    }
-    
-    .description-paragraph {
-      font-size: 20px;
-    }
-    
-    .product-title {
-      font-size: 28px;
-    }
-  }
-
-  /* 中等屏幕 (1024px - 1919px) */
-  @media (min-width: 1024px) and (max-width: 1919px) {
-    .product-collection-container {
-      max-width: 1000px;
-    }
-    
-    .products-grid {
-      gap: 35px;
-    }
-    
-    .product-image-wrapper {
-      width: calc(697px * 0.84);
-      height: calc(396px * 0.84);
-    }
-  }
-
-  /* 平板屏幕 (768px - 1023px) */
-  @media (min-width: 768px) and (max-width: 1023px) {
-    .product-collection-container {
-      padding: 0 30px;
-    }
-    
-    .collection-header {
-      margin-bottom: 40px;
-      text-align: center;
-    }
-    
-    .collection-title {
-      font-size: 40px;
-    }
-    
-    .description-paragraph {
-      font-size: 17px;
-    }
-    
-    .products-grid {
-      gap: 30px;
-    }
-    
-    .product-image-wrapper {
-      width: calc(697px * 0.67);
-      height: calc(396px * 0.67);
-    }
-    
-    .product-title {
-      font-size: 22px;
-    }
-  }
-
-  /* 小屏幕 (481px - 767px) */
-  @media (min-width: 481px) and (max-width: 767px) {
     .product-collection-section {
-      padding: calc({{ section.settings.section_padding_top }}px * 0.7) 0 calc({{ section.settings.section_padding_bottom }}px * 0.7) 0;
+      background-color: {{ section.settings.background_color }};
+      padding: 10px 0;
+      margin: 10px;
     }
-    
+
     .product-collection-container {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 0 20px;
     }
-    
-    .collection-header {
-      margin-bottom: 35px;
-      text-align: center;
-    }
-    
-    .collection-title {
-      font-size: 34px;
-    }
-    
-    .description-paragraph {
-      font-size: 16px;
-    }
-    
-    .products-grid {
-      grid-template-columns: 1fr;
-      gap: 25px;
-    }
-    
-    .product-image-wrapper {
-      width: calc(697px * 0.5);
-      height: calc(396px * 0.5);
-    }
-    
-    .product-title {
-      font-size: 20px;
-    }
-  }
 
-  /* 超小屏幕 (最大480px) */
-  @media (max-width: 480px) {
-    .product-collection-section {
-      padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0 calc({{ section.settings.section_padding_bottom }}px * 0.5) 0;
-    }
-    
-    .product-collection-container {
-      padding: 0 15px;
-    }
-    
+    /* 标题和描述区域 */
     .collection-header {
-      margin-bottom: 30px;
-      text-align: center;
+      margin-bottom: 60px;
+      text-align: left;
     }
-    
+
     .collection-title {
-      font-size: 28px;
-      margin-bottom: 20px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 48px;
+      font-weight: 500;
+      color: {{ section.settings.title_color }};
+      margin: 0 0 30px 0;
+      line-height: 1.2;
     }
-    
+
+    .collection-description {
+      max-width: 900px;
+    }
+
     .description-paragraph {
-      font-size: 15px;
-      margin-bottom: 15px;
-    }
-    
-    .products-grid {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    
-    .product-image-wrapper {
-      width: calc(697px * 0.33);
-      height: calc(396px * 0.33);
-      margin-bottom: 15px;
-      min-width: 280px;
-      min-height: 200px;
-    }
-    
-    .product-title {
+      font-family: 'Poppins', sans-serif;
       font-size: 18px;
-      margin-bottom: 8px;
+      font-weight: 400;
+      color: {{ section.settings.description_color }};
+      line-height: 1.6;
+      margin: 0 0 20px 0;
     }
-    
+
+    .description-paragraph:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 产品网格 */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+
+    .product-card {
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* 产品图片 */
+    .product-image-wrapper {
+      width: 697px;
+      height: 396px;
+      background-color: #F1EFEE;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .product-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+      transform: scale(1.05);
+    }
+
+    .product-image-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #F1EFEE;
+    }
+
+    /* 产品信息 */
+    .product-info {
+      text-align: left;
+    }
+
+    .product-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 24px;
+      font-weight: 500;
+      color: #161616;
+      margin: 0 0 12px 0;
+      line-height: 1.3;
+    }
+
+    .product-title a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .product-title a:hover {
+      color: {{ section.settings.product_title_hover_color }};
+    }
+
+    .product-model {
+      display: flex;
+      align-items: center;
+    }
+
     .model-number {
+      font-family: 'Poppins', sans-serif;
       font-size: 12px;
+      font-weight: 400;
+      color: rgba(22, 22, 22, 0.5);
+      border: 1px solid {{ section.settings.model_number_border_color }};
+      padding: 4px 12px;
+      border-radius: 4px;
+      background-color: transparent;
     }
-    
-  .model-number {
-    padding: 3px 8px;
-  }
 
-  /* 无产品提示信息 */
-  .no-products-message {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 20px;
-  }
+    /* 响应式设计 */
 
-  .no-products-message p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 18px;
-    color: #666666;
-    margin: 0;
+    /* 大屏幕 (1920px+) */
+    @media (min-width: 1920px) {
+      .product-collection-container {
+        max-width: 1400px;
+      }
+
+      .products-grid {
+        gap: 60px;
+      }
+
+      .collection-title {
+        font-size: 50px;
+      }
+
+      .description-paragraph {
+        font-size: 20px;
+      }
+
+      .product-title {
+        font-size: 28px;
+      }
+    }
+
+    /* 中等屏幕 (1024px - 1919px) */
+    @media (min-width: 1024px) and (max-width: 1919px) {
+      .product-collection-container {
+        max-width: 1000px;
+      }
+
+      .products-grid {
+        gap: 35px;
+      }
+
+      .product-image-wrapper {
+        width: calc(697px * 0.84);
+        height: calc(396px * 0.84);
+      }
+    }
+
+    /* 平板屏幕 (768px - 1023px) */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .product-collection-container {
+        padding: 0 30px;
+      }
+
+      .collection-header {
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .collection-title {
+        font-size: 40px;
+      }
+
+      .description-paragraph {
+        font-size: 17px;
+      }
+
+      .products-grid {
+        gap: 30px;
+      }
+
+      .product-image-wrapper {
+        width: calc(697px * 0.67);
+        height: calc(396px * 0.67);
+      }
+
+      .product-title {
+        font-size: 22px;
+      }
+    }
+
+    /* 小屏幕 (481px - 767px) */
+    @media (min-width: 481px) and (max-width: 767px) {
+      .product-collection-section {
+        padding: calc({{ section.settings.section_padding_top }}px * 0.7) 0 calc({{ section.settings.section_padding_bottom }}px * 0.7) 0;
+      }
+
+      .product-collection-container {
+        padding: 0 20px;
+      }
+
+      .collection-header {
+        margin-bottom: 35px;
+        text-align: center;
+      }
+
+      .collection-title {
+        font-size: 34px;
+      }
+
+      .description-paragraph {
+        font-size: 16px;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .product-image-wrapper {
+        width: calc(697px * 0.5);
+        height: calc(396px * 0.5);
+      }
+
+      .product-title {
+        font-size: 20px;
+      }
+    }
+
+    /* 超小屏幕 (最大480px) */
+    @media (max-width: 480px) {
+      .product-collection-section {
+        padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0 calc({{ section.settings.section_padding_bottom }}px * 0.5) 0;
+      }
+
+      .product-collection-container {
+        padding: 0 15px;
+      }
+
+      .collection-header {
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .collection-title {
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+
+      .description-paragraph {
+        font-size: 15px;
+        margin-bottom: 15px;
+      }
+
+      .products-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .product-image-wrapper {
+        width: calc(697px * 0.33);
+        height: calc(396px * 0.33);
+        margin-bottom: 15px;
+        min-width: 280px;
+        min-height: 200px;
+      }
+
+      .product-title {
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+
+      .model-number {
+        font-size: 12px;
+      }
+
+    .model-number {
+      padding: 3px 8px;
+    }
+
+    /* 无产品提示信息 */
+    .no-products-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .no-products-message p {
+      font-family: 'Poppins', sans-serif;
+      font-size: 18px;
+      color: #666666;
+      margin: 0;
+    }
   }
-}
 </style>
 
 {% schema %}
