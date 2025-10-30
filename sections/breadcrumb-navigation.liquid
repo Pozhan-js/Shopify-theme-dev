@@ -70,7 +70,31 @@
         {% endif %}
 
         {% if display_product %}
-          <!-- 产品集合面包屑 -->
+          <!-- 产品集合面包屑 - 固定展示Pilates Equipment -->
+          <li class="breadcrumb-item">
+            <a href="/collections" class="breadcrumb-link"> Pilates Equipment </a>
+            <span class="breadcrumb-separator">
+              {% if section.settings.separator_icon %}
+                <img
+                  src="{{ section.settings.separator_icon | img_url: '12x12' }}"
+                  alt=">"
+                  class="breadcrumb-separator-icon"
+                >
+              {% else %}
+                <svg
+                  class="breadcrumb-separator-icon"
+                  width="8"
+                  height="12"
+                  viewBox="0 0 8 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {% endif %}
+            </span>
+          </li>
+
           {% if collection_from_url %}
             <!-- 从URL获取的集合 -->
             <li class="breadcrumb-item">
@@ -101,40 +125,6 @@
           {% elsif display_product.collections.size > 0 %}
             <!-- 使用产品的第一个集合 -->
             {% assign main_collection = display_product.collections.first %}
-
-            <!-- 父级集合 (如果存在) -->
-            {% if section.settings.parent_collection_title %}
-              <li class="breadcrumb-item">
-                <a
-                  href="{{ section.settings.parent_collection_url | default: '/collections' }}"
-                  class="breadcrumb-link"
-                >
-                  {{ section.settings.parent_collection_title }}
-                </a>
-                <span class="breadcrumb-separator">
-                  {% if section.settings.separator_icon %}
-                    <img
-                      src="{{ section.settings.separator_icon | img_url: '12x12' }}"
-                      alt=">"
-                      class="breadcrumb-separator-icon"
-                    >
-                  {% else %}
-                    <svg
-                      class="breadcrumb-separator-icon"
-                      width="8"
-                      height="12"
-                      viewBox="0 0 8 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M1.5 1L6.5 6L1.5 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  {% endif %}
-                </span>
-              </li>
-            {% endif %}
-
-            <!-- 当前集合 -->
             <li class="breadcrumb-item">
               <a href="{{ main_collection.url }}" class="breadcrumb-link">
                 {{ main_collection.title }}
