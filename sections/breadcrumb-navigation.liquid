@@ -97,9 +97,19 @@
 
           {% if collection_from_url %}
             <!-- 从URL获取的集合 -->
+            {% assign display_collection_name = collection_from_url.title %}
+
+            <!-- 检查是否有配置的别名 -->
+            {% for block in section.blocks %}
+              {% if block.type == 'collection_alias' and block.settings.original_name == collection_from_url.title %}
+                {% assign display_collection_name = block.settings.display_name %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
             <li class="breadcrumb-item">
               <a href="{{ collection_from_url.url }}" class="breadcrumb-link">
-                {{ collection_from_url.title }}
+                {{ display_collection_name }}
               </a>
               <span class="breadcrumb-separator">
                 {% if section.settings.separator_icon %}
@@ -125,9 +135,19 @@
           {% elsif display_product.collections.size > 0 %}
             <!-- 使用产品的第一个集合 -->
             {% assign main_collection = display_product.collections.first %}
+            {% assign display_collection_name = main_collection.title %}
+
+            <!-- 检查是否有配置的别名 -->
+            {% for block in section.blocks %}
+              {% if block.type == 'collection_alias' and block.settings.original_name == main_collection.title %}
+                {% assign display_collection_name = block.settings.display_name %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+
             <li class="breadcrumb-item">
               <a href="{{ main_collection.url }}" class="breadcrumb-link">
-                {{ main_collection.title }}
+                {{ display_collection_name }}
               </a>
               <span class="breadcrumb-separator">
                 {% if section.settings.separator_icon %}
@@ -513,21 +533,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Configure custom display names for collections. Leave empty to use original collection names."
-    },
-    {
-      "type": "text",
-      "id": "collection_alias_test",
-      "label": "Test Collection Display Name",
-      "default": "test",
-      "info": "Display name for 'Test' collection"
-    },
-    {
-      "type": "text",
-      "id": "collection_alias_pilates",
-      "label": "Pilates Collection Display Name",
-      "default": "Pilates Equipment",
-      "info": "Display name for Pilates collections"
+      "content": "Configure custom display names for collections. Add Collection Alias blocks below to map original collection names to custom display names. If no alias is configured, the original collection name will be used."
     },
     {
       "type": "header",
@@ -538,12 +544,7 @@
       "id": "parent_collection_title",
       "label": "Parent Collection Title",
       "default": "Pilates Equipment",
-      "info": "Optional parent category to show before product collection"
-    },
-    {
-      "type": "url",
-      "id": "parent_collection_url",
-      "label": "Parent Collection URL"
+      "info": "Fixed parent category shown before product collection (non-clickable)"
     },
     {
       "type": "header",
@@ -704,6 +705,24 @@
           "info": "Leave empty to make this item non-clickable"
         }
       ]
+    },
+    {
+      "type": "collection_alias",
+      "name": "Collection Alias",
+      "settings": [
+        {
+          "type": "text",
+          "id": "original_name",
+          "label": "Original Collection Name",
+          "info": "Enter the exact original collection name as it appears in Shopify"
+        },
+        {
+          "type": "text",
+          "id": "display_name",
+          "label": "Display Name",
+          "info": "Enter the custom display name you want to show in breadcrumbs"
+        }
+      ]
     }
   ],
   "presets": [
@@ -728,17 +747,24 @@
       },
       "blocks": [
         {
-          "type": "breadcrumb_item",
+          "type": "collection_alias",
           "settings": {
-            "item_text": "Pilates Equipment",
-            "item_url": "/collections/pilates-equipment"
+            "original_name": "Reformer",
+            "display_name": "Pilates Reformers"
           }
         },
         {
-          "type": "breadcrumb_item",
+          "type": "collection_alias",
           "settings": {
-            "item_text": "Reformer",
-            "item_url": "/collections/reformer"
+            "original_name": "Cadillac",
+            "display_name": "Pilates Cadillacs"
+          }
+        },
+        {
+          "type": "collection_alias",
+          "settings": {
+            "original_name": "Chair",
+            "display_name": "Pilates Chairs"
           }
         }
       ]
