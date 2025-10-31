@@ -733,15 +733,22 @@
   /* 快速购买栏样式 */
   .quick-buy-bar {
     position: fixed;
-    bottom: -100px;
+    bottom: 0;
     left: 0;
     width: 100%;
     background: white;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     padding: 15px 20px;
-    z-index: 1000;
-    transition: bottom 0.3s ease;
+    z-index: 99999; /* 确保最高层级 */
+    transition: transform 0.3s ease;
     border-top: 1px solid #eee;
+    transform: translateY(100%);
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  .quick-buy-bar.active {
+    transform: translateY(0);
   }
 
   .quick-buy-bar.active {
@@ -822,14 +829,33 @@
 </style>
 
 <script>
+  // 确保快速购买栏可见性
+  function ensureQuickBuyBarVisible() {
+    const quickBuyBar = document.querySelector('.quick-buy-bar');
+    if (quickBuyBar) {
+      quickBuyBar.style.display = 'block';
+      quickBuyBar.style.visibility = 'visible';
+      console.log('快速购买栏可见性已确保');
+    }
+  }
+
   // 滚动显示快速购买栏
-  document.addEventListener('DOMContentLoaded', function () {
+  function initQuickBuyBar() {
     const quickBuyBar = document.querySelector('.quick-buy-bar');
     const productSection = document.querySelector('[data-product-section]');
 
+    console.log('快速购买栏元素:', quickBuyBar);
+    console.log('商品区域元素:', productSection);
+    console.log('快速购买栏计算样式:', window.getComputedStyle(quickBuyBar));
+
     if (quickBuyBar && productSection) {
+      // 确保初始可见
+      ensureQuickBuyBarVisible();
+
       // 添加调试日志
-      console.log('初始化快速购买栏滚动监听');
+      console.log('快速购买栏初始化成功');
+      console.log('商品区域高度:', productSection.offsetHeight);
+      console.log('快速购买栏位置:', quickBuyBar.getBoundingClientRect());
 
       function handleScroll() {
         const scrollPosition = window.scrollY || window.pageYOffset;
@@ -846,11 +872,22 @@
         }
       }
 
-      // 立即执行一次检查初始状态
-      handleScroll();
+  // 使用MutationObserver确保DOM完全加载
+  const observer = new MutationObserver(function(mutations) {
+    initQuickBuyBar();
+    observer.disconnect();
+  });
 
-      // 添加滚动事件监听
-      window.addEventListener('scroll', handleScroll, { passive: true });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // 同时使用DOMContentLoaded作为备用
+  document.addEventListener('DOMContentLoaded', initQuickBuyBar);
+
+  // 添加resize监听
+  window.addEventListener('resize', initQuickBuyBar);
     } else {
       console.error('未能找到快速购买栏或商品区域元素');
     }
