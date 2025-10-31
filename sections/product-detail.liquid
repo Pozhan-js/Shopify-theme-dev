@@ -48,18 +48,27 @@
             {% for option in product.options_with_values %}
               <div class="quick-cart-option">
                 <label>{{ option.name }}</label>
-                <select class="quick-cart-select" data-option-index="{{ forloop.index0 }}">
+                <div class="quick-cart-button-selector">
                   {% for value in option.values %}
-                    <option
+                    <input
+                      type="radio"
+                      id="quick-cart-{{ option.name | handle }}-{{ value | handle }}"
+                      name="quick-cart-{{ option.name | handle }}"
                       value="{{ value | escape }}"
+                      data-option-index="{{ forloop.index0 }}"
                       {% if option.selected_value == value %}
-                        selected
+                        checked
                       {% endif %}
+                      class="quick-cart-variant-input"
+                    >
+                    <label
+                      for="quick-cart-{{ option.name | handle }}-{{ value | handle }}"
+                      class="quick-cart-variant-btn"
                     >
                       {{ value }}
-                    </option>
+                    </label>
                   {% endfor %}
-                </select>
+                </div>
               </div>
             {% endfor %}
           </div>
@@ -90,7 +99,7 @@
   /* 快速购物篮样式 */
   .quick-cart {
     position: fixed;
-    bottom: 0px;
+    bottom: -100px;
     left: 0;
     width: 100%;
     background: white;
@@ -133,12 +142,13 @@
 
   .quick-cart-variants {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .quick-cart-option {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 5px;
   }
 
@@ -147,11 +157,35 @@
     color: #666;
   }
 
-  .quick-cart-select {
-    padding: 5px;
-    font-size: 12px;
+  .quick-cart-button-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .quick-cart-variant-input {
+    display: none;
+  }
+
+  .quick-cart-variant-btn {
+    padding: 6px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .quick-cart-variant-input:checked + .quick-cart-variant-btn {
+    border-color: {{ section.settings.accent_color }};
+    background: {{ section.settings.accent_color }};
+    color: white;
+  }
+
+  .quick-cart-variant-btn:hover {
+    border-color: {{ section.settings.accent_color }};
   }
 
   .quick-cart-actions {
@@ -740,8 +774,8 @@
     }
 
     // 同步选项选择
-    document.querySelectorAll('.quick-cart-select').forEach(select => {
-      select.addEventListener('change', function() {
+    document.querySelectorAll('.quick-cart-variant-input').forEach(input => {
+      input.addEventListener('change', function() {
         const index = this.dataset.optionIndex;
         const value = this.value;
         // 同步到主表单
