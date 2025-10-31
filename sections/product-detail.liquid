@@ -708,24 +708,48 @@
   });
 </script>
 
-<!-- 快速购买栏 -->
-<div class="quick-buy-bar">
+<!-- 快速购买栏调试信息 -->
+{% if product %}
+  <!-- 产品数据有效 -->
+  <div style="display:none" data-debug-info>
+    产品标题: {{ product.title | default: '无标题' -}}
+    <br>
+    价格: {{ product.price | money | default: '无价格' -}}
+    <br>
+    变体数量: {{ product.variants.size | default: 0 -}}
+    <br>
+    是否有默认变体: {{ product.has_only_default_variant }}
+  </div>
+{% else %}
+  <!-- 产品数据无效 -->
+  <div style="display:none" data-debug-error>警告: 未找到有效产品数据</div>
+{% endif %}
+
+<!-- 简化版快速购买栏 -->
+<div class="quick-buy-bar" data-quick-buy-bar>
   <div class="quick-buy-content">
-    <div class="quick-buy-product-info">
-      <div class="quick-buy-image">
-        <img src="{{ product.featured_image | img_url: '100x100' }}" alt="{{ product.title }}" width="100" height="100">
+    {% if product %}
+      <div class="quick-buy-product-info">
+        <div class="quick-buy-image">
+          <img
+            src="{{ product.featured_image | img_url: '100x100' | default: '' }}"
+            alt="{{ product.title | default: '' }}"
+            width="100"
+            height="100"
+          >
+        </div>
+        <div class="quick-buy-title">{{ product.title | default: '' }}</div>
+        <div class="quick-buy-price">{{ product.price | money | default: '' }}</div>
       </div>
-      <div class="quick-buy-title">{{ product.title }}</div>
-      <div class="quick-buy-price">{{ product.price | money }}</div>
-    </div>
 
-    <div class="quick-buy-options">
-      {% unless product.has_only_default_variant %}
-        {% render 'variant-main-picker', product_resource: product %}
-      {% endunless %}
+      <div class="quick-buy-options">
+        {% unless product.has_only_default_variant %}
+          {% render 'variant-main-picker', product_resource: product %}
+        {% endunless %}
 
-      {% render 'buy-buttons', closest: { product: product } %}
-    </div>
+        {% render 'buy-buttons', closest: { product: product } %}
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -831,18 +855,33 @@
 <script>
   // 确保快速购买栏可见性
   function ensureQuickBuyBarVisible() {
-    const quickBuyBar = document.querySelector('.quick-buy-bar');
+    const quickBuyBar = document.querySelector('[data-quick-buy-bar]');
     if (quickBuyBar) {
+      console.log('快速购买栏HTML内容:', quickBuyBar.innerHTML);
       quickBuyBar.style.display = 'block';
       quickBuyBar.style.visibility = 'visible';
       console.log('快速购买栏可见性已确保');
+      return true;
     }
+    console.error('快速购买栏元素未找到');
+    return false;
   }
 
   // 滚动显示快速购买栏
   function initQuickBuyBar() {
-    const quickBuyBar = document.querySelector('.quick-buy-bar');
+    console.log('初始化快速购买栏...');
+    const quickBuyBar = document.querySelector('[data-quick-buy-bar]');
     const productSection = document.querySelector('[data-product-section]');
+    const debugInfo = document.querySelector('[data-debug-info]');
+    const debugError = document.querySelector('[data-debug-error]');
+
+    if (debugInfo) {
+      console.log('Liquid模板数据:', debugInfo.textContent);
+    }
+    if (debugError) {
+      console.error('Liquid模板错误:', debugError.textContent);
+      return;
+    }
 
     console.log('快速购买栏元素:', quickBuyBar);
     console.log('商品区域元素:', productSection);
