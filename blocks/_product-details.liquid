@@ -125,31 +125,7 @@
 
       <div class="quick-buy-options">
         {% unless product.has_only_default_variant %}
-          <div class="product-form__input product-form__input--dropdown">
-            <label class="form__label" for="Variants-{{ section.id }}"> 选择规格 </label>
-            <select
-              id="Variants-{{ section.id }}"
-              class="select__select"
-              name="id"
-              form="quick-buy-form"
-            >
-              {% for variant in product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  {% if variant == product.selected_or_first_available_variant %}
-                    selected="selected"
-                  {% endif %}
-                  {% unless variant.available %}
-                    disabled
-                  {% endunless %}
-                >
-                  {{ variant.title }}
-                  {% unless variant.available %} - {{ 'products.product.sold_out' | t }}{% endunless %}
-                  - {{ variant.price | money | strip_html }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
+          {% render 'variant-picker', product: product, block: block, product_form_id: 'quick-buy-form' %}
         {% endunless %}
 
         {% form 'product', product, id: 'quick-buy-form' %}
