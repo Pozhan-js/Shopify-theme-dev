@@ -1,0 +1,266 @@
+<div class="brand-showcase">
+      <div class="brand-intro">
+        <h1 class="brand-title">{{ section.settings.title }}</h1>
+        <div class="brand-description">
+          {{ section.settings.description }}
+        </div>
+        <div class="brand-tagline">
+          {{ section.settings.tagline }}
+        </div>
+      </div>
+
+      <div class="media-grid">
+        {% for block in section.blocks %}
+          <div class="media-item" {{ block.shopify_attributes }}>
+            {% if block.settings.media_type == 'image' %}
+              {% if block.settings.image %}
+                <img 
+                  src="{{ block.settings.image | img_url: 'master' }}" 
+                  alt="{{ block.settings.image.alt | escape }}"
+                  loading="lazy"
+                >
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {% endif %}
+            {% elsif block.settings.media_type == 'video' %}
+              {% if block.settings.video_url %}
+                <video 
+                  controls 
+                  {% if block.settings.autoplay %}autoplay{% endif %}
+                  {% if block.settings.loop %}loop{% endif %}
+                  {% if block.settings.muted %}muted{% endif %}
+                  playsinline
+                >
+                  <source src="{{ block.settings.video_url }}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <style>
+      .brand-showcase {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 20px;
+        background-color: {{ section.settings.background_color }};
+      }
+
+      .brand-intro {
+        margin-bottom: 60px;
+      }
+
+      .brand-title {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        color: {{ section.settings.text_color }};
+      }
+
+      .brand-description {
+        font-size: 16px;
+        line-height: 1.8;
+        margin-bottom: 20px;
+        max-width: 900px;
+        color: {{ section.settings.text_color }};
+      }
+
+      .brand-tagline {
+        font-size: 16px;
+        line-height: 1.8;
+        max-width: 900px;
+        color: {{ section.settings.text_color }};
+      }
+
+      .media-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+
+      .media-item {
+        position: relative;
+        overflow: hidden;
+        background-color: #f5f5f5;
+      }
+
+      .media-item img,
+      .media-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .media-item:nth-child(1),
+      .media-item:nth-child(2),
+      .media-item:nth-child(3),
+      .media-item:nth-child(4) {
+        aspect-ratio: 3/4;
+      }
+
+      .media-item:nth-child(5),
+      .media-item:nth-child(6),
+      .media-item:nth-child(7),
+      .media-item:nth-child(8) {
+        aspect-ratio: 3/4;
+      }
+
+      @media (max-width: 1024px) {
+        .media-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 15px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .brand-showcase {
+          padding: 40px 15px;
+        }
+
+        .brand-intro {
+          margin-bottom: 40px;
+        }
+
+        .brand-title {
+          font-size: 16px;
+        }
+
+        .brand-description,
+        .brand-tagline {
+          font-size: 14px;
+        }
+
+        .media-grid {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+      }
+    </style>
+
+    {% schema %}
+    {
+      "name": "Brand Showcase",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "REDEFINING CONTEMPORARY MENSWEAR SINCE 2006."
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>TRÈS BIEN is a connection point between high fashion, sportswear, and streetwear. TRÈS BIEN's ability to curate and champion emerging trends and refined staples generates cultural credibility.</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "tagline",
+          "label": "Tagline",
+          "default": "<p>Since 2006, TRÈS BIEN continues to be the benchmark of curated men's fashion.</p>"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background Color",
+          "default": "#f5f5f0"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#000000"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "media",
+          "name": "Media Block",
+          "settings": [
+            {
+              "type": "select",
+              "id": "media_type",
+              "label": "Media Type",
+              "options": [
+                {
+                  "value": "image",
+                  "label": "Image"
+                },
+                {
+                  "value": "video",
+                  "label": "Video"
+                }
+              ],
+              "default": "image"
+            },
+            {
+              "type": "image_picker",
+              "id": "image",
+              "label": "Image"
+            },
+            {
+              "type": "text",
+              "id": "video_url",
+              "label": "Video URL",
+              "info": "Upload video to Shopify Files and paste the URL here"
+            },
+            {
+              "type": "checkbox",
+              "id": "autoplay",
+              "label": "Autoplay Video",
+              "default": false
+            },
+            {
+              "type": "checkbox",
+              "id": "loop",
+              "label": "Loop Video",
+              "default": false
+            },
+            {
+              "type": "checkbox",
+              "id": "muted",
+              "label": "Mute Video",
+              "default": true
+            }
+          ]
+        }
+      ],
+      "presets": [
+        {
+          "name": "Brand Showcase",
+          "blocks": [
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            },
+            {
+              "type": "media"
+            }
+          ]
+        }
+      ]
+    }
+    {% endschema %}
