@@ -828,17 +828,31 @@
     const productSection = document.querySelector('[data-product-section]');
 
     if (quickBuyBar && productSection) {
-      const showBarHeight = productSection.offsetHeight * 0.3;
+      // 添加调试日志
+      console.log('初始化快速购买栏滚动监听');
 
-      window.addEventListener('scroll', function () {
+      function handleScroll() {
         const scrollPosition = window.scrollY || window.pageYOffset;
+        const showBarHeight = productSection.offsetHeight * 0.3;
+
+        console.log('滚动位置:', scrollPosition, '触发高度:', showBarHeight);
 
         if (scrollPosition > showBarHeight) {
+          console.log('显示快速购买栏');
           quickBuyBar.classList.add('active');
         } else {
+          console.log('隐藏快速购买栏');
           quickBuyBar.classList.remove('active');
         }
-      });
+      }
+
+      // 立即执行一次检查初始状态
+      handleScroll();
+
+      // 添加滚动事件监听
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    } else {
+      console.error('未能找到快速购买栏或商品区域元素');
     }
   });
 </script>
