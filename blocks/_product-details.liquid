@@ -125,7 +125,13 @@
 
       <div class="quick-buy-options">
         {% unless product.has_only_default_variant %}
-          {% render 'variant-picker', product: product, block: block, product_form_id: 'quick-buy-form' %}
+          {% liquid
+            assign product_resource = closest.product
+            if request.visual_preview_mode and product_resource == blank
+              assign product_resource = collections.all.products.first
+            endif
+          -%}
+          {% render 'variant-main-picker', product_resource: product_resource %}
         {% endunless %}
 
         {% form 'product', product, id: 'quick-buy-form' %}
