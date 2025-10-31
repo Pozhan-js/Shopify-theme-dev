@@ -165,13 +165,26 @@
 
       <div class="quick-buy-options">
         {% unless product.has_only_default_variant %}
-          {% render 'variant-main-picker', product_resource: product %}
+          {% render 'variant-picker', product: product, block: block, product_form_id: 'quick-buy-form' %}
         {% endunless %}
 
-        {% form 'product', product, id: 'quick-buy-form' %}
-          <button type="submit" name="add" class="button button--primary">
-            {{ 'products.product.add_to_cart' | t }}
-          </button>
+        {% form 'product', product, id: 'quick-buy-form', class: 'product-form' %}
+          <div class="product-form__buttons">
+            <button
+              type="submit"
+              name="add"
+              class="product-form__submit button button--full-width button--primary"
+              {% if product.selected_or_first_available_variant.available == false %}
+                disabled
+              {% endif %}
+            >
+              {%- if product.selected_or_first_available_variant.available -%}
+                {{ 'products.product.add_to_cart' | t }}
+              {%- else -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- endif -%}
+            </button>
+          </div>
         {% endform %}
       </div>
     {% endif %}
