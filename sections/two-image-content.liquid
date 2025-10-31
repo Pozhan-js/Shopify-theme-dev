@@ -7,7 +7,7 @@
     - 标题2 → 内容 → 图片2（同上 + 20px 上边距）
     - 外层 padding: 5rem 3rem
     - 支持 fallback & 全设备适配（<picture>）
-    - 图片按原始尺寸显示，居中对齐，但限制最大高度
+    - 图片按原始尺寸显示，居中对齐
   ===================================================================
 {% endcomment %}
 
@@ -76,42 +76,40 @@
           <source media="(min-width: 769px)"
                   srcset="
                     {%- if section.settings.image1_desktop -%}
-                      {{ section.settings.image1_desktop | img_url: '1200x800' }}
+                      {{ section.settings.image1_desktop | img_url: '1024x' }}
                     {%- elsif section.settings.image1_mobile -%}
-                      {{ section.settings.image1_mobile | img_url: '1200x800' }}
+                      {{ section.settings.image1_mobile | img_url: '1024x' }}
                     {%- else -%}
-                      {{ 'placeholder.png' | asset_img_url: '1200x800' }}
+                      {{ 'placeholder.png' | asset_img_url: '1024x' }}
                     {%- endif -%}">
           
           <!-- Mobile 图 -->
           <source media="(max-width: 768px)"
                   srcset="
                     {%- if section.settings.image1_mobile -%}
-                      {{ section.settings.image1_mobile | img_url: '600x400' }}
+                      {{ section.settings.image1_mobile | img_url: '600x' }}
                     {%- elsif section.settings.image1_desktop -%}
-                      {{ section.settings.image1_desktop | img_url: '600x400' }}
+                      {{ section.settings.image1_desktop | img_url: '600x' }}
                     {%- else -%}
-                      {{ 'placeholder.png' | asset_img_url: '600x400' }}
+                      {{ 'placeholder.png' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
-          <!-- 默认 img：显示原始高度，不拉伸，居中，但限制最大高度 -->
+          <!-- 默认 img：显示原始高度，不拉伸，居中 -->
           <img src="
             {%- if section.settings.image1_desktop -%}
-              {{ section.settings.image1_desktop | img_url: '1200x800' }}
+              {{ section.settings.image1_desktop | img_url: 'original' }}
             {%- elsif section.settings.image1_mobile -%}
-              {{ section.settings.image1_mobile | img_url: '1200x800' }}
+              {{ section.settings.image1_mobile | img_url: 'original' }}
             {%- else -%}
-              {{ 'placeholder.png' | asset_img_url: '1200x800' }}
+              {{ 'placeholder.png' | asset_img_url: 'original' }}
             {%- endif -%}"
                alt="{{ section.settings.image1_alt }}"
                style="
                  height: auto;
                  max-width: 100%;
-                 max-height: {{ section.settings.image1_max_height }}px;
                  width: auto;
                  display: block;
-                 border-radius: 8px;
-                 object-fit: contain;"
+                 border-radius: 8px;"
                loading="lazy">
         </picture>
       </div>
@@ -161,42 +159,40 @@
           <source media="(min-width: 769px)"
                   srcset="
                     {%- if section.settings.image2_desktop -%}
-                      {{ section.settings.image2_desktop | img_url: '1200x800' }}
+                      {{ section.settings.image2_desktop | img_url: '1024x' }}
                     {%- elsif section.settings.image2_mobile -%}
-                      {{ section.settings.image2_mobile | img_url: '1200x800' }}
+                      {{ section.settings.image2_mobile | img_url: '1024x' }}
                     {%- else -%}
-                      {{ 'placeholder-2.png' | asset_img_url: '1200x800' }}
+                      {{ 'placeholder-2.png' | asset_img_url: '1024x' }}
                     {%- endif -%}">
           
           <!-- Mobile 图 -->
           <source media="(max-width: 768px)"
                   srcset="
                     {%- if section.settings.image2_mobile -%}
-                      {{ section.settings.image2_mobile | img_url: '600x400' }}
+                      {{ section.settings.image2_mobile | img_url: '600x' }}
                     {%- elsif section.settings.image2_desktop -%}
-                      {{ section.settings.image2_desktop | img_url: '600x400' }}
+                      {{ section.settings.image2_desktop | img_url: '600x' }}
                     {%- else -%}
-                      {{ 'placeholder-2.png' | asset_img_url: '600x400' }}
+                      {{ 'placeholder-2.png' | asset_img_url: '600x' }}
                     {%- endif -%}">
           
           <!-- 默认 img -->
           <img src="
             {%- if section.settings.image2_desktop -%}
-              {{ section.settings.image2_desktop | img_url: '1200x800' }}
+              {{ section.settings.image2_desktop | img_url: 'original' }}
             {%- elsif section.settings.image2_mobile -%}
-              {{ section.settings.image2_mobile | img_url: '1200x800' }}
+              {{ section.settings.image2_mobile | img_url: 'original' }}
             {%- else -%}
-              {{ 'placeholder-2.png' | asset_img_url: '1200x800' }}
+              {{ 'placeholder-2.png' | asset_img_url: 'original' }}
             {%- endif -%}"
                alt="{{ section.settings.image2_alt }}"
                style="
                  height: auto;
                  max-width: 100%;
-                 max-height: {{ section.settings.image2_max_height }}px;
                  width: auto;
                  display: block;
-                 border-radius: 8px;
-                 object-fit: contain;"
+                 border-radius: 8px;"
                loading="lazy">
         </picture>
       </div>
@@ -220,21 +216,6 @@
 
   .animated {
     opacity: 0;
-  }
-
-  /* 响应式优化 */
-  @media (max-width: 768px) {
-    .image-below-title-section {
-      padding: 3rem 1.5rem !important;
-    }
-    
-    .main-title {
-      font-size: 28px !important;
-    }
-    
-    .section-title {
-      font-size: 24px !important;
-    }
   }
 </style>
 
@@ -289,16 +270,6 @@
       "default": 90
     },
     {
-      "type": "range",
-      "id": "image1_max_height",
-      "label": "图片1 最大高度",
-      "min": 200,
-      "max": 800,
-      "step": 50,
-      "unit": "px",
-      "default": 500
-    },
-    {
       "type": "image_picker",
       "id": "image1_desktop",
       "label": "图片1 - 桌面端"
@@ -351,16 +322,6 @@
       "step": 5,
       "unit": "%",
       "default": 90
-    },
-    {
-      "type": "range",
-      "id": "image2_max_height",
-      "label": "图片2 最大高度",
-      "min": 200,
-      "max": 800,
-      "step": 50,
-      "unit": "px",
-      "default": 500
     },
     {
       "type": "image_picker",
