@@ -31,6 +31,45 @@
       </div>
     </div>
 
+    <!-- 快速购物篮 -->
+    <div class="quick-cart" id="quick-cart">
+      <div class="quick-cart-container">
+        <div class="quick-cart-image">
+          <img
+            src="{{ product.featured_image | img_url: '100x100' }}"
+            alt="{{ product.title }}"
+            width="100"
+            height="100"
+          >
+        </div>
+        <div class="quick-cart-info">
+          <h4 class="quick-cart-title">{{ product.title }}</h4>
+          <div class="quick-cart-variants">
+            {% for option in product.options_with_values %}
+              <div class="quick-cart-option">
+                <label>{{ option.name }}</label>
+                <select class="quick-cart-select" data-option-index="{{ forloop.index0 }}">
+                  {% for value in option.values %}
+                    <option
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}
+                        selected
+                      {% endif %}
+                    >
+                      {{ value }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="quick-cart-actions">
+          <button class="quick-cart-buy-btn">立即购买</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 右侧商品详情区域 -->
     <div class="product-info" style="background-color: {{ section.settings.info_background_color }};">
       <div class="product-info-content">
@@ -44,21 +83,115 @@
         {{ details }}
       </div>
     </div>
-
-    {% comment %} <div class="quick-buy-bar" id="QuickBuyBar">
-      {% capture quick_buy %}
-        {% content_for 'block',
-          type: '_quick-buy',
-          id: 'quick-buy',
-          closest.product: product
-        %}
-      {% endcapture %}
-      {{ quick_buy }}
-    </div> {% endcomment %}
   </div>
 </div>
 
 <style>
+  /* 快速购物篮样式 */
+  .quick-cart {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    padding: 10px 20px;
+    z-index: 1000;
+    transition: bottom 0.3s ease;
+    border-top: 1px solid #eee;
+  }
+
+  .quick-cart.visible {
+    bottom: 0;
+  }
+
+  .quick-cart-container {
+    display: flex;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+
+  .quick-cart-image {
+    flex: 0 0 60px;
+  }
+
+  .quick-cart-image img {
+    border-radius: 4px;
+  }
+
+  .quick-cart-info {
+    flex: 1;
+  }
+
+  .quick-cart-title {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .quick-cart-variants {
+    display: flex;
+    gap: 10px;
+  }
+
+  .quick-cart-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .quick-cart-option label {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .quick-cart-select {
+    padding: 5px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .quick-cart-actions {
+    flex: 0 0 auto;
+  }
+
+  .quick-cart-buy-btn {
+    padding: 10px 20px;
+    background: {{ section.settings.button_color }};
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: opacity 0.3s ease;
+  }
+
+  .quick-cart-buy-btn:hover {
+    opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    .quick-cart-container {
+      gap: 10px;
+    }
+    .quick-cart-image {
+      flex: 0 0 50px;
+    }
+    .quick-cart-title {
+      font-size: 13px;
+    }
+    .quick-cart-variants {
+      flex-direction: column;
+      gap: 5px;
+    }
+    .quick-cart-buy-btn {
+      padding: 8px 15px;
+      font-size: 13px;
+    }
+  }
   .product-detail-section {
     padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px 20px;
     width: 100%;
@@ -400,26 +533,6 @@
     color: white !important;
   }
 
-  /* 快速购买栏样式 */
-  .quick-buy-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    width: 100%;
-    background: white;
-    padding: 12px 20px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    transform: translateY(80%);
-    transition: transform 0.3s ease;
-    border-top: 1px solid #eee;
-  }
-
-  .quick-buy-bar.visible {
-    transform: translateY(0);
-  }
-
   /* 移动端适配 */
   @media (max-width: 768px) {
     .product-detail-section {
@@ -601,6 +714,51 @@
 </style>
 
 <script>
+  // 快速购物篮功能
+  document.addEventListener('DOMContentLoaded', function() {
+    const quickCart = document.getElementById('quick-cart');
+    const productInfo = document.querySelector('.product-info');
+    const buyNowBtn = document.querySelector('.buy-now-btn');
+    const quickCartBuyBtn = document.querySelector('.quick-cart-buy-btn');
+    
+    // 监听滚动显示/隐藏快速购物篮
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            quickCart.classList.add('visible');
+          } else {
+            quickCart.classList.remove('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (productInfo) {
+      observer.observe(productInfo);
+    }
+
+    // 同步选项选择
+    document.querySelectorAll('.quick-cart-select').forEach(select => {
+      select.addEventListener('change', function() {
+        const index = this.dataset.optionIndex;
+        const value = this.value;
+        // 同步到主表单
+        const mainSelect = document.querySelector(`select[name="options[${index}]"]`);
+        if (mainSelect) {
+          mainSelect.value = value;
+          mainSelect.dispatchEvent(new Event('change'));
+        }
+      });
+    });
+
+    // 快速购物篮购买按钮
+    if (quickCartBuyBtn && buyNowBtn) {
+      quickCartBuyBtn.addEventListener('click', function() {
+        buyNowBtn.click();
+      });
+    }
   document.addEventListener('DOMContentLoaded', function () {
     const mainImage = document.getElementById('main-product-image');
     const productImages = document.querySelector('.product-images');
