@@ -782,18 +782,25 @@
         const mainSelect = document.querySelector(`select[name="options[${index}]"]`);
         if (mainSelect) {
           mainSelect.value = value;
-          mainSelect.dispatchEvent(new Event('change'));
+          const changeEvent = new Event('change', { bubbles: true });
+          mainSelect.dispatchEvent(changeEvent);
           
-          // 获取当前选中的variant ID
-          const variantId = document.querySelector('input[name="id"]:checked')?.value || 
-                           document.querySelector('input[name="id"]')?.value;
-          
-          // 更新URL中的variant参数
-          if (variantId) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('variant', variantId);
-            window.history.replaceState({}, '', url.toString());
-          }
+          // 等待variant更新完成
+          setTimeout(() => {
+            // 获取当前选中的variant ID
+            const variantInput = document.querySelector('input[name="id"]:checked') || 
+                               document.querySelector('input[name="id"]');
+            const variantId = variantInput?.value;
+            
+            if (variantId) {
+              const url = new URL(window.location.href);
+              url.searchParams.set('variant', variantId);
+              window.history.replaceState({}, '', url.toString());
+              console.log('URL updated with variant:', variantId);
+            } else {
+              console.warn('No variant ID found');
+            }
+          }, 100);
         }
       });
     });
