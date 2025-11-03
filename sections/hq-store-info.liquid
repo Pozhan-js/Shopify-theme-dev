@@ -315,40 +315,137 @@ document.addEventListener('DOMContentLoaded', function() {
   let isDown = false;
   let startX;
   let scrollLeft;
+  let startY;
+  let isScrolling = false;
+  let clickPrevented = false;
   
+  // 鼠标事件
   productsGrid.addEventListener('mousedown', (e) => {
     isDown = true;
     productsGrid.classList.add('dragging');
     startX = e.pageX - productsGrid.offsetLeft;
+    startY = e.pageY;
     scrollLeft = productsGrid.scrollLeft;
+    clickPrevented = false;
+    
+    // 防止文本选择
+    e.preventDefault();
   });
   
   productsGrid.addEventListener('mouseleave', () => {
-    isDown = false;
-    productsGrid.classList.remove('dragging');
+    if (isDown) {
+      isDown = false;
+      productsGrid.classList.remove('dragging');
+    }
   });
   
   productsGrid.addEventListener('mouseup', () => {
-    isDown = false;
-    productsGrid.classList.remove('dragging');
+    if (isDown) {
+      isDown = false;
+      setTimeout(() => {
+        productsGrid.classList.remove('dragging');
+      }, 100);
+    }
   });
   
   productsGrid.addEventListener('mousemove', (e) => {
     if (!isDown) return;
-    e.preventDefault();
+    
     const x = e.pageX - productsGrid.offsetLeft;
-    const walk = (x - startX) * 2;
-    productsGrid.scrollLeft = scrollLeft - walk;
+    const y = e.pageY;
+    const walkX = x - startX;
+    const walkY = Math.abs(y - startY);
+    
+    // 如果水平移动距离大于垂直移动距离，认为是拖动
+    if (Math.abs(walkX) > walkY && Math.abs(walkX) > 5) {
+      isScrolling = true;
+      clickPrevented = true;
+    }
+    
+    if (isScrolling) {
+      e.preventDefault();
+      productsGrid.scrollLeft = scrollLeft - walkX * 1.5;
+    }
+  });
+  
+  // 触摸事件支持
+  productsGrid.addEventListener('touchstart', (e) => {
+    isDown = true;
+    startX = e.touches[0].pageX - productsGrid.offsetLeft;
+    startY = e.touches[0].pageY;
+    scrollLeft = productsGrid.scrollLeft;
+    clickPrevented = false;
+    isScrolling = false;
+  });
+  
+  productsGrid.addEventListener('touchend', () => {
+    isDown = false;
+    isScrolling = false;
+    setTimeout(() => {
+      clickPrevented = false;
+    }, 100);
+  });
+  
+  productsGrid.addEventListener('touchmove', (e) => {
+    if (!isDown) return;
+    
+    const x = e.touches[0].pageX - productsGrid.offsetLeft;
+    const y = e.touches[0].pageY;
+    const walkX = x - startX;
+    const walkY = Math.abs(y - startY);
+    
+    if (Math.abs(walkX) > walkY && Math.abs(walkX) > 5) {
+      isScrolling = true;
+      clickPrevented = true;
+      e.preventDefault();
+      productsGrid.scrollLeft = scrollLeft - walkX * 1.5;
+    }
   });
   
   // 防止拖动时触发链接点击
   const productLinks = productsGrid.querySelectorAll('.product-link');
   productLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-      if (productsGrid.classList.contains('dragging')) {
+      if (clickPrevented) {
         e.preventDefault();
       }
     });
+  });
+  
+  // 添加惯性滚动
+  let velocity = 0;
+  let animationId = null;
+  
+  productsGrid.addEventListener('mouseup', handleMouseUp);
+  productsGrid.addEventListener('mouseleave', handleMouseUp);
+  
+  function handleMouseUp() {
+    if (!isDown) return;
+    
+    isDown = false;
+    isScrolling = false;
+    
+    // 简单的惯性效果
+    const deceleration = 0.95;
+    const animate = () => {
+      if (Math.abs(velocity) > 0.5) {
+        productsGrid.scrollLeft += velocity;
+        velocity *= deceleration;
+        animationId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationId);
+        productsGrid.classList.remove('dragging');
+      }
+    };
+    
+    animate();
+  }
+  
+  productsGrid.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    
+    const x = e.pageX - productsGrid.offsetLeft;
+    velocity = (x - startX) * 0.5;
   });
 });
 </script>
