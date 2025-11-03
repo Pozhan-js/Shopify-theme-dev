@@ -204,13 +204,30 @@
 }
 
 .products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
   gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  cursor: grab;
+  user-select: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.products-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.products-grid.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
 }
 
 .product-card {
   position: relative;
+  flex: 0 0 280px;
+  min-width: 280px;
 }
 
 .product-link {
@@ -261,9 +278,9 @@
 }
 
 @media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+  .product-card {
+    flex: 0 0 200px;
+    min-width: 200px;
   }
   
   .section-header {
@@ -282,8 +299,56 @@
 }
 
 @media (max-width: 480px) {
-  .products-grid {
-    grid-template-columns: 1fr;
+  .product-card {
+    flex: 0 0 160px;
+    min-width: 160px;
   }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productsGrid = document.querySelector('.products-grid');
+  
+  if (!productsGrid) return;
+  
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+  
+  productsGrid.addEventListener('mousedown', (e) => {
+    isDown = true;
+    productsGrid.classList.add('dragging');
+    startX = e.pageX - productsGrid.offsetLeft;
+    scrollLeft = productsGrid.scrollLeft;
+  });
+  
+  productsGrid.addEventListener('mouseleave', () => {
+    isDown = false;
+    productsGrid.classList.remove('dragging');
+  });
+  
+  productsGrid.addEventListener('mouseup', () => {
+    isDown = false;
+    productsGrid.classList.remove('dragging');
+  });
+  
+  productsGrid.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - productsGrid.offsetLeft;
+    const walk = (x - startX) * 2;
+    productsGrid.scrollLeft = scrollLeft - walk;
+  });
+  
+  // 防止拖动时触发链接点击
+  const productLinks = productsGrid.querySelectorAll('.product-link');
+  productLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      if (productsGrid.classList.contains('dragging')) {
+        e.preventDefault();
+      }
+    });
+  });
+});
+</script>
