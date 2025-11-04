@@ -1,10 +1,10 @@
 {% comment %}
-  Instagram图片展示 - 带轮播功能
+  Instagram图片展示 - 网格布局
   1. 头部左右布局：左边文本区域，右边Instagram按钮
-  2. 直接展示配置的图片
+  2. 网格展示：奇数排左大图+右小图，偶数排右大图+左小图
 {% endcomment %}
 
-<div class="instagram-carousel-section" data-section-id="{{ section.id }}">
+<div class="instagram-grid-section" data-section-id="{{ section.id }}">
   <div class="container">
     <!-- 左右布局的头部区域 -->
     <div class="header-layout">
@@ -28,47 +28,99 @@
       {% endif %}
     </div>
 
-    <!-- 图片轮播部分 -->
-    <div class="carousel-wrapper">
-      <div class="carousel-content active">
-        <div class="carousel-track">
-          {% for block in section.blocks %}
-            {% if block.type == 'image_item' %}
-              <div class="card-container small-card">
-                <div class="card-inner">
-                  <!-- 图片容器 -->
-                  <div class="image-container">
-                    {% if block.settings.image %}
-                      <img
-                        src="{{ block.settings.image | img_url: '400x500' }}"
-                        alt="{{ block.settings.image.alt | escape }}"
-                        class="card-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="placeholder-image">
-                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                      </div>
-                    {% endif %}
+    <!-- 图片网格部分 -->
+    <div class="grid-wrapper">
+      {% assign images = section.blocks | where: 'type', 'image_item' %}
+      {% assign rows = images.size | divided_by: 7.0 | ceil %}
+      
+      {% for i in (1..rows) %}
+        {% assign row_start = forloop.index0 | times: 7 %}
+        {% assign row_images = images | offset: row_start | limit: 7 %}
+        {% assign row_index = forloop.index0 %}
+        {% assign is_odd_row = row_index | modulo: 2 %}
+        
+        {% if row_images.size > 0 %}
+          <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
+            {% if is_odd_row == 0 %}
+              <!-- 奇数排：左大图 + 右小图 -->
+              <div class="large-image-container left">
+                {% if row_images[0].settings.image %}
+                  <img
+                    src="{{ row_images[0].settings.image | img_url: '600x600' }}"
+                    alt="{{ row_images[0].settings.image.alt | escape }}"
+                    class="large-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="placeholder-image large">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
                   </div>
-                </div>
+                {% endif %}
+              </div>
+              
+              <div class="small-images-grid">
+                {% for j in (1..6) %}
+                  {% assign image_index = j %}
+                  {% if row_images[image_index] %}
+                    <div class="small-image-container">
+                      {% if row_images[image_index].settings.image %}
+                        <img
+                          src="{{ row_images[image_index].settings.image | img_url: '300x300' }}"
+                          alt="{{ row_images[image_index].settings.image.alt | escape }}"
+                          class="small-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image small">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <!-- 偶数排：左小图 + 右大图 -->
+              <div class="small-images-grid">
+                {% for j in (0..5) %}
+                  {% assign image_index = j %}
+                  {% if row_images[image_index] %}
+                    <div class="small-image-container">
+                      {% if row_images[image_index].settings.image %}
+                        <img
+                          src="{{ row_images[image_index].settings.image | img_url: '300x300' }}"
+                          alt="{{ row_images[image_index].settings.image.alt | escape }}"
+                          class="small-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image small">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              
+              <div class="large-image-container right">
+                {% if row_images[6].settings.image %}
+                  <img
+                    src="{{ row_images[6].settings.image | img_url: '600x600' }}"
+                    alt="{{ row_images[6].settings.image.alt | escape }}"
+                    class="large-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="placeholder-image large">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {% endif %}
               </div>
             {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-
-      <!-- 导航按钮 -->
-      <button class="nav-button-img prev-button">
-        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <button class="nav-button-img next-button">
-        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+          </div>
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
 </div>
@@ -94,19 +146,17 @@
 }
 
 /* Section principale */
-.instagram-carousel-section {
+.instagram-grid-section {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
-  min-height: 50vh;
-  padding: 1rem 0;
+  padding: 2rem 0;
 }
 
 /* Container principal */
 .container {
   max-width: 100rem;
   margin: 0 auto;
-  padding: 0 1rem;
-  margin-bottom: 2rem;
+  padding: 0 2rem;
 }
 
 /* 头部左右布局 */
@@ -114,7 +164,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 3rem;
   gap: 2rem;
 }
 
@@ -154,7 +204,6 @@
 }
 
 .instagram-button:hover {
-
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -174,65 +223,71 @@
   color: var(--gray-800);
 }
 
-/* Carousel wrapper */
-.carousel-wrapper {
-  position: relative;
-  overflow: hidden;
+/* Grid wrapper */
+.grid-wrapper {
+  max-width: 80rem;
+  margin: 0 auto;
 }
 
-.carousel-content {
-  display: none;
-}
-
-.carousel-content.active {
-  display: block;
-}
-
-.carousel-track {
+/* Image rows */
+.image-row {
   display: flex;
-  gap: 1rem;
-  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  cursor: grab;
-  user-select: none;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  align-items: center;
 }
 
-.carousel-track:active {
-  cursor: grabbing;
+.image-row:last-child {
+  margin-bottom: 0;
 }
 
-/* Cards containers */
-.card-container {
+/* Large image container */
+.large-image-container {
   flex-shrink: 0;
-}
-
-.small-card {
-  width: 18rem;
-}
-
-/* Image containers */
-.image-container {
-  position: relative;
-  background-color: var(--white);
+  width: 24rem;
+  height: 24rem;
+  border-radius: 12px;
   overflow: hidden;
   transition: transform 0.3s ease;
 }
 
-.small-card .image-container {
-  height: 20rem;
-  border-radius: 8px;
-}
-
-.image-container:hover {
+.large-image-container:hover {
   transform: scale(1.02);
 }
 
-.card-image {
+.large-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.5s ease;
 }
 
+/* Small images grid */
+.small-images-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1rem;
+  height: 24rem;
+}
+
+.small-image-container {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.small-image-container:hover {
+  transform: scale(1.05);
+}
+
+.small-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Placeholder images */
 .placeholder-image {
   width: 100%;
   height: 100%;
@@ -241,64 +296,48 @@
   align-items: center;
   justify-content: center;
   color: var(--gray-400);
+}
+
+.placeholder-image.large {
+  font-size: 1.5rem;
+}
+
+.placeholder-image.small {
   font-size: 0.875rem;
 }
 
-/* Boutons de navigation */
-.nav-button-img {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+.placeholder-svg {
   width: 3rem;
   height: 3rem;
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 10;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.nav-button-img:hover {
-  background-color: var(--gray-50);
-  transform: translateY(-50%) scale(1.05);
-}
-
-.nav-button-img.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.prev-button {
-  left: 1rem;
-}
-
-.next-button {
-  right: 1rem;
-}
-
-.nav-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--gray-600);
+  opacity: 0.5;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .container {
-    padding: 0 0.5rem;
+    padding: 0 1rem;
   }
   
+  .large-image-container {
+    width: 20rem;
+    height: 20rem;
+  }
+  
+  .small-images-grid {
+    height: 20rem;
+  }
+  
+  .image-row {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
   .header-layout {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 2rem;
   }
   
   .text-content {
@@ -314,30 +353,36 @@
     font-size: 1rem;
   }
   
-  .carousel-track {
-    gap: 1rem;
+  .image-row {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
   
-  .small-card {
-    width: 16rem;
+  .large-image-container {
+    width: 100%;
+    height: 20rem;
+    max-width: 24rem;
+    margin: 0 auto;
   }
   
-  .small-card .image-container {
-    height: 22rem;
+  .small-images-grid {
+    height: auto;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 0.75rem;
   }
   
-  .nav-button-img {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-  
-  .nav-icon {
-    width: 1rem;
-    height: 1rem;
+  .small-image-container {
+    height: 8rem;
   }
 }
 
 @media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
   .header-layout {
     margin-bottom: 1.5rem;
   }
@@ -356,83 +401,30 @@
     height: 1rem;
   }
   
-  .small-card {
-    width: 14rem;
+  .large-image-container {
+    height: 16rem;
   }
   
-  .small-card .image-container {
-    height: 20rem;
+  .small-images-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  
+  .small-image-container {
+    height: 6rem;
+  }
+  
+  .image-row {
+    margin-bottom: 1.5rem;
   }
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const section = document.querySelector('.instagram-carousel-section');
-  if (!section) return;
-
-  const track = section.querySelector('.carousel-track');
-  const prevButton = section.querySelector('.prev-button');
-  const nextButton = section.querySelector('.next-button');
-  let currentSlide = 0;
-
-  // 更新轮播位置
-  function updateCarousel() {
-    if (!track) return;
-    
-    const cards = track.querySelectorAll('.card-container');
-    if (cards.length === 0) return;
-    
-    const cardWidth = cards[0].offsetWidth + 16; // 包含间距
-    const offset = currentSlide * cardWidth;
-    track.style.transform = `translateX(-${offset}px)`;
-    
-    // 更新导航按钮状态
-    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
-    const trackWidth = track.scrollWidth;
-    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
-    
-    prevButton.classList.toggle('visible', currentSlide > 0);
-    nextButton.classList.toggle('visible', currentSlide < maxSlide);
-  }
-
-  // 上一张
-  prevButton.addEventListener('click', () => {
-    if (currentSlide > 0) {
-      currentSlide--;
-      updateCarousel();
-    }
-  });
-
-  // 下一张
-  nextButton.addEventListener('click', () => {
-    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
-    const trackWidth = track.scrollWidth;
-    const cards = track.querySelectorAll('.card-container');
-    const cardWidth = cards[0].offsetWidth + 16;
-    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
-    
-    if (currentSlide < maxSlide) {
-      currentSlide++;
-      updateCarousel();
-    }
-  });
-
-  // 初始更新
-  updateCarousel();
-  
-  // 响应式调整
-  window.addEventListener('resize', () => {
-    updateCarousel();
-  });
-});
-</script>
 
 {% schema %}
 {
   "name": "Instagram图片展示",
   "tag": "section",
-  "class": "instagram-carousel-section",
+  "class": "instagram-grid-section",
   "settings": [
     {
       "type": "textarea",
@@ -474,6 +466,39 @@ document.addEventListener('DOMContentLoaded', function() {
         "button_text": "Follow Us"
       },
       "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
         {
           "type": "image_item"
         },
