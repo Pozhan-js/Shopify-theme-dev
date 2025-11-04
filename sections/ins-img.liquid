@@ -1,22 +1,18 @@
 {% comment %}
   Instagram图片展示 - 网格布局
-  1. 头部左右布局：左边文本区域，右边Instagram按钮
-  2. 网格展示：奇数排左大图+右小图，偶数排右大图+左小图
-  3. 默认显示2排，点击加载更多显示全部
+  修正版本
 {% endcomment %}
 
 <div class="instagram-grid-section" data-section-id="{{ section.id }}">
   <div class="container">
-    <!-- 左右布局的头部区域 -->
+    <!-- 头部区域 -->
     <div class="header-layout">
-      <!-- 左侧文本区域 -->
       <div class="text-content">
         {% if section.settings.text_content != blank %}
           <p class="header-text">{{ section.settings.text_content }}</p>
         {% endif %}
       </div>
       
-      <!-- 右侧Instagram按钮 -->
       {% if section.settings.instagram_link != blank %}
         <div class="button-content">
           <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
@@ -31,204 +27,230 @@
 
     <!-- 图片网格部分 -->
     <div class="grid-wrapper">
-      {% assign images = section.blocks | where: 'type', 'image_item' %}
-      {% assign total_rows = images.size | divided_by: 7.0 | ceil %}
+      {% assign all_images = section.blocks | where: 'type', 'image_item' %}
+      {% assign images_per_row = 7 %}
+      {% assign total_images = all_images.size %}
       
-      <!-- 默认显示的前两排 -->
-      <div class="initial-rows">
-        {% for row_num in (0..1) %}
-          {% assign row_start = row_num | times: 7 %}
-          {% assign row_images = images | offset: row_start | limit: 7 %}
-          
-          {% if row_images.size > 0 %}
-            {% assign is_odd_row = row_num | modulo: 2 %}
-            <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
-              {% if is_odd_row == 0 %}
-                <!-- 奇数排：左大图 + 右小图 -->
-                <div class="large-image-container left">
-                  {% if row_images[0].settings.image %}
-                    <img
-                      src="{{ row_images[0].settings.image | img_url: '600x600' }}"
-                      alt="{{ row_images[0].settings.image.alt | escape }}"
-                      class="large-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image large">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
-                </div>
-                
-                <div class="small-images-grid">
-                  {% for j in (1..6) %}
-                    {% if row_images[j] %}
-                      <div class="small-image-container">
-                        {% if row_images[j].settings.image %}
-                          <img
-                            src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                            alt="{{ row_images[j].settings.image.alt | escape }}"
-                            class="small-image"
-                            loading="lazy"
-                          >
-                        {% else %}
-                          <div class="placeholder-image small">
-                            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                          </div>
-                        {% endif %}
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              {% else %}
-                <!-- 偶数排：左小图 + 右大图 -->
-                <div class="small-images-grid">
-                  {% for j in (0..5) %}
-                    {% if row_images[j] %}
-                      <div class="small-image-container">
-                        {% if row_images[j].settings.image %}
-                          <img
-                            src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                            alt="{{ row_images[j].settings.image.alt | escape }}"
-                            class="small-image"
-                            loading="lazy"
-                          >
-                        {% else %}
-                          <div class="placeholder-image small">
-                            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                          </div>
-                        {% endif %}
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-                
-                <div class="large-image-container right">
-                  {% if row_images[6].settings.image %}
-                    <img
-                      src="{{ row_images[6].settings.image | img_url: '600x600' }}"
-                      alt="{{ row_images[6].settings.image.alt | escape }}"
-                      class="large-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image large">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
-                </div>
-              {% endif %}
-            </div>
+      {% if total_images > 0 %}
+        <!-- 默认显示的前两排（最多14张图片） -->
+        <div class="initial-rows">
+          {% assign initial_limit = 14 %}
+          {% if total_images < initial_limit %}
+            {% assign initial_limit = total_images %}
           {% endif %}
-        {% endfor %}
-      </div>
-
-      <!-- 隐藏的额外排 -->
-      {% if total_rows > 2 %}
-        <div class="additional-rows" style="display: none;">
-          {% for row_num in (2..total_rows) %}
-            {% assign row_start = row_num | times: 7 %}
-            {% assign row_images = images | offset: row_start | limit: 7 %}
-            
-            {% if row_images.size > 0 %}
-              {% assign is_odd_row = row_num | modulo: 2 %}
-              <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
-                {% if is_odd_row == 0 %}
-                  <!-- 奇数排：左大图 + 右小图 -->
-                  <div class="large-image-container left">
-                    {% if row_images[0].settings.image %}
-                      <img
-                        src="{{ row_images[0].settings.image | img_url: '600x600' }}"
-                        alt="{{ row_images[0].settings.image.alt | escape }}"
-                        class="large-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="placeholder-image large">
-                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                      </div>
-                    {% endif %}
-                  </div>
+          
+          {% assign current_image_index = 0 %}
+          {% assign row_count = 0 %}
+          
+          {% for i in (1..2) %}
+            {% if current_image_index < initial_limit %}
+              {% assign row_images = all_images | offset: current_image_index | limit: images_per_row %}
+              {% assign images_in_this_row = row_images.size %}
+              
+              {% if images_in_this_row > 0 %}
+                {% assign is_odd_row = row_count | modulo: 2 %}
+                <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
                   
-                  <div class="small-images-grid">
-                    {% for j in (1..6) %}
-                      {% if row_images[j] %}
-                        <div class="small-image-container">
-                          {% if row_images[j].settings.image %}
-                            <img
-                              src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                              alt="{{ row_images[j].settings.image.alt | escape }}"
-                              class="small-image"
-                              loading="lazy"
-                            >
-                          {% else %}
-                            <div class="placeholder-image small">
-                              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                            </div>
-                          {% endif %}
+                  {% if is_odd_row == 0 %}
+                    <!-- 奇数排：左大图 + 右小图 -->
+                    <div class="large-image-container left">
+                      {% if row_images[0].settings.image %}
+                        <img
+                          src="{{ row_images[0].settings.image | img_url: '600x600' }}"
+                          alt="{{ row_images[0].settings.image.alt | escape }}"
+                          class="large-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image large">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
                         </div>
                       {% endif %}
-                    {% endfor %}
-                  </div>
-                {% else %}
-                  <!-- 偶数排：左小图 + 右大图 -->
-                  <div class="small-images-grid">
-                    {% for j in (0..5) %}
-                      {% if row_images[j] %}
-                        <div class="small-image-container">
-                          {% if row_images[j].settings.image %}
-                            <img
-                              src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                              alt="{{ row_images[j].settings.image.alt | escape }}"
-                              class="small-image"
-                              loading="lazy"
-                            >
-                          {% else %}
-                            <div class="placeholder-image small">
-                              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                            </div>
-                          {% endif %}
+                    </div>
+                    
+                    <div class="small-images-grid">
+                      {% for j in (1..6) %}
+                        {% if j < images_in_this_row %}
+                          <div class="small-image-container">
+                            {% if row_images[j].settings.image %}
+                              <img
+                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
+                                alt="{{ row_images[j].settings.image.alt | escape }}"
+                                class="small-image"
+                                loading="lazy"
+                              >
+                            {% else %}
+                              <div class="placeholder-image small">
+                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    
+                  {% else %}
+                    <!-- 偶数排：左小图 + 右大图 -->
+                    <div class="small-images-grid">
+                      {% for j in (0..5) %}
+                        {% if j < images_in_this_row and j < 6 %}
+                          <div class="small-image-container">
+                            {% if row_images[j].settings.image %}
+                              <img
+                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
+                                alt="{{ row_images[j].settings.image.alt | escape }}"
+                                class="small-image"
+                                loading="lazy"
+                              >
+                            {% else %}
+                              <div class="placeholder-image small">
+                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    
+                    <div class="large-image-container right">
+                      {% if images_in_this_row == 7 and row_images[6].settings.image %}
+                        <img
+                          src="{{ row_images[6].settings.image | img_url: '600x600' }}"
+                          alt="{{ row_images[6].settings.image.alt | escape }}"
+                          class="large-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image large">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
                         </div>
                       {% endif %}
-                    {% endfor %}
-                  </div>
-                  
-                  <div class="large-image-container right">
-                    {% if row_images[6].settings.image %}
-                      <img
-                        src="{{ row_images[6].settings.image | img_url: '600x600' }}"
-                        alt="{{ row_images[6].settings.image.alt | escape }}"
-                        class="large-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="placeholder-image large">
-                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                      </div>
-                    {% endif %}
-                  </div>
-                {% endif %}
-              </div>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                {% assign current_image_index = current_image_index | plus: images_in_this_row %}
+                {% assign row_count = row_count | plus: 1 %}
+              {% endif %}
             {% endif %}
           {% endfor %}
         </div>
 
-        <!-- 加载更多按钮 -->
-        <div class="load-more-container">
-          <button class="load-more-button" onclick="loadMoreImages()">
-            <span class="load-more-text">加载更多</span>
-            <svg class="load-more-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
+        <!-- 隐藏的额外排 -->
+        {% if total_images > 14 %}
+          <div class="additional-rows" style="display: none;">
+            {% assign remaining_images = total_images | minus: 14 %}
+            {% assign remaining_rows = remaining_images | divided_by: 7.0 | ceil %}
+            
+            {% for i in (1..remaining_rows) %}
+              {% assign row_start = 14 | plus: forloop.index0 | times: 7 %}
+              {% assign row_images = all_images | offset: row_start | limit: images_per_row %}
+              {% assign images_in_this_row = row_images.size %}
+              
+              {% if images_in_this_row > 0 %}
+                {% assign total_row_index = row_count | plus: forloop.index0 %}
+                {% assign is_odd_row = total_row_index | modulo: 2 %}
+                
+                <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
+                  
+                  {% if is_odd_row == 0 %}
+                    <!-- 奇数排：左大图 + 右小图 -->
+                    <div class="large-image-container left">
+                      {% if row_images[0].settings.image %}
+                        <img
+                          src="{{ row_images[0].settings.image | img_url: '600x600' }}"
+                          alt="{{ row_images[0].settings.image.alt | escape }}"
+                          class="large-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image large">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {% endif %}
+                    </div>
+                    
+                    <div class="small-images-grid">
+                      {% for j in (1..6) %}
+                        {% if j < images_in_this_row %}
+                          <div class="small-image-container">
+                            {% if row_images[j].settings.image %}
+                              <img
+                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
+                                alt="{{ row_images[j].settings.image.alt | escape }}"
+                                class="small-image"
+                                loading="lazy"
+                              >
+                            {% else %}
+                              <div class="placeholder-image small">
+                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    
+                  {% else %}
+                    <!-- 偶数排：左小图 + 右大图 -->
+                    <div class="small-images-grid">
+                      {% for j in (0..5) %}
+                        {% if j < images_in_this_row and j < 6 %}
+                          <div class="small-image-container">
+                            {% if row_images[j].settings.image %}
+                              <img
+                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
+                                alt="{{ row_images[j].settings.image.alt | escape }}"
+                                class="small-image"
+                                loading="lazy"
+                              >
+                            {% else %}
+                              <div class="placeholder-image small">
+                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    
+                    <div class="large-image-container right">
+                      {% if images_in_this_row == 7 and row_images[6].settings.image %}
+                        <img
+                          src="{{ row_images[6].settings.image | img_url: '600x600' }}"
+                          alt="{{ row_images[6].settings.image.alt | escape }}"
+                          class="large-image"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="placeholder-image large">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+
+          <!-- 加载更多按钮 -->
+          <div class="load-more-container">
+            <button class="load-more-button" onclick="loadMoreImages()">
+              <span class="load-more-text">加载更多</span>
+              <svg class="load-more-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+        {% endif %}
       {% endif %}
     </div>
   </div>
 </div>
 
 <style>
-/* Variables CSS */
+/* 保持之前的CSS样式不变 */
 :root {
   --cream: #F5F1EB;
   --warm-beige: #E8DDD4;
@@ -247,21 +269,18 @@
   --orange-400: #FB923C;
 }
 
-/* Section principale */
 .instagram-grid-section {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
   padding: 2rem 0;
 }
 
-/* Container principal */
 .container {
   max-width: 100rem;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-/* 头部左右布局 */
 .header-layout {
   display: flex;
   justify-content: space-between;
@@ -270,7 +289,6 @@
   gap: 2rem;
 }
 
-/* 左侧文本区域 */
 .text-content {
   flex: 1;
   text-align: left;
@@ -284,7 +302,6 @@
   font-weight: 400;
 }
 
-/* 右侧按钮区域 */
 .button-content {
   flex-shrink: 0;
 }
@@ -310,10 +327,6 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.instagram-button:active {
-  transform: translateY(0);
-}
-
 .instagram-icon {
   width: 1.125rem;
   height: 1.125rem;
@@ -321,17 +334,11 @@
   transition: color 0.3s ease;
 }
 
-.instagram-button:hover .instagram-icon {
-  color: var(--gray-800);
-}
-
-/* Grid wrapper */
 .grid-wrapper {
   max-width: 80rem;
   margin: 0 auto;
 }
 
-/* Image rows */
 .image-row {
   display: flex;
   gap: 2rem;
@@ -343,7 +350,6 @@
   margin-bottom: 0;
 }
 
-/* Large image container */
 .large-image-container {
   flex-shrink: 0;
   width: 24rem;
@@ -363,7 +369,6 @@
   object-fit: cover;
 }
 
-/* Small images grid */
 .small-images-grid {
   flex: 1;
   display: grid;
@@ -389,7 +394,6 @@
   object-fit: cover;
 }
 
-/* Placeholder images */
 .placeholder-image {
   width: 100%;
   height: 100%;
@@ -414,7 +418,6 @@
   opacity: 0.5;
 }
 
-/* Load more button */
 .load-more-container {
   display: flex;
   justify-content: center;
@@ -452,7 +455,6 @@
   transform: rotate(180deg);
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .container {
     padding: 0 1rem;
@@ -567,17 +569,14 @@ function loadMoreImages() {
   const loadMoreText = document.querySelector('.load-more-text');
   
   if (additionalRows.style.display === 'none') {
-    // 显示更多图片
     additionalRows.style.display = 'block';
     loadMoreText.textContent = '收起';
     loadMoreButton.classList.add('expanded');
   } else {
-    // 隐藏额外图片
     additionalRows.style.display = 'none';
     loadMoreText.textContent = '加载更多';
     loadMoreButton.classList.remove('expanded');
     
-    // 滚动到网格顶部
     document.querySelector('.grid-wrapper').scrollIntoView({ 
       behavior: 'smooth',
       block: 'start'
