@@ -1,8 +1,8 @@
 {% comment %}
   Instagram图片展示 - 网格布局
-  1. 头部左右布局：左边文本区域，右边Instagram按钮
-  2. 交替网格布局：奇数行左大右小，偶数行右大左小
-  3. 每行7张图片：1张大图 + 6张小图（3x2网格）
+  1. 默认显示2行（14张图片）
+  2. 点击"显示更多"按钮展开全部
+  3. 内容居中，两侧留白
 {% endcomment %}
 
 <div class="instagram-grid-section" data-section-id="{{ section.id }}">
@@ -29,12 +29,15 @@
       {% endif %}
     </div>
 
-    <!-- 图片网格布局 -->
-    <div class="grid-wrapper">
-      {% assign row_count = 0 %}
-      {% assign image_index = 0 %}
-      
-      {% for i in (0..100) %}
+<div class="grid-wrapper">
+  {% assign total_images = section.blocks.size %}
+  {% assign total_rows = total_images | divided_by: 7 %}
+  {% assign remainder = total_images | modulo: 7 %}
+  {% if remainder > 0 %}
+    {% assign total_rows = total_rows | plus: 1 %}
+  {% endif %}
+  
+  {% for i in (0..100) %}
         {% assign start_index = i | times: 7 %}
         {% assign end_index = start_index | plus: 6 %}
         
@@ -52,8 +55,12 @@
         {% endif %}
         
         {% assign is_odd_row = i | modulo: 2 %}
+        {% assign row_class = '' %}
+        {% if i >= 2 %}
+          {% assign row_class = 'hidden-row' %}
+        {% endif %}
         
-        <div class="grid-row {% if is_odd_row == 0 %}layout-left{% else %}layout-right{% endif %}">
+        <div class="grid-row {{ row_class }} {% if is_odd_row == 0 %}layout-left{% else %}layout-right{% endif %}" data-row-index="{{ i }}">
           {% if is_odd_row == 0 %}
             <!-- 奇数行：左大右小 -->
             <div class="large-image-container">
@@ -143,6 +150,18 @@
         </div>
       {% endfor %}
     </div>
+
+    <!-- 显示更多按钮 -->
+    {% if total_rows > 2 %}
+      <div class="load-more-container">
+        <button class="load-more-button" id="loadMoreBtn">
+          <span class="button-text">{{ section.settings.load_more_text | default: '显示更多' }}</span>
+          <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -153,6 +172,7 @@
   --gray-400: #9CA3AF;
   --gray-600: #4B5563;
   --gray-700: #374151;
+  --gray-800: #1F2937;
   --white: #FFFFFF;
 }
 
@@ -163,11 +183,11 @@
   padding: 2rem 0;
 }
 
-/* Container principal */
+/* Container principal - 居中且两侧留白 */
 .container {
-  max-width: 100rem;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 3rem;
 }
 
 /* 头部左右布局 */
@@ -236,6 +256,21 @@
   display: flex;
   gap: 1rem;
   width: 100%;
+  opacity: 1;
+  max-height: 1000px;
+  overflow: hidden;
+  transition: all 0.5s ease;
+}
+
+.grid-row.hidden-row {
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+}
+
+.grid-row.show {
+  opacity: 1;
+  max-height: 1000px;
 }
 
 /* 大图容器 - 占40% */
@@ -287,8 +322,55 @@
   opacity: 0.5;
 }
 
+/* 显示更多按钮 */
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.load-more-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background-color: transparent;
+  border: 1px solid var(--gray-700);
+  border-radius: 0.5rem;
+  color: var(--gray-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.load-more-button:hover {
+  background-color: var(--gray-700);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.load-more-button.hidden {
+  display: none;
+}
+
+.button-icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.load-more-button.expanded .button-icon {
+  transform: rotate(180deg);
+}
+
 /* Responsive - 平板 */
 @media (max-width: 1024px) {
+  .container {
+    padding: 0 2rem;
+  }
+  
   .large-image-container {
     flex: 0 0 45%;
   }
@@ -300,6 +382,10 @@
 
 /* Responsive - 手机 */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
   .header-layout {
     flex-direction: column;
     align-items: stretch;
@@ -361,8 +447,55 @@
   .small-images-grid {
     gap: 0.75rem;
   }
+  
+  .load-more-button {
+    padding: 0.625rem 1.5rem;
+    font-size: 0.8rem;
+  }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if (!loadMoreBtn) return;
+
+  const hiddenRows = document.querySelectorAll('.grid-row.hidden-row');
+  let isExpanded = false;
+
+  loadMoreBtn.addEventListener('click', function() {
+    if (!isExpanded) {
+      // 展开所有隐藏的行
+      hiddenRows.forEach((row, index) => {
+        setTimeout(() => {
+          row.classList.add('show');
+        }, index * 100); // 添加渐进动画效果
+      });
+      
+      // 更新按钮文本和图标
+      loadMoreBtn.querySelector('.button-text').textContent = '收起';
+      loadMoreBtn.classList.add('expanded');
+      isExpanded = true;
+    } else {
+      // 收起所有行
+      hiddenRows.forEach(row => {
+        row.classList.remove('show');
+      });
+      
+      // 更新按钮文本和图标
+      loadMoreBtn.querySelector('.button-text').textContent = '{{ section.settings.load_more_text | default: "显示更多" }}';
+      loadMoreBtn.classList.remove('expanded');
+      isExpanded = false;
+      
+      // 滚动回顶部
+      const section = document.querySelector('.instagram-grid-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+});
+</script>
 
 {% schema %}
 {
@@ -387,6 +520,12 @@
       "id": "instagram_link",
       "label": "Instagram链接",
       "info": "输入Instagram主页链接"
+    },
+    {
+      "type": "text",
+      "id": "load_more_text",
+      "label": "显示更多按钮文本",
+      "default": "显示更多"
     }
   ],
   "blocks": [
@@ -408,7 +547,8 @@
       "name": "Instagram图片展示",
       "settings": {
         "text_content": "关注我们的Instagram，获取最新产品动态和时尚灵感",
-        "button_text": "Follow Us"
+        "button_text": "Follow Us",
+        "load_more_text": "显示更多"
       },
       "blocks": [
         {"type": "image_item"},
