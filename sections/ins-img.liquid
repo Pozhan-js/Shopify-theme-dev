@@ -2,8 +2,7 @@
   Instagram图片展示 - 网格布局
   1. 默认显示2行（14张图片）
   2. 点击"显示更多"按钮展开全部
-  3. 内容居中，两侧留白
-  4. 每张图片支持外部链接
+  3. 支持配置图片URL和外部链接
 {% endcomment %}
 
 <div class="instagram-grid-section" data-section-id="{{ section.id }}">
@@ -40,12 +39,11 @@
       
       {% for i in (0..100) %}
         {% assign start_index = i | times: 7 %}
-        {% assign end_index = start_index | plus: 6 %}
         
         {% comment %}检查是否还有图片{% endcomment %}
         {% assign has_images = false %}
         {% for block in section.blocks limit: 7 offset: start_index %}
-          {% if block.type == 'image_item' %}
+          {% if block.type == 'image_item' and block.settings.image_url != blank %}
             {% assign has_images = true %}
             {% break %}
           {% endif %}
@@ -66,22 +64,16 @@
             <!-- 奇数行：左大右小 -->
             <div class="large-image-container">
               {% assign block = section.blocks[start_index] %}
-              {% if block and block.type == 'image_item' %}
+              {% if block and block.type == 'image_item' and block.settings.image_url != blank %}
                 {% if block.settings.link != blank %}
                   <a href="{{ block.settings.link }}" target="_blank" rel="noopener" class="image-link">
                 {% endif %}
-                  {% if block.settings.image %}
-                    <img
-                      src="{{ block.settings.image | img_url: '800x800' }}"
-                      alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
+                  <img
+                    src="{{ block.settings.image_url }}"
+                    alt="{{ block.settings.alt_text | default: 'Instagram image' | escape }}"
+                    class="grid-image"
+                    loading="lazy"
+                  >
                 {% if block.settings.link != blank %}
                   </a>
                 {% endif %}
@@ -93,22 +85,16 @@
                 {% assign block_index = start_index | plus: j %}
                 {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'image_item' %}
+                  {% if block and block.type == 'image_item' and block.settings.image_url != blank %}
                     {% if block.settings.link != blank %}
                       <a href="{{ block.settings.link }}" target="_blank" rel="noopener" class="image-link">
                     {% endif %}
-                      {% if block.settings.image %}
-                        <img
-                          src="{{ block.settings.image | img_url: '400x400' }}"
-                          alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
+                      <img
+                        src="{{ block.settings.image_url }}"
+                        alt="{{ block.settings.alt_text | default: 'Instagram image' | escape }}"
+                        class="grid-image"
+                        loading="lazy"
+                      >
                     {% if block.settings.link != blank %}
                       </a>
                     {% endif %}
@@ -123,22 +109,16 @@
                 {% assign block_index = start_index | plus: j %}
                 {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'image_item' %}
+                  {% if block and block.type == 'image_item' and block.settings.image_url != blank %}
                     {% if block.settings.link != blank %}
                       <a href="{{ block.settings.link }}" target="_blank" rel="noopener" class="image-link">
                     {% endif %}
-                      {% if block.settings.image %}
-                        <img
-                          src="{{ block.settings.image | img_url: '400x400' }}"
-                          alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
+                      <img
+                        src="{{ block.settings.image_url }}"
+                        alt="{{ block.settings.alt_text | default: 'Instagram image' | escape }}"
+                        class="grid-image"
+                        loading="lazy"
+                      >
                     {% if block.settings.link != blank %}
                       </a>
                     {% endif %}
@@ -150,22 +130,16 @@
             <div class="large-image-container">
               {% assign block_index = start_index | plus: 6 %}
               {% assign block = section.blocks[block_index] %}
-              {% if block and block.type == 'image_item' %}
+              {% if block and block.type == 'image_item' and block.settings.image_url != blank %}
                 {% if block.settings.link != blank %}
                   <a href="{{ block.settings.link }}" target="_blank" rel="noopener" class="image-link">
                 {% endif %}
-                  {% if block.settings.image %}
-                    <img
-                      src="{{ block.settings.image | img_url: '800x800' }}"
-                      alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
+                  <img
+                    src="{{ block.settings.image_url }}"
+                    alt="{{ block.settings.alt_text | default: 'Instagram image' | escape }}"
+                    class="grid-image"
+                    loading="lazy"
+                  >
                 {% if block.settings.link != blank %}
                   </a>
                 {% endif %}
@@ -283,7 +257,7 @@
   width: 100%;
   opacity: 1;
   max-height: 1000px;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.5s ease;
 }
 
@@ -291,25 +265,28 @@
   opacity: 0;
   max-height: 0;
   margin: 0;
+  overflow: hidden;
 }
 
 .grid-row.show {
   opacity: 1;
   max-height: 1000px;
+  overflow: visible;
 }
 
 /* 大图容器 - 占40% */
 .large-image-container {
-  flex: 0 0 40%;
+  flex: 0 0 calc(40% - 0.5rem);
   aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: 8px;
   background-color: var(--gray-200);
+  position: relative;
 }
 
 /* 小图网格容器 - 占60% */
 .small-images-grid {
-  flex: 0 0 60%;
+  flex: 0 0 calc(60% - 0.5rem);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(2, 1fr);
@@ -321,6 +298,7 @@
   overflow: hidden;
   border-radius: 8px;
   background-color: var(--gray-200);
+  position: relative;
 }
 
 /* 图片链接样式 */
@@ -331,7 +309,6 @@
   text-decoration: none;
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
 }
 
 .image-link::after {
@@ -344,6 +321,7 @@
   background-color: rgba(0, 0, 0, 0);
   transition: background-color 0.3s ease;
   pointer-events: none;
+  border-radius: 8px;
 }
 
 .image-link:hover::after {
@@ -357,26 +335,11 @@
   object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
+  border-radius: 8px;
 }
 
 .image-link:hover .grid-image {
   transform: scale(1.05);
-}
-
-.placeholder-image {
-  width: 100%;
-  height: 100%;
-  background-color: var(--gray-200);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-400);
-}
-
-.placeholder-svg {
-  width: 50%;
-  height: 50%;
-  opacity: 0.5;
 }
 
 /* 显示更多按钮 */
@@ -429,11 +392,11 @@
   }
   
   .large-image-container {
-    flex: 0 0 45%;
+    flex: 0 0 calc(45% - 0.5rem);
   }
   
   .small-images-grid {
-    flex: 0 0 55%;
+    flex: 0 0 calc(55% - 0.5rem);
   }
 }
 
@@ -526,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
       hiddenRows.forEach((row, index) => {
         setTimeout(() => {
           row.classList.add('show');
-        }, index * 100); // 添加渐进动画效果
+        }, index * 100);
       });
       
       // 更新按钮文本和图标
@@ -591,9 +554,16 @@ document.addEventListener('DOMContentLoaded', function() {
       "name": "图片项",
       "settings": [
         {
-          "type": "image_picker",
-          "id": "image",
-          "label": "图片"
+          "type": "text",
+          "id": "image_url",
+          "label": "图片URL",
+          "info": "输入图片的完整URL地址"
+        },
+        {
+          "type": "text",
+          "id": "alt_text",
+          "label": "图片描述",
+          "default": "Instagram image"
         },
         {
           "type": "url",
@@ -614,13 +584,6 @@ document.addEventListener('DOMContentLoaded', function() {
         "load_more_text": "显示更多"
       },
       "blocks": [
-        {"type": "image_item"},
-        {"type": "image_item"},
-        {"type": "image_item"},
-        {"type": "image_item"},
-        {"type": "image_item"},
-        {"type": "image_item"},
-        {"type": "image_item"},
         {"type": "image_item"},
         {"type": "image_item"},
         {"type": "image_item"},
