@@ -1,18 +1,21 @@
 {% comment %}
-  Instagram图片展示 - 网格布局
-  修正版本
+  Instagram图片展示 - 带轮播功能
+  1. 头部左右布局：左边文本区域，右边Instagram按钮
+  2. 直接展示配置的图片
 {% endcomment %}
 
-<div class="instagram-grid-section" data-section-id="{{ section.id }}">
+<div class="instagram-carousel-section" data-section-id="{{ section.id }}">
   <div class="container">
-    <!-- 头部区域 -->
+    <!-- 左右布局的头部区域 -->
     <div class="header-layout">
+      <!-- 左侧文本区域 -->
       <div class="text-content">
         {% if section.settings.text_content != blank %}
           <p class="header-text">{{ section.settings.text_content }}</p>
         {% endif %}
       </div>
       
+      <!-- 右侧Instagram按钮 -->
       {% if section.settings.instagram_link != blank %}
         <div class="button-content">
           <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
@@ -25,232 +28,53 @@
       {% endif %}
     </div>
 
-    <!-- 图片网格部分 -->
-    <div class="grid-wrapper">
-      {% assign all_images = section.blocks | where: 'type', 'image_item' %}
-      {% assign images_per_row = 7 %}
-      {% assign total_images = all_images.size %}
-      
-      {% if total_images > 0 %}
-        <!-- 默认显示的前两排（最多14张图片） -->
-        <div class="initial-rows">
-          {% assign initial_limit = 14 %}
-          {% if total_images < initial_limit %}
-            {% assign initial_limit = total_images %}
-          {% endif %}
-          
-          {% assign current_image_index = 0 %}
-          {% assign row_count = 0 %}
-          
-          {% for i in (1..2) %}
-            {% if current_image_index < initial_limit %}
-              {% assign row_images = all_images | offset: current_image_index | limit: images_per_row %}
-              {% assign images_in_this_row = row_images.size %}
-              
-              {% if images_in_this_row > 0 %}
-                {% assign is_odd_row = row_count | modulo: 2 %}
-                <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
-                  
-                  {% if is_odd_row == 0 %}
-                    <!-- 奇数排：左大图 + 右小图 -->
-                    <div class="large-image-container left">
-                      {% if row_images[0].settings.image %}
-                        <img
-                          src="{{ row_images[0].settings.image | img_url: '600x600' }}"
-                          alt="{{ row_images[0].settings.image.alt | escape }}"
-                          class="large-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image large">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                    </div>
-                    
-                    <div class="small-images-grid">
-                      {% for j in (1..6) %}
-                        {% if j < images_in_this_row %}
-                          <div class="small-image-container">
-                            {% if row_images[j].settings.image %}
-                              <img
-                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                                alt="{{ row_images[j].settings.image.alt | escape }}"
-                                class="small-image"
-                                loading="lazy"
-                              >
-                            {% else %}
-                              <div class="placeholder-image small">
-                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                              </div>
-                            {% endif %}
-                          </div>
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                    
-                  {% else %}
-                    <!-- 偶数排：左小图 + 右大图 -->
-                    <div class="small-images-grid">
-                      {% for j in (0..5) %}
-                        {% if j < images_in_this_row and j < 6 %}
-                          <div class="small-image-container">
-                            {% if row_images[j].settings.image %}
-                              <img
-                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                                alt="{{ row_images[j].settings.image.alt | escape }}"
-                                class="small-image"
-                                loading="lazy"
-                              >
-                            {% else %}
-                              <div class="placeholder-image small">
-                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                              </div>
-                            {% endif %}
-                          </div>
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                    
-                    <div class="large-image-container right">
-                      {% if images_in_this_row == 7 and row_images[6].settings.image %}
-                        <img
-                          src="{{ row_images[6].settings.image | img_url: '600x600' }}"
-                          alt="{{ row_images[6].settings.image.alt | escape }}"
-                          class="large-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image large">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                    </div>
-                  {% endif %}
+    <!-- 图片轮播部分 -->
+    <div class="carousel-wrapper">
+      <div class="carousel-content active">
+        <div class="carousel-track">
+          {% for block in section.blocks %}
+            {% if block.type == 'image_item' %}
+              <div class="card-container small-card">
+                <div class="card-inner">
+                  <!-- 图片容器 -->
+                  <div class="image-container">
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x500' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="card-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
+                  </div>
                 </div>
-                
-                {% assign current_image_index = current_image_index | plus: images_in_this_row %}
-                {% assign row_count = row_count | plus: 1 %}
-              {% endif %}
+              </div>
             {% endif %}
           {% endfor %}
         </div>
+      </div>
 
-        <!-- 隐藏的额外排 -->
-        {% if total_images > 14 %}
-          <div class="additional-rows" style="display: none;">
-            {% assign remaining_images = total_images | minus: 14 %}
-            {% assign remaining_rows = remaining_images | divided_by: 7.0 | ceil %}
-            
-            {% for i in (1..remaining_rows) %}
-              {% assign row_start = 14 | plus: forloop.index0 | times: 7 %}
-              {% assign row_images = all_images | offset: row_start | limit: images_per_row %}
-              {% assign images_in_this_row = row_images.size %}
-              
-              {% if images_in_this_row > 0 %}
-                {% assign total_row_index = row_count | plus: forloop.index0 %}
-                {% assign is_odd_row = total_row_index | modulo: 2 %}
-                
-                <div class="image-row {% if is_odd_row == 0 %}left-large{% else %}right-large{% endif %}">
-                  
-                  {% if is_odd_row == 0 %}
-                    <!-- 奇数排：左大图 + 右小图 -->
-                    <div class="large-image-container left">
-                      {% if row_images[0].settings.image %}
-                        <img
-                          src="{{ row_images[0].settings.image | img_url: '600x600' }}"
-                          alt="{{ row_images[0].settings.image.alt | escape }}"
-                          class="large-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image large">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                    </div>
-                    
-                    <div class="small-images-grid">
-                      {% for j in (1..6) %}
-                        {% if j < images_in_this_row %}
-                          <div class="small-image-container">
-                            {% if row_images[j].settings.image %}
-                              <img
-                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                                alt="{{ row_images[j].settings.image.alt | escape }}"
-                                class="small-image"
-                                loading="lazy"
-                              >
-                            {% else %}
-                              <div class="placeholder-image small">
-                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                              </div>
-                            {% endif %}
-                          </div>
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                    
-                  {% else %}
-                    <!-- 偶数排：左小图 + 右大图 -->
-                    <div class="small-images-grid">
-                      {% for j in (0..5) %}
-                        {% if j < images_in_this_row and j < 6 %}
-                          <div class="small-image-container">
-                            {% if row_images[j].settings.image %}
-                              <img
-                                src="{{ row_images[j].settings.image | img_url: '300x300' }}"
-                                alt="{{ row_images[j].settings.image.alt | escape }}"
-                                class="small-image"
-                                loading="lazy"
-                              >
-                            {% else %}
-                              <div class="placeholder-image small">
-                                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                              </div>
-                            {% endif %}
-                          </div>
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                    
-                    <div class="large-image-container right">
-                      {% if images_in_this_row == 7 and row_images[6].settings.image %}
-                        <img
-                          src="{{ row_images[6].settings.image | img_url: '600x600' }}"
-                          alt="{{ row_images[6].settings.image.alt | escape }}"
-                          class="large-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image large">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                    </div>
-                  {% endif %}
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-
-          <!-- 加载更多按钮 -->
-          <div class="load-more-container">
-            <button class="load-more-button" onclick="loadMoreImages()">
-              <span class="load-more-text">加载更多</span>
-              <svg class="load-more-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-          </div>
-        {% endif %}
-      {% endif %}
+      <!-- 导航按钮 -->
+      <button class="nav-button-img prev-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button class="nav-button-img next-button">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
   </div>
 </div>
 
 <style>
-/* 保持之前的CSS样式不变 */
+/* Variables CSS */
 :root {
   --cream: #F5F1EB;
   --warm-beige: #E8DDD4;
@@ -269,26 +93,32 @@
   --orange-400: #FB923C;
 }
 
-.instagram-grid-section {
+/* Section principale */
+.instagram-carousel-section {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
-  padding: 2rem 0;
+  min-height: 50vh;
+  padding: 1rem 0;
 }
 
+/* Container principal */
 .container {
   max-width: 100rem;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
+  margin-bottom: 2rem;
 }
 
+/* 头部左右布局 */
 .header-layout {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
   gap: 2rem;
 }
 
+/* 左侧文本区域 */
 .text-content {
   flex: 1;
   text-align: left;
@@ -302,6 +132,7 @@
   font-weight: 400;
 }
 
+/* 右侧按钮区域 */
 .button-content {
   flex-shrink: 0;
 }
@@ -323,8 +154,13 @@
 }
 
 .instagram-button:hover {
+
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.instagram-button:active {
+  transform: translateY(0);
 }
 
 .instagram-icon {
@@ -334,64 +170,67 @@
   transition: color 0.3s ease;
 }
 
-.grid-wrapper {
-  max-width: 80rem;
-  margin: 0 auto;
+.instagram-button:hover .instagram-icon {
+  color: var(--gray-800);
 }
 
-.image-row {
+/* Carousel wrapper */
+.carousel-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.carousel-content {
+  display: none;
+}
+
+.carousel-content.active {
+  display: block;
+}
+
+.carousel-track {
   display: flex;
-  gap: 2rem;
-  margin-bottom: 3rem;
-  align-items: center;
+  gap: 1rem;
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+  user-select: none;
 }
 
-.image-row:last-child {
-  margin-bottom: 0;
+.carousel-track:active {
+  cursor: grabbing;
 }
 
-.large-image-container {
+/* Cards containers */
+.card-container {
   flex-shrink: 0;
-  width: 24rem;
-  height: 24rem;
-  border-radius: 12px;
+}
+
+.small-card {
+  width: 18rem;
+}
+
+/* Image containers */
+.image-container {
+  position: relative;
+  background-color: var(--white);
   overflow: hidden;
   transition: transform 0.3s ease;
 }
 
-.large-image-container:hover {
+.small-card .image-container {
+  height: 20rem;
+  border-radius: 8px;
+}
+
+.image-container:hover {
   transform: scale(1.02);
 }
 
-.large-image {
+.card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.small-images-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 1rem;
-  height: 24rem;
-}
-
-.small-image-container {
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.small-image-container:hover {
-  transform: scale(1.05);
-}
-
-.small-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  transition: opacity 0.5s ease;
 }
 
 .placeholder-image {
@@ -402,84 +241,64 @@
   align-items: center;
   justify-content: center;
   color: var(--gray-400);
-}
-
-.placeholder-image.large {
-  font-size: 1.5rem;
-}
-
-.placeholder-image.small {
   font-size: 0.875rem;
 }
 
-.placeholder-svg {
+/* Boutons de navigation */
+.nav-button-img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   width: 3rem;
   height: 3rem;
-  opacity: 0.5;
-}
-
-.load-more-container {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
   display: flex;
-  justify-content: center;
-  margin-top: 3rem;
-}
-
-.load-more-button {
-  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 2rem;
-  background-color: transparent;
-  border: 1px solid var(--gray-300);
-  border-radius: 0.5rem;
-  color: var(--gray-700);
-  font-size: 0.875rem;
-  font-weight: 500;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
 }
 
-.load-more-button:hover {
+.nav-button-img:hover {
   background-color: var(--gray-50);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) scale(1.05);
 }
 
-.load-more-icon {
-  width: 1rem;
-  height: 1rem;
-  transition: transform 0.3s ease;
+.nav-button-img.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.load-more-button.expanded .load-more-icon {
-  transform: rotate(180deg);
+.prev-button {
+  left: 1rem;
 }
 
-@media (max-width: 1024px) {
-  .container {
-    padding: 0 1rem;
-  }
-  
-  .large-image-container {
-    width: 20rem;
-    height: 20rem;
-  }
-  
-  .small-images-grid {
-    height: 20rem;
-  }
-  
-  .image-row {
-    gap: 1.5rem;
-  }
+.next-button {
+  right: 1rem;
 }
 
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-600);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
   .header-layout {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
-    margin-bottom: 2rem;
   }
   
   .text-content {
@@ -495,36 +314,30 @@
     font-size: 1rem;
   }
   
-  .image-row {
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+  .carousel-track {
+    gap: 1rem;
   }
   
-  .large-image-container {
-    width: 100%;
-    height: 20rem;
-    max-width: 24rem;
-    margin: 0 auto;
+  .small-card {
+    width: 16rem;
   }
   
-  .small-images-grid {
-    height: auto;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-    gap: 0.75rem;
+  .small-card .image-container {
+    height: 22rem;
   }
   
-  .small-image-container {
-    height: 8rem;
+  .nav-button-img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .nav-icon {
+    width: 1rem;
+    height: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 0.5rem;
-  }
-  
   .header-layout {
     margin-bottom: 1.5rem;
   }
@@ -543,53 +356,83 @@
     height: 1rem;
   }
   
-  .large-image-container {
-    height: 16rem;
+  .small-card {
+    width: 14rem;
   }
   
-  .small-images-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  
-  .small-image-container {
-    height: 6rem;
-  }
-  
-  .image-row {
-    margin-bottom: 1.5rem;
+  .small-card .image-container {
+    height: 20rem;
   }
 }
 </style>
 
 <script>
-function loadMoreImages() {
-  const additionalRows = document.querySelector('.additional-rows');
-  const loadMoreButton = document.querySelector('.load-more-button');
-  const loadMoreText = document.querySelector('.load-more-text');
-  
-  if (additionalRows.style.display === 'none') {
-    additionalRows.style.display = 'block';
-    loadMoreText.textContent = '收起';
-    loadMoreButton.classList.add('expanded');
-  } else {
-    additionalRows.style.display = 'none';
-    loadMoreText.textContent = '加载更多';
-    loadMoreButton.classList.remove('expanded');
+document.addEventListener('DOMContentLoaded', function() {
+  const section = document.querySelector('.instagram-carousel-section');
+  if (!section) return;
+
+  const track = section.querySelector('.carousel-track');
+  const prevButton = section.querySelector('.prev-button');
+  const nextButton = section.querySelector('.next-button');
+  let currentSlide = 0;
+
+  // 更新轮播位置
+  function updateCarousel() {
+    if (!track) return;
     
-    document.querySelector('.grid-wrapper').scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'start'
-    });
+    const cards = track.querySelectorAll('.card-container');
+    if (cards.length === 0) return;
+    
+    const cardWidth = cards[0].offsetWidth + 16; // 包含间距
+    const offset = currentSlide * cardWidth;
+    track.style.transform = `translateX(-${offset}px)`;
+    
+    // 更新导航按钮状态
+    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
+    const trackWidth = track.scrollWidth;
+    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
+    
+    prevButton.classList.toggle('visible', currentSlide > 0);
+    nextButton.classList.toggle('visible', currentSlide < maxSlide);
   }
-}
+
+  // 上一张
+  prevButton.addEventListener('click', () => {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateCarousel();
+    }
+  });
+
+  // 下一张
+  nextButton.addEventListener('click', () => {
+    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
+    const trackWidth = track.scrollWidth;
+    const cards = track.querySelectorAll('.card-container');
+    const cardWidth = cards[0].offsetWidth + 16;
+    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
+    
+    if (currentSlide < maxSlide) {
+      currentSlide++;
+      updateCarousel();
+    }
+  });
+
+  // 初始更新
+  updateCarousel();
+  
+  // 响应式调整
+  window.addEventListener('resize', () => {
+    updateCarousel();
+  });
+});
 </script>
 
 {% schema %}
 {
   "name": "Instagram图片展示",
   "tag": "section",
-  "class": "instagram-grid-section",
+  "class": "instagram-carousel-section",
   "settings": [
     {
       "type": "textarea",
@@ -631,60 +474,6 @@ function loadMoreImages() {
         "button_text": "Follow Us"
       },
       "blocks": [
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
         {
           "type": "image_item"
         },
