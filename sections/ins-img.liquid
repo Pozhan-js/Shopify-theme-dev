@@ -205,12 +205,17 @@
       {% endfor %}
     </div>
 
-    <!-- 显示更多按钮 - 仅图标 -->
+    <!-- 显示更多按钮 - 加减号图标 -->
     {% if total_rows > 2 %}
       <div class="load-more-container">
         <button class="load-more-button" id="loadMoreBtn" aria-label="显示更多">
-          <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          <!-- 加号图标 -->
+          <svg class="button-icon plus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <!-- 减号图标 -->
+          <svg class="button-icon minus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
           </svg>
         </button>
       </div>
@@ -407,7 +412,7 @@
   opacity: 0.5;
 }
 
-/* 显示更多按钮 - 仅图标样式 */
+/* 显示更多按钮 - 加减号图标样式 */
 .load-more-container {
   display: flex;
   justify-content: center;
@@ -415,6 +420,7 @@
 }
 
 .load-more-button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -441,13 +447,32 @@
 }
 
 .button-icon {
+  position: absolute;
   width: 1.25rem;
   height: 1.25rem;
-  transition: transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.load-more-button.expanded .button-icon {
-  transform: rotate(180deg);
+/* 默认显示加号，隐藏减号 */
+.plus-icon {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.minus-icon {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+/* 展开状态：隐藏加号，显示减号 */
+.load-more-button.expanded .plus-icon {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+.load-more-button.expanded .minus-icon {
+  opacity: 1;
+  transform: rotate(0deg);
 }
 
 /* Responsive - 平板 */
