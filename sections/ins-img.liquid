@@ -1,7 +1,8 @@
 {% comment %}
-  Instagram图片展示 - 带轮播功能
+  Instagram图片展示 - 双布局模式
   1. 头部左右布局：左边文本区域，右边Instagram按钮
-  2. 直接展示配置的图片
+  2. 默认布局：左边大图(2/5)，右边6张小图(3/5)，上下两排
+  3. 展开布局：左边6张小图，右边大图
 {% endcomment %}
 
 <div class="instagram-carousel-section" data-section-id="{{ section.id }}">
@@ -28,47 +29,116 @@
       {% endif %}
     </div>
 
-    <!-- 图片轮播部分 -->
-    <div class="carousel-wrapper">
-      <div class="carousel-content active">
-        <div class="carousel-track">
-          {% for block in section.blocks %}
-            {% if block.type == 'image_item' %}
-              <div class="card-container small-card">
-                <div class="card-inner">
-                  <!-- 图片容器 -->
-                  <div class="image-container">
-                    {% if block.settings.image %}
-                      <img
-                        src="{{ block.settings.image | img_url: '400x500' }}"
-                        alt="{{ block.settings.image.alt | escape }}"
-                        class="card-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      <div class="placeholder-image">
-                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                      </div>
-                    {% endif %}
-                  </div>
+    <!-- 图片展示区域 -->
+    <div class="gallery-wrapper">
+      <!-- 默认布局：左大图，右小图 -->
+      <div class="gallery-layout default-layout active">
+        <!-- 左侧大图 -->
+        <div class="large-image-container">
+          {% if section.blocks.first and section.blocks.first.settings.image %}
+            <div class="large-image">
+              <img
+                src="{{ section.blocks.first.settings.image | img_url: '600x600' }}"
+                alt="{{ section.blocks.first.settings.image.alt | escape }}"
+                class="main-image"
+                loading="lazy"
+              >
+            </div>
+          {% else %}
+            <div class="large-image placeholder">
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- 右侧小图网格 -->
+        <div class="small-images-container">
+          <div class="small-images-grid">
+            {% assign remaining_blocks = section.blocks | offset: 1 | limit: 6 %}
+            {% for block in remaining_blocks %}
+              {% if block.type == 'image_item' %}
+                <div class="small-image">
+                  {% if block.settings.image %}
+                    <img
+                      src="{{ block.settings.image | img_url: '300x300' }}"
+                      alt="{{ block.settings.image.alt | escape }}"
+                      class="grid-image"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="placeholder-small">
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {% endif %}
                 </div>
-              </div>
-            {% endif %}
-          {% endfor %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          
+          <!-- 显示更多按钮 -->
+          {% if section.blocks.size > 7 %}
+            <button class="show-more-btn" data-action="expand">
+              <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 13l3 3 7-7"/>
+                <path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+              </svg>
+            </button>
+          {% endif %}
         </div>
       </div>
 
-      <!-- 导航按钮 -->
-      <button class="nav-button-img prev-button">
-        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <button class="nav-button-img next-button">
-        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      <!-- 展开布局：左小图，右大图 -->
+      <div class="gallery-layout expanded-layout">
+        <!-- 左侧小图网格 -->
+        <div class="small-images-container">
+          <div class="small-images-grid">
+            {% assign all_small_blocks = section.blocks | offset: 1 %}
+            {% for block in all_small_blocks %}
+              {% if block.type == 'image_item' %}
+                <div class="small-image">
+                  {% if block.settings.image %}
+                    <img
+                      src="{{ block.settings.image | img_url: '300x300' }}"
+                      alt="{{ block.settings.image.alt | escape }}"
+                      class="grid-image"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="placeholder-small">
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          
+          <!-- 收起按钮 -->
+          <button class="show-more-btn" data-action="collapse">
+            <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 15l-6-6-6 6"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 右侧大图 -->
+        <div class="large-image-container">
+          {% if section.blocks.first and section.blocks.first.settings.image %}
+            <div class="large-image">
+              <img
+                src="{{ section.blocks.first.settings.image | img_url: '600x600' }}"
+                alt="{{ section.blocks.first.settings.image.alt | escape }}"
+                class="main-image"
+                loading="lazy"
+              >
+            </div>
+          {% else %}
+            <div class="large-image placeholder">
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {% endif %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -97,8 +167,7 @@
 .instagram-carousel-section {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
-  min-height: 50vh;
-  padding: 1rem 0;
+  padding: 2rem 0;
 }
 
 /* Container principal */
@@ -106,7 +175,6 @@
   max-width: 100rem;
   margin: 0 auto;
   padding: 0 1rem;
-  margin-bottom: 2rem;
 }
 
 /* 头部左右布局 */
@@ -114,7 +182,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   gap: 2rem;
 }
 
@@ -126,7 +194,7 @@
 
 .header-text {
   font-size: 1.125rem;
-  color: var(--color-foreground);
+  color: var(--gray-700);
   margin: 0;
   line-height: 1.5;
   font-weight: 400;
@@ -143,7 +211,7 @@
   gap: 0.5rem;
   padding: 0.5rem 1.5rem;
   background-color: transparent;
-  border: 1px solid #000;
+  border: 1px solid var(--gray-700);
   border-radius: 0.5rem;
   color: var(--gray-700);
   text-decoration: none;
@@ -154,86 +222,150 @@
 }
 
 .instagram-button:hover {
-
+  background-color: var(--gray-700);
+  color: var(--white);
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.instagram-button:active {
-  transform: translateY(0);
 }
 
 .instagram-icon {
   width: 1.125rem;
   height: 1.125rem;
-  color: var(--gray-600);
   transition: color 0.3s ease;
 }
 
-.instagram-button:hover .instagram-icon {
-  color: var(--gray-800);
-}
-
-/* Carousel wrapper */
-.carousel-wrapper {
+/* Gallery wrapper */
+.gallery-wrapper {
   position: relative;
-  overflow: hidden;
 }
 
-.carousel-content {
+.gallery-layout {
   display: none;
+  gap: 1.5rem;
 }
 
-.carousel-content.active {
-  display: block;
-}
-
-.carousel-track {
+.gallery-layout.active {
   display: flex;
-  gap: 1rem;
-  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  cursor: grab;
-  user-select: none;
 }
 
-.carousel-track:active {
-  cursor: grabbing;
+/* 默认布局：左大右小 */
+.default-layout {
+  flex-direction: row;
 }
 
-/* Cards containers */
-.card-container {
-  flex-shrink: 0;
+.default-layout .large-image-container {
+  flex: 2;
 }
 
-.small-card {
-  width: 18rem;
+.default-layout .small-images-container {
+  flex: 3;
 }
 
-/* Image containers */
-.image-container {
-  position: relative;
-  background-color: var(--white);
+/* 展开布局：左小右大 */
+.expanded-layout {
+  flex-direction: row;
+}
+
+.expanded-layout .small-images-container {
+  flex: 3;
+}
+
+.expanded-layout .large-image-container {
+  flex: 2;
+}
+
+/* 大图容器 */
+.large-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.large-image {
+  width: 100%;
+  height: 400px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.3s ease;
+  background-color: var(--gray-100);
 }
 
-.small-card .image-container {
-  height: 20rem;
-  border-radius: 8px;
-}
-
-.image-container:hover {
-  transform: scale(1.02);
-}
-
-.card-image {
+.main-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 0.5s ease;
+  transition: transform 0.3s ease;
 }
 
-.placeholder-image {
+.large-image:hover .main-image {
+  transform: scale(1.05);
+}
+
+/* 小图容器 */
+.small-images-container {
+  position: relative;
+}
+
+.small-images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 0.75rem;
+  height: 400px;
+}
+
+.small-image {
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--gray-100);
+  position: relative;
+}
+
+.grid-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.small-image:hover .grid-image {
+  transform: scale(1.1);
+}
+
+/* 显示更多按钮 */
+.show-more-btn {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--gray-200);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.show-more-btn:hover {
+  background: var(--white);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.expand-icon,
+.collapse-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--gray-600);
+}
+
+/* Placeholder样式 */
+.placeholder,
+.placeholder-small {
   width: 100%;
   height: 100%;
   background-color: var(--gray-200);
@@ -241,52 +373,11 @@
   align-items: center;
   justify-content: center;
   color: var(--gray-400);
-  font-size: 0.875rem;
 }
 
-/* Boutons de navigation */
-.nav-button-img {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+.placeholder-svg {
   width: 3rem;
   height: 3rem;
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 10;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.nav-button-img:hover {
-  background-color: var(--gray-50);
-  transform: translateY(-50%) scale(1.05);
-}
-
-.nav-button-img.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.prev-button {
-  left: 1rem;
-}
-
-.next-button {
-  right: 1rem;
-}
-
-.nav-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--gray-600);
 }
 
 /* Responsive */
@@ -299,6 +390,7 @@
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+    margin-bottom: 1.5rem;
   }
   
   .text-content {
@@ -310,40 +402,31 @@
     justify-content: center;
   }
   
-  .header-text {
-    font-size: 1rem;
-  }
-  
-  .carousel-track {
+  .gallery-layout {
+    flex-direction: column;
     gap: 1rem;
   }
   
-  .small-card {
-    width: 16rem;
+  .default-layout .large-image-container,
+  .default-layout .small-images-container,
+  .expanded-layout .large-image-container,
+  .expanded-layout .small-images-container {
+    flex: none;
   }
   
-  .small-card .image-container {
-    height: 22rem;
+  .large-image {
+    height: 300px;
   }
   
-  .nav-button-img {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-  
-  .nav-icon {
-    width: 1rem;
-    height: 1rem;
+  .small-images-grid {
+    height: 200px;
+    grid-template-rows: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
-  .header-layout {
-    margin-bottom: 1.5rem;
-  }
-  
   .header-text {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
   
   .instagram-button {
@@ -351,17 +434,23 @@
     font-size: 0.8rem;
   }
   
-  .instagram-icon {
+  .large-image {
+    height: 250px;
+  }
+  
+  .small-images-grid {
+    height: 160px;
+  }
+  
+  .show-more-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .expand-icon,
+  .collapse-icon {
     width: 1rem;
     height: 1rem;
-  }
-  
-  .small-card {
-    width: 14rem;
-  }
-  
-  .small-card .image-container {
-    height: 20rem;
   }
 }
 </style>
@@ -371,59 +460,24 @@ document.addEventListener('DOMContentLoaded', function() {
   const section = document.querySelector('.instagram-carousel-section');
   if (!section) return;
 
-  const track = section.querySelector('.carousel-track');
-  const prevButton = section.querySelector('.prev-button');
-  const nextButton = section.querySelector('.next-button');
-  let currentSlide = 0;
+  const defaultLayout = section.querySelector('.default-layout');
+  const expandedLayout = section.querySelector('.expanded-layout');
+  const showMoreBtns = section.querySelectorAll('.show-more-btn');
 
-  // 更新轮播位置
-  function updateCarousel() {
-    if (!track) return;
-    
-    const cards = track.querySelectorAll('.card-container');
-    if (cards.length === 0) return;
-    
-    const cardWidth = cards[0].offsetWidth + 16; // 包含间距
-    const offset = currentSlide * cardWidth;
-    track.style.transform = `translateX(-${offset}px)`;
-    
-    // 更新导航按钮状态
-    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
-    const trackWidth = track.scrollWidth;
-    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
-    
-    prevButton.classList.toggle('visible', currentSlide > 0);
-    nextButton.classList.toggle('visible', currentSlide < maxSlide);
-  }
-
-  // 上一张
-  prevButton.addEventListener('click', () => {
-    if (currentSlide > 0) {
-      currentSlide--;
-      updateCarousel();
-    }
-  });
-
-  // 下一张
-  nextButton.addEventListener('click', () => {
-    const wrapperWidth = section.querySelector('.carousel-wrapper').offsetWidth;
-    const trackWidth = track.scrollWidth;
-    const cards = track.querySelectorAll('.card-container');
-    const cardWidth = cards[0].offsetWidth + 16;
-    const maxSlide = Math.max(0, Math.floor((trackWidth - wrapperWidth) / cardWidth));
-    
-    if (currentSlide < maxSlide) {
-      currentSlide++;
-      updateCarousel();
-    }
-  });
-
-  // 初始更新
-  updateCarousel();
-  
-  // 响应式调整
-  window.addEventListener('resize', () => {
-    updateCarousel();
+  showMoreBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const action = this.getAttribute('data-action');
+      
+      if (action === 'expand') {
+        // 切换到展开布局
+        defaultLayout.classList.remove('active');
+        expandedLayout.classList.add('active');
+      } else if (action === 'collapse') {
+        // 切换回默认布局
+        expandedLayout.classList.remove('active');
+        defaultLayout.classList.add('active');
+      }
+    });
   });
 });
 </script>
@@ -474,6 +528,18 @@ document.addEventListener('DOMContentLoaded', function() {
         "button_text": "Follow Us"
       },
       "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
         {
           "type": "image_item"
         },
