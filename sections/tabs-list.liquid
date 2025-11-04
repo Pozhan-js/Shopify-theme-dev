@@ -1,5 +1,6 @@
 {% comment %}
-  Carousel de bijoux - Section Liquid (Modified Version)
+  Carousel de bijoux - Section Liquid (Fixed Image Loading)
+  ✅ Fixed: Image loading with correct Liquid syntax
   ✅ Removed: Product title and price
   ✅ Removed: Navigation buttons
   ✅ Added: Smooth scroll functionality
@@ -59,17 +60,19 @@
                     <div class="card-inner">
                       <!-- Image container -->
                       <div class="image-container product-card">
-                        {% if product.featuredimage %}
+                        {% if product.featured_image %}
                           <img
-                            src="{{ product.featuredimage | img_url: '400x500' }}"
-                            alt="{{ product.title }}"
+                            src="{{ product.featured_image | image_url: width: 400, height: 500 }}"
+                            alt="{{ product.title | escape }}"
                             class="card-image main-image"
+                            loading="lazy"
                           >
                           {% if product.images[1] %}
                             <img
-                              src="{{ product.images[1] | img_url: '400x500' }}"
-                              alt="{{ product.title }}"
+                              src="{{ product.images[1] | image_url: width: 400, height: 500 }}"
+                              alt="{{ product.title | escape }}"
                               class="card-image hover-image"
+                              loading="lazy"
                             >
                           {% endif %}
                         {% else %}
@@ -88,6 +91,10 @@
                     </div>
                   </a>
                 {% endfor %}
+              {% else %}
+                <div class="no-products-message">
+                  <p>Aucun produit trouvé dans cette collection.</p>
+                </div>
               {% endif %}
             </div>
           </div>
@@ -226,6 +233,7 @@
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   padding-bottom: 1rem;
+  padding-right: 1rem;
 }
 
 .carousel-track::-webkit-scrollbar {
@@ -273,6 +281,7 @@
   height: 100%;
   object-fit: cover;
   transition: opacity 0.5s ease;
+  display: block;
 }
 
 .hover-image {
@@ -295,6 +304,8 @@
   justify-content: center;
   color: var(--gray-400);
   font-size: 0.875rem;
+  text-align: center;
+  padding: 1rem;
 }
 
 /* Badges */
@@ -310,6 +321,14 @@
   border-radius: 9999px;
   box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
   z-index: 2;
+}
+
+/* No products message */
+.no-products-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--gray-500);
+  font-style: italic;
 }
 
 /* Responsive */
@@ -371,6 +390,10 @@
   .image-container {
     height: 14rem;
   }
+  
+  .carousel-track {
+    gap: 0.5rem;
+  }
 }
 </style>
 
@@ -399,19 +422,27 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function activateTab(index) {
+    // 移除所有活动状态
     tabButtons.forEach(btn => btn.classList.remove('active'));
     carouselContents.forEach(content => content.classList.remove('active'));
     
-    tabButtons[index].classList.add('active');
-    carouselContents[index].classList.add('active');
+    // 添加活动状态
+    if (tabButtons[index]) {
+      tabButtons[index].classList.add('active');
+    }
+    if (carouselContents[index]) {
+      carouselContents[index].classList.add('active');
+    }
     
     currentTabIndex = index;
     
     // 重置滚动位置
     const activeContent = carouselContents[index];
-    const track = activeContent.querySelector('.carousel-track');
-    if (track) {
-      track.scrollLeft = 0;
+    if (activeContent) {
+      const track = activeContent.querySelector('.carousel-track');
+      if (track) {
+        track.scrollLeft = 0;
+      }
     }
   }
 
@@ -461,14 +492,14 @@ document.addEventListener('DOMContentLoaded', function() {
       isDown = true;
       startX = e.touches[0].pageX - trackEl.offsetLeft;
       scrollLeft = trackEl.scrollLeft;
-    });
+    }, { passive: true });
 
     trackEl.addEventListener('touchmove', (e) => {
       if (!isDown) return;
       const x = e.touches[0].pageX - trackEl.offsetLeft;
       const walk = (x - startX) * 2;
       trackEl.scrollLeft = scrollLeft - walk;
-    });
+    }, { passive: true });
 
     trackEl.addEventListener('touchend', () => {
       isDown = false;
@@ -477,6 +508,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // 设置初始光标样式
     trackEl.style.cursor = 'grab';
   }
+
+  // 图片加载错误处理
+  section.addEventListener('error', function(e) {
+    if (e.target.tagName === 'IMG') {
+      const placeholder = e.target.closest('.image-container').querySelector('.placeholder-image');
+      if (!placeholder) {
+        const newPlaceholder = document.createElement('div');
+        newPlaceholder.className = 'placeholder-image';
+        newPlaceholder.innerHTML = '<span>Image non disponible</span>';
+        e.target.parentNode.appendChild(newPlaceholder);
+      }
+      e.target.style.display = 'none';
+    }
+  }, true);
 });
 </script>
 
