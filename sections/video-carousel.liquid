@@ -259,7 +259,7 @@
     line-height: 1.4;
   }
 
-  /* 优化后的视频模态框样式 */
+  /* 视频模态框样式 */
   .video-modal {
     position: fixed;
     top: 0;
@@ -268,13 +268,12 @@
     bottom: 0;
     z-index: 1000;
     display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
   }
 
   .video-modal.active {
     display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .video-modal-overlay {
@@ -284,19 +283,17 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.9);
-    backdrop-filter: blur(5px);
   }
 
   .video-modal-content {
     position: relative;
-    width: 100%;
-    max-width: 90vw;
-    max-height: 90vh;
-    background: transparent;
-    border-radius: 16px;
+    width: 90vw;
+    height: 90vh;
+    max-width: 500px; /* 适合竖屏视频的最大宽度 */
+    max-height: 800px; /* 适合竖屏视频的最大高度 */
+    background: #000;
+    border-radius: 8px;
     overflow: hidden;
-    z-index: 10;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -304,53 +301,40 @@
 
   .video-modal-close {
     position: absolute;
-    top: -60px;
-    right: 0;
-    background: rgba(255, 255, 255, 0.9);
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.7);
     border: none;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 20;
-    color: #333;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    z-index: 10;
+    color: white;
+    transition: background 0.3s ease;
   }
 
   .video-modal-close:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: scale(1.1);
+    background: rgba(0, 0, 0, 0.9);
   }
 
   .video-player-container {
     position: relative;
     width: 100%;
     height: 100%;
-    background: #000;
-    border-radius: 16px;
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   #modalVideo {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    border-radius: 16px;
-    outline: none;
-  }
-
-  /* 自定义视频控件样式 */
-  #modalVideo::-webkit-media-controls-panel {
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    background: #000;
   }
 
   /* 移动端适配 */
@@ -404,19 +388,11 @@
       font-size: 0.8rem;
     }
 
-    .video-modal {
-      padding: 15px;
-    }
-
     .video-modal-content {
-      max-width: 95vw;
-      max-height: 85vh;
-    }
-
-    .video-modal-close {
-      top: -50px;
-      width: 40px;
-      height: 40px;
+      width: 95vw;
+      height: 85vh;
+      max-width: 400px;
+      max-height: 700px;
     }
   }
 
@@ -451,19 +427,11 @@
       transform: scale(1.01) translateZ(0);
     }
 
-    .video-modal {
-      padding: 10px;
-    }
-
     .video-modal-content {
-      max-width: 98vw;
-      max-height: 80vh;
-    }
-
-    .video-modal-close {
-      top: -45px;
-      width: 36px;
-      height: 36px;
+      width: 98vw;
+      height: 80vh;
+      max-width: 350px;
+      max-height: 600px;
     }
   }
 
@@ -478,8 +446,10 @@
     }
 
     .video-modal-content {
-      max-width: 85vw;
-      max-height: 85vh;
+      width: 70vw;
+      height: 85vh;
+      max-width: 450px;
+      max-height: 750px;
     }
   }
 
@@ -488,11 +458,6 @@
     .video-item {
       flex: 0 0 calc(20% - 16px);
     }
-
-    .video-modal-content {
-      max-width: 80vw;
-      max-height: 80vh;
-    }
   }
 
   /* 超大屏幕增加更多空白 */
@@ -500,27 +465,6 @@
     .container-video {
       max-width: 1300px;
       padding: 0 60px;
-    }
-
-    .video-modal-content {
-      max-width: 70vw;
-      max-height: 80vh;
-    }
-  }
-
-  /* 横屏模式优化 */
-  @media (orientation: landscape) and (max-height: 600px) {
-    .video-modal {
-      padding: 10px;
-    }
-
-    .video-modal-content {
-      max-height: 85vh;
-      max-width: 95vw;
-    }
-
-    .video-modal-close {
-      top: -40px;
     }
   }
 
@@ -533,22 +477,6 @@
 
     .play-overlay {
       opacity: 1;
-    }
-
-    .video-modal-close:hover {
-      transform: none;
-    }
-  }
-
-  /* 暗色模式支持 */
-  @media (prefers-color-scheme: dark) {
-    .video-modal-close {
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-    }
-
-    .video-modal-close:hover {
-      background: rgba(0, 0, 0, 0.9);
     }
   }
 </style>
@@ -623,32 +551,16 @@
           modalVideo.src = videoUrl;
           modal.classList.add('active');
           document.body.style.overflow = 'hidden';
-          
-          // 添加淡入动画
-          requestAnimationFrame(() => {
-            modal.style.opacity = '0';
-            modal.style.transition = 'opacity 0.3s ease';
-            requestAnimationFrame(() => {
-              modal.style.opacity = '1';
-            });
-          });
         }
       });
     });
 
     // 关闭模态框
     function closeModal() {
-      modal.style.transition = 'opacity 0.3s ease';
-      modal.style.opacity = '0';
-      
-      setTimeout(() => {
-        modal.classList.remove('active');
-        modalVideo.pause();
-        modalVideo.src = '';
-        document.body.style.overflow = '';
-        modal.style.transition = '';
-        modal.style.opacity = '';
-      }, 300);
+      modal.classList.remove('active');
+      modalVideo.pause();
+      modalVideo.src = '';
+      document.body.style.overflow = '';
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -666,11 +578,6 @@
 
     // 初始化
     updateCarousel();
-
-    // 防止视频播放时的滚动
-    modalVideo.addEventListener('loadstart', () => {
-      modalVideo.style.pointerEvents = 'auto';
-    });
   });
 </script>
 
