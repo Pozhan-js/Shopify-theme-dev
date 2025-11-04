@@ -3,9 +3,12 @@
   1. 主标题展示
   2. 直接展示配置的图片
   3. 支持鼠标拖拽滑动
+  4. 支持自定义锚点ID
 {% endcomment %}
 
-<div class="gallery-showcase-section" id="{{ section.settings.main_title }}" data-section-id="{{ section.id }}">
+<div class="gallery-showcase-section" 
+     id="{{ section.settings.anchor_id | default: section.id | handleize }}" 
+     data-section-id="{{ section.id }}">
   <div class="gallery-container">
     <!-- 主标题区域 -->
     {% if section.settings.main_title != blank %}
@@ -345,6 +348,14 @@
       "id": "main_title",
       "label": "主标题",
       "default": "精选图片展示"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "锚点ID",
+      "info": "用于页面内跳转的唯一标识符，只能包含字母、数字、下划线和连字符。例如：gallery-section",
+      "default": "gallery-section",
+      "placeholder": "gallery-section"
     }
   ],
   "blocks": [
@@ -364,7 +375,8 @@
     {
       "name": "图片展示",
       "settings": {
-        "main_title": "精选图片展示"
+        "main_title": "精选图片展示",
+        "anchor_id": "gallery-section"
       },
       "blocks": [
         {
