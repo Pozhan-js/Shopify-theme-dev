@@ -1,8 +1,8 @@
 {% comment %}
-  Instagram图片展示 - 带轮播功能
+  Instagram图片展示 - 带鼠标拖拽滑动功能
   1. 主标题展示
   2. 直接展示配置的图片
-  3. 图片下方显示标题和文本内容
+  3. 支持鼠标拖拽滑动
 {% endcomment %}
 
 <div class="gallery-showcase-section" id="{{ section.settings.main_title }}" data-section-id="{{ section.id }}">
@@ -21,7 +21,6 @@
           {% for block in section.blocks %}
             {% if block.type == 'image_item' %}
               <div class="gallery-card-container gallery-small-card">
-                <!-- 卡片内容保持不变 -->
                 <div class="gallery-card-inner">
                   <div class="gallery-image-container">
                     {% if block.settings.image %}
@@ -30,6 +29,7 @@
                         alt="{{ block.settings.image.alt | escape }}"
                         class="gallery-card-image"
                         loading="lazy"
+                        draggable="false"
                       >
                     {% else %}
                       <div class="gallery-placeholder-image">
@@ -37,41 +37,12 @@
                       </div>
                     {% endif %}
                   </div>
-
-                  {% if block.settings.card_title != blank or block.settings.card_text != blank %}
-                    <div class="gallery-card-content">
-                      {% if block.settings.card_title != blank %}
-                        <h3 class="gallery-card-title">{{ block.settings.card_title }}</h3>
-                      {% endif %}
-                      {% if block.settings.card_text != blank %}
-                        <p class="gallery-card-text">{{ block.settings.card_text }}</p>
-                      {% endif %}
-                    </div>
-                  {% endif %}
                 </div>
               </div>
             {% endif %}
           {% endfor %}
         </div>
       </div>
-
-      <!-- 使用 data-section-id 区分不同实例 -->
-      <button
-        class="gallery-nav-button gallery-prev-button"
-        data-section-id="{{ section.id }}"
-      >
-        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <button
-        class="gallery-nav-button gallery-next-button"
-        data-section-id="{{ section.id }}"
-      >
-        <svg class="gallery-nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
     </div>
   </div>
 </div>
@@ -92,8 +63,6 @@
     --gallery-gray-700: #374151;
     --gallery-gray-900: #111827;
     --gallery-white: #ffffff;
-    --gallery-amber-400: #fbbf24;
-    --gallery-orange-400: #fb923c;
   }
 
   /* Section principale */
@@ -104,11 +73,11 @@
     padding: 1rem 0;
   }
 
-  /* Container principal - 最大宽度设置为1200px */
+  /* Container principal - 扩大最大宽度到1400px */
   .gallery-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 2rem;
     margin-bottom: 2rem;
   }
 
@@ -131,6 +100,11 @@
   .gallery-carousel-wrapper {
     position: relative;
     overflow: hidden;
+    cursor: grab;
+  }
+
+  .gallery-carousel-wrapper:active {
+    cursor: grabbing;
   }
 
   .gallery-carousel-content {
@@ -144,17 +118,22 @@
   .gallery-carousel-track {
     display: flex;
     gap: 1rem;
-    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.3s ease-out;
     user-select: none;
+    will-change: transform;
   }
 
-  /* Cards containers */
+  .gallery-carousel-track.dragging {
+    transition: none;
+  }
+
+  /* Cards containers - 缩小卡片尺寸 */
   .gallery-card-container {
     flex-shrink: 0;
   }
 
   .gallery-small-card {
-    width: 18rem;
+    width: 15rem; /* 从18rem缩小到15rem */
   }
 
   .gallery-card-inner {
@@ -162,7 +141,7 @@
     flex-direction: column;
   }
 
-  /* Image containers */
+  /* Image containers - 缩小图片高度 */
   .gallery-image-container {
     position: relative;
     background-color: var(--gallery-white);
@@ -170,7 +149,7 @@
   }
 
   .gallery-small-card .gallery-image-container {
-    height: 20rem;
+    height: 17rem; /* 从20rem缩小到17rem */
     border-radius: 8px;
   }
 
@@ -179,6 +158,7 @@
     height: 100%;
     object-fit: cover;
     transition: opacity 0.5s ease;
+    pointer-events: none;
   }
 
   .gallery-placeholder-image {
@@ -192,76 +172,10 @@
     font-size: 0.875rem;
   }
 
-  /* 图片下方内容区域 */
-  .gallery-card-content {
-    padding: 1rem 0.5rem 0;
-    text-align: center;
-  }
-
-  .gallery-card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--color-foreground);
-    margin: 0 0 0.5rem 0;
-    line-height: 1.4;
-  }
-
-  .gallery-card-text {
-    font-size: 0.875rem;
-    color: var(--gallery-gray-600);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  /* Boutons de navigation */
-  .gallery-nav-button {
-    position: absolute;
-    top: 10.5rem !important;
-    transform: translateY(-50%);
-    width: 3rem;
-    height: 3rem;
-    background: var(--gallery-white);
-    border: 1px solid var(--gallery-gray-200);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .gallery-nav-button:hover {
-    background-color: var(--gallery-gray-50);
-    transform: translateY(-50%) scale(1.05);
-  }
-
-  .gallery-nav-button.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .gallery-prev-button {
-    left: 1rem;
-  }
-
-  .gallery-next-button {
-    right: 1rem;
-  }
-
-  .gallery-nav-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--gallery-gray-600);
-  }
-
-  /* PC端优化 - 在1200px以上屏幕的额外优化 */
+  /* PC端优化 */
   @media (min-width: 1201px) {
     .gallery-container {
-      padding: 0 2rem;
+      padding: 0 3rem; /* 增加左右padding */
     }
 
     .gallery-carousel-track {
@@ -269,24 +183,24 @@
     }
 
     .gallery-small-card {
-      width: 20rem;
+      width: 16rem; /* PC端稍大一些 */
     }
 
     .gallery-small-card .gallery-image-container {
-      height: 22rem;
+      height: 18rem;
     }
   }
 
   /* Responsive */
   @media (max-width: 1200px) {
     .gallery-container {
-      padding: 0 1rem;
+      padding: 0 1.5rem;
     }
   }
 
   @media (max-width: 768px) {
     .gallery-container {
-      padding: 0 0.5rem;
+      padding: 0 1rem;
     }
 
     .gallery-title-wrapper {
@@ -302,33 +216,19 @@
     }
 
     .gallery-small-card {
-      width: 16rem;
+      width: 14rem;
     }
 
     .gallery-small-card .gallery-image-container {
-      height: 22rem;
-    }
-
-    .gallery-card-title {
-      font-size: 1rem;
-    }
-
-    .gallery-card-text {
-      font-size: 0.8rem;
-    }
-
-    .gallery-nav-button {
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-
-    .gallery-nav-icon {
-      width: 1rem;
-      height: 1rem;
+      height: 16rem;
     }
   }
 
   @media (max-width: 480px) {
+    .gallery-container {
+      padding: 0 0.5rem;
+    }
+
     .gallery-title-wrapper {
       margin-bottom: 1rem;
     }
@@ -338,24 +238,11 @@
     }
 
     .gallery-small-card {
-      width: 14rem;
+      width: 12rem;
     }
 
     .gallery-small-card .gallery-image-container {
-      height: 20rem;
-    }
-
-    .gallery-card-content {
-      padding: 0.75rem 0.25rem 0;
-    }
-
-    .gallery-card-title {
-      font-size: 0.9rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .gallery-card-text {
-      font-size: 0.75rem;
+      height: 14rem;
     }
   }
 </style>
@@ -365,60 +252,84 @@
     const tracks = document.querySelectorAll('.gallery-carousel-track[data-section-id]');
 
     tracks.forEach((track) => {
-      const sectionId = track.dataset.sectionId;
-      const prevButton = document.querySelector(`.gallery-prev-button[data-section-id="${sectionId}"]`);
-      const nextButton = document.querySelector(`.gallery-next-button[data-section-id="${sectionId}"]`);
       const wrapper = track.closest('.gallery-carousel-wrapper');
+      if (!wrapper) return;
 
-      if (!prevButton || !nextButton || !wrapper) return;
+      let isDragging = false;
+      let startX = 0;
+      let scrollLeft = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+      let animationID = 0;
 
-      let currentSlide = 0;
-
-      function updateCarousel() {
-        const cards = track.querySelectorAll('.gallery-card-container');
-        if (cards.length === 0) return;
-
-        const cardWidth = cards[0].offsetWidth + 16; // 包含 gap
-        const offset = currentSlide * cardWidth;
-        track.style.transform = `translateX(-${offset}px)`;
-
-        // 实际可滚动的最大距离
-        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
-
-        // 当前已滚动的距离
-        const currentOffset = currentSlide * cardWidth;
-
-        // 显示/隐藏按钮：只要有空间就能点
-        prevButton.classList.toggle('visible', currentOffset > 0);
-        nextButton.classList.toggle('visible', currentOffset < maxScroll);
-      }
-
-      prevButton.addEventListener('click', () => {
-        if (currentSlide > 0) {
-          currentSlide--;
-          updateCarousel();
-        }
+      // 鼠标按下
+      wrapper.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - wrapper.offsetLeft;
+        scrollLeft = currentTranslate;
+        track.classList.add('dragging');
+        cancelAnimationFrame(animationID);
       });
 
-      nextButton.addEventListener('click', () => {
-        const cards = track.querySelectorAll('.gallery-card-container');
-        if (cards.length === 0) return;
+      // 鼠标移动
+      wrapper.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const x = e.pageX - wrapper.offsetLeft;
+        const walk = (x - startX) * 1.5; // 调整滑动灵敏度
+        currentTranslate = scrollLeft + walk;
 
-        const cardWidth = cards[0].offsetWidth + 16;
-        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
-        const currentOffset = currentSlide * cardWidth;
+        // 限制滑动范围
+        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
+        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
 
-        if (currentOffset < maxScroll) {
-          currentSlide++;
-          updateCarousel();
-        }
+        track.style.transform = `translateX(${currentTranslate}px)`;
       });
 
-      // 初始更新
-      updateCarousel();
+      // 鼠标松开
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        track.classList.remove('dragging');
+        prevTranslate = currentTranslate;
+      };
 
-      // 响应窗口大小变化
-      window.addEventListener('resize', updateCarousel);
+      wrapper.addEventListener('mouseup', endDrag);
+      wrapper.addEventListener('mouseleave', endDrag);
+
+      // 触摸事件支持（移动端）
+      wrapper.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        scrollLeft = currentTranslate;
+        track.classList.add('dragging');
+      });
+
+      wrapper.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        const x = e.touches[0].clientX;
+        const walk = (x - startX) * 1.5;
+        currentTranslate = scrollLeft + walk;
+
+        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
+        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
+
+        track.style.transform = `translateX(${currentTranslate}px)`;
+      });
+
+      wrapper.addEventListener('touchend', () => {
+        isDragging = false;
+        track.classList.remove('dragging');
+        prevTranslate = currentTranslate;
+      });
+
+      // 防止图片拖拽
+      const images = track.querySelectorAll('img');
+      images.forEach(img => {
+        img.addEventListener('dragstart', (e) => e.preventDefault());
+      });
     });
   });
 </script>
@@ -445,18 +356,6 @@
           "type": "image_picker",
           "id": "image",
           "label": "图片"
-        },
-        {
-          "type": "text",
-          "id": "card_title",
-          "label": "卡片标题",
-          "default": "图片标题"
-        },
-        {
-          "type": "textarea",
-          "id": "card_text",
-          "label": "卡片描述",
-          "default": "这里是图片的描述文本内容"
         }
       ]
     }
@@ -469,25 +368,13 @@
       },
       "blocks": [
         {
-          "type": "image_item",
-          "settings": {
-            "card_title": "图片标题 1",
-            "card_text": "这里是第一张图片的描述文本"
-          }
+          "type": "image_item"
         },
         {
-          "type": "image_item",
-          "settings": {
-            "card_title": "图片标题 2",
-            "card_text": "这里是第二张图片的描述文本"
-          }
+          "type": "image_item"
         },
         {
-          "type": "image_item",
-          "settings": {
-            "card_title": "图片标题 3",
-            "card_text": "这里是第三张图片的描述文本"
-          }
+          "type": "image_item"
         }
       ]
     }
