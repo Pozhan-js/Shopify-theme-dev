@@ -88,14 +88,14 @@
 <style>
   .video-carousel-section {
     padding: 60px 0;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     background: transparent;
   }
 
   .container-video {
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 80px;
+    padding: 0 40px; /* 减小左右内边距 */
   }
 
   .section-title {
@@ -114,7 +114,7 @@
     gap: 30px;
   }
 
-  /* 按钮容器 - 保持固定宽度 */
+  /* 按钮容器 */
   .carousel-btn-container {
     width: 50px;
     height: 50px;
@@ -160,11 +160,12 @@
   .video-carousel-track {
     display: flex;
     transition: transform 0.5s ease;
-    gap: 25px;
+    gap: 20px; /* 统一间距 */
   }
 
+  /* 默认每个项目占位 */
   .video-item {
-    flex: 0 0 calc(25% - 18.75px);
+    flex: 0 0 calc(20% - 16px); /* 5列：100%/5 = 20%，减去 gap/5 的均摊值 */
     min-width: 0;
     transform-origin: center center;
   }
@@ -186,7 +187,6 @@
   .video-thumbnail:hover {
     transform: scale(1.03) translateZ(0);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
   }
 
   .video-thumbnail img {
@@ -200,7 +200,6 @@
   }
 
   .video-thumbnail:hover img {
-    border-radius: 12px;
     transform: translateZ(0);
   }
 
@@ -227,7 +226,6 @@
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
-    border-radius: 12px;
   }
 
   .video-thumbnail:hover .play-overlay {
@@ -358,7 +356,7 @@
     }
 
     .section-title {
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin-bottom: 30px;
     }
 
@@ -377,15 +375,11 @@
     }
 
     .video-item {
-      flex: 0 0 calc(50% - 6px);
+      flex: 0 0 calc(50% - 6px); /* 2 per row */
     }
 
     .video-carousel-track {
       gap: 12px;
-    }
-
-    .video-thumbnail:hover {
-      transform: scale(1.02) translateZ(0);
     }
 
     .play-button {
@@ -422,7 +416,7 @@
     }
 
     .video-item {
-      flex: 0 0 calc(50% - 6px);
+      flex: 0 0 calc(50% - 5px); /* 2 per row */
     }
 
     .carousel-btn-container {
@@ -444,7 +438,7 @@
     }
 
     .video-thumbnail:hover {
-      transform: scale(1.01) translateZ(0);
+      transform: scale(1.01);
     }
 
     .video-modal-content {
@@ -469,16 +463,16 @@
   /* 平板适配 */
   @media (min-width: 769px) and (max-width: 1024px) {
     .container-video {
-      padding: 0 40px;
+      padding: 0 30px;
       max-width: 1100px;
     }
 
     .video-item {
-      flex: 0 0 calc(33.333% - 16.67px);
+      flex: 0 0 calc(33.333% - 13.33px); /* 3 per row */
     }
 
     .video-carousel-track {
-      gap: 25px;
+      gap: 20px;
     }
 
     .video-modal-content {
@@ -486,18 +480,18 @@
     }
   }
 
-  /* 大屏幕显示4个视频 */
+  /* 大屏幕显示5个视频 */
   @media (min-width: 1025px) {
     .video-item {
-      flex: 0 0 calc(25% - 18.75px);
+      flex: 0 0 calc(20% - 16px); /* 5 per row */
     }
   }
 
   /* 超大屏幕 */
   @media (min-width: 1600px) {
     .container-video {
-      max-width: 1400px;
-      padding: 0 100px;
+      max-width: 1600px;
+      padding: 0 60px;
     }
   }
 
@@ -546,24 +540,16 @@
       if (window.innerWidth <= 480) return 2;
       if (window.innerWidth <= 768) return 2;
       if (window.innerWidth <= 1024) return 3;
-      return 4;
+      return 5; // 显示5个
     }
 
     function updateCarousel() {
-      const translateX = -(currentIndex * (100 / itemsPerView));
+      const itemWidthWithGap = 100 / itemsPerView;
+      const translateX = -(currentIndex * itemWidthWithGap);
       carousel.style.transform = `translateX(${translateX}%)`;
 
-      if (currentIndex === 0) {
-        prevBtn.classList.add('hidden');
-      } else {
-        prevBtn.classList.remove('hidden');
-      }
-
-      if (currentIndex >= maxIndex || videoItems.length <= itemsPerView) {
-        nextBtn.classList.add('hidden');
-      } else {
-        nextBtn.classList.remove('hidden');
-      }
+      prevBtn.classList.toggle('hidden', currentIndex === 0);
+      nextBtn.classList.toggle('hidden', currentIndex >= maxIndex || videoItems.length <= itemsPerView);
     }
 
     function handleResize() {
@@ -660,24 +646,14 @@
     {
       "name": "视频轮播",
       "blocks": [
-        {
-          "type": "video"
-        },
-        {
-          "type": "video"
-        },
-        {
-          "type": "video"
-        },
-        {
-          "type": "video"
-        },
-        {
-          "type": "video"
-        },
-        {
-          "type": "video"
-        }
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" },
+        { "type": "video" }
       ]
     }
   ]
