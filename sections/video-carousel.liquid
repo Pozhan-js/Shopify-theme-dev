@@ -78,7 +78,7 @@
           </svg>
         </button>
         <div class="video-player-container">
-          <video autoplay id="modalVideo" controls preload="none">您的浏览器不支持视频播放。</video>
+          <video id="modalVideo" controls preload="metadata">您的浏览器不支持视频播放。</video>
         </div>
       </div>
     </div>
@@ -88,14 +88,13 @@
 <style>
   .video-carousel-section {
     padding: 60px 0;
-    padding-bottom: 0;
-    background: transparent;
+    background-color: #fff;
   }
 
   .container-video {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 40px; /* 减小左右内边距 */
+    padding: 0 30px; /* 显著减少边距 */
   }
 
   .section-title {
@@ -104,17 +103,17 @@
     font-size: 2rem;
     margin-bottom: 40px;
     font-weight: normal;
-    color: var(--color, var(--font-h2-color));
+    color: var(--color, #333);
   }
 
   .video-carousel-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 24px;
   }
 
-  /* 按钮容器 */
+  /* 轮播按钮容器 */
   .carousel-btn-container {
     width: 50px;
     height: 50px;
@@ -135,8 +134,8 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    z-index: 2;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 2;
   }
 
   .carousel-btn:hover {
@@ -151,6 +150,7 @@
     pointer-events: none;
   }
 
+  /* 轮播内容区域 */
   .video-carousel-container {
     flex: 1;
     overflow: hidden;
@@ -159,33 +159,31 @@
 
   .video-carousel-track {
     display: flex;
-    transition: transform 0.5s ease;
-    gap: 20px; /* 统一间距 */
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 20px;
   }
 
-  /* 默认每个项目占位 */
+  /* 每个视频项 - 大屏下 5 列 */
   .video-item {
-    flex: 0 0 calc(20% - 16px); /* 5列：100%/5 = 20%，减去 gap/5 的均摊值 */
+    flex: 0 0 calc(20% - 16px); /* (100%/5) - (gap*4/5) ≈ 20% - 16px */
     min-width: 0;
-    transform-origin: center center;
   }
 
+  /* 缩略图样式 */
   .video-thumbnail {
     position: relative;
     width: 100%;
-    aspect-ratio: 3/5;
+    aspect-ratio: 3 / 5;
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
     background: #f0f0f0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .video-thumbnail:hover {
-    transform: scale(1.03) translateZ(0);
+    transform: scale(1.03);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   }
 
@@ -193,14 +191,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
-    background: #000;
     border-radius: 12px;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s ease;
   }
 
   .video-thumbnail:hover img {
-    transform: translateZ(0);
+    transform: scale(1.02);
   }
 
   .video-placeholder {
@@ -209,8 +205,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #e0e0e0;
-    color: #666;
+    background: #eee;
+    color: #999;
     border-radius: 12px;
   }
 
@@ -220,12 +216,13 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     transition: opacity 0.3s ease;
+    border-radius: 12px;
   }
 
   .video-thumbnail:hover .play-overlay {
@@ -240,24 +237,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateZ(0);
+    transition: transform 0.3s ease;
   }
 
   .play-button:hover {
-    transform: scale(1.1) translateZ(0);
+    transform: scale(1.1);
   }
 
   .video-title {
     margin-top: 12px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 500;
     color: #333;
     text-align: center;
     line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* 视频模态框样式 */
+  /* 模态框样式 */
   .video-modal {
     position: fixed;
     top: 0;
@@ -286,11 +285,11 @@
   .video-modal-content {
     position: relative;
     width: 90vw;
-    height: 90vh;
-    max-width: 400px;
+    height: 85vh;
+    max-width: 500px;
     max-height: 80vh;
     background: transparent;
-    border-radius: 0;
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -310,14 +309,14 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 20;
     color: white;
+    z-index: 20;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .video-modal-close:hover {
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     transform: scale(1.1);
   }
 
@@ -327,41 +326,30 @@
   }
 
   .video-player-container {
-    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
   }
 
   #modalVideo {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    background: transparent;
     border-radius: 8px;
+    background: #000;
   }
 
-  /* 移动端适配 */
+  /* 移动端响应式 */
   @media (max-width: 768px) {
-    .video-carousel-section {
-      padding: 40px 0;
-    }
-
     .container-video {
       padding: 0 15px;
-      max-width: 100%;
     }
 
     .section-title {
       font-size: 1.8rem;
       margin-bottom: 30px;
-    }
-
-    .video-carousel-wrapper {
-      gap: 12px;
     }
 
     .carousel-btn-container {
@@ -374,8 +362,12 @@
       height: 40px;
     }
 
+    .video-carousel-wrapper {
+      gap: 12px;
+    }
+
     .video-item {
-      flex: 0 0 calc(50% - 6px); /* 2 per row */
+      flex: 0 0 calc(50% - 6px); /* 2列 */
     }
 
     .video-carousel-track {
@@ -388,13 +380,13 @@
     }
 
     .video-title {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
     }
 
     .video-modal-content {
       width: 95vw;
-      height: 85vh;
-      max-width: 350px;
+      height: 80vh;
+      max-width: 360px;
     }
 
     .video-modal-close {
@@ -402,11 +394,6 @@
       right: 15px;
       width: 40px;
       height: 40px;
-    }
-    
-    .video-modal-close svg {
-      width: 18px;
-      height: 18px;
     }
   }
 
@@ -416,35 +403,27 @@
     }
 
     .video-item {
-      flex: 0 0 calc(50% - 5px); /* 2 per row */
-    }
-
-    .carousel-btn-container {
-      width: 35px;
-      height: 35px;
-    }
-
-    .carousel-btn {
-      width: 35px;
-      height: 35px;
+      flex: 0 0 calc(50% - 5px);
     }
 
     .video-carousel-track {
       gap: 10px;
     }
 
-    .video-carousel-wrapper {
-      gap: 8px;
+    .carousel-btn-container {
+      width: 36px;
+      height: 36px;
     }
 
-    .video-thumbnail:hover {
-      transform: scale(1.01);
+    .carousel-btn {
+      width: 36px;
+      height: 36px;
     }
 
     .video-modal-content {
       width: 98vw;
-      height: 90vh;
-      max-width: 300px;
+      height: 85vh;
+      max-width: 320px;
     }
 
     .video-modal-close {
@@ -453,49 +432,37 @@
       width: 36px;
       height: 36px;
     }
-    
-    .video-modal-close svg {
-      width: 16px;
-      height: 16px;
-    }
   }
 
-  /* 平板适配 */
   @media (min-width: 769px) and (max-width: 1024px) {
     .container-video {
-      padding: 0 30px;
-      max-width: 1100px;
+      padding: 0 25px;
+      max-width: 1200px;
     }
 
     .video-item {
-      flex: 0 0 calc(33.333% - 13.33px); /* 3 per row */
+      flex: 0 0 calc(33.333% - 13.33px); /* 3列 */
     }
 
     .video-carousel-track {
       gap: 20px;
     }
-
-    .video-modal-content {
-      max-width: 450px;
-    }
   }
 
-  /* 大屏幕显示5个视频 */
   @media (min-width: 1025px) {
     .video-item {
-      flex: 0 0 calc(20% - 16px); /* 5 per row */
+      flex: 0 0 calc(20% - 16px); /* 5列 */
     }
   }
 
-  /* 超大屏幕 */
   @media (min-width: 1600px) {
     .container-video {
-      max-width: 1600px;
       padding: 0 60px;
+      max-width: 1800px;
     }
   }
 
-  /* 针对支持触摸的设备,减少悬停效果 */
+  /* 触摸设备优化悬停 */
   @media (hover: none) and (pointer: coarse) {
     .video-thumbnail:hover {
       transform: none;
@@ -507,13 +474,13 @@
     }
   }
 
-  /* 横屏设备的特殊处理 */
+  /* 横屏小高度设备 */
   @media (orientation: landscape) and (max-height: 600px) {
     .video-modal-content {
-      height: 95vh;
+      height: 90vh;
       max-height: none;
     }
-    
+
     .video-modal-close {
       top: 15px;
       right: 15px;
@@ -534,15 +501,22 @@
 
     let currentIndex = 0;
     let itemsPerView = getItemsPerView();
-    let maxIndex = Math.max(0, videoItems.length - itemsPerView);
+    let maxIndex = getMaxIndex();
 
+    // 获取当前视口下每页显示数量
     function getItemsPerView() {
       if (window.innerWidth <= 480) return 2;
       if (window.innerWidth <= 768) return 2;
       if (window.innerWidth <= 1024) return 3;
-      return 5; // 显示5个
+      return 5;
     }
 
+    // 计算最大索引
+    function getMaxIndex() {
+      return Math.max(0, videoItems.length - itemsPerView);
+    }
+
+    // 更新轮播位置
     function updateCarousel() {
       const itemWidthWithGap = 100 / itemsPerView;
       const translateX = -(currentIndex * itemWidthWithGap);
@@ -552,14 +526,15 @@
       nextBtn.classList.toggle('hidden', currentIndex >= maxIndex || videoItems.length <= itemsPerView);
     }
 
+    // 窗口大小变化时重新计算
     function handleResize() {
       itemsPerView = getItemsPerView();
-      maxIndex = Math.max(0, videoItems.length - itemsPerView);
+      maxIndex = getMaxIndex();
       currentIndex = Math.min(currentIndex, maxIndex);
       updateCarousel();
     }
 
-    // 轮播控制
+    // 按钮事件
     prevBtn.addEventListener('click', () => {
       if (currentIndex > 0) {
         currentIndex--;
@@ -574,13 +549,14 @@
       }
     });
 
-    // 视频播放
-    videoItems.forEach((item) => {
+    // 视频点击播放
+    videoItems.forEach(item => {
       const thumbnail = item.querySelector('.video-thumbnail');
       thumbnail.addEventListener('click', () => {
         const videoUrl = thumbnail.dataset.videoUrl;
         if (videoUrl) {
           modalVideo.src = videoUrl;
+          modalVideo.load(); // 预加载元数据
           modal.classList.add('active');
           document.body.style.overflow = 'hidden';
         }
@@ -598,14 +574,14 @@
     closeBtn.addEventListener('click', closeModal);
     overlay.addEventListener('click', closeModal);
 
-    // ESC键关闭
-    document.addEventListener('keydown', (e) => {
+    // ESC 关闭
+    document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && modal.classList.contains('active')) {
         closeModal();
       }
     });
 
-    // 响应式处理
+    // 监听窗口变化
     window.addEventListener('resize', handleResize);
 
     // 初始化
@@ -645,6 +621,7 @@
   "presets": [
     {
       "name": "视频轮播",
+      "category": "媒体",
       "blocks": [
         { "type": "video" },
         { "type": "video" },
