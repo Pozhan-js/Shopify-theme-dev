@@ -103,7 +103,7 @@
     font-size: 2rem;
     margin-bottom: 40px;
     font-weight: normal;
-    color: var(--color, #333);
+    color: #333;
   }
 
   .video-carousel-wrapper {
@@ -157,7 +157,7 @@
 
   .video-carousel-track {
     display: flex;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     gap: 20px;
   }
 
@@ -251,7 +251,7 @@
     text-overflow: ellipsis;
   }
 
-  /* === 模态框样式：全高播放 === */
+  /* 模态框：全屏高度 */
   .video-modal {
     position: fixed;
     top: 0;
@@ -280,7 +280,7 @@
   .video-modal-content {
     position: relative;
     width: 95vw;
-    height: 95vh; /* 提升高度 */
+    height: 95vh;
     max-width: 600px;
     max-height: 95vh;
     background: transparent;
@@ -336,63 +336,16 @@
     border-radius: 8px;
   }
 
-  /* === 响应式增强 === */
-
+  /* 响应式 */
   @media (max-width: 768px) {
-    .container-video {
-      padding: 0 15px;
-    }
-
-    .section-title {
-      font-size: 1.8rem;
-      margin-bottom: 30px;
-    }
-
-    .carousel-btn-container {
-      width: 40px;
-      height: 40px;
-    }
-
-    .carousel-btn {
-      width: 40px;
-      height: 40px;
-    }
-
-    .video-carousel-wrapper {
-      gap: 12px;
-    }
-
     .video-item {
       flex: 0 0 calc(50% - 6px);
     }
-
-    .video-carousel-track {
-      gap: 12px;
-    }
-
-    .play-button {
-      width: 50px;
-      height: 50px;
-    }
-
-    .video-title {
-      font-size: 0.85rem;
-    }
-
-    /* 手机端模态框更接近全屏 */
+    .video-carousel-track { gap: 12px; }
     .video-modal-content {
       width: 98vw;
       height: 98vh;
-      max-width: 100vw;
-      max-height: 100vh;
       border-radius: 0;
-    }
-
-    .video-modal-close {
-      top: 15px;
-      right: 15px;
-      width: 40px;
-      height: 40px;
     }
   }
 
@@ -403,28 +356,13 @@
       max-height: none;
       border-radius: 0;
     }
-
-    .video-modal-close {
-      top: 12px;
-      right: 12px;
-      width: 36px;
-      height: 36px;
-    }
   }
 
   @media (min-width: 769px) and (max-width: 1024px) {
-    .container-video {
-      padding: 0 25px;
-      max-width: 1200px;
-    }
-
     .video-item {
       flex: 0 0 calc(33.333% - 13.33px);
     }
-
-    .video-carousel-track {
-      gap: 20px;
-    }
+    .video-carousel-track { gap: 20px; }
   }
 
   @media (min-width: 1025px) {
@@ -440,29 +378,23 @@
     }
   }
 
-  /* 触摸设备悬停优化 */
+  /* 触摸设备优化 */
   @media (hover: none) and (pointer: coarse) {
     .video-thumbnail:hover {
       transform: none;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-
     .play-overlay {
       opacity: 1;
     }
   }
 
-  /* 横屏手机或平板：最大化利用空间 */
+  /* 横屏优化 */
   @media (orientation: landscape) and (max-height: 600px) {
     .video-modal-content {
       width: 98vw;
       height: 98vh;
       max-height: none;
-    }
-
-    .video-modal-close {
-      top: 12px;
-      right: 12px;
     }
   }
 </style>
@@ -478,9 +410,9 @@
     const closeBtn = document.querySelector('.video-modal-close');
     const overlay = document.querySelector('.video-modal-overlay');
 
-    let currentIndex = 0;
+    let currentPage = 0; // 当前页码（每页 = 一屏）
     let itemsPerView = getItemsPerView();
-    let maxIndex = getMaxIndex();
+    let totalPages = 0;
 
     function getItemsPerView() {
       if (window.innerWidth <= 480) return 2;
@@ -489,41 +421,38 @@
       return 5;
     }
 
-    function getMaxIndex() {
-      return Math.max(0, videoItems.length - itemsPerView);
-    }
-
-    function updateCarousel() {
-      const itemWidthWithGap = 100 / itemsPerView;
-      const translateX = -(currentIndex * itemWidthWithGap);
-      carousel.style.transform = `translateX(${translateX}%)`;
-
-      prevBtn.classList.toggle('hidden', currentIndex === 0);
-      nextBtn.classList.toggle('hidden', currentIndex >= maxIndex || videoItems.length <= itemsPerView);
-    }
-
-    function handleResize() {
+    function updatePages() {
       itemsPerView = getItemsPerView();
-      maxIndex = getMaxIndex();
-      currentIndex = Math.min(currentIndex, maxIndex);
+      totalPages = Math.max(1, Math.ceil(videoItems.length / itemsPerView));
+      currentPage = Math.min(currentPage, totalPages - 1);
       updateCarousel();
     }
 
-    prevBtn.addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        updateCarousel();
-      }
-    });
+    function updateCarousel() {
+      const translateX = -(currentPage * (100 / itemsPerView) * itemsPerView);
+      carousel.style.transform = `translateX(${translateX}%)`;
 
+      prevBtn.classList.toggle('hidden', currentPage === 0);
+      nextBtn.classList.toggle('hidden', currentPage >= totalPages - 1);
+    }
+
+    // 下一页：跳转一整页
     nextBtn.addEventListener('click', () => {
-      if (currentIndex < maxIndex) {
-        currentIndex++;
+      if (currentPage < totalPages - 1) {
+        currentPage++;
         updateCarousel();
       }
     });
 
-    // 播放视频
+    // 上一页：回退一整页
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        updateCarousel();
+      }
+    });
+
+    // 视频播放
     videoItems.forEach(item => {
       const thumbnail = item.querySelector('.video-thumbnail');
       thumbnail.addEventListener('click', () => {
@@ -554,8 +483,8 @@
       }
     });
 
-    window.addEventListener('resize', handleResize);
-    updateCarousel();
+    window.addEventListener('resize', updatePages);
+    updatePages(); // 初始化
   });
 </script>
 
@@ -593,6 +522,8 @@
       "name": "视频轮播",
       "category": "媒体",
       "blocks": [
+        { "type": "video" },
+        { "type": "video" },
         { "type": "video" },
         { "type": "video" },
         { "type": "video" },
