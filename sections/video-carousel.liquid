@@ -95,7 +95,7 @@
   .container-video {
     max-width: 1300px;
     margin: 0 auto;
-    padding: 0 60px;
+    padding: 0 80px;
   }
 
   .section-title {
@@ -114,7 +114,7 @@
     gap: 30px;
   }
 
-  /* 按钮容器 - 固定尺寸 */
+  /* 按钮容器 - 保持固定宽度 */
   .carousel-btn-container {
     width: 50px;
     height: 50px;
@@ -160,12 +160,11 @@
   .video-carousel-track {
     display: flex;
     transition: transform 0.5s ease;
-    gap: 30px;
+    gap: 25px;
   }
 
-  /* 视频项：每行最多3个，宽度更大 */
   .video-item {
-    flex: 0 0 calc(33.333% - 17px);
+    flex: 0 0 calc(25% - 18.75px);
     min-width: 0;
     transform-origin: center center;
   }
@@ -173,7 +172,7 @@
   .video-thumbnail {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 5;
+    aspect-ratio: 3/5;
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
@@ -185,8 +184,9 @@
   }
 
   .video-thumbnail:hover {
-    transform: scale(1.05) translateY(-4px) translateZ(10px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(1.03) translateZ(0);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
   }
 
   .video-thumbnail img {
@@ -197,6 +197,11 @@
     background: #000;
     border-radius: 12px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .video-thumbnail:hover img {
+    border-radius: 12px;
+    transform: translateZ(0);
   }
 
   .video-placeholder {
@@ -238,10 +243,11 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateZ(0);
   }
 
   .play-button:hover {
-    transform: scale(1.1);
+    transform: scale(1.1) translateZ(0);
   }
 
   .video-title {
@@ -352,7 +358,7 @@
     }
 
     .section-title {
-      font-size: 1.8rem;
+      font-size: 2rem;
       margin-bottom: 30px;
     }
 
@@ -371,15 +377,15 @@
     }
 
     .video-item {
-      flex: 0 0 calc(50% - 4px);
+      flex: 0 0 calc(50% - 6px);
     }
 
     .video-carousel-track {
-      gap: 8px;
+      gap: 12px;
     }
 
     .video-thumbnail:hover {
-      transform: scale(1.02);
+      transform: scale(1.02) translateZ(0);
     }
 
     .play-button {
@@ -416,7 +422,7 @@
     }
 
     .video-item {
-      flex: 0 0 calc(50% - 4px);
+      flex: 0 0 calc(50% - 6px);
     }
 
     .carousel-btn-container {
@@ -430,7 +436,7 @@
     }
 
     .video-carousel-track {
-      gap: 8px;
+      gap: 10px;
     }
 
     .video-carousel-wrapper {
@@ -438,7 +444,7 @@
     }
 
     .video-thumbnail:hover {
-      transform: scale(1.01);
+      transform: scale(1.01) translateZ(0);
     }
 
     .video-modal-content {
@@ -468,7 +474,7 @@
     }
 
     .video-item {
-      flex: 0 0 calc(33.333% - 13px);
+      flex: 0 0 calc(33.333% - 16.67px);
     }
 
     .video-carousel-track {
@@ -480,10 +486,10 @@
     }
   }
 
-  /* 大屏幕：统一为每行3个 */
+  /* 大屏幕显示4个视频 */
   @media (min-width: 1025px) {
     .video-item {
-      flex: 0 0 calc(33.333% - 17px);
+      flex: 0 0 calc(25% - 18.75px);
     }
   }
 
@@ -493,13 +499,9 @@
       max-width: 1400px;
       padding: 0 100px;
     }
-
-    .video-item {
-      flex: 0 0 calc(33.333% - 18px);
-    }
   }
 
-  /* 触摸设备优化 */
+  /* 针对支持触摸的设备,减少悬停效果 */
   @media (hover: none) and (pointer: coarse) {
     .video-thumbnail:hover {
       transform: none;
@@ -511,7 +513,7 @@
     }
   }
 
-  /* 横屏小高度设备 */
+  /* 横屏设备的特殊处理 */
   @media (orientation: landscape) and (max-height: 600px) {
     .video-modal-content {
       height: 95vh;
@@ -540,20 +542,28 @@
     let itemsPerView = getItemsPerView();
     let maxIndex = Math.max(0, videoItems.length - itemsPerView);
 
-    // 根据屏幕宽度获取每屏显示数量
     function getItemsPerView() {
+      if (window.innerWidth <= 480) return 2;
       if (window.innerWidth <= 768) return 2;
       if (window.innerWidth <= 1024) return 3;
-      return 3; // 默认3个
+      return 4;
     }
 
     function updateCarousel() {
       const translateX = -(currentIndex * (100 / itemsPerView));
       carousel.style.transform = `translateX(${translateX}%)`;
 
-      // 控制按钮显隐
-      prevBtn.classList.toggle('hidden', currentIndex === 0);
-      nextBtn.classList.toggle('hidden', currentIndex >= maxIndex || videoItems.length <= itemsPerView);
+      if (currentIndex === 0) {
+        prevBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.remove('hidden');
+      }
+
+      if (currentIndex >= maxIndex || videoItems.length <= itemsPerView) {
+        nextBtn.classList.add('hidden');
+      } else {
+        nextBtn.classList.remove('hidden');
+      }
     }
 
     function handleResize() {
@@ -602,14 +612,14 @@
     closeBtn.addEventListener('click', closeModal);
     overlay.addEventListener('click', closeModal);
 
-    // ESC 键关闭
+    // ESC键关闭
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modal.classList.contains('active')) {
         closeModal();
       }
     });
 
-    // 响应式监听
+    // 响应式处理
     window.addEventListener('resize', handleResize);
 
     // 初始化
@@ -650,12 +660,24 @@
     {
       "name": "视频轮播",
       "blocks": [
-        { "type": "video" },
-        { "type": "video" },
-        { "type": "video" },
-        { "type": "video" },
-        { "type": "video" },
-        { "type": "video" }
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        },
+        {
+          "type": "video"
+        }
       ]
     }
   ]
