@@ -140,6 +140,11 @@
     border-color: #555;
   }
 
+  .ajax-nav-button.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
   @media (max-width: 768px) {
     .ajax-navigation {
       padding: 30px 15px;
@@ -172,43 +177,64 @@
 
 <script>
 (function() {
-  const navSection = document.querySelector('[data-ajax-nav="{{ section.id }}"]');
-  if (!navSection) return;
+  const SECTION_ID = "{{ section.id }}";
+  const MAIN_SELECTOR = "{{ section.settings.main_content_selector }}";
+  let isLoading = false;
 
-  const buttons = navSection.querySelectorAll('.ajax-nav-button');
-  
-  // 标记当前活动按钮
-  const currentPath = window.location.pathname;
-  buttons.forEach(btn => {
-    const btnUrl = new URL(btn.dataset.url, window.location.origin);
-    if (btnUrl.pathname === currentPath) {
-      btn.classList.add('active');
-    }
-  });
-
-  // 使用事件委托，避免按钮被替换后失效
-  navSection.addEventListener('click', function(e) {
-    const button = e.target.closest('.ajax-nav-button');
-    if (!button) return;
+  // 使用 document 级别的事件委托，确保动态加载的按钮也能响应
+  document.addEventListener('click', function(e) {
+    const button = e.target.closest(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
+    if (!button || isLoading) return;
     
     e.preventDefault();
     
     const url = button.dataset.url;
-    const selector = button.dataset.selector || '#MainContent';
+    const selector = button.dataset.selector || MAIN_SELECTOR;
     
     if (!url) return;
     
     // 更新按钮状态
-    buttons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
+    updateButtonStates(url);
     
     // 加载新页面内容
     loadPageContent(url, selector);
   });
 
+  /**
+   * 更新所有导航按钮的激活状态
+   */
+  function updateButtonStates(activeUrl) {
+    const allButtons = document.querySelectorAll(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
+    
+    allButtons.forEach(btn => {
+      try {
+        const btnUrl = new URL(btn.dataset.url, window.location.origin);
+        const targetUrl = new URL(activeUrl, window.location.origin);
+        
+        if (btnUrl.pathname === targetUrl.pathname) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      } catch (error) {
+        console.error('Invalid URL:', btn.dataset.url);
+      }
+    });
+  }
+
+  /**
+   * 通过 AJAX 加载页面内容
+   */
   async function loadPageContent(url, selector) {
+    if (isLoading) return;
+    
+    isLoading = true;
+    
+    // 添加加载状态
+    const allButtons = document.querySelectorAll(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
+    allButtons.forEach(btn => btn.classList.add('loading'));
+    
     try {
-      // 获取新页面内容
       const response = await fetch(url, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
@@ -220,12 +246,9 @@
       }
       
       const html = await response.text();
-      
-      // 解析 HTML
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      // 获取新内容
       const newContent = doc.querySelector(selector);
       const currentContent = document.querySelector(selector);
       
@@ -239,54 +262,95 @@
           document.title = newTitle.textContent;
         }
         
-        // 更新 URL
-        history.pushState({ url }, '', url);
+        // 更新 URL（不触发页面刷新）
+        history.pushState({ url, selector }, '', url);
         
-        // 滚动到顶部
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 平滑滚动到顶部
+        window.scrollTo({ 
+          top: 0, 
+          behavior: 'smooth' 
+        });
         
-        // 触发自定义事件，让其他脚本知道内容已更新
-        document.dispatchEvent(new CustomEvent('page:loaded', {
-          detail: { url }
+        // 触发自定义事件，通知其他脚本内容已更新
+        document.dispatchEvent(new CustomEvent('ajax:pageLoaded', {
+          detail: { 
+            url,
+            selector,
+            timestamp: Date.now()
+          }
         }));
         
-        // 重新初始化 Shopify 相关功能
+        // 重新初始化 Shopify 动态结账按钮
         if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
           Shopify.PaymentButton.init();
         }
         
-        // 重新初始化产品表单
+        // 重新初始化主题相关功能
         if (typeof theme !== 'undefined' && theme.init) {
           theme.init();
         }
         
+        // 重新初始化产品表单
+        if (typeof window.Shopify !== 'undefined' && window.Shopify.ProductForm) {
+          const forms = document.querySelectorAll('form[action*="/cart/add"]');
+          forms.forEach(form => {
+            new Shopify.ProductForm(form);
+          });
+        }
+        
       } else {
         console.error('Content selector not found:', selector);
+        // 如果找不到选择器，直接跳转
         window.location.href = url;
       }
       
     } catch (error) {
       console.error('Error loading page:', error);
+      // 出错时回退到正常页面跳转
       window.location.href = url;
+    } finally {
+      isLoading = false;
+      // 移除加载状态
+      allButtons.forEach(btn => btn.classList.remove('loading'));
     }
   }
 
-  // 处理浏览器前进/后退
+  /**
+   * 处理浏览器前进/后退按钮
+   */
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.url) {
-      const selector = navSection.querySelector('.ajax-nav-button').dataset.selector || '#MainContent';
+      const selector = e.state.selector || MAIN_SELECTOR;
       loadPageContent(e.state.url, selector);
-      
-      // 更新按钮状态
-      buttons.forEach(btn => {
-        const btnUrl = new URL(btn.dataset.url, window.location.origin);
-        if (btnUrl.pathname === e.state.url || btnUrl.href === e.state.url) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
+      updateButtonStates(e.state.url);
     }
   });
+
+  /**
+   * 页面加载时初始化按钮状态
+   */
+  function initializeButtonStates() {
+    const currentPath = window.location.pathname;
+    updateButtonStates(currentPath);
+    
+    // 保存初始状态到历史记录
+    history.replaceState({ 
+      url: window.location.href,
+      selector: MAIN_SELECTOR
+    }, '', window.location.href);
+  }
+
+  // 初始化
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeButtonStates);
+  } else {
+    initializeButtonStates();
+  }
+
+  // 监听自定义事件（可选，用于调试）
+  document.addEventListener('ajax:pageLoaded', function(e) {
+    console.log('Page loaded via AJAX:', e.detail);
+  });
+
 })();
 </script>
