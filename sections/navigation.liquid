@@ -1,0 +1,200 @@
+{% schema %}
+{
+  "name": "Category Navigation",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Shop by Category"
+    },
+    {
+      "type": "range",
+      "id": "buttons_per_row",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "label": "Buttons per row",
+      "default": 6
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button Style",
+      "options": [
+        {
+          "value": "outlined",
+          "label": "Outlined"
+        },
+        {
+          "value": "filled",
+          "label": "Filled"
+        }
+      ],
+      "default": "outlined"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category_button",
+      "name": "Category Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "CATEGORY"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "is_highlighted",
+          "label": "Highlight Button",
+          "default": false,
+          "info": "Make this button stand out with filled style"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Navigation",
+      "blocks": [
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "FEATURED"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "SKIN"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "LIP+CHEEK"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "SETS"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "AWARD WINNERS"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "SHOP ALL",
+            "is_highlighted": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .category-navigation {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .category-navigation__title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .category-navigation__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .category-button {
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .category-button--outlined {
+    background-color: transparent;
+    border: 2px solid #333;
+    color: #333;
+  }
+
+  .category-button--outlined:hover {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .category-button--filled {
+    background-color: #333;
+    border: 2px solid #333;
+    color: #fff;
+  }
+
+  .category-button--filled:hover {
+    background-color: #555;
+    border-color: #555;
+  }
+
+  @media (max-width: 768px) {
+    .category-navigation {
+      padding: 30px 15px;
+    }
+
+    .category-navigation__buttons {
+      gap: 10px;
+    }
+
+    .category-button {
+      padding: 10px 20px;
+      font-size: 12px;
+    }
+  }
+</style>
+
+<div class="category-navigation">
+  {% if section.settings.section_title != blank %}
+    <h2 class="category-navigation__title">{{ section.settings.section_title }}</h2>
+  {% endif %}
+
+  <div class="category-navigation__buttons">
+    {% for block in section.blocks %}
+      {% if block.type == 'category_button' %}
+        <a 
+          href="{{ block.settings.button_link | default: '#' }}" 
+          class="category-button {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          {{ block.settings.button_text }}
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
