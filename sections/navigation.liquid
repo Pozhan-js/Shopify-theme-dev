@@ -8,7 +8,7 @@
       "id": "target_section_id",
       "label": "Target Section ID",
       "default": "product-grid",
-      "info": "The section ID to reload when clicking buttons"
+      "info": "要重新加载的目标 section ID"
     }
   ],
   "blocks": [
@@ -32,6 +32,35 @@
           "id": "is_highlighted",
           "label": "Highlight Button",
           "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Category Navigation",
+      "blocks": [
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "FEATURED",
+            "button_link": "/collections/featured"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "SKIN",
+            "button_link": "/collections/skin"
+          }
+        },
+        {
+          "type": "category_button",
+          "settings": {
+            "button_text": "SHOP ALL",
+            "button_link": "/collections/all",
+            "is_highlighted": true
+          }
         }
       ]
     }
@@ -89,38 +118,34 @@
     border-color: #555;
   }
 
-  /* 加载动画 */
-  .loading-overlay {
-    position: relative;
+  .content-loading {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.3s;
   }
 
-  .loading-overlay::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.7);
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .loading-overlay.is-loading::after {
-    display: flex;
+  @media (max-width: 768px) {
+    .category-navigation {
+      padding: 30px 15px;
+    }
+    
+    .category-button {
+      padding: 10px 20px;
+      font-size: 12px;
+    }
   }
 </style>
 
-<div class="category-navigation" data-section-id="{{ section.id }}">
+<div class="category-navigation" id="category-nav-{{ section.id }}">
   <div class="category-navigation__buttons">
     {% for block in section.blocks %}
       {% if block.type == 'category_button' %}
         <button 
           type="button"
+          class="category-button category-nav-btn {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %} {% if forloop.first %}active{% endif %}"
           data-url="{{ block.settings.button_link }}"
           data-target="{{ section.settings.target_section_id }}"
-          class="category-button {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %} {% if forloop.first %}active{% endif %}"
+          onclick="handleCategoryClick(this)"
           {{ block.shopify_attributes }}
         >
           {{ block.settings.button_text }}
@@ -131,72 +156,101 @@
 </div>
 
 <script>
-(function() {
-  const categoryNav = document.querySelector('[data-section-id="{{ section.id }}"]');
-  if (!categoryNav) return;
-
-  const buttons = categoryNav.querySelectorAll('.category-button');
-  
-  buttons.forEach(button => {
-    button.addEventListener('click', async function(e) {
-      e.preventDefault();
-      
-      const url = this.dataset.url;
-      const targetSectionId = this.dataset.target;
-      
-      if (!url || !targetSectionId) return;
-      
-      // 更新按钮状态
-      buttons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      
-      // 加载新内容
-      await loadSectionContent(url, targetSectionId);
-    });
-  });
-
-  async function loadSectionContent(url, sectionId) {
-    const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
-    if (!targetElement) {
-      console.error(`Target section ${sectionId} not found`);
+  // 全局函数，确保可以被调用
+  window.handleCategoryClick = function(button) {
+    console.log('Button clicked!'); // 调试用
+    
+    const url = button.getAttribute('data-url');
+    const targetId = button.getAttribute('data-target');
+    
+    console.log('URL:', url, 'Target:', targetId); // 调试用
+    
+    if (!url || !targetId) {
+      console.error('Missing URL or target ID');
       return;
     }
-
+    
+    // 更新按钮状态
+    const allButtons = document.querySelectorAll('.category-nav-btn');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    // 查找目标元素
+    const targetElement = document.getElementById(targetId);
+    
+    if (!targetElement) {
+      console.error('Target element not found:', targetId);
+      // 如果找不到目标元素，直接跳转
+      window.location.href = url;
+      return;
+    }
+    
+    // 加载内容
+    loadContent(url, targetId, targetElement);
+  };
+  
+  async function loadContent(url, sectionId, targetElement) {
     try {
       // 添加加载状态
-      targetElement.classList.add('loading-overlay', 'is-loading');
+      targetElement.classList.add('content-loading');
       
       // 构建请求 URL
-      const fetchUrl = `${url}${url.includes('?') ? '&' : '?'}section_id=${sectionId}`;
+      const separator = url.includes('?') ? '&' : '?';
+      const fetchUrl = `${url}${separator}section_id=${sectionId}`;
+      
+      console.log('Fetching:', fetchUrl); // 调试用
       
       // 获取新内容
       const response = await fetch(fetchUrl);
-      if (!response.ok) throw new Error('Network response was not ok');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
       const html = await response.text();
       
-      // 替换内容
-      targetElement.outerHTML = html;
+      console.log('Content loaded'); // 调试用
       
-      // 更新浏览器 URL（不刷新页面）
-      history.pushState({ sectionId, url }, '', url);
+      // 创建临时容器来解析 HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
       
-      // 触发自定义事件，通知其他脚本内容已更新
-      document.dispatchEvent(new CustomEvent('section:loaded', {
-        detail: { sectionId, url }
-      }));
+      // 查找新内容中的目标 section
+      const newContent = tempDiv.querySelector(`#${sectionId}`);
+      
+      if (newContent) {
+        // 替换内容
+        targetElement.innerHTML = newContent.innerHTML;
+      } else {
+        // 如果没有找到特定 section，替换整个内容
+        targetElement.innerHTML = html;
+      }
+      
+      // 移除加载状态
+      targetElement.classList.remove('content-loading');
+      
+      // 更新 URL
+      history.pushState({ url, sectionId }, '', url);
+      
+      // 滚动到内容区域
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       
     } catch (error) {
-      console.error('Error loading section:', error);
-      targetElement.classList.remove('is-loading');
+      console.error('Error loading content:', error);
+      targetElement.classList.remove('content-loading');
+      
+      // 出错时直接跳转
+      window.location.href = url;
     }
   }
-
-  // 处理浏览器前进/后退按钮
+  
+  // 处理浏览器前进/后退
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.url && e.state.sectionId) {
-      loadSectionContent(e.state.url, e.state.sectionId);
+      const targetElement = document.getElementById(e.state.sectionId);
+      if (targetElement) {
+        loadContent(e.state.url, e.state.sectionId, targetElement);
+      }
     }
   });
-})();
 </script>
