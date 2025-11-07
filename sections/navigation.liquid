@@ -1,37 +1,14 @@
+<!-- category-navigation.liquid -->
 {% schema %}
 {
   "name": "Category Navigation",
   "settings": [
     {
       "type": "text",
-      "id": "section_title",
-      "label": "Section Title",
-      "default": "Shop by Category"
-    },
-    {
-      "type": "range",
-      "id": "buttons_per_row",
-      "min": 3,
-      "max": 8,
-      "step": 1,
-      "label": "Buttons per row",
-      "default": 6
-    },
-    {
-      "type": "select",
-      "id": "button_style",
-      "label": "Button Style",
-      "options": [
-        {
-          "value": "outlined",
-          "label": "Outlined"
-        },
-        {
-          "value": "filled",
-          "label": "Filled"
-        }
-      ],
-      "default": "outlined"
+      "id": "target_section_id",
+      "label": "Target Section ID",
+      "default": "product-grid",
+      "info": "The section ID to reload when clicking buttons"
     }
   ],
   "blocks": [
@@ -54,52 +31,7 @@
           "type": "checkbox",
           "id": "is_highlighted",
           "label": "Highlight Button",
-          "default": false,
-          "info": "Make this button stand out with filled style"
-        }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "Category Navigation",
-      "blocks": [
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "FEATURED"
-          }
-        },
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "SKIN"
-          }
-        },
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "LIP+CHEEK"
-          }
-        },
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "SETS"
-          }
-        },
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "AWARD WINNERS"
-          }
-        },
-        {
-          "type": "category_button",
-          "settings": {
-            "button_text": "SHOP ALL",
-            "is_highlighted": true
-          }
+          "default": false
         }
       ]
     }
@@ -112,13 +44,6 @@
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
-  }
-
-  .category-navigation__title {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 24px;
-    font-weight: 600;
   }
 
   .category-navigation__buttons {
@@ -139,22 +64,23 @@
     transition: all 0.3s ease;
     text-transform: uppercase;
     white-space: nowrap;
+    cursor: pointer;
+    border: 2px solid #333;
   }
 
   .category-button--outlined {
     background-color: transparent;
-    border: 2px solid #333;
     color: #333;
   }
 
-  .category-button--outlined:hover {
+  .category-button--outlined:hover,
+  .category-button--outlined.active {
     background-color: #333;
     color: #fff;
   }
 
   .category-button--filled {
     background-color: #333;
-    border: 2px solid #333;
     color: #fff;
   }
 
@@ -163,38 +89,114 @@
     border-color: #555;
   }
 
-  @media (max-width: 768px) {
-    .category-navigation {
-      padding: 30px 15px;
-    }
+  /* 加载动画 */
+  .loading-overlay {
+    position: relative;
+  }
 
-    .category-navigation__buttons {
-      gap: 10px;
-    }
+  .loading-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
 
-    .category-button {
-      padding: 10px 20px;
-      font-size: 12px;
-    }
+  .loading-overlay.is-loading::after {
+    display: flex;
   }
 </style>
 
-<div class="category-navigation">
-  {% if section.settings.section_title != blank %}
-    <h2 class="category-navigation__title">{{ section.settings.section_title }}</h2>
-  {% endif %}
-
+<div class="category-navigation" data-section-id="{{ section.id }}">
   <div class="category-navigation__buttons">
     {% for block in section.blocks %}
       {% if block.type == 'category_button' %}
-        <a 
-          href="{{ block.settings.button_link | default: '#' }}" 
-          class="category-button {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %}"
+        <button 
+          type="button"
+          data-url="{{ block.settings.button_link }}"
+          data-target="{{ section.settings.target_section_id }}"
+          class="category-button {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %} {% if forloop.first %}active{% endif %}"
           {{ block.shopify_attributes }}
         >
           {{ block.settings.button_text }}
-        </a>
+        </button>
       {% endif %}
     {% endfor %}
   </div>
 </div>
+
+<script>
+(function() {
+  const categoryNav = document.querySelector('[data-section-id="{{ section.id }}"]');
+  if (!categoryNav) return;
+
+  const buttons = categoryNav.querySelectorAll('.category-button');
+  
+  buttons.forEach(button => {
+    button.addEventListener('click', async function(e) {
+      e.preventDefault();
+      
+      const url = this.dataset.url;
+      const targetSectionId = this.dataset.target;
+      
+      if (!url || !targetSectionId) return;
+      
+      // 更新按钮状态
+      buttons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+      
+      // 加载新内容
+      await loadSectionContent(url, targetSectionId);
+    });
+  });
+
+  async function loadSectionContent(url, sectionId) {
+    const targetElement = document.querySelector(`[data-section-id="${sectionId}"]`);
+    if (!targetElement) {
+      console.error(`Target section ${sectionId} not found`);
+      return;
+    }
+
+    try {
+      // 添加加载状态
+      targetElement.classList.add('loading-overlay', 'is-loading');
+      
+      // 构建请求 URL
+      const fetchUrl = `${url}${url.includes('?') ? '&' : '?'}section_id=${sectionId}`;
+      
+      // 获取新内容
+      const response = await fetch(fetchUrl);
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const html = await response.text();
+      
+      // 替换内容
+      targetElement.outerHTML = html;
+      
+      // 更新浏览器 URL（不刷新页面）
+      history.pushState({ sectionId, url }, '', url);
+      
+      // 触发自定义事件，通知其他脚本内容已更新
+      document.dispatchEvent(new CustomEvent('section:loaded', {
+        detail: { sectionId, url }
+      }));
+      
+    } catch (error) {
+      console.error('Error loading section:', error);
+      targetElement.classList.remove('is-loading');
+    }
+  }
+
+  // 处理浏览器前进/后退按钮
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.url && e.state.sectionId) {
+      loadSectionContent(e.state.url, e.state.sectionId);
+    }
+  });
+})();
+</script>
