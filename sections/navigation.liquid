@@ -9,6 +9,13 @@
       "label": "主内容区域选择器",
       "default": "#MainContent",
       "info": "要替换的主内容区域的 CSS 选择器，例如：#MainContent 或 .main-content"
+    },
+    {
+      "type": "text",
+      "id": "content_wrapper_selector",
+      "label": "内容包装器选择器",
+      "default": ".collection-products",
+      "info": "实际要替换的内容区域（不包括导航），留空则替换整个主内容区域"
     }
   ],
   "blocks": [
@@ -140,6 +147,11 @@
     border-color: #555;
   }
 
+  .ajax-nav-button--filled.active {
+    background-color: #222;
+    border-color: #222;
+  }
+
   .ajax-nav-button.loading {
     opacity: 0.6;
     pointer-events: none;
@@ -157,7 +169,7 @@
   }
 </style>
 
-<div class="ajax-navigation" data-ajax-nav="{{ section.id }}">
+<div class="ajax-navigation" data-ajax-nav="{{ section.id }}" data-ajax-nav-persistent>
   <div class="ajax-navigation__buttons">
     {% for block in section.blocks %}
       {% if block.type == 'nav_button' %}
@@ -166,6 +178,7 @@
           class="ajax-nav-button {% if block.settings.is_highlighted %}ajax-nav-button--filled{% else %}ajax-nav-button--outlined{% endif %}"
           data-url="{{ block.settings.button_link }}"
           data-selector="{{ section.settings.main_content_selector }}"
+          data-content-selector="{{ section.settings.content_wrapper_selector }}"
           {{ block.shopify_attributes }}
         >
           {{ block.settings.button_text }}
@@ -179,9 +192,10 @@
 (function() {
   const SECTION_ID = "{{ section.id }}";
   const MAIN_SELECTOR = "{{ section.settings.main_content_selector }}";
+  const CONTENT_WRAPPER_SELECTOR = "{{ section.settings.content_wrapper_selector }}";
   let isLoading = false;
 
-  // 使用 document 级别的事件委托，确保动态加载的按钮也能响应
+  // 使用 document 级别的事件委托
   document.addEventListener('click', function(e) {
     const button = e.target.closest(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
     if (!button || isLoading) return;
@@ -189,15 +203,16 @@
     e.preventDefault();
     
     const url = button.dataset.url;
-    const selector = button.dataset.selector || MAIN_SELECTOR;
+    const mainSelector = button.dataset.selector || MAIN_SELECTOR;
+    const contentSelector = button.dataset.contentSelector || CONTENT_WRAPPER_SELECTOR;
     
     if (!url) return;
     
-    // 更新按钮状态
+    // 先更新按钮状态
     updateButtonStates(url);
     
     // 加载新页面内容
-    loadPageContent(url, selector);
+    loadPageContent(url, mainSelector, contentSelector);
   });
 
   /**
@@ -211,10 +226,12 @@
         const btnUrl = new URL(btn.dataset.url, window.location.origin);
         const targetUrl = new URL(activeUrl, window.location.origin);
         
+        // 移除所有按钮的 active 类
+        btn.classList.remove('active');
+        
+        // 给匹配的按钮添加 active 类
         if (btnUrl.pathname === targetUrl.pathname) {
           btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
         }
       } catch (error) {
         console.error('Invalid URL:', btn.dataset.url);
@@ -225,7 +242,7 @@
   /**
    * 通过 AJAX 加载页面内容
    */
-  async function loadPageContent(url, selector) {
+  async function loadPageContent(url, mainSelector, contentSelector) {
     if (isLoading) return;
     
     isLoading = true;
@@ -249,21 +266,55 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      const newContent = doc.querySelector(selector);
-      const currentContent = document.querySelector(selector);
+      // 优先使用 contentSelector，如果不存在则使用 mainSelector
+      let newContent, currentContent;
+      
+      if (contentSelector) {
+        newContent = doc.querySelector(contentSelector);
+        currentContent = document.querySelector(contentSelector);
+      }
+      
+      // 如果 contentSelector 找不到，回退到 mainSelector
+      if (!newContent || !currentContent) {
+        newContent = doc.querySelector(mainSelector);
+        currentContent = document.querySelector(mainSelector);
+        
+        // 如果使用 mainSelector，需要保留导航组件
+        if (newContent && currentContent) {
+          // 保存当前导航组件
+          const navComponent = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
+          
+          // 替换内容
+          currentContent.innerHTML = newContent.innerHTML;
+          
+          // 如果原来有导航组件，将其插回去
+          if (navComponent) {
+            const newNavPosition = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
+            if (newNavPosition) {
+              newNavPosition.replaceWith(navComponent);
+            } else {
+              // 如果新内容中没有导航位置，插入到开头
+              currentContent.insertBefore(navComponent, currentContent.firstChild);
+            }
+            
+            // 重新更新按钮状态
+            updateButtonStates(url);
+          }
+        }
+      } else {
+        // 只替换内容区域，不影响导航
+        currentContent.innerHTML = newContent.innerHTML;
+      }
       
       if (newContent && currentContent) {
-        // 替换内容
-        currentContent.innerHTML = newContent.innerHTML;
-        
         // 更新页面标题
         const newTitle = doc.querySelector('title');
         if (newTitle) {
           document.title = newTitle.textContent;
         }
         
-        // 更新 URL（不触发页面刷新）
-        history.pushState({ url, selector }, '', url);
+        // 更新 URL
+        history.pushState({ url, mainSelector, contentSelector }, '', url);
         
         // 平滑滚动到顶部
         window.scrollTo({ 
@@ -271,21 +322,21 @@
           behavior: 'smooth' 
         });
         
-        // 触发自定义事件，通知其他脚本内容已更新
+        // 触发自定义事件
         document.dispatchEvent(new CustomEvent('ajax:pageLoaded', {
           detail: { 
             url,
-            selector,
+            mainSelector,
+            contentSelector,
             timestamp: Date.now()
           }
         }));
         
-        // 重新初始化 Shopify 动态结账按钮
+        // 重新初始化 Shopify 功能
         if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
           Shopify.PaymentButton.init();
         }
         
-        // 重新初始化主题相关功能
         if (typeof theme !== 'undefined' && theme.init) {
           theme.init();
         }
@@ -299,14 +350,12 @@
         }
         
       } else {
-        console.error('Content selector not found:', selector);
-        // 如果找不到选择器，直接跳转
+        console.error('Content selector not found');
         window.location.href = url;
       }
       
     } catch (error) {
       console.error('Error loading page:', error);
-      // 出错时回退到正常页面跳转
       window.location.href = url;
     } finally {
       isLoading = false;
@@ -320,8 +369,9 @@
    */
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.url) {
-      const selector = e.state.selector || MAIN_SELECTOR;
-      loadPageContent(e.state.url, selector);
+      const mainSelector = e.state.mainSelector || MAIN_SELECTOR;
+      const contentSelector = e.state.contentSelector || CONTENT_WRAPPER_SELECTOR;
+      loadPageContent(e.state.url, mainSelector, contentSelector);
       updateButtonStates(e.state.url);
     }
   });
@@ -333,10 +383,11 @@
     const currentPath = window.location.pathname;
     updateButtonStates(currentPath);
     
-    // 保存初始状态到历史记录
+    // 保存初始状态
     history.replaceState({ 
       url: window.location.href,
-      selector: MAIN_SELECTOR
+      mainSelector: MAIN_SELECTOR,
+      contentSelector: CONTENT_WRAPPER_SELECTOR
     }, '', window.location.href);
   }
 
@@ -346,11 +397,6 @@
   } else {
     initializeButtonStates();
   }
-
-  // 监听自定义事件（可选，用于调试）
-  document.addEventListener('ajax:pageLoaded', function(e) {
-    console.log('Page loaded via AJAX:', e.detail);
-  });
 
 })();
 </script>
