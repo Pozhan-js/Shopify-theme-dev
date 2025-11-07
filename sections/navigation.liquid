@@ -1,36 +1,36 @@
-<!-- category-navigation.liquid -->
+<!-- sections/ajax-navigation.liquid -->
 {% schema %}
 {
-  "name": "Category Navigation",
+  "name": "AJAX Navigation",
   "settings": [
     {
       "type": "text",
-      "id": "target_section_id",
-      "label": "Target Section ID",
-      "default": "product-grid",
-      "info": "要重新加载的目标 section ID"
+      "id": "main_content_selector",
+      "label": "主内容区域选择器",
+      "default": "#MainContent",
+      "info": "要替换的主内容区域的 CSS 选择器，例如：#MainContent 或 .main-content"
     }
   ],
   "blocks": [
     {
-      "type": "category_button",
-      "name": "Category Button",
+      "type": "nav_button",
+      "name": "导航按钮",
       "settings": [
         {
           "type": "text",
           "id": "button_text",
-          "label": "Button Text",
+          "label": "按钮文字",
           "default": "CATEGORY"
         },
         {
           "type": "url",
           "id": "button_link",
-          "label": "Button Link"
+          "label": "按钮链接"
         },
         {
           "type": "checkbox",
           "id": "is_highlighted",
-          "label": "Highlight Button",
+          "label": "高亮显示",
           "default": false
         }
       ]
@@ -38,24 +38,45 @@
   ],
   "presets": [
     {
-      "name": "Category Navigation",
+      "name": "AJAX Navigation",
       "blocks": [
         {
-          "type": "category_button",
+          "type": "nav_button",
           "settings": {
             "button_text": "FEATURED",
             "button_link": "/collections/featured"
           }
         },
         {
-          "type": "category_button",
+          "type": "nav_button",
           "settings": {
             "button_text": "SKIN",
             "button_link": "/collections/skin"
           }
         },
         {
-          "type": "category_button",
+          "type": "nav_button",
+          "settings": {
+            "button_text": "LIP+CHEEK",
+            "button_link": "/collections/lip-cheek"
+          }
+        },
+        {
+          "type": "nav_button",
+          "settings": {
+            "button_text": "SETS",
+            "button_link": "/collections/sets"
+          }
+        },
+        {
+          "type": "nav_button",
+          "settings": {
+            "button_text": "AWARD WINNERS",
+            "button_link": "/collections/award-winners"
+          }
+        },
+        {
+          "type": "nav_button",
           "settings": {
             "button_text": "SHOP ALL",
             "button_link": "/collections/all",
@@ -69,13 +90,13 @@
 {% endschema %}
 
 <style>
-  .category-navigation {
+  .ajax-navigation {
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
   }
 
-  .category-navigation__buttons {
+  .ajax-navigation__buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
@@ -83,7 +104,7 @@
     align-items: center;
   }
 
-  .category-button {
+  .ajax-nav-button {
     padding: 12px 30px;
     border-radius: 50px;
     text-decoration: none;
@@ -95,57 +116,90 @@
     white-space: nowrap;
     cursor: pointer;
     border: 2px solid #333;
+    background: none;
   }
 
-  .category-button--outlined {
+  .ajax-nav-button--outlined {
     background-color: transparent;
     color: #333;
   }
 
-  .category-button--outlined:hover,
-  .category-button--outlined.active {
+  .ajax-nav-button--outlined:hover,
+  .ajax-nav-button--outlined.active {
     background-color: #333;
     color: #fff;
   }
 
-  .category-button--filled {
+  .ajax-nav-button--filled {
     background-color: #333;
     color: #fff;
   }
 
-  .category-button--filled:hover {
+  .ajax-nav-button--filled:hover {
     background-color: #555;
     border-color: #555;
   }
 
-  .content-loading {
-    opacity: 0.5;
-    pointer-events: none;
-    transition: opacity 0.3s;
+  /* 页面加载动画 */
+  .page-loading {
+    position: relative;
+  }
+
+  .page-loading::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-loading::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #333;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10000;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   @media (max-width: 768px) {
-    .category-navigation {
+    .ajax-navigation {
       padding: 30px 15px;
     }
     
-    .category-button {
+    .ajax-nav-button {
       padding: 10px 20px;
       font-size: 12px;
     }
   }
 </style>
 
-<div class="category-navigation" id="category-nav-{{ section.id }}">
-  <div class="category-navigation__buttons">
+<div class="ajax-navigation" data-ajax-nav="{{ section.id }}">
+  <div class="ajax-navigation__buttons">
     {% for block in section.blocks %}
-      {% if block.type == 'category_button' %}
+      {% if block.type == 'nav_button' %}
         <button 
           type="button"
-          class="category-button category-nav-btn {% if block.settings.is_highlighted %}category-button--filled{% else %}category-button--outlined{% endif %} {% if forloop.first %}active{% endif %}"
+          class="ajax-nav-button {% if block.settings.is_highlighted %}ajax-nav-button--filled{% else %}ajax-nav-button--outlined{% endif %}"
           data-url="{{ block.settings.button_link }}"
-          data-target="{{ section.settings.target_section_id }}"
-          onclick="handleCategoryClick(this)"
+          data-selector="{{ section.settings.main_content_selector }}"
           {{ block.shopify_attributes }}
         >
           {{ block.settings.button_text }}
@@ -156,52 +210,50 @@
 </div>
 
 <script>
-  // 全局函数，确保可以被调用
-  window.handleCategoryClick = function(button) {
-    console.log('Button clicked!'); // 调试用
-    
-    const url = button.getAttribute('data-url');
-    const targetId = button.getAttribute('data-target');
-    
-    console.log('URL:', url, 'Target:', targetId); // 调试用
-    
-    if (!url || !targetId) {
-      console.error('Missing URL or target ID');
-      return;
-    }
-    
-    // 更新按钮状态
-    const allButtons = document.querySelectorAll('.category-nav-btn');
-    allButtons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-    
-    // 查找目标元素
-    const targetElement = document.getElementById(targetId);
-    
-    if (!targetElement) {
-      console.error('Target element not found:', targetId);
-      // 如果找不到目标元素，直接跳转
-      window.location.href = url;
-      return;
-    }
-    
-    // 加载内容
-    loadContent(url, targetId, targetElement);
-  };
+(function() {
+  const navSection = document.querySelector('[data-ajax-nav="{{ section.id }}"]');
+  if (!navSection) return;
+
+  const buttons = navSection.querySelectorAll('.ajax-nav-button');
   
-  async function loadContent(url, sectionId, targetElement) {
+  // 标记当前活动按钮
+  const currentPath = window.location.pathname;
+  buttons.forEach(btn => {
+    const btnUrl = new URL(btn.dataset.url, window.location.origin);
+    if (btnUrl.pathname === currentPath) {
+      btn.classList.add('active');
+    }
+  });
+
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const url = this.dataset.url;
+      const selector = this.dataset.selector || '#MainContent';
+      
+      if (!url) return;
+      
+      // 更新按钮状态
+      buttons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+      
+      // 加载新页面内容
+      loadPageContent(url, selector);
+    });
+  });
+
+  async function loadPageContent(url, selector) {
     try {
       // 添加加载状态
-      targetElement.classList.add('content-loading');
+      document.body.classList.add('page-loading');
       
-      // 构建请求 URL
-      const separator = url.includes('?') ? '&' : '?';
-      const fetchUrl = `${url}${separator}section_id=${sectionId}`;
-      
-      console.log('Fetching:', fetchUrl); // 调试用
-      
-      // 获取新内容
-      const response = await fetch(fetchUrl);
+      // 获取新页面内容
+      const response = await fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -209,48 +261,60 @@
       
       const html = await response.text();
       
-      console.log('Content loaded'); // 调试用
+      // 解析 HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
       
-      // 创建临时容器来解析 HTML
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
+      // 获取新内容
+      const newContent = doc.querySelector(selector);
+      const currentContent = document.querySelector(selector);
       
-      // 查找新内容中的目标 section
-      const newContent = tempDiv.querySelector(`#${sectionId}`);
-      
-      if (newContent) {
+      if (newContent && currentContent) {
         // 替换内容
-        targetElement.innerHTML = newContent.innerHTML;
+        currentContent.innerHTML = newContent.innerHTML;
+        
+        // 更新页面标题
+        const newTitle = doc.querySelector('title');
+        if (newTitle) {
+          document.title = newTitle.textContent;
+        }
+        
+        // 更新 URL
+        history.pushState({ url }, '', url);
+        
+        // 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // 触发自定义事件
+        document.dispatchEvent(new CustomEvent('page:loaded', {
+          detail: { url }
+        }));
+        
+        // 重新初始化可能需要的脚本
+        if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
+          Shopify.PaymentButton.init();
+        }
+        
       } else {
-        // 如果没有找到特定 section，替换整个内容
-        targetElement.innerHTML = html;
+        console.error('Content selector not found:', selector);
+        window.location.href = url;
       }
-      
-      // 移除加载状态
-      targetElement.classList.remove('content-loading');
-      
-      // 更新 URL
-      history.pushState({ url, sectionId }, '', url);
-      
-      // 滚动到内容区域
-      targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       
     } catch (error) {
-      console.error('Error loading content:', error);
-      targetElement.classList.remove('content-loading');
-      
-      // 出错时直接跳转
+      console.error('Error loading page:', error);
       window.location.href = url;
+    } finally {
+      // 移除加载状态
+      document.body.classList.remove('page-loading');
     }
   }
-  
+
   // 处理浏览器前进/后退
   window.addEventListener('popstate', function(e) {
-    if (e.state && e.state.url && e.state.sectionId) {
-      const targetElement = document.getElementById(e.state.sectionId);
-      if (targetElement) {
-        loadContent(e.state.url, e.state.sectionId, targetElement);
-      }
+    if (e.state && e.state.url) {
+      const selector = navSection.querySelector('.ajax-nav-button').dataset.selector || '#MainContent';
+      loadPageContent(e.state.url, selector);
     }
   });
+})();
 </script>
