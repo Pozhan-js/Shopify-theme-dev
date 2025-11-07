@@ -140,45 +140,6 @@
     border-color: #555;
   }
 
-  /* 页面加载动画 */
-  .page-loading {
-    position: relative;
-  }
-
-  .page-loading::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .page-loading::after {
-    content: '';
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 50px;
-    height: 50px;
-    margin: -25px 0 0 -25px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #333;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    z-index: 10000;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
   @media (max-width: 768px) {
     .ajax-navigation {
       padding: 30px 15px;
@@ -225,29 +186,28 @@
     }
   });
 
-  buttons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      const url = this.dataset.url;
-      const selector = this.dataset.selector || '#MainContent';
-      
-      if (!url) return;
-      
-      // 更新按钮状态
-      buttons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      
-      // 加载新页面内容
-      loadPageContent(url, selector);
-    });
+  // 使用事件委托，避免按钮被替换后失效
+  navSection.addEventListener('click', function(e) {
+    const button = e.target.closest('.ajax-nav-button');
+    if (!button) return;
+    
+    e.preventDefault();
+    
+    const url = button.dataset.url;
+    const selector = button.dataset.selector || '#MainContent';
+    
+    if (!url) return;
+    
+    // 更新按钮状态
+    buttons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    // 加载新页面内容
+    loadPageContent(url, selector);
   });
 
   async function loadPageContent(url, selector) {
     try {
-      // 添加加载状态
-      document.body.classList.add('page-loading');
-      
       // 获取新页面内容
       const response = await fetch(url, {
         headers: {
@@ -285,14 +245,19 @@
         // 滚动到顶部
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // 触发自定义事件
+        // 触发自定义事件，让其他脚本知道内容已更新
         document.dispatchEvent(new CustomEvent('page:loaded', {
           detail: { url }
         }));
         
-        // 重新初始化可能需要的脚本
+        // 重新初始化 Shopify 相关功能
         if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
           Shopify.PaymentButton.init();
+        }
+        
+        // 重新初始化产品表单
+        if (typeof theme !== 'undefined' && theme.init) {
+          theme.init();
         }
         
       } else {
@@ -303,9 +268,6 @@
     } catch (error) {
       console.error('Error loading page:', error);
       window.location.href = url;
-    } finally {
-      // 移除加载状态
-      document.body.classList.remove('page-loading');
     }
   }
 
@@ -314,6 +276,16 @@
     if (e.state && e.state.url) {
       const selector = navSection.querySelector('.ajax-nav-button').dataset.selector || '#MainContent';
       loadPageContent(e.state.url, selector);
+      
+      // 更新按钮状态
+      buttons.forEach(btn => {
+        const btnUrl = new URL(btn.dataset.url, window.location.origin);
+        if (btnUrl.pathname === e.state.url || btnUrl.href === e.state.url) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
     }
   });
 })();
