@@ -14,15 +14,24 @@
         {% assign selected_blog = blogs[section.settings.blog_handle] %}
         {% if selected_blog and selected_blog.articles.size > 0 %}
           {% for article in selected_blog.articles %}
-            <div class="story-card" {% if article.image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ article.image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
+            <div
+              class="story-card"
+              {% if article.image %}
+                style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ article.image | img_url: '800x600' }}'); background-size: cover; background-position: center;"
+              {% endif %}
+            >
               <!-- 内容区域 -->
               <div class="story-content">
                 <h3 class="story-title">{{ article.title | truncate: 60 }}</h3>
-                
+
                 <!-- 箭头按钮 -->
                 <a href="{{ article.url }}" class="story-arrow-button">
                   {% if section.settings.arrow_icon != blank %}
-                    <img src="{{ section.settings.arrow_icon | img_url: '24x24' }}" alt="Arrow Icon" class="story-arrow-icon">
+                    <img
+                      src="{{ section.settings.arrow_icon | img_url: '24x24' }}"
+                      alt="Arrow Icon"
+                      class="story-arrow-icon"
+                    >
                   {% else %}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -47,15 +56,25 @@
       {% unless has_blog_articles %}
         {% for block in section.blocks %}
           {% if block.type == 'story_card' %}
-            <div class="story-card" {{ block.shopify_attributes }} {% if block.settings.card_background_image %}style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ block.settings.card_background_image | img_url: '800x600' }}'); background-size: cover; background-position: center;"{% endif %}>
+            <div
+              class="story-card"
+              {{ block.shopify_attributes }}
+              {% if block.settings.card_background_image %}
+                style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ block.settings.card_background_image | img_url: '800x600' }}'); background-size: cover; background-position: center;"
+              {% endif %}
+            >
               <!-- 内容区域 -->
               <div class="story-content">
                 <h3 class="story-title">{{ block.settings.story_title }}</h3>
-                
+
                 <!-- 箭头按钮 -->
                 <a href="{{ block.settings.story_url | default: '#' }}" class="story-arrow-button">
                   {% if section.settings.arrow_icon != blank %}
-                    <img src="{{ section.settings.arrow_icon | img_url: '24x24' }}" alt="Arrow Icon" class="story-arrow-icon">
+                    <img
+                      src="{{ section.settings.arrow_icon | img_url: '24x24' }}"
+                      alt="Arrow Icon"
+                      class="story-arrow-icon"
+                    >
                   {% else %}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -191,86 +210,90 @@
       max-width: 1654px;
       padding: 0;
     }
-    
+
     .blog-stories-header {
       margin-bottom: 80px;
     }
-    
+
     .blog-stories-title {
       font-size: 48px;
     }
-    
+
     .blog-stories-grid {
       grid-template-columns: repeat(3, 533px);
       gap: 80px;
     }
-    
+
     .story-card {
       width: 533px;
       height: 422px;
       padding: 0;
     }
-    
+
     .story-content {
       width: 533px;
       height: 128.53px;
       padding: 0 32px;
     }
-    
+
     .story-title {
       font-size: 16px;
       line-height: 24px;
     }
   }
 
-  /* 中等屏幕 (1024px - 1919px) - 84%比例缩放 */
+  /* 笔记本端优化 (1024px - 1919px) - 自适应布局 */
   @media (min-width: 1024px) and (max-width: 1919px) {
     .blog-stories-container {
-      max-width: calc(1654px * 0.84);
-      padding: 0 20px;
+      max-width: 100%;
+      padding: 0 40px;
     }
-    
+
     .blog-stories-header {
-      margin-bottom: calc(80px * 0.84);
+      margin-bottom: 60px;
     }
-    
+
     .blog-stories-title {
-      font-size: calc(48px * 0.84);
+      font-size: 36px;
     }
-    
+
     .blog-stories-grid {
-      grid-template-columns: repeat(3, calc(533px * 0.84));
-      gap: calc(80px * 0.84);
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
-    
+
     .story-card {
-      width: calc(533px * 0.84);
-      height: calc(422px * 0.84);
+      width: 100%;
+      max-width: 400px;
+      height: 320px;
       padding: 0;
+      margin: 0 auto;
     }
-    
+
     .story-content {
-      width: calc(533px * 0.84);
-      height: calc(128.53px * 0.84);
-      padding: 0 calc(32px * 0.84);
+      width: 100%;
+      height: 100px;
+      padding: 0 24px;
     }
-    
+
     .story-title {
-      font-size: calc(16px * 0.84);
-      line-height: calc(24px * 0.84);
-      width: calc(315px * 0.84);
+      font-size: 14px;
+      line-height: 20px;
+      width: 220px;
     }
-    
+
     .story-arrow-button {
-      width: calc(64.22px * 0.84);
-      height: calc(64.26px * 0.84);
-      border-radius: calc(32px * 0.84);
+      width: 50px;
+      height: 50px;
+      border-radius: 25px;
     }
-    
+
     .story-arrow-icon,
     .story-arrow-button svg {
-      width: calc(24px * 0.84);
-      height: calc(24px * 0.84);
+      width: 20px;
+      height: 20px;
     }
   }
 
@@ -280,44 +303,44 @@
       max-width: calc(1654px * 0.67);
       padding: 0 20px;
     }
-    
+
     .blog-stories-header {
       margin-bottom: calc(80px * 0.67);
     }
-    
+
     .blog-stories-title {
       font-size: calc(48px * 0.67);
     }
-    
+
     .blog-stories-grid {
       grid-template-columns: repeat(2, calc(533px * 0.67));
       gap: calc(80px * 0.67);
     }
-    
+
     .story-card {
       width: calc(533px * 0.67);
       height: calc(422px * 0.67);
       padding: 0;
     }
-    
+
     .story-content {
       width: calc(533px * 0.67);
       height: calc(128.53px * 0.67);
       padding: 0 calc(32px * 0.67);
     }
-    
+
     .story-title {
       font-size: calc(16px * 0.67);
       line-height: calc(24px * 0.67);
       width: calc(315px * 0.67);
     }
-    
+
     .story-arrow-button {
       width: calc(64.22px * 0.67);
       height: calc(64.26px * 0.67);
       border-radius: calc(32px * 0.67);
     }
-    
+
     .story-arrow-icon,
     .story-arrow-button svg {
       width: calc(24px * 0.67);
@@ -330,50 +353,50 @@
     .blog-stories-section {
       padding: calc({{ section.settings.section_padding_top }}px * 0.5) 0 calc({{ section.settings.section_padding_bottom }}px * 0.5) 0;
     }
-    
+
     .blog-stories-container {
       max-width: calc(1654px * 0.5);
       padding: 0 20px;
     }
-    
+
     .blog-stories-header {
       margin-bottom: calc(80px * 0.5);
     }
-    
+
     .blog-stories-title {
       font-size: calc(48px * 0.5);
     }
-    
+
     .blog-stories-grid {
       grid-template-columns: 1fr;
       gap: calc(80px * 0.5);
       justify-items: center;
     }
-    
+
     .story-card {
       width: calc(533px * 0.5);
       height: calc(422px * 0.5);
       padding: 0;
     }
-    
+
     .story-content {
       width: calc(533px * 0.5);
       height: calc(128.53px * 0.5);
       padding: 0 calc(32px * 0.5);
     }
-    
+
     .story-title {
       font-size: calc(16px * 0.5);
       line-height: calc(24px * 0.5);
       width: calc(315px * 0.5);
     }
-    
+
     .story-arrow-button {
       width: calc(64.22px * 0.5);
       height: calc(64.26px * 0.5);
       border-radius: calc(32px * 0.5);
     }
-    
+
     .story-arrow-icon,
     .story-arrow-button svg {
       width: calc(24px * 0.5);
@@ -386,29 +409,29 @@
     .blog-stories-section {
       padding: calc({{ section.settings.section_padding_top }}px * 0.33) 0 calc({{ section.settings.section_padding_bottom }}px * 0.33) 0;
     }
-    
+
     .blog-stories-container {
       max-width: calc(1654px * 0.33);
       padding: 0 15px;
     }
-    
+
     .blog-stories-header {
       margin-bottom: calc(80px * 0.33);
       min-margin-bottom: 30px;
     }
-    
+
     .blog-stories-title {
       font-size: calc(48px * 0.33);
       min-font-size: 20px;
     }
-    
+
     .blog-stories-grid {
       grid-template-columns: 1fr;
       gap: calc(80px * 0.33);
       min-gap: 20px;
       justify-items: center;
     }
-    
+
     .story-card {
       width: calc(533px * 0.33);
       height: calc(422px * 0.33);
@@ -416,7 +439,7 @@
       min-width: 280px;
       min-height: 200px;
     }
-    
+
     .story-content {
       width: calc(533px * 0.33);
       height: calc(128.53px * 0.33);
@@ -425,7 +448,7 @@
       min-height: 60px;
       min-padding: 0 20px;
     }
-    
+
     .story-title {
       font-size: calc(16px * 0.33);
       line-height: calc(24px * 0.33);
@@ -434,7 +457,7 @@
       width: calc(315px * 0.33);
       min-width: 200px;
     }
-    
+
     .story-arrow-button {
       width: calc(64.22px * 0.33);
       height: calc(64.26px * 0.33);
@@ -442,7 +465,7 @@
       min-width: 32px;
       min-height: 32px;
     }
-    
+
     .story-arrow-icon,
     .story-arrow-button svg {
       width: calc(24px * 0.33);
