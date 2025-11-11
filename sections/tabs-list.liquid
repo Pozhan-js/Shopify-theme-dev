@@ -1,8 +1,6 @@
 {% comment %}
-  Carousel de bijoux - Section Liquid (按钮自动隐藏版本)
-  ✅ 保留鼠标拖动功能
-  ✅ 添加左右切换按钮，整页切换卡片
-  ✅ 没有更多内容时按钮自动隐藏
+  Carousel de bijoux - Section Liquid (修复按钮切换逻辑)
+  ✅ 修复滑动后按钮切换的bug
 {% endcomment %}
 
 <div class="jewelry-carousel-section-{{ section.id }}" data-section-id="{{ section.id }}">
@@ -518,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const nextButton = section.querySelector('.nav-next-{{ section.id }}');
   
   let currentTabIndex = 0;
-  let currentPage = 0;
   let cardsPerPage = 5;
 
   // 初始化第一个标签页
@@ -540,31 +537,46 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // 更新导航按钮状态 - 隐藏而不是禁用
-  function updateNavigationButtons() {
-    const activeContent = carouselContents[currentTabIndex];
-    if (!activeContent) return;
+  // 获取当前滚动位置对应的页码
+  function getCurrentPage(track) {
+    if (!track) return 0;
     
-    const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
     const cards = track.querySelectorAll('.card-container-{{ section.id }}');
-    const totalPages = Math.ceil(cards.length / cardsPerPage);
+    if (cards.length === 0) return 0;
     
-    // 隐藏或显示按钮
-    if (currentPage === 0) {
-      prevButton.classList.add('hidden');
-    } else {
+    const cardWidth = cards[0].offsetWidth;
+    const gap = 16;
+    const pageWidth = (cardWidth + gap) * cardsPerPage;
+    
+    return Math.round(track.scrollLeft / pageWidth);
+  }
+
+  // 根据滚动位置更新按钮状态
+  function updateNavigationButtonsByScroll(track) {
+    if (!track) return;
+    
+    const scrollLeft = track.scrollLeft;
+    const scrollWidth = track.scrollWidth;
+    const clientWidth = track.clientWidth;
+    const maxScroll = scrollWidth - clientWidth;
+    
+    // 左侧按钮：如果滚动位置大于10px，显示
+    if (scrollLeft > 10) {
       prevButton.classList.remove('hidden');
+    } else {
+      prevButton.classList.add('hidden');
     }
     
-    if (currentPage >= totalPages - 1 || totalPages <= 1) {
-      nextButton.classList.add('hidden');
-    } else {
+    // 右侧按钮：如果还能继续滚动（距离右边界大于10px），显示
+    if (scrollLeft < maxScroll - 10) {
       nextButton.classList.remove('hidden');
+    } else {
+      nextButton.classList.add('hidden');
     }
   }
 
-  // 滚动到指定页面
-  function scrollToPage(page) {
+  // 滚动到指定位置（基于当前位置）
+  function scrollByPages(direction) {
     const activeContent = carouselContents[currentTabIndex];
     if (!activeContent) return;
     
@@ -575,15 +587,27 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const cardWidth = cards[0].offsetWidth;
     const gap = 16;
-    const scrollAmount = (cardWidth + gap) * cardsPerPage * page;
+    const pageWidth = (cardWidth + gap) * cardsPerPage;
     
+    // 获取当前页码
+    const currentPage = getCurrentPage(track);
+    
+    // 计算目标页码
+    let targetPage;
+    if (direction === 'prev') {
+      targetPage = Math.max(0, currentPage - 1);
+    } else {
+      const totalCards = cards.length;
+      const totalPages = Math.ceil(totalCards / cardsPerPage);
+      targetPage = Math.min(totalPages - 1, currentPage + 1);
+    }
+    
+    // 滚动到目标位置
+    const targetScroll = targetPage * pageWidth;
     track.scrollTo({
-      left: scrollAmount,
+      left: targetScroll,
       behavior: 'smooth'
     });
-    
-    currentPage = page;
-    updateNavigationButtons();
   }
 
   // 标签页切换
@@ -605,38 +629,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     currentTabIndex = index;
-    currentPage = 0;
     
     const activeContent = carouselContents[index];
     if (activeContent) {
       const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
       if (track) {
         track.scrollLeft = 0;
+        // 初始化按钮状态
+        setTimeout(() => {
+          updateNavigationButtonsByScroll(track);
+        }, 100);
       }
     }
-    
-    updateNavigationButtons();
   }
 
   // 上一页按钮
   prevButton.addEventListener('click', () => {
-    if (currentPage > 0) {
-      scrollToPage(currentPage - 1);
-    }
+    scrollByPages('prev');
   });
 
   // 下一页按钮
   nextButton.addEventListener('click', () => {
-    const activeContent = carouselContents[currentTabIndex];
-    if (!activeContent) return;
-    
-    const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
-    const cards = track.querySelectorAll('.card-container-{{ section.id }}');
-    const totalPages = Math.ceil(cards.length / cardsPerPage);
-    
-    if (currentPage < totalPages - 1) {
-      scrollToPage(currentPage + 1);
-    }
+    scrollByPages('next');
   });
 
   // 响应式更新
@@ -645,20 +659,33 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
       cardsPerPage = calculateCardsPerPage();
-      currentPage = 0;
-      scrollToPage(0);
+      const activeContent = carouselContents[currentTabIndex];
+      if (activeContent) {
+        const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
+        if (track) {
+          updateNavigationButtonsByScroll(track);
+        }
+      }
     }, 250);
   });
 
   // 初始化
   cardsPerPage = calculateCardsPerPage();
-  updateNavigationButtons();
 
-  // 为每个轮播轨道添加拖动支持
+  // 为每个轮播轨道添加拖动支持和滚动监听
   carouselContents.forEach(content => {
     const track = content.querySelector('.carousel-track-{{ section.id }}');
     if (track) {
       addDragSupport(track);
+      
+      // 添加滚动监听
+      let scrollTimer;
+      track.addEventListener('scroll', () => {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          updateNavigationButtonsByScroll(track);
+        }, 50);
+      });
     }
   });
 
