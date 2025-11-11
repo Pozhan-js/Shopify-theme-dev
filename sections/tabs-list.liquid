@@ -2,37 +2,36 @@
   Carousel de bijoux - Section Liquid (Fixed Image Loading)
   ✅ Fixed: Image loading with correct Liquid syntax
   ✅ Removed: Product title and price
-  ✅ Removed: Navigation buttons
-  ✅ Added: Smooth scroll functionality
-  ✅ Modified: Display 5 products per view
-  ✅ Modified: Full width with 50px padding on sides
+  ✅ Added: Unique class names with section prefix
+  ✅ Added: Pagination controls for page-based navigation
+  ✅ Modified: Display 5 products per view with page switching
 {% endcomment %}
 
-<div class="jewelry-carousel-section" data-section-id="{{ section.id }}">
-  <div class="container">
+<div class="jewelry-carousel-section-{{ section.id }}" data-section-id="{{ section.id }}">
+  <div class="container-{{ section.id }}">
     
     <!-- Section Title and Subtitle -->
     {% if section.settings.sectiontitle != blank  %}
-      <div class="section-header">
+      <div class="section-header-{{ section.id }}">
         {% if section.settings.sectiontitle != blank %}
           {% if section.settings.titlelink != blank %}
-            <a href="{{ section.settings.titlelink }}" class="section-title-link">
-              <h2 class="section-title1">{{ section.settings.sectiontitle }}</h2>
+            <a href="{{ section.settings.titlelink }}" class="section-title-link-{{ section.id }}">
+              <h2 class="section-title1-{{ section.id }}">{{ section.settings.sectiontitle }}</h2>
             </a>
           {% else %}
-            <h2 class="section-title1">{{ section.settings.sectiontitle }}</h2>
+            <h2 class="section-title1-{{ section.id }}">{{ section.settings.sectiontitle }}</h2>
           {% endif %}
         {% endif %}
       </div>
     {% endif %}
     
     <!-- Navigation par onglets -->
-    <div class="tab-navigation">
-      <div class="tab-container">
+    <div class="tab-navigation-{{ section.id }}">
+      <div class="tab-container-{{ section.id }}">
         {% for block in section.blocks %}
           {% if block.type == 'collectiontab' %}
             <button
-              class="tab-button"
+              class="tab-button-{{ section.id }}"
               data-tab="{{ block.id }}"
               data-collection="{{ block.settings.collection.handle }}"
             >
@@ -44,56 +43,85 @@
     </div>
 
     <!-- Conteneur du carousel -->
-    <div class="carousel-wrapper">
+    <div class="carousel-wrapper-{{ section.id }}">
       {% for block in section.blocks %}
         {% if block.type == 'collectiontab' %}
           <div 
-            class="carousel-content"
+            class="carousel-content-{{ section.id }}"
             data-content="{{ block.id }}"
           >
-            <div class="carousel-track">
+            <div class="carousel-container-{{ section.id }}">
               
               <!-- Cartes produits : chaque carte est un lien vers la page produit -->
               {% assign collection = collections[block.settings.collection.handle] %}
               {% if collection and collection.products.size > 0 %}
-                {% for product in collection.products limit: block.settings.productslimit %}
-                  <a href="{{ product.url }}" class="card-container card-link">
-                    <div class="card-inner">
-                      <!-- Image container -->
-                      <div class="image-container product-card">
-                        {% if product.featured_image %}
-                          <img
-                            src="{{ product.featured_image | image_url: width: 400, height: 500 }}"
-                            alt="{{ product.title | escape }}"
-                            class="card-image main-image"
-                            loading="lazy"
-                          >
-                          {% if product.images[1] %}
+                <div class="carousel-track-{{ section.id }}" data-page="0">
+                  {% assign total_products = collection.products | size %}
+                  {% assign max_page = total_products | divided_by: 5 | ceil %}
+                  
+                  {% for product in collection.products limit: block.settings.productslimit %}
+                    <a href="{{ product.url }}" class="card-container-{{ section.id }} card-link-{{ section.id }}" 
+                       data-product-index="{{ forloop.index0 }}">
+                      <div class="card-inner-{{ section.id }}">
+                        <!-- Image container -->
+                        <div class="image-container-{{ section.id }} product-card-{{ section.id }}">
+                          {% if product.featured_image %}
                             <img
-                              src="{{ product.images[1] | image_url: width: 400, height: 500 }}"
+                              src="{{ product.featured_image | image_url: width: 400, height: 500 }}"
                               alt="{{ product.title | escape }}"
-                              class="card-image hover-image"
+                              class="card-image-{{ section.id }} main-image-{{ section.id }}"
                               loading="lazy"
                             >
+                            {% if product.images[1] %}
+                              <img
+                                src="{{ product.images[1] | image_url: width: 400, height: 500 }}"
+                                alt="{{ product.title | escape }}"
+                                class="card-image-{{ section.id }} hover-image-{{ section.id }}"
+                                loading="lazy"
+                              >
+                            {% endif %}
+                          {% else %}
+                            <div class="placeholder-image-{{ section.id }}">
+                              <span>{{ product.title }}</span>
+                            </div>
                           {% endif %}
-                        {% else %}
-                          <div class="placeholder-image">
-                            <span>{{ product.title }}</span>
-                          </div>
-                        {% endif %}
-                        
-                        <!-- Badge Best Seller conditionnel -->
-                        {% if product.tags contains 'bestseller' %}
-                          <div class="bestseller-badge"> 
-                            BEST SELLER
-                          </div>
-                        {% endif %}
+                          
+                          <!-- Badge Best Seller conditionnel -->
+                          {% if product.tags contains 'bestseller' %}
+                            <div class="bestseller-badge-{{ section.id }}"> 
+                              BEST SELLER
+                            </div>
+                          {% endif %}
+                        </div>
                       </div>
+                    </a>
+                  {% endfor %}
+                </div>
+                
+                <!-- Pagination Controls -->
+                {% if total_products > 5 %}
+                  <div class="pagination-controls-{{ section.id }}">
+                    <button class="prev-btn-{{ section.id }}" data-action="prev" disabled>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    
+                    <div class="page-indicator-{{ section.id }}">
+                      <span class="current-page-{{ section.id }}">1</span>
+                      <span class="separator-{{ section.id }}">/</span>
+                      <span class="total-pages-{{ section.id }}">{{ max_page }}</span>
                     </div>
-                  </a>
-                {% endfor %}
+                    
+                    <button class="next-btn-{{ section.id }}" data-action="next">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                {% endif %}
               {% else %}
-                <div class="no-products-message">
+                <div class="no-products-message-{{ section.id }}">
                   <p>Aucun produit trouvé dans cette collection.</p>
                 </div>
               {% endif %}
@@ -126,7 +154,7 @@
 }
 
 /* Section principale */
-.jewelry-carousel-section {
+.jewelry-carousel-section-{{ section.id }} {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
   min-height: 50vh;
@@ -134,36 +162,36 @@
 }
 
 /* Container principal - 全宽设计 */
-.container {
+.container-{{ section.id }} {
   width: 100%;
   margin: 0 auto;
   padding: 0 50px; /* 左右各留50px内边距 */
 }
 
 /* Section Header */
-.section-header {
+.section-header-{{ section.id }} {
   text-align: center;
   margin-bottom: 2rem;
 }
 
 /* 标题链接样式 */
-.section-title-link {
+.section-title-link-{{ section.id }} {
   text-decoration: none;
   color: inherit;
   display: inline-block;
   transition: all 0.3s ease;
 }
 
-.section-title-link:hover {
+.section-title-link-{{ section.id }}:hover {
   transform: translateY(-2px);
   opacity: 0.8;
 }
 
-.section-title-link:hover .section-title1 {
+.section-title-link-{{ section.id }}:hover .section-title1-{{ section.id }} {
   color: var(--soft-brown);
 }
 
-.section-title1 {
+.section-title1-{{ section.id }} {
   font-size: 2.5rem;
   font-family: Georgia, serif;
   font-weight: normal;
@@ -174,16 +202,16 @@
 }
 
 /* 当标题是链接时，添加光标指针 */
-.section-title-link .section-title1 {
+.section-title-link-{{ section.id }} .section-title1-{{ section.id }} {
   cursor: pointer;
 }
 
 /* Navigation des onglets */
-.tab-navigation {
+.tab-navigation-{{ section.id }} {
   margin-bottom: 2rem;
 }
 
-.tab-container {
+.tab-container-{{ section.id }} {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -191,7 +219,7 @@
   flex-wrap: wrap;
 }
 
-.tab-button {
+.tab-button-{{ section.id }} {
   padding: 0.5rem 0;
   font-size: 0.875rem;
   font-weight: 500;
@@ -203,68 +231,65 @@
   transition: color 0.3s ease;
 }
 
-.tab-button:hover,
-.tab-button.active {
+.tab-button-{{ section.id }}:hover,
+.tab-button-{{ section.id }}.active {
   color: var(--gray-900);
 }
 
-.tab-button.active {
+.tab-button-{{ section.id }}.active {
   font-weight: 600;
 }
 
 /* Carousel wrapper */
-.carousel-wrapper {
+.carousel-wrapper-{{ section.id }} {
   position: relative;
   overflow: hidden;
 }
 
-.carousel-content {
+.carousel-content-{{ section.id }} {
   display: none;
 }
 
-.carousel-content.active {
+.carousel-content-{{ section.id }}.active {
   display: block;
 }
 
-.carousel-track {
-  display: flex;
-  gap: 1rem;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-  padding-bottom: 1rem;
-  padding-right: 1rem;
+.carousel-container-{{ section.id }} {
+  position: relative;
+  max-width: 100%;
 }
 
-.carousel-track::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+.carousel-track-{{ section.id }} {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  transition: transform 0.3s ease;
 }
 
 /* Cards containers - 调整为显示5个产品，基于全宽容器 */
-.card-container {
+.card-container-{{ section.id }} {
   flex-shrink: 0;
   width: calc((100% - 4rem) / 5); /* 5个产品，4个间隙 */
   min-width: 200px; /* 最小宽度保证在小屏幕上的显示 */
 }
 
-.card-link {
+.card-link-{{ section.id }} {
   text-decoration: none;
   color: inherit;
   display: block;
   transition: all 0.3s ease;
 }
 
-.card-link:hover {
+.card-link-{{ section.id }}:hover {
   transform: translateY(-6px);
 }
 
-.card-link .card-inner {
+.card-link-{{ section.id }} .card-inner-{{ section.id }} {
   height: 100%;
 }
 
 /* Image containers */
-.image-container {
+.image-container-{{ section.id }} {
   position: relative;
   background-color: var(--white);
   overflow: hidden;
@@ -273,11 +298,11 @@
   height: 20rem; /* 固定高度 */
 }
 
-.image-container:hover {
+.image-container-{{ section.id }}:hover {
   transform: scale(1.02);
 }
 
-.card-image {
+.card-image-{{ section.id }} {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -285,18 +310,18 @@
   display: block;
 }
 
-.hover-image {
+.hover-image-{{ section.id }} {
   position: absolute;
   top: 0;
   left: 0;
   opacity: 0;
 }
 
-.product-card:hover .hover-image {
+.product-card-{{ section.id }}:hover .hover-image-{{ section.id }} {
   opacity: 1;
 }
 
-.placeholder-image {
+.placeholder-image-{{ section.id }} {
   width: 100%;
   height: 100%;
   background-color: var(--gray-200);
@@ -310,7 +335,7 @@
 }
 
 /* Badges */
-.bestseller-badge {
+.bestseller-badge-{{ section.id }} {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
@@ -324,8 +349,74 @@
   z-index: 2;
 }
 
+/* Pagination Controls */
+.pagination-controls-{{ section.id }} {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.prev-btn-{{ section.id }},
+.next-btn-{{ section.id }} {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--gray-600);
+}
+
+.prev-btn-{{ section.id }}:hover:not(:disabled),
+.next-btn-{{ section.id }}:hover:not(:disabled) {
+  background: var(--soft-brown);
+  border-color: var(--soft-brown);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.prev-btn-{{ section.id }}:disabled,
+.next-btn-{{ section.id }}:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--gray-100);
+}
+
+.prev-btn-{{ section.id }}:disabled:hover,
+.next-btn-{{ section.id }}:disabled:hover {
+  background: var(--gray-100);
+  border-color: var(--gray-200);
+  color: var(--gray-600);
+  transform: none;
+}
+
+.page-indicator-{{ section.id }} {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.current-page-{{ section.id }},
+.total-pages-{{ section.id }} {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.separator-{{ section.id }} {
+  color: var(--gray-400);
+}
+
 /* No products message */
-.no-products-message {
+.no-products-message-{{ section.id }} {
   text-align: center;
   padding: 2rem;
   color: var(--gray-500);
@@ -334,108 +425,128 @@
 
 /* Responsive - 调整响应式设计以保持5个产品显示 */
 @media (max-width: 1400px) {
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 180px;
   }
 }
 
 @media (max-width: 1200px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 40px; /* 稍微减少内边距 */
   }
   
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 160px;
   }
 }
 
 @media (max-width: 992px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 30px; /* 进一步减少内边距 */
   }
   
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 150px;
   }
 }
 
 @media (max-width: 768px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 20px; /* 移动端减少内边距 */
   }
   
-  .section-title1 {
+  .section-title1-{{ section.id }} {
     font-size: 2rem;
   }
   
-  .tab-container {
+  .tab-container-{{ section.id }} {
     gap: 0.75rem;
   }
   
-  .carousel-track {
+  .carousel-track-{{ section.id }} {
     gap: 0.75rem;
   }
   
   /* 在中等屏幕上仍显示5个产品但缩小尺寸 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 4rem) / 5);
     min-width: 120px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 16rem;
   }
 
-  .card-link:hover {
+  .card-link-{{ section.id }}:hover {
     transform: translateY(-4px);
   }
 
-  .section-title-link:hover {
+  .section-title-link-{{ section.id }}:hover {
     transform: translateY(-1px);
+  }
+  
+  .prev-btn-{{ section.id }},
+  .next-btn-{{ section.id }} {
+    width: 40px;
+    height: 40px;
   }
 }
 
 @media (max-width: 576px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 15px; /* 小屏幕进一步减少内边距 */
   }
   
-  .section-header {
+  .section-header-{{ section.id }} {
     margin-bottom: 2rem;
   }
   
-  .section-title1 {
+  .section-title1-{{ section.id }} {
     font-size: 1.75rem;
   }
   
   /* 在小屏幕上调整为显示3个产品 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 2rem) / 3);
     min-width: 100px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 12rem;
   }
   
-  .carousel-track {
+  .carousel-track-{{ section.id }} {
     gap: 0.5rem;
+  }
+  
+  .pagination-controls-{{ section.id }} {
+    gap: 1rem;
+  }
+  
+  .prev-btn-{{ section.id }},
+  .next-btn-{{ section.id }} {
+    width: 36px;
+    height: 36px;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 10px; /* 最小屏幕内边距 */
   }
   
   /* 在超小屏幕上显示2个产品 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 0.5rem) / 2);
     min-width: 90px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 10rem;
+  }
+  
+  .page-indicator-{{ section.id }} {
+    font-size: 0.875rem;
   }
 }
 </style>
@@ -447,10 +558,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (!section) return;
   
-  const tabButtons = section.querySelectorAll('.tab-button');
-  const carouselContents = section.querySelectorAll('.carousel-content');
+  const tabButtons = section.querySelectorAll('.tab-button-{{ section.id }}');
+  const carouselContents = section.querySelectorAll('.carousel-content-{{ section.id }}');
   
   let currentTabIndex = 0;
+  let currentPage = 0;
+  let totalPages = 0;
+  let productsPerPage = 5;
 
   // 初始化第一个标签页
   if (tabButtons.length > 0) {
@@ -478,93 +592,112 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     currentTabIndex = index;
+    currentPage = 0; // 重置到第一页
     
-    // 重置滚动位置
-    const activeContent = carouselContents[index];
-    if (activeContent) {
-      const track = activeContent.querySelector('.carousel-track');
-      if (track) {
-        track.scrollLeft = 0;
-      }
+    // 重新初始化当前标签页的分页控制
+    initializePagination();
+  }
+
+  function initializePagination() {
+    const activeContent = carouselContents[currentTabIndex];
+    if (!activeContent) return;
+    
+    const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
+    const prevBtn = activeContent.querySelector('.prev-btn-{{ section.id }}');
+    const nextBtn = activeContent.querySelector('.next-btn-{{ section.id }}');
+    const currentPageSpan = activeContent.querySelector('.current-page-{{ section.id }}');
+    const totalPagesSpan = activeContent.querySelector('.total-pages-{{ section.id }}');
+    
+    if (!track || !prevBtn || !nextBtn || !currentPageSpan || !totalPagesSpan) return;
+    
+    // 计算总页数
+    const totalProducts = track.querySelectorAll('.card-container-{{ section.id }}').length;
+    totalPages = Math.ceil(totalProducts / productsPerPage);
+    currentPage = 0;
+    
+    // 更新分页显示
+    totalPagesSpan.textContent = totalPages;
+    updatePageDisplay();
+    
+    // 绑定按钮事件
+    prevBtn.onclick = () => goToPrevPage();
+    nextBtn.onclick = () => goToNextPage();
+  }
+
+  function updatePageDisplay() {
+    const activeContent = carouselContents[currentTabIndex];
+    if (!activeContent) return;
+    
+    const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
+    const prevBtn = activeContent.querySelector('.prev-btn-{{ section.id }}');
+    const nextBtn = activeContent.querySelector('.next-btn-{{ section.id }}');
+    const currentPageSpan = activeContent.querySelector('.current-page-{{ section.id }}');
+    
+    if (!track || !prevBtn || !nextBtn || !currentPageSpan) return;
+    
+    // 更新当前页显示
+    currentPageSpan.textContent = currentPage + 1;
+    
+    // 更新按钮状态
+    prevBtn.disabled = currentPage === 0;
+    nextBtn.disabled = currentPage === totalPages - 1;
+    
+    // 平滑移动到对应页面
+    const translateX = -(currentPage * 100);
+    track.style.transform = `translateX(${translateX}%)`;
+  }
+
+  function goToPrevPage() {
+    if (currentPage > 0) {
+      currentPage--;
+      updatePageDisplay();
     }
   }
 
-  // 为每个轮播轨道添加触摸滑动支持
-  carouselContents.forEach(content => {
-    const track = content.querySelector('.carousel-track');
-    if (track) {
-      addTouchSupport(track);
+  function goToNextPage() {
+    if (currentPage < totalPages - 1) {
+      currentPage++;
+      updatePageDisplay();
+    }
+  }
+
+  // 键盘导航支持
+  document.addEventListener('keydown', function(e) {
+    const activeContent = carouselContents[currentTabIndex];
+    if (!activeContent || !activeContent.classList.contains('active')) return;
+    
+    if (e.key === 'ArrowLeft') {
+      goToPrevPage();
+    } else if (e.key === 'ArrowRight') {
+      goToNextPage();
     }
   });
-
-  // 触摸滑动支持
-  function addTouchSupport(trackEl) {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-
-    // 鼠标事件
-    trackEl.addEventListener('mousedown', (e) => {
-      isDown = true;
-      trackEl.style.cursor = 'grabbing';
-      startX = e.pageX - trackEl.offsetLeft;
-      scrollLeft = trackEl.scrollLeft;
-      e.preventDefault();
-    });
-
-    trackEl.addEventListener('mouseleave', () => {
-      isDown = false;
-      trackEl.style.cursor = 'grab';
-    });
-
-    trackEl.addEventListener('mouseup', () => {
-      isDown = false;
-      trackEl.style.cursor = 'grab';
-    });
-
-    trackEl.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - trackEl.offsetLeft;
-      const walk = (x - startX) * 2;
-      trackEl.scrollLeft = scrollLeft - walk;
-    });
-
-    // 触摸事件
-    trackEl.addEventListener('touchstart', (e) => {
-      isDown = true;
-      startX = e.touches[0].pageX - trackEl.offsetLeft;
-      scrollLeft = trackEl.scrollLeft;
-    }, { passive: true });
-
-    trackEl.addEventListener('touchmove', (e) => {
-      if (!isDown) return;
-      const x = e.touches[0].pageX - trackEl.offsetLeft;
-      const walk = (x - startX) * 2;
-      trackEl.scrollLeft = scrollLeft - walk;
-    }, { passive: true });
-
-    trackEl.addEventListener('touchend', () => {
-      isDown = false;
-    });
-
-    // 设置初始光标样式
-    trackEl.style.cursor = 'grab';
-  }
 
   // 图片加载错误处理
   section.addEventListener('error', function(e) {
     if (e.target.tagName === 'IMG') {
-      const placeholder = e.target.closest('.image-container').querySelector('.placeholder-image');
+      const placeholder = e.target.closest('.image-container-{{ section.id }}').querySelector('.placeholder-image-{{ section.id }}');
       if (!placeholder) {
         const newPlaceholder = document.createElement('div');
-        newPlaceholder.className = 'placeholder-image';
+        newPlaceholder.className = 'placeholder-image-{{ section.id }}';
         newPlaceholder.innerHTML = '<span>Image non disponible</span>';
         e.target.parentNode.appendChild(newPlaceholder);
       }
       e.target.style.display = 'none';
     }
   }, true);
+
+  // 初始化所有分页控制
+  carouselContents.forEach(content => {
+    const track = content.querySelector('.carousel-track-{{ section.id }}');
+    if (track && track.querySelectorAll('.card-container-{{ section.id }}').length > 5) {
+      // 只在有足够产品的情况下显示分页控制
+      const controls = content.querySelector('.pagination-controls-{{ section.id }}');
+      if (controls) {
+        controls.style.display = 'flex';
+      }
+    }
+  });
 });
 </script>
 
