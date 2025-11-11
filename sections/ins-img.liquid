@@ -537,7 +537,7 @@
   }
 </style>
 
-<!-- Instagram帖子弹窗 -->
+<!-- Instagram帖子弹窗 - 自定义布局 -->
 <div class="instagram-modal" id="instagramModal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
@@ -546,7 +546,21 @@
         <path d="M6 18L18 6M6 6l12 12"/>
       </svg>
     </button>
-    <div class="instagram-embed-container" id="instagramEmbed"></div>
+    <div class="instagram-post-container">
+      <div class="post-content-container" style="width: 100%">
+        <div class="post-header">
+          <div class="post-author">
+            <img id="authorAvatar" src="" alt="Author avatar" loading="lazy" width="40" height="40">
+            <span id="authorName"></span>
+          </div>
+        </div>
+        <div class="post-text" id="postText"></div>
+        <div class="post-meta">
+          <span id="postLikes"></span>
+          <span id="postDate"></span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -556,16 +570,26 @@
     const postUrl = element.dataset.instagramUrl;
     if (!postUrl) return;
 
-    // 创建嵌入iframe
-    const embedContainer = document.getElementById('instagramEmbed');
-    embedContainer.innerHTML = `
-    <iframe 
-      src="https://www.instagram.com/p/${extractPostId(postUrl)}/embed" 
-      frameborder="0" 
-      scrolling="no"
-      allowtransparency="true"
-    ></iframe>
-  `;
+    // 获取帖子ID
+    const postId = extractPostId(postUrl);
+
+    // 这里应该调用Instagram API获取帖子数据
+    // 由于需要API密钥，这里使用模拟数据演示布局
+    const mockData = {
+      image: element.src,
+      authorAvatar: 'https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png',
+      authorName: 'instagram_user',
+      text: '这是模拟的Instagram帖子内容。实际实现中需要通过Instagram API获取真实数据。',
+      likes: '1,234 次赞',
+      date: '2023年11月11日',
+    };
+
+    // 填充数据
+    document.getElementById('authorAvatar').src = mockData.authorAvatar;
+    document.getElementById('authorName').textContent = mockData.authorName;
+    document.getElementById('postText').textContent = mockData.text;
+    document.getElementById('postLikes').textContent = mockData.likes;
+    document.getElementById('postDate').textContent = mockData.date;
 
     // 显示弹窗
     document.getElementById('instagramModal').classList.add('active');
@@ -625,7 +649,7 @@
 </script>
 
 <style>
-  /* Instagram弹窗样式 */
+  /* Instagram弹窗样式 - 自定义布局 */
   .instagram-modal {
     position: fixed;
     top: 0;
@@ -654,12 +678,60 @@
   .modal-content {
     position: relative;
     width: 90%;
-    max-width: 600px;
-    max-height: 90vh;
+    max-width: 800px;
+    height: 80vh;
     background: white;
-    border-radius: 12px;
+    border-radius: 0;
     overflow: hidden;
     z-index: 1;
+    padding: 0;
+    margin: 0;
+  }
+
+  .instagram-post-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+
+  .post-content-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #efefef;
+  }
+
+  .post-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .post-author img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .post-text {
+    padding: 20px 0;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+
+  .post-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #8e8e8e;
+    font-size: 14px;
   }
 
   .modal-close {
@@ -684,43 +756,10 @@
     height: 20px;
   }
 
-  .instagram-embed-container {
-    width: 100%;
-    height: 100%;
-    min-height: 500px;
-    overflow: auto;
-  }
-
-  .instagram-embed-container iframe {
-    width: 100%;
-    height: 100%;
-    min-height: 500px;
-  }
-
   /* 响应式调整 */
   @media (max-width: 768px) {
-    .modal-content {
-      width: 95%;
-      max-height: 80vh;
-    }
-
-    .instagram-embed-container,
-    .instagram-embed-container iframe {
-      min-height: 400px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .modal-content {
-      width: 100%;
-      height: 100%;
-      max-height: none;
-      border-radius: 0;
-    }
-
-    .instagram-embed-container,
-    .instagram-embed-container iframe {
-      min-height: 300px;
+    .post-content-container {
+      height: 80vh;
     }
   }
 </style>
