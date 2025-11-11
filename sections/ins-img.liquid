@@ -242,6 +242,105 @@
   </div>
 </div>
 
+<!-- Instagram弹框 -->
+<div class="instagram-modal" id="instagramModal">
+  <div class="modal-overlay"></div>
+  <div class="modal-container">
+    <button class="modal-close" aria-label="关闭弹框">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="modal-content">
+      <iframe id="instagramEmbed" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Instagram弹框样式 */
+  .instagram-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal-container {
+    position: relative;
+    width: 95%;
+    max-width: 500px;
+    height: 90vh;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 1;
+    animation: modalFadeIn 0.3s ease-out;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: white;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-close svg {
+    width: 24px;
+    height: 24px;
+    stroke: var(--gray-800);
+  }
+
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-content iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    border: none;
+    display: block;
+    flex-grow: 1;
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   /* Variables CSS */
   :root {
@@ -596,18 +695,51 @@
       });
     }
 
-    // 使用Instagram Feed应用的弹窗功能
+    // Instagram弹框功能
+    const modal = document.getElementById('instagramModal');
+    const modalClose = modal?.querySelector('.modal-close');
+    const instagramEmbed = document.getElementById('instagramEmbed');
     const gridImages = document.querySelectorAll('.grid-image[data-ins-link]');
-    gridImages.forEach((img) => {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', function() {
-        const postUrl = this.dataset.insLink;
-        if (postUrl && window.instafeed) {
-          // 调用Instagram Feed应用的弹窗方法
-          window.instafeed.openLightbox(postUrl);
+
+    if (modal && modalClose && instagramEmbed && gridImages.length) {
+      // 点击图片打开弹框
+      gridImages.forEach((img) => {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function () {
+          const postUrl = this.dataset.insLink;
+          if (postUrl) {
+            // 转换Instagram链接为嵌入格式
+            let embedUrl = postUrl;
+            if (!postUrl.includes('/embed')) {
+              embedUrl = postUrl.endsWith('/') ? postUrl + 'embed' : postUrl + '/embed';
+            }
+
+            instagramEmbed.src = embedUrl;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+          }
+        });
+      });
+
+      // 关闭弹框
+      modalClose.addEventListener('click', function () {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        instagramEmbed.src = '';
+      });
+
+      // 点击遮罩层关闭弹框
+      modal.querySelector('.modal-overlay').addEventListener('click', function () {
+        modalClose.click();
+      });
+
+      // ESC键关闭弹框
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+          modalClose.click();
         }
       });
-    });
+    }
   });
 </script>
 
