@@ -3,7 +3,7 @@
   ✅ Fixed: Image loading with correct Liquid syntax
   ✅ Removed: Product title and price
   ✅ Added: Unique class names
-  ✅ Added: Left/right pagination buttons
+  ✅ Added: Left/right pagination buttons with beautiful icons
   ✅ Added: Pagination functionality (1-5 to 6-10, etc.)
   ✅ Modified: Display 5 products per view
   ✅ Modified: Full width with 50px padding on sides
@@ -52,17 +52,21 @@
             class="carousel-content-{{ section.id }}"
             data-content="{{ block.id }}"
           >
-            <!-- Boutons de pagination -->
+            <!-- Boutons de pagination avec nouveaux icônes -->
             <div class="pagination-buttons-{{ section.id }}">
               <button class="pagination-btn prev-btn-{{ section.id }}" data-direction="prev" data-collection="{{ block.settings.collection.handle }}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="btn-icon-wrapper-{{ section.id }}">
+                  <svg class="btn-icon-{{ section.id }}" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
               </button>
               <button class="pagination-btn next-btn-{{ section.id }}" data-direction="next" data-collection="{{ block.settings.collection.handle }}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="btn-icon-wrapper-{{ section.id }}">
+                  <svg class="btn-icon-{{ section.id }}" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
               </button>
             </div>
 
@@ -256,7 +260,7 @@
   display: none; /* Chrome, Safari and Opera */
 }
 
-/* Pagination Buttons */
+/* Pagination Buttons - Nouveau design */
 .pagination-buttons-{{ section.id }} {
   position: absolute;
   top: 50%;
@@ -271,52 +275,89 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, var(--white-{{ section.id }}) 0%, var(--pearl-white-{{ section.id }}) 100%);
   border: 1px solid var(--gray-200-{{ section.id }});
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: all;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-btn-{{ section.id }}:hover {
-  background: var(--white-{{ section.id }});
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-50%) scale(1.1);
+  background: linear-gradient(135deg, var(--white-{{ section.id }}) 0%, var(--gray-50-{{ section.id }}) 100%);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.15),
+    0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) translateZ(0) scale(1.05);
+  border-color: var(--gray-300-{{ section.id }});
+}
+
+.pagination-btn-{{ section.id }}:active {
+  transform: translateY(-50%) translateZ(0) scale(0.95);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .pagination-btn-{{ section.id }}:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.9);
+  background: var(--gray-100-{{ section.id }});
 }
 
 .pagination-btn-{{ section.id }}:disabled:hover {
-  transform: translateY(-50%) scale(0.95);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-50%) scale(0.9);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .prev-btn-{{ section.id }} {
-  left: -20px;
+  left: -24px;
 }
 
 .next-btn-{{ section.id }} {
-  right: -20px;
+  right: -24px;
 }
 
-.pagination-btn-{{ section.id }} svg {
-  color: var(--gray-700-{{ section.id }});
-  transition: color 0.3s ease;
+/* Nouveaux icônes avec wrapper */
+.btn-icon-wrapper-{{ section.id }} {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.pagination-btn-{{ section.id }}:hover svg {
+.btn-icon-{{ section.id }} {
+  color: var(--gray-600-{{ section.id }});
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.pagination-btn-{{ section.id }}:hover .btn-icon-{{ section.id }} {
   color: var(--soft-brown-{{ section.id }});
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.pagination-btn-{{ section.id }}:active .btn-icon-{{ section.id }} {
+  transform: scale(0.95);
+}
+
+.pagination-btn-{{ section.id }}:disabled .btn-icon-{{ section.id }} {
+  color: var(--gray-400-{{ section.id }});
+  filter: none;
 }
 
 /* Cards containers - 调整为显示5个产品，基于全宽容器 */
@@ -455,16 +496,16 @@
   }
 
   .pagination-btn-{{ section.id }} {
-    width: 35px;
-    height: 35px;
+    width: 42px;
+    height: 42px;
   }
 
   .prev-btn-{{ section.id }} {
-    left: -17px;
+    left: -21px;
   }
 
   .next-btn-{{ section.id }} {
-    right: -17px;
+    right: -21px;
   }
   
   /* 在中等屏幕上仍显示5个产品但缩小尺寸 */
@@ -500,16 +541,16 @@
   }
 
   .pagination-btn-{{ section.id }} {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
   }
 
   .prev-btn-{{ section.id }} {
-    left: -15px;
+    left: -18px;
   }
 
   .next-btn-{{ section.id }} {
-    right: -15px;
+    right: -18px;
   }
   
   /* 在小屏幕上调整为显示3个产品 */
@@ -533,16 +574,16 @@
   }
   
   .pagination-btn-{{ section.id }} {
-    width: 25px;
-    height: 25px;
+    width: 32px;
+    height: 32px;
   }
 
   .prev-btn-{{ section.id }} {
-    left: -12px;
+    left: -16px;
   }
 
   .next-btn-{{ section.id }} {
-    right: -12px;
+    right: -16px;
   }
   
   /* 在超小屏幕上显示2个产品 */
@@ -841,7 +882,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ],
   "presets": [
     {
-      "name": "Carousel de bijoux avec pagination",
+      "name": "Carousel de bijoux",
       "settings": {
         "sectiontitle": "Nos Collections"
       },
