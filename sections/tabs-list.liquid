@@ -1,8 +1,6 @@
 {% comment %}
-  Carousel de bijoux - Section Liquid (Optimized)
-  ✅ Fixed: Pagination buttons always visible on left/right sides
-  ✅ Improved: Better icons for navigation
-  ✅ Fixed: Mobile card size - shows 1.5 cards
+  Carousel de bijoux - Section Liquid (Fixed 5 cards display)
+  ✅ Fixed: PC端正确显示5张卡片
 {% endcomment %}
 
 <div class="jewelry-carousel-section-{{ section.id }}" data-section-id="{{ section.id }}">
@@ -40,7 +38,7 @@
       </div>
     </div>
 
-    <!-- Conteneur du carousel avec pagination -->
+    <!-- Conteneur du carousel -->
     <div class="carousel-wrapper-{{ section.id }}">
       {% for block in section.blocks %}
         {% if block.type == 'collectiontab' %}
@@ -48,19 +46,6 @@
             class="carousel-content-{{ section.id }}"
             data-content="{{ block.id }}"
           >
-            <!-- Boutons de pagination - 固定在左右两侧 -->
-            <button class="pagination-btn-{{ section.id }} prev-btn-{{ section.id }}" data-direction="prev" data-collection="{{ block.settings.collection.handle }}">
-              <svg class="btn-icon-{{ section.id }}" viewBox="0 0 24 24" fill="none">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            
-            <button class="pagination-btn-{{ section.id }} next-btn-{{ section.id }}" data-direction="next" data-collection="{{ block.settings.collection.handle }}">
-              <svg class="btn-icon-{{ section.id }}" viewBox="0 0 24 24" fill="none">
-                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-
             <div class="carousel-track-{{ section.id }}">
               
               <!-- Cartes produits -->
@@ -146,6 +131,7 @@
 /* Container principal */
 .container-{{ section.id }} {
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 50px;
 }
@@ -239,79 +225,29 @@
   display: flex;
   gap: 1rem;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
   padding-bottom: 1rem;
-  padding: 0 60px; /* 为左右按钮留出空间 */
+  cursor: grab;
+  user-select: none;
 }
 
 .carousel-track-{{ section.id }}::-webkit-scrollbar {
   display: none;
 }
 
-/* Pagination Buttons - 优化设计，固定在左右两侧 */
-.pagination-btn-{{ section.id }} {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+.carousel-track-{{ section.id }}:active {
+  cursor: grabbing;
 }
 
-.pagination-btn-{{ section.id }}:hover {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-50%) scale(1.05);
-}
-
-.pagination-btn-{{ section.id }}:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.pagination-btn-{{ section.id }}:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.prev-btn-{{ section.id }} {
-  left: 10px;
-}
-
-.next-btn-{{ section.id }} {
-  right: 10px;
-}
-
-/* 优化的图标样式 */
-.btn-icon-{{ section.id }} {
-  width: 20px;
-  height: 20px;
-  color: var(--gray-700-{{ section.id }});
-  transition: all 0.3s ease;
-}
-
-.pagination-btn-{{ section.id }}:hover .btn-icon-{{ section.id }} {
-  color: var(--soft-brown-{{ section.id }});
-  transform: scale(1.1);
-}
-
-/* Cards containers */
+/* Cards containers - PC端固定显示5张 */
 .card-container-{{ section.id }} {
-  flex-shrink: 0;
-  width: calc((100% - 4rem - 120px) / 5); /* 减去左右按钮空间 */
-  min-width: 200px;
+  flex: 0 0 auto;
+  width: calc((100% - 4rem) / 5); /* 5张卡片，4个间隙(每个1rem) */
+  min-width: 220px;
+  max-width: 320px;
 }
 
 .card-link-{{ section.id }} {
@@ -319,6 +255,7 @@
   color: inherit;
   display: block;
   transition: all 0.3s ease;
+  pointer-events: auto;
 }
 
 .card-link-{{ section.id }}:hover {
@@ -349,6 +286,7 @@
   object-fit: cover;
   transition: opacity 0.5s ease;
   display: block;
+  pointer-events: none;
 }
 
 .hover-image-{{ section.id }} {
@@ -401,7 +339,8 @@
 /* Responsive */
 @media (max-width: 1400px) {
   .card-container-{{ section.id }} {
-    min-width: 180px;
+    width: calc((100% - 4rem) / 5);
+    min-width: 200px;
   }
 }
 
@@ -411,7 +350,8 @@
   }
   
   .card-container-{{ section.id }} {
-    min-width: 160px;
+    width: calc((100% - 3rem) / 4); /* 4张卡片 */
+    min-width: 200px;
   }
 }
 
@@ -421,7 +361,8 @@
   }
   
   .card-container-{{ section.id }} {
-    min-width: 150px;
+    width: calc((100% - 2rem) / 3); /* 3张卡片 */
+    min-width: 200px;
   }
 }
 
@@ -437,38 +378,20 @@
   .tab-container-{{ section.id }} {
     gap: 0.75rem;
   }
-
-  .pagination-btn-{{ section.id }} {
-    width: 38px;
-    height: 38px;
-  }
-
-  .prev-btn-{{ section.id }} {
-    left: 5px;
-  }
-
-  .next-btn-{{ section.id }} {
-    right: 5px;
-  }
-
-  .btn-icon-{{ section.id }} {
-    width: 18px;
-    height: 18px;
-  }
   
-  /* 移动端：保持卡片原始大小，显示1.5张 */
+  /* 移动端：显示1.5张卡片 */
   .carousel-track-{{ section.id }} {
-    padding: 0 50px;
     gap: 1rem;
   }
   
   .card-container-{{ section.id }} {
-    width: calc(66.666% - 50px); /* 显示1.5张卡片 */
+    width: 66.666%;
     min-width: 280px;
+    max-width: none;
   }
   
   .image-container-{{ section.id }} {
-    height: 22rem; /* 移动端保持较大尺寸 */
+    height: 22rem;
   }
 }
 
@@ -480,33 +403,13 @@
   .section-title1-{{ section.id }} {
     font-size: 1.75rem;
   }
-
-  .pagination-btn-{{ section.id }} {
-    width: 36px;
-    height: 36px;
-  }
-
-  .prev-btn-{{ section.id }} {
-    left: 5px;
-  }
-
-  .next-btn-{{ section.id }} {
-    right: 5px;
-  }
-
-  .btn-icon-{{ section.id }} {
-    width: 16px;
-    height: 16px;
-  }
   
-  /* 小屏幕：显示1.5张卡片 */
   .carousel-track-{{ section.id }} {
-    padding: 0 45px;
     gap: 0.75rem;
   }
   
   .card-container-{{ section.id }} {
-    width: calc(66.666% - 45px);
+    width: 66.666%;
     min-width: 260px;
   }
   
@@ -520,12 +423,8 @@
     padding: 0 10px;
   }
   
-  .carousel-track-{{ section.id }} {
-    padding: 0 40px;
-  }
-  
   .card-container-{{ section.id }} {
-    width: calc(66.666% - 40px);
+    width: 66.666%;
     min-width: 240px;
   }
   
@@ -579,76 +478,27 @@ document.addEventListener('DOMContentLoaded', function() {
         track.scrollLeft = 0;
       }
     }
-
-    updatePaginationButtons();
   }
 
-  // 分页按钮功能 - 简化逻辑
-  section.querySelectorAll('.pagination-btn-{{ section.id }}').forEach(button => {
-    button.addEventListener('click', function() {
-      const direction = this.dataset.direction;
-      const activeContent = carouselContents[currentTabIndex];
-      
-      if (activeContent) {
-        const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
-        if (track) {
-          const scrollAmount = track.clientWidth * 0.8; // 每次滚动80%的可见宽度
-          
-          if (direction === 'next') {
-            track.scrollBy({
-              left: scrollAmount,
-              behavior: 'smooth'
-            });
-          } else {
-            track.scrollBy({
-              left: -scrollAmount,
-              behavior: 'smooth'
-            });
-          }
-        }
-      }
-    });
-  });
-
-  function updatePaginationButtons() {
-    const activeContent = carouselContents[currentTabIndex];
-    if (activeContent) {
-      const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
-      const prevBtn = activeContent.querySelector('.prev-btn-{{ section.id }}');
-      const nextBtn = activeContent.querySelector('.next-btn-{{ section.id }}');
-      
-      if (track && prevBtn && nextBtn) {
-        // 检查是否在最左侧
-        const isAtStart = track.scrollLeft <= 10;
-        // 检查是否在最右侧
-        const isAtEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
-        
-        prevBtn.disabled = isAtStart;
-        nextBtn.disabled = isAtEnd;
-      }
-    }
-  }
-
-  // 监听滚动事件更新按钮状态
+  // 为每个轮播轨道添加拖动支持
   carouselContents.forEach(content => {
     const track = content.querySelector('.carousel-track-{{ section.id }}');
     if (track) {
-      track.addEventListener('scroll', debounce(() => {
-        updatePaginationButtons();
-      }, 100));
-      
-      addTouchSupport(track);
+      addDragSupport(track);
     }
   });
 
-  // 触摸滑动支持
-  function addTouchSupport(trackEl) {
+  // 鼠标拖动和触摸滑动支持
+  function addDragSupport(trackEl) {
     let isDown = false;
     let startX;
     let scrollLeft;
+    let isDragging = false;
 
+    // 鼠标事件
     trackEl.addEventListener('mousedown', (e) => {
       isDown = true;
+      isDragging = false;
       trackEl.style.cursor = 'grabbing';
       startX = e.pageX - trackEl.offsetLeft;
       scrollLeft = trackEl.scrollLeft;
@@ -663,6 +513,13 @@ document.addEventListener('DOMContentLoaded', function() {
     trackEl.addEventListener('mouseup', () => {
       isDown = false;
       trackEl.style.cursor = 'grab';
+      
+      // 如果发生了拖动，阻止链接点击
+      if (isDragging) {
+        setTimeout(() => {
+          isDragging = false;
+        }, 10);
+      }
     });
 
     trackEl.addEventListener('mousemove', (e) => {
@@ -670,11 +527,18 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const x = e.pageX - trackEl.offsetLeft;
       const walk = (x - startX) * 2;
+      
+      if (Math.abs(walk) > 5) {
+        isDragging = true;
+      }
+      
       trackEl.scrollLeft = scrollLeft - walk;
     });
 
+    // 触摸事件
     trackEl.addEventListener('touchstart', (e) => {
       isDown = true;
+      isDragging = false;
       startX = e.touches[0].pageX - trackEl.offsetLeft;
       scrollLeft = trackEl.scrollLeft;
     }, { passive: true });
@@ -683,27 +547,31 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!isDown) return;
       const x = e.touches[0].pageX - trackEl.offsetLeft;
       const walk = (x - startX) * 2;
+      
+      if (Math.abs(walk) > 5) {
+        isDragging = true;
+      }
+      
       trackEl.scrollLeft = scrollLeft - walk;
     }, { passive: true });
 
     trackEl.addEventListener('touchend', () => {
       isDown = false;
+      
+      if (isDragging) {
+        setTimeout(() => {
+          isDragging = false;
+        }, 10);
+      }
     });
 
-    trackEl.style.cursor = 'grab';
-  }
-
-  // 防抖函数
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
+    // 阻止拖动时的链接点击
+    trackEl.addEventListener('click', (e) => {
+      if (isDragging) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
   }
 
   // 图片加载错误处理
@@ -719,9 +587,6 @@ document.addEventListener('DOMContentLoaded', function() {
       e.target.style.display = 'none';
     }
   }, true);
-
-  // 初始化按钮状态
-  setTimeout(updatePaginationButtons, 100);
 });
 </script>
 
@@ -778,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ],
   "presets": [
     {
-      "name": "Carousel de bijoux avec pagination",
+      "name": "Carousel de bijoux",
       "settings": {
         "sectiontitle": "Nos Collections"
       },
