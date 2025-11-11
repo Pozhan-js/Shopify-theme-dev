@@ -1,9 +1,10 @@
 {% comment %}
-  Instagram图片展示 - 网格布局 + 弹窗功能
+  Instagram图片展示 - 网格布局
   1. 默认显示2行（14张图片）
   2. 点击"显示更多"按钮展开全部
-  3. 点击图片弹窗展示Instagram帖子
-  4. 内容居中，两侧留白
+  3. 内容居中，两侧留白
+  4. 图片仅用于展示，无点击事件
+  5. 当没有选择图片时，显示配置的URL链接内容
 {% endcomment %}
 
 <div class="instagram-grid-section" data-section-id="{{ section.id }}">
@@ -12,138 +13,108 @@
     <div class="header-layout">
       <!-- 左侧文本区域 -->
       <div class="text-content">
-        {% if section.settings.textcontent != blank %}
-          <p class="header-text">{{ section.settings.textcontent }}</p>
+        {% if section.settings.text_content != blank %}
+          <p class="header-text">{{ section.settings.text_content }}</p>
         {% endif %}
       </div>
       
       <!-- 右侧Instagram按钮 -->
-      {% if section.settings.instagramlink != blank %}
+      {% if section.settings.instagram_link != blank %}
         <div class="button-content">
-          <a href="{{ section.settings.instagramlink }}" class="instagram-button" target="_blank" rel="noopener">
+          <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
             <svg class="instagram-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
-            {{ section.settings.buttontext | default: 'Follow Us' }}
+            {{ section.settings.button_text | default: 'Follow Us' }}
           </a>
         </div>
       {% endif %}
     </div>
 
     <div class="grid-wrapper">
-      {% assign totalimages = section.blocks.size %}
-      {% assign totalrows = totalimages | divided_by: 7 %}
-      {% assign remainder = totalimages | modulo: 7 %}
+      {% assign total_images = section.blocks.size %}
+      {% assign total_rows = total_images | divided_by: 7 %}
+      {% assign remainder = total_images | modulo: 7 %}
       {% if remainder > 0 %}
-        {% assign totalrows = totalrows | plus: 1 %}
+        {% assign total_rows = total_rows | plus: 1 %}
       {% endif %}
       
       {% for i in (0..100) %}
-        {% assign startindex = i | times: 7 %}
-        {% assign endindex = startindex | plus: 6 %}
+        {% assign start_index = i | times: 7 %}
+        {% assign end_index = start_index | plus: 6 %}
         
         {% comment %}检查是否还有图片{% endcomment %}
-        {% assign hasimages = false %}
-        {% for block in section.blocks limit: 7 offset: startindex %}
-          {% if block.type == 'imageitem' %}
-            {% assign hasimages = true %}
+        {% assign has_images = false %}
+        {% for block in section.blocks limit: 7 offset: start_index %}
+          {% if block.type == 'image_item' %}
+            {% assign has_images = true %}
             {% break %}
           {% endif %}
         {% endfor %}
         
-        {% if hasimages == false %}
+        {% if has_images == false %}
           {% break %}
         {% endif %}
         
-        {% assign isoddrow = i | modulo: 2 %}
-        {% assign rowclass = '' %}
+        {% assign is_odd_row = i | modulo: 2 %}
+        {% assign row_class = '' %}
         {% if i >= 2 %}
-          {% assign rowclass = 'hidden-row' %}
+          {% assign row_class = 'hidden-row' %}
         {% endif %}
         
-        <div class="grid-row {{ rowclass }} {% if isoddrow == 0 %}layout-left{% else %}layout-right{% endif %}" data-row-index="{{ i }}">
-          {% if isoddrow == 0 %}
+        <div class="grid-row {{ row_class }} {% if is_odd_row == 0 %}layout-left{% else %}layout-right{% endif %}" data-row-index="{{ i }}">
+          {% if is_odd_row == 0 %}
             <!-- 奇数行：左大右小 -->
             <div class="large-image-container">
-              {% assign block = section.blocks[startindex] %}
-              {% if block and block.type == 'imageitem' %}
-                <div class="image-wrapper" 
-                     {% if block.settings.postlink != blank %}
-                     data-post-url="{{ block.settings.postlink }}"
-                     role="button"
-                     tabindex="0"
-                     aria-label="查看Instagram帖子"
-                     {% endif %}>
-                  {% if block.settings.image %}
-                    <img
-                      src="{{ block.settings.image | img_url: '800x800' }}"
-                      alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% elsif block.settings.link != blank %}
-                    <img
-                      src="{{ block.settings.link }}"
-                      alt="Instagram image"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
-                  {% if block.settings.postlink != blank %}
-                    <div class="image-overlay">
-                      <svg class="instagram-icon-overlay" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                    </div>
-                  {% endif %}
-                </div>
+              {% assign block = section.blocks[start_index] %}
+              {% if block and block.type == 'image_item' %}
+                {% if block.settings.image %}
+                  <img
+                    src="{{ block.settings.image | img_url: '800x800' }}"
+                    alt="{{ block.settings.image.alt | escape }}"
+                    class="grid-image"
+                    loading="lazy"
+                  >
+                {% elsif block.settings.link != blank %}
+                  <img
+                    src="{{ block.settings.link }}"
+                    alt="Instagram image"
+                    class="grid-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="placeholder-image">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {% endif %}
               {% endif %}
             </div>
             
             <div class="small-images-grid">
               {% for j in (1..6) %}
-                {% assign blockindex = startindex | plus: j %}
-                {% assign block = section.blocks[blockindex] %}
+                {% assign block_index = start_index | plus: j %}
+                {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'imageitem' %}
-                    <div class="image-wrapper"
-                         {% if block.settings.postlink != blank %}
-                         data-post-url="{{ block.settings.postlink }}"
-                         role="button"
-                         tabindex="0"
-                         aria-label="查看Instagram帖子"
-                         {% endif %}>
-                      {% if block.settings.image %}
-                        <img
-                          src="{{ block.settings.image | img_url: '400x400' }}"
-                          alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% elsif block.settings.link != blank %}
-                        <img
-                          src="{{ block.settings.link }}"
-                          alt="Instagram image"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                      {% if block.settings.postlink != blank %}
-                        <div class="image-overlay">
-                          <svg class="instagram-icon-overlay" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                          </svg>
-                        </div>
-                      {% endif %}
-                    </div>
+                  {% if block and block.type == 'image_item' %}
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x400' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="grid-image"
+                        loading="lazy"
+                      >
+                    {% elsif block.settings.link != blank %}
+                      <img
+                        src="{{ block.settings.link }}"
+                        alt="Instagram image"
+                        class="grid-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
                   {% endif %}
                 </div>
               {% endfor %}
@@ -152,87 +123,57 @@
             <!-- 偶数行：右大左小 -->
             <div class="small-images-grid">
               {% for j in (0..5) %}
-                {% assign blockindex = startindex | plus: j %}
-                {% assign block = section.blocks[blockindex] %}
+                {% assign block_index = start_index | plus: j %}
+                {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'imageitem' %}
-                    <div class="image-wrapper"
-                         {% if block.settings.postlink != blank %}
-                         data-post-url="{{ block.settings.postlink }}"
-                         role="button"
-                         tabindex="0"
-                         aria-label="查看Instagram帖子"
-                         {% endif %}>
-                      {% if block.settings.image %}
-                        <img
-                          src="{{ block.settings.image | img_url: '400x400' }}"
-                          alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% elsif block.settings.link != blank %}
-                        <img
-                          src="{{ block.settings.link }}"
-                          alt="Instagram image"
-                          class="grid-image"
-                          loading="lazy"
-                        >
-                      {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
-                      {% endif %}
-                      {% if block.settings.postlink != blank %}
-                        <div class="image-overlay">
-                          <svg class="instagram-icon-overlay" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                          </svg>
-                        </div>
-                      {% endif %}
-                    </div>
+                  {% if block and block.type == 'image_item' %}
+                    {% if block.settings.image %}
+                      <img
+                        src="{{ block.settings.image | img_url: '400x400' }}"
+                        alt="{{ block.settings.image.alt | escape }}"
+                        class="grid-image"
+                        loading="lazy"
+                      >
+                    {% elsif block.settings.link != blank %}
+                      <img
+                        src="{{ block.settings.link }}"
+                        alt="Instagram image"
+                        class="grid-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      <div class="placeholder-image">
+                        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                      </div>
+                    {% endif %}
                   {% endif %}
                 </div>
               {% endfor %}
             </div>
             
             <div class="large-image-container">
-              {% assign blockindex = startindex | plus: 6 %}
-              {% assign block = section.blocks[blockindex] %}
-              {% if block and block.type == 'imageitem' %}
-                <div class="image-wrapper"
-                     {% if block.settings.postlink != blank %}
-                     data-post-url="{{ block.settings.postlink }}"
-                     role="button"
-                     tabindex="0"
-                     aria-label="查看Instagram帖子"
-                     {% endif %}>
-                  {% if block.settings.image %}
-                    <img
-                      src="{{ block.settings.image | img_url: '800x800' }}"
-                      alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% elsif block.settings.link != blank %}
-                    <img
-                      src="{{ block.settings.link }}"
-                      alt="Instagram image"
-                      class="grid-image"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                    </div>
-                  {% endif %}
-                  {% if block.settings.postlink != blank %}
-                    <div class="image-overlay">
-                      <svg class="instagram-icon-overlay" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                    </div>
-                  {% endif %}
-                </div>
+              {% assign block_index = start_index | plus: 6 %}
+              {% assign block = section.blocks[block_index] %}
+              {% if block and block.type == 'image_item' %}
+                {% if block.settings.image %}
+                  <img
+                    src="{{ block.settings.image | img_url: '800x800' }}"
+                    alt="{{ block.settings.image.alt | escape }}"
+                    class="grid-image"
+                    loading="lazy"
+                  >
+                {% elsif block.settings.link != blank %}
+                  <img
+                    src="{{ block.settings.link }}"
+                    alt="Instagram image"
+                    class="grid-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="placeholder-image">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {% endif %}
               {% endif %}
             </div>
           {% endif %}
@@ -240,32 +181,21 @@
       {% endfor %}
     </div>
 
-    <!-- 显示更多按钮 -->
-    {% if totalrows > 2 %}
+    <!-- 显示更多按钮 - 加减号图标 -->
+    {% if total_rows > 2 %}
       <div class="load-more-container">
         <button class="load-more-button" id="loadMoreBtn" aria-label="显示更多">
+          <!-- 加号图标 -->
           <svg class="button-icon plus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
+          <!-- 减号图标 -->
           <svg class="button-icon minus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
           </svg>
         </button>
       </div>
     {% endif %}
-  </div>
-</div>
-
-<!-- Instagram 模态弹窗 -->
-<div class="instagram-modal" id="instagramModal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <button class="modal-close" aria-label="关闭">&times;</button>
-    <div class="modal-loading">
-      <div class="loading-spinner"></div>
-      <p>加载中...</p>
-    </div>
-    <div class="instagram-embed-container"></div>
   </div>
 </div>
 
@@ -287,7 +217,7 @@
   padding: 2rem 0;
 }
 
-/* Container principal */
+/* Container principal - 居中且两侧留白 */
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -377,7 +307,7 @@
   max-height: 1000px;
 }
 
-/* 大图容器 */
+/* 大图容器 - 占40%，减去一半的gap */
 .large-image-container {
   flex: 0 0 calc(40% - 0.5rem);
   aspect-ratio: 1 / 1;
@@ -386,7 +316,7 @@
   background-color: var(--gray-200);
 }
 
-/* 小图网格容器 */
+/* 小图网格容器 - 占60%，减去一半的gap */
 .small-images-grid {
   flex: 0 0 calc(60% - 0.5rem);
   display: grid;
@@ -402,52 +332,12 @@
   background-color: var(--gray-200);
 }
 
-/* 图片包装器 - 添加悬停效果 */
-.image-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.image-wrapper[data-post-url]:hover .grid-image {
-  transform: scale(1.05);
-}
-
-.image-wrapper[data-post-url]:hover .image-overlay {
-  opacity: 1;
-}
-
 /* 图片样式 */
 .grid-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
-}
-
-/* 图片悬停遮罩 */
-.image-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.instagram-icon-overlay {
-  width: 3rem;
-  height: 3rem;
-  color: white;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .placeholder-image {
@@ -466,11 +356,10 @@
   opacity: 0.5;
 }
 
-/* 显示更多按钮 */
+/* 显示更多按钮 - 加减号图标样式 */
 .load-more-container {
   display: flex;
   justify-content: center;
-  margin-top: 2rem;
 }
 
 .load-more-button {
@@ -496,6 +385,10 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.load-more-button.hidden {
+  display: none;
+}
+
 .button-icon {
   position: absolute;
   width: 1.25rem;
@@ -503,6 +396,7 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
+/* 默认显示加号，隐藏减号 */
 .plus-icon {
   opacity: 1;
   transform: rotate(0deg);
@@ -513,6 +407,7 @@
   transform: rotate(90deg);
 }
 
+/* 展开状态：隐藏加号，显示减号 */
 .load-more-button.expanded .plus-icon {
   opacity: 0;
   transform: rotate(90deg);
@@ -521,140 +416,6 @@
 .load-more-button.expanded .minus-icon {
   opacity: 1;
   transform: rotate(0deg);
-}
-
-/* ===== 模态弹窗样式 ===== */
-.instagram-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.instagram-modal.active {
-  display: flex;
-}
-
-.modal-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-  position: relative;
-  background-color: white;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow: hidden;
-  z-index: 10000;
-  animation: slideUp 0.3s ease;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  background-color: rgba(255, 255, 255, 0.9);
-  border: none;
-  border-radius: 50%;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  z-index: 10001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gray-700);
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.modal-close:hover {
-  background-color: white;
-  transform: scale(1.1);
-}
-
-.modal-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem;
-  color: var(--gray-600);
-}
-
-.modal-loading.hidden {
-  display: none;
-}
-
-.loading-spinner {
-  width: 3rem;
-  height: 3rem;
-  border: 3px solid var(--gray-200);
-  border-top-color: var(--gray-600);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-.instagram-embed-container {
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: none;
-}
-
-.instagram-embed-container.loaded {
-  display: block;
-}
-
-.instagram-embed-container iframe {
-  width: 100% !important;
-  border: none !important;
-  max-width: 100% !important;
-}
-
-/* 动画 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(2rem);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Responsive - 平板 */
@@ -669,10 +430,6 @@
   
   .small-images-grid {
     flex: 0 0 calc(55% - 0.5rem);
-  }
-  
-  .modal-content {
-    max-width: 90%;
   }
 }
 
@@ -721,22 +478,6 @@
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 1fr);
   }
-  
-  .instagram-icon-overlay {
-    width: 2rem;
-    height: 2rem;
-  }
-  
-  .modal-content {
-    max-width: 95%;
-    max-height: 85vh;
-  }
-  
-  .modal-close {
-    width: 2rem;
-    height: 2rem;
-    font-size: 1.25rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -775,142 +516,39 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // ===== 展开/收起功能 =====
   const loadMoreBtn = document.getElementById('loadMoreBtn');
-  if (loadMoreBtn) {
-    const hiddenRows = document.querySelectorAll('.grid-row.hidden-row');
-    let isExpanded = false;
+  if (!loadMoreBtn) return;
 
-    loadMoreBtn.addEventListener('click', function() {
-      if (!isExpanded) {
-        hiddenRows.forEach((row, index) => {
-          setTimeout(() => {
-            row.classList.add('show');
-          }, index * 100);
-        });
-        
-        loadMoreBtn.classList.add('expanded');
-        loadMoreBtn.setAttribute('aria-label', '收起');
-        isExpanded = true;
-      } else {
-        hiddenRows.forEach(row => {
-          row.classList.remove('show');
-        });
-        
-        loadMoreBtn.classList.remove('expanded');
-        loadMoreBtn.setAttribute('aria-label', '显示更多');
-        isExpanded = false;
-        
-        const section = document.querySelector('.instagram-grid-section');
-        if (section) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    });
-  }
+  const hiddenRows = document.querySelectorAll('.grid-row.hidden-row');
+  let isExpanded = false;
 
-  // ===== Instagram 模态弹窗功能 =====
-  const modal = document.getElementById('instagramModal');
-  const modalOverlay = modal.querySelector('.modal-overlay');
-  const modalClose = modal.querySelector('.modal-close');
-  const embedContainer = modal.querySelector('.instagram-embed-container');
-  const loadingIndicator = modal.querySelector('.modal-loading');
-  
-  // 所有可点击的图片
-  const imageWrappers = document.querySelectorAll('.image-wrapper[data-post-url]');
-  
-  // 打开模态框
-  function openModal(postUrl) {
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    loadInstagramPost(postUrl);
-  }
-  
-  // 关闭模态框
-  function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    embedContainer.innerHTML = '';
-    embedContainer.classList.remove('loaded');
-    loadingIndicator.classList.remove('hidden');
-  }
-  
-  // 加载 Instagram 帖子
-  function loadInstagramPost(postUrl) {
-    // 显示加载状态
-    loadingIndicator.classList.remove('hidden');
-    embedContainer.classList.remove('loaded');
-    
-    // 使用 Instagram oEmbed API
-    const oembedUrl = `https://api.instagram.com/oembed?url=${encodeURIComponent(postUrl)}&omitscript=true`;
-    
-    fetch(oembedUrl)
-      .then(response => response.json())
-      .then(data => {
-        // 隐藏加载状态
-        loadingIndicator.classList.add('hidden');
-        
-        // 插入 Instagram 嵌入代码
-        embedContainer.innerHTML = data.html;
-        embedContainer.classList.add('loaded');
-        
-        // 加载 Instagram 嵌入脚本
-        if (window.instgrm) {
-          window.instgrm.Embeds.process();
-        } else {
-          const script = document.createElement('script');
-          script.src = '//www.instagram.com/embed.js';
-          script.async = true;
-          document.body.appendChild(script);
-        }
-      })
-      .catch(error => {
-        console.error('加载 Instagram 帖子失败:', error);
-        loadingIndicator.classList.add('hidden');
-        embedContainer.innerHTML = `
-          <div style="padding: 2rem; text-align: center; color: var(--gray-600);">
-            <p style="margin-bottom: 1rem;">无法加载 Instagram 帖子</p>
-            <a href="${postUrl}" target="_blank" rel="noopener" 
-               style="color: var(--gray-700); text-decoration: underline;">
-              在 Instagram 上查看
-            </a>
-          </div>
-        `;
-        embedContainer.classList.add('loaded');
+  loadMoreBtn.addEventListener('click', function() {
+    if (!isExpanded) {
+      // 展开所有隐藏的行
+      hiddenRows.forEach((row, index) => {
+        setTimeout(() => {
+          row.classList.add('show');
+        }, index * 100);
       });
-  }
-  
-  // 为每个图片添加点击事件
-  imageWrappers.forEach(wrapper => {
-    wrapper.addEventListener('click', function() {
-      const postUrl = this.dataset.postUrl;
-      if (postUrl) {
-        openModal(postUrl);
+      
+      loadMoreBtn.classList.add('expanded');
+      loadMoreBtn.setAttribute('aria-label', '收起');
+      isExpanded = true;
+    } else {
+      // 收起所有行
+      hiddenRows.forEach(row => {
+        row.classList.remove('show');
+      });
+      
+      loadMoreBtn.classList.remove('expanded');
+      loadMoreBtn.setAttribute('aria-label', '显示更多');
+      isExpanded = false;
+      
+      // 滚动回顶部
+      const section = document.querySelector('.instagram-grid-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    });
-    
-    // 键盘支持
-    wrapper.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const postUrl = this.dataset.postUrl;
-        if (postUrl) {
-          openModal(postUrl);
-        }
-      }
-    });
-  });
-  
-  // 关闭按钮事件
-  modalClose.addEventListener('click', closeModal);
-  
-  // 点击遮罩关闭
-  modalOverlay.addEventListener('click', closeModal);
-  
-  // ESC 键关闭
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
-      closeModal();
     }
   });
 });
@@ -924,26 +562,26 @@ document.addEventListener('DOMContentLoaded', function() {
   "settings": [
     {
       "type": "textarea",
-      "id": "textcontent",
+      "id": "text_content",
       "label": "文本内容",
       "default": "关注我们的Instagram,获取最新产品动态和时尚灵感"
     },
     {
       "type": "text",
-      "id": "buttontext",
+      "id": "button_text",
       "label": "按钮文本",
       "default": "Follow Us"
     },
     {
       "type": "url",
-      "id": "instagramlink",
+      "id": "instagram_link",
       "label": "Instagram链接",
       "info": "输入Instagram主页链接"
     }
   ],
   "blocks": [
     {
-      "type": "imageitem",
+      "type": "image_item",
       "name": "图片项",
       "settings": [
         {
@@ -957,12 +595,6 @@ document.addEventListener('DOMContentLoaded', function() {
           "id": "link",
           "label": "图片URL",
           "info": "如果未选择图片,此链接将作为图片URL加载显示"
-        },
-        {
-          "type": "url",
-          "id": "postlink",
-          "label": "Instagram帖子链接",
-          "info": "输入完整的Instagram帖子URL (例如: https://www.instagram.com/p/xxxxx/),点击图片时将在弹窗中显示该帖子"
         }
       ]
     }
@@ -972,24 +604,24 @@ document.addEventListener('DOMContentLoaded', function() {
     {
       "name": "Instagram图片展示",
       "settings": {
-        "textcontent": "关注我们的Instagram,获取最新产品动态和时尚灵感",
-        "buttontext": "Follow Us"
+        "text_content": "关注我们的Instagram,获取最新产品动态和时尚灵感",
+        "button_text": "Follow Us"
       },
       "blocks": [
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"},
-        {"type": "imageitem"}
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"},
+        {"type": "image_item"}
       ]
     }
   ]
