@@ -6,15 +6,6 @@
     {% endif %}
 
     <div class="video-carousel-wrapper">
-      <!-- 左侧切换按钮 -->
-      <div class="carousel-btn-container">
-        <button class="carousel-btn carousel-btn--prev" aria-label="上一组视频">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
       <!-- 视频轮播容器 -->
       <div class="video-carousel-container">
         <div class="video-carousel-track">
@@ -56,10 +47,15 @@
             {% endif %}
           {% endfor %}
         </div>
-      </div>
 
-      <!-- 右侧切换按钮 -->
-      <div class="carousel-btn-container">
+        <!-- 左侧切换按钮（内侧） -->
+        <button class="carousel-btn carousel-btn--prev" aria-label="上一组视频">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- 右侧切换按钮（内侧） -->
         <button class="carousel-btn carousel-btn--next" aria-label="下一组视频">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -93,7 +89,7 @@
   .container-video {
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 50px; /* PC端左右边距50px */
+    padding: 0 50px;
   }
 
   .section-title {
@@ -107,49 +103,10 @@
 
   .video-carousel-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-  }
-
-  .carousel-btn-container {
-    width: 50px;
-    height: 50px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .carousel-btn {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 2;
-  }
-
-  .carousel-btn:hover {
-    background: #333;
-    color: white;
-    border-color: #333;
-  }
-
-  .carousel-btn.hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
   }
 
   .video-carousel-container {
-    flex: 1;
+    position: relative;
     overflow: hidden;
     border-radius: 12px;
   }
@@ -160,16 +117,15 @@
     gap: 20px;
   }
 
-  /* PC端：4个视频卡片 */
   .video-item {
-    flex: 0 0 calc(25% - 15px); /* 4个卡片，减去gap */
+    flex: 0 0 calc(25% - 15px);
     min-width: 0;
   }
 
   .video-thumbnail {
     position: relative;
     width: 100%;
-    aspect-ratio: 9 / 16; /* 增加宽度，改为9:16比例 */
+    aspect-ratio: 3 / 4; /* 更合理的比例，不会太长 */
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
@@ -251,7 +207,47 @@
     text-overflow: ellipsis;
   }
 
-  /* 模态框：全屏高度 */
+  /* 切换按钮：内侧覆盖 */
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #e0e0e0;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+  }
+
+  .carousel-btn:hover {
+    background: #333;
+    color: white;
+    border-color: #333;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .carousel-btn--prev {
+    left: 20px;
+  }
+
+  .carousel-btn--next {
+    right: 20px;
+  }
+
+  .carousel-btn.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* 模态框 */
   .video-modal {
     position: fixed;
     top: 0;
@@ -339,12 +335,24 @@
   /* 响应式 */
   @media (max-width: 768px) {
     .container-video {
-      padding: 0 20px; /* 移动端减小边距 */
+      padding: 0 20px;
     }
     .video-item {
       flex: 0 0 calc(50% - 6px);
     }
-    .video-carousel-track { gap: 12px; }
+    .video-carousel-track { 
+      gap: 12px; 
+    }
+    .carousel-btn {
+      width: 40px;
+      height: 40px;
+    }
+    .carousel-btn--prev {
+      left: 10px;
+    }
+    .carousel-btn--next {
+      right: 10px;
+    }
     .video-modal-content {
       width: 98vw;
       height: 98vh;
@@ -368,13 +376,14 @@
     .video-item {
       flex: 0 0 calc(33.333% - 13.33px);
     }
-    .video-carousel-track { gap: 20px; }
+    .video-carousel-track { 
+      gap: 20px; 
+    }
   }
 
-  /* PC端：确保4个卡片显示 */
   @media (min-width: 1025px) {
     .video-item {
-      flex: 0 0 calc(25% - 15px); /* 4个卡片 */
+      flex: 0 0 calc(25% - 15px);
     }
   }
 
@@ -418,7 +427,7 @@
       if (window.innerWidth <= 480) return 2;
       if (window.innerWidth <= 768) return 2;
       if (window.innerWidth <= 1024) return 3;
-      return 4; // PC端显示4个
+      return 4;
     }
 
     function updatePages() {
