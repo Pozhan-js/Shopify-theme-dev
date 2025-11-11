@@ -537,7 +537,7 @@
   }
 </style>
 
-<!-- Instagram帖子弹窗 - 左右布局 -->
+<!-- Instagram帖子弹窗 -->
 <div class="instagram-modal" id="instagramModal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
@@ -546,12 +546,7 @@
         <path d="M6 18L18 6M6 6l12 12"/>
       </svg>
     </button>
-    <div class="instagram-post-layout">
-      <div class="post-image-container">
-        <img id="postImage" class="post-image" src="" alt="Instagram post">
-      </div>
-      <div class="post-content-container" id="instagramEmbed"></div>
-    </div>
+    <div class="instagram-embed-container" id="instagramEmbed"></div>
   </div>
 </div>
 
@@ -561,17 +556,12 @@
     const postUrl = element.dataset.instagramUrl;
     if (!postUrl) return;
 
-    // 设置点击的图片
-    const postImage = document.getElementById('postImage');
-    postImage.src = element.src;
-    postImage.alt = element.alt;
-
     // 创建嵌入iframe
     const embedContainer = document.getElementById('instagramEmbed');
     embedContainer.innerHTML = `
     <iframe 
       src="https://www.instagram.com/p/${extractPostId(postUrl)}/embed" 
-      frameborder="0"
+      frameborder="0" 
       scrolling="no"
       allowtransparency="true"
     ></iframe>
@@ -664,40 +654,12 @@
   .modal-content {
     position: relative;
     width: 90%;
-    max-width: 800px;
+    max-width: 600px;
     max-height: 90vh;
     background: white;
-    border-radius: 0;
+    border-radius: 12px;
     overflow: hidden;
     z-index: 1;
-    padding: 0;
-  }
-
-  .instagram-post-layout {
-    display: flex;
-    height: 100%;
-  }
-
-  .post-image-container {
-    flex: 1;
-    background: #fafafa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .post-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-
-  .post-content-container {
-    flex: 1;
-    min-height: 500px;
-    overflow: auto;
-    padding: 0;
   }
 
   .modal-close {
@@ -722,15 +684,33 @@
     height: 20px;
   }
 
-  .post-content-container iframe {
+  .instagram-embed-container {
     width: 100%;
     height: 100%;
     min-height: 500px;
-    border: none;
+    overflow: auto;
+  }
+
+  .instagram-embed-container iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
   }
 
   /* 响应式调整 */
   @media (max-width: 768px) {
+    .modal-content {
+      width: 95%;
+      max-height: 80vh;
+    }
+
+    .instagram-embed-container,
+    .instagram-embed-container iframe {
+      min-height: 400px;
+    }
+  }
+
+  @media (max-width: 480px) {
     .modal-content {
       width: 100%;
       height: 100%;
@@ -738,18 +718,9 @@
       border-radius: 0;
     }
 
-    .instagram-post-layout {
-      flex-direction: column;
-      height: auto;
-    }
-
-    .post-image-container {
-      padding: 0.5rem;
-    }
-
-    .post-content-container,
-    .post-content-container iframe {
-      min-height: 400px;
+    .instagram-embed-container,
+    .instagram-embed-container iframe {
+      min-height: 300px;
     }
   }
 </style>
