@@ -1,7 +1,8 @@
 {% comment %}
-  Carousel de bijoux - Section Liquid (带分页切换按钮)
+  Carousel de bijoux - Section Liquid (按钮自动隐藏版本)
   ✅ 保留鼠标拖动功能
   ✅ 添加左右切换按钮，整页切换卡片
+  ✅ 没有更多内容时按钮自动隐藏
 {% endcomment %}
 
 <div class="jewelry-carousel-section-{{ section.id }}" data-section-id="{{ section.id }}">
@@ -245,6 +246,8 @@
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   color: var(--gray-700-{{ section.id }});
+  opacity: 1;
+  visibility: visible;
 }
 
 .nav-button-{{ section.id }}:hover {
@@ -254,9 +257,9 @@
   transform: translateY(-50%) scale(1.1);
 }
 
-.nav-button-{{ section.id }}:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+.nav-button-{{ section.id }}.hidden {
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
@@ -516,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   let currentTabIndex = 0;
   let currentPage = 0;
-  let cardsPerPage = 5; // PC端默认显示5张
+  let cardsPerPage = 5;
 
   // 初始化第一个标签页
   if (tabButtons.length > 0) {
@@ -527,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function calculateCardsPerPage() {
     const width = window.innerWidth;
     if (width <= 768) {
-      return 1; // 移动端显示1张完整卡片
+      return 1;
     } else if (width <= 992) {
       return 3;
     } else if (width <= 1200) {
@@ -537,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // 更新导航按钮状态
+  // 更新导航按钮状态 - 隐藏而不是禁用
   function updateNavigationButtons() {
     const activeContent = carouselContents[currentTabIndex];
     if (!activeContent) return;
@@ -546,8 +549,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const cards = track.querySelectorAll('.card-container-{{ section.id }}');
     const totalPages = Math.ceil(cards.length / cardsPerPage);
     
-    prevButton.disabled = currentPage === 0;
-    nextButton.disabled = currentPage >= totalPages - 1;
+    // 隐藏或显示按钮
+    if (currentPage === 0) {
+      prevButton.classList.add('hidden');
+    } else {
+      prevButton.classList.remove('hidden');
+    }
+    
+    if (currentPage >= totalPages - 1 || totalPages <= 1) {
+      nextButton.classList.add('hidden');
+    } else {
+      nextButton.classList.remove('hidden');
+    }
   }
 
   // 滚动到指定页面
@@ -561,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (cards.length === 0) return;
     
     const cardWidth = cards[0].offsetWidth;
-    const gap = 16; // 1rem = 16px
+    const gap = 16;
     const scrollAmount = (cardWidth + gap) * cardsPerPage * page;
     
     track.scrollTo({
