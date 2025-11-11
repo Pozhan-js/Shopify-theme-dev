@@ -18,6 +18,14 @@
         {% endif %}
       </div>
 
+      <!-- Instagram帖子弹窗 -->
+      <div class="instagram-modal" id="instagramModal">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <iframe id="instagramEmbed" src="" frameborder="0"></iframe>
+        </div>
+      </div>
+
       <!-- 右侧Instagram按钮 -->
       {% if section.settings.instagram_link != blank %}
         <div class="button-content">
@@ -79,8 +87,10 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    data-instagram-url="{% if block.settings.instagram_post %}{{ block.settings.instagram_post }}{% elsif block.settings.link %}{{ block.settings.link }}{% endif %}"
-                    onclick="showInstagramPost(this)"
+                    {% if block.settings.instagram_post %}
+                      data-instagram-post="{{ block.settings.instagram_post }}"
+                      data-block-id="{{ block.id }}"
+                    {% endif %}
                   >
                 {% elsif block.settings.link != blank %}
                   <img
@@ -90,8 +100,10 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    data-instagram-url="{% if block.settings.instagram_post %}{{ block.settings.instagram_post }}{% else %}{{ block.settings.link }}{% endif %}"
-                    onclick="showInstagramPost(this)"
+                    {% if block.settings.instagram_post %}
+                      data-instagram-post="{{ block.settings.instagram_post }}"
+                      data-block-id="{{ block.id }}"
+                    {% endif %}
                   >
                 {% else %}
                   <div class="placeholder-image">
@@ -115,6 +127,10 @@
                         loading="lazy"
                         width="400"
                         height="400"
+                        {% if block.settings.instagram_post %}
+                          data-instagram-post="{{ block.settings.instagram_post }}"
+                          data-block-id="{{ block.id }}"
+                        {% endif %}
                       >
                     {% elsif block.settings.link != blank %}
                       <img
@@ -124,6 +140,10 @@
                         loading="lazy"
                         width="400"
                         height="400"
+                        {% if block.settings.instagram_post %}
+                          data-instagram-post="{{ block.settings.instagram_post }}"
+                          data-block-id="{{ block.id }}"
+                        {% endif %}
                       >
                     {% else %}
                       <div class="placeholder-image">
@@ -150,6 +170,10 @@
                         loading="lazy"
                         width="400"
                         height="400"
+                        {% if block.settings.instagram_post %}
+                          data-instagram-post="{{ block.settings.instagram_post }}"
+                          data-block-id="{{ block.id }}"
+                        {% endif %}
                       >
                     {% elsif block.settings.link != blank %}
                       <img
@@ -159,6 +183,10 @@
                         loading="lazy"
                         width="400"
                         height="400"
+                        {% if block.settings.instagram_post %}
+                          data-instagram-post="{{ block.settings.instagram_post }}"
+                          data-block-id="{{ block.id }}"
+                        {% endif %}
                       >
                     {% else %}
                       <div class="placeholder-image">
@@ -182,6 +210,10 @@
                     loading="lazy"
                     width="800"
                     height="800"
+                    {% if block.settings.instagram_post %}
+                      data-instagram-post="{{ block.settings.instagram_post }}"
+                      data-block-id="{{ block.id }}"
+                    {% endif %}
                   >
                 {% elsif block.settings.link != blank %}
                   <img
@@ -191,6 +223,10 @@
                     loading="lazy"
                     width="800"
                     height="800"
+                    {% if block.settings.instagram_post %}
+                      data-instagram-post="{{ block.settings.instagram_post }}"
+                      data-block-id="{{ block.id }}"
+                    {% endif %}
                   >
                 {% else %}
                   <div class="placeholder-image">
@@ -223,6 +259,75 @@
 </div>
 
 <style>
+  /* Instagram弹窗样式 */
+  .instagram-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .close-modal {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .close-modal:hover {
+    color: #000;
+  }
+
+  #instagramEmbed {
+    width: 100%;
+    height: 500px;
+    border: none;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .modal-content {
+      width: 90%;
+      margin: 10% auto;
+    }
+
+    #instagramEmbed {
+      height: 400px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-content {
+      width: 95%;
+      margin: 15% auto;
+      padding: 15px;
+    }
+
+    #instagramEmbed {
+      height: 300px;
+    }
+  }
+
   /* Variables CSS */
   :root {
     --gray-200: #e5e7eb;
@@ -314,9 +419,8 @@
     gap: 1rem;
     width: 100%;
     opacity: 1;
-    max-height: none;
-    min-height: 300px;
-    overflow: visible;
+    max-height: 1000px;
+    overflow: hidden;
     transition: all 0.5s ease;
   }
 
@@ -335,7 +439,6 @@
   .large-image-container {
     flex: 0 0 calc(40% - 0.5rem);
     aspect-ratio: 1 / 1;
-    min-height: 300px;
     overflow: hidden;
     border-radius: 8px;
     background-color: var(--gray-200);
@@ -348,7 +451,6 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, 1fr);
     gap: 1rem;
-    min-height: 300px;
   }
 
   .small-image-container {
@@ -540,54 +642,7 @@
   }
 </style>
 
-<!-- Instagram帖子弹窗 -->
-<div class="instagram-modal" id="instagramModal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeInstagramPost()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M6 18L18 6M6 6l12 12"/>
-      </svg>
-    </button>
-    <div class="instagram-embed-container" id="instagramEmbed"></div>
-  </div>
-</div>
-
 <script>
-  // 显示Instagram帖子弹窗
-  function showInstagramPost(element) {
-    const postUrl = element.dataset.instagramUrl;
-    if (!postUrl) return;
-
-    // 创建嵌入iframe
-    const embedContainer = document.getElementById('instagramEmbed');
-    embedContainer.innerHTML = `
-    <iframe 
-      src="https://www.instagram.com/p/${extractPostId(postUrl)}/embed" 
-      frameborder="0" 
-      scrolling="no"
-      allowtransparency="true"
-    ></iframe>
-  `;
-
-    // 显示弹窗
-    document.getElementById('instagramModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  // 关闭弹窗
-  function closeInstagramPost() {
-    document.getElementById('instagramModal').classList.remove('active');
-    document.body.style.overflow = '';
-    document.getElementById('instagramEmbed').innerHTML = '';
-  }
-
-  // 从URL提取帖子ID
-  function extractPostId(url) {
-    const matches = url.match(/instagram\.com\/p\/([^\/]+)/);
-    return matches ? matches[1] : '';
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (!loadMoreBtn) return;
@@ -624,110 +679,54 @@
         }
       }
     });
+
+    // 处理Instagram图片点击事件
+    const imageContainers = document.querySelectorAll('.large-image-container, .small-image-container');
+    const modal = document.getElementById('instagramModal');
+    const closeBtn = document.querySelector('.close-modal');
+    const embedFrame = document.getElementById('instagramEmbed');
+
+    imageContainers.forEach((container) => {
+      container.addEventListener('click', function () {
+        const blockId = this.closest('[data-block-id]')?.getAttribute('data-block-id');
+        if (!blockId) return;
+
+        const postUrl = this.querySelector('[data-instagram-post]')?.getAttribute('data-instagram-post');
+        if (!postUrl) return;
+
+        // 转换Instagram链接为嵌入链接
+        let embedUrl = postUrl;
+        if (postUrl.includes('instagram.com/p/')) {
+          embedUrl = postUrl.replace('instagram.com/p/', 'instagram.com/p/embed/captioned/');
+        }
+
+        embedFrame.src = embedUrl;
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      });
+    });
+
+    // 关闭弹窗
+    closeBtn.addEventListener('click', function () {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      embedFrame.src = '';
+    });
+
+    // 点击模态框外部关闭
+    window.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        embedFrame.src = '';
+      }
+    });
   });
 </script>
 
-<style>
-  /* Instagram弹窗样式 */
-  .instagram-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .instagram-modal.active {
-    display: flex;
-  }
-
-  .modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-
-  .modal-content {
-    position: relative;
-    width: 90%;
-    max-width: 800px;
-    background: white;
-    border-radius: 12px;
-    overflow: auto;
-    z-index: 1;
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-close svg {
-    width: 20px;
-    height: 20px;
-  }
-
-  .instagram-embed-container {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-  }
-
-  .instagram-embed-container iframe {
-    width: 100%;
-    min-height: 600px;
-    border: none;
-    display: block;
-  }
-
-  /* 响应式调整 */
-  @media (max-width: 768px) {
-    .modal-content {
-      width: 95%;
-      max-height: 80vh;
-    }
-
-    .instagram-embed-container iframe {
-      min-height: 400px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .modal-content {
-      width: 100%;
-      height: 100%;
-      max-height: none;
-      border-radius: 0;
-    }
-
-    .instagram-embed-container iframe {
-      min-height: 300px;
-    }
-  }
-</style>
-
 {% schema %}
 {
-  "name": "Instagram图片展示(带弹窗)",
+  "name": "Instagram图片展示",
   "tag": "section",
   "class": "instagram-grid-section",
   "settings": [
@@ -771,7 +770,7 @@
           "type": "url",
           "id": "instagram_post",
           "label": "Instagram帖子链接",
-          "info": "输入Instagram帖子链接,点击图片时将显示此帖子"
+          "info": "输入Instagram帖子链接，点击图片后将展示此内容"
         }
       ]
     }
@@ -785,6 +784,13 @@
         "button_text": "Follow Us"
       },
       "blocks": [
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
         { "type": "image_item" },
         { "type": "image_item" },
         { "type": "image_item" },
