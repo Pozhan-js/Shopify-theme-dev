@@ -1,38 +1,39 @@
 {% comment %}
-  Carousel de bijoux - Section Liquid (Fixed Image Loading)
+  Carousel de bijoux - Section Liquid (Fixed Image Loading + Pagination)
   ✅ Fixed: Image loading with correct Liquid syntax
   ✅ Removed: Product title and price
-  ✅ Removed: Navigation buttons
-  ✅ Added: Smooth scroll functionality
+  ✅ Added: Unique class names
+  ✅ Added: Left/right pagination buttons
+  ✅ Added: Pagination functionality (1-5 to 6-10, etc.)
   ✅ Modified: Display 5 products per view
   ✅ Modified: Full width with 50px padding on sides
 {% endcomment %}
 
-<div class="jewelry-carousel-section" data-section-id="{{ section.id }}">
-  <div class="container">
+<div class="jewelry-carousel-section-{{ section.id }}" data-section-id="{{ section.id }}">
+  <div class="container-{{ section.id }}">
     
     <!-- Section Title and Subtitle -->
     {% if section.settings.sectiontitle != blank  %}
-      <div class="section-header">
+      <div class="section-header-{{ section.id }}">
         {% if section.settings.sectiontitle != blank %}
           {% if section.settings.titlelink != blank %}
-            <a href="{{ section.settings.titlelink }}" class="section-title-link">
-              <h2 class="section-title1">{{ section.settings.sectiontitle }}</h2>
+            <a href="{{ section.settings.titlelink }}" class="section-title-link-{{ section.id }}">
+              <h2 class="section-title1-{{ section.id }}">{{ section.settings.sectiontitle }}</h2>
             </a>
           {% else %}
-            <h2 class="section-title1">{{ section.settings.sectiontitle }}</h2>
+            <h2 class="section-title1-{{ section.id }}">{{ section.settings.sectiontitle }}</h2>
           {% endif %}
         {% endif %}
       </div>
     {% endif %}
     
     <!-- Navigation par onglets -->
-    <div class="tab-navigation">
-      <div class="tab-container">
+    <div class="tab-navigation-{{ section.id }}">
+      <div class="tab-container-{{ section.id }}">
         {% for block in section.blocks %}
           {% if block.type == 'collectiontab' %}
             <button
-              class="tab-button"
+              class="tab-button-{{ section.id }}"
               data-tab="{{ block.id }}"
               data-collection="{{ block.settings.collection.handle }}"
             >
@@ -43,48 +44,62 @@
       </div>
     </div>
 
-    <!-- Conteneur du carousel -->
-    <div class="carousel-wrapper">
+    <!-- Conteneur du carousel avec pagination -->
+    <div class="carousel-wrapper-{{ section.id }}">
       {% for block in section.blocks %}
         {% if block.type == 'collectiontab' %}
           <div 
-            class="carousel-content"
+            class="carousel-content-{{ section.id }}"
             data-content="{{ block.id }}"
           >
-            <div class="carousel-track">
+            <!-- Boutons de pagination -->
+            <div class="pagination-buttons-{{ section.id }}">
+              <button class="pagination-btn prev-btn-{{ section.id }}" data-direction="prev" data-collection="{{ block.settings.collection.handle }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="pagination-btn next-btn-{{ section.id }}" data-direction="next" data-collection="{{ block.settings.collection.handle }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="carousel-track-{{ section.id }}">
               
               <!-- Cartes produits : chaque carte est un lien vers la page produit -->
               {% assign collection = collections[block.settings.collection.handle] %}
               {% if collection and collection.products.size > 0 %}
                 {% for product in collection.products limit: block.settings.productslimit %}
-                  <a href="{{ product.url }}" class="card-container card-link">
-                    <div class="card-inner">
+                  <a href="{{ product.url }}" class="card-container-{{ section.id }} card-link-{{ section.id }}">
+                    <div class="card-inner-{{ section.id }}">
                       <!-- Image container -->
-                      <div class="image-container product-card">
+                      <div class="image-container-{{ section.id }} product-card-{{ section.id }}">
                         {% if product.featured_image %}
                           <img
                             src="{{ product.featured_image | image_url: width: 400, height: 500 }}"
                             alt="{{ product.title | escape }}"
-                            class="card-image main-image"
+                            class="card-image-{{ section.id }} main-image-{{ section.id }}"
                             loading="lazy"
                           >
                           {% if product.images[1] %}
                             <img
                               src="{{ product.images[1] | image_url: width: 400, height: 500 }}"
                               alt="{{ product.title | escape }}"
-                              class="card-image hover-image"
+                              class="card-image-{{ section.id }} hover-image-{{ section.id }}"
                               loading="lazy"
                             >
                           {% endif %}
                         {% else %}
-                          <div class="placeholder-image">
+                          <div class="placeholder-image-{{ section.id }}">
                             <span>{{ product.title }}</span>
                           </div>
                         {% endif %}
                         
                         <!-- Badge Best Seller conditionnel -->
                         {% if product.tags contains 'bestseller' %}
-                          <div class="bestseller-badge"> 
+                          <div class="bestseller-badge-{{ section.id }}"> 
                             BEST SELLER
                           </div>
                         {% endif %}
@@ -93,7 +108,7 @@
                   </a>
                 {% endfor %}
               {% else %}
-                <div class="no-products-message">
+                <div class="no-products-message-{{ section.id }}">
                   <p>Aucun produit trouvé dans cette collection.</p>
                 </div>
               {% endif %}
@@ -108,25 +123,25 @@
 <style>
 /* Variables CSS */
 :root {
-  --cream: #F5F1EB;
-  --warm-beige: #E8DDD4;
-  --soft-brown: #C4A484;
-  --pearl-white: #FFF8F0;
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-200: #E5E7EB;
-  --gray-400: #9CA3AF;
-  --gray-500: #6B7280;
-  --gray-600: #4B5563;
-  --gray-700: #374151;
-  --gray-900: #111827;
-  --white: #FFFFFF;
-  --amber-400: #FBBF24;
-  --orange-400: #FB923C;
+  --cream-{{ section.id }}: #F5F1EB;
+  --warm-beige-{{ section.id }}: #E8DDD4;
+  --soft-brown-{{ section.id }}: #C4A484;
+  --pearl-white-{{ section.id }}: #FFF8F0;
+  --gray-50-{{ section.id }}: #F9FAFB;
+  --gray-100-{{ section.id }}: #F3F4F6;
+  --gray-200-{{ section.id }}: #E5E7EB;
+  --gray-400-{{ section.id }}: #9CA3AF;
+  --gray-500-{{ section.id }}: #6B7280;
+  --gray-600-{{ section.id }}: #4B5563;
+  --gray-700-{{ section.id }}: #374151;
+  --gray-900-{{ section.id }}: #111827;
+  --white-{{ section.id }}: #FFFFFF;
+  --amber-400-{{ section.id }}: #FBBF24;
+  --orange-400-{{ section.id }}: #FB923C;
 }
 
 /* Section principale */
-.jewelry-carousel-section {
+.jewelry-carousel-section-{{ section.id }} {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: transparent;
   min-height: 50vh;
@@ -134,36 +149,36 @@
 }
 
 /* Container principal - 全宽设计 */
-.container {
+.container-{{ section.id }} {
   width: 100%;
   margin: 0 auto;
   padding: 0 50px; /* 左右各留50px内边距 */
 }
 
 /* Section Header */
-.section-header {
+.section-header-{{ section.id }} {
   text-align: center;
   margin-bottom: 2rem;
 }
 
 /* 标题链接样式 */
-.section-title-link {
+.section-title-link-{{ section.id }} {
   text-decoration: none;
   color: inherit;
   display: inline-block;
   transition: all 0.3s ease;
 }
 
-.section-title-link:hover {
+.section-title-link-{{ section.id }}:hover {
   transform: translateY(-2px);
   opacity: 0.8;
 }
 
-.section-title-link:hover .section-title1 {
-  color: var(--soft-brown);
+.section-title-link-{{ section.id }}:hover .section-title1-{{ section.id }} {
+  color: var(--soft-brown-{{ section.id }});
 }
 
-.section-title1 {
+.section-title1-{{ section.id }} {
   font-size: 2.5rem;
   font-family: Georgia, serif;
   font-weight: normal;
@@ -174,16 +189,16 @@
 }
 
 /* 当标题是链接时，添加光标指针 */
-.section-title-link .section-title1 {
+.section-title-link-{{ section.id }} .section-title1-{{ section.id }} {
   cursor: pointer;
 }
 
 /* Navigation des onglets */
-.tab-navigation {
+.tab-navigation-{{ section.id }} {
   margin-bottom: 2rem;
 }
 
-.tab-container {
+.tab-container-{{ section.id }} {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -191,7 +206,7 @@
   flex-wrap: wrap;
 }
 
-.tab-button {
+.tab-button-{{ section.id }} {
   padding: 0.5rem 0;
   font-size: 0.875rem;
   font-weight: 500;
@@ -203,30 +218,30 @@
   transition: color 0.3s ease;
 }
 
-.tab-button:hover,
-.tab-button.active {
-  color: var(--gray-900);
+.tab-button-{{ section.id }}:hover,
+.tab-button-{{ section.id }}.active {
+  color: var(--gray-900-{{ section.id }});
 }
 
-.tab-button.active {
+.tab-button-{{ section.id }}.active {
   font-weight: 600;
 }
 
 /* Carousel wrapper */
-.carousel-wrapper {
+.carousel-wrapper-{{ section.id }} {
   position: relative;
   overflow: hidden;
 }
 
-.carousel-content {
+.carousel-content-{{ section.id }} {
   display: none;
 }
 
-.carousel-content.active {
+.carousel-content-{{ section.id }}.active {
   display: block;
 }
 
-.carousel-track {
+.carousel-track-{{ section.id }} {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
@@ -237,47 +252,110 @@
   padding-right: 1rem;
 }
 
-.carousel-track::-webkit-scrollbar {
+.carousel-track-{{ section.id }}::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
 }
 
+/* Pagination Buttons */
+.pagination-buttons-{{ section.id }} {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.pagination-btn-{{ section.id }} {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--gray-200-{{ section.id }});
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: all;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-btn-{{ section.id }}:hover {
+  background: var(--white-{{ section.id }});
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.pagination-btn-{{ section.id }}:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.pagination-btn-{{ section.id }}:disabled:hover {
+  transform: translateY(-50%) scale(0.95);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prev-btn-{{ section.id }} {
+  left: -20px;
+}
+
+.next-btn-{{ section.id }} {
+  right: -20px;
+}
+
+.pagination-btn-{{ section.id }} svg {
+  color: var(--gray-700-{{ section.id }});
+  transition: color 0.3s ease;
+}
+
+.pagination-btn-{{ section.id }}:hover svg {
+  color: var(--soft-brown-{{ section.id }});
+}
+
 /* Cards containers - 调整为显示5个产品，基于全宽容器 */
-.card-container {
+.card-container-{{ section.id }} {
   flex-shrink: 0;
   width: calc((100% - 4rem) / 5); /* 5个产品，4个间隙 */
   min-width: 200px; /* 最小宽度保证在小屏幕上的显示 */
 }
 
-.card-link {
+.card-link-{{ section.id }} {
   text-decoration: none;
   color: inherit;
   display: block;
   transition: all 0.3s ease;
 }
 
-.card-link:hover {
+.card-link-{{ section.id }}:hover {
   transform: translateY(-6px);
 }
 
-.card-link .card-inner {
+.card-link-{{ section.id }} .card-inner-{{ section.id }} {
   height: 100%;
 }
 
 /* Image containers */
-.image-container {
+.image-container-{{ section.id }} {
   position: relative;
-  background-color: var(--white);
+  background-color: var(--white-{{ section.id }});
   overflow: hidden;
   transition: transform 0.3s ease;
   border-radius: 12px;
   height: 20rem; /* 固定高度 */
 }
 
-.image-container:hover {
+.image-container-{{ section.id }}:hover {
   transform: scale(1.02);
 }
 
-.card-image {
+.card-image-{{ section.id }} {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -285,37 +363,37 @@
   display: block;
 }
 
-.hover-image {
+.hover-image-{{ section.id }} {
   position: absolute;
   top: 0;
   left: 0;
   opacity: 0;
 }
 
-.product-card:hover .hover-image {
+.product-card-{{ section.id }}:hover .hover-image-{{ section.id }} {
   opacity: 1;
 }
 
-.placeholder-image {
+.placeholder-image-{{ section.id }} {
   width: 100%;
   height: 100%;
-  background-color: var(--gray-200);
+  background-color: var(--gray-200-{{ section.id }});
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--gray-400);
+  color: var(--gray-400-{{ section.id }});
   font-size: 0.875rem;
   text-align: center;
   padding: 1rem;
 }
 
 /* Badges */
-.bestseller-badge {
+.bestseller-badge-{{ section.id }} {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
-  background: linear-gradient(135deg, var(--amber-400) 0%, var(--orange-400) 100%);
-  color: var(--white);
+  background: linear-gradient(135deg, var(--amber-400-{{ section.id }}) 0%, var(--orange-400-{{ section.id }}) 100%);
+  color: var(--white-{{ section.id }});
   padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -325,116 +403,155 @@
 }
 
 /* No products message */
-.no-products-message {
+.no-products-message-{{ section.id }} {
   text-align: center;
   padding: 2rem;
-  color: var(--gray-500);
+  color: var(--gray-500-{{ section.id }});
   font-style: italic;
 }
 
 /* Responsive - 调整响应式设计以保持5个产品显示 */
 @media (max-width: 1400px) {
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 180px;
   }
 }
 
 @media (max-width: 1200px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 40px; /* 稍微减少内边距 */
   }
   
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 160px;
   }
 }
 
 @media (max-width: 992px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 30px; /* 进一步减少内边距 */
   }
   
-  .card-container {
+  .card-container-{{ section.id }} {
     min-width: 150px;
   }
 }
 
 @media (max-width: 768px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 20px; /* 移动端减少内边距 */
   }
   
-  .section-title1 {
+  .section-title1-{{ section.id }} {
     font-size: 2rem;
   }
   
-  .tab-container {
+  .tab-container-{{ section.id }} {
     gap: 0.75rem;
   }
   
-  .carousel-track {
+  .carousel-track-{{ section.id }} {
     gap: 0.75rem;
+  }
+
+  .pagination-btn-{{ section.id }} {
+    width: 35px;
+    height: 35px;
+  }
+
+  .prev-btn-{{ section.id }} {
+    left: -17px;
+  }
+
+  .next-btn-{{ section.id }} {
+    right: -17px;
   }
   
   /* 在中等屏幕上仍显示5个产品但缩小尺寸 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 4rem) / 5);
     min-width: 120px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 16rem;
   }
 
-  .card-link:hover {
+  .card-link-{{ section.id }}:hover {
     transform: translateY(-4px);
   }
 
-  .section-title-link:hover {
+  .section-title-link-{{ section.id }}:hover {
     transform: translateY(-1px);
   }
 }
 
 @media (max-width: 576px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 15px; /* 小屏幕进一步减少内边距 */
   }
   
-  .section-header {
+  .section-header-{{ section.id }} {
     margin-bottom: 2rem;
   }
   
-  .section-title1 {
+  .section-title1-{{ section.id }} {
     font-size: 1.75rem;
+  }
+
+  .pagination-btn-{{ section.id }} {
+    width: 30px;
+    height: 30px;
+  }
+
+  .prev-btn-{{ section.id }} {
+    left: -15px;
+  }
+
+  .next-btn-{{ section.id }} {
+    right: -15px;
   }
   
   /* 在小屏幕上调整为显示3个产品 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 2rem) / 3);
     min-width: 100px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 12rem;
   }
   
-  .carousel-track {
+  .carousel-track-{{ section.id }} {
     gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
+  .container-{{ section.id }} {
     padding: 0 10px; /* 最小屏幕内边距 */
   }
   
+  .pagination-btn-{{ section.id }} {
+    width: 25px;
+    height: 25px;
+  }
+
+  .prev-btn-{{ section.id }} {
+    left: -12px;
+  }
+
+  .next-btn-{{ section.id }} {
+    right: -12px;
+  }
+  
   /* 在超小屏幕上显示2个产品 */
-  .card-container {
+  .card-container-{{ section.id }} {
     width: calc((100% - 0.5rem) / 2);
     min-width: 90px;
   }
   
-  .image-container {
+  .image-container-{{ section.id }} {
     height: 10rem;
   }
 }
@@ -447,10 +564,29 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (!section) return;
   
-  const tabButtons = section.querySelectorAll('.tab-button');
-  const carouselContents = section.querySelectorAll('.carousel-content');
+  const tabButtons = section.querySelectorAll('.tab-button-{{ section.id }}');
+  const carouselContents = section.querySelectorAll('.carousel-content-{{ section.id }}');
   
   let currentTabIndex = 0;
+  const productsPerPage = 5;
+
+  // 存储每个collection的产品信息和当前页码
+  const collectionState = {};
+
+  // 初始化所有collection的状态
+  carouselContents.forEach((content, contentIndex) => {
+    const collection = content.querySelector('.carousel-track-{{ section.id }}');
+    if (collection) {
+      const products = collection.querySelectorAll('.card-container-{{ section.id }}');
+      const totalPages = Math.ceil(products.length / productsPerPage);
+      const collectionHandle = content.dataset.content;
+      collectionState[collectionHandle] = {
+        totalPages: totalPages,
+        currentPage: 0,
+        productsPerPage: productsPerPage
+      };
+    }
+  });
 
   // 初始化第一个标签页
   if (tabButtons.length > 0) {
@@ -482,23 +618,79 @@ document.addEventListener('DOMContentLoaded', function() {
     // 重置滚动位置
     const activeContent = carouselContents[index];
     if (activeContent) {
-      const track = activeContent.querySelector('.carousel-track');
+      const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
       if (track) {
         track.scrollLeft = 0;
+      }
+    }
+
+    // 更新分页按钮状态
+    updatePaginationButtons();
+  }
+
+  // 分页按钮功能
+  section.querySelectorAll('.pagination-btn-{{ section.id }}').forEach(button => {
+    button.addEventListener('click', function() {
+      const direction = this.dataset.direction;
+      const collectionHandle = this.dataset.collection;
+      
+      if (collectionState[collectionHandle]) {
+        const state = collectionState[collectionHandle];
+        
+        if (direction === 'next' && state.currentPage < state.totalPages - 1) {
+          state.currentPage++;
+        } else if (direction === 'prev' && state.currentPage > 0) {
+          state.currentPage--;
+        }
+        
+        // 滚动到对应页面
+        const activeContent = carouselContents[currentTabIndex];
+        if (activeContent && activeContent.dataset.content === collectionHandle) {
+          const track = activeContent.querySelector('.carousel-track-{{ section.id }}');
+          if (track) {
+            const scrollAmount = state.currentPage * (track.clientWidth + 16); // 16px 是 gap
+            track.scrollTo({
+              left: scrollAmount,
+              behavior: 'smooth'
+            });
+          }
+        }
+        
+        updatePaginationButtons();
+      }
+    });
+  });
+
+  function updatePaginationButtons() {
+    const activeContent = carouselContents[currentTabIndex];
+    if (activeContent) {
+      const collectionHandle = activeContent.dataset.content;
+      const prevBtn = activeContent.querySelector('.prev-btn-{{ section.id }}');
+      const nextBtn = activeContent.querySelector('.next-btn-{{ section.id }}');
+      
+      if (collectionState[collectionHandle]) {
+        const state = collectionState[collectionHandle];
+        
+        if (prevBtn) {
+          prevBtn.disabled = state.currentPage === 0;
+        }
+        if (nextBtn) {
+          nextBtn.disabled = state.currentPage >= state.totalPages - 1;
+        }
       }
     }
   }
 
   // 为每个轮播轨道添加触摸滑动支持
   carouselContents.forEach(content => {
-    const track = content.querySelector('.carousel-track');
+    const track = content.querySelector('.carousel-track-{{ section.id }}');
     if (track) {
-      addTouchSupport(track);
+      addTouchSupport(track, content.dataset.content);
     }
   });
 
   // 触摸滑动支持
-  function addTouchSupport(trackEl) {
+  function addTouchSupport(trackEl, collectionHandle) {
     let isDown = false;
     let startX;
     let scrollLeft;
@@ -550,21 +742,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 设置初始光标样式
     trackEl.style.cursor = 'grab';
+
+    // 监听滚动事件，更新分页状态
+    trackEl.addEventListener('scroll', debounce(() => {
+      if (collectionState[collectionHandle]) {
+        const state = collectionState[collectionHandle];
+        const newPage = Math.round(trackEl.scrollLeft / (trackEl.clientWidth + 16));
+        if (newPage !== state.currentPage && newPage >= 0 && newPage < state.totalPages) {
+          state.currentPage = newPage;
+          updatePaginationButtons();
+        }
+      }
+    }, 100));
+  }
+
+  // 防抖函数
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   }
 
   // 图片加载错误处理
   section.addEventListener('error', function(e) {
     if (e.target.tagName === 'IMG') {
-      const placeholder = e.target.closest('.image-container').querySelector('.placeholder-image');
+      const placeholder = e.target.closest('.image-container-{{ section.id }}')?.querySelector('.placeholder-image-{{ section.id }}');
       if (!placeholder) {
         const newPlaceholder = document.createElement('div');
-        newPlaceholder.className = 'placeholder-image';
+        newPlaceholder.className = 'placeholder-image-{{ section.id }}';
         newPlaceholder.innerHTML = '<span>Image non disponible</span>';
         e.target.parentNode.appendChild(newPlaceholder);
       }
       e.target.style.display = 'none';
     }
   }, true);
+
+  // 初始化时设置分页按钮状态
+  setTimeout(updatePaginationButtons, 100);
 });
 </script>
 
@@ -621,7 +841,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ],
   "presets": [
     {
-      "name": "Carousel de bijoux",
+      "name": "Carousel de bijoux avec pagination",
       "settings": {
         "sectiontitle": "Nos Collections"
       },
