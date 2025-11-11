@@ -91,9 +91,9 @@
   }
 
   .container-video {
-    max-width: 1600px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 0 30px;
+    padding: 0 50px; /* PC端左右边距50px */
   }
 
   .section-title {
@@ -160,15 +160,16 @@
     gap: 20px;
   }
 
+  /* PC端：4个视频卡片 */
   .video-item {
-    flex: 0 0 calc(20% - 16px);
+    flex: 0 0 calc(25% - 15px); /* 4个卡片，减去gap */
     min-width: 0;
   }
 
   .video-thumbnail {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 5;
+    aspect-ratio: 9 / 16; /* 增加宽度，改为9:16比例 */
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
@@ -337,6 +338,9 @@
 
   /* 响应式 */
   @media (max-width: 768px) {
+    .container-video {
+      padding: 0 20px; /* 移动端减小边距 */
+    }
     .video-item {
       flex: 0 0 calc(50% - 6px);
     }
@@ -349,6 +353,9 @@
   }
 
   @media (max-width: 480px) {
+    .container-video {
+      padding: 0 15px;
+    }
     .video-modal-content {
       width: 100vw;
       height: 100vh;
@@ -364,16 +371,10 @@
     .video-carousel-track { gap: 20px; }
   }
 
+  /* PC端：确保4个卡片显示 */
   @media (min-width: 1025px) {
     .video-item {
-      flex: 0 0 calc(20% - 16px);
-    }
-  }
-
-  @media (min-width: 1600px) {
-    .container-video {
-      padding: 0 60px;
-      max-width: 1800px;
+      flex: 0 0 calc(25% - 15px); /* 4个卡片 */
     }
   }
 
@@ -409,7 +410,7 @@
     const closeBtn = document.querySelector('.video-modal-close');
     const overlay = document.querySelector('.video-modal-overlay');
 
-    let currentPage = 0; // 当前页码（每页 = 一屏）
+    let currentPage = 0;
     let itemsPerView = getItemsPerView();
     let totalPages = 0;
 
@@ -417,7 +418,7 @@
       if (window.innerWidth <= 480) return 2;
       if (window.innerWidth <= 768) return 2;
       if (window.innerWidth <= 1024) return 3;
-      return 5;
+      return 4; // PC端显示4个
     }
 
     function updatePages() {
@@ -435,7 +436,6 @@
       nextBtn.classList.toggle('hidden', currentPage >= totalPages - 1);
     }
 
-    // 下一页：跳转一整页
     nextBtn.addEventListener('click', () => {
       if (currentPage < totalPages - 1) {
         currentPage++;
@@ -443,7 +443,6 @@
       }
     });
 
-    // 上一页：回退一整页
     prevBtn.addEventListener('click', () => {
       if (currentPage > 0) {
         currentPage--;
@@ -451,7 +450,6 @@
       }
     });
 
-    // 视频播放
     videoItems.forEach(item => {
       const thumbnail = item.querySelector('.video-thumbnail');
       thumbnail.addEventListener('click', () => {
@@ -483,7 +481,7 @@
     });
 
     window.addEventListener('resize', updatePages);
-    updatePages(); // 初始化
+    updatePages();
   });
 </script>
 
