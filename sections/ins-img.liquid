@@ -3,7 +3,7 @@
   1. 默认显示2行（14张图片）
   2. 点击"显示更多"按钮展开全部
   3. 内容居中，两侧留白
-  4. 图片点击后显示Instagram帖子
+  4. 图片仅用于展示，无点击事件
   5. 当没有选择图片时，显示配置的URL链接内容
 {% endcomment %}
 
@@ -13,64 +13,64 @@
     <div class="header-layout">
       <!-- 左侧文本区域 -->
       <div class="text-content">
-        {% if section.settings.textcontent != blank %}
-          <p class="header-text">{{ section.settings.textcontent }}</p>
+        {% if section.settings.text_content != blank %}
+          <p class="header-text">{{ section.settings.text_content }}</p>
         {% endif %}
       </div>
 
       <!-- 右侧Instagram按钮 -->
-      {% if section.settings.instagramlink != blank %}
+      {% if section.settings.instagram_link != blank %}
         <div class="button-content">
-          <a href="{{ section.settings.instagramlink }}" class="instagram-button" target="_blank" rel="noopener">
+          <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
             <svg class="instagram-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
-            {{ section.settings.buttontext | default: 'Follow Us' }}
+            {{ section.settings.button_text | default: 'Follow Us' }}
           </a>
         </div>
       {% endif %}
     </div>
 
     <div class="grid-wrapper">
-      {% assign totalimages = section.blocks.size %}
-      {% assign totalrows = totalimages | divided_by: 7 %}
-      {% assign remainder = totalimages | modulo: 7 %}
+      {% assign total_images = section.blocks.size %}
+      {% assign total_rows = total_images | divided_by: 7 %}
+      {% assign remainder = total_images | modulo: 7 %}
       {% if remainder > 0 %}
-        {% assign totalrows = totalrows | plus: 1 %}
+        {% assign total_rows = total_rows | plus: 1 %}
       {% endif %}
 
       {% for i in (0..100) %}
-        {% assign startindex = i | times: 7 %}
-        {% assign endindex = startindex | plus: 6 %}
+        {% assign start_index = i | times: 7 %}
+        {% assign end_index = start_index | plus: 6 %}
 
         {% comment %}检查是否还有图片{% endcomment %}
-        {% assign hasimages = false %}
-        {% for block in section.blocks limit: 7 offset: startindex %}
-          {% if block.type == 'imageitem' %}
-            {% assign hasimages = true %}
+        {% assign has_images = false %}
+        {% for block in section.blocks limit: 7 offset: start_index %}
+          {% if block.type == 'image_item' %}
+            {% assign has_images = true %}
             {% break %}
           {% endif %}
         {% endfor %}
 
-        {% if hasimages == false %}
+        {% if has_images == false %}
           {% break %}
         {% endif %}
 
-        {% assign isoddrow = i | modulo: 2 %}
-        {% assign rowclass = '' %}
+        {% assign is_odd_row = i | modulo: 2 %}
+        {% assign row_class = '' %}
         {% if i >= 2 %}
-          {% assign rowclass = 'hidden-row' %}
+          {% assign row_class = 'hidden-row' %}
         {% endif %}
 
         <div
-          class="grid-row {{ rowclass }} {% if isoddrow == 0 %}layout-left{% else %}layout-right{% endif %}"
+          class="grid-row {{ row_class }} {% if is_odd_row == 0 %}layout-left{% else %}layout-right{% endif %}"
           data-row-index="{{ i }}"
         >
-          {% if isoddrow == 0 %}
+          {% if is_odd_row == 0 %}
             <!-- 奇数行：左大右小 -->
             <div class="large-image-container">
-              {% assign block = section.blocks[startindex] %}
-              {% if block and block.type == 'imageitem' %}
+              {% assign block = section.blocks[start_index] %}
+              {% if block and block.type == 'image_item' %}
                 {% if block.settings.image %}
                   <img
                     src="{{ block.settings.image | img_url: '800x800' }}"
@@ -79,8 +79,8 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    {% if block.settings.inslink %}
-                      data-ins-link="{{ block.settings.inslink }}"
+                    {% if block.settings.ins_link %}
+                      data-ins-link="{{ block.settings.ins_link }}"
                     {% endif %}
                   >
                 {% elsif block.settings.link != blank %}
@@ -91,8 +91,8 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    {% if block.settings.inslink %}
-                      data-ins-link="{{ block.settings.inslink }}"
+                    {% if block.settings.ins_link %}
+                      data-ins-link="{{ block.settings.ins_link }}"
                     {% endif %}
                   >
                 {% else %}
@@ -105,10 +105,10 @@
 
             <div class="small-images-grid">
               {% for j in (1..6) %}
-                {% assign blockindex = startindex | plus: j %}
-                {% assign block = section.blocks[blockindex] %}
+                {% assign block_index = start_index | plus: j %}
+                {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'imageitem' %}
+                  {% if block and block.type == 'image_item' %}
                     {% if block.settings.image %}
                       <img
                         src="{{ block.settings.image | img_url: '400x400' }}"
@@ -117,8 +117,8 @@
                         loading="lazy"
                         width="400"
                         height="400"
-                        {% if block.settings.inslink %}
-                          data-ins-link="{{ block.settings.inslink }}"
+                        {% if block.settings.ins_link %}
+                          data-ins-link="{{ block.settings.ins_link }}"
                         {% endif %}
                       >
                     {% elsif block.settings.link != blank %}
@@ -129,8 +129,8 @@
                         loading="lazy"
                         width="400"
                         height="400"
-                        {% if block.settings.inslink %}
-                          data-ins-link="{{ block.settings.inslink }}"
+                        {% if block.settings.ins_link %}
+                          data-ins-link="{{ block.settings.ins_link }}"
                         {% endif %}
                       >
                     {% else %}
@@ -146,10 +146,10 @@
             <!-- 偶数行：右大左小 -->
             <div class="small-images-grid">
               {% for j in (0..5) %}
-                {% assign blockindex = startindex | plus: j %}
-                {% assign block = section.blocks[blockindex] %}
+                {% assign block_index = start_index | plus: j %}
+                {% assign block = section.blocks[block_index] %}
                 <div class="small-image-container">
-                  {% if block and block.type == 'imageitem' %}
+                  {% if block and block.type == 'image_item' %}
                     {% if block.settings.image %}
                       <img
                         src="{{ block.settings.image | img_url: '400x400' }}"
@@ -158,8 +158,8 @@
                         loading="lazy"
                         width="400"
                         height="400"
-                        {% if block.settings.inslink %}
-                          data-ins-link="{{ block.settings.inslink }}"
+                        {% if block.settings.ins_link %}
+                          data-ins-link="{{ block.settings.ins_link }}"
                         {% endif %}
                       >
                     {% elsif block.settings.link != blank %}
@@ -170,8 +170,8 @@
                         loading="lazy"
                         width="400"
                         height="400"
-                        {% if block.settings.inslink %}
-                          data-ins-link="{{ block.settings.inslink }}"
+                        {% if block.settings.ins_link %}
+                          data-ins-link="{{ block.settings.ins_link }}"
                         {% endif %}
                       >
                     {% else %}
@@ -185,9 +185,9 @@
             </div>
 
             <div class="large-image-container">
-              {% assign blockindex = startindex | plus: 6 %}
-              {% assign block = section.blocks[blockindex] %}
-              {% if block and block.type == 'imageitem' %}
+              {% assign block_index = start_index | plus: 6 %}
+              {% assign block = section.blocks[block_index] %}
+              {% if block and block.type == 'image_item' %}
                 {% if block.settings.image %}
                   <img
                     src="{{ block.settings.image | img_url: '800x800' }}"
@@ -196,8 +196,8 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    {% if block.settings.inslink %}
-                      data-ins-link="{{ block.settings.inslink }}"
+                    {% if block.settings.ins_link %}
+                      data-ins-link="{{ block.settings.ins_link }}"
                     {% endif %}
                   >
                 {% elsif block.settings.link != blank %}
@@ -208,8 +208,8 @@
                     loading="lazy"
                     width="800"
                     height="800"
-                    {% if block.settings.inslink %}
-                      data-ins-link="{{ block.settings.inslink }}"
+                    {% if block.settings.ins_link %}
+                      data-ins-link="{{ block.settings.ins_link }}"
                     {% endif %}
                   >
                 {% else %}
@@ -225,7 +225,7 @@
     </div>
 
     <!-- 显示更多按钮 - 加减号图标 -->
-    {% if totalrows > 2 %}
+    {% if total_rows > 2 %}
       <div class="load-more-container">
         <button class="load-more-button" id="loadMoreBtn" aria-label="显示更多">
           <!-- 加号图标 -->
@@ -252,7 +252,7 @@
       </svg>
     </button>
     <div class="modal-content">
-      <div id="instagramEmbedContainer"></div>
+      <iframe id="instagramEmbed" frameborder="0" allowfullscreen></iframe>
     </div>
   </div>
 </div>
@@ -271,31 +271,25 @@
     justify-content: center;
   }
 
-  .instagram-modal.active {
-    display: flex;
-  }
-
   .modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(0, 0, 0, 0.8);
   }
 
   .modal-container {
     position: relative;
     width: 95%;
     max-width: 500px;
-    max-height: 95vh;
+    height: 90vh;
     background: white;
     border-radius: 12px;
     overflow: hidden;
     z-index: 1;
     animation: modalFadeIn 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
   }
 
   .modal-close {
@@ -305,74 +299,36 @@
     width: 36px;
     height: 36px;
     border: none;
-    background: rgba(255, 255, 255, 0.95);
+    background: white;
     border-radius: 50%;
     cursor: pointer;
     z-index: 2;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
-  }
-
-  .modal-close:hover {
-    background: white;
-    transform: scale(1.1);
   }
 
   .modal-close svg {
-    width: 20px;
-    height: 20px;
-    stroke: #1f2937;
+    width: 24px;
+    height: 24px;
+    stroke: var(--gray-800);
   }
 
   .modal-content {
     width: 100%;
-    height: auto;
-    max-height: 95vh;
+    height: 100%;
     padding: 0;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
   }
 
-  #instagramEmbedContainer {
+  .modal-content iframe {
     width: 100%;
-    min-height: 400px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #instagramEmbedContainer iframe {
-    width: 100% !important;
-    max-width: 540px !important;
-    border: none !important;
-    margin: 0 auto !important;
-  }
-
-  #instagramEmbedContainer blockquote {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-  }
-
-  /* 加载动画 */
-  .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    height: 100%;
+    min-height: 300px;
+    border: none;
+    display: block;
+    flex-grow: 1;
   }
 
   @keyframes modalFadeIn {
@@ -524,15 +480,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease;
-  }
-
-  .grid-image[data-ins-link] {
-    cursor: pointer;
-  }
-
-  .grid-image[data-ins-link]:hover {
-    transform: scale(1.05);
   }
 
   .placeholder-image {
@@ -555,7 +502,6 @@
   .load-more-container {
     display: flex;
     justify-content: center;
-    margin-top: 2rem;
   }
 
   .load-more-button {
@@ -674,13 +620,6 @@
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(3, 1fr);
     }
-
-    .modal-container {
-      width: 100%;
-      max-width: 100%;
-      max-height: 100vh;
-      border-radius: 0;
-    }
   }
 
   @media (max-width: 480px) {
@@ -718,30 +657,14 @@
 </style>
 
 <script>
-  (function() {
-    'use strict';
-
-    // 等待DOM加载完成
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-
-    function init() {
-      initLoadMoreButton();
-      initInstagramModal();
-    }
-
+  document.addEventListener('DOMContentLoaded', function () {
     // 显示更多按钮功能
-    function initLoadMoreButton() {
-      const loadMoreBtn = document.getElementById('loadMoreBtn');
-      if (!loadMoreBtn) return;
-
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
       const hiddenRows = document.querySelectorAll('.grid-row.hidden-row');
       let isExpanded = false;
 
-      loadMoreBtn.addEventListener('click', function() {
+      loadMoreBtn.addEventListener('click', function () {
         if (!isExpanded) {
           // 展开所有隐藏的行
           hiddenRows.forEach((row, index) => {
@@ -773,118 +696,51 @@
     }
 
     // Instagram弹框功能
-    function initInstagramModal() {
-      const modal = document.getElementById('instagramModal');
-      const modalClose = modal?.querySelector('.modal-close');
-      const embedContainer = document.getElementById('instagramEmbedContainer');
-      const gridImages = document.querySelectorAll('.grid-image[data-ins-link]');
+    const modal = document.getElementById('instagramModal');
+    const modalClose = modal?.querySelector('.modal-close');
+    const instagramEmbed = document.getElementById('instagramEmbed');
+    const gridImages = document.querySelectorAll('.grid-image[data-ins-link]');
 
-      if (!modal || !modalClose || !embedContainer || !gridImages.length) return;
-
+    if (modal && modalClose && instagramEmbed && gridImages.length) {
       // 点击图片打开弹框
       gridImages.forEach((img) => {
-        img.addEventListener('click', function() {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', function () {
           const postUrl = this.dataset.insLink;
           if (postUrl) {
-            openInstagramModal(postUrl);
+            // 转换Instagram链接为嵌入格式
+            let embedUrl = postUrl;
+            if (!postUrl.includes('/embed')) {
+              embedUrl = postUrl.endsWith('/') ? postUrl + 'embed' : postUrl + '/embed';
+            }
+
+            instagramEmbed.src = embedUrl;
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
           }
         });
       });
 
       // 关闭弹框
-      modalClose.addEventListener('click', closeModal);
-
-      // 点击遮罩层关闭弹框
-      modal.querySelector('.modal-overlay').addEventListener('click', closeModal);
-
-      // ESC键关闭弹框
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-          closeModal();
-        }
+      modalClose.addEventListener('click', function () {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        instagramEmbed.src = '';
       });
 
-      function openInstagramModal(postUrl) {
-        // 显示加载动画
-        embedContainer.innerHTML = '<div class="loading-spinner"></div>';
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+      // 点击遮罩层关闭弹框
+      modal.querySelector('.modal-overlay').addEventListener('click', function () {
+        modalClose.click();
+      });
 
-        // 转换Instagram链接为嵌入格式
-        let embedUrl = postUrl;
-        if (!postUrl.includes('/embed')) {
-          embedUrl = postUrl.replace(/\/$/, '') + '/embed';
+      // ESC键关闭弹框
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+          modalClose.click();
         }
-
-        // 创建iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.style.cssText = 'width: 100%; border: none; overflow: hidden;';
-        iframe.scrolling = 'no';
-        iframe.allowTransparency = true;
-        iframe.frameBorder = '0';
-
-        // 监听iframe加载
-        iframe.onload = function() {
-          // 给Instagram一些时间来渲染内容
-          setTimeout(() => {
-            try {
-              // 尝试获取iframe内容高度
-              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-              if (iframeDoc && iframeDoc.body) {
-                const contentHeight = iframeDoc.body.scrollHeight;
-                iframe.style.height = contentHeight + 'px';
-              } else {
-                // 如果无法访问iframe内容（跨域），使用默认高度
-                iframe.style.height = '600px';
-              }
-            } catch (e) {
-              // 跨域限制，使用默认高度
-              iframe.style.height = '600px';
-            }
-
-            // 移除加载动画
-            embedContainer.innerHTML = '';
-            embedContainer.appendChild(iframe);
-
-            // 加载Instagram的embed脚本
-            loadInstagramScript();
-          }, 500);
-        };
-
-        iframe.onerror = function() {
-          embedContainer.innerHTML = '<p style="padding: 2rem; text-align: center;">无法加载Instagram内容</p>';
-        };
-      }
-
-      function closeModal() {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-        // 清空内容
-        setTimeout(() => {
-          embedContainer.innerHTML = '';
-        }, 300);
-      }
-
-      function loadInstagramScript() {
-        // 检查是否已经加载了Instagram脚本
-        if (window.instgrm) {
-          window.instgrm.Embeds.process();
-        } else {
-          // 加载Instagram的embed脚本
-          const script = document.createElement('script');
-          script.src = '//www.instagram.com/embed.js';
-          script.async = true;
-          script.onload = function() {
-            if (window.instgrm) {
-              window.instgrm.Embeds.process();
-            }
-          };
-          document.body.appendChild(script);
-        }
-      }
+      });
     }
-  })();
+  });
 </script>
 
 {% schema %}
@@ -895,26 +751,26 @@
   "settings": [
     {
       "type": "textarea",
-      "id": "textcontent",
+      "id": "text_content",
       "label": "文本内容",
       "default": "关注我们的Instagram,获取最新产品动态和时尚灵感"
     },
     {
       "type": "text",
-      "id": "buttontext",
+      "id": "button_text",
       "label": "按钮文本",
       "default": "Follow Us"
     },
     {
       "type": "url",
-      "id": "instagramlink",
+      "id": "instagram_link",
       "label": "Instagram链接",
       "info": "输入Instagram主页链接"
     }
   ],
   "blocks": [
     {
-      "type": "imageitem",
+      "type": "image_item",
       "name": "图片项",
       "settings": [
         {
@@ -931,7 +787,7 @@
         },
         {
           "type": "url",
-          "id": "inslink",
+          "id": "ins_link",
           "label": "Instagram帖子链接",
           "info": "点击图片后展示的Instagram帖子链接"
         }
@@ -943,24 +799,24 @@
     {
       "name": "Instagram图片展示",
       "settings": {
-        "textcontent": "关注我们的Instagram,获取最新产品动态和时尚灵感",
-        "buttontext": "Follow Us"
+        "text_content": "关注我们的Instagram,获取最新产品动态和时尚灵感",
+        "button_text": "Follow Us"
       },
       "blocks": [
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" },
-        { "type": "imageitem" }
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" }
       ]
     }
   ]
