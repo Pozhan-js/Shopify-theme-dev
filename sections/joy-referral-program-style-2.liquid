@@ -1,0 +1,1284 @@
+{% comment %}
+  Joy: Referral Program Section (Style 2 - Card/Overlay Layout)
+
+  A referral program section with background image and overlay card.
+  Content card can be positioned anywhere on the image (9 positions).
+
+  Key Features:
+    - Card layout: Content card overlays background image
+    - Flexible positioning: 9 positions (top/center/bottom × left/center/right)
+    - Auto-prefills email for logged-in customers
+    - Social sharing: Copy link, email, WhatsApp
+    - LocalStorage caching: Saves referral data for 30 days
+    - Optional "Generate New Link" for guests
+    - Responsive: Stacks vertically on mobile (image top, card bottom)
+
+  Customization (Theme Editor):
+    - Layout: Container width, card border radius, content positioning
+    - Image: Background image for full card
+    - Content: Badge, title, description, terms text
+    - Form: Email placeholder, button texts (default, loading, error)
+    - Sharing: Toggle copy/email/WhatsApp buttons, share texts
+    - Colors: Section background, card, button, inputs
+    - Typography: Font sizes for badge, title, description, form
+    - Spacing: Section padding (top/bottom), input border radius
+
+  Use Cases:
+    - Dedicated referral page with hero image
+    - Landing page referral widget
+    - Visual referral campaign
+
+  Difference from Style 1:
+    - Style 1: Horizontal layout with image beside form
+    - Style 2: Overlay card layout with background image
+{% endcomment %}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .referral-card-section-{{ section.id }} {
+    --joy-referral-bg-color: {{ section.settings.background_color | default: "transparent" }};
+    --joy-referral-card-bg: {{ section.settings.card_background_color | default: "#ffffff" }};
+    --joy-referral-button-color: {{ section.settings.button_color | default: "#000000" }};
+    background-color: var(--joy-referral-bg-color);
+    color: #000000;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-wrapper {
+    max-width: {{ section.settings.container_max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-inner {
+    {% if section.settings.full_width == false %}
+      background-color: transparent;
+      border-radius: {{ section.settings.card_border_radius }}px;
+      overflow: hidden;
+    {% endif %}
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    margin: 0 auto;
+    border-radius: {{ section.settings.card_border_radius | default: 20 }}px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    {% if section.settings.image == blank %}
+      background: transparent;
+    {% endif %}
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-content {
+    position: absolute;
+    {% if section.settings.content_vertical_position == 'top' %}
+      top: 40px;
+    {% elsif section.settings.content_vertical_position == 'bottom' %}
+      bottom: 40px;
+    {% else %}
+      top: 50%;
+      transform: translateY(-50%);
+    {% endif %}
+
+    {% if section.settings.content_horizontal_position == 'left' %}
+      left: 40px;
+      right: auto;
+    {% elsif section.settings.content_horizontal_position == 'right' %}
+      right: 40px;
+      left: auto;
+    {% else %}
+      left: 50%;
+      {% if section.settings.content_vertical_position == 'center' %}
+        transform: translate(-50%, -50%);
+      {% else %}
+        transform: translateX(-50%);
+      {% endif %}
+    {% endif %}
+
+    background: var(--joy-referral-card-bg);
+    padding: 40px;
+    border-radius: {{ section.settings.card_border_radius | default: 20 }}px;
+    max-width: 500px;
+    width: calc(100% - 80px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-content p {
+    margin: 0;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-badge {
+    display: inline-block;
+    background: var(--joy-referral-button-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: {{ section.settings.badge_font_size | default: 12 }}px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-title {
+    font-size: {{ section.settings.title_font_size | default: 28 }}px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    color: #000;
+    line-height: 1.3;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-description {
+    font-size: {{ section.settings.description_font_size | default: 16 }}px;
+    line-height: 1.6;
+    margin: 0 0 30px;
+    color: #666;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid var(--joy-referral-button-color);
+    border-radius: {{ section.settings.input_border_radius | default: 10 }}px;
+    font-size: {{ section.settings.form_font_size | default: 16 }}px;
+    background: #f8f8f8;
+    color: #333;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-input:focus {
+    outline: none;
+    border-color: var(--joy-referral-button-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-input[readonly] {
+    background: #fff;
+    border-color: var(--joy-referral-button-color);
+    cursor: text;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-button {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px;
+    font-weight: 600;
+    border: none;
+    border-radius: {{ section.settings.input_border_radius | default: 10 }}px;
+    background: var(--joy-referral-button-color);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-share-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-share-btn {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: {{ section.settings.input_border_radius | default: 10 }}px;
+    background: var(--joy-referral-button-color);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-share-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-share-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-terms {
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+    margin: 20px 0 0;
+    line-height: 1.5;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-result {
+    display: none;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-result.show {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-new-link-btn {
+    width: 100%;
+    padding: 14px 18px;
+    font-size: {{ section.settings.button_font_size | default: 16 }}px;
+    font-weight: 500;
+    border: none;
+    border-radius: {{ section.settings.input_border_radius | default: 10 }}px;
+    background-color: var(--joy-referral-button-color);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+    {% if section.settings.show_generate_new_link == false %}
+      display: none;
+    {% endif %}
+  }
+
+  .referral-card-section-{{ section.id }} .referral-card-new-link-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  @media screen and (max-width: 749px) {
+    .referral-card-section-{{ section.id }} .referral-card {
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-image {
+      position: relative;
+      height: 300px;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-overlay {
+      display: none;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-content {
+      position: relative;
+      top: auto;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      transform: none;
+      padding: 30px 20px;
+      width: 100%;
+      max-width: 100%;
+      border-radius: 0 0 {{ section.settings.card_border_radius | default: 20 }}px {{ section.settings.card_border_radius | default: 20 }}px;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-badge {
+      margin-bottom: 16px;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-title {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-description {
+      margin-bottom: 24px;
+    }
+
+    .referral-card-section-{{ section.id }} .referral-card-share-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="referral-card-section referral-card-section-{{ section.id }} section-{{ section.id }}-padding">
+  <div class="referral-card-wrapper">
+    <div class="referral-card-inner">
+    <referral-card-program-style-2
+      section-id="{{ section.id }}"
+      settings='{
+        "buttonLoadingText": "{{ section.settings.button_loading_text | default: "Generating link..." }}",
+        "buttonErrorText": "{{ section.settings.button_error_text | default: "Try Again" }}",
+        "errorMessage": "{{ section.settings.error_message | default: "Unable to generate referral link. Please try again." }}",
+        "linkLabel": "{{ section.settings.link_label | default: "Here is your personal link:" }}",
+        "copyButtonText": "{{ section.settings.copy_button_text | default: "Copy" }}",
+        "emailButtonText": "{{ section.settings.email_button_text | default: "Email" }}",
+        "whatsappButtonText": "{{ section.settings.whatsapp_button_text | default: "WhatsApp" }}",
+        "copiedText": "{{ section.settings.copied_text | default: "Copied!" }}",
+        "shareTitle": "{{ section.settings.share_title | default: "Check out this exclusive offer!" }}",
+        "shareText": "{{ section.settings.share_text | default: "Get exclusive rewards on your first purchase!" }}",
+        "showCopyButton": {{ section.settings.show_copy_button | default: true }},
+        "showEmailButton": {{ section.settings.show_email_button | default: false }},
+        "showWhatsappButton": {{ section.settings.show_whatsapp_button | default: false }}
+      }'>
+
+      <div class="referral-card">
+        <div class="referral-card-image">
+          {% if section.settings.image != blank %}
+            {{
+              section.settings.image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'lazy',
+                widths: '800, 1200, 1600, 2000, 2400',
+                sizes: '(min-width: 750px) 1600px, calc(100vw - 40px)',
+                alt: section.settings.image.alt
+            }}
+          {% else %}
+            <div style="background: transparent; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #666; font-size: 18px;">
+              <!-- No background image -->
+            </div>
+          {% endif %}
+          <div class="referral-card-overlay"></div>
+        </div>
+
+        <div class="referral-card-content">
+          <div class="referral-card-badge">
+            {{ section.settings.badge_text }}
+          </div>
+
+          <h2 class="referral-card-title">{{ section.settings.title }}</h2>
+
+          <div class="referral-card-description">
+            {{ section.settings.description }}
+          </div>
+
+          <div class="referral-card-form-container" data-referral-form-container="{{ section.id }}">
+            <form class="referral-card-form" data-referral-form="{{ section.id }}">
+              <div class="referral-card-input-group">
+                <input
+                  type="email"
+                  class="referral-card-input"
+                  placeholder="{{ section.settings.email_placeholder }}"
+                  name="referrer_email"
+                  required
+                  aria-label="{{ section.settings.email_placeholder }}"
+                >
+              </div>
+
+              <button type="submit" class="referral-card-button">
+                {{ section.settings.button_text }}
+              </button>
+            </form>
+          </div>
+
+          <div class="referral-card-result" data-referral-result="{{ section.id }}">
+            <!-- Result content will be inserted here by JavaScript -->
+          </div>
+
+          {% if section.settings.terms_text != blank %}
+            <div class="referral-card-terms">{{ section.settings.terms_text }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </referral-card-program-style-2>
+    </div>
+  </div>
+</div>
+
+<script>
+  class ReferralCardProgramStyle2 extends HTMLElement {
+    constructor() {
+      super();
+      this.sectionId = this.getAttribute('section-id');
+      this.settings = JSON.parse(this.getAttribute('settings') || '{}');
+      this.initialized = false;
+    }
+
+    connectedCallback() {
+      if (!this.initialized) {
+        this.init();
+        this.initialized = true;
+      }
+    }
+
+    init() {
+      this.form = this.querySelector(`[data-referral-form="${this.sectionId}"]`);
+      this.formContainer = this.querySelector(`[data-referral-form-container="${this.sectionId}"]`);
+      this.resultContainer = this.querySelector(`[data-referral-result="${this.sectionId}"]`);
+
+      if (this.form) {
+        this.form.addEventListener('submit', this.handleSubmit.bind(this));
+
+        // Check for cached data first, then initialize Joy integration
+        const hasCachedData = this.checkExistingReferralData();
+
+        // Only initialize Joy integration if no cached data found
+        if (!hasCachedData) {
+          this.initializeJoyIntegration();
+        }
+      }
+    }
+
+    async initializeJoyIntegration() {
+      console.log('Initializing Joy integration for card...');
+
+      const handleJoyReady = () => {
+        console.log('Joy ready event received for card');
+        this.setupCustomerPrefill();
+        document.removeEventListener('joy:ready', handleJoyReady);
+      };
+
+      document.addEventListener('joy:ready', handleJoyReady);
+
+      if (window.AVADA_JOY?.customer && window.joyInstance) {
+        console.log('Joy already ready for card, setting up immediately');
+        setTimeout(() => this.setupCustomerPrefill(), 100);
+      } else {
+        let attempts = 0;
+        const maxAttempts = 150;
+        const checkReady = () => {
+          attempts++;
+          console.log(`Checking Joy readiness attempt ${attempts} for card`);
+
+          if (window.AVADA_JOY?.customer && window.joyInstance) {
+            console.log('Joy detected via polling for card');
+            this.setupCustomerPrefill();
+            document.removeEventListener('joy:ready', handleJoyReady);
+          } else if (attempts < maxAttempts) {
+            setTimeout(checkReady, 100);
+          } else {
+            console.warn('Joy integration timeout after 15 seconds for card');
+            this.setupCustomerPrefill();
+            document.removeEventListener('joy:ready', handleJoyReady);
+          }
+        };
+
+        setTimeout(checkReady, 100);
+      }
+    }
+
+    checkExistingReferralData() {
+      const savedReferralData = this.getSavedReferralData();
+      if (savedReferralData) {
+        console.log('📦 Found cached referral data for card, showing existing result');
+        this.showReferralResult(savedReferralData);
+        return true;
+      }
+      return false;
+    }
+
+    getSavedReferralData() {
+      try {
+        const isLoggedIn = window.AVADA_JOY?.customer?.email;
+        const storageKey = isLoggedIn
+          ? `joy_user_referral_data_${btoa(window.AVADA_JOY.customer.email).replace(/[^a-zA-Z0-9]/g, '')}`
+          : 'joy_guest_referral_data';
+
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const data = JSON.parse(saved);
+          const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+          if (data.timestamp && data.timestamp > thirtyDaysAgo) {
+            if (isLoggedIn && data.email !== window.AVADA_JOY.customer.email) {
+              localStorage.removeItem(storageKey);
+              return null;
+            }
+            return data.referralData;
+          } else {
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch (error) {
+        console.warn('Error reading saved referral data:', error);
+      }
+      return null;
+    }
+
+    saveReferralData(email, referralData) {
+      try {
+        const isLoggedIn = window.AVADA_JOY?.customer?.email;
+        const storageKey = isLoggedIn
+          ? `joy_user_referral_data_${btoa(window.AVADA_JOY.customer.email).replace(/[^a-zA-Z0-9]/g, '')}`
+          : 'joy_guest_referral_data';
+
+        const dataToSave = {
+          email: email,
+          referralData: referralData,
+          timestamp: Date.now(),
+          userType: isLoggedIn ? 'logged_in' : 'guest'
+        };
+
+        localStorage.setItem(storageKey, JSON.stringify(dataToSave));
+        console.log('💾 Saved referral data to localStorage for card', isLoggedIn ? 'logged-in user' : 'guest');
+      } catch (error) {
+        console.warn('Error saving referral data:', error);
+      }
+    }
+
+    async setupCustomerPrefill() {
+      const emailInput = this.form.querySelector('input[name="referrer_email"]');
+
+      console.log("Customer prefill for card", emailInput, window.AVADA_JOY?.customer?.email);
+
+      if (window.AVADA_JOY?.customer?.email && emailInput) {
+        emailInput.value = window.AVADA_JOY.customer.email;
+        emailInput.readOnly = true;
+        emailInput.placeholder = 'Your account email';
+
+        const cachedData = this.getSavedReferralData();
+        if (cachedData) {
+          console.log('🎯 Using cached referral data for logged-in user (card)');
+          this.showReferralResult(cachedData);
+        } else {
+          console.log('🆕 No cached data found for card, generating new referral link');
+          await this.generateReferralForLoggedInUser(window.AVADA_JOY.customer.email);
+        }
+      }
+    }
+
+    async generateReferralForLoggedInUser(email) {
+      console.log('🚀 Starting referral generation for logged-in user (card):', email);
+      const button = this.form.querySelector('.referral-card-button');
+      const originalText = button.textContent;
+
+      button.disabled = true;
+      button.textContent = this.settings.buttonLoadingText || 'Generating link...';
+
+      try {
+        console.log('⏳ Waiting for Joy instance (card)...');
+        const joyInstance = await this.waitForJoyInstance();
+        console.log('✅ Joy instance obtained for card:', !!joyInstance);
+
+        if (!joyInstance || typeof joyInstance.generateLinkReferral !== 'function') {
+          console.error('❌ Joy instance validation failed for card');
+          throw new Error('Joy is not available. Please ensure Joy app is installed and enabled.');
+        }
+
+        console.log('📞 Calling generateLinkReferral with email (card):', email);
+        const referralData = await joyInstance.generateLinkReferral(email);
+        console.log('📋 Referral data received for card:', referralData);
+
+        if (referralData && referralData.url) {
+          console.log('✨ Saving and showing referral result for card with URL:', referralData.url);
+          this.saveReferralData(email, referralData);
+          this.showReferralResult(referralData);
+        } else {
+          console.error('❌ No referral URL in response for card');
+          throw new Error('No referral URL generated');
+        }
+      } catch (error) {
+        console.error('💥 Auto-generation failed for card:', error);
+        button.disabled = false;
+        button.textContent = originalText;
+        console.warn('Auto-generation failed for card:', error.message);
+      }
+    }
+
+    async waitForJoyInstance(timeout = 10000) {
+      return new Promise((resolve, reject) => {
+        if (window.joyInstance && typeof window.joyInstance.generateLinkReferral === 'function') {
+          resolve(window.joyInstance);
+          return;
+        }
+
+        const startTime = Date.now();
+        const checkInterval = setInterval(() => {
+          if (window.joyInstance && typeof window.joyInstance.generateLinkReferral === 'function') {
+            clearInterval(checkInterval);
+            resolve(window.joyInstance);
+          } else if (Date.now() - startTime > timeout) {
+            clearInterval(checkInterval);
+            reject(new Error('Joy instance timeout'));
+          }
+        }, 100);
+
+        if (typeof window.addEventListener === 'function') {
+          const handleJoyReady = () => {
+            if (window.joyInstance && typeof window.joyInstance.generateLinkReferral === 'function') {
+              clearInterval(checkInterval);
+              window.removeEventListener('joy:ready', handleJoyReady);
+              resolve(window.joyInstance);
+            }
+          };
+          window.addEventListener('joy:ready', handleJoyReady);
+        }
+      });
+    }
+
+    async handleSubmit(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this.form);
+      const button = this.form.querySelector('.referral-card-button');
+      const originalText = button.textContent;
+
+      const email = window.AVADA_JOY?.customer?.email || formData.get('referrer_email');
+
+      if (!email) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = this.settings.buttonLoadingText || 'Generating link...';
+
+      try {
+        const joyInstance = await this.waitForJoyInstance();
+
+        if (!joyInstance || typeof joyInstance.generateLinkReferral !== 'function') {
+          throw new Error('Joy is not available. Please ensure Joy app is installed and enabled.');
+        }
+
+        const referralData = await joyInstance.generateLinkReferral(email);
+
+        if (referralData && referralData.url) {
+          this.saveReferralData(email, referralData);
+          this.showReferralResult(referralData);
+        } else {
+          throw new Error('No referral URL generated');
+        }
+      } catch (error) {
+        this.showError(error, button, originalText);
+      }
+    }
+
+    showReferralResult(referralData) {
+      if (this.formContainer) {
+        this.formContainer.style.display = 'none';
+      }
+
+      if (this.resultContainer) {
+        const shareText = encodeURIComponent(this.settings.shareText || 'Get exclusive rewards on your first purchase!');
+        const shareUrl = encodeURIComponent(referralData.url);
+
+        this.resultContainer.innerHTML = this.createResultHTML(referralData, shareText, shareUrl);
+        this.resultContainer.classList.add('show');
+
+        this.addShareEventListeners();
+      }
+    }
+
+    createResultHTML(referralData, shareText, shareUrl) {
+      const showGenerateNewLink = !window.AVADA_JOY?.customer?.email; // Only show for guests
+
+      return `
+        <div class="referral-card-input-group">
+          <label class="referral-card-label">${this.settings.linkLabel || 'Here is your personal link:'}</label>
+          <input type="text"
+                 class="referral-card-input"
+                 value="${referralData.url}"
+                 readonly
+                 id="referral-link-${this.sectionId}">
+        </div>
+
+        <div class="referral-card-share-buttons">
+          ${this.settings.showCopyButton !== false ? this.createShareButton('copy', this.settings.copyButtonText || 'Copy', this.getCopyIcon()) : ''}
+          ${this.settings.showEmailButton === true ? this.createShareButton('email', this.settings.emailButtonText || 'Email', this.getEmailIcon(), `mailto:?subject=${shareText}&body=${shareText}%20${shareUrl}`) : ''}
+          ${this.settings.showWhatsappButton === true ? this.createShareButton('whatsapp', this.settings.whatsappButtonText || 'WhatsApp', this.getWhatsAppIcon(), `https://wa.me/?text=${shareText}%20${shareUrl}`) : ''}
+        </div>
+
+        ${showGenerateNewLink ? `
+          <button type="button" class="referral-card-new-link-btn" data-action="generate-new">
+            Generate New Link
+          </button>
+        ` : ''}
+      `;
+    }
+
+    createShareButton(type, text, icon, href = '') {
+      return `
+        <button type="button"
+                class="referral-card-share-btn referral-${type}-btn"
+                data-share-type="${type}"
+                data-href="${href}">
+          ${icon}
+          ${text}
+        </button>
+      `;
+    }
+
+    addShareEventListeners() {
+      const shareButtons = this.resultContainer.querySelectorAll('.referral-card-share-btn');
+      shareButtons.forEach(button => {
+        button.addEventListener('click', this.handleShare.bind(this));
+      });
+
+      // Add event listener for Generate New Link button
+      const generateNewLinkBtn = this.resultContainer.querySelector('[data-action="generate-new"]');
+      if (generateNewLinkBtn) {
+        generateNewLinkBtn.addEventListener('click', this.handleGenerateNewLink.bind(this));
+      }
+    }
+
+    async handleGenerateNewLink(e) {
+      const button = e.currentTarget;
+      const originalText = button.textContent;
+
+      try {
+        // Clear cached data
+        this.clearSavedReferralData();
+
+        // Reset the form and show it again
+        this.hideResult();
+        this.showForm();
+
+        // Optional: You can also regenerate with the same email if available
+        const emailInput = this.form.querySelector('input[name="referrer_email"]');
+        if (emailInput && emailInput.value) {
+          // Automatically submit the form with existing email
+          this.form.dispatchEvent(new Event('submit'));
+        }
+      } catch (error) {
+        console.error('Error generating new link:', error);
+        button.textContent = 'Try Again';
+        setTimeout(() => {
+          button.textContent = originalText;
+        }, 2000);
+      }
+    }
+
+    clearSavedReferralData() {
+      try {
+        const isLoggedIn = window.AVADA_JOY?.customer?.email;
+        const storageKey = isLoggedIn
+          ? `joy_user_referral_data_${btoa(window.AVADA_JOY.customer.email).replace(/[^a-zA-Z0-9]/g, '')}`
+          : 'joy_guest_referral_data';
+
+        localStorage.removeItem(storageKey);
+        console.log('🗑️ Cleared saved referral data');
+      } catch (error) {
+        console.warn('Error clearing saved referral data:', error);
+      }
+    }
+
+    hideResult() {
+      if (this.resultContainer) {
+        this.resultContainer.style.display = 'none';
+      }
+    }
+
+    showForm() {
+      if (this.formContainer) {
+        this.formContainer.style.display = 'block';
+      }
+    }
+
+    async handleShare(e) {
+      const button = e.currentTarget;
+      const shareType = button.dataset.shareType;
+      const href = button.dataset.href;
+
+      if (shareType === 'copy') {
+        await this.copyToClipboard(button);
+      } else if (shareType === 'email') {
+        window.location.href = href;
+      } else if (shareType === 'whatsapp') {
+        window.open(href, '_blank');
+      }
+    }
+
+    async copyToClipboard(button) {
+      const input = this.querySelector(`#referral-link-${this.sectionId}`);
+      const originalText = button.textContent;
+      const referralUrl = input?.value;
+
+      if (!referralUrl) return;
+
+      if (navigator.share && /mobile|android|iphone/i.test(navigator.userAgent)) {
+        try {
+          await navigator.share({
+            title: this.settings.shareTitle || 'Check out this exclusive offer!',
+            text: this.settings.shareText || 'Get exclusive rewards on your first purchase!',
+            url: referralUrl
+          });
+          return;
+        } catch (err) {
+          console.log('Share failed, falling back to copy:', err);
+        }
+      }
+
+      if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999);
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(referralUrl);
+          } else {
+            document.execCommand('copy');
+          }
+
+          const copiedText = this.settings.copiedText || 'Copied!';
+          button.innerHTML = button.innerHTML.replace(button.lastChild.textContent.trim(), copiedText);
+
+          setTimeout(() => {
+            button.innerHTML = button.innerHTML.replace(copiedText, originalText.trim());
+          }, 2000);
+        } catch (err) {
+          console.error('Failed to copy:', err);
+          input.focus();
+          input.select();
+        }
+      }
+    }
+
+    showError(error, button, originalText) {
+      console.error('Referral generation error for card:', error);
+      button.textContent = this.settings.buttonErrorText || 'Try Again';
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.disabled = false;
+      }, 3000);
+    }
+
+    getCopyIcon() {
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>`;
+    }
+
+    getEmailIcon() {
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+      </svg>`;
+    }
+
+    getWhatsAppIcon() {
+      return `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.149-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.123-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>`;
+    }
+  }
+
+  if (!customElements.get('referral-card-program-style-2')) {
+    customElements.define('referral-card-program-style-2', ReferralCardProgramStyle2);
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Joy: Referral Program 2",
+  "tag": "section",
+  "class": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout & Design"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": false,
+      "label": "Full width inner content",
+      "info": "When enabled, content stretches full width without card styling"
+    },
+    {
+      "type": "range",
+      "id": "container_max_width",
+      "min": 600,
+      "max": 1600,
+      "step": 100,
+      "unit": "px",
+      "label": "Container max width",
+      "default": 1200,
+      "info": "Controls the maximum width of the content area"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "content_horizontal_position",
+      "label": "Content horizontal position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "content_vertical_position",
+      "label": "Content vertical position",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "paragraph",
+      "content": "Configure colors for the section and card"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "#000000"
+    },
+    {
+      "type": "paragraph",
+      "content": "Customize input field styling"
+    },
+    {
+      "type": "range",
+      "id": "input_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Input border radius",
+      "default": 10,
+      "info": "0px for square, 20px for rounded"
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Card background image",
+      "info": "Recommended: Use an image that represents friendship or sharing (800x600px or larger)"
+    },
+    {
+      "type": "header",
+      "content": "Content & Messaging"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "default": "REFER & EARN",
+      "label": "Badge text"
+    },
+    {
+      "type": "richtext",
+      "id": "title",
+      "default": "<p>Share & Earn Rewards</p>",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "default": "<p>Share your referral link with friends and earn rewards when they make their first purchase.</p>",
+      "label": "Description"
+    },
+    {
+      "type": "richtext",
+      "id": "terms_text",
+      "default": "<p>Offer only valid for new customers</p>",
+      "label": "Terms text"
+    },
+    {
+      "type": "header",
+      "content": "Form & Share Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "Customize form labels and button texts"
+    },
+    {
+      "type": "text",
+      "id": "email_placeholder",
+      "default": "Your email",
+      "label": "Email field placeholder"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "default": "Get Started",
+      "label": "Button text"
+    },
+    {
+      "type": "text",
+      "id": "button_loading_text",
+      "default": "Generating link...",
+      "label": "Button loading text"
+    },
+    {
+      "type": "text",
+      "id": "button_error_text",
+      "default": "Try Again",
+      "label": "Button error text"
+    },
+    {
+      "type": "paragraph",
+      "content": "Configure success state and sharing buttons"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "default": "Here is your personal link:",
+      "label": "Link label text"
+    },
+    {
+      "type": "text",
+      "id": "copy_button_text",
+      "default": "Copy",
+      "label": "Copy button text"
+    },
+    {
+      "type": "text",
+      "id": "email_button_text",
+      "default": "Email",
+      "label": "Email button text"
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_button_text",
+      "default": "WhatsApp",
+      "label": "WhatsApp button text"
+    },
+    {
+      "type": "text",
+      "id": "copied_text",
+      "default": "Copied!",
+      "label": "Copied confirmation text"
+    },
+    {
+      "type": "paragraph",
+      "content": "Configure mobile sharing and error messages"
+    },
+    {
+      "type": "text",
+      "id": "share_title",
+      "default": "Check out this exclusive offer!",
+      "label": "Share dialog title (mobile)"
+    },
+    {
+      "type": "text",
+      "id": "share_text",
+      "default": "Get exclusive rewards on your first purchase!",
+      "label": "Share dialog text (mobile)"
+    },
+    {
+      "type": "text",
+      "id": "error_message",
+      "default": "Unable to generate referral link. Please try again.",
+      "label": "Error message"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_generate_new_link",
+      "default": true,
+      "label": "Show 'Generate New Link' button",
+      "info": "Controls whether guests can generate a new referral link"
+    },
+    {
+      "type": "paragraph",
+      "content": "Choose which social sharing buttons to display"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_copy_button",
+      "default": true,
+      "label": "Show Copy button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_email_button",
+      "default": false,
+      "label": "Show Email button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_whatsapp_button",
+      "default": false,
+      "label": "Show WhatsApp button"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge font size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 20,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title font size",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Description font size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "form_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Form text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button text size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Joy: Referral Program 2"
+    }
+  ]
+}
+{% endschema %}
