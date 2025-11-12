@@ -61,37 +61,6 @@
     margin-top: 20px;
   }
 
-  .product-card {
-    border: 1px solid #e0e0e0;
-    padding: 15px;
-    text-align: center;
-    transition: box-shadow 0.3s ease;
-  }
-
-  .product-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-
-  .product-card img {
-    width: 100%;
-    height: auto;
-    margin-bottom: 15px;
-  }
-
-  .product-title {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #000;
-    text-decoration: none;
-    display: block;
-  }
-
-  .product-price {
-    font-size: 18px;
-    font-weight: 600;
-    color: #000;
-  }
-
   @media (max-width: 768px) {
     .tab-header {
       padding: 12px 20px;
@@ -120,17 +89,7 @@
     <div class="product-grid" id="recommended-products">
       {% if recommendations.performed and recommendations.products_count > 0 %}
         {% for product in recommendations.products limit: section.settings.products_to_show %}
-          <div class="product-card">
-            <a href="{{ product.url }}">
-              {% if product.featured_image %}
-                <img src="{{ product.featured_image | image_url: width: 300 }}" 
-                     alt="{{ product.featured_image.alt | escape }}"
-                     loading="lazy">
-              {% endif %}
-              <div class="product-title">{{ product.title }}</div>
-              <div class="product-price">{{ product.price | money }}</div>
-            </a>
-          </div>
+          {% render '_product-card', product: product %}
         {% endfor %}
       {% else %}
         <p>暂无推荐商品</p>
@@ -177,36 +136,31 @@
       return;
     }
 
-    // 获取产品数据
-    fetch('/products.json')
-      .then(response => response.json())
-      .then(data => {
-        const products = data.products.filter(p => recentlyViewed.includes(p.handle));
-        
-        if (products.length === 0) {
-          container.innerHTML = '<p>暂无浏览记录</p>';
-          return;
-        }
-
-        container.innerHTML = products.map(product => `
-          <div class="product-card">
-            <a href="/products/${product.handle}">
-              ${product.images[0] ? `<img src="${product.images[0].src}" alt="${product.title}" loading="lazy">` : ''}
-              <div class="product-title">${product.title}</div>
-              <div class="product-price">${formatMoney(product.variants[0].price)}</div>
-            </a>
-          </div>
-        `).join('');
-      })
-      .catch(error => {
-        console.error('Error loading recently viewed:', error);
-        container.innerHTML = '<p>加载失败，请稍后再试</p>';
-      });
-  }
-
-  // 格式化价格
-  function formatMoney(cents) {
-    return '{{ shop.money_format }}'.replace('{{amount}}', (cents / 100).toFixed(2));
+    // 使用 Section Rendering API 获取产品卡片
+    const handles = recentlyViewed.slice(0, {{ section.settings.products_to_show }});
+    
+    Promise.all(
+      handles.map(handle => 
+        fetch(`/products/${handle}?section_id={{ section.id }}`)
+          .then(response => response.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            return doc.querySelector('.product-card-wrapper');
+          })
+      )
+    ).then(cards => {
+      const validCards = cards.filter(card => card !== null);
+      if (validCards.length === 0) {
+        container.innerHTML = '<p>暂无浏览记录</p>';
+        return;
+      }
+      container.innerHTML = '';
+      validCards.forEach(card => container.appendChild(card));
+    }).catch(error => {
+      console.error('Error loading recently viewed:', error);
+      container.innerHTML = '<p>加载失败，请稍后再试</p>';
+    });
   }
 
   // 保存当前浏览的商品
