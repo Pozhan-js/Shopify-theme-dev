@@ -55,20 +55,29 @@
           </div>
         </div>
         <div class="quick-buy-right">
-          {% if product.variants.size > 1 %}
-            <select class="quick-buy-variant-selector" id="quick-buy-variant-selector">
-              {% for variant in product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  {% if variant == product.selected_or_first_available_variant %}
-                    selected
-                  {% endif %}
-                >
-                  {{ variant.title }}
-                </option>
-              {% endfor %}
-            </select>
-          {% endif %}
+          {% for option in product.options_with_values %}
+            <div class="quick-buy-option">
+              <label for="quick-buy-option-{{ forloop.index }}" class="quick-buy-option-label">
+                {{ option.name }}
+              </label>
+              <select
+                class="quick-buy-variant-selector"
+                id="quick-buy-option-{{ forloop.index }}"
+                data-option-index="{{ forloop.index }}"
+              >
+                {% for value in option.values %}
+                  <option
+                    value="{{ value | escape }}"
+                    {% if option.selected_value == value %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ value }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endfor %}
           <button class="quick-buy-btn" type="button">
             <span>快速购买</span>
           </button>
@@ -98,17 +107,19 @@
     position: fixed;
     bottom: 0;
     left: 0;
-    transform: translateY(100%);
     width: 100%;
     background: white;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     z-index: 999;
-    transition: bottom 0.3s ease;
     border-top: 1px solid #eee;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
   }
 
   .quick-buy-bar.visible {
     transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .quick-buy-content {
@@ -180,12 +191,23 @@
     gap: 15px;
   }
 
+  .quick-buy-option {
+    margin-right: 10px;
+  }
+
+  .quick-buy-option-label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: {{ section.settings.label_color }};
+  }
+
   .quick-buy-variant-selector {
-    padding: 10px 15px;
+    padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
-    min-width: 150px;
+    min-width: 120px;
     background: white;
   }
 
@@ -785,23 +807,41 @@
             }
           });
         },
-        { threshold: 0.1 }
+        {
+          threshold: 0.5,
+          rootMargin: "0px 0px -50px 0px"
+        }
       );
 
       observer.observe(productInfo);
+    }
+
+    // 变体选择逻辑
+    const variantSelectors = document.querySelectorAll('.quick-buy-variant-selector');
+    let currentVariant = {{ product.selected_or_first_available_variant | json }};
+
+    if (variantSelectors.length > 0) {
+      variantSelectors.forEach(selector => {
+        selector.addEventListener('change', function() {
+          const selectedOptions = Array.from(variantSelectors).map(select => select.value);
+          const matchedVariant = product.variants.find(variant => {
+            return variant.options.every((option, index) => {
+              return option === selectedOptions[index];
+            });
+          });
+
+          if (matchedVariant) {
+            currentVariant = matchedVariant;
+          }
+        });
+      });
     }
 
     // 快速购买功能
     if (quickBuyBtn) {
       quickBuyBtn.addEventListener('click', function(e) {
         e.preventDefault();
-
-        let variantId;
-        if (variantSelector) {
-          variantId = variantSelector.value;
-        } else {
-          variantId = {{ product.selected_or_first_available_variant.id }};
-        }
+        const variantId = currentVariant.id;
 
         // 添加加载状态
         this.textContent = '处理中...';
