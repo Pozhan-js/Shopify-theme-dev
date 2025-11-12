@@ -7,22 +7,22 @@
   5. 当没有选择图片时，显示配置的URL链接内容
 {% endcomment %}
 
-<div class="instagram-grid-section" data-section-id="{{ section.id }}">
-  <div class="container">
+<div class="ig-grid-showcase-v2" data-section-id="{{ section.id }}">
+  <div class="ig-grid-showcase-v2__container">
     <!-- 左右布局的头部区域 -->
-    <div class="header-layout">
+    <div class="ig-grid-showcase-v2__header">
       <!-- 左侧文本区域 -->
-      <div class="text-content">
+      <div class="ig-grid-showcase-v2__text-content">
         {% if section.settings.text_content != blank %}
-          <p class="header-text">{{ section.settings.text_content }}</p>
+          <p class="ig-grid-showcase-v2__header-text">{{ section.settings.text_content }}</p>
         {% endif %}
       </div>
 
       <!-- 右侧Instagram按钮 -->
       {% if section.settings.instagram_link != blank %}
-        <div class="button-content">
-          <a href="{{ section.settings.instagram_link }}" class="instagram-button" target="_blank" rel="noopener">
-            <svg class="instagram-icon" viewBox="0 0 24 24" fill="currentColor">
+        <div class="ig-grid-showcase-v2__button-content">
+          <a href="{{ section.settings.instagram_link }}" class="ig-grid-showcase-v2__instagram-button" target="_blank" rel="noopener">
+            <svg class="ig-grid-showcase-v2__instagram-icon" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
             </svg>
             {{ section.settings.button_text | default: 'Follow Us' }}
@@ -31,7 +31,7 @@
       {% endif %}
     </div>
 
-    <div class="grid-wrapper">
+    <div class="ig-grid-showcase-v2__grid-wrapper">
       {% assign total_images = section.blocks.size %}
       {% assign total_rows = total_images | divided_by: 7 %}
       {% assign remainder = total_images | modulo: 7 %}
@@ -59,20 +59,20 @@
         {% assign is_odd_row = i | modulo: 2 %}
         {% assign row_class = '' %}
         {% if i >= 2 %}
-          {% assign row_class = 'hidden-row' %}
+          {% assign row_class = 'ig-grid-showcase-v2__grid-row--hidden' %}
         {% endif %}
 
         <div
-          class="grid-row {{ row_class }} {% if is_odd_row == 0 %}layout-left{% else %}layout-right{% endif %}"
+          class="ig-grid-showcase-v2__grid-row {{ row_class }} {% if is_odd_row == 0 %}ig-grid-showcase-v2__grid-row--layout-left{% else %}ig-grid-showcase-v2__grid-row--layout-right{% endif %}"
           data-row-index="{{ i }}"
         >
           {% if is_odd_row == 0 %}
             <!-- 奇数行：左大右小 -->
-            <div class="large-image-container">
+            <div class="ig-grid-showcase-v2__large-image-container">
               {% assign block = section.blocks[start_index] %}
               {% if block and block.type == 'image_item' %}
                 <div
-                  class="instagram-image-wrapper"
+                  class="ig-grid-showcase-v2__image-wrapper"
                   {% if block.settings.instagram_url != blank %}
                     onclick="openInstagramModal('{{ block.settings.instagram_url }}')" style="cursor: pointer;"
                   {% endif %}
@@ -81,24 +81,24 @@
                     <img
                       src="{{ block.settings.image | img_url: '800x800' }}"
                       alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
+                      class="ig-grid-showcase-v2__grid-image"
                       loading="lazy"
                     >
                   {% elsif block.settings.link != blank %}
                     <img
                       src="{{ block.settings.link }}"
                       alt="Instagram image"
-                      class="grid-image"
+                      class="ig-grid-showcase-v2__grid-image"
                       loading="lazy"
                     >
                   {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    <div class="ig-grid-showcase-v2__placeholder-image">
+                      {{ 'image' | placeholder_svg_tag: 'ig-grid-showcase-v2__placeholder-svg' }}
                     </div>
                   {% endif %}
                   {% if block.settings.instagram_url != blank %}
-                    <div class="instagram-overlay">
-                      <svg class="instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
+                    <div class="ig-grid-showcase-v2__instagram-overlay">
+                      <svg class="ig-grid-showcase-v2__instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                       </svg>
                     </div>
@@ -107,14 +107,14 @@
               {% endif %}
             </div>
 
-            <div class="small-images-grid">
+            <div class="ig-grid-showcase-v2__small-images-grid">
               {% for j in (1..6) %}
                 {% assign block_index = start_index | plus: j %}
                 {% assign block = section.blocks[block_index] %}
-                <div class="small-image-container">
+                <div class="ig-grid-showcase-v2__small-image-container">
                   {% if block and block.type == 'image_item' %}
                     <div
-                      class="instagram-image-wrapper"
+                      class="ig-grid-showcase-v2__image-wrapper"
                       {% if block.settings.instagram_url != blank %}
                         onclick="openInstagramModal('{{ block.settings.instagram_url }}')" style="cursor: pointer;"
                       {% endif %}
@@ -123,24 +123,24 @@
                         <img
                           src="{{ block.settings.image | img_url: '400x400' }}"
                           alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
+                          class="ig-grid-showcase-v2__grid-image"
                           loading="lazy"
                         >
                       {% elsif block.settings.link != blank %}
                         <img
                           src="{{ block.settings.link }}"
                           alt="Instagram image"
-                          class="grid-image"
+                          class="ig-grid-showcase-v2__grid-image"
                           loading="lazy"
                         >
                       {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        <div class="ig-grid-showcase-v2__placeholder-image">
+                          {{ 'image' | placeholder_svg_tag: 'ig-grid-showcase-v2__placeholder-svg' }}
                         </div>
                       {% endif %}
                       {% if block.settings.instagram_url != blank %}
-                        <div class="instagram-overlay">
-                          <svg class="instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
+                        <div class="ig-grid-showcase-v2__instagram-overlay">
+                          <svg class="ig-grid-showcase-v2__instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
                             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                           </svg>
                         </div>
@@ -152,14 +152,14 @@
             </div>
           {% else %}
             <!-- 偶数行：右大左小 -->
-            <div class="small-images-grid">
+            <div class="ig-grid-showcase-v2__small-images-grid">
               {% for j in (0..5) %}
                 {% assign block_index = start_index | plus: j %}
                 {% assign block = section.blocks[block_index] %}
-                <div class="small-image-container">
+                <div class="ig-grid-showcase-v2__small-image-container">
                   {% if block and block.type == 'image_item' %}
                     <div
-                      class="instagram-image-wrapper"
+                      class="ig-grid-showcase-v2__image-wrapper"
                       {% if block.settings.instagram_url != blank %}
                         onclick="openInstagramModal('{{ block.settings.instagram_url }}')" style="cursor: pointer;"
                       {% endif %}
@@ -168,24 +168,24 @@
                         <img
                           src="{{ block.settings.image | img_url: '400x400' }}"
                           alt="{{ block.settings.image.alt | escape }}"
-                          class="grid-image"
+                          class="ig-grid-showcase-v2__grid-image"
                           loading="lazy"
                         >
                       {% elsif block.settings.link != blank %}
                         <img
                           src="{{ block.settings.link }}"
                           alt="Instagram image"
-                          class="grid-image"
+                          class="ig-grid-showcase-v2__grid-image"
                           loading="lazy"
                         >
                       {% else %}
-                        <div class="placeholder-image">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        <div class="ig-grid-showcase-v2__placeholder-image">
+                          {{ 'image' | placeholder_svg_tag: 'ig-grid-showcase-v2__placeholder-svg' }}
                         </div>
                       {% endif %}
                       {% if block.settings.instagram_url != blank %}
-                        <div class="instagram-overlay">
-                          <svg class="instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
+                        <div class="ig-grid-showcase-v2__instagram-overlay">
+                          <svg class="ig-grid-showcase-v2__instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
                             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                           </svg>
                         </div>
@@ -196,12 +196,12 @@
               {% endfor %}
             </div>
 
-            <div class="large-image-container">
+            <div class="ig-grid-showcase-v2__large-image-container">
               {% assign block_index = start_index | plus: 6 %}
               {% assign block = section.blocks[block_index] %}
               {% if block and block.type == 'image_item' %}
                 <div
-                  class="instagram-image-wrapper"
+                  class="ig-grid-showcase-v2__image-wrapper"
                   {% if block.settings.instagram_url != blank %}
                     onclick="openInstagramModal('{{ block.settings.instagram_url }}')" style="cursor: pointer;"
                   {% endif %}
@@ -210,24 +210,24 @@
                     <img
                       src="{{ block.settings.image | img_url: '800x800' }}"
                       alt="{{ block.settings.image.alt | escape }}"
-                      class="grid-image"
+                      class="ig-grid-showcase-v2__grid-image"
                       loading="lazy"
                     >
                   {% elsif block.settings.link != blank %}
                     <img
                       src="{{ block.settings.link }}"
                       alt="Instagram image"
-                      class="grid-image"
+                      class="ig-grid-showcase-v2__grid-image"
                       loading="lazy"
                     >
                   {% else %}
-                    <div class="placeholder-image">
-                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    <div class="ig-grid-showcase-v2__placeholder-image">
+                      {{ 'image' | placeholder_svg_tag: 'ig-grid-showcase-v2__placeholder-svg' }}
                     </div>
                   {% endif %}
                   {% if block.settings.instagram_url != blank %}
-                    <div class="instagram-overlay">
-                      <svg class="instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
+                    <div class="ig-grid-showcase-v2__instagram-overlay">
+                      <svg class="ig-grid-showcase-v2__instagram-overlay-icon" viewBox="0 0 24 24" fill="white">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.265-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                       </svg>
                     </div>
@@ -242,14 +242,14 @@
 
     <!-- 显示更多按钮 - 加减号图标 -->
     {% if total_rows > 2 %}
-      <div class="load-more-container">
-        <button class="load-more-button" id="loadMoreBtn" aria-label="显示更多">
+      <div class="ig-grid-showcase-v2__load-more-container">
+        <button class="ig-grid-showcase-v2__load-more-button" id="igGridShowcaseV2LoadMoreBtn" aria-label="显示更多">
           <!-- 加号图标 -->
-          <svg class="button-icon plus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <svg class="ig-grid-showcase-v2__button-icon ig-grid-showcase-v2__button-icon--plus" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
           </svg>
           <!-- 减号图标 -->
-          <svg class="button-icon minus-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <svg class="ig-grid-showcase-v2__button-icon ig-grid-showcase-v2__button-icon--minus" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
           </svg>
         </button>
@@ -264,30 +264,30 @@
 <style>
   /* Variables CSS */
   :root {
-    --gray-200: #E5E7EB;
-    --gray-400: #9CA3AF;
-    --gray-600: #4B5563;
-    --gray-700: #374151;
-    --gray-800: #1F2937;
-    --white: #FFFFFF;
+    --ig-grid-v2-gray-200: #E5E7EB;
+    --ig-grid-v2-gray-400: #9CA3AF;
+    --ig-grid-v2-gray-600: #4B5563;
+    --ig-grid-v2-gray-700: #374151;
+    --ig-grid-v2-gray-800: #1F2937;
+    --ig-grid-v2-white: #FFFFFF;
   }
 
   /* Section principale */
-  .instagram-grid-section {
+  .ig-grid-showcase-v2 {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: transparent;
     padding: 2rem 0;
   }
 
-  /* Container principal - 居中且两侧留白 */
-  .container {
+  /* Container principal - PC端左右边距50px */
+  .ig-grid-showcase-v2__container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 3rem;
+    padding: 0 50px;
   }
 
   /* 头部左右布局 */
-  .header-layout {
+  .ig-grid-showcase-v2__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -296,12 +296,12 @@
   }
 
   /* 左侧文本区域 */
-  .text-content {
+  .ig-grid-showcase-v2__text-content {
     flex: 1;
     text-align: left;
   }
 
-  .header-text {
+  .ig-grid-showcase-v2__header-text {
     font-size: 1.125rem;
     color: var(--color-foreground);
     margin: 0;
@@ -310,11 +310,11 @@
   }
 
   /* 右侧按钮区域 */
-  .button-content {
+  .ig-grid-showcase-v2__button-content {
     flex-shrink: 0;
   }
 
-  .instagram-button {
+  .ig-grid-showcase-v2__instagram-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -322,7 +322,7 @@
     background-color: transparent;
     border: 1px solid #000;
     border-radius: 0.5rem;
-    color: var(--gray-700);
+    color: var(--ig-grid-v2-gray-700);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
@@ -330,25 +330,25 @@
     cursor: pointer;
   }
 
-  .instagram-button:hover {
+  .ig-grid-showcase-v2__instagram-button:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  .instagram-icon {
+  .ig-grid-showcase-v2__instagram-icon {
     width: 1.125rem;
     height: 1.125rem;
-    color: var(--gray-600);
+    color: var(--ig-grid-v2-gray-600);
   }
 
   /* 网格布局 */
-  .grid-wrapper {
+  .ig-grid-showcase-v2__grid-wrapper {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .grid-row {
+  .ig-grid-showcase-v2__grid-row {
     display: flex;
     gap: 1rem;
     width: 100%;
@@ -358,28 +358,28 @@
     transition: all 0.5s ease;
   }
 
-  .grid-row.hidden-row {
+  .ig-grid-showcase-v2__grid-row--hidden {
     opacity: 0;
     max-height: 0;
     margin: 0;
   }
 
-  .grid-row.show {
+  .ig-grid-showcase-v2__grid-row.ig-grid-showcase-v2__grid-row--show {
     opacity: 1;
     max-height: 1000px;
   }
 
   /* 大图容器 - 占40%，减去一半的gap */
-  .large-image-container {
+  .ig-grid-showcase-v2__large-image-container {
     flex: 0 0 calc(40% - 0.5rem);
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 8px;
-    background-color: var(--gray-200);
+    background-color: var(--ig-grid-v2-gray-200);
   }
 
   /* 小图网格容器 - 占60%，减去一半的gap */
-  .small-images-grid {
+  .ig-grid-showcase-v2__small-images-grid {
     flex: 0 0 calc(60% - 0.5rem);
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -387,44 +387,76 @@
     gap: 1rem;
   }
 
-  .small-image-container {
+  .ig-grid-showcase-v2__small-image-container {
     aspect-ratio: 1 / 1;
     overflow: hidden;
     border-radius: 8px;
-    background-color: var(--gray-200);
+    background-color: var(--ig-grid-v2-gray-200);
+  }
+
+  /* 图片包装器 */
+  .ig-grid-showcase-v2__image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Instagram 悬浮层 */
+  .ig-grid-showcase-v2__instagram-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .ig-grid-showcase-v2__image-wrapper:hover .ig-grid-showcase-v2__instagram-overlay {
+    opacity: 1;
+  }
+
+  .ig-grid-showcase-v2__instagram-overlay-icon {
+    width: 3rem;
+    height: 3rem;
   }
 
   /* 图片样式 */
-  .grid-image {
+  .ig-grid-showcase-v2__grid-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
   }
 
-  .placeholder-image {
+  .ig-grid-showcase-v2__placeholder-image {
     width: 100%;
     height: 100%;
-    background-color: var(--gray-200);
+    background-color: var(--ig-grid-v2-gray-200);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--gray-400);
+    color: var(--ig-grid-v2-gray-400);
   }
 
-  .placeholder-svg {
+  .ig-grid-showcase-v2__placeholder-svg {
     width: 50%;
     height: 50%;
     opacity: 0.5;
   }
 
   /* 显示更多按钮 - 加减号图标样式 */
-  .load-more-container {
+  .ig-grid-showcase-v2__load-more-container {
     display: flex;
     justify-content: center;
+    margin-top: 2rem;
   }
 
-  .load-more-button {
+  .ig-grid-showcase-v2__load-more-button {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -433,25 +465,25 @@
     height: 3rem;
     padding: 0;
     background-color: transparent;
-    border: 1px solid var(--gray-700);
+    border: 1px solid var(--ig-grid-v2-gray-700);
     border-radius: 50%;
-    color: var(--gray-700);
+    color: var(--ig-grid-v2-gray-700);
     cursor: pointer;
     transition: all 0.3s ease;
   }
 
-  .load-more-button:hover {
-    background-color: var(--gray-700);
-    color: var(--white);
+  .ig-grid-showcase-v2__load-more-button:hover {
+    background-color: var(--ig-grid-v2-gray-700);
+    color: var(--ig-grid-v2-white);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  .load-more-button.hidden {
+  .ig-grid-showcase-v2__load-more-button.ig-grid-showcase-v2__load-more-button--hidden {
     display: none;
   }
 
-  .button-icon {
+  .ig-grid-showcase-v2__button-icon {
     position: absolute;
     width: 1.25rem;
     height: 1.25rem;
@@ -459,117 +491,117 @@
   }
 
   /* 默认显示加号，隐藏减号 */
-  .plus-icon {
+  .ig-grid-showcase-v2__button-icon--plus {
     opacity: 1;
     transform: rotate(0deg);
   }
 
-  .minus-icon {
+  .ig-grid-showcase-v2__button-icon--minus {
     opacity: 0;
     transform: rotate(90deg);
   }
 
   /* 展开状态：隐藏加号，显示减号 */
-  .load-more-button.expanded .plus-icon {
+  .ig-grid-showcase-v2__load-more-button.ig-grid-showcase-v2__load-more-button--expanded .ig-grid-showcase-v2__button-icon--plus {
     opacity: 0;
     transform: rotate(90deg);
   }
 
-  .load-more-button.expanded .minus-icon {
+  .ig-grid-showcase-v2__load-more-button.ig-grid-showcase-v2__load-more-button--expanded .ig-grid-showcase-v2__button-icon--minus {
     opacity: 1;
     transform: rotate(0deg);
   }
 
   /* Responsive - 平板 */
   @media (max-width: 1024px) {
-    .container {
+    .ig-grid-showcase-v2__container {
       padding: 0 2rem;
     }
 
-    .large-image-container {
+    .ig-grid-showcase-v2__large-image-container {
       flex: 0 0 calc(45% - 0.5rem);
     }
 
-    .small-images-grid {
+    .ig-grid-showcase-v2__small-images-grid {
       flex: 0 0 calc(55% - 0.5rem);
     }
   }
 
   /* Responsive - 手机 */
   @media (max-width: 768px) {
-    .container {
+    .ig-grid-showcase-v2__container {
       padding: 0 1rem;
     }
 
-    .header-layout {
+    .ig-grid-showcase-v2__header {
       flex-direction: column;
       align-items: stretch;
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
 
-    .text-content {
+    .ig-grid-showcase-v2__text-content {
       text-align: center;
     }
 
-    .button-content {
+    .ig-grid-showcase-v2__button-content {
       display: flex;
       justify-content: center;
     }
 
-    .header-text {
+    .ig-grid-showcase-v2__header-text {
       font-size: 1rem;
     }
 
-    .grid-row {
+    .ig-grid-showcase-v2__grid-row {
       flex-direction: column;
       gap: 1rem;
     }
 
-    .grid-row.layout-right {
+    .ig-grid-showcase-v2__grid-row--layout-right {
       flex-direction: column-reverse;
     }
 
-    .large-image-container,
-    .small-images-grid {
+    .ig-grid-showcase-v2__large-image-container,
+    .ig-grid-showcase-v2__small-images-grid {
       flex: 1 1 auto;
       width: 100%;
     }
 
-    .small-images-grid {
+    .ig-grid-showcase-v2__small-images-grid {
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(3, 1fr);
     }
   }
 
   @media (max-width: 480px) {
-    .header-text {
+    .ig-grid-showcase-v2__header-text {
       font-size: 0.875rem;
     }
 
-    .instagram-button {
+    .ig-grid-showcase-v2__instagram-button {
       padding: 0.625rem 1.25rem;
       font-size: 0.8rem;
     }
 
-    .grid-wrapper {
+    .ig-grid-showcase-v2__grid-wrapper {
       gap: 0.75rem;
     }
 
-    .grid-row {
+    .ig-grid-showcase-v2__grid-row {
       gap: 0.75rem;
     }
 
-    .small-images-grid {
+    .ig-grid-showcase-v2__small-images-grid {
       gap: 0.75rem;
     }
 
-    .load-more-button {
+    .ig-grid-showcase-v2__load-more-button {
       width: 2.5rem;
       height: 2.5rem;
     }
 
-    .button-icon {
+    .ig-grid-showcase-v2__button-icon {
       width: 1rem;
       height: 1rem;
     }
@@ -578,10 +610,10 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadMoreBtn = document.getElementById('igGridShowcaseV2LoadMoreBtn');
     if (!loadMoreBtn) return;
 
-    const hiddenRows = document.querySelectorAll('.grid-row.hidden-row');
+    const hiddenRows = document.querySelectorAll('.ig-grid-showcase-v2__grid-row--hidden');
     let isExpanded = false;
 
     loadMoreBtn.addEventListener('click', function () {
@@ -589,25 +621,25 @@
         // 展开所有隐藏的行
         hiddenRows.forEach((row, index) => {
           setTimeout(() => {
-            row.classList.add('show');
+            row.classList.add('ig-grid-showcase-v2__grid-row--show');
           }, index * 100);
         });
 
-        loadMoreBtn.classList.add('expanded');
+        loadMoreBtn.classList.add('ig-grid-showcase-v2__load-more-button--expanded');
         loadMoreBtn.setAttribute('aria-label', '收起');
         isExpanded = true;
       } else {
         // 收起所有行
         hiddenRows.forEach((row) => {
-          row.classList.remove('show');
+          row.classList.remove('ig-grid-showcase-v2__grid-row--show');
         });
 
-        loadMoreBtn.classList.remove('expanded');
+        loadMoreBtn.classList.remove('ig-grid-showcase-v2__load-more-button--expanded');
         loadMoreBtn.setAttribute('aria-label', '显示更多');
         isExpanded = false;
 
         // 滚动回顶部
-        const section = document.querySelector('.instagram-grid-section');
+        const section = document.querySelector('.ig-grid-showcase-v2');
         if (section) {
           section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -620,7 +652,7 @@
 {
   "name": "Instagram图片展示",
   "tag": "section",
-  "class": "instagram-grid-section",
+  "class": "ig-grid-showcase-v2",
   "settings": [
     {
       "type": "textarea",
