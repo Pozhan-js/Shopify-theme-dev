@@ -818,30 +818,43 @@
 
     // 变体选择逻辑
     const variantSelectors = document.querySelectorAll('.quick-buy-variant-selector');
+    const productVariants = {{ product.variants | json }};
     let currentVariant = {{ product.selected_or_first_available_variant | json }};
+    
+    console.log('Initial variant:', currentVariant);
+    console.log('All variants:', productVariants);
 
-    if (variantSelectors.length > 0) {
+    if (variantSelectors.length > 0 && productVariants) {
       variantSelectors.forEach(selector => {
         selector.addEventListener('change', function() {
           const selectedOptions = Array.from(variantSelectors).map(select => select.value);
-          const matchedVariant = product.variants.find(variant => {
-            return variant.options.every((option, index) => {
+          console.log('Selected options:', selectedOptions);
+          
+          // 精确匹配变体
+          const matchedVariant = productVariants.find(variant => {
+            const match = variant.options.every((option, index) => {
               return option === selectedOptions[index];
             });
+            console.log(`Checking variant ${variant.id}:`, variant.options, 'match:', match);
+            return match;
           });
 
           if (matchedVariant) {
+            console.log('Matched variant:', matchedVariant);
             currentVariant = matchedVariant;
+          } else {
+            console.warn('No variant matched selected options');
           }
         });
       });
     }
 
-    // 快速购买功能
-    if (quickBuyBtn) {
-      quickBuyBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const variantId = currentVariant.id;
+        // 快速购买功能
+        if (quickBuyBtn) {
+          quickBuyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Current variant when adding to cart:', currentVariant);
+            const variantId = currentVariant ? currentVariant.id : {{ product.selected_or_first_available_variant.id }};
 
         // 添加加载状态
         this.textContent = '处理中...';
