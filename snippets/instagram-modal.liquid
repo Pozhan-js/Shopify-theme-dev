@@ -1,0 +1,230 @@
+{% comment %}
+  Instagram Post Modal Snippet
+  Usage: {% render 'instagram-modal' %}
+  Call modal with: openInstagramModal('INSTAGRAM_POST_URL')
+{% endcomment %}
+
+<div id="instagram-modal" class="instagram-modal" style="display: none;">
+  <div class="instagram-modal-overlay"></div>
+  <div class="instagram-modal-content">
+    <button class="instagram-modal-close" aria-label="Close modal">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <div class="instagram-modal-body">
+      <div class="instagram-embed-container" id="instagram-embed-container">
+        <div class="instagram-loading">
+          <div class="spinner"></div>
+          <p>Loading Instagram post...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .instagram-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .instagram-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    cursor: pointer;
+  }
+
+  .instagram-modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 10000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .instagram-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    transition: background-color 0.2s ease;
+  }
+
+  .instagram-modal-close:hover {
+    background-color: #fff;
+  }
+
+  .instagram-modal-close svg {
+    color: #000;
+  }
+
+  .instagram-modal-body {
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .instagram-embed-container {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .instagram-loading {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 16px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #E1306C;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .instagram-loading p {
+    color: #666;
+    font-size: 14px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .instagram-modal-content {
+      width: 95%;
+      max-width: none;
+    }
+  }
+
+  /* Instagram embed iframe styling */
+  .instagram-embed-container iframe {
+    width: 100% !important;
+    max-width: 500px !important;
+    margin: 0 auto;
+    display: block;
+  }
+</style>
+
+<script>
+  // Load Instagram embed script
+  (function() {
+    if (!window.instagramEmbedLoaded) {
+      const script = document.createElement('script');
+      script.src = 'https://www.instagram.com/embed.js';
+      script.async = true;
+      document.body.appendChild(script);
+      window.instagramEmbedLoaded = true;
+    }
+  })();
+
+  // Open Instagram modal function
+  function openInstagramModal(instagramUrl) {
+    const modal = document.getElementById('instagram-modal');
+    const embedContainer = document.getElementById('instagram-embed-container');
+    
+    if (!modal || !embedContainer) return;
+
+    // Show modal
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Clear previous content
+    embedContainer.innerHTML = `
+      <div class="instagram-loading">
+        <div class="spinner"></div>
+        <p>Loading Instagram post...</p>
+      </div>
+    `;
+
+    // Create Instagram embed
+    const blockquote = document.createElement('blockquote');
+    blockquote.className = 'instagram-media';
+    blockquote.setAttribute('data-instgrm-permalink', instagramUrl);
+    blockquote.setAttribute('data-instgrm-version', '14');
+    blockquote.style.maxWidth = '500px';
+    blockquote.style.minWidth = '326px';
+    
+    // Add fallback link
+    const link = document.createElement('a');
+    link.href = instagramUrl;
+    link.target = '_blank';
+    link.textContent = 'View this post on Instagram';
+    blockquote.appendChild(link);
+
+    // Replace loading with embed
+    embedContainer.innerHTML = '';
+    embedContainer.appendChild(blockquote);
+
+    // Process Instagram embed
+    if (window.instgrm) {
+      window.instgrm.Embeds.process();
+    }
+  }
+
+  // Close Instagram modal function
+  function closeInstagramModal() {
+    const modal = document.getElementById('instagram-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('instagram-modal');
+    const closeBtn = modal?.querySelector('.instagram-modal-close');
+    const overlay = modal?.querySelector('.instagram-modal-overlay');
+
+    // Close button click
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeInstagramModal);
+    }
+
+    // Overlay click
+    if (overlay) {
+      overlay.addEventListener('click', closeInstagramModal);
+    }
+
+    // ESC key to close
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal?.style.display === 'flex') {
+        closeInstagramModal();
+      }
+    });
+  });
+</script>
