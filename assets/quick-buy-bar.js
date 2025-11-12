@@ -48,13 +48,6 @@ class QuickBuyBar {
     
     // 页面加载时更新一次购物车数量
     this.updateCart();
-    
-    // 调试：查找购物车元素（开发时使用，生产环境可删除）
-    if (window.location.search.includes('debug=true')) {
-      setTimeout(() => {
-        this.debugCartElements();
-      }, 1000);
-    }
   }
 
   /**
@@ -254,7 +247,7 @@ class QuickBuyBar {
       // 更新购物车（多次尝试确保成功）
       await this.updateCart();
       setTimeout(() => this.updateCart(), 100);
-      setTimeout(() => this.updateCart(), 500);
+      setTimeout(() => this.updateCart(), 300);
 
     } catch (error) {
       console.error('添加到购物车失败:', error);
@@ -287,13 +280,10 @@ class QuickBuyBar {
     // 获取产品图片位置
     const imageRect = this.productImage.getBoundingClientRect();
     
-    // 获取购物车图标位置（尝试多个 Savor 主题常见选择器）
-    const cartIcon = document.querySelector('.header__cart') || 
-                     document.querySelector('.cart-link') ||
-                     document.querySelector('[data-cart-icon]') || 
-                     document.querySelector('.header__icon--cart') ||
-                     document.querySelector('[href="/cart"]') ||
-                     document.querySelector('a[href*="cart"]');
+    // 获取购物车图标位置 - Savor 主题专用
+    const cartIcon = document.querySelector('cart-icon') || 
+                     document.querySelector('.header-actions__cart-icon') ||
+                     document.querySelector('[data-testid="cart-icon"]');
     
     if (!cartIcon) {
       console.warn('未找到购物车图标');
@@ -336,7 +326,7 @@ class QuickBuyBar {
   }
 
   /**
-   * 更新购物车 - Savor 主题优化版
+   * 更新购物车 - Savor 主题专用版本
    */
   async updateCart() {
     try {
@@ -346,92 +336,95 @@ class QuickBuyBar {
       console.log('✓ 购物车数据:', cart);
       console.log('✓ 商品数量:', cart.item_count);
       
-      // Savor 主题特定的选择器 + 通用选择器
-      const cartCountSelectors = [
-        // Savor 主题常用选择器
-        '.header__cart-count',
-        '.cart__count',
-        '.cart-count-bubble',
-        '.cart-link__bubble',
-        // 通用选择器
-        '#cart-count',
-        '[data-cart-count]',
-        '.cart-count',
-        '.cart-item-count',
-        '#CartCount',
-        '.header-cart-count',
-        // 额外的可能选择器
-        '.cart-counter',
-        '[data-cart-item-count]',
-        '.js-cart-count'
-      ];
-
-      let foundElements = 0;
-      cartCountSelectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        if (elements.length > 0) {
-          console.log(`✓ 找到 ${elements.length} 个元素: ${selector}`);
-          foundElements += elements.length;
-          
-          elements.forEach(el => {
-            // 更新文本内容
-            el.textContent = cart.item_count;
-            el.innerText = cart.item_count;
-            
-            // 更新 data 属性（如果存在）
-            if (el.hasAttribute('data-cart-count')) {
-              el.setAttribute('data-cart-count', cart.item_count);
-            }
-            
-            // 控制显示/隐藏
-            if (cart.item_count === 0) {
-              el.classList.add('hidden');
-              el.style.opacity = '0';
-              el.style.visibility = 'hidden';
-            } else {
-              el.classList.remove('hidden');
-              el.style.opacity = '1';
-              el.style.visibility = 'visible';
-            }
-            
-            // 添加弹出动画
-            el.classList.add('cart-count-pop');
-            setTimeout(() => {
-              el.classList.remove('cart-count-pop');
-            }, 400);
-          });
+      let updatedCount = 0;
+      
+      // ========== Savor 主题的购物车数量元素 ==========
+      
+      // 1. 主要目标：cart-bubble__text-count
+      const cartBubbleCount = document.querySelector('.cart-bubble__text-count');
+      if (cartBubbleCount) {
+        cartBubbleCount.textContent = cart.item_count;
+        cartBubbleCount.setAttribute('aria-hidden', 'true');
+        updatedCount++;
+        console.log('✅ 已更新 .cart-bubble__text-count:', cart.item_count);
+      }
+      
+      // 2. 更新 visually-hidden 的文本（用于屏幕阅读器）
+      const visuallyHidden = document.querySelector('.cart-bubble__text .visually-hidden');
+      if (visuallyHidden) {
+        visuallyHidden.textContent = `Total items in cart: ${cart.item_count}`;
+        updatedCount++;
+        console.log('✅ 已更新 visually-hidden 文本');
+      }
+      
+      // 3. 更新整个 cart-bubble__text 的 role status
+      const cartBubbleText = document.querySelector('.cart-bubble__text');
+      if (cartBubbleText) {
+        cartBubbleText.setAttribute('role', 'status');
+        updatedCount++;
+      }
+      
+      // 4. 控制 cart-bubble 的显示/隐藏
+      const cartBubble = document.querySelector('.cart-bubble');
+      const cartIcon = document.querySelector('cart-icon');
+      
+      if (cart.item_count === 0) {
+        // 购物车为空
+        if (cartBubble) {
+          cartBubble.style.opacity = '0';
+          cartBubble.style.visibility = 'hidden';
         }
-      });
-
-      if (foundElements === 0) {
-        console.warn('⚠️ 未找到购物车数量元素，尝试自动检测...');
-        this.autoDetectAndUpdateCartCount(cart.item_count);
+        if (cartIcon) {
+          cartIcon.classList.remove('header-actions__cart-icon--has-cart');
+        }
       } else {
-        console.log(`✓ 成功更新 ${foundElements} 个购物车数量元素`);
+        // 购物车有商品
+        if (cartBubble) {
+          cartBubble.style.opacity = '1';
+          cartBubble.style.visibility = 'visible';
+        }
+        if (cartIcon) {
+          cartIcon.classList.add('header-actions__cart-icon--has-cart');
+        }
+      }
+      
+      // 5. 添加弹出动画
+      if (cartBubbleCount) {
+        cartBubbleCount.classList.add('cart-count-pop');
+        setTimeout(() => {
+          cartBubbleCount.classList.remove('cart-count-pop');
+        }, 400);
+      }
+      
+      // 6. 购物车图标抖动动画
+      if (cartIcon) {
+        cartIcon.classList.add('cart-shake');
+        setTimeout(() => {
+          cartIcon.classList.remove('cart-shake');
+        }, 500);
+      }
+      
+      // 7. 备用方法：使用 data-testid
+      const cartBubbleTestId = document.querySelector('[data-testid="cart-bubble"]');
+      if (cartBubbleTestId && cartBubbleTestId !== cartBubbleCount) {
+        cartBubbleTestId.textContent = cart.item_count;
+        updatedCount++;
+        console.log('✅ 已更新 [data-testid="cart-bubble"]');
+      }
+      
+      // 8. 如果 cart-icon 是 Web Component，尝试调用其方法
+      if (cartIcon && typeof cartIcon.updateCount === 'function') {
+        cartIcon.updateCount(cart.item_count);
+        console.log('✅ 已调用 cart-icon.updateCount()');
+      }
+      
+      if (updatedCount === 0) {
+        console.error('❌ 未找到购物车数量元素！');
+      } else {
+        console.log(`✅ 成功更新了 ${updatedCount} 个元素`);
       }
 
-      // 更新购物车图标（添加抖动动画）
-      const cartIconSelectors = [
-        '.header__cart',
-        '.cart-link',
-        '[data-cart-icon]',
-        '.header__icon--cart',
-        'a[href="/cart"]',
-        'a[href*="/cart"]',
-        '.cart-icon'
-      ];
-
-      cartIconSelectors.forEach(selector => {
-        const icons = document.querySelectorAll(selector);
-        icons.forEach(icon => {
-          icon.classList.add('cart-shake');
-          setTimeout(() => {
-            icon.classList.remove('cart-shake');
-          }, 500);
-        });
-      });
-
-      // 如果 Savor 主题使用 cart drawer，刷新它
+      // 刷新 cart drawer（如果有）
       await this.refreshCartDrawer(cart);
 
       // 触发自定义事件
@@ -442,8 +435,7 @@ class QuickBuyBar {
           itemCount: cart.item_count
         }
       }));
-
-      // 触发 Savor 主题可能监听的事件
+      
       document.dispatchEvent(new CustomEvent('cart:refresh'));
       document.dispatchEvent(new CustomEvent('theme:cart:update', {
         detail: { cart: cart }
@@ -457,151 +449,37 @@ class QuickBuyBar {
   }
 
   /**
-   * 自动检测并更新购物车数量
-   */
-  autoDetectAndUpdateCartCount(itemCount) {
-    // 查找所有可能包含购物车数量的元素
-    const allElements = document.querySelectorAll('span, div, p, a');
-    
-    allElements.forEach(el => {
-      const text = el.textContent.trim();
-      const isNumber = text.match(/^\d+$/);
-      const isSmall = el.offsetWidth < 50 && el.offsetHeight < 50;
-      const hasCartInClass = el.className.toLowerCase().includes('cart');
-      const hasCartInParent = el.parentElement?.className.toLowerCase().includes('cart');
-      
-      // 如果是小的数字元素，且与购物车相关
-      if (isNumber && isSmall && (hasCartInClass || hasCartInParent)) {
-        console.log('🎯 自动检测到可能的购物车数量元素:', el);
-        el.textContent = itemCount;
-        el.classList.add('cart-count-pop');
-        setTimeout(() => {
-          el.classList.remove('cart-count-pop');
-        }, 400);
-      }
-    });
-  }
-
-  /**
    * 刷新购物车抽屉（如果 Savor 主题使用）
    */
   async refreshCartDrawer(cart) {
-    // 查找 cart drawer 元素
     const cartDrawer = document.querySelector('cart-drawer') || 
                        document.querySelector('.cart-drawer') ||
-                       document.querySelector('#cart-drawer') ||
-                       document.querySelector('[data-cart-drawer]');
+                       document.querySelector('#cart-drawer');
     
     if (cartDrawer) {
       console.log('✓ 找到 cart drawer，正在刷新...');
       
-      // 如果是 Web Component
       if (cartDrawer.tagName === 'CART-DRAWER' && typeof cartDrawer.renderContents === 'function') {
         cartDrawer.renderContents(cart);
-      }
-      // 如果有刷新方法
-      else if (typeof cartDrawer.refresh === 'function') {
+      } else if (typeof cartDrawer.refresh === 'function') {
         cartDrawer.refresh();
       }
-      // 手动刷新 drawer 内容
-      else {
-        try {
-          const response = await fetch('/cart?section_id=cart-drawer');
-          const html = await response.text();
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newContent = doc.querySelector('.cart-drawer__inner') || 
-                            doc.querySelector('.drawer__inner');
-          
-          if (newContent) {
-            const currentContent = cartDrawer.querySelector('.cart-drawer__inner') || 
-                                  cartDrawer.querySelector('.drawer__inner');
-            if (currentContent) {
-              currentContent.innerHTML = newContent.innerHTML;
-              console.log('✓ Cart drawer 内容已刷新');
-            }
-          }
-        } catch (error) {
-          console.error('刷新 cart drawer 失败:', error);
-        }
-      }
     }
-  }
-
-  /**
-   * 调试：查找所有购物车相关元素
-   */
-  debugCartElements() {
-    console.log('=== 🔍 调试：查找购物车元素 ===');
-    
-    // 查找所有包含 "cart" 的类名
-    const cartElements = document.querySelectorAll('[class*="cart"]');
-    console.log(`找到 ${cartElements.length} 个包含 "cart" 的元素:`);
-    
-    cartElements.forEach(el => {
-      const text = el.textContent.trim();
-      if (text.match(/^\d+$/) && parseInt(text) < 100) {
-        console.log('✓ 可能的购物车数量元素:', {
-          element: el,
-          className: el.className,
-          id: el.id,
-          textContent: text,
-          selector: this.getSelector(el)
-        });
-      }
-    });
-    
-    // 查找所有包含数字的小元素
-    const allElements = document.querySelectorAll('span, div, p');
-    console.log('\n查找所有小的数字元素:');
-    
-    allElements.forEach(el => {
-      const text = el.textContent.trim();
-      if (text.match(/^\d+$/) && parseInt(text) < 100 && el.offsetWidth < 50) {
-        console.log('✓ 可能的数量标记:', {
-          element: el,
-          className: el.className,
-          id: el.id,
-          textContent: text,
-          width: el.offsetWidth,
-          height: el.offsetHeight
-        });
-      }
-    });
-  }
-
-  /**
-   * 获取元素的 CSS 选择器
-   */
-  getSelector(el) {
-    if (el.id) return `#${el.id}`;
-    if (el.className) {
-      const classes = el.className.split(' ').filter(c => c.trim());
-      if (classes.length > 0) return `.${classes.join('.')}`;
-    }
-    return el.tagName.toLowerCase();
   }
 
   /**
    * 显示错误提示
    */
   showError(message) {
-    // 可以替换为更友好的提示方式
     alert(message);
-    
-    // 或者使用自定义通知
-    // this.showNotification(message, 'error');
   }
 
   /**
    * 格式化金额
    */
   formatMoney(cents) {
-    // 获取 Shopify 的货币格式设置
     const moneyFormat = window.theme?.moneyFormat || '${{amount}}';
     const amount = (cents / 100).toFixed(2);
-    
-    // 简单替换
     return moneyFormat.replace('{{amount}}', amount).replace('{{amount_no_decimals}}', Math.round(cents / 100));
   }
 }
@@ -612,36 +490,37 @@ window.updateCartCount = async function() {
     const response = await fetch('/cart.js');
     const cart = await response.json();
     
-    // 尝试所有可能的选择器
-    const selectors = [
-      '.header__cart-count',
-      '.cart__count',
-      '.cart-count-bubble',
-      '.cart-link__bubble',
-      '[data-cart-count]',
-      '.cart-count',
-      '#cart-count',
-      '.cart-item-count',
-      '#CartCount'
-    ];
-    
-    let updated = false;
-    selectors.forEach(selector => {
-      document.querySelectorAll(selector).forEach(el => {
-        el.textContent = cart.item_count;
-        if (cart.item_count === 0) {
-          el.style.display = 'none';
-        } else {
-          el.style.display = '';
-        }
-        updated = true;
-      });
-    });
-    
-    if (updated) {
+    // Savor 主题专用更新
+    const cartBubbleCount = document.querySelector('.cart-bubble__text-count');
+    if (cartBubbleCount) {
+      cartBubbleCount.textContent = cart.item_count;
       console.log('✓ 购物车数量已更新:', cart.item_count);
+    }
+    
+    const visuallyHidden = document.querySelector('.cart-bubble__text .visually-hidden');
+    if (visuallyHidden) {
+      visuallyHidden.textContent = `Total items in cart: ${cart.item_count}`;
+    }
+    
+    const cartBubble = document.querySelector('.cart-bubble');
+    const cartIcon = document.querySelector('cart-icon');
+    
+    if (cart.item_count === 0) {
+      if (cartBubble) {
+        cartBubble.style.opacity = '0';
+        cartBubble.style.visibility = 'hidden';
+      }
+      if (cartIcon) {
+        cartIcon.classList.remove('header-actions__cart-icon--has-cart');
+      }
     } else {
-      console.warn('⚠️ 未找到购物车数量元素');
+      if (cartBubble) {
+        cartBubble.style.opacity = '1';
+        cartBubble.style.visibility = 'visible';
+      }
+      if (cartIcon) {
+        cartIcon.classList.add('header-actions__cart-icon--has-cart');
+      }
     }
     
     return cart;
