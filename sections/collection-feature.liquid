@@ -1,71 +1,51 @@
 {% comment %}
   产品系列展示 Section
-  自动显示产品所属系列的信息
+  只在产品属于指定系列时显示
 {% endcomment %}
 
 {% if product.collections.size > 0 %}
   {% assign target_collection = collections[section.settings.collection_handle] %}
   {% assign show_section = false %}
-  {% assign matched_collection = null %}
   
   {% for collection in product.collections %}
     {% if collection.handle == section.settings.collection_handle %}
       {% assign show_section = true %}
-      {% assign matched_collection = collection %}
       {% break %}
     {% endif %}
   {% endfor %}
 
-  {% if show_section and matched_collection %}
+  {% if show_section %}
     <section class="collection-feature-section" data-section-id="{{ section.id }}">
       <div class="container">
         <div class="collection-feature-wrapper">
           <div class="collection-feature-image">
-            {% if section.settings.use_custom_image and section.settings.image != blank %}
+            {% if section.settings.image != blank %}
               <img 
                 src="{{ section.settings.image | img_url: '800x' }}" 
-                alt="{{ section.settings.image_alt | default: matched_collection.title | escape }}"
-                loading="lazy"
-                width="800"
-                height="auto"
-              >
-            {% elsif matched_collection.image %}
-              <img 
-                src="{{ matched_collection.image | img_url: '800x' }}" 
-                alt="{{ matched_collection.title | escape }}"
+                alt="{{ section.settings.image_alt | escape }}"
                 loading="lazy"
                 width="800"
                 height="auto"
               >
             {% else %}
-              {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
             {% endif %}
           </div>
           
           <div class="collection-feature-content">
-            {% if section.settings.use_custom_title and section.settings.title != blank %}
+            {% if section.settings.title != blank %}
               <h2 class="collection-feature-title">{{ section.settings.title }}</h2>
-            {% else %}
-              <h2 class="collection-feature-title">{{ matched_collection.title }}</h2>
             {% endif %}
             
-            {% if section.settings.use_custom_description and section.settings.description != blank %}
+            {% if section.settings.description != blank %}
               <div class="collection-feature-description">
                 {{ section.settings.description }}
               </div>
-            {% elsif matched_collection.description != blank %}
-              <div class="collection-feature-description">
-                {{ matched_collection.description }}
-              </div>
             {% endif %}
             
-            {% if section.settings.show_button %}
-              <a href="{{ matched_collection.url }}" class="collection-feature-button">
-                {% if section.settings.button_text != blank %}
-                  {{ section.settings.button_text }}
-                {% else %}
-                  查看 {{ matched_collection.title }}
-                {% endif %}
+            {% if section.settings.button_text != blank and section.settings.button_link != blank %}
+              <a href="{{ section.settings.button_link }}" class="collection-feature-button">
+                {{ section.settings.button_text }}
               </a>
             {% endif %}
           </div>
@@ -100,11 +80,6 @@
         object-fit: cover;
       }
 
-      .placeholder-svg {
-        background-color: #f5f5f5;
-        border-radius: {{ section.settings.image_radius }}px;
-      }
-
       .collection-feature-content {
         padding: 20px;
       }
@@ -114,7 +89,6 @@
         font-weight: 700;
         margin-bottom: 20px;
         color: {{ section.settings.title_color }};
-        line-height: 1.2;
       }
 
       .collection-feature-description {
@@ -122,14 +96,6 @@
         line-height: 1.6;
         margin-bottom: 30px;
         color: {{ section.settings.text_color }};
-      }
-
-      .collection-feature-description p {
-        margin-bottom: 15px;
-      }
-
-      .collection-feature-description p:last-child {
-        margin-bottom: 0;
       }
 
       .collection-feature-button {
@@ -161,10 +127,6 @@
         .collection-feature-title {
           font-size: {{ section.settings.title_size | minus: 4 }}px;
         }
-
-        .collection-feature-content {
-          padding: 10px;
-        }
       }
     </style>
   {% endif %}
@@ -177,29 +139,19 @@
   "class": "section-collection-feature",
   "settings": [
     {
-      "type": "paragraph",
-      "content": "此 section 会自动显示产品所属系列的图片和描述"
-    },
-    {
       "type": "text",
       "id": "collection_handle",
       "label": "产品系列 Handle",
-      "info": "输入产品系列的 handle"
+      "info": "输入产品系列的 handle（例如：summer-collection）。只有属于此系列的产品才会显示此 section。"
     },
     {
       "type": "header",
       "content": "图片设置"
     },
     {
-      "type": "checkbox",
-      "id": "use_custom_image",
-      "label": "使用自定义图片",
-      "default": false
-    },
-    {
       "type": "image_picker",
       "id": "image",
-      "label": "自定义图片"
+      "label": "图片"
     },
     {
       "type": "text",
@@ -221,37 +173,27 @@
       "content": "内容设置"
     },
     {
-      "type": "checkbox",
-      "id": "use_custom_title",
-      "label": "使用自定义标题",
-      "default": false
-    },
-    {
       "type": "text",
       "id": "title",
-      "label": "自定义标题"
-    },
-    {
-      "type": "checkbox",
-      "id": "use_custom_description",
-      "label": "使用自定义描述",
-      "default": false
+      "label": "标题",
+      "default": "特色系列"
     },
     {
       "type": "richtext",
       "id": "description",
-      "label": "自定义描述"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_button",
-      "label": "显示按钮",
-      "default": true
+      "label": "描述",
+      "default": "<p>这是一个精选系列的产品，为您带来独特的体验。</p>"
     },
     {
       "type": "text",
       "id": "button_text",
-      "label": "按钮文字"
+      "label": "按钮文字",
+      "default": "查看系列"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "按钮链接"
     },
     {
       "type": "header",
