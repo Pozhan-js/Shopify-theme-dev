@@ -1,0 +1,317 @@
+{% comment %}
+  产品系列展示 Section
+  自动显示产品所属系列的信息
+{% endcomment %}
+
+{% if product.collections.size > 0 %}
+  {% assign target_collection = collections[section.settings.collection_handle] %}
+  {% assign show_section = false %}
+  {% assign matched_collection = null %}
+  
+  {% for collection in product.collections %}
+    {% if collection.handle == section.settings.collection_handle %}
+      {% assign show_section = true %}
+      {% assign matched_collection = collection %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+
+  {% if show_section and matched_collection %}
+    <section class="collection-feature-section" data-section-id="{{ section.id }}">
+      <div class="container">
+        <div class="collection-feature-wrapper">
+          <div class="collection-feature-image">
+            {% if section.settings.use_custom_image and section.settings.image != blank %}
+              <img 
+                src="{{ section.settings.image | img_url: '800x' }}" 
+                alt="{{ section.settings.image_alt | default: matched_collection.title | escape }}"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% elsif matched_collection.image %}
+              <img 
+                src="{{ matched_collection.image | img_url: '800x' }}" 
+                alt="{{ matched_collection.title | escape }}"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% else %}
+              {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          </div>
+          
+          <div class="collection-feature-content">
+            {% if section.settings.use_custom_title and section.settings.title != blank %}
+              <h2 class="collection-feature-title">{{ section.settings.title }}</h2>
+            {% else %}
+              <h2 class="collection-feature-title">{{ matched_collection.title }}</h2>
+            {% endif %}
+            
+            {% if section.settings.use_custom_description and section.settings.description != blank %}
+              <div class="collection-feature-description">
+                {{ section.settings.description }}
+              </div>
+            {% elsif matched_collection.description != blank %}
+              <div class="collection-feature-description">
+                {{ matched_collection.description }}
+              </div>
+            {% endif %}
+            
+            {% if section.settings.show_button %}
+              <a href="{{ matched_collection.url }}" class="collection-feature-button">
+                {% if section.settings.button_text != blank %}
+                  {{ section.settings.button_text }}
+                {% else %}
+                  查看 {{ matched_collection.title }}
+                {% endif %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <style>
+      .collection-feature-section {
+        padding: 60px 0;
+        background-color: {{ section.settings.background_color }};
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      .collection-feature-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+      }
+
+      .collection-feature-image img,
+      .collection-feature-image svg {
+        width: 100%;
+        height: auto;
+        border-radius: {{ section.settings.image_radius }}px;
+        object-fit: cover;
+      }
+
+      .placeholder-svg {
+        background-color: #f5f5f5;
+        border-radius: {{ section.settings.image_radius }}px;
+      }
+
+      .collection-feature-content {
+        padding: 20px;
+      }
+
+      .collection-feature-title {
+        font-size: {{ section.settings.title_size }}px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: {{ section.settings.title_color }};
+        line-height: 1.2;
+      }
+
+      .collection-feature-description {
+        font-size: {{ section.settings.text_size }}px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        color: {{ section.settings.text_color }};
+      }
+
+      .collection-feature-description p {
+        margin-bottom: 15px;
+      }
+
+      .collection-feature-description p:last-child {
+        margin-bottom: 0;
+      }
+
+      .collection-feature-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: {{ section.settings.button_bg_color }};
+        color: {{ section.settings.button_text_color }};
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .collection-feature-button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 768px) {
+        .collection-feature-wrapper {
+          grid-template-columns: 1fr;
+          gap: 30px;
+        }
+
+        .collection-feature-section {
+          padding: 40px 0;
+        }
+
+        .collection-feature-title {
+          font-size: {{ section.settings.title_size | minus: 4 }}px;
+        }
+
+        .collection-feature-content {
+          padding: 10px;
+        }
+      }
+    </style>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "产品系列展示",
+  "tag": "section",
+  "class": "section-collection-feature",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "此 section 会自动显示产品所属系列的图片和描述"
+    },
+    {
+      "type": "text",
+      "id": "collection_handle",
+      "label": "产品系列 Handle",
+      "info": "输入产品系列的 handle"
+    },
+    {
+      "type": "header",
+      "content": "图片设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_image",
+      "label": "使用自定义图片",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "自定义图片"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "图片替代文本"
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "图片圆角",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "内容设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_title",
+      "label": "使用自定义标题",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "自定义标题"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_description",
+      "label": "使用自定义描述",
+      "default": false
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "自定义描述"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "显示按钮",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "按钮文字"
+    },
+    {
+      "type": "header",
+      "content": "样式设置"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "标题字体大小",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "标题颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "文字字体大小",
+      "default": 16
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "文字颜色",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "按钮背景颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "按钮文字颜色",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品系列展示"
+    }
+  ]
+}
+{% endschema %}
