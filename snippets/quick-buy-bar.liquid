@@ -5,12 +5,11 @@
 
 <div class="quick-buy-bar" id="quickBuyBar" data-product-id="{{ product.id }}">
   <div class="quick-buy-container">
-    
     {%- comment -%} 产品图片 {%- endcomment -%}
     <div class="quick-buy-image">
       {% if product.featured_image %}
-        <img 
-          src="{{ product.featured_image | img_url: '100x100', crop: 'center' }}" 
+        <img
+          src="{{ product.featured_image | img_url: '100x100', crop: 'center' }}"
           alt="{{ product.featured_image.alt | escape }}"
           loading="lazy"
           data-quick-image
@@ -25,7 +24,9 @@
         <span class="price" data-quick-price>
           {{ product.selected_or_first_available_variant.price | money }}
         </span>
-        {% if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}
+        {% if product.selected_or_first_available_variant.compare_at_price
+            > product.selected_or_first_available_variant.price
+        %}
           <span class="compare-price" data-quick-compare-price>
             {{ product.selected_or_first_available_variant.compare_at_price | money }}
           </span>
@@ -39,8 +40,8 @@
         {% for option in product.options_with_values %}
           <div class="quick-variant-option" data-option-position="{{ option.position }}">
             <label class="quick-option-label">{{ option.name }}</label>
-            <select 
-              class="quick-variant-select" 
+            <select
+              class="quick-variant-select"
               data-option-position="{{ option.position }}"
               data-option-name="{{ option.name }}"
             >
@@ -55,11 +56,13 @@
 
     {%- comment -%} 添加到购物车按钮 {%- endcomment -%}
     <div class="quick-buy-actions">
-      <button 
-        type="button" 
-        class="quick-add-to-cart" 
+      <button
+        type="button"
+        class="quick-add-to-cart"
         data-quick-add-to-cart
-        {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
+        {% unless product.selected_or_first_available_variant.available %}
+          disabled
+        {% endunless %}
       >
         <span class="btn-icon">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -68,11 +71,12 @@
         </span>
         <span class="btn-text" data-btn-text>
           {% if product.selected_or_first_available_variant.available %}
-           ADD TO CART
+            {{ 'products.product.add_to_cart' | t }}
           {% else %}
-            SOLD OUT
+            {{ 'products.product.sold_out' | t }}
           {% endif %}
         </span>
+
         <span class="btn-loading" style="display: none;">
           <svg class="spinner" width="20" height="20" viewBox="0 0 20 20">
             <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3"/>
@@ -93,7 +97,6 @@
         <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" stroke-width="2"/>
       </svg>
     </button>
-
   </div>
 </div>
 
