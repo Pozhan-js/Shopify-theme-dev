@@ -45,9 +45,525 @@
       </div>
     </div>
   </div>
+   <!-- 快速购买栏 -->
+  <div class="quick-buy-bar" id="quickBuyBar" style="display: none;">
+    <div class="quick-buy-content">
+      <div class="quick-buy-product-info">
+        <div class="quick-buy-image">
+          {% if closest.product.featured_media %}
+            <img
+              src="{{ closest.product.featured_media | image_url: width: 60 }}"
+              alt="{{ closest.product.title }}"
+              loading="lazy"
+            >
+          {% endif %}
+        </div>
+        <div class="quick-buy-details">
+          <h3 class="quick-buy-title">{{ closest.product.title }}</h3>
+        </div>
+      </div>
+
+      <div class="quick-buy-options">
+        {% unless closest.product.has_only_default_variant %}
+          <div class="quick-buy-variants">
+            {% for option in closest.product.options_with_values %}
+              <div class="variant-option">
+                <label class="option-label">{{ option.name }}:</label>
+                <div class="option-buttons" data-option-index="{{ forloop.index0 }}">
+                  {% for value in option.values %}
+                    <button
+                      type="button"
+                      class="option-btn {% if forloop.first %}active{% endif %}"
+                      data-value="{{ value }}"
+                    >
+                      {{ value }}
+                    </button>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endunless %}
+
+        <div class="quick-buy-quantity">
+          <label class="quantity-label">Qty:</label>
+          <div class="quantity-selector">
+            <button type="button" class="quantity-btn quantity-minus">-</button>
+            <input type="number" class="quantity-input" value="1" min="1">
+            <button type="button" class="quantity-btn quantity-plus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-buy-actions">
+        <button type="button" class="quick-buy-btn" id="quickBuyButton">
+          <span class="btn-text"
+            >Buy Now · <span class="btn-price">{{ closest.product.price | money }}</span></span
+          >
+          <span class="btn-loading" style="display: none;">Adding...</span>
+        </button>
+      </div>
+
+      {% comment %} <button type="button" class="quick-buy-close" id="quickBuyClose">×</button> {% endcomment %}
+    </div>
+  </div>
+    {% content_for 'blocks' %}
 </div>
 
 <style>
+  /* 快速购买栏样式 */
+  .quick-buy-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #e0e0e0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+    padding: 16px;
+  }
+
+  .quick-buy-bar.show {
+    transform: translateY(0);
+  }
+
+  .quick-buy-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .quick-buy-product-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .quick-buy-image img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .quick-buy-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.2;
+    max-width: 150px;
+  }
+
+  .quick-buy-options {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+  }
+
+  .quick-buy-variants {
+    display: flex;
+    gap: 16px;
+  }
+
+  .variant-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .option-label,
+  .quantity-label {
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .option-buttons {
+    display: flex;
+    gap: 6px;
+  }
+
+  .option-btn {
+    background: #f5f5f5;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 40px;
+  }
+
+  .option-btn:hover {
+    background: #e0e0e0;
+  }
+
+  .option-btn.active {
+    background: #000;
+    color: #fff;
+  }
+
+  .option-btn.active:hover {
+    background: #333;
+  }
+
+  .quick-buy-quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .quantity-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .quantity-btn {
+    background: #f8f9fa;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    color: #333;
+  }
+
+  .quantity-btn:hover {
+    background: #e9ecef;
+  }
+
+  .quantity-input {
+    border: none;
+    text-align: center;
+    width: 50px;
+    padding: 8px 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .quick-buy-actions {
+    flex-shrink: 0;
+  }
+
+  .quick-buy-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    min-width: 140px;
+    font-size: 14px;
+  }
+
+  .quick-buy-btn:hover {
+    background: #0056b3;
+  }
+
+  .quick-buy-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .btn-price {
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .quick-buy-close {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+
+  .quick-buy-close:hover {
+    background: #5a6268;
+  }
+
+  /* 移动端适配 */
+  @media screen and (max-width: 768px) {
+    .quick-buy-content {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .quick-buy-product-info {
+      justify-content: center;
+    }
+
+    .quick-buy-title {
+      max-width: none;
+      text-align: center;
+    }
+
+    .quick-buy-options {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quick-buy-variants {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .variant-option {
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .option-buttons {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .quick-buy-quantity {
+      justify-content: center;
+    }
+
+    .quick-buy-btn {
+      width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .quick-buy-variants {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-btn {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+  }
+
+  .product-information {
+    gap: var(--gap) 0;
+  }
+
+  /* Base grid layout */
+  .product-information__grid {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+  }
+
+  /* Default column positions */
+  .product-details {
+    order: 1;
+  }
+
+  .product-information__media {
+    order: 0;
+    width: 0;
+    min-width: 100%;
+  }
+
+  /* Mobile styles */
+  @media screen and (max-width: 749px) {
+    .product-information__media {
+      grid-column: 1 / -1;
+    }
+
+    .product-details {
+      grid-column: 2 / 3;
+    }
+  }
+
+  /* Desktop styles */
+  @media screen and (min-width: 750px) {
+    .product-information__grid {
+      grid-column: 2;
+    }
+
+    /* Position when there is no media */
+    .product-information__grid.product-information--media-none,
+    .product-information__grid:has(.product-information__media:empty) {
+      .product-details {
+        width: var(--narrow-content-width);
+        margin: 0 auto;
+      }
+    }
+
+    /* Position when there is media */
+    .product-information__grid:not(:has(.product-information__media:empty)) {
+      /* Media on the left side */
+      &.product-information--media-left {
+        grid-template-columns: 1fr min(50vw, var(--sidebar-width));
+
+        .product-information__media {
+          padding-right: calc(var(--gap, 0) / 2);
+        }
+
+        .product-details {
+          padding-left: calc(var(--gap, 0) / 2);
+        }
+
+        &:has(.media-gallery--extend) {
+          grid-column: 1 / 3;
+        }
+      }
+
+      /* Media on the right side */
+      &.product-information--media-right {
+        grid-template-columns: min(50vw, var(--sidebar-width)) 1fr;
+
+        .product-information__media {
+          padding-left: calc(var(--gap, 0) / 2);
+          order: 1;
+        }
+
+        .product-details {
+          padding-right: calc(var(--gap, 0) / 2);
+          order: 0;
+        }
+
+        &:has(.media-gallery--extend) {
+          grid-column: 2 / -1;
+        }
+      }
+
+      /* Equal width columns */
+      &.product-information__grid--half,
+      &.product-information__grid--half:has(.media-gallery--extend) {
+        grid-column: 1 / -1;
+        grid-template-columns:
+          var(--full-page-grid-margin) calc(var(--full-page-grid-central-column-width) / 2) calc(
+            var(--full-page-grid-central-column-width) / 2
+          )
+          var(--full-page-grid-margin);
+
+        &.product-information--media-left {
+          .product-information__media {
+            grid-column: 2 / 3;
+
+            &:has(.media-gallery--extend) {
+              grid-column: 1 / 3;
+            }
+          }
+
+          .product-details {
+            grid-column: 3 / 4;
+          }
+        }
+
+        &.product-information--media-right {
+          .product-information__media {
+            grid-column: 3 / 4;
+
+            &:has(.media-gallery--extend) {
+              grid-column: 3 / -1;
+            }
+          }
+
+          .product-details {
+            grid-column: 2 / 3;
+          }
+        }
+      }
+    }
+
+    /* Handle full width section */
+    .section--full-width {
+      .product-information__grid:not(:has(.product-information__media:empty)),
+      .product-information__grid:not(:has(.product-information__media:empty)) {
+        &.product-information--media-left,
+        &.product-information--media-right {
+          grid-column: 1 / -1;
+        }
+
+        &.product-information--media-left .product-details {
+          padding-inline-end: var(--padding-lg);
+        }
+
+        &.product-information--media-right .product-details {
+          padding-inline-start: var(--padding-lg);
+        }
+
+        &.product-information__grid--half.product-information--media-left {
+          .product-information__media {
+            grid-column: 1 / 3;
+          }
+
+          .product-details {
+            grid-column: 3 / -1;
+          }
+        }
+
+        &.product-information__grid--half.product-information--media-right {
+          .product-information__media {
+            grid-column: 3 / -1;
+          }
+
+          .product-details {
+            grid-column: 1 / 3;
+          }
+        }
+      }
+    }
+  }
+
+  /* Wider sidebar for large screens */
+  @media screen and (min-width: 1200px) {
+    .product-information__grid:not(
+        .product-information__grid--half,
+        :has(.product-information__media:empty)
+      ).product-information--media-left {
+      grid-template-columns: 2fr 1fr;
+    }
+
+    .product-information__grid:not(
+        .product-information__grid--half,
+        :has(.product-information__media:empty)
+      ).product-information--media-right {
+      grid-template-columns: 1fr 2fr;
+    }
+  }
+
+  .product-information__grid--limit-details .product-details > .group-block {
+    max-width: var(--sidebar-width);
+  }
+
+  /* If the header is sticky, make product details content stick underneath the header */
+  body:has(#header-group #header-component[data-sticky-state='active']) .product-details.sticky-content--desktop {
+    --sticky-header-offset: var(--header-height);
+  }
+
   .product-detail-section {
     padding: {{ section.settings.section_padding_top }}px 20px {{ section.settings.section_padding_bottom }}px 20px;
     width: 100%;
@@ -701,6 +1217,178 @@
           });
       });
     }
+    const quickBuyBar = document.getElementById('quickBuyBar');
+  const quickBuyButton = document.getElementById('quickBuyButton');
+  // const quickBuyClose = document.getElementById('quickBuyClose');
+  const quantityInput = document.querySelector('.quantity-input');
+  const quantityMinus = document.querySelector('.quantity-minus');
+  const quantityPlus = document.querySelector('.quantity-plus');
+  const optionButtons = document.querySelectorAll('.option-btn');
+  const btnPrice = document.querySelector('.btn-price');
+  
+  let currentVariant = null;
+  let isVisible = false;
+  let selectedOptions = [];
+  
+  // 产品变体数据
+  const productVariants = {{ closest.product.variants | json }};
+  const productOptions = {{ closest.product.options | json }};
+  
+  // 初始化选中的选项
+  document.querySelectorAll('.option-buttons').forEach((buttonGroup, index) => {
+    const activeBtn = buttonGroup.querySelector('.option-btn.active');
+    selectedOptions[index] = activeBtn ? activeBtn.dataset.value : '';
+  });
+  
+  // 滚动监听
+  let ticking = false;
+  function handleScroll() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        const scrollY = window.scrollY;
+        const shouldShow = scrollY > 300;
+        
+        if (shouldShow && !isVisible) {
+          quickBuyBar.style.display = 'block';
+          setTimeout(() => quickBuyBar.classList.add('show'), 10);
+          isVisible = true;
+        } else if (!shouldShow && isVisible) {
+          quickBuyBar.classList.remove('show');
+          setTimeout(() => {
+            if (!quickBuyBar.classList.contains('show')) {
+              quickBuyBar.style.display = 'none';
+            }
+          }, 300);
+          isVisible = false;
+        }
+        ticking = false;
+      });
+    }
+    ticking = true;
+  }
+  
+  window.addEventListener('scroll', handleScroll);
+  
+  // // 关闭按钮
+  // quickBuyClose.addEventListener('click', function() {
+  //   quickBuyBar.classList.remove('show');
+  //   setTimeout(() => quickBuyBar.style.display = 'none', 300);
+  //   isVisible = false;
+  // });
+  
+  // 数量控制
+  quantityMinus.addEventListener('click', function() {
+    const currentValue = parseInt(quantityInput.value);
+    if (currentValue > 1) {
+      quantityInput.value = currentValue - 1;
+    }
+  });
+  
+  quantityPlus.addEventListener('click', function() {
+    const currentValue = parseInt(quantityInput.value);
+    quantityInput.value = currentValue + 1;
+  });
+  
+  // 选项按钮点击事件
+  optionButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const buttonGroup = this.parentElement;
+      const optionIndex = parseInt(buttonGroup.dataset.optionIndex);
+      
+      // 移除同组其他按钮的active状态
+      buttonGroup.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // 添加当前按钮的active状态
+      this.classList.add('active');
+      
+      // 更新选中的选项
+      selectedOptions[optionIndex] = this.dataset.value;
+      
+      // 更新当前变体
+      updateCurrentVariant();
+    });
+  });
+  
+  // 查找变体
+  function findVariantByOptions(options) {
+    return productVariants.find(variant => {
+      return variant.options.every((option, index) => option === options[index]);
+    });
+  }
+  
+  // 格式化价格
+  function formatPrice(price) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price / 100);
+  }
+  
+  // 更新当前变体
+  function updateCurrentVariant() {
+    currentVariant = findVariantByOptions(selectedOptions);
+    
+    if (currentVariant) {
+      // 更新按钮中的价格
+      btnPrice.textContent = formatPrice(currentVariant.price);
+      
+      // 更新按钮状态
+      quickBuyButton.disabled = !currentVariant.available;
+      const btnText = quickBuyButton.querySelector('.btn-text');
+      
+      if (currentVariant.available) {
+        btnText.innerHTML = `Buy Now · <span class="btn-price">${formatPrice(currentVariant.price)}</span>`;
+      } else {
+        btnText.innerHTML = 'Out of Stock';
+      }
+    }
+  }
+  
+  // 初始化当前变体
+  updateCurrentVariant();
+  
+  // 购买按钮点击
+  quickBuyButton.addEventListener('click', function() {
+    if (!currentVariant || !currentVariant.available) return;
+    
+    const quantity = parseInt(quantityInput.value);
+    const btnText = quickBuyButton.querySelector('.btn-text');
+    const btnLoading = quickBuyButton.querySelector('.btn-loading');
+    
+    // 显示加载状态
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    quickBuyButton.disabled = true;
+    
+    // 添加到购物车
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: currentVariant.id,
+        quantity: quantity
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      // 成功后跳转到购物车
+      window.location.href = '/cart';
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to add to cart, please try again');
+    })
+    .finally(() => {
+      // 恢复按钮状态
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
+      quickBuyButton.disabled = !currentVariant.available;
+    });
+  });
 
     // 监听屏幕旋转
     window.addEventListener('orientationchange', function () {
