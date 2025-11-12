@@ -13,6 +13,7 @@
           src="{{ product.featured_image | img_url: '100x100', crop: 'center' }}" 
           alt="{{ product.featured_image.alt | escape }}"
           loading="lazy"
+          data-quick-image
         >
       {% endif %}
     </div>
@@ -52,31 +53,6 @@
       </div>
     {% endunless %}
 
-    {%- comment -%} 数量选择器 {%- endcomment -%}
-    {% comment %} <div class="quick-buy-quantity">
-      <label class="quantity-label">数量</label>
-      <div class="quantity-selector">
-        <button type="button" class="quantity-btn quantity-minus" data-quantity-minus>
-          <svg width="12" height="2" viewBox="0 0 12 2" fill="none">
-            <path d="M0 1H12" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
-        <input 
-          type="number" 
-          class="quantity-input" 
-          value="1" 
-          min="1" 
-          max="99"
-          data-quantity-input
-        >
-        <button type="button" class="quantity-btn quantity-plus" data-quantity-plus>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M6 0V12M0 6H12" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </button>
-      </div>
-    </div> {% endcomment %}
-
     {%- comment -%} 添加到购物车按钮 {%- endcomment -%}
     <div class="quick-buy-actions">
       <button 
@@ -85,6 +61,11 @@
         data-quick-add-to-cart
         {% unless product.selected_or_first_available_variant.available %}disabled{% endunless %}
       >
+        <span class="btn-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 3H5L5.4 5M7 13H15L17 5H5.4M7 13L5.4 5M7 13L5.5 15.5C5.2 16 5.5 16.5 6 16.5H15M15 16.5C14.2 16.5 13.5 17.2 13.5 18C13.5 18.8 14.2 19.5 15 19.5C15.8 19.5 16.5 18.8 16.5 18C16.5 17.2 15.8 16.5 15 16.5ZM8 18C8 18.8 7.3 19.5 6.5 19.5C5.7 19.5 5 18.8 5 18C5 17.2 5.7 16.5 6.5 16.5C7.3 16.5 8 17.2 8 18Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
         <span class="btn-text" data-btn-text>
           {% if product.selected_or_first_available_variant.available %}
             加入购物车
@@ -98,6 +79,11 @@
             <path d="M10 2 A8 8 0 0 1 18 10" stroke="currentColor" stroke-width="2" fill="none"/>
           </svg>
         </span>
+        <span class="btn-success" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10L8 14L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </button>
     </div>
 
@@ -109,6 +95,11 @@
     </button>
 
   </div>
+</div>
+
+{%- comment -%} 飞入购物车动画元素 {%- endcomment -%}
+<div class="cart-fly-item" id="cartFlyItem" style="display: none;">
+  <img src="" alt="" data-fly-image>
 </div>
 
 {%- comment -%} 产品数据 JSON {%- endcomment -%}
