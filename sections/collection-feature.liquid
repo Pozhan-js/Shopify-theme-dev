@@ -1,203 +1,53 @@
-{% comment %}
-  产品系列展示 Section
-  只在产品属于指定系列时显示
-{% endcomment %}
-
-{% if product.collections.size > 0 %}
-  {% assign target_collection = collections[section.settings.collection_handle] %}
-  {% assign show_section = false %}
-  
-  {% for collection in product.collections %}
-    {% if collection.handle == section.settings.collection_handle %}
-      {% assign show_section = true %}
-      {% break %}
-    {% endif %}
-  {% endfor %}
-
-  {% if show_section %}
-    <section class="collection-feature-section" data-section-id="{{ section.id }}">
-      <div class="container">
-        <div class="collection-feature-wrapper">
-          <div class="collection-feature-image">
-            {% if section.settings.image != blank %}
-              <img 
-                src="{{ section.settings.image | img_url: '800x' }}" 
-                alt="{{ section.settings.image_alt | escape }}"
-                loading="lazy"
-                width="800"
-                height="auto"
-              >
-            {% else %}
-              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-            {% endif %}
-          </div>
-          
-          <div class="collection-feature-content">
-            {% if section.settings.title != blank %}
-              <h2 class="collection-feature-title">{{ section.settings.title }}</h2>
-            {% endif %}
-            
-            {% if section.settings.description != blank %}
-              <div class="collection-feature-description">
-                {{ section.settings.description }}
-              </div>
-            {% endif %}
-            
-            {% if section.settings.button_text != blank and section.settings.button_link != blank %}
-              <a href="{{ section.settings.button_link }}" class="collection-feature-button">
-                {{ section.settings.button_text }}
-              </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <style>
-      .collection-feature-section {
-        padding: 60px 0;
-        background-color: {{ section.settings.background_color }};
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-      }
-
-      .collection-feature-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        align-items: center;
-      }
-
-      .collection-feature-image img,
-      .collection-feature-image svg {
-        width: 100%;
-        height: auto;
-        border-radius: {{ section.settings.image_radius }}px;
-        object-fit: cover;
-      }
-
-      .collection-feature-content {
-        padding: 20px;
-      }
-
-      .collection-feature-title {
-        font-size: {{ section.settings.title_size }}px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: {{ section.settings.title_color }};
-      }
-
-      .collection-feature-description {
-        font-size: {{ section.settings.text_size }}px;
-        line-height: 1.6;
-        margin-bottom: 30px;
-        color: {{ section.settings.text_color }};
-      }
-
-      .collection-feature-button {
-        display: inline-block;
-        padding: 12px 30px;
-        background-color: {{ section.settings.button_bg_color }};
-        color: {{ section.settings.button_text_color }};
-        text-decoration: none;
-        border-radius: 4px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-      }
-
-      .collection-feature-button:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-      }
-
-      @media (max-width: 768px) {
-        .collection-feature-wrapper {
-          grid-template-columns: 1fr;
-          gap: 30px;
-        }
-
-        .collection-feature-section {
-          padding: 40px 0;
-        }
-
-        .collection-feature-title {
-          font-size: {{ section.settings.title_size | minus: 4 }}px;
-        }
-      }
-    </style>
-  {% endif %}
-{% endif %}
-
 {% schema %}
 {
-  "name": "产品系列展示",
-  "tag": "section",
-  "class": "section-collection-feature",
+  "name": "图文展示",
   "settings": [
-    {
-      "type": "text",
-      "id": "collection_handle",
-      "label": "产品系列 Handle",
-      "info": "输入产品系列的 handle（例如：summer-collection）。只有属于此系列的产品才会显示此 section。"
-    },
-    {
-      "type": "header",
-      "content": "图片设置"
-    },
     {
       "type": "image_picker",
       "id": "image",
       "label": "图片"
     },
     {
-      "type": "text",
-      "id": "image_alt",
-      "label": "图片替代文本"
-    },
-    {
       "type": "range",
-      "id": "image_radius",
-      "min": 0,
-      "max": 20,
-      "step": 2,
-      "unit": "px",
-      "label": "图片圆角",
-      "default": 8
-    },
-    {
-      "type": "header",
-      "content": "内容设置"
-    },
-    {
-      "type": "text",
-      "id": "title",
-      "label": "标题",
-      "default": "特色系列"
+      "id": "image_width",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "label": "图片宽度",
+      "default": 50
     },
     {
       "type": "richtext",
-      "id": "description",
-      "label": "描述",
-      "default": "<p>这是一个精选系列的产品，为您带来独特的体验。</p>"
+      "id": "title",
+      "label": "标题",
+      "default": "<p>标题文字</p>"
     },
     {
-      "type": "text",
-      "id": "button_text",
-      "label": "按钮文字",
-      "default": "查看系列"
+      "type": "richtext",
+      "id": "content",
+      "label": "内容",
+      "default": "<p>这里是内容描述文字</p>"
     },
     {
-      "type": "url",
-      "id": "button_link",
-      "label": "按钮链接"
+      "type": "range",
+      "id": "gap",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "间隙大小",
+      "default": 30
     },
     {
-      "type": "header",
-      "content": "样式设置"
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "圆角大小",
+      "default": 10
     },
     {
       "type": "color",
@@ -207,53 +57,111 @@
     },
     {
       "type": "range",
-      "id": "title_size",
-      "min": 20,
-      "max": 48,
-      "step": 2,
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
       "unit": "px",
-      "label": "标题字体大小",
-      "default": 32
-    },
-    {
-      "type": "color",
-      "id": "title_color",
-      "label": "标题颜色",
-      "default": "#000000"
+      "label": "上边距",
+      "default": 50
     },
     {
       "type": "range",
-      "id": "text_size",
-      "min": 12,
-      "max": 24,
-      "step": 1,
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
       "unit": "px",
-      "label": "文字字体大小",
-      "default": 16
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "文字颜色",
-      "default": "#666666"
-    },
-    {
-      "type": "color",
-      "id": "button_bg_color",
-      "label": "按钮背景颜色",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "按钮文字颜色",
-      "default": "#ffffff"
+      "label": "下边距",
+      "default": 50
     }
   ],
   "presets": [
     {
-      "name": "产品系列展示"
+      "name": "图文展示"
     }
   ]
 }
 {% endschema %}
+
+<style>
+  .image-text-section-{{ section.id }} {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.background_color }};
+  }
+
+  .image-text-container-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ section.settings.gap }}px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .image-text-image-{{ section.id }} {
+    flex: 0 0 {{ section.settings.image_width }}%;
+    border-radius: {{ section.settings.border_radius }}px;
+    overflow: hidden;
+  }
+
+  .image-text-image-{{ section.id }} img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .image-text-content-{{ section.id }} {
+    flex: 1;
+  }
+
+  .image-text-content-{{ section.id }} h2 {
+    margin-bottom: 20px;
+    font-size: 32px;
+    font-weight: bold;
+  }
+
+  .image-text-content-{{ section.id }} .content-text {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .image-text-container-{{ section.id }} {
+      flex-direction: column;
+    }
+
+    .image-text-image-{{ section.id }} {
+      flex: 0 0 100%;
+      width: 100%;
+    }
+
+    .image-text-content-{{ section.id }} h2 {
+      font-size: 24px;
+    }
+  }
+</style>
+
+<div class="image-text-section-{{ section.id }}">
+  <div class="image-text-container-{{ section.id }}">
+    {% if section.settings.image %}
+      <div class="image-text-image-{{ section.id }}">
+        <img src="{{ section.settings.image | img_url: 'master' }}" alt="{{ section.settings.image.alt | escape }}">
+      </div>
+    {% endif %}
+
+    <div class="image-text-content-{{ section.id }}">
+      {% if section.settings.title != blank %}
+        <div class="title-text">
+          {{ section.settings.title }}
+        </div>
+      {% endif %}
+
+      {% if section.settings.content != blank %}
+        <div class="content-text">
+          {{ section.settings.content }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
