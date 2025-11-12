@@ -1,6 +1,6 @@
 {% comment %}
   Section: Collection Info on Product Page
-  显示产品所属系列的图片和描述
+  在商品详情页显示产品所属系列的图片和描述
 {% endcomment %}
 
 {% if product.collections.first %}
@@ -10,13 +10,17 @@
     <div class="collection-info-container">
       <div class="collection-info-image">
         {% if collection.image %}
-          <img 
-            src="{{ collection.image | image_url: width: 600 }}"
-            alt="{{ collection.title }}"
-            loading="lazy"
-            width="600"
-            height="{{ 600 | divided_by: collection.image.aspect_ratio | round }}"
-          >
+          {{ collection.image | image_url: width: 600 | image_tag: 
+             alt: collection.title,
+             loading: 'lazy',
+             widths: '300, 400, 500, 600, 700, 800'
+          }}
+        {% elsif collection.featured_image %}
+          {{ collection.featured_image | image_url: width: 600 | image_tag: 
+             alt: collection.title,
+             loading: 'lazy',
+             widths: '300, 400, 500, 600, 700, 800'
+          }}
         {% endif %}
       </div>
       
@@ -28,7 +32,7 @@
           </div>
         {% endif %}
         <a href="{{ collection.url }}" class="collection-info-link">
-          查看系列 →
+          查看完整系列 →
         </a>
       </div>
     </div>
@@ -49,11 +53,16 @@
       margin: 0 auto;
     }
     
+    .collection-info-image {
+      width: 100%;
+    }
+    
     .collection-info-image img {
       width: 100%;
       height: auto;
       display: block;
       border-radius: 8px;
+      object-fit: cover;
     }
     
     .collection-info-content {
@@ -64,6 +73,7 @@
       font-size: 28px;
       font-weight: bold;
       margin-bottom: 16px;
+      color: #000;
     }
     
     .collection-info-description {
@@ -80,18 +90,87 @@
       color: #fff;
       text-decoration: none;
       border-radius: 4px;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
+      font-weight: 500;
     }
     
     .collection-info-link:hover {
       background-color: #333;
     }
     
+    /* 响应式设计 */
     @media (max-width: 768px) {
       .collection-info-container {
         grid-template-columns: 1fr;
         gap: 24px;
       }
+      
+      .collection-info-content {
+        padding: 10px;
+      }
+      
+      .collection-info-title {
+        font-size: 24px;
+      }
     }
   </style>
 {% endif %}
+
+{% schema %}
+{
+  "name": "产品系列信息",
+  "tag": "section",
+  "class": "section-collection-info",
+  "settings": [
+    {
+      "type": "header",
+      "content": "显示设置"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_link",
+      "label": "显示查看系列链接",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "图片比例",
+      "options": [
+        {
+          "value": "auto",
+          "label": "原始比例"
+        },
+        {
+          "value": "1/1",
+          "label": "正方形 (1:1)"
+        },
+        {
+          "value": "4/3",
+          "label": "横向 (4:3)"
+        },
+        {
+          "value": "16/9",
+          "label": "宽屏 (16:9)"
+        }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "label": "上下间距",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "产品系列信息"
+    }
+  ]
+}
+{% endschema %}
