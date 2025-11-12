@@ -1,11 +1,11 @@
 {% schema %}
 {
-  "name": "图文展示",
+  "name": "产品系列图文展示",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "图片"
+      "type": "collection",
+      "id": "collection",
+      "label": "选择产品系列"
     },
     {
       "type": "range",
@@ -16,18 +16,6 @@
       "unit": "%",
       "label": "图片宽度",
       "default": 50
-    },
-    {
-      "type": "richtext",
-      "id": "title",
-      "label": "标题",
-      "default": "<p>标题文字</p>"
-    },
-    {
-      "type": "richtext",
-      "id": "content",
-      "label": "内容",
-      "default": "<p>这里是内容描述文字</p>"
     },
     {
       "type": "range",
@@ -74,23 +62,29 @@
       "unit": "px",
       "label": "下边距",
       "default": 50
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "显示系列标题",
+      "default": true
     }
   ],
   "presets": [
     {
-      "name": "图文展示"
+      "name": "产品系列图文展示"
     }
   ]
 }
 {% endschema %}
 
 <style>
-  .image-text-section-{{ section.id }} {
+  .collection-image-text-section-{{ section.id }} {
     padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
     background-color: {{ section.settings.background_color }};
   }
 
-  .image-text-container-{{ section.id }} {
+  .collection-image-text-container-{{ section.id }} {
     display: flex;
     align-items: center;
     gap: {{ section.settings.gap }}px;
@@ -99,67 +93,72 @@
     padding: 0 20px;
   }
 
-  .image-text-image-{{ section.id }} {
+  .collection-image-text-image-{{ section.id }} {
     flex: 0 0 {{ section.settings.image_width }}%;
     border-radius: {{ section.settings.border_radius }}px;
     overflow: hidden;
   }
 
-  .image-text-image-{{ section.id }} img {
+  .collection-image-text-image-{{ section.id }} img {
     width: 100%;
     height: auto;
     display: block;
   }
 
-  .image-text-content-{{ section.id }} {
+  .collection-image-text-content-{{ section.id }} {
     flex: 1;
   }
 
-  .image-text-content-{{ section.id }} h2 {
+  .collection-image-text-content-{{ section.id }} h2 {
     margin-bottom: 20px;
     font-size: 32px;
     font-weight: bold;
   }
 
-  .image-text-content-{{ section.id }} .content-text {
+  .collection-image-text-content-{{ section.id }} .description-text {
     font-size: 16px;
     line-height: 1.6;
+    color: #333;
   }
 
   @media (max-width: 768px) {
-    .image-text-container-{{ section.id }} {
+    .collection-image-text-container-{{ section.id }} {
       flex-direction: column;
     }
 
-    .image-text-image-{{ section.id }} {
+    .collection-image-text-image-{{ section.id }} {
       flex: 0 0 100%;
       width: 100%;
     }
 
-    .image-text-content-{{ section.id }} h2 {
+    .collection-image-text-content-{{ section.id }} h2 {
       font-size: 24px;
     }
   }
 </style>
 
-<div class="image-text-section-{{ section.id }}">
-  <div class="image-text-container-{{ section.id }}">
-    {% if section.settings.image %}
-      <div class="image-text-image-{{ section.id }}">
-        <img src="{{ section.settings.image | img_url: 'master' }}" alt="{{ section.settings.image.alt | escape }}">
+{% assign collection = collections[section.settings.collection] %}
+
+<div class="collection-image-text-section-{{ section.id }}">
+  <div class="collection-image-text-container-{{ section.id }}">
+    {% if collection.image %}
+      <div class="collection-image-text-image-{{ section.id }}">
+        <img 
+          src="{{ collection.image | img_url: 'master' }}" 
+          alt="{{ collection.image.alt | default: collection.title | escape }}"
+          loading="lazy"
+        >
       </div>
     {% endif %}
 
-    <div class="image-text-content-{{ section.id }}">
-      {% if section.settings.title != blank %}
-        <div class="title-text">
-          {{ section.settings.title }}
-        </div>
+    <div class="collection-image-text-content-{{ section.id }}">
+      {% if section.settings.show_title and collection.title %}
+        <h2>{{ collection.title }}</h2>
       {% endif %}
 
-      {% if section.settings.content != blank %}
-        <div class="content-text">
-          {{ section.settings.content }}
+      {% if collection.description != blank %}
+        <div class="description-text">
+          {{ collection.description }}
         </div>
       {% endif %}
     </div>
