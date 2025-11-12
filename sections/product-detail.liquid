@@ -35,10 +35,14 @@
     <div class="quick-buy-bar">
       <div class="quick-buy-content">
         <div class="quick-buy-left">
-          <div class="quick-buy-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 10V8H6V10H8ZM18 10V8H16V10H18ZM9 16V18H7V16H9ZM13 16V18H11V16H13ZM17 16V18H15V16H17ZM12 8C12 5.79 10.21 4 8 4C5.79 4 4 5.79 4 8C4 10.21 5.79 12 8 12C10.21 12 12 10.21 12 8ZM10 8C10 9.1 9.1 10 8 10C6.9 10 6 9.1 6 8C6 6.9 6.9 6 8 6C9.1 6 10 6.9 10 8ZM16 4C13.79 4 12 5.79 12 8C12 10.21 13.79 12 16 12C18.21 12 20 10.21 20 8C20 5.79 18.21 4 16 4ZM18 8C18 9.1 17.1 10 16 10C14.9 10 14 9.1 14 8C14 6.9 14.9 6 16 6C17.1 6 18 6.9 18 8ZM8 14C5.79 14 4 15.79 4 18C4 20.21 5.79 22 8 22C10.21 22 12 20.21 12 18C12 15.79 10.21 14 8 14ZM10 18C10 19.1 9.1 20 8 20C6.9 20 6 19.1 6 18C6 16.9 6.9 16 8 16C9.1 16 10 16.9 10 18ZM16 14C13.79 14 12 15.79 12 18C12 20.21 13.79 22 16 22C18.21 22 20 20.21 20 18C20 15.79 18.21 14 16 14ZM18 18C18 19.1 17.1 20 16 20C14.9 20 14 19.1 14 18C14 16.9 14.9 16 16 16C17.1 16 18 16.9 18 18Z" fill="currentColor"/>
-            </svg>
+          <div class="quick-buy-image">
+            <img
+              src="{{ product.featured_image | img_url: '100x100' }}"
+              alt="{{ product.title }}"
+              width="100"
+              height="100"
+              loading="lazy"
+            >
           </div>
           <div class="quick-buy-info">
             <h4 class="quick-buy-title">{{ product.title }}</h4>
@@ -60,7 +64,7 @@
                     selected
                   {% endif %}
                 >
-                  {{ variant.title }} - {{ variant.price | money }}
+                  {{ variant.title }}
                 </option>
               {% endfor %}
             </select>
@@ -92,8 +96,9 @@
   /* 快速购买栏样式 */
   .quick-buy-bar {
     position: fixed;
-    bottom: 100px;
+    bottom: 0;
     left: 0;
+    transform: translateY(100%);
     width: 100%;
     background: white;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -103,7 +108,7 @@
   }
 
   .quick-buy-bar.visible {
-    bottom: 0;
+    transform: translateY(0);
   }
 
   .quick-buy-content {
@@ -121,15 +126,18 @@
     gap: 15px;
   }
 
-  .quick-buy-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f8f8f8;
-    border-radius: 50%;
-    color: {{ section.settings.accent_color }};
+  .quick-buy-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .quick-buy-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .quick-buy-info {
@@ -207,9 +215,9 @@
       gap: 10px;
     }
 
-    .quick-buy-icon {
-      width: 36px;
-      height: 36px;
+    .quick-buy-image {
+      width: 50px;
+      height: 50px;
     }
 
     .quick-buy-title {
