@@ -78,9 +78,6 @@
               </select>
             </div>
           {% endfor %}
-          <button class="quick-buy-btn" type="button">
-            <span>快速购买</span>
-          </button>
         </div>
       </div>
     </div>
@@ -214,21 +211,6 @@
     background: white;
   }
 
-  .quick-buy-btn {
-    padding: 12px 24px;
-    background: {{ section.settings.button_color }};
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-  }
-
-  .quick-buy-btn:hover {
-    opacity: 0.9;
-  }
 
   /* 移动端适配 */
   @media (max-width: 768px) {
@@ -270,10 +252,7 @@
       font-size: 13px;
     }
 
-    .quick-buy-btn {
-      padding: 10px 20px;
-      font-size: 13px;
-    }
+
   }
 
   .product-detail-section {
@@ -802,7 +781,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     const quickBuyBar = document.querySelector('.quick-buy-bar');
     const productInfo = document.querySelector('.product-info');
-    const quickBuyBtn = document.querySelector('.quick-buy-btn');
     const variantSelector = document.querySelector('#quick-buy-variant-selector');
 
     if (quickBuyBar && productInfo) {
@@ -858,62 +836,7 @@
       });
     }
 
-        // 快速购买功能
-        if (quickBuyBtn) {
-          quickBuyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Current variant when adding to cart:', currentVariant);
-            const variantId = currentVariant ? currentVariant.id : {{ product.selected_or_first_available_variant.id }};
-
-        // 添加加载状态
-        this.textContent = '处理中...';
-        this.disabled = true;
-
-        // 添加到购物车
-        fetch('/cart/add.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: variantId,
-            quantity: 1
-          }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('添加到购物车失败');
-          })
-          .then((data) => {
-            // 更新购物车数量
-            fetch('/cart.js')
-              .then(response => response.json())
-              .then(cart => {
-                const cartItems = document.querySelectorAll('.cart-count-bubble');
-                if (cartItems) {
-                  cartItems.forEach(item => {
-                    item.textContent = cart.item_count;
-                  });
-                }
-              });
-
-            // 恢复按钮状态
-            this.textContent = '快速购买';
-            this.disabled = false;
-
-            // 静默添加，不显示提示
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-            console.error('添加到购物车失败:', error);
-            // 恢复按钮状态
-            this.textContent = '快速购买';
-            this.disabled = false;
-          });
-      });
-    }
+ 
   });
 
   document.addEventListener('DOMContentLoaded', function () {
