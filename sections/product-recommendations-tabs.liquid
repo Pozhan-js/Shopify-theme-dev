@@ -86,14 +86,10 @@
 
   <!-- 你可能喜欢 Tab -->
   <div class="tab-content active" id="recommended">
-    <div class="product-grid" id="recommended-products">
-      {% if recommendations.performed and recommendations.products_count > 0 %}
-        {% for product in recommendations.products limit: section.settings.products_to_show %}
-          {% render '_product-card', product: product %}
-        {% endfor %}
-      {% else %}
-        <p>暂无推荐商品</p>
-      {% endif %}
+    <div class="product-recommendations" data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}">
+      <div class="product-grid" id="recommended-products">
+        <p>正在加载推荐商品...</p>
+      </div>
     </div>
   </div>
 
@@ -126,41 +122,91 @@
     });
   });
 
+  // 加载产品推荐
+  function loadRecommendations() {
+    const container = document.querySelector('.product-recommendations');
+    if (!container) return;
+    
+    const url = container.dataset.url;
+    
+    fetch(url)
+      .then(response => response.text())
+      .then(text => {
+        const html = document.createElement('div');
+        html.innerHTML = text;
+        const recommendations = html.querySelector('.product-recommendations');
+        
+        if (recommendations && recommendations.innerHTML.trim().length) {
+          container.innerHTML = recommendations.innerHTML;
+        } else {
+          container.innerHTML = '<p>暂无推荐商品</p>';
+        }
+      })
+      .catch(e => {
+        console.error('加载推荐失败:', e);
+        container.innerHTML = '<p>暂无推荐商品</p>';
+      });
+  }
+
   // 浏览记录功能
   function loadRecentlyViewed() {
     const container = document.getElementById('recently-viewed-products');
     const recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+    
+    console.log('浏览记录:', recentlyViewed); // 调试用
     
     if (recentlyViewed.length === 0) {
       container.innerHTML = '<p>暂无浏览记录</p>';
       return;
     }
 
-    // 使用 Section Rendering API 获取产品卡片
+    // 构建产品查询
     const handles = recentlyViewed.slice(0, {{ section.settings.products_to_show }});
-    
-    Promise.all(
-      handles.map(handle => 
-        fetch(`/products/${handle}?section_id={{ section.id }}`)
-          .then(response => response.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            return doc.querySelector('.product-card-wrapper');
-          })
-      )
-    ).then(cards => {
-      const validCards = cards.filter(card => card !== null);
-      if (validCards.length === 0) {
-        container.innerHTML = '<p>暂无浏览记录</p>';
-        return;
-      }
-      container.innerHTML = '';
-      validCards.forEach(card => container.appendChild(card));
-    }).catch(error => {
-      console.error('Error loading recently viewed:', error);
-      container.innerHTML = '<p>加载失败，请稍后再试</p>';
-    });
+    const requests = handles.map(handle => 
+      fetch(`/products/${handle}.js`)
+        .then(response => response.json())
+        .catch(error => {
+          console.error(`加载产品 ${handle} 失败:`, error);
+          return null;
+        })
+    );
+
+    Promise.all(requests)
+      .then(products => {
+        const validProducts = products.filter(p => p !== null);
+        
+        if (validProducts.length === 0) {
+          container.innerHTML = '<p>暂无浏览记录</p>';
+          return;
+        }
+
+        container.innerHTML = validProducts.map(product => `
+          <div class="product-card">
+            <a href="${product.url}">
+              ${product.featured_image ? `
+                <img src="${product.featured_image}" 
+                     alt="${product.title}" 
+                     loading="lazy"
+                     style="width: 100%; height: auto;">
+              ` : ''}
+              <div class="product-title" style="margin: 10px 0; font-size: 16px;">${product.title}</div>
+              <div class="product-price" style="font-size: 18px; font-weight: 600;">
+                ${formatMoney(product.price)}
+              </div>
+            </a>
+          </div>
+        `).join('');
+      })
+      .catch(error => {
+        console.error('加载浏览记录失败:', error);
+        container.innerHTML = '<p>加载失败，请稍后再试</p>';
+      });
+  }
+
+  // 格式化价格
+  function formatMoney(cents) {
+    const amount = (cents / 100).toFixed(2);
+    return '{{ shop.money_format }}'.replace('{{amount}}', amount).replace('{{amount_no_decimals}}', Math.round(cents / 100));
   }
 
   // 保存当前浏览的商品
@@ -175,17 +221,25 @@
       // 添加到开头
       recentlyViewed.unshift(handle);
       
-      // 只保留最近 {{ section.settings.products_to_show }} 个
+      // 只保留最近的商品
       recentlyViewed = recentlyViewed.slice(0, {{ section.settings.products_to_show }});
       
       localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+      
+      console.log('已保存浏览记录:', handle); // 调试用
     {% endif %}
   }
 
-  // 在产品页面保存浏览记录
-  if (window.location.pathname.includes('/products/')) {
-    saveRecentlyViewed();
-  }
+  // 页面加载时执行
+  document.addEventListener('DOMContentLoaded', function() {
+    // 在产品页面保存浏览记录
+    if (window.location.pathname.includes('/products/')) {
+      saveRecentlyViewed();
+    }
+    
+    // 加载推荐商品
+    loadRecommendations();
+  });
 </script>
 
 {% schema %}
