@@ -322,52 +322,216 @@ class QuickBuyBar {
   /**
    * 更新购物车
    */
-  async updateCart() {
-    try {
-      const cartResponse = await fetch('/cart.js');
-      const cart = await cartResponse.json();
-      
-      // 更新购物车数量显示（支持多种选择器）
-      const cartCountSelectors = [
-        '[data-cart-count]',
-        '.cart-count',
-        '#cart-count',
-        '.cart-item-count'
-      ];
+/**
+ * 更新购物车（Savor 主题专用版本）
+ */
+async updateCart() {
+  try {
+    const cartResponse = await fetch('/cart.js');
+    const cart = await cartResponse.json();
+    
+    console.log('✓ 购物车数据:', cart);
+    console.log('✓ 商品数量:', cart.item_count);
+    
+    // Savor 主题特定的选择器
+    const cartCountSelectors = [
+      // Savor 主题常用选择器
+      '.header__cart-count',
+      '.cart__count',
+      '.cart-count-bubble',
+      '#cart-count',
+      '[data-cart-count]',
+      '.cart-link__bubble',
+      // 通用备选选择器
+      '.cart-count',
+      '.cart-item-count',
+      '#CartCount',
+      '.header-cart-count'
+    ];
 
-      cartCountSelectors.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
+    let foundElements = 0;
+    cartCountSelectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      if (elements.length > 0) {
+        console.log(`✓ 找到 ${elements.length} 个元素: ${selector}`);
+        foundElements += elements.length;
+        
         elements.forEach(el => {
+          // 更新文本内容
           el.textContent = cart.item_count;
+          el.innerText = cart.item_count;
+          
+          // 更新 data 属性（如果存在）
+          if (el.hasAttribute('data-cart-count')) {
+            el.setAttribute('data-cart-count', cart.item_count);
+          }
+          
+          // 控制显示/隐藏
+          if (cart.item_count === 0) {
+            el.classList.add('hidden');
+            el.style.opacity = '0';
+            el.style.visibility = 'hidden';
+          } else {
+            el.classList.remove('hidden');
+            el.style.opacity = '1';
+            el.style.visibility = 'visible';
+          }
+          
           // 添加弹出动画
           el.classList.add('cart-count-pop');
           setTimeout(() => {
             el.classList.remove('cart-count-pop');
           }, 400);
         });
-      });
+      }
+    });
 
-      // 购物车图标抖动动画
-      const cartIcons = document.querySelectorAll('[data-cart-icon], .cart-icon, [href="/cart"]');
-      cartIcons.forEach(icon => {
+    if (foundElements === 0) {
+      console.warn('⚠️ 未找到购物车数量元素');
+      // 尝试查找所有可能的购物车相关元素
+      this.debugCartElements();
+    } else {
+      console.log(`✓ 成功更新 ${foundElements} 个购物车数量元素`);
+    }
+
+    // 更新购物车图标（添加抖动动画）
+    const cartIconSelectors = [
+      '.header__cart',
+      '.cart-link',
+      '[data-cart-icon]',
+      '.header__icon--cart',
+      'a[href="/cart"]',
+      'a[href*="/cart"]'
+    ];
+
+    cartIconSelectors.forEach(selector => {
+      const icons = document.querySelectorAll(selector);
+      icons.forEach(icon => {
         icon.classList.add('cart-shake');
         setTimeout(() => {
           icon.classList.remove('cart-shake');
         }, 500);
       });
+    });
 
-      // 触发自定义事件
-      document.dispatchEvent(new CustomEvent('cart:updated', {
-        detail: { 
-          cart: cart,
-          addedVariant: this.currentVariant
+    // 如果 Savor 主题使用 cart drawer，刷新它
+    await this.refreshCartDrawer(cart);
+
+    // 触发自定义事件
+    document.dispatchEvent(new CustomEvent('cart:updated', {
+      detail: { 
+        cart: cart,
+        addedVariant: this.currentVariant,
+        itemCount: cart.item_count
+      }
+    }));
+
+    // 触发 Savor 主题可能监听的事件
+    document.dispatchEvent(new CustomEvent('cart:refresh'));
+    document.dispatchEvent(new CustomEvent('theme:cart:update', {
+      detail: { cart: cart }
+    }));
+    
+    return cart;
+    
+  } catch (error) {
+    console.error('✗ 更新购物车失败:', error);
+  }
+}
+
+/**
+ * 刷新购物车抽屉（如果 Savor 主题使用）
+ */
+async refreshCartDrawer(cart) {
+  // 查找 cart drawer 元素
+  const cartDrawer = document.querySelector('cart-drawer') || 
+                     document.querySelector('.cart-drawer') ||
+                     document.querySelector('#cart-drawer');
+  
+  if (cartDrawer) {
+    console.log('✓ 找到 cart drawer，正在刷新...');
+    
+    // 如果是 Web Component
+    if (cartDrawer.tagName === 'CART-DRAWER' && typeof cartDrawer.renderContents === 'function') {
+      cartDrawer.renderContents(cart);
+    }
+    // 如果有刷新方法
+    else if (typeof cartDrawer.refresh === 'function') {
+      cartDrawer.refresh();
+    }
+    // 手动刷新 drawer 内容
+    else {
+      try {
+        const response = await fetch('/cart?section_id=cart-drawer');
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newContent = doc.querySelector('.cart-drawer__inner') || 
+                          doc.querySelector('.drawer__inner');
+        
+        if (newContent) {
+          const currentContent = cartDrawer.querySelector('.cart-drawer__inner') || 
+                                cartDrawer.querySelector('.drawer__inner');
+          if (currentContent) {
+            currentContent.innerHTML = newContent.innerHTML;
+            console.log('✓ Cart drawer 内容已刷新');
+          }
         }
-      }));
-      
-    } catch (error) {
-      console.error('更新购物车失败:', error);
+      } catch (error) {
+        console.error('刷新 cart drawer 失败:', error);
+      }
     }
   }
+}
+
+/**
+ * 调试：查找所有购物车相关元素
+ */
+debugCartElements() {
+  console.log('=== 🔍 调试：查找购物车元素 ===');
+  
+  // 查找所有包含 "cart" 的类名
+  const cartElements = document.querySelectorAll('[class*="cart"]');
+  console.log(`找到 ${cartElements.length} 个包含 "cart" 的元素:`);
+  cartElements.forEach(el => {
+    if (el.textContent.trim().match(/^\d+$/)) {
+      console.log('可能的购物车数量元素:', {
+        element: el,
+        className: el.className,
+        id: el.id,
+        textContent: el.textContent,
+        selector: this.getSelector(el)
+      });
+    }
+  });
+  
+  // 查找所有包含数字的小元素
+  const allElements = document.querySelectorAll('span, div, p');
+  allElements.forEach(el => {
+    const text = el.textContent.trim();
+    if (text.match(/^\d+$/) && parseInt(text) < 100 && el.offsetWidth < 50) {
+      console.log('可能的数量标记:', {
+        element: el,
+        className: el.className,
+        id: el.id,
+        textContent: text
+      });
+    }
+  });
+}
+
+/**
+ * 获取元素的 CSS 选择器
+ */
+getSelector(el) {
+  if (el.id) return `#${el.id}`;
+  if (el.className) {
+    const classes = el.className.split(' ').filter(c => c.trim());
+    if (classes.length > 0) return `.${classes.join('.')}`;
+  }
+  return el.tagName.toLowerCase();
+}
+
 
   /**
    * 显示错误提示
