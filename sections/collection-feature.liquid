@@ -1,166 +1,97 @@
-{% schema %}
-{
-  "name": "产品系列图文展示",
-  "settings": [
-    {
-      "type": "collection",
-      "id": "collection",
-      "label": "选择产品系列"
-    },
-    {
-      "type": "range",
-      "id": "image_width",
-      "min": 30,
-      "max": 70,
-      "step": 5,
-      "unit": "%",
-      "label": "图片宽度",
-      "default": 50
-    },
-    {
-      "type": "range",
-      "id": "gap",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "px",
-      "label": "间隙大小",
-      "default": 30
-    },
-    {
-      "type": "range",
-      "id": "border_radius",
-      "min": 0,
-      "max": 50,
-      "step": 5,
-      "unit": "px",
-      "label": "圆角大小",
-      "default": 10
-    },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "背景颜色",
-      "default": "#ffffff"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "px",
-      "label": "上边距",
-      "default": 50
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "px",
-      "label": "下边距",
-      "default": 50
-    },
-    {
-      "type": "checkbox",
-      "id": "show_title",
-      "label": "显示系列标题",
-      "default": true
-    }
-  ],
-  "presets": [
-    {
-      "name": "产品系列图文展示"
-    }
-  ]
-}
-{% endschema %}
+{% comment %}
+  Section: Collection Info on Product Page
+  显示产品所属系列的图片和描述
+{% endcomment %}
 
-<style>
-  .collection-image-text-section-{{ section.id }} {
-    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
-    background-color: {{ section.settings.background_color }};
-  }
-
-  .collection-image-text-container-{{ section.id }} {
-    display: flex;
-    align-items: center;
-    gap: {{ section.settings.gap }}px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-
-  .collection-image-text-image-{{ section.id }} {
-    flex: 0 0 {{ section.settings.image_width }}%;
-    border-radius: {{ section.settings.border_radius }}px;
-    overflow: hidden;
-  }
-
-  .collection-image-text-image-{{ section.id }} img {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-
-  .collection-image-text-content-{{ section.id }} {
-    flex: 1;
-  }
-
-  .collection-image-text-content-{{ section.id }} h2 {
-    margin-bottom: 20px;
-    font-size: 32px;
-    font-weight: bold;
-  }
-
-  .collection-image-text-content-{{ section.id }} .description-text {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #333;
-  }
-
-  @media (max-width: 768px) {
-    .collection-image-text-container-{{ section.id }} {
-      flex-direction: column;
-    }
-
-    .collection-image-text-image-{{ section.id }} {
-      flex: 0 0 100%;
-      width: 100%;
-    }
-
-    .collection-image-text-content-{{ section.id }} h2 {
-      font-size: 24px;
-    }
-  }
-</style>
-
-{% assign collection = collections[section.settings.collection] %}
-
-<div class="collection-image-text-section-{{ section.id }}">
-  <div class="collection-image-text-container-{{ section.id }}">
-    {% if collection.image %}
-      <div class="collection-image-text-image-{{ section.id }}">
-        <img 
-          src="{{ collection.image | img_url: 'master' }}" 
-          alt="{{ collection.image.alt | default: collection.title | escape }}"
-          loading="lazy"
-        >
+{% if product.collections.first %}
+  {% assign collection = product.collections.first %}
+  
+  <div class="collection-info-section">
+    <div class="collection-info-container">
+      <div class="collection-info-image">
+        {% if collection.image %}
+          <img 
+            src="{{ collection.image | image_url: width: 600 }}"
+            alt="{{ collection.title }}"
+            loading="lazy"
+            width="600"
+            height="{{ 600 | divided_by: collection.image.aspect_ratio | round }}"
+          >
+        {% endif %}
       </div>
-    {% endif %}
-
-    <div class="collection-image-text-content-{{ section.id }}">
-      {% if section.settings.show_title and collection.title %}
-        <h2>{{ collection.title }}</h2>
-      {% endif %}
-
-      {% if collection.description != blank %}
-        <div class="description-text">
-          {{ collection.description }}
-        </div>
-      {% endif %}
+      
+      <div class="collection-info-content">
+        <h2 class="collection-info-title">{{ collection.title }}</h2>
+        {% if collection.description != blank %}
+          <div class="collection-info-description">
+            {{ collection.description }}
+          </div>
+        {% endif %}
+        <a href="{{ collection.url }}" class="collection-info-link">
+          查看系列 →
+        </a>
+      </div>
     </div>
   </div>
-</div>
+
+  <style>
+    .collection-info-section {
+      margin: 40px 0;
+      padding: 0 20px;
+    }
+    
+    .collection-info-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .collection-info-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+    
+    .collection-info-content {
+      padding: 20px;
+    }
+    
+    .collection-info-title {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 16px;
+    }
+    
+    .collection-info-description {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      color: #666;
+    }
+    
+    .collection-info-link {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #000;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    
+    .collection-info-link:hover {
+      background-color: #333;
+    }
+    
+    @media (max-width: 768px) {
+      .collection-info-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+  </style>
+{% endif %}
