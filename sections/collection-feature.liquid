@@ -1,46 +1,63 @@
 {% comment %}
   Section: Collection Info on Product Page
-  在商品详情页显示产品所属系列的图片和描述
+  在商品详情页显示该商品所属系列的图片和描述
+  当产品属于多个系列时，显示第一个系列
 {% endcomment %}
 
-{% if product.collections.first %}
-  {% assign collection = product.collections.first %}
-  
-  <div class="collection-info-section">
+{% assign target_collection = product.collections.first %}
+
+{% if target_collection %}
+  <div class="collection-info-section" style="margin: {{ section.settings.section_spacing }}px 0;">
     <div class="collection-info-container">
       <div class="collection-info-image">
-        {% if collection.image %}
-          {{ collection.image | image_url: width: 600 | image_tag: 
-             alt: collection.title,
-             loading: 'lazy',
-             widths: '300, 400, 500, 600, 700, 800'
-          }}
-        {% elsif collection.featured_image %}
-          {{ collection.featured_image | image_url: width: 600 | image_tag: 
-             alt: collection.title,
-             loading: 'lazy',
-             widths: '300, 400, 500, 600, 700, 800'
-          }}
+        {% if target_collection.image %}
+          <img 
+            src="{{ target_collection.image | img_url: '600x' }}"
+            srcset="{{ target_collection.image | img_url: '300x' }} 300w,
+                    {{ target_collection.image | img_url: '600x' }} 600w,
+                    {{ target_collection.image | img_url: '900x' }} 900w"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            alt="{{ target_collection.title }}"
+            loading="lazy"
+          >
+        {% else %}
+          {%- comment -%}如果第一个系列没有图片，尝试找一个有图片的系列{%- endcomment -%}
+          {% for collection in product.collections %}
+            {% if collection.image %}
+              {% assign target_collection = collection %}
+              <img 
+                src="{{ collection.image | img_url: '600x' }}"
+                srcset="{{ collection.image | img_url: '300x' }} 300w,
+                        {{ collection.image | img_url: '600x' }} 600w,
+                        {{ collection.image | img_url: '900x' }} 900w"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                alt="{{ collection.title }}"
+                loading="lazy"
+              >
+              {% break %}
+            {% endif %}
+          {% endfor %}
         {% endif %}
       </div>
       
       <div class="collection-info-content">
-        <h2 class="collection-info-title">{{ collection.title }}</h2>
-        {% if collection.description != blank %}
+        <h2 class="collection-info-title">{{ target_collection.title }}</h2>
+        {% if target_collection.description != blank %}
           <div class="collection-info-description">
-            {{ collection.description }}
+            {{ target_collection.description }}
           </div>
         {% endif %}
-        <a href="{{ collection.url }}" class="collection-info-link">
-          查看完整系列 →
-        </a>
+        {% if section.settings.show_link %}
+          <a href="{{ target_collection.url }}" class="collection-info-link">
+            查看完整系列 →
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
 
   <style>
     .collection-info-section {
-      margin: 40px 0;
       padding: 0 20px;
     }
     
@@ -81,6 +98,7 @@
       line-height: 1.6;
       margin-bottom: 24px;
       color: #666;
+      white-space: pre-line;
     }
     
     .collection-info-link {
@@ -98,7 +116,6 @@
       background-color: #333;
     }
     
-    /* 响应式设计 */
     @media (max-width: 768px) {
       .collection-info-container {
         grid-template-columns: 1fr;
@@ -127,34 +144,14 @@
       "content": "显示设置"
     },
     {
+      "type": "paragraph",
+      "content": "当产品属于多个系列时，将显示第一个有图片的系列"
+    },
+    {
       "type": "checkbox",
       "id": "show_link",
       "label": "显示查看系列链接",
       "default": true
-    },
-    {
-      "type": "select",
-      "id": "image_ratio",
-      "label": "图片比例",
-      "options": [
-        {
-          "value": "auto",
-          "label": "原始比例"
-        },
-        {
-          "value": "1/1",
-          "label": "正方形 (1:1)"
-        },
-        {
-          "value": "4/3",
-          "label": "横向 (4:3)"
-        },
-        {
-          "value": "16/9",
-          "label": "宽屏 (16:9)"
-        }
-      ],
-      "default": "auto"
     },
     {
       "type": "range",
