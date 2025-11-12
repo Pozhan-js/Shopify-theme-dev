@@ -861,62 +861,8 @@
       });
     }
 
-        // 快速购买功能
-        if (quickBuyBtn) {
-          quickBuyBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Current variant when adding to cart:', currentVariant);
-            const variantId = currentVariant ? currentVariant.id : {{ product.selected_or_first_available_variant.id }};
 
-        // 添加加载状态
-        this.textContent = '处理中...';
-        this.disabled = true;
 
-        // 添加到购物车
-        fetch('/cart/add.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: variantId,
-            quantity: 1
-          }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('添加到购物车失败');
-          })
-          .then((data) => {
-            // 更新购物车数量
-            fetch('/cart.js')
-              .then(response => response.json())
-              .then(cart => {
-                const cartItems = document.querySelectorAll('.cart-count-bubble');
-                if (cartItems) {
-                  cartItems.forEach(item => {
-                    item.textContent = cart.item_count;
-                  });
-                }
-              });
-
-            // 恢复按钮状态
-            this.textContent = '快速购买';
-            this.disabled = false;
-
-            // 静默添加，不显示提示
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-            console.error('添加到购物车失败:', error);
-            // 恢复按钮状态
-            this.textContent = '快速购买';
-            this.disabled = false;
-          });
-      });
-    }
   });
 
   document.addEventListener('DOMContentLoaded', function () {
