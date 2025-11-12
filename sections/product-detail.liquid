@@ -1116,6 +1116,233 @@
       });
     }
   });
+class CustomVariantSelector {
+  constructor(container) {
+    this.container = container;
+    this.productData = JSON.parse(document.getElementById('product-json').textContent);
+    this.variantSelect = container.querySelector('#variant-selector');
+    this.optionButtons = container.querySelectorAll('.option-button');
+    this.addToCartBtn = container.querySelector('[data-add-to-cart]');
+    
+    // 当前选中的选项
+    this.selectedOptions = this.getInitialSelectedOptions();
+    
+    this.init();
+  }
+
+  init() {
+    // 绑定选项按钮点击事件
+    this.optionButtons.forEach(button => {
+      button.addEventListener('click', this.handleOptionClick.bind(this));
+    });
+
+    // 初始化时更新一次
+    this.updateVariant();
+    
+    // 监听 URL 变化（浏览器前进/后退）
+    window.addEventListener('popstate', this.handlePopState.bind(this));
+    
+    // 从 URL 读取初始变体
+    this.loadVariantFromUrl();
+  }
+
+  // 获取初始选中的选项
+  getInitialSelectedOptions() {
+    const options = {};
+    this.productData.options.forEach((option, index) => {
+      const position = index + 1;
+      const activeButton = this.container.querySelector(
+        `.option-button[data-option-position="${position}"].active`
+      );
+      options[position] = activeButton ? activeButton.dataset.value : option.values[0];
+    });
+    return options;
+  }
+
+  // 处理选项点击
+  handleOptionClick(event) {
+    const button = event.currentTarget;
+    const position = button.dataset.optionPosition;
+    const value = button.dataset.value;
+
+    // 更新选中状态
+    const optionGroup = button.closest('.option-group');
+    optionGroup.querySelectorAll('.option-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    button.classList.add('active');
+
+    // 更新选中的选项
+    this.selectedOptions[position] = value;
+
+    // 更新变体
+    this.updateVariant();
+  }
+
+  // 更新变体
+  updateVariant() {
+    const variant = this.getVariantFromOptions();
+    
+    if (variant) {
+      // 更新隐藏的 select
+      this.variantSelect.value = variant.id;
+      
+      // 更新 URL
+      this.updateUrl(variant.id);
+      
+      // 更新价格
+      this.updatePrice(variant);
+      
+      // 更新库存状态
+      this.updateAvailability(variant);
+      
+      // 更新按钮状态
+      this.updateAddToCartButton(variant);
+      
+      // 更新不可用的选项
+      this.updateDisabledOptions();
+    }
+  }
+
+  // 根据选中的选项获取变体
+  getVariantFromOptions() {
+    return this.productData.variants.find(variant => {
+      return this.productData.options.every((option, index) => {
+        const position = index + 1;
+        return variant.options[index] === this.selectedOptions[position];
+      });
+    });
+  }
+
+  // 更新 URL
+  updateUrl(variantId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('variant', variantId);
+    window.history.replaceState({ path: url.href }, '', url.href);
+  }
+
+  // 更新价格
+  updatePrice(variant) {
+    const priceElement = this.container.querySelector('[data-price]');
+    const comparePriceElement = this.container.querySelector('[data-compare-price]');
+    
+    if (priceElement) {
+      priceElement.textContent = this.formatMoney(variant.price);
+    }
+    
+    if (comparePriceElement) {
+      if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+        comparePriceElement.textContent = this.formatMoney(variant.compare_at_price);
+        comparePriceElement.style.display = 'inline';
+      } else {
+        comparePriceElement.style.display = 'none';
+      }
+    }
+  }
+
+  // 更新库存状态
+  updateAvailability(variant) {
+    const availabilityElement = this.container.querySelector('[data-availability]');
+    
+    if (availabilityElement) {
+      if (variant.available) {
+        availabilityElement.innerHTML = '<span class="in-stock">有货</span>';
+      } else {
+        availabilityElement.innerHTML = '<span class="out-of-stock">缺货</span>';
+      }
+    }
+  }
+
+  // 更新加入购物车按钮
+  updateAddToCartButton(variant) {
+    if (variant.available) {
+      this.addToCartBtn.disabled = false;
+      this.addToCartBtn.textContent = '加入购物车';
+    } else {
+      this.addToCartBtn.disabled = true;
+      this.addToCartBtn.textContent = '售罄';
+    }
+  }
+
+  // 更新不可用的选项（禁用售罄的组合）
+  updateDisabledOptions() {
+    this.productData.options.forEach((option, optionIndex) => {
+      const position = optionIndex + 1;
+      
+      option.values.forEach(value => {
+        const button = this.container.querySelector(
+          `.option-button[data-option-position="${position}"][data-value="${value}"]`
+        );
+        
+        if (button) {
+          // 创建临时选项对象来检查
+          const tempOptions = { ...this.selectedOptions };
+          tempOptions[position] = value;
+          
+          // 检查是否有可用的变体
+          const hasAvailableVariant = this.productData.variants.some(variant => {
+            const matchesOptions = this.productData.options.every((opt, idx) => {
+              const pos = idx + 1;
+              return variant.options[idx] === tempOptions[pos];
+            });
+            return matchesOptions && variant.available;
+          });
+          
+          button.disabled = !hasAvailableVariant;
+        }
+      });
+    });
+  }
+
+  // 从 URL 加载变体
+  loadVariantFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const variantId = urlParams.get('variant');
+    
+    if (variantId) {
+      const variant = this.productData.variants.find(v => v.id == variantId);
+      if (variant) {
+        // 更新选中的选项
+        variant.options.forEach((value, index) => {
+          const position = index + 1;
+          this.selectedOptions[position] = value;
+          
+          // 更新按钮状态
+          const button = this.container.querySelector(
+            `.option-button[data-option-position="${position}"][data-value="${value}"]`
+          );
+          if (button) {
+            const optionGroup = button.closest('.option-group');
+            optionGroup.querySelectorAll('.option-button').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            button.classList.add('active');
+          }
+        });
+        
+        this.updateVariant();
+      }
+    }
+  }
+
+  // 处理浏览器前进/后退
+  handlePopState() {
+    this.loadVariantFromUrl();
+  }
+
+  // 格式化金额（简化版，实际应使用 Shopify 的 money_format）
+  formatMoney(cents) {
+    return '$' + (cents / 100).toFixed(2);
+  }
+}
+
+// 初始化
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.querySelector('.custom-variant-selector');
+  if (container) {
+    new CustomVariantSelector(container);
+  }
+});
 
   document.addEventListener('DOMContentLoaded', function () {
     const mainImage = document.getElementById('main-product-image');
