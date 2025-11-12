@@ -1,0 +1,241 @@
+{% schema %}
+{
+  "name": "Feature Cards Slider",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Why Choose Us?"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "label": "Cards per row (desktop)",
+      "default": 3
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Feature Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Card Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Card Title",
+          "default": "Feature Title"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Add your description here.</p>"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL"
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Link Text",
+          "default": "LEARN MORE"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Feature Cards Slider",
+      "blocks": [
+        {
+          "type": "card"
+        },
+        {
+          "type": "card"
+        },
+        {
+          "type": "card"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .feature-cards-section {
+    padding: 60px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .feature-cards-title {
+    font-size: 42px;
+    font-weight: 400;
+    margin-bottom: 50px;
+    text-align: left;
+    font-family: serif;
+    color: #333;
+  }
+
+  .cards-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+  }
+
+  .cards-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .cards-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .cards-container::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+  }
+
+  .cards-wrapper {
+    display: flex;
+    gap: 30px;
+    padding-bottom: 20px;
+  }
+
+  .feature-card {
+    flex: 0 0 calc((100% - 60px) / {{ section.settings.cards_per_row }});
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-image-wrapper {
+    width: 100%;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #333;
+    font-family: sans-serif;
+  }
+
+  .card-description {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 15px;
+    flex-grow: 1;
+  }
+
+  .card-description p {
+    margin: 0;
+  }
+
+  .card-link {
+    display: inline-block;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #333;
+    padding-bottom: 2px;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-link:hover {
+    opacity: 0.7;
+  }
+
+  @media (max-width: 768px) {
+    .feature-cards-section {
+      padding: 40px 15px;
+    }
+
+    .feature-cards-title {
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    .feature-card {
+      flex: 0 0 85%;
+      min-width: 280px;
+    }
+
+    .cards-wrapper {
+      gap: 20px;
+    }
+  }
+</style>
+
+<div class="feature-cards-section">
+  {% if section.settings.section_title != blank %}
+    <h2 class="feature-cards-title">{{ section.settings.section_title }}</h2>
+  {% endif %}
+
+  <div class="cards-container">
+    <div class="cards-wrapper">
+      {% for block in section.blocks %}
+        <div class="feature-card" {{ block.shopify_attributes }}>
+          {% if block.settings.image != blank %}
+            <div class="card-image-wrapper">
+              <img 
+                src="{{ block.settings.image | img_url: '800x' }}" 
+                alt="{{ block.settings.title }}"
+                class="card-image"
+                loading="lazy"
+              >
+            </div>
+          {% else %}
+            <div class="card-image-wrapper">
+              {{ 'image' | placeholder_svg_tag: 'card-image' }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.title != blank %}
+            <h3 class="card-title">{{ block.settings.title }}</h3>
+          {% endif %}
+
+          {% if block.settings.description != blank %}
+            <div class="card-description">
+              {{ block.settings.description }}
+            </div>
+          {% endif %}
+
+          {% if block.settings.link_url != blank and block.settings.link_text != blank %}
+            <a href="{{ block.settings.link_url }}" class="card-link">
+              {{ block.settings.link_text }}
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
