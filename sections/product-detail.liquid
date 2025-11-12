@@ -55,59 +55,33 @@
           </div>
         </div>
         <div class="quick-buy-right">
-          <div class="custom-variant-selector" data-product-id="{{ product.id }}">
-            {% unless product.has_only_default_variant %}
-              <div class="variant-options">
-                {% for option in product.options_with_values %}
-                  <div class="option-group" data-option-position="{{ option.position }}">
-                    <label class="quick-buy-option-label">{{ option.name }}</label>
-                    <div class="option-values">
-                      {% for value in option.values %}
-                        <button
-                          type="button"
-                          class="option-button {% if forloop.first %}active{% endif %}"
-                          data-option-position="{{ option.position }}"
-                          data-value="{{ value | escape }}"
-                        >
-                          {{ value }}
-                        </button>
-                      {% endfor %}
-                    </div>
-                  </div>
+          {% for option in product.options_with_values %}
+            <div class="quick-buy-option">
+              <label for="quick-buy-option-{{ forloop.index }}" class="quick-buy-option-label">
+                {{ option.name }}
+              </label>
+              <select
+                class="quick-buy-variant-selector"
+                id="quick-buy-option-{{ forloop.index }}"
+                data-option-index="{{ forloop.index }}"
+              >
+                {% for value in option.values %}
+                  <option
+                    value="{{ value | escape }}"
+                    {% if option.selected_value == value %}
+                      selected
+                    {% endif %}
+                  >
+                    {{ value }}
+                  </option>
                 {% endfor %}
-              </div>
-            {% endunless %}
-
-            <select name="id" id="variant-selector" class="hidden-select" style="display: none;">
-              {% for variant in product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  {% if variant.id == current_variant.id %}
-                    selected
-                  {% endif %}
-                  {% unless variant.available %}
-                    disabled
-                  {% endunless %}
-                  data-inventory="{{ variant.inventory_quantity }}"
-                >
-                  {{ variant.title }} - {{ variant.price | money }}
-                </option>
-              {% endfor %}
-            </select>
-
-            <button class="quick-buy-btn" type="button" data-add-to-cart>
-              {% if current_variant.available %}
-                快速购买
-              {% else %}
-                售罄
-              {% endif %}
-            </button>
-          </div>
+              </select>
+            </div>
+          {% endfor %}
+          <button class="quick-buy-btn" type="button">
+            <span>快速购买</span>
+          </button>
         </div>
-
-        <script type="application/json" id="product-json">
-          {{ product | json }}
-        </script>
       </div>
     </div>
 
@@ -219,53 +193,9 @@
 
   .quick-buy-option {
     margin-right: 10px;
-  }
-
-  .variant-options {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .option-group {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
-
-  .option-values {
-    display: flex;
-    gap: 6px;
-  }
-
-  .option-button {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .option-button:hover {
-    border-color: #999;
-  }
-
-  .option-button.active {
-    border-color: #333;
-    background: #333;
-    color: white;
-  }
-
-  .option-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    text-decoration: line-through;
-  }
-
-  .hidden-select {
-    display: none !important;
   }
 
   .quick-buy-option-label {
@@ -869,7 +799,7 @@
 
 <script>
   // 快速购买栏滚动显示逻辑
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const quickBuyBar = document.querySelector('.quick-buy-bar');
     const productInfo = document.querySelector('.product-info');
     const quickBuyBtn = document.querySelector('.quick-buy-btn');
@@ -878,7 +808,7 @@
     if (quickBuyBar && productInfo) {
       const observer = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
+          entries.forEach(entry => {
             if (!entry.isIntersecting) {
               quickBuyBar.classList.add('visible');
             } else {
@@ -888,204 +818,102 @@
         },
         {
           threshold: 0.5,
-          rootMargin: '0px 0px -50px 0px',
+          rootMargin: "0px 0px -50px 0px"
         }
       );
 
       observer.observe(productInfo);
     }
 
-    // 初始化自定义变体选择器
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.querySelector('.custom-variant-selector');
-      if (container) {
-        new CustomVariantSelector(container);
-      }
-    });
+    // 变体选择逻辑
+    const variantSelectors = document.querySelectorAll('.quick-buy-variant-selector');
+    const productVariants = {{ product.variants | json }};
+    let currentVariant = {{ product.selected_or_first_available_variant | json }};
+    
+    console.log('Initial variant:', currentVariant);
+    console.log('All variants:', productVariants);
 
-    class CustomVariantSelector {
-      constructor(container) {
-        this.container = container;
-        this.productData = JSON.parse(document.getElementById('product-json').textContent);
-        this.variantSelect = container.querySelector('#variant-selector');
-        this.optionButtons = container.querySelectorAll('.option-button');
-        this.addToCartBtn = container.querySelector('[data-add-to-cart]');
-
-        this.selectedOptions = this.getInitialSelectedOptions();
-        this.init();
-      }
-
-      init() {
-        this.optionButtons.forEach((button) => {
-          button.addEventListener('click', this.handleOptionClick.bind(this));
-        });
-
-        this.updateVariant();
-        window.addEventListener('popstate', this.handlePopState.bind(this));
-        this.loadVariantFromUrl();
-      }
-
-      getInitialSelectedOptions() {
-        const options = {};
-        this.productData.options.forEach((option, index) => {
-          const position = index + 1;
-          const activeButton = this.container.querySelector(
-            `.option-button[data-option-position="${position}"].active`
-          );
-          options[position] = activeButton ? activeButton.dataset.value : option.values[0];
-        });
-        return options;
-      }
-
-      handleOptionClick(event) {
-        const button = event.currentTarget;
-        const position = button.dataset.optionPosition;
-        const value = button.dataset.value;
-
-        const optionGroup = button.closest('.option-group');
-        optionGroup.querySelectorAll('.option-button').forEach((btn) => {
-          btn.classList.remove('active');
-        });
-        button.classList.add('active');
-
-        this.selectedOptions[position] = value;
-        this.updateVariant();
-      }
-
-      updateVariant() {
-        const variant = this.getVariantFromOptions();
-
-        if (variant) {
-          this.variantSelect.value = variant.id;
-          this.updateUrl(variant.id);
-          this.updatePrice(variant);
-          this.updateAvailability(variant);
-          this.updateAddToCartButton(variant);
-          this.updateDisabledOptions();
-        }
-      }
-
-      getVariantFromOptions() {
-        return this.productData.variants.find((variant) => {
-          return this.productData.options.every((option, index) => {
-            const position = index + 1;
-            return variant.options[index] === this.selectedOptions[position];
+    if (variantSelectors.length > 0 && productVariants) {
+      variantSelectors.forEach(selector => {
+        selector.addEventListener('change', function() {
+          const selectedOptions = Array.from(variantSelectors).map(select => select.value);
+          console.log('Selected options:', selectedOptions);
+          
+          // 精确匹配变体
+          const matchedVariant = productVariants.find(variant => {
+            const match = variant.options.every((option, index) => {
+              return option === selectedOptions[index];
+            });
+            console.log(`Checking variant ${variant.id}:`, variant.options, 'match:', match);
+            return match;
           });
+
+          if (matchedVariant) {
+            console.log('Matched variant:', matchedVariant);
+            currentVariant = matchedVariant;
+          } else {
+            console.warn('No variant matched selected options');
+          }
         });
-      }
+      });
+    }
 
-      updateUrl(variantId) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('variant', variantId);
-        window.history.replaceState({ path: url.href }, '', url.href);
-      }
+        // 快速购买功能
+        if (quickBuyBtn) {
+          quickBuyBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Current variant when adding to cart:', currentVariant);
+            const variantId = currentVariant ? currentVariant.id : {{ product.selected_or_first_available_variant.id }};
 
-      updatePrice(variant) {
-        const priceElement = this.container.closest('.quick-buy-bar').querySelector('.quick-buy-price .price');
-        const comparePriceElement = this.container
-          .closest('.quick-buy-bar')
-          .querySelector('.quick-buy-price .compare-price');
+        // 添加加载状态
+        this.textContent = '处理中...';
+        this.disabled = true;
 
-        if (priceElement) {
-          priceElement.textContent = this.formatMoney(variant.price);
-        }
-
-        if (comparePriceElement) {
-          if (variant.compare_at_price && variant.compare_at_price > variant.price) {
-            comparePriceElement.textContent = this.formatMoney(variant.compare_at_price);
-            comparePriceElement.style.display = 'inline';
-          } else {
-            comparePriceElement.style.display = 'none';
-          }
-        }
-      }
-
-      updateAvailability(variant) {
-        if (this.addToCartBtn) {
-          if (variant.available) {
-            this.addToCartBtn.disabled = false;
-            this.addToCartBtn.textContent = '快速购买';
-          } else {
-            this.addToCartBtn.disabled = true;
-            this.addToCartBtn.textContent = '售罄';
-          }
-        }
-      }
-
-      updateAddToCartButton(variant) {
-        if (this.addToCartBtn) {
-          if (variant.available) {
-            this.addToCartBtn.disabled = false;
-            this.addToCartBtn.textContent = '快速购买';
-          } else {
-            this.addToCartBtn.disabled = true;
-            this.addToCartBtn.textContent = '售罄';
-          }
-        }
-      }
-
-      updateDisabledOptions() {
-        this.productData.options.forEach((option, optionIndex) => {
-          const position = optionIndex + 1;
-
-          option.values.forEach((value) => {
-            const button = this.container.querySelector(
-              `.option-button[data-option-position="${position}"][data-value="${value}"]`
-            );
-
-            if (button) {
-              const tempOptions = { ...this.selectedOptions };
-              tempOptions[position] = value;
-
-              const hasAvailableVariant = this.productData.variants.some((variant) => {
-                const matchesOptions = this.productData.options.every((opt, idx) => {
-                  const pos = idx + 1;
-                  return variant.options[idx] === tempOptions[pos];
-                });
-                return matchesOptions && variant.available;
+        // 添加到购物车
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: variantId,
+            quantity: 1
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('添加到购物车失败');
+          })
+          .then((data) => {
+            // 更新购物车数量
+            fetch('/cart.js')
+              .then(response => response.json())
+              .then(cart => {
+                const cartItems = document.querySelectorAll('.cart-count-bubble');
+                if (cartItems) {
+                  cartItems.forEach(item => {
+                    item.textContent = cart.item_count;
+                  });
+                }
               });
 
-              button.disabled = !hasAvailableVariant;
-            }
+            // 恢复按钮状态
+            this.textContent = '快速购买';
+            this.disabled = false;
+
+            // 显示成功提示
+            alert('商品已添加到购物车');
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert('添加到购物车时出现错误，请重试');
+            // 恢复按钮状态
+            this.textContent = '快速购买';
+            this.disabled = false;
           });
-        });
-      }
-
-      loadVariantFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const variantId = urlParams.get('variant');
-
-        if (variantId) {
-          const variant = this.productData.variants.find((v) => v.id == variantId);
-          if (variant) {
-            variant.options.forEach((value, index) => {
-              const position = index + 1;
-              this.selectedOptions[position] = value;
-
-              const button = this.container.querySelector(
-                `.option-button[data-option-position="${position}"][data-value="${value}"]`
-              );
-              if (button) {
-                const optionGroup = button.closest('.option-group');
-                optionGroup.querySelectorAll('.option-button').forEach((btn) => {
-                  btn.classList.remove('active');
-                });
-                button.classList.add('active');
-              }
-            });
-
-            this.updateVariant();
-          }
-        }
-      }
-
-      handlePopState() {
-        this.loadVariantFromUrl();
-      }
-
-      formatMoney(cents) {
-        return '$' + (cents / 100).toFixed(2);
-      }
+      });
     }
   });
 
