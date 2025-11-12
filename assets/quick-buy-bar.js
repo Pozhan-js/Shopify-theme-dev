@@ -163,10 +163,10 @@ class QuickBuyBar {
   updateButton(variant) {
     if (variant.available) {
       this.addToCartBtn.disabled = false;
-      this.btnText.textContent = '加入购物车';
+      this.btnText.textContent = 'ADD TO CART';
     } else {
       this.addToCartBtn.disabled = true;
-      this.btnText.textContent = '售罄';
+      this.btnText.textContent = 'SOLD OUT';
     }
   }
 
