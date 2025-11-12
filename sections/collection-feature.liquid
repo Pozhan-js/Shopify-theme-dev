@@ -7,7 +7,7 @@
 {% assign target_collection = product.collections.first %}
 
 {% if target_collection %}
-  <div class="collection-info-section" style="margin: {{ section.settings.section_spacing }}px 0;">
+  <div class="collection-info-section" style="margin: {{ section.settings.section_spacing }}px 0; background-color: {{ section.settings.section_bg_color }};">
     <div class="collection-info-container">
       <div class="collection-info-image">
         {% if target_collection.image %}
@@ -16,7 +16,7 @@
             srcset="{{ target_collection.image | img_url: '300x' }} 300w,
                     {{ target_collection.image | img_url: '600x' }} 600w,
                     {{ target_collection.image | img_url: '900x' }} 900w"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, 55vw"
             alt="{{ target_collection.title }}"
             loading="lazy"
           >
@@ -30,7 +30,7 @@
                 srcset="{{ collection.image | img_url: '300x' }} 300w,
                         {{ collection.image | img_url: '600x' }} 600w,
                         {{ collection.image | img_url: '900x' }} 900w"
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="(max-width: 768px) 100vw, 55vw"
                 alt="{{ collection.title }}"
                 loading="lazy"
               >
@@ -40,7 +40,7 @@
         {% endif %}
       </div>
       
-      <div class="collection-info-content">
+      <div class="collection-info-content" style="background-color: {{ section.settings.text_bg_color }};">
         <h2 class="collection-info-title">{{ target_collection.title }}</h2>
         {% if target_collection.description != blank %}
           <div class="collection-info-description">
@@ -58,16 +58,14 @@
 
   <style>
     .collection-info-section {
-      padding: 0 20px;
+      padding: 0 40px;
     }
     
     .collection-info-container {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
+      grid-template-columns: 55% 45%;
+      gap: 12px;
       align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
     }
     
     .collection-info-image {
@@ -84,6 +82,7 @@
     
     .collection-info-content {
       padding: 20px;
+      border-radius: 8px;
     }
     
     .collection-info-title {
@@ -117,6 +116,10 @@
     }
     
     @media (max-width: 768px) {
+      .collection-info-section {
+        padding: 0 20px;
+      }
+      
       .collection-info-container {
         grid-template-columns: 1fr;
         gap: 24px;
@@ -162,6 +165,22 @@
       "unit": "px",
       "label": "上下间距",
       "default": 40
+    },
+    {
+      "type": "header",
+      "content": "颜色设置"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "整体背景颜色",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_bg_color",
+      "label": "文字区域背景颜色",
+      "default": "#ffffff"
     }
   ],
   "presets": [
