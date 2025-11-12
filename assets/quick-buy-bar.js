@@ -11,14 +11,15 @@ class QuickBuyBar {
     
     // DOM 元素
     this.variantSelects = this.bar.querySelectorAll('.quick-variant-select');
-    this.quantityInput = this.bar.querySelector('[data-quantity-input]');
-    this.minusBtn = this.bar.querySelector('[data-quantity-minus]');
-    this.plusBtn = this.bar.querySelector('[data-quantity-plus]');
     this.addToCartBtn = this.bar.querySelector('[data-quick-add-to-cart]');
     this.closeBtn = this.bar.querySelector('[data-quick-close]');
     this.priceElement = this.bar.querySelector('[data-quick-price]');
     this.comparePriceElement = this.bar.querySelector('[data-quick-compare-price]');
     this.btnText = this.bar.querySelector('[data-btn-text]');
+    this.btnIcon = this.bar.querySelector('.btn-icon');
+    this.productImage = this.bar.querySelector('[data-quick-image]');
+    this.flyItem = document.getElementById('cartFlyItem');
+    this.flyImage = this.flyItem?.querySelector('[data-fly-image]');
     
     // 当前选中的变体
     this.currentVariant = this.productData.selected_or_first_available_variant || this.productData.variants[0];
@@ -36,11 +37,6 @@ class QuickBuyBar {
       select.addEventListener('change', this.handleVariantChange.bind(this));
     });
 
-    // 数量选择器事件
-    this.minusBtn.addEventListener('click', () => this.changeQuantity(-1));
-    this.plusBtn.addEventListener('click', () => this.changeQuantity(1));
-    this.quantityInput.addEventListener('change', this.validateQuantity.bind(this));
-
     // 添加到购物车事件
     this.addToCartBtn.addEventListener('click', this.addToCart.bind(this));
 
@@ -57,9 +53,8 @@ class QuickBuyBar {
   handleScroll() {
     const scrollPosition = window.scrollY;
     const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
     
-    // 滚动超过一屏后显示
+    // 滚动超过半屏后显示
     if (scrollPosition > windowHeight * 0.5) {
       this.show();
     } else {
@@ -121,6 +116,9 @@ class QuickBuyBar {
     // 更新价格
     this.updatePrice(variant);
     
+    // 更新图片
+    this.updateImage(variant);
+    
     // 更新按钮状态
     this.updateButton(variant);
     
@@ -143,6 +141,16 @@ class QuickBuyBar {
       } else {
         this.comparePriceElement.style.display = 'none';
       }
+    }
+  }
+
+  /**
+   * 更新图片
+   */
+  updateImage(variant) {
+    if (variant.featured_image && this.productImage) {
+      const imageUrl = variant.featured_image.src.replace(/\.(jpg|jpeg|png|gif|webp)/, '_100x100.$1');
+      this.productImage.src = imageUrl;
     }
   }
 
@@ -194,36 +202,11 @@ class QuickBuyBar {
   }
 
   /**
-   * 改变数量
-   */
-  changeQuantity(delta) {
-    const currentValue = parseInt(this.quantityInput.value) || 1;
-    const newValue = Math.max(1, Math.min(99, currentValue + delta));
-    this.quantityInput.value = newValue;
-    this.validateQuantity();
-  }
-
-  /**
-   * 验证数量
-   */
-  validateQuantity() {
-    let value = parseInt(this.quantityInput.value) || 1;
-    value = Math.max(1, Math.min(99, value));
-    this.quantityInput.value = value;
-
-    // 更新按钮状态
-    this.minusBtn.disabled = value <= 1;
-    this.plusBtn.disabled = value >= 99;
-  }
-
-  /**
    * 添加到购物车
    */
   async addToCart() {
     if (!this.currentVariant || !this.currentVariant.available) return;
 
-    const quantity = parseInt(this.quantityInput.value) || 1;
-    
     // 显示加载状态
     this.addToCartBtn.classList.add('loading');
     this.addToCartBtn.disabled = true;
@@ -237,7 +220,7 @@ class QuickBuyBar {
         },
         body: JSON.stringify({
           id: this.currentVariant.id,
-          quantity: quantity
+          quantity: 1
         })
       });
 
@@ -247,37 +230,143 @@ class QuickBuyBar {
 
       const data = await response.json();
       
-      // 成功提示
+      // 移除加载状态
+      this.addToCartBtn.classList.remove('loading');
+      
+      // 显示成功状态
       this.showSuccess();
       
-      // 更新购物车（如果有购物车组件）
-      this.updateCart();
+      // 播放飞入动画
+      this.playFlyAnimation();
       
-      // 触发自定义事件
-      document.dispatchEvent(new CustomEvent('cart:item-added', {
-        detail: { variant: this.currentVariant, quantity: quantity }
-      }));
+      // 更新购物车
+      await this.updateCart();
 
     } catch (error) {
       console.error('添加到购物车失败:', error);
-      this.showError('添加失败，请重试');
-    } finally {
-      // 恢复按钮状态
       this.addToCartBtn.classList.remove('loading');
-      this.addToCartBtn.disabled = false;
+      this.showError('添加失败，请重试');
     }
   }
 
   /**
-   * 显示成功提示
+   * 显示成功状态
    */
   showSuccess() {
-    const originalText = this.btnText.textContent;
-    this.btnText.textContent = '✓ 已添加';
+    this.addToCartBtn.classList.add('success');
     
     setTimeout(() => {
-      this.btnText.textContent = originalText;
-    }, 2000);
+      this.addToCartBtn.classList.remove('success');
+      this.addToCartBtn.disabled = false;
+    }, 1500);
+  }
+
+  /**
+   * 播放飞入购物车动画
+   */
+  playFlyAnimation() {
+    if (!this.flyItem || !this.flyImage || !this.productImage) return;
+
+    // 获取产品图片位置
+    const imageRect = this.productImage.getBoundingClientRect();
+    
+    // 获取购物车图标位置（尝试多个常见选择器）
+    const cartIcon = document.querySelector('[data-cart-icon]') || 
+                     document.querySelector('.cart-icon') ||
+                     document.querySelector('[href="/cart"]') ||
+                     document.querySelector('a[href*="cart"]');
+    
+    if (!cartIcon) {
+      console.warn('未找到购物车图标');
+      return;
+    }
+
+    const cartRect = cartIcon.getBoundingClientRect();
+
+    // 设置飞行元素的图片
+    this.flyImage.src = this.productImage.src;
+
+    // 设置初始位置
+    this.flyItem.style.display = 'block';
+    this.flyItem.style.left = imageRect.left + 'px';
+    this.flyItem.style.top = imageRect.top + 'px';
+
+    // 计算目标位置
+    const deltaX = cartRect.left - imageRect.left;
+    const deltaY = cartRect.top - imageRect.top;
+
+    // 使用 CSS 变量设置动画终点
+    this.flyItem.style.setProperty('--fly-x', deltaX + 'px');
+    this.flyItem.style.setProperty('--fly-y', deltaY + 'px');
+
+    // 添加动画类
+    requestAnimationFrame(() => {
+      this.flyItem.classList.add('flying');
+      
+      // 使用 transform 实现飞行效果
+      this.flyItem.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.3)`;
+      this.flyItem.style.opacity = '0';
+      this.flyItem.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+
+    // 动画结束后清理
+    setTimeout(() => {
+      this.flyItem.classList.remove('flying');
+      this.flyItem.style.display = 'none';
+      this.flyItem.style.transform = '';
+      this.flyItem.style.opacity = '';
+      this.flyItem.style.transition = '';
+    }, 800);
+  }
+
+  /**
+   * 更新购物车
+   */
+  async updateCart() {
+    try {
+      const cartResponse = await fetch('/cart.js');
+      const cart = await cartResponse.json();
+      
+      // 更新购物车数量显示（支持多种选择器）
+      const cartCountSelectors = [
+        '[data-cart-count]',
+        '.cart-count',
+        '#cart-count',
+        '.cart-item-count'
+      ];
+
+      cartCountSelectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          el.textContent = cart.item_count;
+          // 添加弹出动画
+          el.classList.add('cart-count-pop');
+          setTimeout(() => {
+            el.classList.remove('cart-count-pop');
+          }, 400);
+        });
+      });
+
+      // 购物车图标抖动动画
+      const cartIcons = document.querySelectorAll('[data-cart-icon], .cart-icon, [href="/cart"]');
+      cartIcons.forEach(icon => {
+        icon.classList.add('cart-shake');
+        setTimeout(() => {
+          icon.classList.remove('cart-shake');
+        }, 500);
+      });
+
+      // 触发自定义事件
+      document.dispatchEvent(new CustomEvent('cart:updated', {
+        detail: { 
+          cart: cart,
+          addedVariant: this.currentVariant
+        }
+      }));
+      
+    } catch (error) {
+      console.error('更新购物车失败:', error);
+    }
   }
 
   /**
@@ -288,36 +377,10 @@ class QuickBuyBar {
   }
 
   /**
-   * 更新购物车
-   */
-  async updateCart() {
-    // 如果页面有购物车图标或抽屉，触发更新
-    try {
-      const cartResponse = await fetch('/cart.js');
-      const cart = await cartResponse.json();
-      
-      // 更新购物车数量显示
-      const cartCountElements = document.querySelectorAll('[data-cart-count]');
-      cartCountElements.forEach(el => {
-        el.textContent = cart.item_count;
-      });
-
-      // 触发购物车更新事件
-      document.dispatchEvent(new CustomEvent('cart:updated', {
-        detail: { cart: cart }
-      }));
-      
-    } catch (error) {
-      console.error('更新购物车失败:', error);
-    }
-  }
-
-  /**
    * 格式化金额
    */
   formatMoney(cents) {
-    // 使用 Shopify 的 money_format
-    // 这里是简化版，实际应该使用主题的 money format 设置
+    // 简化版，实际应使用 Shopify 的 money_format
     const amount = (cents / 100).toFixed(2);
     return `$${amount}`;
   }
