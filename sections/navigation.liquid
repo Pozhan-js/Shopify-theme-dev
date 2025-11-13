@@ -195,6 +195,7 @@
   const CONTENT_WRAPPER_SELECTOR = "{{ section.settings.content_wrapper_selector }}";
   let isLoading = false;
 
+  // 使用 document 级别的事件委托
   document.addEventListener('click', function(e) {
     const button = e.target.closest(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
     if (!button || isLoading) return;
@@ -207,10 +208,16 @@
     
     if (!url) return;
     
+    // 先更新按钮状态
     updateButtonStates(url);
+    
+    // 加载新页面内容
     loadPageContent(url, mainSelector, contentSelector);
   });
 
+  /**
+   * 更新所有导航按钮的激活状态
+   */
   function updateButtonStates(activeUrl) {
     const allButtons = document.querySelectorAll(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
     
@@ -219,8 +226,10 @@
         const btnUrl = new URL(btn.dataset.url, window.location.origin);
         const targetUrl = new URL(activeUrl, window.location.origin);
         
+        // 移除所有按钮的 active 类
         btn.classList.remove('active');
         
+        // 给匹配的按钮添加 active 类
         if (btnUrl.pathname === targetUrl.pathname) {
           btn.classList.add('active');
         }
@@ -230,11 +239,15 @@
     });
   }
 
+  /**
+   * 通过 AJAX 加载页面内容
+   */
   async function loadPageContent(url, mainSelector, contentSelector) {
     if (isLoading) return;
     
     isLoading = true;
     
+    // 添加加载状态
     const allButtons = document.querySelectorAll(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
     allButtons.forEach(btn => btn.classList.add('loading'));
     
@@ -253,17 +266,7 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      // 🔑 关键改进：保存导航组件的引用（不是克隆）
-      const navComponent = document.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
-      const navParent = navComponent ? navComponent.parentElement : null;
-      const navNextSibling = navComponent ? navComponent.nextSibling : null;
-      
-      // 临时移除导航（保持在 DOM 中，只是脱离父元素）
-      if (navComponent) {
-        navComponent.remove();
-      }
-      
-      // 尝试替换内容
+      // 优先使用 contentSelector，如果不存在则使用 mainSelector
       let newContent, currentContent;
       
       if (contentSelector) {
@@ -271,42 +274,55 @@
         currentContent = document.querySelector(contentSelector);
       }
       
-      // 回退到 mainSelector
+      // 如果 contentSelector 找不到，回退到 mainSelector
       if (!newContent || !currentContent) {
         newContent = doc.querySelector(mainSelector);
         currentContent = document.querySelector(mainSelector);
+        
+        // 如果使用 mainSelector，需要保留导航组件
+        if (newContent && currentContent) {
+          // 保存当前导航组件
+          const navComponent = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
+          
+          // 替换内容
+          currentContent.innerHTML = newContent.innerHTML;
+          
+          // 如果原来有导航组件，将其插回去
+          if (navComponent) {
+            const newNavPosition = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
+            if (newNavPosition) {
+              newNavPosition.replaceWith(navComponent);
+            } else {
+              // 如果新内容中没有导航位置，插入到开头
+              currentContent.insertBefore(navComponent, currentContent.firstChild);
+            }
+            
+            // 重新更新按钮状态
+            updateButtonStates(url);
+          }
+        }
+      } else {
+        // 只替换内容区域，不影响导航
+        currentContent.innerHTML = newContent.innerHTML;
       }
       
       if (newContent && currentContent) {
-        // 替换内容
-        currentContent.innerHTML = newContent.innerHTML;
-        
-        // 🔑 关键改进：将导航插回原位置
-        if (navComponent && navParent) {
-          if (navNextSibling && navNextSibling.parentElement === navParent) {
-            navParent.insertBefore(navComponent, navNextSibling);
-          } else {
-            navParent.appendChild(navComponent);
-          }
-        } else if (navComponent) {
-          // 如果原父元素不存在，插入到 currentContent 顶部
-          currentContent.insertBefore(navComponent, currentContent.firstChild);
-        }
-        
-        // 更新页面元数据
+        // 更新页面标题
         const newTitle = doc.querySelector('title');
         if (newTitle) {
           document.title = newTitle.textContent;
         }
         
+        // 更新 URL
         history.pushState({ url, mainSelector, contentSelector }, '', url);
         
+        // 平滑滚动到顶部
         window.scrollTo({ 
           top: 0, 
           behavior: 'smooth' 
         });
         
-        // 触发事件
+        // 触发自定义事件
         document.dispatchEvent(new CustomEvent('ajax:pageLoaded', {
           detail: { 
             url,
@@ -317,10 +333,24 @@
         }));
         
         // 重新初始化 Shopify 功能
-        reinitializeShopifyFeatures();
+        if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
+          Shopify.PaymentButton.init();
+        }
+        
+        if (typeof theme !== 'undefined' && theme.init) {
+          theme.init();
+        }
+        
+        // 重新初始化产品表单
+        if (typeof window.Shopify !== 'undefined' && window.Shopify.ProductForm) {
+          const forms = document.querySelectorAll('form[action*="/cart/add"]');
+          forms.forEach(form => {
+            new Shopify.ProductForm(form);
+          });
+        }
         
       } else {
-        console.error('Content selector not found, falling back to full page load');
+        console.error('Content selector not found');
         window.location.href = url;
       }
       
@@ -329,30 +359,14 @@
       window.location.href = url;
     } finally {
       isLoading = false;
+      // 移除加载状态
       allButtons.forEach(btn => btn.classList.remove('loading'));
     }
   }
 
   /**
-   * 重新初始化 Shopify 相关功能
+   * 处理浏览器前进/后退按钮
    */
-  function reinitializeShopifyFeatures() {
-    if (typeof Shopify !== 'undefined' && Shopify.PaymentButton) {
-      Shopify.PaymentButton.init();
-    }
-    
-    if (typeof theme !== 'undefined' && theme.init) {
-      theme.init();
-    }
-    
-    if (typeof window.Shopify !== 'undefined' && window.Shopify.ProductForm) {
-      const forms = document.querySelectorAll('form[action*="/cart/add"]');
-      forms.forEach(form => {
-        new Shopify.ProductForm(form);
-      });
-    }
-  }
-
   window.addEventListener('popstate', function(e) {
     if (e.state && e.state.url) {
       const mainSelector = e.state.mainSelector || MAIN_SELECTOR;
@@ -362,10 +376,14 @@
     }
   });
 
+  /**
+   * 页面加载时初始化按钮状态
+   */
   function initializeButtonStates() {
     const currentPath = window.location.pathname;
     updateButtonStates(currentPath);
     
+    // 保存初始状态
     history.replaceState({ 
       url: window.location.href,
       mainSelector: MAIN_SELECTOR,
@@ -373,6 +391,7 @@
     }, '', window.location.href);
   }
 
+  // 初始化
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeButtonStates);
   } else {
