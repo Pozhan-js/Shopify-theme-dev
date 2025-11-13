@@ -96,7 +96,78 @@
 }
 {% endschema %}
 
+<style>
+  .ajax-navigation {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
 
+  .ajax-navigation__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ajax-nav-button {
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 2px solid #333;
+    background: none;
+  }
+
+  .ajax-nav-button--outlined {
+    background-color: transparent;
+    color: #333;
+  }
+
+  .ajax-nav-button--outlined:hover,
+  .ajax-nav-button--outlined.active {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .ajax-nav-button--filled {
+    background-color: #333;
+    color: #fff;
+  }
+
+  .ajax-nav-button--filled:hover {
+    background-color: #555;
+    border-color: #555;
+  }
+
+  .ajax-nav-button--filled.active {
+    background-color: #222;
+    border-color: #222;
+  }
+
+  .ajax-nav-button.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .ajax-navigation {
+      padding: 30px 15px;
+    }
+    
+    .ajax-nav-button {
+      padding: 10px 20px;
+      font-size: 12px;
+    }
+  }
+</style>
 
 <div class="ajax-navigation" data-ajax-nav="{{ section.id }}" data-ajax-nav-persistent>
   <div class="ajax-navigation__buttons">
@@ -213,18 +284,18 @@
           // 保存当前导航组件
           const navComponent = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
           
+          // ✅ 关键修复：先从新内容中移除导航组件（避免重复）
+          const newNavComponent = newContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
+          if (newNavComponent) {
+            newNavComponent.remove();
+          }
+          
           // 替换内容
           currentContent.innerHTML = newContent.innerHTML;
           
-          // 如果原来有导航组件，将其插回去
+          // 如果原来有导航组件，将其插回到开头
           if (navComponent) {
-            const newNavPosition = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
-            if (newNavPosition) {
-              newNavPosition.replaceWith(navComponent);
-            } else {
-              // 如果新内容中没有导航位置，插入到开头
-              currentContent.insertBefore(navComponent, currentContent.firstChild);
-            }
+            currentContent.insertBefore(navComponent, currentContent.firstChild);
             
             // 重新更新按钮状态
             updateButtonStates(url);
@@ -330,76 +401,3 @@
 })();
 </script>
 
-
-<style>
-  .ajax-navigation {
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .ajax-navigation__buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .ajax-nav-button {
-    padding: 12px 30px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    white-space: nowrap;
-    cursor: pointer;
-    border: 2px solid #333;
-    background: none;
-  }
-
-  .ajax-nav-button--outlined {
-    background-color: transparent;
-    color: #333;
-  }
-
-  .ajax-nav-button--outlined:hover,
-  .ajax-nav-button--outlined.active {
-    background-color: #333;
-    color: #fff;
-  }
-
-  .ajax-nav-button--filled {
-    background-color: #333;
-    color: #fff;
-  }
-
-  .ajax-nav-button--filled:hover {
-    background-color: #555;
-    border-color: #555;
-  }
-
-  .ajax-nav-button--filled.active {
-    background-color: #222;
-    border-color: #222;
-  }
-
-  .ajax-nav-button.loading {
-    opacity: 0.6;
-    pointer-events: none;
-  }
-
-  @media (max-width: 768px) {
-    .ajax-navigation {
-      padding: 30px 15px;
-    }
-    
-    .ajax-nav-button {
-      padding: 10px 20px;
-      font-size: 12px;
-    }
-  }
-</style>
