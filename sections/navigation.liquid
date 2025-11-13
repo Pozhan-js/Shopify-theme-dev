@@ -284,18 +284,18 @@
           // 保存当前导航组件
           const navComponent = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
           
-          // ✅ 关键修复：先从新内容中移除导航组件（避免重复）
-          const newNavComponent = newContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
-          if (newNavComponent) {
-            newNavComponent.remove();
-          }
-          
           // 替换内容
           currentContent.innerHTML = newContent.innerHTML;
           
-          // 如果原来有导航组件，将其插回到开头
+          // 如果原来有导航组件，将其插回去
           if (navComponent) {
-            currentContent.insertBefore(navComponent, currentContent.firstChild);
+            const newNavPosition = currentContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
+            if (newNavPosition) {
+              newNavPosition.replaceWith(navComponent);
+            } else {
+              // 如果新内容中没有导航位置，插入到开头
+              currentContent.insertBefore(navComponent, currentContent.firstChild);
+            }
             
             // 重新更新按钮状态
             updateButtonStates(url);
@@ -400,4 +400,3 @@
 
 })();
 </script>
-
