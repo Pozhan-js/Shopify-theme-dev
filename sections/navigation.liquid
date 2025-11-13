@@ -253,27 +253,36 @@
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       
-      // 🔑 核心逻辑：找到导航栏和需要替换的内容区域
+      console.log('🔍 Debug Info:');
+      console.log('Main Selector:', mainSelector);
+      console.log('Content Selector:', contentSelector);
+      
       const navComponent = document.querySelector(`[data-ajax-nav="${SECTION_ID}"][data-ajax-nav-persistent]`);
       const mainContent = document.querySelector(mainSelector);
       
+      console.log('Current nav found:', !!navComponent);
+      console.log('Current main content found:', !!mainContent);
+      
       if (!mainContent) {
-        console.error('Main content area not found');
+        console.error('❌ Main content area not found');
         window.location.href = url;
         return;
       }
       
-      // 获取新页面的内容
       const newMainContent = doc.querySelector(mainSelector);
+      console.log('New main content found:', !!newMainContent);
+      
       if (!newMainContent) {
-        console.error('New content not found');
+        console.error('❌ New content not found in fetched page');
         window.location.href = url;
         return;
       }
       
-      // 🔑 策略：提取导航栏之后的所有内容
+      // 🔑 改进的内容替换逻辑
       if (navComponent) {
-        // 收集当前页面导航栏之后的所有兄弟元素
+        console.log('✅ Using nav-aware replacement');
+        
+        // 收集导航栏之后的所有内容
         let currentSibling = navComponent.nextElementSibling;
         const toRemove = [];
         
@@ -282,51 +291,49 @@
           currentSibling = currentSibling.nextElementSibling;
         }
         
+        console.log('Removing', toRemove.length, 'elements after nav');
+        
         // 移除旧内容
         toRemove.forEach(el => el.remove());
         
-        // 从新页面提取内容（跳过新页面中的导航栏）
+        // 从新页面提取内容
         const newNavInNewPage = newMainContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
+        let insertedCount = 0;
         
-        // 插入新内容
         Array.from(newMainContent.children).forEach(child => {
-          // 跳过新页面中的导航栏（如果存在）
-          if (newNavInNewPage && child.contains(newNavInNewPage)) {
+          // 跳过新页面中的导航栏
+          if (newNavInNewPage && (child === newNavInNewPage || child.contains(newNavInNewPage))) {
+            console.log('Skipping nav in new content');
             return;
           }
-          // 将新内容插入到当前导航栏之后
-          mainContent.appendChild(child.cloneNode(true));
+          
+          // 克隆并插入新内容
+          const clonedChild = child.cloneNode(true);
+          mainContent.appendChild(clonedChild);
+          insertedCount++;
         });
         
-      } else {
-        // 如果找不到导航栏，直接替换整个 MainContent
-        // 但先尝试查找并保留导航
-        const tempNav = mainContent.querySelector(`[data-ajax-nav-persistent]`);
+        console.log('✅ Inserted', insertedCount, 'new elements');
         
-        if (tempNav) {
-          const navClone = tempNav.cloneNode(true);
-          mainContent.innerHTML = newMainContent.innerHTML;
-          
-          // 移除新内容中可能存在的导航副本
-          const duplicateNav = mainContent.querySelector(`[data-ajax-nav="${SECTION_ID}"]`);
-          if (duplicateNav) {
-            duplicateNav.remove();
-          }
-          
-          // 将原导航插入到顶部
-          mainContent.insertBefore(navClone, mainContent.firstChild);
-        } else {
-          mainContent.innerHTML = newMainContent.innerHTML;
-        }
+      } else {
+        console.log('⚠️ Nav not found, using fallback replacement');
+        
+        // 备用方案：直接替换 MainContent
+        const oldHTML = mainContent.innerHTML;
+        mainContent.innerHTML = newMainContent.innerHTML;
+        
+        console.log('Content changed:', oldHTML !== mainContent.innerHTML);
       }
       
       // 更新页面元数据
       const newTitle = doc.querySelector('title');
       if (newTitle) {
         document.title = newTitle.textContent;
+        console.log('✅ Title updated:', newTitle.textContent);
       }
       
       history.pushState({ url, mainSelector, contentSelector }, '', url);
+      console.log('✅ URL updated:', url);
       
       window.scrollTo({ 
         top: 0, 
@@ -345,7 +352,7 @@
       reinitializeShopifyFeatures();
       
     } catch (error) {
-      console.error('Error loading page:', error);
+      console.error('❌ Error loading page:', error);
       window.location.href = url;
     } finally {
       isLoading = false;
