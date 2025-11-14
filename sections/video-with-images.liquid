@@ -1,11 +1,6 @@
 {% comment %}
-  Instagram图片展示 - 鼠标移动跟随滑动功能
-  1. 主标题展示
-  2. 直接展示配置的图片
-  3. 鼠标左右移动时图片跟随滑动
-  4. 支持自定义锚点ID
-  5. PC端左边留白加大
-  6. 显示完整的5张图片
+  Instagram图片展示 - 鼠标移动跟随滑动
+  鼠标在图片区域左右移动时，图片跟随移动
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -70,7 +65,6 @@
     --gallery-white: #ffffff;
   }
 
-  /* Section principale */
   .gallery-showcase-section {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: transparent;
@@ -78,7 +72,6 @@
     padding: 1rem 0;
   }
 
-  /* Container principal */
   .gallery-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -86,7 +79,6 @@
     margin-bottom: 2rem;
   }
 
-  /* 主标题区域 */
   .gallery-title-wrapper {
     text-align: center;
     margin-bottom: 2rem;
@@ -101,7 +93,6 @@
     letter-spacing: -0.025em;
   }
 
-  /* Carousel wrapper */
   .gallery-carousel-wrapper {
     position: relative;
     overflow: hidden;
@@ -119,12 +110,11 @@
   .gallery-carousel-track {
     display: flex;
     gap: 1rem;
-    transition: transform 0.3s ease-out;
+    transition: transform 0.1s ease-out;
     user-select: none;
     will-change: transform;
   }
 
-  /* Cards containers - 显示完整的5张图片 */
   .gallery-card-container {
     flex-shrink: 0;
   }
@@ -138,7 +128,6 @@
     flex-direction: column;
   }
 
-  /* Image containers */
   .gallery-image-container {
     position: relative;
     background-color: var(--gallery-white);
@@ -169,7 +158,6 @@
     font-size: 0.875rem;
   }
 
-  /* PC端优化 */
   @media (min-width: 1201px) {
     .gallery-container {
       margin: 0 3rem 2rem 10rem;
@@ -189,7 +177,6 @@
     }
   }
 
-  /* 平板端 */
   @media (max-width: 1200px) and (min-width: 769px) {
     .gallery-container {
       padding: 0 1.5rem;
@@ -200,7 +187,6 @@
     }
   }
 
-  /* 移动端 */
   @media (max-width: 768px) {
     .gallery-container {
       padding: 0 1rem;
@@ -258,37 +244,49 @@
       const wrapper = track.closest('.gallery-carousel-wrapper');
       if (!wrapper) return;
 
+      let lastMouseX = null;
       let currentTranslate = 0;
 
-      // 鼠标移动事件 - 根据鼠标位置计算滚动
+      // 鼠标移动事件 - 根据鼠标移动方向和距离滑动图片
       wrapper.addEventListener('mousemove', (e) => {
-        const rect = wrapper.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left; // 鼠标在容器内的X坐标
-        const wrapperWidth = rect.width;
+        const currentMouseX = e.clientX;
         
-        // 计算鼠标位置的百分比 (0 到 1)
-        const mousePercent = mouseX / wrapperWidth;
+        // 如果是第一次移动，记录初始位置
+        if (lastMouseX === null) {
+          lastMouseX = currentMouseX;
+          return;
+        }
+
+        // 计算鼠标移动的距离
+        const deltaX = currentMouseX - lastMouseX;
+        
+        // 更新图片位置（鼠标向右移动，图片向右滑；鼠标向左移动，图片向左滑）
+        currentTranslate += deltaX * 1.5; // 1.5 是灵敏度系数，可以调整
         
         // 计算最大可滚动距离
-        const maxScroll = track.scrollWidth - wrapper.offsetWidth;
+        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
         
-        // 根据鼠标位置计算滚动位置
-        // 鼠标在左边时显示开始，在右边时显示末尾
-        currentTranslate = -(maxScroll * mousePercent);
+        // 限制滚动范围
+        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
         
-        // 确保不超出边界
-        currentTranslate = Math.max(-maxScroll, Math.min(0, currentTranslate));
-        
+        // 应用变换
         track.style.transform = `translateX(${currentTranslate}px)`;
+        
+        // 更新上一次的鼠标位置
+        lastMouseX = currentMouseX;
       });
 
-      // 鼠标离开时重置到初始位置（可选）
+      // 鼠标离开时重置记录
       wrapper.addEventListener('mouseleave', () => {
-        currentTranslate = 0;
-        track.style.transform = `translateX(0px)`;
+        lastMouseX = null;
       });
 
-      // 触摸事件支持（移动端）- 保持拖拽功能
+      // 鼠标进入时重置记录
+      wrapper.addEventListener('mouseenter', () => {
+        lastMouseX = null;
+      });
+
+      // 触摸事件支持（移动端）
       let isDragging = false;
       let startX = 0;
       let scrollLeft = 0;
@@ -341,7 +339,7 @@
       "type": "text",
       "id": "anchor_id",
       "label": "锚点ID",
-      "info": "用于页面内跳转的唯一标识符，只能包含字母、数字、下划线和连字符。例如：gallery-section",
+      "info": "用于页面内跳转的唯一标识符",
       "default": "gallery-section",
       "placeholder": "gallery-section"
     }
