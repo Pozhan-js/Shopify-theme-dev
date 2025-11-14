@@ -2,9 +2,10 @@
   Instagram图片展示 - 带鼠标拖拽滑动功能
   1. 主标题展示
   2. 直接展示配置的图片
-  3. 支持鼠标拖拽滑动
+  3. 支持鼠标拖拽滑动和触控板滑动
   4. 支持自定义锚点ID
   5. PC端左边留白加大
+  6. 完整显示5张图片
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -77,7 +78,7 @@
     padding: 1rem 0;
   }
 
-  /* Container principal - 移动端保持原样 */
+  /* Container principal */
   .gallery-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -104,11 +105,6 @@
   .gallery-carousel-wrapper {
     position: relative;
     overflow: hidden;
-    cursor: grab;
-  }
-
-  .gallery-carousel-wrapper:active {
-    cursor: grabbing;
   }
 
   .gallery-carousel-content {
@@ -122,13 +118,22 @@
   .gallery-carousel-track {
     display: flex;
     gap: 1rem;
-    transition: transform 0.3s ease-out;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    cursor: grab;
     user-select: none;
-    will-change: transform;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .gallery-carousel-track.dragging {
-    transition: none;
+  .gallery-carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .gallery-carousel-track:active {
+    cursor: grabbing;
   }
 
   /* Cards containers */
@@ -176,11 +181,12 @@
     font-size: 0.875rem;
   }
 
-  /* PC端优化 - 只在PC端左边留白加大 */
+  /* PC端优化 - 调整为显示完整5张图片 */
   @media (min-width: 1201px) {
     .gallery-container {
-      margin: 0 3rem 2rem 10rem; /* PC端：左边距10rem，右边距3rem */
+      margin: 0 3rem 2rem 10rem;
       padding: 0;
+      max-width: calc(86rem + 13rem);
     }
 
     .gallery-carousel-track {
@@ -257,84 +263,106 @@
     const tracks = document.querySelectorAll('.gallery-carousel-track[data-section-id]');
 
     tracks.forEach((track) => {
-      const wrapper = track.closest('.gallery-carousel-wrapper');
-      if (!wrapper) return;
+      addDragSupport(track);
+    });
 
+    // 鼠标拖动和触摸滑动支持
+    function addDragSupport(trackEl) {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
       let isDragging = false;
-      let startX = 0;
-      let scrollLeft = 0;
-      let currentTranslate = 0;
-      let prevTranslate = 0;
-      let animationID = 0;
 
       // 鼠标按下
-      wrapper.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.pageX - wrapper.offsetLeft;
-        scrollLeft = currentTranslate;
-        track.classList.add('dragging');
-        cancelAnimationFrame(animationID);
+      trackEl.addEventListener('mousedown', (e) => {
+        isDown = true;
+        isDragging = false;
+        trackEl.style.cursor = 'grabbing';
+        startX = e.pageX - trackEl.offsetLeft;
+        scrollLeft = trackEl.scrollLeft;
+        e.preventDefault();
       });
 
-      // 鼠标移动
-      wrapper.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        
-        const x = e.pageX - wrapper.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        currentTranslate = scrollLeft + walk;
-
-        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
-        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
-
-        track.style.transform = `translateX(${currentTranslate}px)`;
+      // 鼠标离开
+      trackEl.addEventListener('mouseleave', () => {
+        isDown = false;
+        trackEl.style.cursor = 'grab';
       });
 
       // 鼠标松开
-      const endDrag = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        track.classList.remove('dragging');
-        prevTranslate = currentTranslate;
-      };
-
-      wrapper.addEventListener('mouseup', endDrag);
-      wrapper.addEventListener('mouseleave', endDrag);
-
-      // 触摸事件支持（移动端）
-      wrapper.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        startX = e.touches[0].clientX;
-        scrollLeft = currentTranslate;
-        track.classList.add('dragging');
-      });
-
-      wrapper.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
+      trackEl.addEventListener('mouseup', () => {
+        isDown = false;
+        trackEl.style.cursor = 'grab';
         
-        const x = e.touches[0].clientX;
-        const walk = (x - startX) * 1.5;
-        currentTranslate = scrollLeft + walk;
-
-        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
-        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
-
-        track.style.transform = `translateX(${currentTranslate}px)`;
+        // 延迟重置 isDragging，防止触发点击事件
+        if (isDragging) {
+          setTimeout(() => {
+            isDragging = false;
+          }, 10);
+        }
       });
 
-      wrapper.addEventListener('touchend', () => {
+      // 鼠标移动
+      trackEl.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - trackEl.offsetLeft;
+        const walk = (x - startX) * 2; // 滑动速度倍数
+        
+        // 如果移动距离超过5px，标记为拖拽状态
+        if (Math.abs(walk) > 5) {
+          isDragging = true;
+        }
+        
+        trackEl.scrollLeft = scrollLeft - walk;
+      });
+
+      // 触摸开始
+      trackEl.addEventListener('touchstart', (e) => {
+        isDown = true;
         isDragging = false;
-        track.classList.remove('dragging');
-        prevTranslate = currentTranslate;
+        startX = e.touches[0].pageX - trackEl.offsetLeft;
+        scrollLeft = trackEl.scrollLeft;
+      }, { passive: true });
+
+      // 触摸移动
+      trackEl.addEventListener('touchmove', (e) => {
+        if (!isDown) return;
+        const x = e.touches[0].pageX - trackEl.offsetLeft;
+        const walk = (x - startX) * 2;
+        
+        if (Math.abs(walk) > 5) {
+          isDragging = true;
+        }
+        
+        trackEl.scrollLeft = scrollLeft - walk;
+      }, { passive: true });
+
+      // 触摸结束
+      trackEl.addEventListener('touchend', () => {
+        isDown = false;
+        
+        if (isDragging) {
+          setTimeout(() => {
+            isDragging = false;
+          }, 10);
+        }
       });
 
-      // 防止图片拖拽
-      const images = track.querySelectorAll('img');
+      // 防止拖拽时触发点击事件
+      trackEl.addEventListener('click', (e) => {
+        if (isDragging) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
+      // 防止图片被拖拽
+      const images = trackEl.querySelectorAll('img');
       images.forEach(img => {
         img.addEventListener('dragstart', (e) => e.preventDefault());
       });
-    });
+    }
   });
 </script>
 
@@ -380,6 +408,12 @@
         "anchor_id": "gallery-section"
       },
       "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
         {
           "type": "image_item"
         },
