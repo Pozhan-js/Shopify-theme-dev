@@ -1,5 +1,5 @@
 {% comment %}
-  轮播英雄区块 - 支持图片文字联动的轮播组件
+  双图轮播英雄区块 - 支持左右两张图片联动轮播
 {% endcomment %}
 
 <div class="carousel-hero-section" data-section-id="{{ section.id }}">
@@ -46,6 +46,33 @@
       transform: scale(1);
     }
 
+    /* 右侧图片区域样式 */
+    .carousel-right-image-area-{{ section.id }} {
+      position: relative;
+      width: 50%;
+      overflow: hidden;
+      background: #f3f4f6;
+      border-radius:0.5rem;
+      z-index: 1;
+    }
+
+    .carousel-right-image-{{ section.id }} {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      transform: scale(1.02);
+    }
+
+    .carousel-right-image-{{ section.id }}.active {
+      opacity: 1;
+      z-index: 10;
+      transform: scale(1);
+    }
+
     .carousel-thumbnails-{{ section.id }} {
       position: absolute;
       left: 1rem;
@@ -84,132 +111,6 @@
       object-fit: cover;
     }
 
-    .carousel-indicator-{{ section.id }} {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(0, 0, 0, 0.5);
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      z-index: 20;
-    }
-
-    .carousel-text-area-{{ section.id }} {
-      width: 50%;
-      padding: 2rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      background: transparent;
-      position: relative;
-      border-radius:0.5rem
-    }
-
-    .carousel-text-content-{{ section.id }} {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      width: 100%;
-      opacity: 0;
-      transform: translateX(20px);
-      transition: all 0.3s ease-out;
-    }
-
-    .carousel-text-content-{{ section.id }}.active {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .carousel-text-content-{{ section.id }}:not(.active) {
-      position: absolute;
-      top: 2rem;
-      left: 2rem;
-      right: 2rem;
-      bottom: 2rem;
-    }
-
-    .carousel-rich-text-{{ section.id }} {
-      color: #374151;
-      line-height: 1.6;
-      font-size: 1rem;
-      width: 100%;
-      text-align: left;
-    }
-
-    .carousel-rich-text-{{ section.id }} h1,
-    .carousel-rich-text-{{ section.id }} h2,
-    .carousel-rich-text-{{ section.id }} h3,
-    .carousel-rich-text-{{ section.id }} h4,
-    .carousel-rich-text-{{ section.id }} h5,
-    .carousel-rich-text-{{ section.id }} h6 {
-      margin-bottom: 1rem;
-      font-weight: 600;
-      color: #1f2937;
-    }
-
-    .carousel-rich-text-{{ section.id }} h1 { font-size: 2.5rem; }
-    .carousel-rich-text-{{ section.id }} h2 { font-size: 2rem; }
-    .carousel-rich-text-{{ section.id }} h3 { font-size: 1.5rem; }
-    .carousel-rich-text-{{ section.id }} h4 { font-size: 1.25rem; }
-    .carousel-rich-text-{{ section.id }} h5 { font-size: 1.125rem; }
-    .carousel-rich-text-{{ section.id }} h6 { font-size: 1rem; }
-
-    .carousel-rich-text-{{ section.id }} p {
-      margin-bottom: 1rem;
-    }
-
-    .carousel-rich-text-{{ section.id }} ul,
-    .carousel-rich-text-{{ section.id }} ol {
-      margin-bottom: 1rem;
-      padding-left: 1.5rem;
-    }
-
-    .carousel-rich-text-{{ section.id }} li {
-      margin-bottom: 0.5rem;
-    }
-
-    .carousel-rich-text-{{ section.id }} strong {
-      font-weight: 600;
-    }
-
-    .carousel-rich-text-{{ section.id }} em {
-      font-style: italic;
-    }
-
-    .carousel-rich-text-{{ section.id }} a {
-      color: #2563eb;
-      text-decoration: underline;
-    }
-
-    .carousel-rich-text-{{ section.id }} a:hover {
-      color: #1d4ed8;
-    }
-
-    .carousel-rich-text-{{ section.id }} blockquote {
-      border-left: 4px solid #e5e7eb;
-      padding-left: 1rem;
-      margin: 1rem 0;
-      font-style: italic;
-      color: #6b7280;
-    }
-
-
-    .carousel-progress-{{ section.id }} {
-      height: 4px;
-      background: #e5e7eb;
-    }
-
-    .carousel-progress-bar-{{ section.id }} {
-      height: 100%;
-      background: #2563eb;
-      transition: width 0.3s ease-out;
-    }
-
-
     @media (max-width: 768px) {
       .carousel-content-{{ section.id }} {
         flex-direction: column;
@@ -217,175 +118,150 @@
       }
 
       .carousel-image-area-{{ section.id }},
-      .carousel-text-area-{{ section.id }} {
+      .carousel-right-image-area-{{ section.id }} {
         width: 100%;
-      }
-
-      .carousel-image-area-{{ section.id }} {
         height: 300px;
       }
-
-      .carousel-title-{{ section.id }} {
-        font-size: 2rem;
-      }
-
     }
   </style>
 
   <div class="carousel-container-{{ section.id }}">
-      <div class="carousel-content-{{ section.id }}">
-        <!-- 左侧图片区域 -->
-        <div class="carousel-image-area-{{ section.id }}">
+    <div class="carousel-content-{{ section.id }}">
+      <!-- 左侧图片区域 -->
+      <div class="carousel-image-area-{{ section.id }}">
+        {% for block in section.blocks %}
+          {% if block.settings.left_image != blank %}
+            <img
+              src="{{ block.settings.left_image | img_url: '800x600' }}"
+              alt="{{ block.settings.title | escape }}"
+              class="carousel-image-{{ section.id }}{% if forloop.first %} active{% endif %}"
+              data-index="{{ forloop.index0 }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            >
+          {% endif %}
+        {% endfor %}
+
+        <!-- 缩略图导航 -->
+        <div class="carousel-thumbnails-{{ section.id }}">
           {% for block in section.blocks %}
-            {% if block.settings.image != blank %}
-              <img
-                src="{{ block.settings.image | img_url: '800x600' }}"
-                alt="{{ block.settings.title | escape }}"
-                class="carousel-image-{{ section.id }}{% if forloop.first %} active{% endif %}"
+            {% if block.settings.left_image != blank %}
+              <div
+                class="thumbnail-item-{{ section.id }}{% if forloop.first %} active{% endif %}"
                 data-index="{{ forloop.index0 }}"
-                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
               >
-            {% endif %}
-          {% endfor %}
-
-          <!-- 缩略图导航 -->
-          <div class="carousel-thumbnails-{{ section.id }}">
-            {% for block in section.blocks %}
-              {% if block.settings.image != blank %}
-                <div
-                  class="thumbnail-item-{{ section.id }}{% if forloop.first %} active{% endif %}"
-                  data-index="{{ forloop.index0 }}"
+                <img
+                  src="{{ block.settings.left_image | img_url: '64x48' }}"
+                  alt="缩略图 {{ forloop.index }}"
                 >
-                  <img
-                    src="{{ block.settings.image | img_url: '64x48' }}"
-                    alt="缩略图 {{ forloop.index }}"
-                  >
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-
-          {% comment %} <!-- 图片序号指示器 -->
-          <div class="carousel-indicator-{{ section.id }}">
-            <span class="current-index">1</span> / {{ section.blocks.size }}
-          </div> {% endcomment %}
-        </div>
-
-        <!-- 右侧文字区域 -->
-        <div class="carousel-text-area-{{ section.id }}">
-          {% for block in section.blocks %}
-            <div class="carousel-text-content-{{ section.id }}{% if forloop.first %} active{% endif %}" data-index="{{ forloop.index0 }}">
-              {% if block.settings.rich_text != blank %}
-                <div class="carousel-rich-text-{{ section.id }}">
-                  {{ block.settings.rich_text }}
-                </div>
-              {% endif %}
-            </div>
+              </div>
+            {% endif %}
           {% endfor %}
         </div>
       </div>
 
+      <!-- 右侧图片区域 -->
+      <div class="carousel-right-image-area-{{ section.id }}">
+        {% for block in section.blocks %}
+          {% if block.settings.right_image != blank %}
+            <img
+              src="{{ block.settings.right_image | img_url: '800x600' }}"
+              alt="{{ block.settings.title | escape }}"
+              class="carousel-right-image-{{ section.id }}{% if forloop.first %} active{% endif %}"
+              data-index="{{ forloop.index0 }}"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+            >
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
   </div>
+</div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const sectionId = '{{ section.id }}';
-      const carousel = document.querySelector(`[data-section-id="${sectionId}"]`);
-      
-      if (!carousel) return;
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sectionId = '{{ section.id }}';
+    const carousel = document.querySelector(`[data-section-id="${sectionId}"]`);
+    
+    if (!carousel) return;
 
-      const images = carousel.querySelectorAll(`.carousel-image-${sectionId}`);
-      const textContents = carousel.querySelectorAll(`.carousel-text-content-${sectionId}`);
-      const thumbnails = carousel.querySelectorAll(`.thumbnail-item-${sectionId}`);
-      const progressBar = carousel.querySelector(`.carousel-progress-bar-${sectionId}`);
-      const currentIndexEl = carousel.querySelector('.current-index');
-      
-      let currentIndex = 0;
-      let autoPlayTimer;
-      const totalSlides = images.length;
+    const leftImages = carousel.querySelectorAll(`.carousel-image-${sectionId}`);
+    const rightImages = carousel.querySelectorAll(`.carousel-right-image-${sectionId}`);
+    const thumbnails = carousel.querySelectorAll(`.thumbnail-item-${sectionId}`);
+    
+    let currentIndex = 0;
+    let autoPlayTimer;
+    const totalSlides = leftImages.length;
 
-      function updateCarousel(index) {
-        // 更新图片
-        images.forEach((img, i) => {
-          img.classList.toggle('active', i === index);
-        });
-
-        // 更新文字内容
-        textContents.forEach((content, i) => {
-          content.classList.toggle('active', i === index);
-        });
-
-        // 更新缩略图
-        thumbnails.forEach((thumb, i) => {
-          thumb.classList.toggle('active', i === index);
-        });
-
-        // 更新进度条
-        if (progressBar) {
-          progressBar.style.width = `${((index + 1) / totalSlides) * 100}%`;
-        }
-
-        // 更新序号指示器
-        if (currentIndexEl) {
-          currentIndexEl.textContent = index + 1;
-        }
-
-        currentIndex = index;
-      }
-
-      function nextSlide() {
-        const nextIndex = currentIndex === totalSlides - 1 ? 0 : currentIndex + 1;
-        updateCarousel(nextIndex);
-      }
-
-      function startAutoPlay() {
-        if (totalSlides <= 1) return;
-        autoPlayTimer = setInterval(nextSlide, {{ section.settings.autoplay_speed | default: 5000 }});
-      }
-
-      function stopAutoPlay() {
-        if (autoPlayTimer) {
-          clearInterval(autoPlayTimer);
-        }
-      }
-
-      // 缩略图点击/悬停事件
-      thumbnails.forEach((thumb, index) => {
-        thumb.addEventListener('mouseenter', () => {
-          stopAutoPlay();
-          updateCarousel(index);
-        });
-
-        thumb.addEventListener('mouseleave', () => {
-          {% if section.settings.enable_autoplay %}
-            startAutoPlay();
-          {% endif %}
-        });
+    function updateCarousel(index) {
+      // 更新左侧图片
+      leftImages.forEach((img, i) => {
+        img.classList.toggle('active', i === index);
       });
 
-      // 启动自动轮播
-      {% if section.settings.enable_autoplay %}
-        startAutoPlay();
-      {% endif %}
+      // 更新右侧图片
+      rightImages.forEach((img, i) => {
+        img.classList.toggle('active', i === index);
+      });
 
-      // 页面可见性变化时控制自动播放
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-          stopAutoPlay();
-        } else {
-          {% if section.settings.enable_autoplay %}
-            startAutoPlay();
-          {% endif %}
-        }
+      // 更新缩略图
+      thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+      });
+
+      currentIndex = index;
+    }
+
+    function nextSlide() {
+      const nextIndex = currentIndex === totalSlides - 1 ? 0 : currentIndex + 1;
+      updateCarousel(nextIndex);
+    }
+
+    function startAutoPlay() {
+      if (totalSlides <= 1) return;
+      autoPlayTimer = setInterval(nextSlide, {{ section.settings.autoplay_speed | default: 5000 }});
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+      }
+    }
+
+    // 缩略图点击/悬停事件
+    thumbnails.forEach((thumb, index) => {
+      thumb.addEventListener('mouseenter', () => {
+        stopAutoPlay();
+        updateCarousel(index);
+      });
+
+      thumb.addEventListener('mouseleave', () => {
+        {% if section.settings.enable_autoplay %}
+          startAutoPlay();
+        {% endif %}
       });
     });
-  </script>
-</div>
+
+    // 启动自动轮播
+    {% if section.settings.enable_autoplay %}
+      startAutoPlay();
+    {% endif %}
+
+    // 页面可见性变化时控制自动播放
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopAutoPlay();
+      } else {
+        {% if section.settings.enable_autoplay %}
+          startAutoPlay();
+        {% endif %}
+      }
+    });
+  });
+</script>
 
 {% schema %}
 {
-  "name": "轮播英雄区块",
+  "name": "双图轮播英雄区块",
   "tag": "section",
   "class": "carousel-hero-section",
   "settings": [
@@ -412,39 +288,35 @@
       "settings": [
         {
           "type": "image_picker",
-          "id": "image",
-          "label": "图片"
+          "id": "left_image",
+          "label": "左侧图片"
         },
         {
-          "type": "richtext",
-          "id": "rich_text",
-          "label": "文本内容",
-          "default": "<h2>标题文字</h2><p>在这里输入详细的描述内容，支持富文本格式，包括<strong>粗体</strong>、<em>斜体</em>、列表等。</p><ul><li>特色亮点一</li><li>特色亮点二</li><li>特色亮点三</li></ul>"
+          "type": "image_picker",
+          "id": "right_image",
+          "label": "右侧图片"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "标题（用于图片alt属性）",
+          "default": "轮播图片"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "轮播英雄区块",
+      "name": "双图轮播英雄区块",
       "blocks": [
         {
-          "type": "slide",
-          "settings": {
-            "rich_text": "<h2>壮丽山川</h2><p><em>探索自然之美</em></p><p>在这片广袤的土地上，山峦起伏，云雾缭绕。每一座山峰都诉说着大自然的鬼斧神工，每一片云彩都承载着天空的诗意。</p><ul><li>海拔3000米以上</li><li>四季景色各异</li><li>摄影爱好者天堂</li></ul>"
-          }
+          "type": "slide"
         },
         {
-          "type": "slide",
-          "settings": {
-            "rich_text": "<h2>宁静湖泊</h2><p><em>心灵的栖息地</em></p><p>湖水如镜，倒映着蓝天白云和远山近树。微风轻拂过湖面，泛起层层涟漪，如同大自然在演奏一首无声的乐曲。</p><ul><li>水质清澈见底</li><li>野生动物栖息地</li><li>划船垂钓胜地</li></ul>"
-          }
+          "type": "slide"
         },
         {
-          "type": "slide",
-          "settings": {
-            "rich_text": "<h2>神秘森林</h2><p><em>生命的绿色奇迹</em></p><p>古老的森林中，参天大树遮天蔽日，阳光透过树叶的缝隙洒下斑驳的光影。这里是生命的摇篮，无数的动植物在这片绿色的海洋中繁衍生息。</p><ul><li>百年古树群落</li><li>丰富生物多样性</li><li>天然氧吧环境</li></ul>"
-          }
+          "type": "slide"
         }
       ]
     }
