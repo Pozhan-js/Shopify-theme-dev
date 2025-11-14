@@ -1,10 +1,11 @@
 {% comment %}
-  Instagram图片展示 - 带鼠标拖拽滑动功能
+  Instagram图片展示 - 鼠标悬停自动滑动功能
   1. 主标题展示
   2. 直接展示配置的图片
-  3. 支持鼠标拖拽滑动
+  3. 支持鼠标悬停自动滑动
   4. 支持自定义锚点ID
   5. PC端左边留白加大
+  6. 显示完整的5张图片
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -104,11 +105,6 @@
   .gallery-carousel-wrapper {
     position: relative;
     overflow: hidden;
-    cursor: grab;
-  }
-
-  .gallery-carousel-wrapper:active {
-    cursor: grabbing;
   }
 
   .gallery-carousel-content {
@@ -122,22 +118,18 @@
   .gallery-carousel-track {
     display: flex;
     gap: 1rem;
-    transition: transform 0.3s ease-out;
+    transition: transform 0.5s ease-out;
     user-select: none;
     will-change: transform;
   }
 
-  .gallery-carousel-track.dragging {
-    transition: none;
-  }
-
-  /* Cards containers */
+  /* Cards containers - 调整宽度以显示完整的5张图片 */
   .gallery-card-container {
     flex-shrink: 0;
   }
 
   .gallery-small-card {
-    width: 15rem;
+    width: calc((100% - 4rem) / 5); /* 5张图片，4个间隙 */
   }
 
   .gallery-card-inner {
@@ -176,10 +168,10 @@
     font-size: 0.875rem;
   }
 
-  /* PC端优化 - 只在PC端左边留白加大 */
+  /* PC端优化 */
   @media (min-width: 1201px) {
     .gallery-container {
-      margin: 0 3rem 2rem 10rem; /* PC端：左边距10rem，右边距3rem */
+      margin: 0 3rem 2rem 10rem;
       padding: 0;
     }
 
@@ -188,7 +180,7 @@
     }
 
     .gallery-small-card {
-      width: 16rem;
+      width: calc((100% - 6rem) / 5); /* 5张图片，4个1.5rem的间隙 */
     }
 
     .gallery-small-card .gallery-image-container {
@@ -196,13 +188,18 @@
     }
   }
 
-  /* 移动端保持原样 */
-  @media (max-width: 1200px) {
+  /* 平板端 */
+  @media (max-width: 1200px) and (min-width: 769px) {
     .gallery-container {
       padding: 0 1.5rem;
     }
+
+    .gallery-small-card {
+      width: calc((100% - 3rem) / 4); /* 显示4张 */
+    }
   }
 
+  /* 移动端 */
   @media (max-width: 768px) {
     .gallery-container {
       padding: 0 1rem;
@@ -221,7 +218,7 @@
     }
 
     .gallery-small-card {
-      width: 14rem;
+      width: calc((100% - 2rem) / 3); /* 显示3张 */
     }
 
     .gallery-small-card .gallery-image-container {
@@ -243,7 +240,7 @@
     }
 
     .gallery-small-card {
-      width: 12rem;
+      width: calc((100% - 1rem) / 2); /* 显示2张 */
     }
 
     .gallery-small-card .gallery-image-container {
@@ -260,54 +257,56 @@
       const wrapper = track.closest('.gallery-carousel-wrapper');
       if (!wrapper) return;
 
+      let currentTranslate = 0;
+      let animationID = null;
+      let isHovering = false;
+      let scrollSpeed = 1; // 滚动速度（像素/帧）
+
+      // 自动滚动函数
+      function autoScroll() {
+        if (!isHovering) {
+          cancelAnimationFrame(animationID);
+          return;
+        }
+
+        currentTranslate -= scrollSpeed;
+
+        // 计算最大滚动距离
+        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
+        
+        // 如果滚动到末尾，重置到开始
+        if (currentTranslate <= maxScroll) {
+          currentTranslate = 0;
+        }
+
+        track.style.transform = `translateX(${currentTranslate}px)`;
+        animationID = requestAnimationFrame(autoScroll);
+      }
+
+      // 鼠标进入时开始自动滚动
+      wrapper.addEventListener('mouseenter', () => {
+        isHovering = true;
+        autoScroll();
+      });
+
+      // 鼠标离开时停止滚动
+      wrapper.addEventListener('mouseleave', () => {
+        isHovering = false;
+        if (animationID) {
+          cancelAnimationFrame(animationID);
+        }
+      });
+
+      // 触摸事件支持（移动端）- 保持拖拽功能
       let isDragging = false;
       let startX = 0;
       let scrollLeft = 0;
-      let currentTranslate = 0;
-      let prevTranslate = 0;
-      let animationID = 0;
 
-      // 鼠标按下
-      wrapper.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.pageX - wrapper.offsetLeft;
-        scrollLeft = currentTranslate;
-        track.classList.add('dragging');
-        cancelAnimationFrame(animationID);
-      });
-
-      // 鼠标移动
-      wrapper.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        
-        const x = e.pageX - wrapper.offsetLeft;
-        const walk = (x - startX) * 1.5;
-        currentTranslate = scrollLeft + walk;
-
-        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
-        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
-
-        track.style.transform = `translateX(${currentTranslate}px)`;
-      });
-
-      // 鼠标松开
-      const endDrag = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        track.classList.remove('dragging');
-        prevTranslate = currentTranslate;
-      };
-
-      wrapper.addEventListener('mouseup', endDrag);
-      wrapper.addEventListener('mouseleave', endDrag);
-
-      // 触摸事件支持（移动端）
       wrapper.addEventListener('touchstart', (e) => {
         isDragging = true;
         startX = e.touches[0].clientX;
         scrollLeft = currentTranslate;
-        track.classList.add('dragging');
+        isHovering = false; // 停止自动滚动
       });
 
       wrapper.addEventListener('touchmove', (e) => {
@@ -325,8 +324,6 @@
 
       wrapper.addEventListener('touchend', () => {
         isDragging = false;
-        track.classList.remove('dragging');
-        prevTranslate = currentTranslate;
       });
 
       // 防止图片拖拽
@@ -380,6 +377,12 @@
         "anchor_id": "gallery-section"
       },
       "blocks": [
+        {
+          "type": "image_item"
+        },
+        {
+          "type": "image_item"
+        },
         {
           "type": "image_item"
         },
