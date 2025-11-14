@@ -4,6 +4,7 @@
   2. 直接展示配置的图片
   3. 支持鼠标拖拽滑动
   4. 支持自定义锚点ID
+  5. PC端左边留白加大
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -76,7 +77,7 @@
     padding: 1rem 0;
   }
 
-  /* Container principal - 扩大最大宽度到1400px */
+  /* Container principal - 移动端保持原样 */
   .gallery-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -130,13 +131,13 @@
     transition: none;
   }
 
-  /* Cards containers - 缩小卡片尺寸 */
+  /* Cards containers */
   .gallery-card-container {
     flex-shrink: 0;
   }
 
   .gallery-small-card {
-    width: 15rem; /* 从18rem缩小到15rem */
+    width: 15rem;
   }
 
   .gallery-card-inner {
@@ -144,7 +145,7 @@
     flex-direction: column;
   }
 
-  /* Image containers - 缩小图片高度 */
+  /* Image containers */
   .gallery-image-container {
     position: relative;
     background-color: var(--gallery-white);
@@ -152,7 +153,7 @@
   }
 
   .gallery-small-card .gallery-image-container {
-    height: 17rem; /* 从20rem缩小到17rem */
+    height: 17rem;
     border-radius: 8px;
   }
 
@@ -175,10 +176,11 @@
     font-size: 0.875rem;
   }
 
-  /* PC端优化 */
+  /* PC端优化 - 只在PC端左边留白加大 */
   @media (min-width: 1201px) {
     .gallery-container {
-      padding: 0 3rem; /* 增加左右padding */
+      margin: 0 3rem 2rem 10rem; /* PC端：左边距10rem，右边距3rem */
+      padding: 0;
     }
 
     .gallery-carousel-track {
@@ -186,7 +188,7 @@
     }
 
     .gallery-small-card {
-      width: 16rem; /* PC端稍大一些 */
+      width: 16rem;
     }
 
     .gallery-small-card .gallery-image-container {
@@ -194,7 +196,7 @@
     }
   }
 
-  /* Responsive */
+  /* 移动端保持原样 */
   @media (max-width: 1200px) {
     .gallery-container {
       padding: 0 1.5rem;
@@ -280,10 +282,9 @@
         e.preventDefault();
         
         const x = e.pageX - wrapper.offsetLeft;
-        const walk = (x - startX) * 1.5; // 调整滑动灵敏度
+        const walk = (x - startX) * 1.5;
         currentTranslate = scrollLeft + walk;
 
-        // 限制滑动范围
         const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
         currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
 
