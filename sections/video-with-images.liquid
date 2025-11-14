@@ -1,6 +1,9 @@
 {% comment %}
-  Instagram图片展示 - 鼠标移动跟随滑动
-  鼠标在图片区域左右移动时，图片跟随移动
+  Instagram图片展示 - 带鼠标拖拽滑动功能
+  1. 主标题展示
+  2. 直接展示配置的图片
+  3. 支持鼠标拖拽滑动
+  4. 支持自定义锚点ID
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -65,6 +68,7 @@
     --gallery-white: #ffffff;
   }
 
+  /* Section principale */
   .gallery-showcase-section {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: transparent;
@@ -72,6 +76,7 @@
     padding: 1rem 0;
   }
 
+  /* Container principal - 扩大最大宽度到1400px */
   .gallery-container {
     max-width: 1400px;
     margin: 0 auto;
@@ -79,6 +84,7 @@
     margin-bottom: 2rem;
   }
 
+  /* 主标题区域 */
   .gallery-title-wrapper {
     text-align: center;
     margin-bottom: 2rem;
@@ -93,10 +99,15 @@
     letter-spacing: -0.025em;
   }
 
+  /* Carousel wrapper */
   .gallery-carousel-wrapper {
     position: relative;
     overflow: hidden;
-    cursor: default;
+    cursor: grab;
+  }
+
+  .gallery-carousel-wrapper:active {
+    cursor: grabbing;
   }
 
   .gallery-carousel-content {
@@ -110,17 +121,22 @@
   .gallery-carousel-track {
     display: flex;
     gap: 1rem;
-    transition: transform 0.1s ease-out;
+    transition: transform 0.3s ease-out;
     user-select: none;
     will-change: transform;
   }
 
+  .gallery-carousel-track.dragging {
+    transition: none;
+  }
+
+  /* Cards containers - 缩小卡片尺寸 */
   .gallery-card-container {
     flex-shrink: 0;
   }
 
   .gallery-small-card {
-    width: calc((100% - 4rem) / 5);
+    width: 15rem; /* 从18rem缩小到15rem */
   }
 
   .gallery-card-inner {
@@ -128,6 +144,7 @@
     flex-direction: column;
   }
 
+  /* Image containers - 缩小图片高度 */
   .gallery-image-container {
     position: relative;
     background-color: var(--gallery-white);
@@ -135,7 +152,7 @@
   }
 
   .gallery-small-card .gallery-image-container {
-    height: 17rem;
+    height: 17rem; /* 从20rem缩小到17rem */
     border-radius: 8px;
   }
 
@@ -158,10 +175,10 @@
     font-size: 0.875rem;
   }
 
+  /* PC端优化 */
   @media (min-width: 1201px) {
     .gallery-container {
-      margin: 0 3rem 2rem 10rem;
-      padding: 0;
+      padding: 0 3rem; /* 增加左右padding */
     }
 
     .gallery-carousel-track {
@@ -169,7 +186,7 @@
     }
 
     .gallery-small-card {
-      width: calc((100% - 6rem) / 5);
+      width: 16rem; /* PC端稍大一些 */
     }
 
     .gallery-small-card .gallery-image-container {
@@ -177,13 +194,10 @@
     }
   }
 
-  @media (max-width: 1200px) and (min-width: 769px) {
+  /* Responsive */
+  @media (max-width: 1200px) {
     .gallery-container {
       padding: 0 1.5rem;
-    }
-
-    .gallery-small-card {
-      width: calc((100% - 3rem) / 4);
     }
   }
 
@@ -205,7 +219,7 @@
     }
 
     .gallery-small-card {
-      width: calc((100% - 2rem) / 3);
+      width: 14rem;
     }
 
     .gallery-small-card .gallery-image-container {
@@ -227,7 +241,7 @@
     }
 
     .gallery-small-card {
-      width: calc((100% - 1rem) / 2);
+      width: 12rem;
     }
 
     .gallery-small-card .gallery-image-container {
@@ -244,57 +258,55 @@
       const wrapper = track.closest('.gallery-carousel-wrapper');
       if (!wrapper) return;
 
-      let lastMouseX = null;
-      let currentTranslate = 0;
-
-      // 鼠标移动事件 - 根据鼠标移动方向和距离滑动图片
-      wrapper.addEventListener('mousemove', (e) => {
-        const currentMouseX = e.clientX;
-        
-        // 如果是第一次移动，记录初始位置
-        if (lastMouseX === null) {
-          lastMouseX = currentMouseX;
-          return;
-        }
-
-        // 计算鼠标移动的距离
-        const deltaX = currentMouseX - lastMouseX;
-        
-        // 更新图片位置（鼠标向右移动，图片向右滑；鼠标向左移动，图片向左滑）
-        currentTranslate += deltaX * 1.5; // 1.5 是灵敏度系数，可以调整
-        
-        // 计算最大可滚动距离
-        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
-        
-        // 限制滚动范围
-        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
-        
-        // 应用变换
-        track.style.transform = `translateX(${currentTranslate}px)`;
-        
-        // 更新上一次的鼠标位置
-        lastMouseX = currentMouseX;
-      });
-
-      // 鼠标离开时重置记录
-      wrapper.addEventListener('mouseleave', () => {
-        lastMouseX = null;
-      });
-
-      // 鼠标进入时重置记录
-      wrapper.addEventListener('mouseenter', () => {
-        lastMouseX = null;
-      });
-
-      // 触摸事件支持（移动端）
       let isDragging = false;
       let startX = 0;
       let scrollLeft = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+      let animationID = 0;
 
+      // 鼠标按下
+      wrapper.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - wrapper.offsetLeft;
+        scrollLeft = currentTranslate;
+        track.classList.add('dragging');
+        cancelAnimationFrame(animationID);
+      });
+
+      // 鼠标移动
+      wrapper.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const x = e.pageX - wrapper.offsetLeft;
+        const walk = (x - startX) * 1.5; // 调整滑动灵敏度
+        currentTranslate = scrollLeft + walk;
+
+        // 限制滑动范围
+        const maxScroll = -(track.scrollWidth - wrapper.offsetWidth);
+        currentTranslate = Math.max(maxScroll, Math.min(0, currentTranslate));
+
+        track.style.transform = `translateX(${currentTranslate}px)`;
+      });
+
+      // 鼠标松开
+      const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        track.classList.remove('dragging');
+        prevTranslate = currentTranslate;
+      };
+
+      wrapper.addEventListener('mouseup', endDrag);
+      wrapper.addEventListener('mouseleave', endDrag);
+
+      // 触摸事件支持（移动端）
       wrapper.addEventListener('touchstart', (e) => {
         isDragging = true;
         startX = e.touches[0].clientX;
         scrollLeft = currentTranslate;
+        track.classList.add('dragging');
       });
 
       wrapper.addEventListener('touchmove', (e) => {
@@ -312,6 +324,8 @@
 
       wrapper.addEventListener('touchend', () => {
         isDragging = false;
+        track.classList.remove('dragging');
+        prevTranslate = currentTranslate;
       });
 
       // 防止图片拖拽
@@ -339,7 +353,7 @@
       "type": "text",
       "id": "anchor_id",
       "label": "锚点ID",
-      "info": "用于页面内跳转的唯一标识符",
+      "info": "用于页面内跳转的唯一标识符，只能包含字母、数字、下划线和连字符。例如：gallery-section",
       "default": "gallery-section",
       "placeholder": "gallery-section"
     }
@@ -365,12 +379,6 @@
         "anchor_id": "gallery-section"
       },
       "blocks": [
-        {
-          "type": "image_item"
-        },
-        {
-          "type": "image_item"
-        },
         {
           "type": "image_item"
         },
