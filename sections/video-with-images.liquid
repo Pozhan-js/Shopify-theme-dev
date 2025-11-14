@@ -4,8 +4,8 @@
   2. 直接展示配置的图片
   3. 支持鼠标拖拽滑动和触控板滑动
   4. 支持自定义锚点ID
-  5. PC端左边留白加大
-  6. 完整显示5张图片
+  5. PC端左边留白加大，右边50px
+  6. 完整显示5张图片，自适应大小
 {% endcomment %}
 
 <div class="gallery-showcase-section" 
@@ -181,31 +181,31 @@
     font-size: 0.875rem;
   }
 
-  /* PC端优化 - 精确控制显示5张完整图片 */
+  /* PC端优化 - 左边10rem，右边50px，图片自适应显示5张 */
   @media (min-width: 1201px) {
     .gallery-container {
-      margin-left: 10rem; /* 左边距 */
-      margin-right: 3rem; /* 右边距 */
+      margin-left: 10rem; /* 左边距 10rem */
+      margin-right: 50px; /* 右边距 50px */
       margin-bottom: 2rem;
       padding: 0;
-      max-width: none; /* 移除最大宽度限制 */
-    }
-
-    .gallery-carousel-wrapper {
-      /* 精确计算：5张图片 × 13.5rem + 4个间距 × 1.2rem = 72.3rem */
-      max-width: 72.3rem;
+      max-width: none;
     }
 
     .gallery-carousel-track {
       gap: 1.2rem;
     }
 
+    /* 使用 calc 计算图片宽度：(100vw - 左边距 - 右边距 - 4个间距) / 5 */
     .gallery-small-card {
-      width: 13.5rem;
+      width: calc((100vw - 10rem - 50px - 4.8rem) / 5);
+      min-width: 12rem; /* 设置最小宽度防止过小 */
+      max-width: 16rem; /* 设置最大宽度防止过大 */
     }
 
     .gallery-small-card .gallery-image-container {
-      height: 15.5rem;
+      height: calc((100vw - 10rem - 50px - 4.8rem) / 5 * 1.15); /* 保持宽高比 */
+      min-height: 13.8rem;
+      max-height: 18.4rem;
     }
   }
 
