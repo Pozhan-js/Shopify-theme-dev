@@ -108,6 +108,153 @@
   .header__icons svg {
     stroke-width: 2px;
   }
+
+  .header-cart-container {
+    position: relative;
+  }
+
+  .cart-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    max-height: 400px;
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .cart-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .cart-dropdown-content {
+    padding: 1rem;
+  }
+
+  .cart-items {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .cart-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .cart-item:last-child {
+    border-bottom: none;
+  }
+
+  .cart-item-image {
+    flex-shrink: 0;
+  }
+
+  .cart-item-image img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .cart-item-details {
+    flex: 1;
+  }
+
+  .cart-item-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+  }
+
+  .cart-item-price {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .cart-item-quantity {
+    font-size: 0.75rem;
+    color: #888;
+    margin: 0;
+  }
+
+  .cart-summary {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 1rem;
+    margin-top: 1rem;
+  }
+
+  .cart-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .cart-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+
+  .cart-empty p {
+    margin-bottom: 1rem;
+    color: #666;
+  }
+
+  .button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: center;
+    transition: background-color 0.3s ease;
+  }
+
+  .button--primary {
+    background-color: #000;
+    color: white;
+    border: none;
+  }
+
+  .button--primary:hover {
+    background-color: #333;
+  }
+
+  .button--secondary {
+    background-color: transparent;
+    color: #000;
+    border: 1px solid #000;
+  }
+
+  .button--secondary:hover {
+    background-color: #f5f5f5;
+  }
+
+  .view-cart-btn, .checkout-btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  @media screen and (max-width: 480px) {
+    .cart-dropdown {
+      width: 280px;
+      right: -1rem;
+    }
+  }
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
@@ -296,7 +443,8 @@
         {%- endcase -%}
       {%- endfor -%}
 
-      <a href="{{ routes.cart_url }}" class="header__icon header__icon--cart link focus-inset" id="cart-icon-bubble">
+      <div class="header-cart-container">
+        <button class="header__icon header__icon--cart link focus-inset" id="cart-icon-bubble" onclick="toggleCartDropdown(event)">
           {% if cart == empty %}
             <span class="svg-wrapper">
               <svg viewBox="0 0 100 100" width="20" height="20" aria-hidden="true" focusable="false" class="icon">
@@ -310,16 +458,51 @@
               </svg>
             </span>
           {% endif %}
-        <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-        {%- if cart != empty -%}
-          <div class="cart-count-bubble">
-            {%- if cart.item_count < 100 -%}
-              <span aria-hidden="true">{{ cart.item_count }}</span>
+          <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
+          {%- if cart != empty -%}
+            <div class="cart-count-bubble">
+              {%- if cart.item_count < 100 -%}
+                <span aria-hidden="true">{{ cart.item_count }}</span>
+              {%- endif -%}
+              <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
+            </div>
+          {%- endif -%}
+        </button>
+        
+        <div class="cart-dropdown" id="cart-dropdown">
+          <div class="cart-dropdown-content">
+            {%- if cart == empty -%}
+              <div class="cart-empty">
+                <p>{{ 'sections.cart.empty' | t }}</p>
+                <a href="{{ routes.all_products_collection_url }}" class="button button--primary">{{ 'sections.cart.continue_shopping' | t }}</a>
+              </div>
+            {%- else -%}
+              <div class="cart-items">
+                {%- for item in cart.items -%}
+                  <div class="cart-item">
+                    <div class="cart-item-image">
+                      <img src="{{ item.image | img_url: '100x100' }}" alt="{{ item.title }}" loading="lazy">
+                    </div>
+                    <div class="cart-item-details">
+                      <h3 class="cart-item-title">{{ item.title }}</h3>
+                      <p class="cart-item-price">{{ item.price | money }}</p>
+                      <p class="cart-item-quantity">Qty: {{ item.quantity }}</p>
+                    </div>
+                  </div>
+                {%- endfor -%}
+              </div>
+              <div class="cart-summary">
+                <div class="cart-total">
+                  <span>{{ 'sections.cart.total' | t }}:</span>
+                  <span>{{ cart.total_price | money }}</span>
+                </div>
+                <a href="{{ routes.cart_url }}" class="button button--primary view-cart-btn">{{ 'sections.cart.view_cart' | t }}</a>
+                <a href="{{ routes.checkout_url }}" class="button button--secondary checkout-btn">{{ 'sections.cart.checkout' | t }}</a>
+              </div>
             {%- endif -%}
-            <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
           </div>
-        {%- endif -%}
-      </a>
+        </div>
+      </div>
     </div>
   </header>
 </{{ header_tag }}>
@@ -337,6 +520,53 @@
       customMenuIcon.addEventListener('click', function() {
         menuDrawer.setAttribute('open', '');
         menuDrawer.querySelector('summary').focus();
+      });
+    }
+  });
+
+  function toggleCartDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const dropdown = document.getElementById('cart-dropdown');
+    const isActive = dropdown.classList.contains('active');
+    
+    // 关闭所有其他下拉菜单
+    document.querySelectorAll('.cart-dropdown.active').forEach(el => {
+      if (el !== dropdown) {
+        el.classList.remove('active');
+      }
+    });
+    
+    // 切换当前下拉菜单
+    dropdown.classList.toggle('active', !isActive);
+    
+    // 点击外部关闭下拉菜单
+    if (!isActive) {
+      setTimeout(() => {
+        document.addEventListener('click', closeCartDropdown);
+      }, 10);
+    } else {
+      document.removeEventListener('click', closeCartDropdown);
+    }
+  }
+
+  function closeCartDropdown(event) {
+    const dropdown = document.getElementById('cart-dropdown');
+    const cartButton = document.getElementById('cart-icon-bubble');
+    
+    if (!dropdown.contains(event.target) && !cartButton.contains(event.target)) {
+      dropdown.classList.remove('active');
+      document.removeEventListener('click', closeCartDropdown);
+    }
+  }
+
+  // 防止下拉菜单内部点击事件冒泡
+  document.addEventListener('DOMContentLoaded', function() {
+    const cartDropdown = document.getElementById('cart-dropdown');
+    if (cartDropdown) {
+      cartDropdown.addEventListener('click', function(event) {
+        event.stopPropagation();
       });
     }
   });
