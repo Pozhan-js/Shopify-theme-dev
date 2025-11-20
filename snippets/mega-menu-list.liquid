@@ -106,49 +106,21 @@
             style="column-count: {{ column_span }};"
           {% endif %}
         >
-        {% for childLink in link.links %}
-  {% assign break_after_modulo = forloop.index | modulo: links_before_wrap %}
-  {% liquid
-    # 获取菜单项图片 - 支持多种来源
-    assign menu_image = null
-    
-    # 1. 优先使用 metafield 自定义图片（如果将来添加）
-    if childLink.object.metafields.custom.menu_image
-      assign menu_image = childLink.object.metafields.custom.menu_image
-    # 2. 如果链接到产品，使用产品特色图片
-    elsif childLink.type == 'product_link' and childLink.object.featured_image
-      assign menu_image = childLink.object.featured_image
-    # 3. 如果链接到专辑，使用专辑特色图片
-    elsif childLink.type == 'collection_link' and childLink.object.featured_image
-      assign menu_image = childLink.object.featured_image
-    endif
-  %}
-  <li
-    {% if break_after_modulo == 0 and should_break_columns %}
-      style="break-after: column;"
-    {% endif %}
-    class="{% if menu_image %}mega-menu__item--has-image{% endif %}"
-  >
-    <a
-      href="{{ childLink.url }}"
-      class="mega-menu__link{% if menu_image %} mega-menu__link--with-image{% endif %}"
-    >
-      {% if menu_image %}
-        <span class="mega-menu__link-image-wrapper">
-          {{- menu_image | image_url: width: 300 | image_tag: 
-            loading: 'lazy',
-            widths: '80, 120, 160, 200, 300',
-            sizes: '80px',
-            class: 'mega-menu__link-img',
-            alt: childLink.title
-          -}}
-        </span>
-      {% endif %}
-      <span class="mega-menu__link-title">{{- childLink.title -}}</span>
-    </a>
-  </li>
-{% endfor %}
-
+          {% for childLink in link.links %}
+            {% assign break_after_modulo = forloop.index | modulo: links_before_wrap %}
+            <li
+              {% if break_after_modulo == 0 and should_break_columns %}
+                style="break-after: column;"
+              {% endif %}
+            >
+              <a
+                href="{{ childLink.url }}"
+                class="mega-menu__link"
+              >
+                <span class="mega-menu__link-title">{{- childLink.title -}}</span>
+              </a>
+            </li>
+          {% endfor %}
         </ul>
       {% endif %}
     </div>
