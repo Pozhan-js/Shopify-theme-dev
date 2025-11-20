@@ -1,9 +1,24 @@
 {% comment %}
   文件名: mega-menu.liquid
   位置: blocks/mega-menu.liquid
+  根据菜单二级项自动匹配图片
 {% endcomment %}
 
 {{ 'component-mega-menu.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%} 构建图片映射表 {%- endcomment -%}
+{%- assign image_map = '' -%}
+{%- if block.settings.images_data != blank -%}
+  {%- assign image_entries = block.settings.images_data | split: '||' -%}
+  {%- assign image_map = '' | split: '' -%}
+  {%- for entry in image_entries -%}
+    {%- assign parts = entry | split: '::' -%}
+    {%- if parts.size == 2 -%}
+      {%- assign map_item = parts[0] | append: '::' | append: parts[1] -%}
+      {%- assign image_map = image_map | push: map_item -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 
 <nav class="mega-menu" role="navigation">
   <ul class="mega-menu__list">
@@ -22,13 +37,30 @@
           <div class="mega-menu__dropdown">
             <ul class="mega-menu__dropdown-list">
               {%- for child_link in link.links -%}
+                {%- assign menu_handle = child_link.title | handleize -%}
+                {%- assign matched_image = blank -%}
+                
+                {%- comment -%} 匹配图片 {%- endcomment -%}
+                {%- for i in (1..10) -%}
+                  {%- assign title_key = 'item' | append: i | append: '_title' -%}
+                  {%- assign image_key = 'item' | append: i | append: '_image' -%}
+                  {%- assign config_title = block.settings[title_key] -%}
+                  {%- assign config_image = block.settings[image_key] -%}
+                  
+                  {%- if config_title != blank and config_image != blank -%}
+                    {%- if child_link.title == config_title -%}
+                      {%- assign matched_image = config_image -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                
                 <li class="mega-menu__dropdown-item">
                   <a href="{{ child_link.url }}" class="mega-menu__dropdown-link">
-                    {%- comment -%} 从菜单项的 metafield 获取图片 {%- endcomment -%}
-                    {%- if child_link.object.metafields.custom.menu_image != blank -%}
+                    {%- if matched_image != blank -%}
                       <div class="mega-menu__image-wrapper">
                         <img 
-                          src="{{ child_link.object.metafields.custom.menu_image | image_url: width: 200 }}"
+                          src="{{ matched_image | image_url: width: 200 }}"
                           alt="{{ child_link.title }}"
                           width="200"
                           height="auto"
@@ -55,8 +87,118 @@
     {
       "type": "link_list",
       "id": "menu",
-      "label": "菜单",
-      "default": "main-menu"
+      "label": "选择菜单",
+      "default": "main-menu",
+      "info": "选择菜单后，在下方为每个二级菜单项配置图片"
+    },
+    {
+      "type": "header",
+      "content": "📸 二级菜单图片配置"
+    },
+    {
+      "type": "paragraph",
+      "content": "为需要显示图片的二级菜单项配置。标题必须与菜单中的二级项标题完全一致。"
+    },
+    {
+      "type": "text",
+      "id": "item1_title",
+      "label": "菜单项 1 - 标题",
+      "info": "输入二级菜单的确切标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item1_image",
+      "label": "菜单项 1 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item2_title",
+      "label": "菜单项 2 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item2_image",
+      "label": "菜单项 2 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item3_title",
+      "label": "菜单项 3 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item3_image",
+      "label": "菜单项 3 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item4_title",
+      "label": "菜单项 4 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item4_image",
+      "label": "菜单项 4 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item5_title",
+      "label": "菜单项 5 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item5_image",
+      "label": "菜单项 5 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item6_title",
+      "label": "菜单项 6 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item6_image",
+      "label": "菜单项 6 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item7_title",
+      "label": "菜单项 7 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item7_image",
+      "label": "菜单项 7 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item8_title",
+      "label": "菜单项 8 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item8_image",
+      "label": "菜单项 8 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item9_title",
+      "label": "菜单项 9 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item9_image",
+      "label": "菜单项 9 - 图片"
+    },
+    {
+      "type": "text",
+      "id": "item10_title",
+      "label": "菜单项 10 - 标题"
+    },
+    {
+      "type": "image_picker",
+      "id": "item10_image",
+      "label": "菜单项 10 - 图片"
     }
   ]
 }
