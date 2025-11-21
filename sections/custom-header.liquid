@@ -1,6 +1,6 @@
 <!-- sections/custom-header.liquid -->
 {% comment %}
-  自定义导航栏 - 固定在顶部，左右Logo + 中间菜单
+  自定义导航栏 - 固定在顶部,左右Logo + 中间菜单
 {% endcomment %}
 
 <style>
@@ -108,43 +108,33 @@
 
     .custom-header__container {
       flex-wrap: wrap;
-      /* 添加固定的顶部行高度 */
-      min-height: 50px;
-    }
-
-    /* 创建一个包装器来固定顶部行的布局 */
-    .custom-header__top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      position: relative;
     }
 
     .custom-header__logo--left {
       max-width: {{ section.settings.logo_left_width_mobile }}px;
+      order: 1;
     }
 
     .custom-header__logo--right {
       max-width: {{ section.settings.logo_right_width_mobile }}px;
+      order: 3;
     }
 
     .custom-header__menu-toggle {
       display: flex;
-      /* 改为相对定位，保持在顶部行中央 */
+      order: 2;
       position: absolute;
       left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
+      transform: translateX(-50%);
+      top: 10px;
     }
 
     .custom-header__nav {
-      /* 改为相对定位，作为独立的一行 */
       position: relative;
       left: auto;
       transform: none;
       flex-basis: 100%;
-      order: 3;
+      order: 4;
       flex-direction: column;
       gap: 15px;
       padding: 0;
@@ -190,41 +180,25 @@
 
 <header class="custom-header">
   <div class="custom-header__container">
-    <!-- 移动端顶部行包装器 -->
-    <div class="custom-header__top-row">
-      <!-- 左侧Logo -->
-      <div class="custom-header__logo custom-header__logo--left">
-        {% if section.settings.logo_left != blank %}
-          <a href="/">
-            {{ section.settings.logo_left | image_url: width: 600 | image_tag: alt: shop.name }}
-          </a>
-        {% else %}
-          <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
-            {{ shop.name }}
-          </a>
-        {% endif %}
-      </div>
-
-      <!-- 移动端菜单切换按钮 -->
-      <button class="custom-header__menu-toggle" aria-label="切换菜单" onclick="toggleMobileMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      <!-- 右侧Logo -->
-      <div class="custom-header__logo custom-header__logo--right">
-        {% if section.settings.logo_right != blank %}
-          <a href="/">
-            {{ section.settings.logo_right | image_url: width: 600 | image_tag: alt: shop.name }}
-          </a>
-        {% else %}
-          <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
-            {{ shop.name }}
-          </a>
-        {% endif %}
-      </div>
+    <!-- 左侧Logo -->
+    <div class="custom-header__logo custom-header__logo--left">
+      {% if section.settings.logo_left != blank %}
+        <a href="/">
+          {{ section.settings.logo_left | image_url: width: 600 | image_tag: alt: shop.name }}
+        </a>
+      {% else %}
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
+          {{ shop.name }}
+        </a>
+      {% endif %}
     </div>
+
+    <!-- 移动端菜单切换按钮 -->
+    <button class="custom-header__menu-toggle" aria-label="切换菜单" onclick="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
     <!-- 中间菜单 -->
     <nav class="custom-header__nav" id="customHeaderNav">
@@ -234,6 +208,19 @@
         </a>
       {% endfor %}
     </nav>
+
+    <!-- 右侧Logo -->
+    <div class="custom-header__logo custom-header__logo--right">
+      {% if section.settings.logo_right != blank %}
+        <a href="/">
+          {{ section.settings.logo_right | image_url: width: 600 | image_tag: alt: shop.name }}
+        </a>
+      {% else %}
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
+          {{ shop.name }}
+        </a>
+      {% endif %}
+    </div>
   </div>
 </header>
 
