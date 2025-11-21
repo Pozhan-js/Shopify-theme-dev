@@ -1,0 +1,181 @@
+<!-- sections/custom-header.liquid -->
+{% comment %}
+  自定义导航栏 - 左右Logo + 中间菜单
+{% endcomment %}
+
+<style>
+  .custom-header {
+    background-color: {{ section.settings.header_bg_color }};
+    padding: 15px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .custom-header__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .custom-header__logo {
+    flex: 0 0 auto;
+    max-width: 150px;
+  }
+
+  .custom-header__logo img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .custom-header__nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 0 40px;
+  }
+
+  .custom-header__nav-link {
+    color: {{ section.settings.menu_text_color }};
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .custom-header__nav-link:hover {
+    color: {{ section.settings.menu_hover_color }};
+  }
+
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .custom-header__container {
+      flex-wrap: wrap;
+    }
+
+    .custom-header__logo {
+      max-width: 100px;
+    }
+
+    .custom-header__nav {
+      flex-basis: 100%;
+      order: 3;
+      margin-top: 15px;
+      gap: 20px;
+      padding: 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .custom-header__nav-link {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<header class="custom-header">
+  <div class="custom-header__container">
+    <!-- 左侧Logo -->
+    <div class="custom-header__logo">
+      {% if section.settings.logo_left != blank %}
+        <a href="/">
+          {{ section.settings.logo_left | image_url: width: 300 | image_tag: alt: shop.name }}
+        </a>
+      {% else %}
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 24px; font-weight: bold; text-decoration: none;">
+          {{ shop.name }}
+        </a>
+      {% endif %}
+    </div>
+
+    <!-- 中间菜单 -->
+    <nav class="custom-header__nav">
+      {% for link in linklists[section.settings.menu].links %}
+        <a href="{{ link.url }}" class="custom-header__nav-link">
+          {{ link.title }}
+        </a>
+      {% endfor %}
+    </nav>
+
+    <!-- 右侧Logo -->
+    <div class="custom-header__logo">
+      {% if section.settings.logo_right != blank %}
+        <a href="/">
+          {{ section.settings.logo_right | image_url: width: 300 | image_tag: alt: shop.name }}
+        </a>
+      {% else %}
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 24px; font-weight: bold; text-decoration: none;">
+          {{ shop.name }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "自定义导航栏",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Logo设置"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_left",
+      "label": "左侧Logo"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo_right",
+      "label": "右侧Logo"
+    },
+    {
+      "type": "header",
+      "content": "菜单设置"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "选择菜单",
+      "default": "main-menu",
+      "info": "从Shopify后台的导航菜单中选择"
+    },
+    {
+      "type": "header",
+      "content": "颜色设置"
+    },
+    {
+      "type": "color",
+      "id": "header_bg_color",
+      "label": "导航栏背景色",
+      "default": "#FDD835"
+    },
+    {
+      "type": "color",
+      "id": "menu_text_color",
+      "label": "菜单文字颜色",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "menu_hover_color",
+      "label": "菜单悬停颜色",
+      "default": "#666666"
+    }
+  ],
+  "presets": [
+    {
+      "name": "自定义导航栏"
+    }
+  ]
+}
+{% endschema %}
