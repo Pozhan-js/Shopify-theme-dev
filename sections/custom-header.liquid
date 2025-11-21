@@ -1,6 +1,6 @@
 <!-- sections/custom-header.liquid -->
 {% comment %}
-  自定义导航栏 - 左右Logo + 中间菜单
+  自定义导航栏 - 左右Logo + 中间菜单 (支持logo大小自定义和移动端适配)
 {% endcomment %}
 
 <style>
@@ -20,11 +20,19 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 20px;
   }
 
   .custom-header__logo {
     flex: 0 0 auto;
-    max-width: 150px;
+  }
+
+  .custom-header__logo--left {
+    max-width: {{ section.settings.logo_left_width }}px;
+  }
+
+  .custom-header__logo--right {
+    max-width: {{ section.settings.logo_right_width }}px;
   }
 
   .custom-header__logo img {
@@ -39,7 +47,7 @@
     justify-content: center;
     align-items: center;
     gap: 40px;
-    padding: 0 40px;
+    padding: 0 20px;
   }
 
   .custom-header__nav-link {
@@ -55,24 +63,79 @@
     color: {{ section.settings.menu_hover_color }};
   }
 
-  /* 响应式设计 */
+  /* 移动端菜单切换按钮 */
+  .custom-header__menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .custom-header__menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background-color: {{ section.settings.menu_text_color }};
+    transition: all 0.3s ease;
+  }
+
+  /* 移动端响应式设计 */
   @media (max-width: 768px) {
     .custom-header__container {
       flex-wrap: wrap;
+      position: relative;
     }
 
-    .custom-header__logo {
-      max-width: 100px;
+    .custom-header__logo--left {
+      max-width: {{ section.settings.logo_left_width_mobile }}px;
+    }
+
+    .custom-header__logo--right {
+      max-width: {{ section.settings.logo_right_width_mobile }}px;
+    }
+
+    .custom-header__menu-toggle {
+      display: flex;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .custom-header__nav {
       flex-basis: 100%;
       order: 3;
-      margin-top: 15px;
-      gap: 20px;
-      padding: 0;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      gap: 15px;
+      padding: 15px 0 0 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .custom-header__nav.active {
+      max-height: 500px;
+      opacity: 1;
+      padding: 15px 0;
+    }
+
+    .custom-header__nav-link {
+      font-size: 16px;
+      padding: 8px 0;
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .custom-header__logo--left {
+      max-width: {{ section.settings.logo_left_width_mobile | times: 0.8 }}px;
+    }
+
+    .custom-header__logo--right {
+      max-width: {{ section.settings.logo_right_width_mobile | times: 0.8 }}px;
     }
 
     .custom-header__nav-link {
@@ -84,20 +147,27 @@
 <header class="custom-header">
   <div class="custom-header__container">
     <!-- 左侧Logo -->
-    <div class="custom-header__logo">
+    <div class="custom-header__logo custom-header__logo--left">
       {% if section.settings.logo_left != blank %}
         <a href="/">
-          {{ section.settings.logo_left | image_url: width: 300 | image_tag: alt: shop.name }}
+          {{ section.settings.logo_left | image_url: width: 600 | image_tag: alt: shop.name }}
         </a>
       {% else %}
-        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 24px; font-weight: bold; text-decoration: none;">
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
           {{ shop.name }}
         </a>
       {% endif %}
     </div>
 
+    <!-- 移动端菜单切换按钮 -->
+    <button class="custom-header__menu-toggle" aria-label="切换菜单" onclick="toggleMobileMenu()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
     <!-- 中间菜单 -->
-    <nav class="custom-header__nav">
+    <nav class="custom-header__nav" id="customHeaderNav">
       {% for link in linklists[section.settings.menu].links %}
         <a href="{{ link.url }}" class="custom-header__nav-link">
           {{ link.title }}
@@ -106,19 +176,42 @@
     </nav>
 
     <!-- 右侧Logo -->
-    <div class="custom-header__logo">
+    <div class="custom-header__logo custom-header__logo--right">
       {% if section.settings.logo_right != blank %}
         <a href="/">
-          {{ section.settings.logo_right | image_url: width: 300 | image_tag: alt: shop.name }}
+          {{ section.settings.logo_right | image_url: width: 600 | image_tag: alt: shop.name }}
         </a>
       {% else %}
-        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 24px; font-weight: bold; text-decoration: none;">
+        <a href="/" style="color: {{ section.settings.menu_text_color }}; font-size: 20px; font-weight: bold; text-decoration: none;">
           {{ shop.name }}
         </a>
       {% endif %}
     </div>
   </div>
 </header>
+
+<script>
+  function toggleMobileMenu() {
+    const nav = document.getElementById('customHeaderNav');
+    nav.classList.toggle('active');
+  }
+
+  // 点击菜单项后自动关闭移动端菜单
+  document.querySelectorAll('.custom-header__nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        document.getElementById('customHeaderNav').classList.remove('active');
+      }
+    });
+  });
+
+  // 窗口大小改变时重置菜单状态
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      document.getElementById('customHeaderNav').classList.remove('active');
+    }
+  });
+</script>
 
 {% schema %}
 {
@@ -134,9 +227,49 @@
       "label": "左侧Logo"
     },
     {
+      "type": "range",
+      "id": "logo_left_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "左侧Logo宽度（桌面端）",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "logo_left_width_mobile",
+      "min": 40,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "左侧Logo宽度（移动端）",
+      "default": 100
+    },
+    {
       "type": "image_picker",
       "id": "logo_right",
       "label": "右侧Logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_right_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "label": "右侧Logo宽度（桌面端）",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "logo_right_width_mobile",
+      "min": 40,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "右侧Logo宽度（移动端）",
+      "default": 100
     },
     {
       "type": "header",
