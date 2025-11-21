@@ -1,16 +1,23 @@
 <!-- sections/custom-header.liquid -->
 {% comment %}
-  自定义导航栏 - 左右Logo + 中间菜单 (支持logo大小自定义和移动端适配)
+  自定义导航栏 - 固定在顶部，左右Logo + 中间菜单
 {% endcomment %}
 
 <style>
   .custom-header {
     background-color: {{ section.settings.header_bg_color }};
     padding: 15px 0;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* 为页面内容添加顶部间距，避免被固定导航栏遮挡 */
+  body {
+    padding-top: 80px;
   }
 
   .custom-header__container {
@@ -83,6 +90,14 @@
 
   /* 移动端响应式设计 */
   @media (max-width: 768px) {
+    body {
+      padding-top: 70px;
+    }
+
+    .custom-header {
+      padding: 10px 0;
+    }
+
     .custom-header__container {
       flex-wrap: wrap;
       position: relative;
@@ -108,7 +123,7 @@
       order: 3;
       flex-direction: column;
       gap: 15px;
-      padding: 15px 0 0 0;
+      padding: 0;
       max-height: 0;
       overflow: hidden;
       opacity: 0;
@@ -118,7 +133,7 @@
     .custom-header__nav.active {
       max-height: 500px;
       opacity: 1;
-      padding: 15px 0;
+      padding: 15px 0 5px 0;
     }
 
     .custom-header__nav-link {
@@ -130,6 +145,10 @@
   }
 
   @media (max-width: 480px) {
+    body {
+      padding-top: 60px;
+    }
+
     .custom-header__logo--left {
       max-width: {{ section.settings.logo_left_width_mobile | times: 0.8 }}px;
     }
