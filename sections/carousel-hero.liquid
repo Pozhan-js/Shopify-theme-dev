@@ -8,16 +8,16 @@
       background: transparent;
       border-radius: 1rem;
       overflow: hidden;
-      width:100%;
-      margin: 0 auto;
-      {% comment %} box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); {% endcomment %}
-      margin-bottom:40px;
+      width: 100%;
+      max-width: calc(100% - 40px); /* PC端左右各留20px */
+      margin: 0 auto 40px;
+      padding: 0 20px; /* 添加内边距 */
     }
 
     .carousel-content-{{ section.id }} {
       display: flex;
       height: 600px;
-      gap:1rem;
+      gap: 1rem;
     }
 
     .carousel-image-area-{{ section.id }} {
@@ -25,7 +25,7 @@
       width: 50%;
       overflow: hidden;
       background: #f3f4f6;
-      border-radius:0.5rem;
+      border-radius: 0.5rem;
       z-index: 1;
     }
 
@@ -46,13 +46,12 @@
       transform: scale(1);
     }
 
-    /* 右侧图片区域样式 */
     .carousel-right-image-area-{{ section.id }} {
       position: relative;
       width: 50%;
       overflow: hidden;
       background: #f3f4f6;
-      border-radius:0.5rem;
+      border-radius: 0.5rem;
       z-index: 1;
     }
 
@@ -112,6 +111,11 @@
     }
 
     @media (max-width: 768px) {
+      .carousel-container-{{ section.id }} {
+        max-width: 100%;
+        padding: 0; /* 移动端取消内边距 */
+      }
+
       .carousel-content-{{ section.id }} {
         flex-direction: column;
         height: auto;
@@ -193,17 +197,14 @@
     const totalSlides = leftImages.length;
 
     function updateCarousel(index) {
-      // 更新左侧图片
       leftImages.forEach((img, i) => {
         img.classList.toggle('active', i === index);
       });
 
-      // 更新右侧图片
       rightImages.forEach((img, i) => {
         img.classList.toggle('active', i === index);
       });
 
-      // 更新缩略图
       thumbnails.forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
       });
@@ -227,7 +228,6 @@
       }
     }
 
-    // 缩略图点击/悬停事件
     thumbnails.forEach((thumb, index) => {
       thumb.addEventListener('mouseenter', () => {
         stopAutoPlay();
@@ -241,12 +241,10 @@
       });
     });
 
-    // 启动自动轮播
     {% if section.settings.enable_autoplay %}
       startAutoPlay();
     {% endif %}
 
-    // 页面可见性变化时控制自动播放
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         stopAutoPlay();
