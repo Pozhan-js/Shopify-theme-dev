@@ -4,7 +4,7 @@
 {%- endcomment %}
 
 {%- if section.blocks.size > 0 and request.page_type == 'page' %}
-  <div class="sticky-nav" data-sticky-nav>
+  <div class="sticky-nav" data-sticky-nav style="--custom-top: {{ section.settings.top_distance }}%;">
     {%- for block in section.blocks %}
       {%- assign target_id = block.settings.section_id | strip | downcase | handleize %}
       <a
@@ -22,7 +22,7 @@
     .sticky-nav {
       position: fixed;
       left: 20px;
-      top: 50%;
+      top: var(--custom-top, 50%);
       transform: translateY(-50%);
       z-index: 3;
       display: flex;
@@ -39,7 +39,6 @@
       font-size: 14px;
       transition: all 0.3s ease;
       text-align: center;
-      {% comment %} width: 100px; {% endcomment %}
       opacity: 0;
       transform: translateX(-20px);
       animation: fadeInRight 0.5s ease forwards;
@@ -49,6 +48,11 @@
     .nav-link:hover {
       background-color: #007acc;
       transform: scale(1.05);
+    }
+
+    .nav-link.active {
+      background-color: #007acc;
+      box-shadow: 0 0 10px rgba(0, 122, 204, 0.5);
     }
 
     @keyframes fadeInRight {
@@ -78,7 +82,7 @@
         });
       });
 
-      // 【可选】激活当前可视区域的导航项
+      // 激活当前可视区域的导航项
       function activateNav() {
         const sections = Array.from(document.querySelectorAll('[id^="section-"]'));
         let closest = null;
@@ -86,7 +90,7 @@
 
         sections.forEach((section) => {
           const rect = section.getBoundingClientRect();
-          const distance = Math.abs(rect.top - window.innerHeight * 0.3); // 视口 30%
+          const distance = Math.abs(rect.top - window.innerHeight * 0.3);
           if (distance < closestDistance) {
             closestDistance = distance;
             closest = section;
@@ -95,7 +99,7 @@
 
         navLinks.forEach((link) => {
           link.classList.remove('active');
-          if (link.getAttribute('href') === '#' + closest.id) {
+          if (closest && link.getAttribute('href') === '#' + closest.id) {
             link.classList.add('active');
           }
         });
@@ -112,6 +116,19 @@
   "name": "左侧固定导航栏",
   "tag": "section",
   "class": "sticky-nav-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "top_distance",
+      "min": 10,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "label": "导航栏垂直位置",
+      "default": 50,
+      "info": "调整导航栏在页面上的垂直位置（10% = 靠近顶部，50% = 居中，90% = 靠近底部）"
+    }
+  ],
   "blocks": [
     {
       "type": "link",
