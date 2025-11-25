@@ -247,6 +247,9 @@
     
     isLoading = true;
     
+    // 保存当前滚动位置
+    const currentScrollY = window.scrollY;
+    
     // 添加加载状态
     const allButtons = document.querySelectorAll(`[data-ajax-nav="${SECTION_ID}"] .ajax-nav-button`);
     allButtons.forEach(btn => btn.classList.add('loading'));
@@ -313,13 +316,17 @@
           document.title = newTitle.textContent;
         }
         
-        // 更新 URL
-        history.pushState({ url, mainSelector, contentSelector }, '', url);
+        // 更新 URL，并保存滚动位置
+        history.pushState({ 
+          url, 
+          mainSelector, 
+          contentSelector,
+          scrollY: currentScrollY 
+        }, '', url);
         
-        // 平滑滚动到顶部
-        window.scrollTo({ 
-          top: 0, 
-          behavior: 'smooth' 
+        // 恢复滚动位置（使用 requestAnimationFrame 确保 DOM 更新完成）
+        requestAnimationFrame(() => {
+          window.scrollTo(0, currentScrollY);
         });
         
         // 触发自定义事件
@@ -371,7 +378,16 @@
     if (e.state && e.state.url) {
       const mainSelector = e.state.mainSelector || MAIN_SELECTOR;
       const contentSelector = e.state.contentSelector || CONTENT_WRAPPER_SELECTOR;
-      loadPageContent(e.state.url, mainSelector, contentSelector);
+      const savedScrollY = e.state.scrollY || 0;
+      
+      // 加载内容
+      loadPageContent(e.state.url, mainSelector, contentSelector).then(() => {
+        // 恢复保存的滚动位置
+        requestAnimationFrame(() => {
+          window.scrollTo(0, savedScrollY);
+        });
+      });
+      
       updateButtonStates(e.state.url);
     }
   });
@@ -387,7 +403,8 @@
     history.replaceState({ 
       url: window.location.href,
       mainSelector: MAIN_SELECTOR,
-      contentSelector: CONTENT_WRAPPER_SELECTOR
+      contentSelector: CONTENT_WRAPPER_SELECTOR,
+      scrollY: window.scrollY
     }, '', window.location.href);
   }
 
