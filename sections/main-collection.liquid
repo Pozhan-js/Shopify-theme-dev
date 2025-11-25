@@ -1,5 +1,3 @@
-
-
 {% liquid
   # Onboarding: When no products are available, we show placeholder items
   assign products = ''
@@ -34,6 +32,7 @@
 {% endjavascript %}
 
 {% comment %} We always render this full-width, as the child blocks have width: page/full settings {% endcomment %}
+ {% comment %}       {% paginate collection.products by 24 %} {% endcomment %}
 <div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <results-list
   class="section product-grid-container color-{{ section.settings.color_scheme }}"
@@ -70,7 +69,8 @@
         {% render 'product-grid', section: section, children: children, products: products, paginate: paginate %}
       {% endpaginate %}
     {% else %}
-      {% paginate collection.products by 24 %}
+      {% assign sort_by_param = collection.sort_by | default: 'created-descending' %}
+      {% paginate collection.products by 24, sort_by: sort_by_param %}
         {% capture children %}
           {% for product in collection.products %}
           <li
