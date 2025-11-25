@@ -193,6 +193,7 @@
   const SECTION_ID = "{{ section.id }}";
   const MAIN_SELECTOR = "{{ section.settings.main_content_selector }}";
   const CONTENT_WRAPPER_SELECTOR = "{{ section.settings.content_wrapper_selector }}";
+  const DEFAULT_SORT_BY = "created-descending"; // 默认排序参数
   let isLoading = false;
 
   // 使用 document 级别的事件委托
@@ -202,11 +203,14 @@
     
     e.preventDefault();
     
-    const url = button.dataset.url;
+    let url = button.dataset.url;
     const mainSelector = button.dataset.selector || MAIN_SELECTOR;
     const contentSelector = button.dataset.contentSelector || CONTENT_WRAPPER_SELECTOR;
     
     if (!url) return;
+    
+    // 为 /collections/all 页面添加默认排序参数
+    url = addDefaultSortParam(url);
     
     // 先更新按钮状态
     updateButtonStates(url);
@@ -214,6 +218,25 @@
     // 加载新页面内容
     loadPageContent(url, mainSelector, contentSelector);
   });
+
+  /**
+   * 为 /collections/all 页面添加默认排序参数
+   */
+  function addDefaultSortParam(url) {
+    try {
+      const urlObj = new URL(url, window.location.origin);
+      
+      // 只对 /collections/all 页面添加默认排序
+      if (urlObj.pathname === '/collections/all' && !urlObj.searchParams.has('sort_by')) {
+        urlObj.searchParams.set('sort_by', DEFAULT_SORT_BY);
+        return urlObj.toString();
+      }
+    } catch (error) {
+      console.error('URL parsing error:', error);
+    }
+    
+    return url;
+  }
 
   /**
    * 更新所有导航按钮的激活状态
