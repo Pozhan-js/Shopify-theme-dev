@@ -855,6 +855,19 @@ class FacetStatusComponent extends Component {
 if (!customElements.get('facet-status-component')) {
   customElements.define('facet-status-component', FacetStatusComponent);
 }
+// 自动为 /collections/all 添加默认排序
+document.addEventListener('DOMContentLoaded', () => {
+  const url = new URL(window.location.href);
+  const isCollectionPage = url.pathname.includes('/collections/');
+  const hasSortParam = url.searchParams.has('sort_by');
+  
+  if (isCollectionPage && !hasSortParam) {
+    url.searchParams.set('sort_by', 'created-descending');
+    window.history.replaceState({}, '', url.toString());
+    window.location.reload();
+  }
+});
+
 
 /**
  * Default currency decimals used in most currenies
