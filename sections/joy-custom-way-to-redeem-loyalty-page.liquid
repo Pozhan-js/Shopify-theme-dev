@@ -139,7 +139,7 @@
             font-weight: 400;
         }
 
-        .joy-programs-list .joy-redeem-card, .joy-programs-list .joy-see-more-card {
+        .joy-programs-list .joy-redeem-card, .joy-programs-list {
             flex: 0 0 200px;
             max-width: 200px;
         }
@@ -242,40 +242,6 @@
         }
 
         .joy-redeem-button:hover {
-            background: {{ section.settings.primary_color_hover | default: '#4B5563' }};
-            transform: none;
-        }
-
-        .joy-see-more-button {
-            background: {{ section.settings.primary_color | default: '#6B7280' }};
-            color: {{ section.settings.button_color | default: '#FFFFFF' }};
-            border: none;
-            padding: 12px 24px;
-            border-radius: {{ section.settings.button_border_radius | default: 6 }}px;
-            font-size: {{ section.settings.button_text_size | default: 14 }}px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            width: 100%;
-            justify-content: center;
-            display: flex;
-        }
-
-        .joy-see-more-reward-icon {
-            height: 100%;
-            margin-bottom: 20px;
-            border-radius: {{ section.settings.icon_border_radius | default: 12 }}px !important;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        }
-        .joy-see-more-reward-icon img {
-            aspect-ratio: 9/14;
-            object-fit: cover;
-            object-position: left;
-        }
-
-        .joy-see-more-button:hover {
             background: {{ section.settings.primary_color_hover | default: '#4B5563' }};
             transform: none;
         }
@@ -592,7 +558,7 @@
         }
 
 
-        .joy-redeem-card, .joy-see-more-card {
+        .joy-redeem-card {
             background: {{ section.settings.card_background | default: '#FFFFFF' }};
             border: {{ section.settings.card_border_width | default: 1 }}px solid {{ section.settings.card_border_color | default: '#E5E7EB' }};
             border-radius: {{ section.settings.card_border_radius | default: 8 }}px;
@@ -610,16 +576,6 @@
             min-height: 180px;
         }
 
-        .joy-see-more-card:hover {
-            transform: translateY(-1px);
-            border-color: {{ section.settings.card_hover_border_color | default: '#6B7280' }};
-            background: {{ section.settings.card_hover_background | default: '#F9FAFB' }};
-        }
-
-        .joy-see-more-content {
-            width: 100%;
-        }
-
         /* Responsive */
         @media screen and (max-width: 460px) {
             .joy-redeem-title {
@@ -634,7 +590,7 @@
                 justify-content: center;
             }
 
-            .joy-redeem-card, .joy-see-more-card {
+            .joy-redeem-card {
                 padding: {{ section.settings.card_padding_mobile | default: 16 }}px;
                 gap: {{ section.settings.card_gap_mobile | default: 12 }}px;
             }
@@ -648,9 +604,6 @@
                 justify-content: center;
                 display: flex;
             }
-
-            .joy-see-more-
-        }
     </style>
 
     <div class="joy-custom-redeem-container">
@@ -931,8 +884,6 @@
                 }
 
                 renderProgramCards(activePrograms) {
-                    const seeMoreCard = this.createSeeMoreCard();
-                    this.appendChild(seeMoreCard);
                     activePrograms.forEach((program, index) => {
                         try {
                             const card = this.createProgramCard(program);
@@ -1106,32 +1057,6 @@
                         e.preventDefault();
                             this.handleRedeemClick(program);
                     });
-                }
-
-                createSeeMoreCard() {
-                    const card = document.createElement('div');
-                    card.className = 'joy-see-more-card';
-                    const imageUrl = '{{ section.settings.see_more_image | image_url: width: 400 | image_url: height: 400 }}';
-                    const buttonText = '{{ section.settings.see_more_button_text | escape }}';
-                    const redirectUrl = '{{ section.settings.see_more_page.url | default: "/pages/redeem-program" }}';
-                    card.innerHTML = `
-                        <div class="joy-see-more-reward-icon"> ${imageUrl
-                        ? `<img src="${imageUrl}" alt="See more rewards" style="width:100%;height:100%;border-radius:inherit;">`
-                        : `<div style="width:100%; height:100%; background:rgba(212,165,116,0.08); border-radius:inherit; display:flex; align-items:center; justify-content:center; font-size:32px; color:${'{{ section.settings.primary_color | default: "#6B7280" }}'};">➕</div>`
-                      }
-                      </div>
-                    <div class="joy-see-more-content">
-                        <div class="joy-see-more-action">
-                        <button class="joy-see-more-button">${buttonText}</button>
-                        </div>
-                    </div>
-                    `;
-
-                    card.addEventListener('click', () => {
-                        window.location.href = redirectUrl;
-                    });
-
-                    return card;
                 }
 
                 createProgramCard(program) {
@@ -1895,26 +1820,6 @@
       "max": 10,
       "step": 1,
       "default": 5
-    },
-    {
-        "type": "header",
-        "content": "See More Button Settings"
-    },
-    {
-      "type": "text",
-      "id": "see_more_button_text",
-      "label": "See More Button Text",
-      "default": "See more rewards"
-    },
-    {
-      "type": "image_picker",
-      "id": "see_more_image",
-      "label": "See More Image",
-    },
-    {
-        "type": "page",
-        "id": "see_more_page",
-        "label": "See More Redirect"
     },
     {
       "type": "header",
