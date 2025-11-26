@@ -590,6 +590,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     const mainImage = document.getElementById('main-product-image');
     const productImages = document.querySelector('.product-images');
+    const variantPickers = document.querySelectorAll('[name="id"]');
     let touchStartX = 0;
     let touchEndX = 0;
     let currentImageIndex = 0;
@@ -722,6 +723,32 @@
         window.dispatchEvent(new Event('resize'));
       }, 100);
     });
+
+    // 监听多属性变化
+    if (variantPickers.length) {
+      variantPickers.forEach((picker) => {
+        picker.addEventListener('change', function () {
+          const selectedVariantId = this.value;
+          const variantImage = document.querySelector(`[data-variant-id="${selectedVariantId}"]`);
+
+          if (variantImage) {
+            const newImageSrc = variantImage.dataset.image;
+            const newImageAlt = variantImage.dataset.imageAlt;
+            mainImage.src = newImageSrc;
+            mainImage.alt = newImageAlt;
+
+            // 更新激活的缩略图
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            thumbnails.forEach((thumb) => {
+              thumb.classList.remove('active');
+              if (thumb.dataset.image === newImageSrc) {
+                thumb.classList.add('active');
+              }
+            });
+          }
+        });
+      });
+    }
   });
 </script>
 
