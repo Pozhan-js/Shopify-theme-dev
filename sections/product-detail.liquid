@@ -18,6 +18,10 @@
               class="thumbnail {% if forloop.first %}active{% endif %}"
               data-image="{{ image | img_url: '800x800' }}"
               data-image-alt="{{ product.title }}"
+              {% if image.attached_to_variant? %}
+                {% assign variant_ids = image.variants | map: 'id' %}
+                data-variant-id="{{ variant_ids | join: ',' }}"
+              {% endif %}
             >
               <img
                 src="{{ image | img_url: '100x100' }}"
@@ -729,11 +733,23 @@
       variantPickers.forEach((picker) => {
         picker.addEventListener('change', function () {
           const selectedVariantId = this.value;
-          const variantImage = document.querySelector(`[data-variant-id="${selectedVariantId}"]`);
+          console.log('Selected variant ID:', selectedVariantId);
 
-          if (variantImage) {
-            const newImageSrc = variantImage.dataset.image;
-            const newImageAlt = variantImage.dataset.imageAlt;
+          // 查找包含该variant ID的图片元素
+          const variantImages = document.querySelectorAll('[data-variant-id]');
+          let targetImage = null;
+
+          variantImages.forEach((img) => {
+            const variantIds = img.dataset.variantId.split(',');
+            if (variantIds.includes(selectedVariantId)) {
+              targetImage = img;
+            }
+          });
+
+          if (targetImage) {
+            console.log('Found matching image:', targetImage);
+            const newImageSrc = targetImage.dataset.image;
+            const newImageAlt = targetImage.dataset.imageAlt;
 
             // 添加淡出效果
             mainImage.style.opacity = '0';
@@ -760,6 +776,8 @@
                 mainImage.style.transition = '';
               }, 300);
             }, 150);
+          } else {
+            console.warn('No matching image found for variant ID:', selectedVariantId);
           }
         });
       });
