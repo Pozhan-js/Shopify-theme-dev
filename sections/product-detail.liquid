@@ -18,10 +18,6 @@
               class="thumbnail {% if forloop.first %}active{% endif %}"
               data-image="{{ image | img_url: '800x800' }}"
               data-image-alt="{{ product.title }}"
-              {% if image.attached_to_variant? %}
-                {% assign variant_ids = image.variants | map: 'id' %}
-                data-variant-id="{{ variant_ids | join: ',' }}"
-              {% endif %}
             >
               <img
                 src="{{ image | img_url: '100x100' }}"
@@ -594,7 +590,6 @@
   document.addEventListener('DOMContentLoaded', function () {
     const mainImage = document.getElementById('main-product-image');
     const productImages = document.querySelector('.product-images');
-    const variantPickers = document.querySelectorAll('[name="id"]');
     let touchStartX = 0;
     let touchEndX = 0;
     let currentImageIndex = 0;
@@ -727,61 +722,6 @@
         window.dispatchEvent(new Event('resize'));
       }, 100);
     });
-
-    // 监听多属性变化
-    if (variantPickers.length) {
-      variantPickers.forEach((picker) => {
-        picker.addEventListener('change', function () {
-          const selectedVariantId = this.value;
-          console.log('Selected variant ID:', selectedVariantId);
-
-          // 查找包含该variant ID的图片元素
-          const variantImages = document.querySelectorAll('[data-variant-id]');
-          let targetImage = null;
-
-          variantImages.forEach((img) => {
-            const variantIds = img.dataset.variantId.split(',');
-            if (variantIds.includes(selectedVariantId)) {
-              targetImage = img;
-            }
-          });
-
-          if (targetImage) {
-            console.log('Found matching image:', targetImage);
-            const newImageSrc = targetImage.dataset.image;
-            const newImageAlt = targetImage.dataset.imageAlt;
-
-            // 添加淡出效果
-            mainImage.style.opacity = '0';
-
-            setTimeout(() => {
-              mainImage.src = newImageSrc;
-              mainImage.alt = newImageAlt;
-
-              // 添加淡入效果
-              mainImage.style.transition = 'opacity 0.3s ease';
-              mainImage.style.opacity = '1';
-
-              // 更新激活的缩略图
-              const thumbnails = document.querySelectorAll('.thumbnail');
-              thumbnails.forEach((thumb) => {
-                thumb.classList.remove('active');
-                if (thumb.dataset.image === newImageSrc) {
-                  thumb.classList.add('active');
-                }
-              });
-
-              // 3秒后移除过渡效果避免干扰其他动画
-              setTimeout(() => {
-                mainImage.style.transition = '';
-              }, 300);
-            }, 150);
-          } else {
-            console.warn('No matching image found for variant ID:', selectedVariantId);
-          }
-        });
-      });
-    }
   });
 </script>
 
