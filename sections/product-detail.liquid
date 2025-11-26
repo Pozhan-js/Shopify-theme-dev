@@ -136,6 +136,26 @@
     object-fit: cover;
   }
 
+  /* 移动端图片指示器 */
+  .image-indicator {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 20;
+    backdrop-filter: blur(5px);
+    display: none;
+  }
+
+  .image-indicator .current {
+    font-weight: 700;
+  }
+
   /* 右侧商品信息区域 */
   .product-info {
     height: calc(100vh - 170px);
@@ -423,6 +443,17 @@
       max-height: none;
       min-height: 300px;
       border-radius: 8px;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .main-image img {
+      transition: opacity 0.3s ease;
+    }
+
+    /* 移动端显示图片指示器 */
+    .image-indicator {
+      display: block;
     }
 
     .product-info {
@@ -593,63 +624,108 @@
     let touchStartX = 0;
     let touchEndX = 0;
     let currentImageIndex = 0;
-    const images = Array.from(document.querySelectorAll('.thumbnail')).map((thumb) => ({
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const images = Array.from(thumbnails).map((thumb) => ({
       src: thumb.dataset.image,
       alt: thumb.dataset.imageAlt,
     }));
 
-    // 移动端滑动切换功能
-    if (window.innerWidth <= 768) {
-      productImages.addEventListener(
-        'touchstart',
-        function (e) {
-          touchStartX = e.changedTouches[0].screenX;
-        },
-        false
-      );
+    // 检测是否为移动设备
+    function isMobileDevice() {
+      return window.innerWidth <= 768 || 'ontouchstart' in window;
+    }
 
-      productImages.addEventListener(
-        'touchend',
-        function (e) {
-          touchEndX = e.changedTouches[0].screenX;
-          handleSwipe();
-        },
-        false
-      );
-
-      function handleSwipe() {
-        if (touchEndX < touchStartX && currentImageIndex < images.length - 1) {
-          // 向左滑动 - 下一张
-          currentImageIndex++;
-          changeImage(currentImageIndex);
-        } else if (touchEndX > touchStartX && currentImageIndex > 0) {
-          // 向右滑动 - 上一张
-          currentImageIndex--;
-          changeImage(currentImageIndex);
-        }
-      }
-
-      function changeImage(index) {
-        if (mainImage && images[index]) {
+    // 切换图片函数
+    function changeImage(index) {
+      if (mainImage && images[index]) {
+        // 添加淡出效果
+        mainImage.style.opacity = '0.5';
+        
+        setTimeout(() => {
           mainImage.src = images[index].src;
           mainImage.alt = images[index].alt;
+          mainImage.style.opacity = '1';
+        }, 150);
+
+        // 更新缩略图激活状态（桌面端）
+        if (!isMobileDevice()) {
+          thumbnails.forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+          });
         }
       }
-    } else {
-      // 桌面端保留缩略图悬停切换功能
-      const thumbnails = document.querySelectorAll('.thumbnail');
-      thumbnails.forEach((thumbnail) => {
+    }
+
+    // 移动端滑动切换功能
+    function setupMobileSwipe() {
+      if (!productImages) return;
+
+      productImages.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      productImages.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        const swipeDistance = touchStartX - touchEndX;
+        const minSwipeDistance = 50; // 最小滑动距离（像素）
+
+        // 向左滑动 - 下一张
+        if (swipeDistance > minSwipeDistance && currentImageIndex < images.length - 1) {
+          currentImageIndex++;
+          changeImage(currentImageIndex);
+          updateIndicator();
+        } 
+        // 向右滑动 - 上一张
+        else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
+          currentImageIndex--;
+          changeImage(currentImageIndex);
+          updateIndicator();
+        }
+      }
+    }
+
+    // 桌面端悬停切换功能
+    function setupDesktopHover() {
+      thumbnails.forEach((thumbnail, index) => {
         thumbnail.addEventListener('mouseenter', function () {
-          const newImageSrc = this.dataset.image;
-          const newImageAlt = this.dataset.imageAlt;
-          if (newImageSrc && mainImage) {
-            mainImage.src = newImageSrc;
-            mainImage.alt = newImageAlt;
-            thumbnails.forEach((t) => t.classList.remove('active'));
-            this.classList.add('active');
-          }
+          currentImageIndex = index;
+          changeImage(index);
         });
       });
+    }
+
+    // 添加图片指示器（移动端）
+    function addImageIndicator() {
+      if (images.length <= 1) return;
+
+      const indicator = document.createElement('div');
+      indicator.className = 'image-indicator';
+      indicator.innerHTML = `<span class="current">${currentImageIndex + 1}</span> / ${images.length}`;
+      
+      const mainImageContainer = document.querySelector('.main-image');
+      if (mainImageContainer) {
+        mainImageContainer.appendChild(indicator);
+      }
+    }
+
+    // 更新指示器
+    function updateIndicator() {
+      const currentSpan = document.querySelector('.image-indicator .current');
+      if (currentSpan) {
+        currentSpan.textContent = currentImageIndex + 1;
+      }
+    }
+
+    // 初始化
+    if (isMobileDevice()) {
+      setupMobileSwipe();
+      addImageIndicator();
+    } else {
+      setupDesktopHover();
     }
 
     // 数量选择器功能
@@ -678,7 +754,13 @@
         e.preventDefault();
 
         const form = document.getElementById('product-form');
+        if (!form) {
+          console.error('找不到产品表单');
+          return;
+        }
+
         const formData = new FormData(form);
+        const originalText = this.textContent;
 
         // 添加加载状态
         this.textContent = '处理中...';
@@ -707,20 +789,27 @@
           })
           .catch((error) => {
             console.error('Error:', error);
-            alert('添加到购物车时出现错误，请重试');
+            alert('添加到购物车时出现错误,请重试');
             // 恢复按钮状态
-            this.textContent = '{{ section.settings.buy_now_text }}';
+            this.textContent = originalText;
             this.disabled = false;
           });
       });
     }
 
-    // 监听屏幕旋转
-    window.addEventListener('orientationchange', function () {
-      setTimeout(function () {
-        // 重新计算布局
-        window.dispatchEvent(new Event('resize'));
-      }, 100);
+    // 监听窗口大小变化
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        const wasMobile = document.querySelector('.image-indicator') !== null;
+        const isMobileNow = isMobileDevice();
+        
+        // 如果设备类型改变，重新加载页面
+        if (wasMobile !== isMobileNow) {
+          location.reload();
+        }
+      }, 250);
     });
   });
 </script>
@@ -1078,6 +1167,7 @@
   ]
 }
 {% endschema %}
+
 {%- comment -%} 在产品页面底部添加快速购买栏 {%- endcomment -%}
 {% render 'quick-buy-bar', product: product %}
 
