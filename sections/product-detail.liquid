@@ -1,4 +1,8 @@
 <!-- sections/product-detail.liquid -->
+<script type="application/json" data-product-json>
+  {{ product | json }}
+</script>
+
 <div class="product-detail-section">
   <div class="product-container">
     <!-- 左侧图片展示区域 -->
@@ -46,6 +50,282 @@
     </div>
   </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 添加到 DOMContentLoaded 事件监听器内部
+
+// 监听变体选择变化
+function setupVariantImageChange() {
+  // 监听所有变体选择器的变化
+  const variantSelectors = document.querySelectorAll('input[name="option1"], input[name="option2"], input[name="option3"], select[name="id"]');
+  
+  variantSelectors.forEach(selector => {
+    selector.addEventListener('change', function() {
+      // 延迟执行以确保变体已更新
+      setTimeout(() => {
+        updateImageForVariant();
+      }, 100);
+    });
+  });
+
+  // 也可以监听 variant-picker 组件的变化事件
+  document.addEventListener('variant:change', function(event) {
+    if (event.detail && event.detail.variant) {
+      updateVariantImage(event.detail.variant);
+    }
+  });
+}
+
+// 更新变体对应的图片
+function updateImageForVariant() {
+  // 获取当前选中的变体 ID
+  const variantIdInput = document.querySelector('input[name="id"]:checked, select[name="id"]');
+  if (!variantIdInput) return;
+  
+  const variantId = variantIdInput.value;
+  
+  // 通过 Shopify 的 product JSON 获取变体信息
+  const productJson = document.querySelector('[data-product-json]');
+  if (!productJson) return;
+  
+  try {
+    const product = JSON.parse(productJson.textContent);
+    const variant = product.variants.find(v => v.id == variantId);
+    
+    if (variant && variant.featured_image) {
+      updateVariantImage(variant);
+    }
+  } catch (error) {
+    console.error('解析产品数据失败:', error);
+  }
+}
+
+// 更新图片显示
+function updateVariantImage(variant) {
+  if (!variant.featured_image) return;
+  
+  const variantImageSrc = variant.featured_image.src;
+  
+  // 查找对应的缩略图索引
+  const matchingIndex = images.findIndex(img => 
+    img.src.includes(variant.featured_image.id) || 
+    img.src === variantImageSrc
+  );
+  
+  if (matchingIndex !== -1) {
+    currentImageIndex = matchingIndex;
+    changeImage(matchingIndex);
+    updateIndicator();
+  } else {
+    // 如果缩略图中没有，直接更新主图
+    if (mainImage) {
+      mainImage.style.opacity = '0.5';
+      setTimeout(() => {
+        mainImage.src = variantImageSrc;
+        mainImage.alt = variant.name || product.title;
+        mainImage.style.opacity = '1';
+      }, 150);
+    }
+  }
+}
+
+// 初始化变体图片切换
+setupVariantImageChange();
+
+    const mainImage = document.getElementById('main-product-image');
+    const productImages = document.querySelector('.product-images');
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let currentImageIndex = 0;
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const images = Array.from(thumbnails).map((thumb) => ({
+      src: thumb.dataset.image,
+      alt: thumb.dataset.imageAlt,
+    }));
+
+    // 检测是否为移动设备
+    function isMobileDevice() {
+      return window.innerWidth <= 768 || 'ontouchstart' in window;
+    }
+
+    // 切换图片函数
+    function changeImage(index) {
+      if (mainImage && images[index]) {
+        // 添加淡出效果
+        mainImage.style.opacity = '0.5';
+        
+        setTimeout(() => {
+          mainImage.src = images[index].src;
+          mainImage.alt = images[index].alt;
+          mainImage.style.opacity = '1';
+        }, 150);
+
+        // 更新缩略图激活状态（桌面端）
+        if (!isMobileDevice()) {
+          thumbnails.forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+          });
+        }
+      }
+    }
+
+    // 移动端滑动切换功能
+    function setupMobileSwipe() {
+      if (!productImages) return;
+
+      productImages.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      productImages.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      function handleSwipe() {
+        const swipeDistance = touchStartX - touchEndX;
+        const minSwipeDistance = 50; // 最小滑动距离（像素）
+
+        // 向左滑动 - 下一张
+        if (swipeDistance > minSwipeDistance && currentImageIndex < images.length - 1) {
+          currentImageIndex++;
+          changeImage(currentImageIndex);
+          updateIndicator();
+        } 
+        // 向右滑动 - 上一张
+        else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
+          currentImageIndex--;
+          changeImage(currentImageIndex);
+          updateIndicator();
+        }
+      }
+    }
+
+    // 桌面端悬停切换功能
+    function setupDesktopHover() {
+      thumbnails.forEach((thumbnail, index) => {
+        thumbnail.addEventListener('mouseenter', function () {
+          currentImageIndex = index;
+          changeImage(index);
+        });
+      });
+    }
+
+    // 添加图片指示器（移动端）
+    function addImageIndicator() {
+      if (images.length <= 1) return;
+
+      const indicator = document.createElement('div');
+      indicator.className = 'image-indicator';
+      indicator.innerHTML = `<span class="current">${currentImageIndex + 1}</span> / ${images.length}`;
+      
+      const mainImageContainer = document.querySelector('.main-image');
+      if (mainImageContainer) {
+        mainImageContainer.appendChild(indicator);
+      }
+    }
+
+    // 更新指示器
+    function updateIndicator() {
+      const currentSpan = document.querySelector('.image-indicator .current');
+      if (currentSpan) {
+        currentSpan.textContent = currentImageIndex + 1;
+      }
+    }
+
+    // 初始化
+    if (isMobileDevice()) {
+      setupMobileSwipe();
+      addImageIndicator();
+    } else {
+      setupDesktopHover();
+    }
+
+    // 数量选择器功能
+    const minusBtn = document.querySelector('.quantity-btn.minus');
+    const plusBtn = document.querySelector('.quantity-btn.plus');
+    const quantityField = document.querySelector('.quantity-field');
+
+    if (minusBtn && plusBtn && quantityField) {
+      minusBtn.addEventListener('click', function () {
+        const currentValue = parseInt(quantityField.value);
+        if (currentValue > 1) {
+          quantityField.value = currentValue - 1;
+        }
+      });
+
+      plusBtn.addEventListener('click', function () {
+        const currentValue = parseInt(quantityField.value);
+        quantityField.value = currentValue + 1;
+      });
+    }
+
+    // 立即购买功能
+    const buyNowBtn = document.querySelector('.buy-now-btn');
+    if (buyNowBtn) {
+      buyNowBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const form = document.getElementById('product-form');
+        if (!form) {
+          console.error('找不到产品表单');
+          return;
+        }
+
+        const formData = new FormData(form);
+        const originalText = this.textContent;
+
+        // 添加加载状态
+        this.textContent = '处理中...';
+        this.disabled = true;
+
+        // 先添加到购物车
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: formData.get('id'),
+            quantity: parseInt(formData.get('quantity')) || 1,
+          }),
+        })
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('添加到购物车失败');
+          })
+          .then((data) => {
+            // 成功添加后跳转到结账页面
+            window.location.href = '/checkout';
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert('添加到购物车时出现错误,请重试');
+            // 恢复按钮状态
+            this.textContent = originalText;
+            this.disabled = false;
+          });
+      });
+    }
+
+    // 监听窗口大小变化
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        const wasMobile = document.querySelector('.image-indicator') !== null;
+        const isMobileNow = isMobileDevice();
+        
+        // 如果设备类型改变，重新加载页面
+        if (wasMobile !== isMobileNow) {
+          location.reload();
+        }
+      }, 250);
+    });
+  });
+</script>
 
 <style>
   .product-detail-section {
@@ -617,202 +897,7 @@
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const mainImage = document.getElementById('main-product-image');
-    const productImages = document.querySelector('.product-images');
-    let touchStartX = 0;
-    let touchEndX = 0;
-    let currentImageIndex = 0;
-    const thumbnails = document.querySelectorAll('.thumbnail');
-    const images = Array.from(thumbnails).map((thumb) => ({
-      src: thumb.dataset.image,
-      alt: thumb.dataset.imageAlt,
-    }));
 
-    // 检测是否为移动设备
-    function isMobileDevice() {
-      return window.innerWidth <= 768 || 'ontouchstart' in window;
-    }
-
-    // 切换图片函数
-    function changeImage(index) {
-      if (mainImage && images[index]) {
-        // 添加淡出效果
-        mainImage.style.opacity = '0.5';
-        
-        setTimeout(() => {
-          mainImage.src = images[index].src;
-          mainImage.alt = images[index].alt;
-          mainImage.style.opacity = '1';
-        }, 150);
-
-        // 更新缩略图激活状态（桌面端）
-        if (!isMobileDevice()) {
-          thumbnails.forEach((t, i) => {
-            t.classList.toggle('active', i === index);
-          });
-        }
-      }
-    }
-
-    // 移动端滑动切换功能
-    function setupMobileSwipe() {
-      if (!productImages) return;
-
-      productImages.addEventListener('touchstart', function (e) {
-        touchStartX = e.changedTouches[0].screenX;
-      }, { passive: true });
-
-      productImages.addEventListener('touchend', function (e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-      }, { passive: true });
-
-      function handleSwipe() {
-        const swipeDistance = touchStartX - touchEndX;
-        const minSwipeDistance = 50; // 最小滑动距离（像素）
-
-        // 向左滑动 - 下一张
-        if (swipeDistance > minSwipeDistance && currentImageIndex < images.length - 1) {
-          currentImageIndex++;
-          changeImage(currentImageIndex);
-          updateIndicator();
-        } 
-        // 向右滑动 - 上一张
-        else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
-          currentImageIndex--;
-          changeImage(currentImageIndex);
-          updateIndicator();
-        }
-      }
-    }
-
-    // 桌面端悬停切换功能
-    function setupDesktopHover() {
-      thumbnails.forEach((thumbnail, index) => {
-        thumbnail.addEventListener('mouseenter', function () {
-          currentImageIndex = index;
-          changeImage(index);
-        });
-      });
-    }
-
-    // 添加图片指示器（移动端）
-    function addImageIndicator() {
-      if (images.length <= 1) return;
-
-      const indicator = document.createElement('div');
-      indicator.className = 'image-indicator';
-      indicator.innerHTML = `<span class="current">${currentImageIndex + 1}</span> / ${images.length}`;
-      
-      const mainImageContainer = document.querySelector('.main-image');
-      if (mainImageContainer) {
-        mainImageContainer.appendChild(indicator);
-      }
-    }
-
-    // 更新指示器
-    function updateIndicator() {
-      const currentSpan = document.querySelector('.image-indicator .current');
-      if (currentSpan) {
-        currentSpan.textContent = currentImageIndex + 1;
-      }
-    }
-
-    // 初始化
-    if (isMobileDevice()) {
-      setupMobileSwipe();
-      addImageIndicator();
-    } else {
-      setupDesktopHover();
-    }
-
-    // 数量选择器功能
-    const minusBtn = document.querySelector('.quantity-btn.minus');
-    const plusBtn = document.querySelector('.quantity-btn.plus');
-    const quantityField = document.querySelector('.quantity-field');
-
-    if (minusBtn && plusBtn && quantityField) {
-      minusBtn.addEventListener('click', function () {
-        const currentValue = parseInt(quantityField.value);
-        if (currentValue > 1) {
-          quantityField.value = currentValue - 1;
-        }
-      });
-
-      plusBtn.addEventListener('click', function () {
-        const currentValue = parseInt(quantityField.value);
-        quantityField.value = currentValue + 1;
-      });
-    }
-
-    // 立即购买功能
-    const buyNowBtn = document.querySelector('.buy-now-btn');
-    if (buyNowBtn) {
-      buyNowBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-
-        const form = document.getElementById('product-form');
-        if (!form) {
-          console.error('找不到产品表单');
-          return;
-        }
-
-        const formData = new FormData(form);
-        const originalText = this.textContent;
-
-        // 添加加载状态
-        this.textContent = '处理中...';
-        this.disabled = true;
-
-        // 先添加到购物车
-        fetch('/cart/add.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: formData.get('id'),
-            quantity: parseInt(formData.get('quantity')) || 1,
-          }),
-        })
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('添加到购物车失败');
-          })
-          .then((data) => {
-            // 成功添加后跳转到结账页面
-            window.location.href = '/checkout';
-          })
-          .catch((error) => {
-            console.error('Error:', error);
-            alert('添加到购物车时出现错误,请重试');
-            // 恢复按钮状态
-            this.textContent = originalText;
-            this.disabled = false;
-          });
-      });
-    }
-
-    // 监听窗口大小变化
-    let resizeTimer;
-    window.addEventListener('resize', function () {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function () {
-        const wasMobile = document.querySelector('.image-indicator') !== null;
-        const isMobileNow = isMobileDevice();
-        
-        // 如果设备类型改变，重新加载页面
-        if (wasMobile !== isMobileNow) {
-          location.reload();
-        }
-      }, 250);
-    });
-  });
-</script>
 
 {% schema %}
 {
