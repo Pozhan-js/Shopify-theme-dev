@@ -66,30 +66,35 @@
     // 防抖标志
     let isChangingImage = false;
     let variantChangeTimeout = null;
+    let imageChangeTimeout = null;
 
     // 检测是否为移动设备
     function isMobileDevice() {
       return window.innerWidth <= 768 || 'ontouchstart' in window;
     }
 
-    // 切换图片函数 - 修复版
+    // 切换图片函数 - 优化版，消除闪动
     function changeImage(index, skipTransition = false, force = false) {
       if (!mainImage || !images[index]) return;
 
       // 如果不是强制切换且索引相同，则跳过
       if (!force && currentImageIndex === index) return;
 
+      // 如果图片URL完全相同，只更新状态
+      if (mainImage.src === images[index].src) {
+        currentImageIndex = index;
+        updateThumbnailActive(index);
+        return;
+      }
+
       // 防止重复切换（但允许强制切换）
       if (isChangingImage && !force) return;
       
       isChangingImage = true;
 
-      // 如果是同一张图片URL，只更新状态
-      if (mainImage.src === images[index].src) {
-        currentImageIndex = index;
-        updateThumbnailActive(index);
-        isChangingImage = false;
-        return;
+      // 清除之前的定时器
+      if (imageChangeTimeout) {
+        clearTimeout(imageChangeTimeout);
       }
 
       if (skipTransition) {
@@ -100,21 +105,33 @@
         updateThumbnailActive(index);
         isChangingImage = false;
       } else {
-        // 平滑过渡（用于鼠标悬停和滑动）
-        mainImage.style.transition = 'opacity 0.15s ease-in-out';
-        mainImage.style.opacity = '0.5';
+        // 优化的平滑过渡（用于鼠标悬停）
+        // 使用图片预加载避免闪动
+        const newImage = new Image();
+        newImage.src = images[index].src;
         
-        setTimeout(() => {
-          mainImage.src = images[index].src;
-          mainImage.alt = images[index].alt;
-          mainImage.style.opacity = '1';
-          currentImageIndex = index;
-          updateThumbnailActive(index);
+        newImage.onload = function() {
+          // 图片加载完成后再切换
+          mainImage.style.transition = 'opacity 0.2s ease-in-out';
+          mainImage.style.opacity = '0.7';
           
-          setTimeout(() => {
-            isChangingImage = false;
-          }, 150);
-        }, 150);
+          imageChangeTimeout = setTimeout(() => {
+            mainImage.src = images[index].src;
+            mainImage.alt = images[index].alt;
+            mainImage.style.opacity = '1';
+            currentImageIndex = index;
+            updateThumbnailActive(index);
+            
+            imageChangeTimeout = setTimeout(() => {
+              isChangingImage = false;
+            }, 200);
+          }, 100);
+        };
+        
+        // 如果图片已经缓存，立即触发
+        if (newImage.complete) {
+          newImage.onload();
+        }
       }
     }
 
@@ -306,12 +323,15 @@
       }
     }
 
-    // 桌面端悬停切换功能 - 修复版
+    // 桌面端悬停切换功能 - 优化版
     function setupDesktopHover() {
       thumbnails.forEach((thumbnail, index) => {
+        // 使用 mouseenter 而不是 mouseover 避免重复触发
         thumbnail.addEventListener('mouseenter', function () {
-          // 允许鼠标悬停切换，使用平滑过渡
-          changeImage(index, false, false);
+          // 只在索引不同时才切换
+          if (currentImageIndex !== index) {
+            changeImage(index, false, false);
+          }
         });
       });
     }
@@ -338,6 +358,14 @@
       }
     }
 
+    // 预加载所有图片以避免切换时的闪动
+    function preloadImages() {
+      images.forEach(img => {
+        const preloadImg = new Image();
+        preloadImg.src = img.src;
+      });
+    }
+
     // 初始化
     if (isMobileDevice()) {
       setupMobileSwipe();
@@ -345,6 +373,9 @@
     } else {
       setupDesktopHover();
     }
+
+    // 预加载图片
+    preloadImages();
 
     // 初始化变体图片切换功能
     setupVariantImageSwitch();
