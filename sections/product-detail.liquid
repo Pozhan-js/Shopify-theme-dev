@@ -640,7 +640,7 @@
       if (mainImage && images[index]) {
         // 添加淡出效果
         mainImage.style.opacity = '0.5';
-
+        
         setTimeout(() => {
           mainImage.src = images[index].src;
           mainImage.alt = images[index].alt;
@@ -660,22 +660,14 @@
     function setupMobileSwipe() {
       if (!productImages) return;
 
-      productImages.addEventListener(
-        'touchstart',
-        function (e) {
-          touchStartX = e.changedTouches[0].screenX;
-        },
-        { passive: true }
-      );
+      productImages.addEventListener('touchstart', function (e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
 
-      productImages.addEventListener(
-        'touchend',
-        function (e) {
-          touchEndX = e.changedTouches[0].screenX;
-          handleSwipe();
-        },
-        { passive: true }
-      );
+      productImages.addEventListener('touchend', function (e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
 
       function handleSwipe() {
         const swipeDistance = touchStartX - touchEndX;
@@ -686,7 +678,7 @@
           currentImageIndex++;
           changeImage(currentImageIndex);
           updateIndicator();
-        }
+        } 
         // 向右滑动 - 上一张
         else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
           currentImageIndex--;
@@ -713,7 +705,7 @@
       const indicator = document.createElement('div');
       indicator.className = 'image-indicator';
       indicator.innerHTML = `<span class="current">${currentImageIndex + 1}</span> / ${images.length}`;
-
+      
       const mainImageContainer = document.querySelector('.main-image');
       if (mainImageContainer) {
         mainImageContainer.appendChild(indicator);
@@ -804,32 +796,6 @@
           });
       });
     }
-    // 监听变体选择变化
-    document.querySelectorAll('input[name="options"]').forEach((input) => {
-      input.addEventListener('change', function () {
-        // 获取当前选中的变体
-        const selectedVariant = getSelectedVariant();
-
-        // 如果变体有关联图片,切换主图
-        if (selectedVariant && selectedVariant.featured_media) {
-          updateFeaturedImage(selectedVariant.featured_media.id);
-        }
-      });
-    });
-
-    function updateFeaturedImage(mediaId) {
-      // 找到对应的图片元素并切换显示
-      const targetImage = document.querySelector(`[data-media-id="${mediaId}"]`);
-      if (targetImage) {
-        // 移除其他图片的激活状态
-        document.querySelectorAll('.product-image').forEach((img) => {
-          img.classList.remove('active');
-        });
-        // 激活目标图片
-        targetImage.classList.add('active');
-        targetImage.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
 
     // 监听窗口大小变化
     let resizeTimer;
@@ -838,7 +804,7 @@
       resizeTimer = setTimeout(function () {
         const wasMobile = document.querySelector('.image-indicator') !== null;
         const isMobileNow = isMobileDevice();
-
+        
         // 如果设备类型改变，重新加载页面
         if (wasMobile !== isMobileNow) {
           location.reload();
@@ -1208,7 +1174,3 @@
 {%- comment -%} 引入 CSS 和 JS {%- endcomment -%}
 {{ 'quick-buy-bar.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'quick-buy-bar.js' | asset_url }}" defer></script>
-<script>
-  const productVariants = {{ product.variants | json }};
-</script>
-
