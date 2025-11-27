@@ -76,63 +76,92 @@
           mainImage.style.opacity = '1';
         }, 150);
 
-        if (!isMobileDevice()) {
-          thumbnails.forEach((t, i) => {
-            t.classList.toggle('active', i === index);
-          });
-        }
+        // 更新缩略图激活状态
+        thumbnails.forEach((t, i) => {
+          t.classList.toggle('active', i === index);
+        });
+        
+        // 更新当前索引
+        currentImageIndex = index;
       }
     }
 
-    // ========== 新增：变体图片切换功能 ==========
+    // ========== 变体切换时选中对应的缩略图 ==========
     
-    // 监听变体选择变化
     function setupVariantImageSwitch() {
-      // 方法1: 监听所有变体选项按钮/单选框
+      // 监听所有可能的变体选择器
       const variantInputs = document.querySelectorAll(
-        'input[name^="option"], input[type="radio"][name*="option"], fieldset input[type="radio"]'
+        'input[name^="option"], input[type="radio"], fieldset input, .variant-input'
       );
       
       variantInputs.forEach(input => {
-        input.addEventListener('change', handleVariantChange);
+        input.addEventListener('change', function() {
+          setTimeout(handleVariantChange, 150);
+        });
       });
 
-      // 方法2: 监听下拉选择器
-      const variantSelects = document.querySelectorAll('select[name^="option"]');
+      // 监听下拉选择器
+      const variantSelects = document.querySelectorAll('select[name^="option"], select.variant-select');
       variantSelects.forEach(select => {
-        select.addEventListener('change', handleVariantChange);
+        select.addEventListener('change', function() {
+          setTimeout(handleVariantChange, 150);
+        });
       });
 
-      // 方法3: 使用 MutationObserver 监听 DOM 变化(适用于动态加载的变体选择器)
-      const productForm = document.querySelector('form[action*="/cart/add"]');
-      if (productForm) {
-        const observer = new MutationObserver(() => {
-          handleVariantChange();
+      // 使用 MutationObserver 监听变体ID的变化
+      const variantIdInput = document.querySelector('input[name="id"]');
+      if (variantIdInput) {
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+              handleVariantChange();
+            }
+          });
         });
         
-        observer.observe(productForm, {
+        observer.observe(variantIdInput, { 
           attributes: true,
-          attributeFilter: ['data-variant-id', 'data-selected-variant'],
-          subtree: true
+          attributeFilter: ['value']
+        });
+      }
+
+      // 监听整个产品表单的变化
+      const productForm = document.querySelector('form[action*="/cart/add"]');
+      if (productForm) {
+        productForm.addEventListener('change', function() {
+          setTimeout(handleVariantChange, 100);
         });
       }
     }
 
     // 处理变体变化
     function handleVariantChange() {
-      setTimeout(() => {
-        // 获取当前选中的变体ID
-        const selectedVariantId = getSelectedVariantId();
+      const selectedVariantId = getSelectedVariantId();
+      
+      if (selectedVariantId) {
+        const variantImageUrl = getVariantImageUrl(selectedVariantId);
         
-        if (selectedVariantId) {
-          updateImageForVariant(selectedVariantId);
+        if (variantImageUrl) {
+          // 在缩略图列表中查找匹配的图片索引
+          const matchingIndex = findMatchingThumbnailIndex(variantImageUrl);
+          
+          if (matchingIndex !== -1) {
+            // 选中对应的缩略图（这会触发图片切换）
+            changeImage(matchingIndex);
+            updateIndicator();
+            
+            // 如果是移动端，也更新指示器
+            if (isMobileDevice()) {
+              currentImageIndex = matchingIndex;
+            }
+          }
         }
-      }, 100);
+      }
     }
 
     // 获取当前选中的变体ID
     function getSelectedVariantId() {
-      // 方法1: 从隐藏的 input[name="id"] 获取
+      // 方法1: 从 input[name="id"] 获取
       const variantIdInput = document.querySelector('input[name="id"]');
       if (variantIdInput && variantIdInput.value) {
         return variantIdInput.value;
@@ -144,87 +173,69 @@
         return variantSelect.value;
       }
 
-      // 方法3: 从表单的 data 属性获取
+      // 方法3: 从表单 data 属性获取
       const form = document.querySelector('form[action*="/cart/add"]');
       if (form) {
-        const dataVariantId = form.getAttribute('data-variant-id') || 
-                             form.getAttribute('data-selected-variant');
-        if (dataVariantId) {
-          return dataVariantId;
-        }
+        return form.getAttribute('data-variant-id') || 
+               form.getAttribute('data-selected-variant');
       }
 
       return null;
     }
 
-    // 根据变体ID更新图片
-    function updateImageForVariant(variantId) {
-      // 从页面中查找变体数据
-      const variantData = findVariantData(variantId);
-      
-      if (variantData && variantData.featured_image) {
-        const variantImageUrl = variantData.featured_image.src || variantData.featured_image;
-        
-        // 在缩略图中查找匹配的图片
-        const matchingIndex = images.findIndex(img => {
-          // 比较图片URL(去除尺寸参数)
-          const imgSrcClean = img.src.split('?')[0].replace(/_\d+x\d+/, '');
-          const variantSrcClean = variantImageUrl.split('?')[0].replace(/_\d+x\d+/, '');
-          return imgSrcClean.includes(variantSrcClean) || variantSrcClean.includes(imgSrcClean);
-        });
-
-        if (matchingIndex !== -1) {
-          currentImageIndex = matchingIndex;
-          changeImage(matchingIndex);
-          updateIndicator();
-        } else {
-          // 如果缩略图中没有,直接更新主图
-          if (mainImage) {
-            mainImage.style.opacity = '0.5';
-            setTimeout(() => {
-              mainImage.src = variantImageUrl;
-              mainImage.alt = variantData.name || variantData.title || '';
-              mainImage.style.opacity = '1';
-            }, 150);
-          }
-        }
-      }
-    }
-
-    // 查找变体数据
-    function findVariantData(variantId) {
-      // 方法1: 从 JSON script 标签获取
-      const productJsonScript = document.querySelector('script[type="application/json"][data-product-json], script[data-product-json]');
+    // 获取变体对应的图片URL
+    function getVariantImageUrl(variantId) {
+      // 从产品JSON数据中查找
+      const productJsonScript = document.querySelector('script[data-product-json]');
       if (productJsonScript) {
         try {
           const productData = JSON.parse(productJsonScript.textContent);
           const variant = productData.variants.find(v => v.id == variantId);
-          if (variant) return variant;
+          
+          if (variant && variant.featured_image) {
+            return variant.featured_image.src || variant.featured_image;
+          }
         } catch (e) {
-          console.log('无法解析产品JSON数据');
+          console.log('解析产品数据失败:', e);
         }
       }
 
-      // 方法2: 从 window 对象获取(某些主题会将产品数据存储在 window 中)
-      if (window.ShopifyProduct && window.ShopifyProduct.variants) {
-        const variant = window.ShopifyProduct.variants.find(v => v.id == variantId);
-        if (variant) return variant;
-      }
-
-      // 方法3: 从 data 属性获取
-      const variantElements = document.querySelectorAll(`[data-variant-id="${variantId}"]`);
-      for (const el of variantElements) {
-        const imageUrl = el.getAttribute('data-variant-image') || 
-                        el.getAttribute('data-image');
-        if (imageUrl) {
-          return { featured_image: { src: imageUrl } };
+      // 从 window 对象获取
+      if (window.product && window.product.variants) {
+        const variant = window.product.variants.find(v => v.id == variantId);
+        if (variant && variant.featured_image) {
+          return variant.featured_image.src || variant.featured_image;
         }
       }
 
       return null;
     }
 
-    // ========== 原有功能保持不变 ==========
+    // 在缩略图列表中查找匹配的图片
+    function findMatchingThumbnailIndex(variantImageUrl) {
+      if (!variantImageUrl) return -1;
+
+      // 清理URL用于比较（去除尺寸参数和查询字符串）
+      const cleanUrl = (url) => {
+        return url.split('?')[0]
+                  .replace(/_\d+x\d+\.(jpg|jpeg|png|gif|webp)/i, '.$1')
+                  .replace(/\.(jpg|jpeg|png|gif|webp).*$/i, '.$1');
+      };
+
+      const cleanVariantUrl = cleanUrl(variantImageUrl);
+
+      // 在缩略图数组中查找匹配项
+      return images.findIndex(img => {
+        const cleanImgUrl = cleanUrl(img.src);
+        
+        // 比较清理后的URL
+        return cleanImgUrl === cleanVariantUrl || 
+               cleanImgUrl.includes(cleanVariantUrl) || 
+               cleanVariantUrl.includes(cleanImgUrl);
+      });
+    }
+
+    // ========== 原有功能 ==========
 
     // 移动端滑动切换功能
     function setupMobileSwipe() {
@@ -296,7 +307,7 @@
       setupDesktopHover();
     }
 
-    // ========== 初始化变体图片切换 ==========
+    // 初始化变体图片切换功能
     setupVariantImageSwitch();
 
     // 数量选择器功能
