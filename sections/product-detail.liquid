@@ -1,8 +1,4 @@
 <!-- sections/product-detail.liquid -->
-<script type="application/json" data-product-json>
-  {{ product | json }}
-</script>
-
 <div class="product-detail-section">
   <div class="product-container">
     <!-- 左侧图片展示区域 -->
@@ -50,88 +46,9 @@
     </div>
   </div>
 </div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // 添加到 DOMContentLoaded 事件监听器内部
-
-// 监听变体选择变化
-function setupVariantImageChange() {
-  // 监听所有变体选择器的变化
-  const variantSelectors = document.querySelectorAll('input[name="option1"], input[name="option2"], input[name="option3"], select[name="id"]');
-  
-  variantSelectors.forEach(selector => {
-    selector.addEventListener('change', function() {
-      // 延迟执行以确保变体已更新
-      setTimeout(() => {
-        updateImageForVariant();
-      }, 100);
-    });
-  });
-
-  // 也可以监听 variant-picker 组件的变化事件
-  document.addEventListener('variant:change', function(event) {
-    if (event.detail && event.detail.variant) {
-      updateVariantImage(event.detail.variant);
-    }
-  });
-}
-
-// 更新变体对应的图片
-function updateImageForVariant() {
-  // 获取当前选中的变体 ID
-  const variantIdInput = document.querySelector('input[name="id"]:checked, select[name="id"]');
-  if (!variantIdInput) return;
-  
-  const variantId = variantIdInput.value;
-  
-  // 通过 Shopify 的 product JSON 获取变体信息
-  const productJson = document.querySelector('[data-product-json]');
-  if (!productJson) return;
-  
-  try {
-    const product = JSON.parse(productJson.textContent);
-    const variant = product.variants.find(v => v.id == variantId);
-    
-    if (variant && variant.featured_image) {
-      updateVariantImage(variant);
-    }
-  } catch (error) {
-    console.error('解析产品数据失败:', error);
-  }
-}
-
-// 更新图片显示
-function updateVariantImage(variant) {
-  if (!variant.featured_image) return;
-  
-  const variantImageSrc = variant.featured_image.src;
-  
-  // 查找对应的缩略图索引
-  const matchingIndex = images.findIndex(img => 
-    img.src.includes(variant.featured_image.id) || 
-    img.src === variantImageSrc
-  );
-  
-  if (matchingIndex !== -1) {
-    currentImageIndex = matchingIndex;
-    changeImage(matchingIndex);
-    updateIndicator();
-  } else {
-    // 如果缩略图中没有，直接更新主图
-    if (mainImage) {
-      mainImage.style.opacity = '0.5';
-      setTimeout(() => {
-        mainImage.src = variantImageSrc;
-        mainImage.alt = variant.name || product.title;
-        mainImage.style.opacity = '1';
-      }, 150);
-    }
-  }
-}
-
-// 初始化变体图片切换
-setupVariantImageChange();
-
     const mainImage = document.getElementById('main-product-image');
     const productImages = document.querySelector('.product-images');
     let touchStartX = 0;
@@ -896,7 +813,6 @@ setupVariantImageChange();
     }
   }
 </style>
-
 
 
 {% schema %}
