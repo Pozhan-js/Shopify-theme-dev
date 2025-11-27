@@ -48,18 +48,45 @@
 </div>
 
 <script>
+
+  console.log('=== 脚本开始执行 ===');
+  
   // 获取产品数据
-   console.log('脚本开始执行');
+  const productData = {{ product | json }};
+  console.log('1. 完整产品数据:', productData);
+  console.log('2. 产品标题:', productData.title);
+  console.log('3. 产品图片数量:', productData.images.length);
   
-  // 测试产品数据是否正确输出
-  try {
-    const productData = {{ product | json }};
-    console.log('产品数据加载成功:', productData);
-  } catch(e) {
-    console.error('产品数据加载失败:', e);
-  }
+  // 打印所有图片的ID
+  console.log('4. 所有产品图片:');
+  productData.images.forEach((img, index) => {
+    console.log(`   图片 ${index + 1}: ID = ${img.id}`);
+  });
   
-  console.log('脚本执行完毕');
+  // 打印所有变体及其关联的图片
+  console.log('5. 所有变体信息:');
+  productData.variants.forEach((variant, index) => {
+    console.log(`   变体 ${index + 1}: ${variant.title}`);
+    console.log(`      变体ID: ${variant.id}`);
+    console.log(`      关联图片ID: ${variant.featured_media ? variant.featured_media.id : '无图片'}`);
+  });
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('6. DOM 加载完成');
+    
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    console.log('7. 页面缩略图数量:', thumbnails.length);
+    
+    // 打印页面上每个缩略图的媒体ID
+    console.log('8. 页面缩略图的媒体ID:');
+    thumbnails.forEach((thumb, index) => {
+      console.log(`   缩略图 ${index + 1}: 媒体ID = ${thumb.dataset.mediaId}`);
+    });
+    
+    console.log('=== 调试信息输出完毕 ===');
+  });
+
+
   const productData = {{ product | json }};
   
   document.addEventListener('DOMContentLoaded', function() {
