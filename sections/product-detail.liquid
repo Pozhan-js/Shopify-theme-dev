@@ -72,47 +72,49 @@
       return window.innerWidth <= 768 || 'ontouchstart' in window;
     }
 
-    // 切换图片函数 - 优化版，减少闪动
-    function changeImage(index, skipTransition = false) {
-      if (mainImage && images[index] && currentImageIndex !== index) {
-        // 防止重复切换
-        if (isChangingImage) return;
-        isChangingImage = true;
+    // 切换图片函数 - 修复版
+    function changeImage(index, skipTransition = false, force = false) {
+      if (!mainImage || !images[index]) return;
 
-        // 如果是同一张图片，直接返回
-        if (mainImage.src === images[index].src) {
-          isChangingImage = false;
-          currentImageIndex = index;
-          updateThumbnailActive(index);
-          return;
-        }
+      // 如果不是强制切换且索引相同，则跳过
+      if (!force && currentImageIndex === index) return;
 
-        if (skipTransition) {
-          // 无过渡直接切换
+      // 防止重复切换（但允许强制切换）
+      if (isChangingImage && !force) return;
+      
+      isChangingImage = true;
+
+      // 如果是同一张图片URL，只更新状态
+      if (mainImage.src === images[index].src) {
+        currentImageIndex = index;
+        updateThumbnailActive(index);
+        isChangingImage = false;
+        return;
+      }
+
+      if (skipTransition) {
+        // 无过渡直接切换（用于变体切换）
+        mainImage.src = images[index].src;
+        mainImage.alt = images[index].alt;
+        currentImageIndex = index;
+        updateThumbnailActive(index);
+        isChangingImage = false;
+      } else {
+        // 平滑过渡（用于鼠标悬停和滑动）
+        mainImage.style.transition = 'opacity 0.15s ease-in-out';
+        mainImage.style.opacity = '0.5';
+        
+        setTimeout(() => {
           mainImage.src = images[index].src;
           mainImage.alt = images[index].alt;
+          mainImage.style.opacity = '1';
           currentImageIndex = index;
           updateThumbnailActive(index);
-          isChangingImage = false;
-        } else {
-          // 平滑过渡
-          mainImage.style.transition = 'opacity 0.15s ease-in-out';
-          mainImage.style.opacity = '0.5';
           
           setTimeout(() => {
-            mainImage.src = images[index].src;
-            mainImage.alt = images[index].alt;
-            mainImage.style.opacity = '1';
-            currentImageIndex = index;
-            updateThumbnailActive(index);
-            
-            setTimeout(() => {
-              isChangingImage = false;
-            }, 150);
+            isChangingImage = false;
           }, 150);
-        }
-      } else {
-        isChangingImage = false;
+        }, 150);
       }
     }
 
@@ -123,7 +125,7 @@
       });
     }
 
-    // ========== 变体切换时选中对应的缩略图 - 优化版 ==========
+    // ========== 变体切换时选中对应的缩略图 ==========
     
     function setupVariantImageSwitch() {
       // 监听所有可能的变体选择器
@@ -187,9 +189,9 @@
           // 在缩略图列表中查找匹配的图片索引
           const matchingIndex = findMatchingThumbnailIndex(variantImageUrl);
           
-          if (matchingIndex !== -1 && matchingIndex !== currentImageIndex) {
-            // 选中对应的缩略图（快速切换，无过渡）
-            changeImage(matchingIndex, true);
+          if (matchingIndex !== -1) {
+            // 选中对应的缩略图（快速切换，无过渡，强制执行）
+            changeImage(matchingIndex, true, true);
             updateIndicator();
           }
         }
@@ -293,24 +295,23 @@
 
         if (swipeDistance > minSwipeDistance && currentImageIndex < images.length - 1) {
           currentImageIndex++;
-          changeImage(currentImageIndex);
+          changeImage(currentImageIndex, false, false);
           updateIndicator();
         } 
         else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
           currentImageIndex--;
-          changeImage(currentImageIndex);
+          changeImage(currentImageIndex, false, false);
           updateIndicator();
         }
       }
     }
 
-    // 桌面端悬停切换功能
+    // 桌面端悬停切换功能 - 修复版
     function setupDesktopHover() {
       thumbnails.forEach((thumbnail, index) => {
         thumbnail.addEventListener('mouseenter', function () {
-          if (currentImageIndex !== index) {
-            changeImage(index);
-          }
+          // 允许鼠标悬停切换，使用平滑过渡
+          changeImage(index, false, false);
         });
       });
     }
@@ -428,6 +429,7 @@
     });
   });
 </script>
+
 
 
 
