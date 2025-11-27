@@ -618,6 +618,8 @@
 </style>
 
 <script>
+    const productData = {{ product_resource | json }};
+  
   document.addEventListener('DOMContentLoaded', function () {
     const mainImage = document.getElementById('main-product-image');
     const productImages = document.querySelector('.product-images');
@@ -635,6 +637,37 @@
       return window.innerWidth <= 768 || 'ontouchstart' in window;
     }
 
+     const variantInputs = document.querySelectorAll('variant-picker input[type="radio"], variant-picker select');
+    
+    variantInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        const variantId = this.dataset.variantId || this.selectedOptions?.[0]?.dataset.variantId;
+        
+        if (variantId) {
+          // 从产品数据中找到对应的变体
+          const variant = productData.variants.find(v => v.id == variantId);
+          
+          if (variant && variant.featured_media) {
+            // 切换到对应的图片
+            switchToImage(variant.featured_media.id);
+          }
+        }
+      });
+    });
+    
+    function switchToImage(mediaId) {
+      // 根据你的主题图片结构调整这个选择器
+      const allImages = document.querySelectorAll('[data-media-id]');
+      const targetImage = document.querySelector(`[data-media-id="${mediaId}"]`);
+      
+      if (targetImage) {
+        // 移除所有激活状态
+        allImages.forEach(img => img.classList.remove('is-active', 'active'));
+        
+        // 激活目标图片
+        targetImage.classList.add('is-active');
+        targetImage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     // 切换图片函数
     function changeImage(index) {
       if (mainImage && images[index]) {
