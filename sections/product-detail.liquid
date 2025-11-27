@@ -63,33 +63,67 @@
       alt: thumb.dataset.imageAlt,
     }));
 
+    // 防抖标志
+    let isChangingImage = false;
+    let variantChangeTimeout = null;
+
     // 检测是否为移动设备
     function isMobileDevice() {
       return window.innerWidth <= 768 || 'ontouchstart' in window;
     }
 
-    // 切换图片函数
-    function changeImage(index) {
-      if (mainImage && images[index]) {
-        mainImage.style.opacity = '0.5';
-        
-        setTimeout(() => {
+    // 切换图片函数 - 优化版，减少闪动
+    function changeImage(index, skipTransition = false) {
+      if (mainImage && images[index] && currentImageIndex !== index) {
+        // 防止重复切换
+        if (isChangingImage) return;
+        isChangingImage = true;
+
+        // 如果是同一张图片，直接返回
+        if (mainImage.src === images[index].src) {
+          isChangingImage = false;
+          currentImageIndex = index;
+          updateThumbnailActive(index);
+          return;
+        }
+
+        if (skipTransition) {
+          // 无过渡直接切换
           mainImage.src = images[index].src;
           mainImage.alt = images[index].alt;
-          mainImage.style.opacity = '1';
-        }, 150);
-
-        // 更新缩略图激活状态
-        thumbnails.forEach((t, i) => {
-          t.classList.toggle('active', i === index);
-        });
-        
-        // 更新当前索引
-        currentImageIndex = index;
+          currentImageIndex = index;
+          updateThumbnailActive(index);
+          isChangingImage = false;
+        } else {
+          // 平滑过渡
+          mainImage.style.transition = 'opacity 0.15s ease-in-out';
+          mainImage.style.opacity = '0.5';
+          
+          setTimeout(() => {
+            mainImage.src = images[index].src;
+            mainImage.alt = images[index].alt;
+            mainImage.style.opacity = '1';
+            currentImageIndex = index;
+            updateThumbnailActive(index);
+            
+            setTimeout(() => {
+              isChangingImage = false;
+            }, 150);
+          }, 150);
+        }
+      } else {
+        isChangingImage = false;
       }
     }
 
-    // ========== 变体切换时选中对应的缩略图 ==========
+    // 更新缩略图激活状态
+    function updateThumbnailActive(index) {
+      thumbnails.forEach((t, i) => {
+        t.classList.toggle('active', i === index);
+      });
+    }
+
+    // ========== 变体切换时选中对应的缩略图 - 优化版 ==========
     
     function setupVariantImageSwitch() {
       // 监听所有可能的变体选择器
@@ -99,7 +133,7 @@
       
       variantInputs.forEach(input => {
         input.addEventListener('change', function() {
-          setTimeout(handleVariantChange, 150);
+          handleVariantChangeDebounced();
         });
       });
 
@@ -107,7 +141,7 @@
       const variantSelects = document.querySelectorAll('select[name^="option"], select.variant-select');
       variantSelects.forEach(select => {
         select.addEventListener('change', function() {
-          setTimeout(handleVariantChange, 150);
+          handleVariantChangeDebounced();
         });
       });
 
@@ -117,7 +151,7 @@
         const observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-              handleVariantChange();
+              handleVariantChangeDebounced();
             }
           });
         });
@@ -127,14 +161,19 @@
           attributeFilter: ['value']
         });
       }
+    }
 
-      // 监听整个产品表单的变化
-      const productForm = document.querySelector('form[action*="/cart/add"]');
-      if (productForm) {
-        productForm.addEventListener('change', function() {
-          setTimeout(handleVariantChange, 100);
-        });
+    // 防抖处理变体变化
+    function handleVariantChangeDebounced() {
+      // 清除之前的定时器
+      if (variantChangeTimeout) {
+        clearTimeout(variantChangeTimeout);
       }
+
+      // 设置新的定时器
+      variantChangeTimeout = setTimeout(() => {
+        handleVariantChange();
+      }, 100);
     }
 
     // 处理变体变化
@@ -148,15 +187,10 @@
           // 在缩略图列表中查找匹配的图片索引
           const matchingIndex = findMatchingThumbnailIndex(variantImageUrl);
           
-          if (matchingIndex !== -1) {
-            // 选中对应的缩略图（这会触发图片切换）
-            changeImage(matchingIndex);
+          if (matchingIndex !== -1 && matchingIndex !== currentImageIndex) {
+            // 选中对应的缩略图（快速切换，无过渡）
+            changeImage(matchingIndex, true);
             updateIndicator();
-            
-            // 如果是移动端，也更新指示器
-            if (isMobileDevice()) {
-              currentImageIndex = matchingIndex;
-            }
           }
         }
       }
@@ -274,8 +308,9 @@
     function setupDesktopHover() {
       thumbnails.forEach((thumbnail, index) => {
         thumbnail.addEventListener('mouseenter', function () {
-          currentImageIndex = index;
-          changeImage(index);
+          if (currentImageIndex !== index) {
+            changeImage(index);
+          }
         });
       });
     }
@@ -393,6 +428,7 @@
     });
   });
 </script>
+
 
 
 <style>
