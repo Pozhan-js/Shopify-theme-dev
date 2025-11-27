@@ -7,15 +7,31 @@
 {% assign target_collection = product.collections.first %}
 
 {% if target_collection %}
-  <div class="collection-info-section" style="margin: {{ section.settings.section_spacing }}px 0; background-color: {{ section.settings.section_bg_color }};">
+  <div
+    class="collection-info-section"
+    style="margin: {{ section.settings.section_spacing }}px 0; background-color: {{ section.settings.section_bg_color }};"
+  >
     <div class="collection-info-container">
+      <div class="collection-info-content" style="background-color: {{ section.settings.text_bg_color }};">
+        <h2 class="collection-info-title">{{ target_collection.title }}</h2>
+        {% if target_collection.description != blank %}
+          <div class="collection-info-description">
+            {{ target_collection.description }}
+          </div>
+        {% endif %}
+        {% if section.settings.show_link %}
+          <a href="{{ target_collection.url }}" class="collection-info-link"> Discover the collection → </a>
+        {% endif %}
+      </div>
       <div class="collection-info-image">
         {% if target_collection.image %}
-          <img 
+          <img
             src="{{ target_collection.image | img_url: '600x' }}"
-            srcset="{{ target_collection.image | img_url: '300x' }} 300w,
-                    {{ target_collection.image | img_url: '600x' }} 600w,
-                    {{ target_collection.image | img_url: '900x' }} 900w"
+            srcset="
+              {{ target_collection.image | img_url: '300x' }} 300w,
+              {{ target_collection.image | img_url: '600x' }} 600w,
+              {{ target_collection.image | img_url: '900x' }} 900w
+            "
             sizes="(max-width: 768px) 100vw, 55vw"
             alt="{{ target_collection.title }}"
             loading="lazy"
@@ -25,11 +41,13 @@
           {% for collection in product.collections %}
             {% if collection.image %}
               {% assign target_collection = collection %}
-              <img 
+              <img
                 src="{{ collection.image | img_url: '600x' }}"
-                srcset="{{ collection.image | img_url: '300x' }} 300w,
-                        {{ collection.image | img_url: '600x' }} 600w,
-                        {{ collection.image | img_url: '900x' }} 900w"
+                srcset="
+                  {{ collection.image | img_url: '300x' }} 300w,
+                  {{ collection.image | img_url: '600x' }} 600w,
+                  {{ collection.image | img_url: '900x' }} 900w
+                "
                 sizes="(max-width: 768px) 100vw, 55vw"
                 alt="{{ collection.title }}"
                 loading="lazy"
@@ -39,20 +57,6 @@
           {% endfor %}
         {% endif %}
       </div>
-      
-      <div class="collection-info-content" style="background-color: {{ section.settings.text_bg_color }};">
-        <h2 class="collection-info-title">{{ target_collection.title }}</h2>
-        {% if target_collection.description != blank %}
-          <div class="collection-info-description">
-            {{ target_collection.description }}
-          </div>
-        {% endif %}
-        {% if section.settings.show_link %}
-          <a href="{{ target_collection.url }}" class="collection-info-link">
-            Discover the collection →
-          </a>
-        {% endif %}
-      </div>
     </div>
   </div>
 
@@ -60,18 +64,18 @@
     .collection-info-section {
       padding: 0 40px;
     }
-    
+
     .collection-info-container {
       display: grid;
       grid-template-columns: 49% 51%;
       gap: 12px;
       align-items: center;
     }
-    
+
     .collection-info-image {
       width: 100%;
     }
-    
+
     .collection-info-image img {
       width: 100%;
       height: auto;
@@ -79,20 +83,20 @@
       border-radius: 8px;
       object-fit: cover;
     }
-    
+
     .collection-info-content {
       padding: 20px;
       border-radius: 8px;
       height:100%;
     }
-    
+
     .collection-info-title {
       font-size: 28px;
       font-weight: bold;
       margin-bottom: 16px;
       color: #000;
     }
-    
+
     .collection-info-description {
       font-size: 16px;
       line-height: 1.6;
@@ -100,7 +104,7 @@
       color: #666;
       white-space: pre-line;
     }
-    
+
     .collection-info-link {
       display: inline-block;
       padding: 12px 24px;
@@ -111,25 +115,25 @@
       transition: background-color 0.3s ease;
       font-weight: 500;
     }
-    
+
     .collection-info-link:hover {
       background-color: #333;
     }
-    
+
     @media (max-width: 768px) {
       .collection-info-section {
         padding: 0 20px;
       }
-      
+
       .collection-info-container {
         grid-template-columns: 1fr;
         gap: 24px;
       }
-      
+
       .collection-info-content {
         padding: 10px;
       }
-      
+
       .collection-info-title {
         font-size: 24px;
       }
