@@ -68,7 +68,6 @@
     // 切换图片函数
     function changeImage(index) {
       if (mainImage && images[index]) {
-        // 添加淡出效果
         mainImage.style.opacity = '0.5';
         
         setTimeout(() => {
@@ -77,7 +76,6 @@
           mainImage.style.opacity = '1';
         }, 150);
 
-        // 更新缩略图激活状态（桌面端）
         if (!isMobileDevice()) {
           thumbnails.forEach((t, i) => {
             t.classList.toggle('active', i === index);
@@ -85,6 +83,148 @@
         }
       }
     }
+
+    // ========== 新增：变体图片切换功能 ==========
+    
+    // 监听变体选择变化
+    function setupVariantImageSwitch() {
+      // 方法1: 监听所有变体选项按钮/单选框
+      const variantInputs = document.querySelectorAll(
+        'input[name^="option"], input[type="radio"][name*="option"], fieldset input[type="radio"]'
+      );
+      
+      variantInputs.forEach(input => {
+        input.addEventListener('change', handleVariantChange);
+      });
+
+      // 方法2: 监听下拉选择器
+      const variantSelects = document.querySelectorAll('select[name^="option"]');
+      variantSelects.forEach(select => {
+        select.addEventListener('change', handleVariantChange);
+      });
+
+      // 方法3: 使用 MutationObserver 监听 DOM 变化(适用于动态加载的变体选择器)
+      const productForm = document.querySelector('form[action*="/cart/add"]');
+      if (productForm) {
+        const observer = new MutationObserver(() => {
+          handleVariantChange();
+        });
+        
+        observer.observe(productForm, {
+          attributes: true,
+          attributeFilter: ['data-variant-id', 'data-selected-variant'],
+          subtree: true
+        });
+      }
+    }
+
+    // 处理变体变化
+    function handleVariantChange() {
+      setTimeout(() => {
+        // 获取当前选中的变体ID
+        const selectedVariantId = getSelectedVariantId();
+        
+        if (selectedVariantId) {
+          updateImageForVariant(selectedVariantId);
+        }
+      }, 100);
+    }
+
+    // 获取当前选中的变体ID
+    function getSelectedVariantId() {
+      // 方法1: 从隐藏的 input[name="id"] 获取
+      const variantIdInput = document.querySelector('input[name="id"]');
+      if (variantIdInput && variantIdInput.value) {
+        return variantIdInput.value;
+      }
+
+      // 方法2: 从 select[name="id"] 获取
+      const variantSelect = document.querySelector('select[name="id"]');
+      if (variantSelect && variantSelect.value) {
+        return variantSelect.value;
+      }
+
+      // 方法3: 从表单的 data 属性获取
+      const form = document.querySelector('form[action*="/cart/add"]');
+      if (form) {
+        const dataVariantId = form.getAttribute('data-variant-id') || 
+                             form.getAttribute('data-selected-variant');
+        if (dataVariantId) {
+          return dataVariantId;
+        }
+      }
+
+      return null;
+    }
+
+    // 根据变体ID更新图片
+    function updateImageForVariant(variantId) {
+      // 从页面中查找变体数据
+      const variantData = findVariantData(variantId);
+      
+      if (variantData && variantData.featured_image) {
+        const variantImageUrl = variantData.featured_image.src || variantData.featured_image;
+        
+        // 在缩略图中查找匹配的图片
+        const matchingIndex = images.findIndex(img => {
+          // 比较图片URL(去除尺寸参数)
+          const imgSrcClean = img.src.split('?')[0].replace(/_\d+x\d+/, '');
+          const variantSrcClean = variantImageUrl.split('?')[0].replace(/_\d+x\d+/, '');
+          return imgSrcClean.includes(variantSrcClean) || variantSrcClean.includes(imgSrcClean);
+        });
+
+        if (matchingIndex !== -1) {
+          currentImageIndex = matchingIndex;
+          changeImage(matchingIndex);
+          updateIndicator();
+        } else {
+          // 如果缩略图中没有,直接更新主图
+          if (mainImage) {
+            mainImage.style.opacity = '0.5';
+            setTimeout(() => {
+              mainImage.src = variantImageUrl;
+              mainImage.alt = variantData.name || variantData.title || '';
+              mainImage.style.opacity = '1';
+            }, 150);
+          }
+        }
+      }
+    }
+
+    // 查找变体数据
+    function findVariantData(variantId) {
+      // 方法1: 从 JSON script 标签获取
+      const productJsonScript = document.querySelector('script[type="application/json"][data-product-json], script[data-product-json]');
+      if (productJsonScript) {
+        try {
+          const productData = JSON.parse(productJsonScript.textContent);
+          const variant = productData.variants.find(v => v.id == variantId);
+          if (variant) return variant;
+        } catch (e) {
+          console.log('无法解析产品JSON数据');
+        }
+      }
+
+      // 方法2: 从 window 对象获取(某些主题会将产品数据存储在 window 中)
+      if (window.ShopifyProduct && window.ShopifyProduct.variants) {
+        const variant = window.ShopifyProduct.variants.find(v => v.id == variantId);
+        if (variant) return variant;
+      }
+
+      // 方法3: 从 data 属性获取
+      const variantElements = document.querySelectorAll(`[data-variant-id="${variantId}"]`);
+      for (const el of variantElements) {
+        const imageUrl = el.getAttribute('data-variant-image') || 
+                        el.getAttribute('data-image');
+        if (imageUrl) {
+          return { featured_image: { src: imageUrl } };
+        }
+      }
+
+      return null;
+    }
+
+    // ========== 原有功能保持不变 ==========
 
     // 移动端滑动切换功能
     function setupMobileSwipe() {
@@ -101,15 +241,13 @@
 
       function handleSwipe() {
         const swipeDistance = touchStartX - touchEndX;
-        const minSwipeDistance = 50; // 最小滑动距离（像素）
+        const minSwipeDistance = 50;
 
-        // 向左滑动 - 下一张
         if (swipeDistance > minSwipeDistance && currentImageIndex < images.length - 1) {
           currentImageIndex++;
           changeImage(currentImageIndex);
           updateIndicator();
         } 
-        // 向右滑动 - 上一张
         else if (swipeDistance < -minSwipeDistance && currentImageIndex > 0) {
           currentImageIndex--;
           changeImage(currentImageIndex);
@@ -128,7 +266,7 @@
       });
     }
 
-    // 添加图片指示器（移动端）
+    // 添加图片指示器(移动端)
     function addImageIndicator() {
       if (images.length <= 1) return;
 
@@ -157,6 +295,9 @@
     } else {
       setupDesktopHover();
     }
+
+    // ========== 初始化变体图片切换 ==========
+    setupVariantImageSwitch();
 
     // 数量选择器功能
     const minusBtn = document.querySelector('.quantity-btn.minus');
@@ -192,11 +333,9 @@
         const formData = new FormData(form);
         const originalText = this.textContent;
 
-        // 添加加载状态
         this.textContent = '处理中...';
         this.disabled = true;
 
-        // 先添加到购物车
         fetch('/cart/add.js', {
           method: 'POST',
           headers: {
@@ -214,13 +353,11 @@
             throw new Error('添加到购物车失败');
           })
           .then((data) => {
-            // 成功添加后跳转到结账页面
             window.location.href = '/checkout';
           })
           .catch((error) => {
             console.error('Error:', error);
             alert('添加到购物车时出现错误,请重试');
-            // 恢复按钮状态
             this.textContent = originalText;
             this.disabled = false;
           });
@@ -235,7 +372,6 @@
         const wasMobile = document.querySelector('.image-indicator') !== null;
         const isMobileNow = isMobileDevice();
         
-        // 如果设备类型改变，重新加载页面
         if (wasMobile !== isMobileNow) {
           location.reload();
         }
@@ -243,6 +379,7 @@
     });
   });
 </script>
+
 
 <style>
   .product-detail-section {
