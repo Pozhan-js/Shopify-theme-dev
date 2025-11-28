@@ -335,7 +335,120 @@
     </div>
   </div>
 
-  <button class="apply-btn" onclick="applyFilters()">SHOW RESULTS</button>
+  {%- comment -%} 计算筛选后的产品数量 {%- endcomment -%}
+  {%- assign filtered_product_count = 0 -%}
+  {%- assign filtered_products = '' | split: '' -%}
+  
+  {%- comment -%} 获取当前URL参数 {%- endcomment -%}
+  {%- assign query_params = request.query_string | split: '&' -%}
+  
+  {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
+  {%- if collection and collection.products.size > 0 -%}
+    {%- assign base_products = collection.products -%}
+  {%- else -%}
+    {%- assign base_products = collections.all.products -%}
+  {%- endif -%}
+  
+  {%- comment -%} 基于当前筛选条件过滤产品并计数 {%- endcomment -%}
+  {%- for product in base_products limit: 500 -%}
+    {%- assign include_product = true -%}
+    
+    {%- comment -%} 检查品牌筛选 {%- endcomment -%}
+    {%- assign brand_filter = '' -%}
+    {%- for param in query_params -%}
+      {%- if param contains 'filter.v.brand' -%}
+        {%- assign brand_filter = param | remove: 'filter.v.brand=' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if brand_filter != blank -%}
+      {%- assign selected_brands = brand_filter | split: '+' -%}
+      {%- unless selected_brands contains product.vendor -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 检查产品类型筛选 {%- endcomment -%}
+    {%- assign type_filter = '' -%}
+    {%- for param in query_params -%}
+      {%- if param contains 'filter.v.product_type' -%}
+        {%- assign type_filter = param | remove: 'filter.v.product_type=' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if type_filter != blank -%}
+      {%- assign selected_types = type_filter | split: '+' -%}
+      {%- assign product_type = product.type | replace: ' ', '-' -%}
+      {%- unless selected_types contains product_type -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 检查颜色筛选 {%- endcomment -%}
+    {%- assign color_filter = '' -%}
+    {%- for param in query_params -%}
+      {%- if param contains 'filter.v.color' -%}
+        {%- assign color_filter = param | remove: 'filter.v.color=' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if color_filter != blank -%}
+      {%- assign selected_colors = color_filter | split: '+' -%}
+      {%- assign product_colors = '' | split: '' -%}
+      {%- for variant in product.variants -%}
+        {%- if variant.available -%}
+          {%- assign variant_color = variant.title | split: ' / ' | first -%}
+          {%- unless product_colors contains variant_color -%}
+            {%- assign product_colors = product_colors | push: variant_color -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign color_match = false -%}
+      {%- for color in product_colors -%}
+        {%- if selected_colors contains color -%}
+          {%- assign color_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless color_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 检查SIZE筛选 {%- endcomment -%}
+    {%- assign size_filter = '' -%}
+    {%- for param in query_params -%}
+      {%- if param contains 'filter.v.size' -%}
+        {%- assign size_filter = param | remove: 'filter.v.size=' -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if size_filter != blank -%}
+      {%- assign selected_sizes = size_filter | split: '+' -%}
+      {%- assign product_sizes = '' | split: '' -%}
+      {%- for variant in product.variants -%}
+        {%- if variant.available -%}
+          {%- assign variant_size = variant.title | split: ' / ' | last -%}
+          {%- unless product_sizes contains variant_size -%}
+            {%- assign product_sizes = product_sizes | push: variant_size -%}
+          {%- endunless -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- assign size_match = false -%}
+      {%- for size in product_sizes -%}
+        {%- if selected_sizes contains size -%}
+          {%- assign size_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless size_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if include_product -%}
+      {%- assign filtered_product_count = filtered_product_count | plus: 1 -%}
+      {%- assign filtered_products = filtered_products | push: product -%}
+    {%- endif -%}
+  {%- endfor -%}
+  
+  <button class="apply-btn" onclick="applyFilters()">
+    SHOW RESULTS ({{ filtered_product_count }})
+  </button>
 </div>
 
 <script>
