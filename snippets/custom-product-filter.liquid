@@ -127,10 +127,74 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {% assign size_options = shop.metaobjects.standard_product_attributes.values | where: "definition_name", "尺寸" %}
-        {% for size in size_options %}
-          <li><input type="checkbox" name="size" value="{{ size.value }}"> {{ size.value }}</li>
-        {% endfor %}
+        {%- comment -%} 获取当前集合的所有产品 {%- endcomment -%}
+        {%- assign current_collection = collection -%}
+        {%- assign available_sizes = '' | split: '' -%}
+        
+        {%- comment -%} 遍历当前集合的所有产品获取SIZE {%- endcomment -%}
+        {%- if current_collection and current_collection.products.size > 0 -%}
+          {%- for product in current_collection.products -%}
+            {%- for variant in product.variants -%}
+              {%- if variant.available -%}
+                {%- assign variant_size = variant.title | split: ' / ' | last -%}
+                {%- unless available_sizes contains variant_size -%}
+                  {%- assign available_sizes = available_sizes | push: variant_size -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        {%- endif -%}
+        
+        {%- comment -%} 如果没有集合，使用所有产品的SIZE {%- endcomment -%}
+        {%- if available_sizes.size == 0 -%}
+          {%- assign all_products = collections.all.products -%}
+          {%- for product in all_products limit: 100 -%}
+            {%- for variant in product.variants -%}
+              {%- if variant.available -%}
+                {%- assign variant_size = variant.title | split: ' / ' | last -%}
+                {%- unless available_sizes contains variant_size -%}
+                  {%- assign available_sizes = available_sizes | push: variant_size -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        {%- endif -%}
+        
+        {%- comment -%} 按标准顺序排序SIZE {%- endcomment -%}
+        {%- assign size_order = 'XS,S,M,L,XL,XXL,XXXL,2XL,3XL,4XL,5XL,6XL,7XL,8XL,9XL,10XL' | split: ',' -%}
+        {%- assign sorted_sizes = '' | split: '' -%}
+        
+        {%- for standard_size in size_order -%}
+          {%- if available_sizes contains standard_size -%}
+            {%- assign sorted_sizes = sorted_sizes | push: standard_size -%}
+          {%- endif -%}
+        {%- endfor -%}
+        
+        {%- comment -%} 添加剩余的SIZE {%- endcomment -%}
+        {%- for size in available_sizes -%}
+          {%- unless size_order contains size -%}
+            {%- assign sorted_sizes = sorted_sizes | push: size -%}
+          {%- endunless -%}
+        {%- endfor -%}
+        
+        {%- comment -%} 显示SIZE选项 {%- endcomment -%}
+        {%- for size in sorted_sizes -%}
+          {%- assign is_checked = false -%}
+          {%- if request.params contains 'filter.v.size' -%}
+            {%- assign selected_sizes = request.params['filter.v.size'] | split: '+' -%}
+            {%- if selected_sizes contains size -%}
+              {%- assign is_checked = true -%}
+            {%- endif -%}
+          {%- endif -%}
+          
+          <li>
+            <input type="checkbox" 
+                   name="size" 
+                   value="{{ size }}" 
+                   {% if is_checked %}checked{% endif %}>
+            {{ size }}
+          </li>
+        {%- endfor -%}
       </ul>
     </div>
   </div>
