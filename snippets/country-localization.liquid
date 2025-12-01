@@ -364,205 +364,128 @@
 {% endstyle %}
 
 <script>
-// Override the original localization-form behavior
-(function() {
-  'use strict';
+// Debug version with console logs
+console.log('🚀 Country Modal Script Loading...');
+
+// Simple event delegation approach
+function initCountryModal() {
+  console.log('🔄 initCountryModal called');
   
-  // Store original custom element definition
-  const originalDefine = customElements.define;
+  // Find all disclosure containers
+  const containers = document.querySelectorAll('.disclosure');
+  console.log(`📦 Found ${containers.length} disclosure containers`);
   
-  // Override customElements.define to prevent original localization-form
-  customElements.define = function(name, constructor, options) {
-    if (name === 'localization-form') {
-      // Skip original definition, use our modal instead
+  containers.forEach((container, index) => {
+    console.log(`🔍 Processing container ${index}`);
+    
+    const modal = container.querySelector('.country-modal');
+    const trigger = container.querySelector('.disclosure__button');
+    const closeButtons = container.querySelectorAll('[data-country-modal-close]');
+    const confirmButton = container.querySelector('[data-country-modal-confirm]');
+    const originalPanel = container.querySelector('.disclosure__list-wrapper');
+    
+    console.log('📋 Elements:', {
+      modal: modal,
+      trigger: trigger,
+      closeButtons: closeButtons.length,
+      confirmButton: confirmButton,
+      originalPanel: originalPanel
+    });
+    
+    if (!modal || !trigger) {
+      console.warn('❌ Missing modal or trigger');
       return;
     }
-    return originalDefine.call(this, name, constructor, options);
-  };
-
-  class CountryModal {
-    constructor(container) {
-      if (!container) return;
-      
-      this.container = container;
-      this.modal = container.querySelector('.country-modal');
-      this.trigger = container.querySelector('.disclosure__button');
-      this.closeButtons = container.querySelectorAll('[data-country-modal-close]');
-      this.confirmButton = container.querySelector('[data-country-modal-confirm]');
-      this.radioButtons = container.querySelectorAll('input[name="country_code_modal"]');
-      this.hiddenInput = container.querySelector('input[name="country_code"]');
-      this.originalPanel = container.querySelector('.disclosure__list-wrapper');
-      
-      // Only initialize if all required elements exist
-      if (this.modal && this.trigger) {
-        this.init();
-      }
+    
+    // Hide original dropdown
+    if (originalPanel) {
+      originalPanel.style.display = 'none';
+      originalPanel.setAttribute('hidden', 'true');
     }
-
-    init() {
-      // Hide original dropdown
-      if (this.originalPanel) {
-        this.originalPanel.style.display = 'none';
-        this.originalPanel.setAttribute('hidden', 'true');
-      }
+    
+    // Add click listener to trigger
+    trigger.addEventListener('click', function(e) {
+      console.log('🖱️ Trigger clicked!', e.target);
+      e.preventDefault();
+      e.stopPropagation();
       
-      // Remove original event listeners by replacing the button
-      const newTrigger = this.trigger.cloneNode(true);
-      this.trigger.parentNode.replaceChild(newTrigger, this.trigger);
-      this.trigger = newTrigger;
-      
-      this.bindEvents();
-    }
-
-    bindEvents() {
-      if (this.trigger) {
-        this.trigger.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          this.open();
-        });
-      }
-      
-      if (this.closeButtons) {
-        this.closeButtons.forEach(button => {
-          if (button) {
-            button.addEventListener('click', (e) => {
-              e.preventDefault();
-              this.close();
-            });
-          }
-        });
-      }
-
-      if (this.confirmButton) {
-        this.confirmButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.confirmSelection();
-        });
-      }
-
-      if (this.radioButtons) {
-        this.radioButtons.forEach(radio => {
-          if (radio) {
-            radio.addEventListener('change', this.handleRadioChange.bind(this));
-          }
-        });
-      }
-
-      if (this.modal) {
-        this.modal.addEventListener('click', (e) => {
-          console.log(1111)
-          if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
-            e.preventDefault();
-            this.close();
-          }
-        });
-      }
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && this.modal && this.modal.getAttribute('aria-hidden') === 'false') {
-          e.preventDefault();
-          this.close();
-        }
-      });
-    }
-
-    open() {
-      if (!this.modal) return;
-      
-      try {
-        this.modal.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-        
-        // Focus management
-        const checkedRadio = this.modal.querySelector('input[type="radio"]:checked');
-        const radioToFocus = checkedRadio || this.modal.querySelector('input[type="radio"]');
-        if (radioToFocus) {
-          setTimeout(() => radioToFocus.focus(), 100);
-        }
-      } catch (error) {
-        console.warn('CountryModal: Error opening modal', error);
-      }
-    }
-
-    close() {
-      if (!this.modal) return;
-      
-      try {
-        this.modal.setAttribute('aria-hidden', 'true');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      console.log('✅ Modal opened');
+    });
+    
+    // Add click listeners to close buttons
+    closeButtons.forEach((button, i) => {
+      button.addEventListener('click', function(e) {
+        console.log(`🖱️ Close button ${i} clicked!`);
+        e.preventDefault();
+        modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        if (this.trigger) {
-          this.trigger.focus();
-        }
-      } catch (error) {
-        console.warn('CountryModal: Error closing modal', error);
-      }
-    }
-
-    handleRadioChange(event) {
-      // Enable confirm button when selection changes
-      if (this.confirmButton) {
-        this.confirmButton.disabled = false;
-      }
-    }
-
-    confirmSelection() {
-      try {
-        const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
-        if (selectedRadio && this.hiddenInput) {
-          this.hiddenInput.value = selectedRadio.value;
+        console.log('✅ Modal closed');
+      });
+    });
+    
+    // Add click listener to confirm button
+    if (confirmButton) {
+      confirmButton.addEventListener('click', function(e) {
+        console.log('🖱️ Confirm button clicked!');
+        e.preventDefault();
+        
+        const selectedRadio = container.querySelector('input[name="country_code_modal"]:checked');
+        const hiddenInput = container.querySelector('input[name="country_code"]');
+        
+        if (selectedRadio && hiddenInput) {
+          hiddenInput.value = selectedRadio.value;
           
           // Find and click the corresponding original link
-          const originalLink = this.container.querySelector(`a[data-value="${selectedRadio.value}"]`);
+          const originalLink = container.querySelector(`a[data-value="${selectedRadio.value}"]`);
           if (originalLink) {
+            console.log('🔗 Clicking original link');
             originalLink.click();
           } else {
-            // Fallback: submit form
-            const form = this.container.closest('form');
-            if (form) {
-              form.submit();
-            }
+            const form = container.closest('form');
+            if (form) form.submit();
           }
         }
         
-        this.close();
-      } catch (error) {
-        console.warn('CountryModal: Error confirming selection', error);
-      }
-    }
-  }
-
-  // Initialize on DOM ready
-  function initCountryModals() {
-    try {
-      const containers = document.querySelectorAll('.disclosure');
-      containers.forEach(container => {
-        if (container) new CountryModal(container);
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
       });
-    } catch (error) {
-      console.warn('CountryModal: Error initializing modals', error);
     }
-  }
-
-  // Wait for DOM to be ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCountryModals);
-  } else {
-    initCountryModals();
-  }
-
-  // Re-initialize when sections are re-rendered (for theme editor)
-  if (typeof Shopify !== 'undefined' && Shopify.designMode) {
-    document.addEventListener('shopify:section:load', (event) => {
-      try {
-        const containers = event.target.querySelectorAll('.disclosure');
-        containers.forEach(container => {
-          if (container) new CountryModal(container);
-        });
-      } catch (error) {
-        console.warn('CountryModal: Error re-initializing modals', error);
+    
+    // Add click listener to modal overlay
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal || e.target.classList.contains('country-modal__overlay')) {
+        console.log('🖱️ Modal overlay clicked!');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
       }
     });
-  }
-})();
+    
+    // Add escape key listener
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+        console.log('⌨️ Escape key pressed!');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    });
+    
+    console.log('✅ CountryModal initialized for container', index);
+  });
+}
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCountryModal);
+} else {
+  initCountryModal();
+}
+
+// Re-initialize for theme editor
+if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+  document.addEventListener('shopify:section:load', initCountryModal);
+}
+
+console.log('✅ Country Modal Script Loaded');
 </script>
