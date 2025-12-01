@@ -252,6 +252,8 @@
 <script>
 class CountryModal {
   constructor(container) {
+    if (!container) return;
+    
     this.container = container;
     this.modal = container.querySelector('.country-modal');
     this.trigger = container.querySelector('[data-country-modal-trigger]');
@@ -260,7 +262,10 @@ class CountryModal {
     this.radioButtons = container.querySelectorAll('input[name="country_code_modal"]');
     this.hiddenInput = container.querySelector('input[name="country_code"]');
     
-    this.init();
+    // Only initialize if all required elements exist
+    if (this.modal && this.trigger) {
+      this.init();
+    }
   }
 
   init() {
@@ -268,26 +273,51 @@ class CountryModal {
   }
 
   bindEvents() {
-    this.trigger?.addEventListener('click', this.open.bind(this));
+    if (this.trigger) {
+      this.trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.open();
+      });
+    }
     
-    this.closeButtons.forEach(button => {
-      button.addEventListener('click', this.close.bind(this));
-    });
+    if (this.closeButtons) {
+      this.closeButtons.forEach(button => {
+        if (button) {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.close();
+          });
+        }
+      });
+    }
 
-    this.confirmButton?.addEventListener('click', this.confirmSelection.bind(this));
+    if (this.confirmButton) {
+      this.confirmButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.confirmSelection();
+      });
+    }
 
-    this.radioButtons.forEach(radio => {
-      radio.addEventListener('change', this.handleRadioChange.bind(this));
-    });
+    if (this.radioButtons) {
+      this.radioButtons.forEach(radio => {
+        if (radio) {
+          radio.addEventListener('change', this.handleRadioChange.bind(this));
+        }
+      });
+    }
 
-    this.modal?.addEventListener('click', (e) => {
-      if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
-        this.close();
-      }
-    });
+    if (this.modal) {
+      this.modal.addEventListener('click', (e) => {
+        if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
+          e.preventDefault();
+          this.close();
+        }
+      });
+    }
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.modal?.getAttribute('aria-hidden') === 'false') {
+      if (e.key === 'Escape' && this.modal && this.modal.getAttribute('aria-hidden') === 'false') {
+        e.preventDefault();
         this.close();
       }
     });
@@ -296,22 +326,32 @@ class CountryModal {
   open() {
     if (!this.modal) return;
     
-    this.modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-    
-    // Focus management
-    const firstRadio = this.modal.querySelector('input[type="radio"]');
-    if (firstRadio) {
-      setTimeout(() => firstRadio.focus(), 100);
+    try {
+      this.modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      
+      // Focus management
+      const firstRadio = this.modal.querySelector('input[type="radio"]');
+      if (firstRadio) {
+        setTimeout(() => firstRadio.focus(), 100);
+      }
+    } catch (error) {
+      console.warn('CountryModal: Error opening modal', error);
     }
   }
 
   close() {
     if (!this.modal) return;
     
-    this.modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-    this.trigger?.focus();
+    try {
+      this.modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      if (this.trigger) {
+        this.trigger.focus();
+      }
+    } catch (error) {
+      console.warn('CountryModal: Error closing modal', error);
+    }
   }
 
   handleRadioChange(event) {
@@ -322,37 +362,63 @@ class CountryModal {
   }
 
   confirmSelection() {
-    const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
-    if (selectedRadio && this.hiddenInput) {
-      this.hiddenInput.value = selectedRadio.value;
-      
-      // Submit the form or trigger change event
-      const form = this.container.closest('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true }));
-      } else {
-        // Fallback: trigger custom event for theme integration
-        this.hiddenInput.dispatchEvent(new CustomEvent('change', { 
-          detail: { countryCode: selectedRadio.value } 
-        }));
+    try {
+      const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
+      if (selectedRadio && this.hiddenInput) {
+        this.hiddenInput.value = selectedRadio.value;
+        
+        // Submit the form or trigger change event
+        const form = this.container.closest('form');
+        if (form) {
+          const event = new Event('submit', { cancelable: true, bubbles: true });
+          form.dispatchEvent(event);
+        } else {
+          // Fallback: trigger custom event for theme integration
+          const changeEvent = new CustomEvent('change', { 
+            detail: { countryCode: selectedRadio.value },
+            bubbles: true
+          });
+          this.hiddenInput.dispatchEvent(changeEvent);
+        }
       }
+      
+      this.close();
+    } catch (error) {
+      console.warn('CountryModal: Error confirming selection', error);
     }
-    
-    this.close();
   }
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  const containers = document.querySelectorAll('.country-localization');
-  containers.forEach(container => new CountryModal(container));
-});
+function initCountryModals() {
+  try {
+    const containers = document.querySelectorAll('.country-localization');
+    containers.forEach(container => {
+      if (container) new CountryModal(container);
+    });
+  } catch (error) {
+    console.warn('CountryModal: Error initializing modals', error);
+  }
+}
+
+// Wait for DOM to be ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCountryModals);
+} else {
+  initCountryModals();
+}
 
 // Re-initialize when sections are re-rendered (for theme editor)
-if (Shopify && Shopify.designMode) {
+if (typeof Shopify !== 'undefined' && Shopify.designMode) {
   document.addEventListener('shopify:section:load', (event) => {
-    const containers = event.target.querySelectorAll('.country-localization');
-    containers.forEach(container => new CountryModal(container));
+    try {
+      const containers = event.target.querySelectorAll('.country-localization');
+      containers.forEach(container => {
+        if (container) new CountryModal(container);
+      });
+    } catch (error) {
+      console.warn('CountryModal: Error re-initializing modals', error);
+    }
   });
 }
 </script>
