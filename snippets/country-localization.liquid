@@ -408,37 +408,18 @@
 {% endstyle %}
 
 <script>
-// Updated script for new modal design
-console.log('🚀 Country Modal Script Loading...');
-
 function initCountryModal() {
-  console.log('🔄 initCountryModal called');
-  
-  // Find all modal overlays
   const overlays = document.querySelectorAll('.country-modal-overlay');
-  console.log(`🎯 Found ${overlays.length} country-modal-overlay elements`);
   
-  overlays.forEach((overlay, index) => {
-    console.log(`🔍 Processing overlay ${index}:`, overlay);
-    
-    // Get modal ID
+  overlays.forEach((overlay) => {
     const modalId = overlay.id;
     const localPosition = modalId.replace('country-modal-overlay-', '');
-    console.log('� Local position:', localPosition);
-    
-    // Find associated container
     const container = document.querySelector(`#LocalizationForm-${localPosition}`) || 
                      overlay.closest('.disclosure') || 
                      overlay.parentElement;
     
-    console.log('📦 Associated container:', container);
+    if (!container) return;
     
-    if (!container) {
-      console.warn('❌ No container found for overlay');
-      return;
-    }
-    
-    // Find elements
     const trigger = container.querySelector('.disclosure__button') || 
                    container.querySelector('.localization-form__select');
     const closeButtons = overlay.querySelectorAll('[data-country-modal-close]');
@@ -447,20 +428,7 @@ function initCountryModal() {
     const hiddenInput = container.querySelector('input[name="country_code"]');
     const originalPanel = container.querySelector('.disclosure__list-wrapper');
     
-    console.log('📋 Elements found:', {
-      overlay: overlay,
-      trigger: trigger,
-      closeButtons: closeButtons.length,
-      confirmButton: confirmButton,
-      countrySelect: countrySelect,
-      hiddenInput: hiddenInput,
-      originalPanel: originalPanel
-    });
-    
-    if (!trigger || !countrySelect) {
-      console.warn('❌ Missing trigger or country select');
-      return;
-    }
+    if (!trigger || !countrySelect) return;
     
     // Hide original dropdown
     if (originalPanel) {
@@ -473,62 +441,48 @@ function initCountryModal() {
       countrySelect.value = hiddenInput.value;
     }
     
-    // Add click listener to trigger
+    // Open modal
     trigger.addEventListener('click', function(e) {
-      console.log('🖱️ Trigger clicked!', e.target);
       e.preventDefault();
       e.stopPropagation();
-      
       overlay.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-      console.log('✅ Modal opened');
     });
     
-    // Add click listeners to close buttons
-    closeButtons.forEach((button, i) => {
+    // Close modal handlers
+    closeButtons.forEach((button) => {
       button.addEventListener('click', function(e) {
-        console.log(`🖱️ Close button ${i} clicked!`);
         e.preventDefault();
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
-        console.log('✅ Modal closed');
       });
     });
     
-    // Add click listener to overlay background
     overlay.addEventListener('click', function(e) {
       if (e.target === overlay) {
-        console.log('🖱️ Overlay background clicked!');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
       }
     });
     
-    // Add click listener to confirm button
+    // Confirm selection
     if (confirmButton) {
       confirmButton.addEventListener('click', function(e) {
-        console.log('🖱️ Confirm button clicked!');
         e.preventDefault();
         
         const selectedValue = countrySelect.value;
-        console.log('📋 Selected value:', selectedValue);
-        
         if (hiddenInput) {
           hiddenInput.value = selectedValue;
         }
         
-        // Find and click the corresponding original link
         const originalLink = container.querySelector(`a[data-value="${selectedValue}"]`);
         if (originalLink) {
-          console.log('🔗 Clicking original link');
           originalLink.click();
         } else {
           const form = container.closest('form');
           if (form) {
-            console.log('🚀 Submitting form');
             form.submit();
           } else {
-            console.log('📄 No form found, just closing modal');
             overlay.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
           }
@@ -536,30 +490,23 @@ function initCountryModal() {
       });
     }
     
-    // Add escape key listener
+    // Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') {
-        console.log('⌨️ Escape key pressed!');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
       }
     });
-    
-    console.log('✅ CountryModal initialized for overlay', index);
   });
 }
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initCountryModal);
 } else {
   initCountryModal();
 }
 
-// Re-initialize for theme editor
 if (typeof Shopify !== 'undefined' && Shopify.designMode) {
   document.addEventListener('shopify:section:load', initCountryModal);
 }
-
-console.log('✅ Country Modal Script Loaded');
 </script>
