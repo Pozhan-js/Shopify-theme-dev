@@ -375,25 +375,46 @@ function initCountryModal() {
   const containers = document.querySelectorAll('.disclosure');
   console.log(`📦 Found ${containers.length} disclosure containers`);
   
-  containers.forEach((container, index) => {
-    console.log(`🔍 Processing container ${index}`);
+  // Also check for country-modal elements directly
+  const modals = document.querySelectorAll('.country-modal');
+  console.log(`🎯 Found ${modals.length} country-modal elements`);
+  
+  // Process each modal with its associated trigger
+  modals.forEach((modal, index) => {
+    console.log(`🔍 Processing modal ${index}:`, modal);
     
-    const modal = container.querySelector('.country-modal');
-    const trigger = container.querySelector('.disclosure__button');
-    const closeButtons = container.querySelectorAll('[data-country-modal-close]');
-    const confirmButton = container.querySelector('[data-country-modal-confirm]');
+    // Find the associated disclosure container (parent or nearby)
+    const container = modal.closest('.disclosure') || modal.parentElement;
+    console.log('📦 Associated container:', container);
+    
+    if (!container) {
+      console.warn('❌ No container found for modal');
+      return;
+    }
+    
+    // Find elements within this container
+    const trigger = container.querySelector('.disclosure__button') || 
+                   container.querySelector('[data-country-modal-trigger]') ||
+                   container.querySelector('.localization-form__select');
+    
+    const closeButtons = modal.querySelectorAll('[data-country-modal-close]');
+    const confirmButton = modal.querySelector('[data-country-modal-confirm]');
     const originalPanel = container.querySelector('.disclosure__list-wrapper');
     
-    console.log('📋 Elements:', {
+    console.log('📋 Elements found:', {
       modal: modal,
       trigger: trigger,
       closeButtons: closeButtons.length,
       confirmButton: confirmButton,
-      originalPanel: originalPanel
+      originalPanel: originalPanel,
+      container: container
     });
     
-    if (!modal || !trigger) {
-      console.warn('❌ Missing modal or trigger');
+    if (!trigger) {
+      console.warn('❌ No trigger button found in container');
+      // Try to find any clickable element
+      const possibleTriggers = container.querySelectorAll('button, .link, [role="button"]');
+      console.log('🔍 Possible triggers:', possibleTriggers);
       return;
     }
     
@@ -401,6 +422,7 @@ function initCountryModal() {
     if (originalPanel) {
       originalPanel.style.display = 'none';
       originalPanel.setAttribute('hidden', 'true');
+      console.log('🙈 Original dropdown hidden');
     }
     
     // Add click listener to trigger
@@ -431,8 +453,11 @@ function initCountryModal() {
         console.log('🖱️ Confirm button clicked!');
         e.preventDefault();
         
-        const selectedRadio = container.querySelector('input[name="country_code_modal"]:checked');
-        const hiddenInput = container.querySelector('input[name="country_code"]');
+        const selectedRadio = modal.querySelector('input[name="country_code_modal"]:checked');
+        const hiddenInput = container.querySelector('input[name="country_code"]') || 
+                           container.querySelector('input[type="hidden"]');
+        
+        console.log('📋 Selection:', { selectedRadio, hiddenInput });
         
         if (selectedRadio && hiddenInput) {
           hiddenInput.value = selectedRadio.value;
@@ -444,7 +469,12 @@ function initCountryModal() {
             originalLink.click();
           } else {
             const form = container.closest('form');
-            if (form) form.submit();
+            if (form) {
+              console.log('🚀 Submitting form');
+              form.submit();
+            } else {
+              console.log('📄 No form found, just closing modal');
+            }
           }
         }
         
@@ -471,11 +501,12 @@ function initCountryModal() {
       }
     });
     
-    console.log('✅ CountryModal initialized for container', index);
+    console.log('✅ CountryModal initialized for modal', index);
   });
 }
 
 // Initialize when DOM is ready
+console.log('📊 Document readyState:', document.readyState);
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initCountryModal);
 } else {
@@ -484,6 +515,7 @@ if (document.readyState === 'loading') {
 
 // Re-initialize for theme editor
 if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+  console.log('🎨 Shopify design mode detected');
   document.addEventListener('shopify:section:load', initCountryModal);
 }
 
