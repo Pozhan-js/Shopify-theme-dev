@@ -25,10 +25,12 @@
   endif
 %}
 
-<div class="country-localization">
+<div class="disclosure">
   <button
     type="button"
-    class="country-localization__button localization-form__select localization-selector link link--text caption-large"
+    class="disclosure__button localization-form__select localization-selector link link--text caption-large"
+    aria-expanded="false"
+    aria-controls="{{ localPosition }}-country-results"
     aria-describedby="{{ localPosition }}Label"
     data-country-modal-trigger
   >
@@ -37,6 +39,118 @@
     </svg>
     {{ 'icon-caret.svg' | inline_asset_content }}
   </button>
+  <div class="disclosure__list-wrapper country-selector" hidden style="display: none !important;">
+    <div class="country-filter{% unless show_country_filter %} country-filter--no-padding{% endunless %}">
+      {% if show_country_filter %}
+        <div class="field">
+          <input
+            class="country-filter__input field__input"
+            id="country-filter-input"
+            type="search"
+            name="country_filter"
+            value=""
+            placeholder="{{ 'localization.search' | t }}"
+            role="combobox"
+            aria-owns="country-results"
+            aria-controls="country-results"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+            autocorrect="off"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <label class="field__label" for="country-filter-input">{{ 'localization.search' | t }}</label>
+          <button
+            type="reset"
+            class="country-filter__reset-button field__button hidden"
+            aria-label="{{ 'general.search.reset' | t }}"
+          >
+            {{- 'icon-reset.svg' | inline_asset_content -}}
+          </button>
+          <div class="country-filter__search-icon field__button motion-reduce">
+            {{- 'icon-search.svg' | inline_asset_content -}}
+          </div>
+        </div>
+      {% endif %}
+      <button
+        class="country-selector__close-button button--small link"
+        type="button"
+        aria-label="{{ 'accessibility.close' | t }}"
+      >
+        {{- 'icon-close.svg' | inline_asset_content -}}
+      </button>
+    </div>
+    <div id="sr-country-search-results" class="visually-hidden" aria-live="polite"></div>
+    <div
+      class="disclosure__list country-selector__list{% if show_currencies %} country-selector__list--with-multiple-currencies{% endif %}"
+      id="{{ localPosition }}-country-results"
+    >
+      {% if show_popular_countries %}
+        <ul
+          role="list"
+          class="list-unstyled popular-countries"
+          aria-label="{{ 'localization.popular_countries_regions' | t }}"
+        >
+          {%- for country in popular_countries -%}
+            <li class="disclosure__item" tabindex="-1">
+              <a
+                class="link link--text disclosure__link caption-large focus-inset"
+                href="#"
+                {% if country.iso_code == localization.country.iso_code %}
+                  aria-current="true"
+                {% endif %}
+                data-value="{{ country.iso_code }}"
+                id="{{ country.name }}"
+              >
+                <span
+                  {% if country.iso_code != localization.country.iso_code %}
+                    class="visibility-hidden"
+                  {% endif %}
+                >
+                  {{- 'icon-checkmark.svg' | inline_asset_content -}}
+                </span>
+                <span class="country">{{- country.name }}</span>
+                <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
+                  {{ country.currency.iso_code }}
+                  {{ country.currency.symbol -}}
+                </span>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {% endif %}
+      <ul role="list" class="list-unstyled countries">
+        {%- for country in localization.available_countries -%}
+          <li class="disclosure__item" tabindex="-1">
+            <a
+              class="link link--text disclosure__link caption-large focus-inset"
+              href="#"
+              {% if country.iso_code == localization.country.iso_code %}
+                aria-current="true"
+              {% endif %}
+              data-value="{{ country.iso_code }}"
+              id="{{ country.name }}"
+            >
+              <span
+                {% if country.iso_code != localization.country.iso_code %}
+                  class="visibility-hidden"
+                {% endif %}
+              >
+                {{- 'icon-checkmark.svg' | inline_asset_content -}}
+              </span>
+              <span class="country">{{- country.name }}</span>
+              <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
+                {{ country.currency.iso_code }}
+                {{ country.currency.symbol -}}
+              </span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+  <div class="country-selector__overlay"></div>
 </div>
 
 <!-- Country Modal -->
@@ -250,175 +364,204 @@
 {% endstyle %}
 
 <script>
-class CountryModal {
-  constructor(container) {
-    if (!container) return;
-    
-    this.container = container;
-    this.modal = container.querySelector('.country-modal');
-    this.trigger = container.querySelector('[data-country-modal-trigger]');
-    this.closeButtons = container.querySelectorAll('[data-country-modal-close]');
-    this.confirmButton = container.querySelector('[data-country-modal-confirm]');
-    this.radioButtons = container.querySelectorAll('input[name="country_code_modal"]');
-    this.hiddenInput = container.querySelector('input[name="country_code"]');
-    
-    // Only initialize if all required elements exist
-    if (this.modal && this.trigger) {
-      this.init();
+// Override the original localization-form behavior
+(function() {
+  'use strict';
+  
+  // Store original custom element definition
+  const originalDefine = customElements.define;
+  
+  // Override customElements.define to prevent original localization-form
+  customElements.define = function(name, constructor, options) {
+    if (name === 'localization-form') {
+      // Skip original definition, use our modal instead
+      return;
     }
-  }
+    return originalDefine.call(this, name, constructor, options);
+  };
 
-  init() {
-    this.bindEvents();
-  }
-
-  bindEvents() {
-    if (this.trigger) {
-      this.trigger.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.open();
-      });
+  class CountryModal {
+    constructor(container) {
+      if (!container) return;
+      
+      this.container = container;
+      this.modal = container.querySelector('.country-modal');
+      this.trigger = container.querySelector('.disclosure__button');
+      this.closeButtons = container.querySelectorAll('[data-country-modal-close]');
+      this.confirmButton = container.querySelector('[data-country-modal-confirm]');
+      this.radioButtons = container.querySelectorAll('input[name="country_code_modal"]');
+      this.hiddenInput = container.querySelector('input[name="country_code"]');
+      this.originalPanel = container.querySelector('.disclosure__list-wrapper');
+      
+      // Only initialize if all required elements exist
+      if (this.modal && this.trigger) {
+        this.init();
+      }
     }
-    
-    if (this.closeButtons) {
-      this.closeButtons.forEach(button => {
-        if (button) {
-          button.addEventListener('click', (e) => {
+
+    init() {
+      // Hide original dropdown
+      if (this.originalPanel) {
+        this.originalPanel.style.display = 'none';
+        this.originalPanel.setAttribute('hidden', 'true');
+      }
+      
+      // Remove original event listeners by replacing the button
+      const newTrigger = this.trigger.cloneNode(true);
+      this.trigger.parentNode.replaceChild(newTrigger, this.trigger);
+      this.trigger = newTrigger;
+      
+      this.bindEvents();
+    }
+
+    bindEvents() {
+      if (this.trigger) {
+        this.trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.open();
+        });
+      }
+      
+      if (this.closeButtons) {
+        this.closeButtons.forEach(button => {
+          if (button) {
+            button.addEventListener('click', (e) => {
+              e.preventDefault();
+              this.close();
+            });
+          }
+        });
+      }
+
+      if (this.confirmButton) {
+        this.confirmButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.confirmSelection();
+        });
+      }
+
+      if (this.radioButtons) {
+        this.radioButtons.forEach(radio => {
+          if (radio) {
+            radio.addEventListener('change', this.handleRadioChange.bind(this));
+          }
+        });
+      }
+
+      if (this.modal) {
+        this.modal.addEventListener('click', (e) => {
+          if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
             e.preventDefault();
             this.close();
-          });
-        }
-      });
-    }
+          }
+        });
+      }
 
-    if (this.confirmButton) {
-      this.confirmButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.confirmSelection();
-      });
-    }
-
-    if (this.radioButtons) {
-      this.radioButtons.forEach(radio => {
-        if (radio) {
-          radio.addEventListener('change', this.handleRadioChange.bind(this));
-        }
-      });
-    }
-
-    if (this.modal) {
-      this.modal.addEventListener('click', (e) => {
-        if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.modal && this.modal.getAttribute('aria-hidden') === 'false') {
           e.preventDefault();
           this.close();
         }
       });
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.modal && this.modal.getAttribute('aria-hidden') === 'false') {
-        e.preventDefault();
-        this.close();
-      }
-    });
-  }
-
-  open() {
-    if (!this.modal) return;
-    
-    try {
-      this.modal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+    open() {
+      if (!this.modal) return;
       
-      // Focus management
-      const firstRadio = this.modal.querySelector('input[type="radio"]');
-      if (firstRadio) {
-        setTimeout(() => firstRadio.focus(), 100);
-      }
-    } catch (error) {
-      console.warn('CountryModal: Error opening modal', error);
-    }
-  }
-
-  close() {
-    if (!this.modal) return;
-    
-    try {
-      this.modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      if (this.trigger) {
-        this.trigger.focus();
-      }
-    } catch (error) {
-      console.warn('CountryModal: Error closing modal', error);
-    }
-  }
-
-  handleRadioChange(event) {
-    // Enable confirm button when selection changes
-    if (this.confirmButton) {
-      this.confirmButton.disabled = false;
-    }
-  }
-
-  confirmSelection() {
-    try {
-      const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
-      if (selectedRadio && this.hiddenInput) {
-        this.hiddenInput.value = selectedRadio.value;
+      try {
+        this.modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
         
-        // Submit the form or trigger change event
-        const form = this.container.closest('form');
-        if (form) {
-          const event = new Event('submit', { cancelable: true, bubbles: true });
-          form.dispatchEvent(event);
-        } else {
-          // Fallback: trigger custom event for theme integration
-          const changeEvent = new CustomEvent('change', { 
-            detail: { countryCode: selectedRadio.value },
-            bubbles: true
-          });
-          this.hiddenInput.dispatchEvent(changeEvent);
+        // Focus management
+        const checkedRadio = this.modal.querySelector('input[type="radio"]:checked');
+        const radioToFocus = checkedRadio || this.modal.querySelector('input[type="radio"]');
+        if (radioToFocus) {
+          setTimeout(() => radioToFocus.focus(), 100);
         }
+      } catch (error) {
+        console.warn('CountryModal: Error opening modal', error);
       }
+    }
+
+    close() {
+      if (!this.modal) return;
       
-      this.close();
-    } catch (error) {
-      console.warn('CountryModal: Error confirming selection', error);
+      try {
+        this.modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (this.trigger) {
+          this.trigger.focus();
+        }
+      } catch (error) {
+        console.warn('CountryModal: Error closing modal', error);
+      }
+    }
+
+    handleRadioChange(event) {
+      // Enable confirm button when selection changes
+      if (this.confirmButton) {
+        this.confirmButton.disabled = false;
+      }
+    }
+
+    confirmSelection() {
+      try {
+        const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
+        if (selectedRadio && this.hiddenInput) {
+          this.hiddenInput.value = selectedRadio.value;
+          
+          // Find and click the corresponding original link
+          const originalLink = this.container.querySelector(`a[data-value="${selectedRadio.value}"]`);
+          if (originalLink) {
+            originalLink.click();
+          } else {
+            // Fallback: submit form
+            const form = this.container.closest('form');
+            if (form) {
+              form.submit();
+            }
+          }
+        }
+        
+        this.close();
+      } catch (error) {
+        console.warn('CountryModal: Error confirming selection', error);
+      }
     }
   }
-}
 
-// Initialize on DOM ready
-function initCountryModals() {
-  try {
-    const containers = document.querySelectorAll('.country-localization');
-    containers.forEach(container => {
-      if (container) new CountryModal(container);
-    });
-  } catch (error) {
-    console.warn('CountryModal: Error initializing modals', error);
-  }
-}
-
-// Wait for DOM to be ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initCountryModals);
-} else {
-  initCountryModals();
-}
-
-// Re-initialize when sections are re-rendered (for theme editor)
-if (typeof Shopify !== 'undefined' && Shopify.designMode) {
-  document.addEventListener('shopify:section:load', (event) => {
+  // Initialize on DOM ready
+  function initCountryModals() {
     try {
-      const containers = event.target.querySelectorAll('.country-localization');
+      const containers = document.querySelectorAll('.disclosure');
       containers.forEach(container => {
         if (container) new CountryModal(container);
       });
     } catch (error) {
-      console.warn('CountryModal: Error re-initializing modals', error);
+      console.warn('CountryModal: Error initializing modals', error);
     }
-  });
-}
+  }
+
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCountryModals);
+  } else {
+    initCountryModals();
+  }
+
+  // Re-initialize when sections are re-rendered (for theme editor)
+  if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+    document.addEventListener('shopify:section:load', (event) => {
+      try {
+        const containers = event.target.querySelectorAll('.disclosure');
+        containers.forEach(container => {
+          if (container) new CountryModal(container);
+        });
+      } catch (error) {
+        console.warn('CountryModal: Error re-initializing modals', error);
+      }
+    });
+  }
+})();
 </script>
