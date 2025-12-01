@@ -25,137 +25,56 @@
   endif
 %}
 
-<div class="disclosure">
+<div class="country-localization">
   <button
     type="button"
-    class="disclosure__button localization-form__select localization-selector link link--text caption-large"
-    aria-expanded="false"
-    aria-controls="{{ localPosition }}-country-results"
+    class="country-localization__button localization-form__select localization-selector link link--text caption-large"
     aria-describedby="{{ localPosition }}Label"
+    data-country-modal-trigger
   >
     <svg width="25" height="25" viewBox="0 0 100 100" aria-hidden="true" focusable="false" class="icon" style="max-width: 80px; max-height: 80px;margin-top:.5rem;">
       <path fill="#000" fill-rule="evenodd" d="M51.939 91.4758C51.4613 91.4919 50.9816 91.5 50.5 91.5C50.275 91.5 50.0504 91.4982 49.8262 91.4947C43.6748 84.9588 39.0998 77.176 36.3514 68.75H65.6132C62.8053 77.184 58.1632 84.9624 51.939 91.4758ZM63.0667 89.5877C73.835 86.2155 82.7377 78.6242 87.8386 68.75H73.3125C71.1194 76.2156 67.6599 83.2698 63.0667 89.5877ZM75.0627 61.25H90.8343C91.9186 57.5213 92.5 53.5786 92.5 49.5C92.5 45.7842 92.0175 42.1811 91.1116 38.75H75.2297C75.7925 42.283 76.0802 45.8767 76.0802 49.5C76.0802 53.4658 75.7355 57.396 75.0627 61.25ZM67.7771 38.75H34.367C33.694 42.3854 33.3485 46.1001 33.3485 49.851C33.3485 53.7045 33.7131 57.5197 34.423 61.25H67.5894C68.3438 57.4082 68.7317 53.4744 68.7317 49.5C68.7317 45.8697 68.4081 42.2733 67.7771 38.75ZM65.9365 31.25H36.255C39.0906 22.4029 43.9358 14.2545 50.5028 7.5C50.9835 7.50003 51.4623 7.50814 51.939 7.52419C58.4084 14.2942 63.1687 22.4309 65.9365 31.25ZM73.598 31.25H88.3384C83.3321 20.8892 74.1957 12.8975 63.0667 9.41232C67.8645 16.0116 71.4253 23.4142 73.598 31.25ZM28.6656 68.75C30.8487 76.3313 34.3353 83.4949 38.9872 89.9025C27.7467 86.7056 18.4278 78.9445 13.1614 68.75H28.6656ZM26 49.851C26 46.1076 26.3071 42.3958 26.9074 38.75H9.88836C8.98253 42.1811 8.5 45.7842 8.5 49.5C8.5 53.5786 9.08135 57.5213 10.1657 61.25H26.9571C26.3241 57.5085 26 53.6965 26 49.851ZM28.5806 31.25C30.8566 23.2084 34.5972 15.6304 39.6381 8.91806C27.7397 12.0946 17.9213 20.3648 12.6616 31.25H28.5806ZM100 49.5C100 76.8381 77.8381 99 50.5 99C23.1619 99 1 76.8381 1 49.5C1 22.1619 23.1619 0 50.5 0C77.8381 0 100 22.1619 100 49.5Z" clip-rule="evenodd"></path>
     </svg>
-    {% comment %} <span>
-      {{- localization.country.name }} |
-      {{ localization.country.currency.iso_code }}
-      {{ localization.country.currency.symbol -}}
-    </span> {% endcomment %}
     {{ 'icon-caret.svg' | inline_asset_content }}
   </button>
-  <div class="disclosure__list-wrapper country-selector" hidden>
-    <div class="country-filter{% unless show_country_filter %} country-filter--no-padding{% endunless %}">
-      {% if show_country_filter %}
-        <div class="field">
-          <input
-            class="country-filter__input field__input"
-            id="country-filter-input"
-            type="search"
-            name="country_filter"
-            value=""
-            placeholder="{{ 'localization.search' | t }}"
-            role="combobox"
-            aria-owns="country-results"
-            aria-controls="country-results"
-            aria-haspopup="listbox"
-            aria-autocomplete="list"
-            autocorrect="off"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-          >
-          <label class="field__label" for="country-filter-input">{{ 'localization.search' | t }}</label>
-          <button
-            type="reset"
-            class="country-filter__reset-button field__button hidden"
-            aria-label="{{ 'general.search.reset' | t }}"
-          >
-            {{- 'icon-reset.svg' | inline_asset_content -}}
-          </button>
-          <div class="country-filter__search-icon field__button motion-reduce">
-            {{- 'icon-search.svg' | inline_asset_content -}}
-          </div>
-        </div>
-      {% endif %}
-      <button
-        class="country-selector__close-button button--small link"
-        type="button"
-        aria-label="{{ 'accessibility.close' | t }}"
-      >
+</div>
+
+<!-- Country Modal -->
+<div class="country-modal" id="country-modal-{{ localPosition }}" aria-hidden="true" role="dialog" aria-labelledby="country-modal-title-{{ localPosition }}">
+  <div class="country-modal__overlay" data-country-modal-close></div>
+  <div class="country-modal__content">
+    <div class="country-modal__header">
+      <h2 class="country-modal__title" id="country-modal-title-{{ localPosition }}">SELECT COUNTRY</h2>
+      <button class="country-modal__close" type="button" aria-label="{{ 'accessibility.close' | t }}" data-country-modal-close>
         {{- 'icon-close.svg' | inline_asset_content -}}
       </button>
     </div>
-    <div id="sr-country-search-results" class="visually-hidden" aria-live="polite"></div>
-    <div
-      class="disclosure__list country-selector__list{% if show_currencies %} country-selector__list--with-multiple-currencies{% endif %}"
-      id="{{ localPosition }}-country-results"
-    >
-      {% if show_popular_countries %}
-        <ul
-          role="list"
-          class="list-unstyled popular-countries"
-          aria-label="{{ 'localization.popular_countries_regions' | t }}"
-        >
-          {%- for country in popular_countries -%}
-            <li class="disclosure__item" tabindex="-1">
-              <a
-                class="link link--text disclosure__link caption-large focus-inset"
-                href="#"
-                {% if country.iso_code == localization.country.iso_code %}
-                  aria-current="true"
-                {% endif %}
-                data-value="{{ country.iso_code }}"
-                id="{{ country.name }}"
-              >
-                <span
-                  {% if country.iso_code != localization.country.iso_code %}
-                    class="visibility-hidden"
-                  {% endif %}
-                >
-                  {{- 'icon-checkmark.svg' | inline_asset_content -}}
-                </span>
-                <span class="country">{{- country.name }}</span>
-                <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
-                  {{ country.currency.iso_code }}
-                  {{ country.currency.symbol -}}
-                </span>
-              </a>
-            </li>
-          {%- endfor -%}
-        </ul>
-      {% endif %}
-      <ul role="list" class="list-unstyled countries">
+    <div class="country-modal__body">
+      <div class="country-modal__list">
         {%- for country in localization.available_countries -%}
-          <li class="disclosure__item" tabindex="-1">
-            <a
-              class="link link--text disclosure__link caption-large focus-inset"
-              href="#"
-              {% if country.iso_code == localization.country.iso_code %}
-                aria-current="true"
-              {% endif %}
-              data-value="{{ country.iso_code }}"
-              id="{{ country.name }}"
+          <label class="country-modal__item">
+            <input
+              type="radio"
+              name="country_code_modal"
+              value="{{ country.iso_code }}"
+              class="country-modal__radio"
+              {% if country.iso_code == localization.country.iso_code %}checked{% endif %}
             >
-              <span
-                {% if country.iso_code != localization.country.iso_code %}
-                  class="visibility-hidden"
-                {% endif %}
-              >
-                {{- 'icon-checkmark.svg' | inline_asset_content -}}
-              </span>
-              <span class="country">{{- country.name }}</span>
-              <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
-                {{ country.currency.iso_code }}
-                {{ country.currency.symbol -}}
-              </span>
-            </a>
-          </li>
+            <span class="country-modal__label">
+              <span class="country-modal__name">{{ country.name }} ({{ country.currency.iso_code }})</span>
+            </span>
+          </label>
         {%- endfor -%}
-      </ul>
+      </div>
+    </div>
+    <div class="country-modal__footer">
+      <button type="button" class="country-modal__confirm button button--primary" data-country-modal-confirm>
+        CONFIRM
+      </button>
     </div>
   </div>
-  <div class="country-selector__overlay"></div>
 </div>
+
 <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
 
 {% style %}
@@ -168,4 +87,272 @@
   .localization-form__select {
     min-width:unset!important;
   }
+
+  /* Country Modal Styles */
+  .country-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .country-modal[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .country-modal__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+  }
+
+  .country-modal__content {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .country-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .country-modal__title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+  }
+
+  .country-modal__close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s ease;
+  }
+
+  .country-modal__close:hover {
+    color: #000;
+  }
+
+  .country-modal__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .country-modal__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .country-modal__item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    cursor: pointer;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.2s ease;
+    margin: 0;
+  }
+
+  .country-modal__item:hover {
+    background-color: #f8f8f8;
+  }
+
+  .country-modal__item:last-child {
+    border-bottom: none;
+  }
+
+  .country-modal__radio {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  .country-modal__label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .country-modal__name {
+    font-weight: 400;
+  }
+
+  .country-modal__footer {
+    padding: 20px 24px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+  }
+
+  .country-modal__confirm {
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .country-modal__confirm:hover {
+    background: #333;
+  }
+
+  .country-modal__confirm:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    .country-modal__content {
+      width: 95%;
+      margin: 20px;
+    }
+    
+    .country-modal__header,
+    .country-modal__item,
+    .country-modal__footer {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
 {% endstyle %}
+
+<script>
+class CountryModal {
+  constructor(container) {
+    this.container = container;
+    this.modal = container.querySelector('.country-modal');
+    this.trigger = container.querySelector('[data-country-modal-trigger]');
+    this.closeButtons = container.querySelectorAll('[data-country-modal-close]');
+    this.confirmButton = container.querySelector('[data-country-modal-confirm]');
+    this.radioButtons = container.querySelectorAll('input[name="country_code_modal"]');
+    this.hiddenInput = container.querySelector('input[name="country_code"]');
+    
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    this.trigger?.addEventListener('click', this.open.bind(this));
+    
+    this.closeButtons.forEach(button => {
+      button.addEventListener('click', this.close.bind(this));
+    });
+
+    this.confirmButton?.addEventListener('click', this.confirmSelection.bind(this));
+
+    this.radioButtons.forEach(radio => {
+      radio.addEventListener('change', this.handleRadioChange.bind(this));
+    });
+
+    this.modal?.addEventListener('click', (e) => {
+      if (e.target === this.modal || e.target.classList.contains('country-modal__overlay')) {
+        this.close();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.modal?.getAttribute('aria-hidden') === 'false') {
+        this.close();
+      }
+    });
+  }
+
+  open() {
+    if (!this.modal) return;
+    
+    this.modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus management
+    const firstRadio = this.modal.querySelector('input[type="radio"]');
+    if (firstRadio) {
+      setTimeout(() => firstRadio.focus(), 100);
+    }
+  }
+
+  close() {
+    if (!this.modal) return;
+    
+    this.modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    this.trigger?.focus();
+  }
+
+  handleRadioChange(event) {
+    // Enable confirm button when selection changes
+    if (this.confirmButton) {
+      this.confirmButton.disabled = false;
+    }
+  }
+
+  confirmSelection() {
+    const selectedRadio = this.container.querySelector('input[name="country_code_modal"]:checked');
+    if (selectedRadio && this.hiddenInput) {
+      this.hiddenInput.value = selectedRadio.value;
+      
+      // Submit the form or trigger change event
+      const form = this.container.closest('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      } else {
+        // Fallback: trigger custom event for theme integration
+        this.hiddenInput.dispatchEvent(new CustomEvent('change', { 
+          detail: { countryCode: selectedRadio.value } 
+        }));
+      }
+    }
+    
+    this.close();
+  }
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  const containers = document.querySelectorAll('.country-localization');
+  containers.forEach(container => new CountryModal(container));
+});
+
+// Re-initialize when sections are re-rendered (for theme editor)
+if (Shopify && Shopify.designMode) {
+  document.addEventListener('shopify:section:load', (event) => {
+    const containers = event.target.querySelectorAll('.country-localization');
+    containers.forEach(container => new CountryModal(container));
+  });
+}
+</script>
