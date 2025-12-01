@@ -1,0 +1,390 @@
+{% comment %}
+  Renders a header search modal. Should be used with 'header.liquid'
+
+  Accepts:
+  - input_id: {String} Id for the search input element (required)
+
+  Usage:
+  {% render 'header-search-new', input_id: 'My-Id'%}
+{% endcomment %}
+
+<div class="custom-search-overlay" id="custom-search-overlay" style="display: none;">
+  <div class="custom-search-modal">
+    <div class="custom-search-header">
+      <h2 class="custom-search-title">SEARCH</h2>
+      <button class="custom-search-close" aria-label="Close search">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="custom-search-form">
+      <form action="{{ routes.search_url }}" method="get" role="search">
+        <input
+          class="custom-search-input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="Search..."
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <input type="hidden" name="options[prefix]" value="last">
+      </form>
+    </div>
+    
+    <div class="custom-search-results">
+      <div class="search-results-header">
+        <span class="results-count" id="results-count">0</span>
+        <a href="{{ routes.search_url }}" class="view-all-results" id="view-all-results">
+          VIEW ALL RESULTS
+        </a>
+      </div>
+      
+      <div class="search-suggestions">
+        <h3 class="suggestions-title">SUGGESTIONS</h3>
+        <ul class="suggestions-list" id="suggestions-list">
+          <li><a href="#">12 hz</a></li>
+        </ul>
+      </div>
+      
+      <div class="search-products">
+        <h3 class="products-title">PRODUCTS</h3>
+        <div class="products-grid" id="products-grid">
+          <!-- 产品将通过JavaScript动态加载 -->
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="New Balance x Auralee CT500v1 Java / Delicioso">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">New Balance x Auralee CT500v1 Java / Delicioso</h4>
+              <p class="product-price">€152</p>
+            </div>
+          </div>
+          
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="On Cloudmonster Hyper PAF 1 M Black / Black">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">On Cloudmonster Hyper PAF 1 M Black / Black</h4>
+              <p class="product-price">€236</p>
+            </div>
+          </div>
+          
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="New Balance 1906 Loafer Black Croc">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">New Balance 1906 Loafer Black Croc</h4>
+              <p class="product-price">€124</p>
+            </div>
+          </div>
+          
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="New Balance 1906 Loafer Black">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">New Balance 1906 Loafer Black</h4>
+              <p class="product-price">€124</p>
+            </div>
+          </div>
+          
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="New Balance x Auralee CT500v1 Asparagus / Green Hay">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">New Balance x Auralee CT500v1 Asparagus / Green Hay</h4>
+              <p class="product-price">€152</p>
+            </div>
+          </div>
+          
+          <div class="product-item">
+            <div class="product-image">
+              <img src="https://via.placeholder.com/80x80" alt="adidas by Wales Bonner Karintha Lo Sequin">
+            </div>
+            <div class="product-info">
+              <h4 class="product-title">adidas by Wales Bonner Karintha Lo Sequin Core Black / Silver Metallic</h4>
+              <p class="product-price">
+                <span class="sale-price">€218</span>
+                <span class="original-price">€312</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 触发按钮 -->
+<button class="custom-search-trigger" aria-label="Search">
+  <svg width="24" height="24" viewBox="0 0 100 100" fill="currentColor">
+    <path fill="currentColor" fill-rule="evenodd" d="M67.1755 74.4267c-6.9463 5.3998-15.6749 8.6153-25.1545 8.6153C19.3657 83.042 1 64.6763 1 42.021S19.3657 1 42.021 1s41.021 18.3657 41.021 41.021c0 9.4794-3.2154 18.2078-8.615 25.1541L100 92.7481l-7.2516 7.2515-25.5729-25.5729Zm5.6113-32.4057c0 16.9915-13.7743 30.7658-30.7658 30.7658S11.2553 59.0125 11.2553 42.021 25.0295 11.2553 42.021 11.2553 72.7868 25.0295 72.7868 42.021Z" clip-rule="evenodd"></path>
+  </svg>
+</button>
+
+<style>
+/* 全屏搜索覆盖层 */
+.custom-search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-search-modal {
+  width: 100%;
+  height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.custom-search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.custom-search-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.custom-search-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.custom-search-form {
+  padding: 2rem;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.custom-search-input {
+  width: 100%;
+  font-size: 1.5rem;
+  padding: 1rem;
+  border: 2px solid #333;
+  border-radius: 4px;
+  outline: none;
+}
+
+.custom-search-results {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.search-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.results-count {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.view-all-results {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.view-all-results:hover {
+  text-decoration: underline;
+}
+
+.search-suggestions {
+  margin-bottom: 2rem;
+}
+
+.suggestions-title,
+.products-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.suggestions-list {
+  list-style: none;
+  padding: 0;
+}
+
+.suggestions-list li {
+  margin-bottom: 0.5rem;
+}
+
+.suggestions-list a {
+  color: #666;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.suggestions-list a:hover {
+  color: #333;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.product-item {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.product-image {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-title {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.product-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sale-price {
+  color: #e74c3c;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  margin-left: 0.5rem;
+}
+
+.custom-search-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .custom-search-header,
+  .custom-search-form,
+  .custom-search-results {
+    padding: 1rem;
+  }
+  
+  .custom-search-title {
+    font-size: 1.5rem;
+  }
+  
+  .custom-search-input {
+    font-size: 1.2rem;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const trigger = document.querySelector('.custom-search-trigger');
+  const overlay = document.getElementById('custom-search-overlay');
+  const closeBtn = document.querySelector('.custom-search-close');
+  const searchInput = document.querySelector('.custom-search-input');
+  
+  // 显示搜索弹窗
+  function showSearch() {
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    searchInput.focus();
+  }
+  
+  // 隐藏搜索弹窗
+  function hideSearch() {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+    searchInput.value = '';
+  }
+  
+  // 事件监听
+  trigger.addEventListener('click', showSearch);
+  closeBtn.addEventListener('click', hideSearch);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) hideSearch();
+  });
+  
+  // ESC键关闭
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && overlay.style.display === 'flex') {
+      hideSearch();
+    }
+  });
+  
+  // 更新搜索结果数量
+  searchInput.addEventListener('input', function(e) {
+    const query = e.target.value;
+    const viewAllLink = document.getElementById('view-all-results');
+    if (query) {
+      viewAllLink.href = `/search?q=${encodeURIComponent(query)}`;
+    } else {
+      viewAllLink.href = '/search';
+    }
+  });
+});
+</script>
