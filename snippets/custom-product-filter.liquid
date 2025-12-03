@@ -652,22 +652,25 @@
 </div>
 
 <script>
-function toggleFilter() {
-  const sidebar = document.querySelector('.filter-sidebar');
-  if (sidebar) {
-    sidebar.classList.toggle('active');
-  }
+// 确保toggleFilterGroup在全局作用域可用
+window.toggleFilterGroup = function(header) {
+  const group = header.parentElement;
+  group.classList.toggle('active');
+  const icon = header.querySelector('span');
+  icon.textContent = group.classList.contains('active') ? '-' : '+';
 }
 
-// 点击外部区域关闭筛选器
-document.addEventListener('DOMContentLoaded', function() {
-  const sidebar = document.querySelector('.filter-sidebar');
-  if (sidebar) {
+// 增强筛选器交互功能
+(function() {
+  function initFilterEvents() {
+    const sidebar = document.getElementById('filter-sidebar') || document.querySelector('.filter-sidebar');
+    if (!sidebar) return;
+    
     // 点击侧边栏外部关闭
     document.addEventListener('click', function(e) {
       if (sidebar.classList.contains('active') && 
           !sidebar.contains(e.target) && 
-          !e.target.closest('[onclick="toggleFilter()"]')) {
+          !e.target.closest('[onclick*="toggleFilter"]')) {
         sidebar.classList.remove('active');
       }
     });
@@ -679,14 +682,16 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});
+  
+  // 立即初始化或等待DOM加载
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFilterEvents);
+  } else {
+    initFilterEvents();
+  }
+})();
 
-function toggleFilterGroup(header) {
-  const group = header.parentElement;
-  group.classList.toggle('active');
-  const icon = header.querySelector('span');
-  icon.textContent = group.classList.contains('active') ? '-' : '+';
-}
+
 
 function applyFilters() {
   const selectedSort = document.querySelector('input[name="sort"]:checked').value;
