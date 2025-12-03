@@ -113,69 +113,73 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 从产品元字段获取品牌数据 {%- endcomment -%}
-        {%- assign available_brands = '' | split: '' -%}
-        
-        {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
+        {%- comment -%} 调试：显示产品总数 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
           {%- assign base_products = collection.products -%}
+          <li style="color: red;">调试：集合产品数量 {{ collection.products.size }}</li>
         {%- else -%}
           {%- assign base_products = collections.all.products -%}
+          <li style="color: red;">调试：所有产品数量 {{ collections.all.products.size }}</li>
         {%- endif -%}
         
-        {%- comment -%} 从产品元字段中提取品牌 {%- endcomment -%}
-        {%- for product in base_products limit: 300 -%}
-          {%- comment -%} 尝试从不同的元字段获取品牌信息 {%- endcomment -%}
+        {%- assign available_brands = '' | split: '' -%}
+        {%- assign debug_info = '' | split: '' -%}
+        
+        {%- comment -%} 从多个来源获取品牌数据 {%- endcomment -%}
+        {%- for product in base_products limit: 50 -%}
           {%- assign brand_value = '' -%}
+          {%- assign source = '' -%}
           
-          {%- comment -%} 方式1: 从custom.brand元字段获取 {%- endcomment -%}
-          {%- if product.metafields.custom.brand != blank -%}
+          {%- comment -%} 尝试多种元字段路径 {%- endcomment -%}
+          {%- if product.metafields.custom.brand.value != blank -%}
+            {%- assign brand_value = product.metafields.custom.brand.value -%}
+            {%- assign source = 'custom.brand.value' -%}
+          {%- elsif product.metafields.custom.brand != blank -%}
             {%- assign brand_value = product.metafields.custom.brand -%}
-          {%- comment -%} 方式2: 从namespace.brand元字段获取 {%- endcomment -%}
-          {%- elsif product.metafields.namespace.brand != blank -%}
-            {%- assign brand_value = product.metafields.namespace.brand -%}
-          {%- comment -%} 方式3: 从product.brand元字段获取 {%- endcomment -%}
+            {%- assign source = 'custom.brand' -%}
+          {%- elsif product.metafields.global.brand != blank -%}
+            {%- assign brand_value = product.metafields.global.brand -%}
+            {%- assign source = 'global.brand' -%}
           {%- elsif product.metafields.product.brand != blank -%}
             {%- assign brand_value = product.metafields.product.brand -%}
-          {%- comment -%} 方式4: 从vendor字段获取 {%- endcomment -%}
+            {%- assign source = 'product.brand' -%}
           {%- elsif product.vendor != blank -%}
             {%- assign brand_value = product.vendor -%}
+            {%- assign source = 'vendor' -%}
           {%- endif -%}
           
           {%- if brand_value != blank -%}
             {%- unless available_brands contains brand_value -%}
               {%- assign available_brands = available_brands | push: brand_value -%}
+              {%- assign debug_info = debug_info | push: source -%}
             {%- endunless -%}
           {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 按字母顺序排序品牌 {%- endcomment -%}
-        {%- assign sorted_brands = available_brands | sort -%}
+        {%- comment -%} 显示调试信息 {%- endcomment -%}
+        <li style="color: blue;">调试：找到品牌数量 {{ available_brands.size }}</li>
+        {%- for i in (0..available_brands.size) -%}
+          {%- if available_brands[i] != blank -%}
+            <li style="color: green;">调试：{{ available_brands[i] }} (来源: {{ debug_info[i] }})</li>
+          {%- endif -%}
+        {%- endfor -%}
         
-        {%- comment -%} 显示品牌选项 {%- endcomment -%}
+        {%- comment -%} 显示实际品牌选项 {%- endcomment -%}
+        {%- assign sorted_brands = available_brands | sort -%}
         {%- for brand in sorted_brands -%}
-          {%- assign is_checked = false -%}
-          {%- assign current_params = request.query_string | split: '&' -%}
-          {%- for param in current_params -%}
-            {%- if param contains 'filter.v.brand' -%}
-              {%- assign param_parts = param | split: '=' -%}
-              {%- if param_parts.size > 1 -%}
-                {%- assign selected_brands = param_parts[1] | split: '+' -%}
-                {%- if selected_brands contains brand -%}
-                  {%- assign is_checked = true -%}
-                {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-          
           <li>
-            <input type="checkbox" 
-                   name="brand" 
-                   value="{{ brand }}" 
-                   {% if is_checked %}checked{% endif %}>
+            <input type="checkbox" name="brand" value="{{ brand }}">
             {{ brand }}
           </li>
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有找到品牌，显示备用选项 {%- endcomment -%}
+        {%- if available_brands.size == 0 -%}
+          <li style="color: orange;">没有找到品牌数据，显示备用选项：</li>
+          <li><input type="checkbox" name="brand" value="Nike"> Nike</li>
+          <li><input type="checkbox" name="brand" value="Adidas"> Adidas</li>
+          <li><input type="checkbox" name="brand" value="Puma"> Puma</li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
@@ -187,124 +191,85 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 从产品元字段获取尺码数据 {%- endcomment -%}
         {%- assign available_sizes = '' | split: '' -%}
+        {%- assign debug_sizes = '' | split: '' -%}
         
-        {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
           {%- assign base_products = collection.products -%}
         {%- else -%}
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 从产品元字段和变体中提取SIZE {%- endcomment -%}
-        {%- for product in base_products limit: 300 -%}
-          {%- comment -%} 方式1: 从产品元字段获取尺码列表 {%- endcomment -%}
-          {%- if product.metafields.custom.size != blank -%}
+        {%- comment -%} 从多个来源获取尺码数据 {%- endcomment -%}
+        {%- for product in base_products limit: 50 -%}
+          {%- comment -%} 尝试从产品元字段获取 {%- endcomment -%}
+          {%- if product.metafields.custom.size.value != blank -%}
+            {%- assign size_list = product.metafields.custom.size.value | split: ',' -%}
+            {%- for size in size_list -%}
+              {%- assign size_value = size | strip -%}
+              {%- unless available_sizes contains size_value -%}
+                {%- assign available_sizes = available_sizes | push: size_value -%}
+                {%- assign debug_sizes = debug_sizes | push: 'custom.size.value' -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- elsif product.metafields.custom.size != blank -%}
             {%- assign size_list = product.metafields.custom.size | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
               {%- unless available_sizes contains size_value -%}
                 {%- assign available_sizes = available_sizes | push: size_value -%}
-              {%- endunless -%}
-            {%- endfor -%}
-          {%- elsif product.metafields.namespace.size != blank -%}
-            {%- assign size_list = product.metafields.namespace.size | split: ',' -%}
-            {%- for size in size_list -%}
-              {%- assign size_value = size | strip -%}
-              {%- unless available_sizes contains size_value -%}
-                {%- assign available_sizes = available_sizes | push: size_value -%}
+                {%- assign debug_sizes = debug_sizes | push: 'custom.size' -%}
               {%- endunless -%}
             {%- endfor -%}
           {%- else -%}
-            {%- comment -%} 方式2: 从变体选项中提取 {%- endcomment -%}
-            {%- for variant in product.variants -%}
+            {%- comment -%} 从变体选项获取 {%- endcomment -%}
+            {%- for variant in product.variants limit: 10 -%}
               {%- if variant.available -%}
-                {%- assign size_value = '' -%}
-                
-                {%- comment -%} 从变体元字段获取 {%- endcomment -%}
-                {%- if variant.metafields.custom.size != blank -%}
-                  {%- assign size_value = variant.metafields.custom.size -%}
-                {%- comment -%} 从变体选项获取 {%- endcomment -%}
-                {%- elsif variant.option1 and variant.option1 != 'Default Title' -%}
-                  {%- assign option1_upper = variant.option1 | upcase -%}
-                  {%- if option1_upper contains 'XS' or option1_upper contains 'SMALL' or option1_upper contains 'MEDIUM' or option1_upper contains 'LARGE' or option1_upper == 'S' or option1_upper == 'M' or option1_upper == 'L' -%}
-                    {%- assign size_value = variant.option1 -%}
-                  {%- endif -%}
-                {%- elsif variant.option2 -%}
-                  {%- assign option2_upper = variant.option2 | upcase -%}
-                  {%- if option2_upper contains 'XS' or option2_upper contains 'SMALL' or option2_upper contains 'MEDIUM' or option2_upper contains 'LARGE' or option2_upper == 'S' or option2_upper == 'M' or option2_upper == 'L' -%}
-                    {%- assign size_value = variant.option2 -%}
-                  {%- endif -%}
-                {%- elsif variant.option3 -%}
-                  {%- assign option3_upper = variant.option3 | upcase -%}
-                  {%- if option3_upper contains 'XS' or option3_upper contains 'SMALL' or option3_upper contains 'MEDIUM' or option3_upper contains 'LARGE' or option3_upper == 'S' or option3_upper == 'M' or option3_upper == 'L' -%}
-                    {%- assign size_value = variant.option3 -%}
-                  {%- endif -%}
-                {%- endif -%}
-                
-                {%- if size_value != blank -%}
-                  {%- comment -%} 标准化SIZE值 {%- endcomment -%}
-                  {%- assign normalized_size = size_value | strip | upcase -%}
-                  {%- assign standard_mapping = 'SMALL:S,MEDIUM:M,LARGE:L,X-SMALL:XS,X-LARGE:XL,XX-LARGE:XXL,XXX-LARGE:XXXL' | split: ',' -%}
-                  {%- for mapping in standard_mapping -%}
-                    {%- assign parts = mapping | split: ':' -%}
-                    {%- if parts.size == 2 and normalized_size == parts[0] -%}
-                      {%- assign size_value = parts[1] -%}
-                      {%- break -%}
+                {%- comment -%} 检查所有选项 {%- endcomment -%}
+                {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+                {%- for option in options -%}
+                  {%- if option != blank and option != 'Default Title' -%}
+                    {%- assign option_upper = option | upcase -%}
+                    {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' -%}
+                      {%- unless available_sizes contains option -%}
+                        {%- assign available_sizes = available_sizes | push: option -%}
+                        {%- assign debug_sizes = debug_sizes | push: 'variant_option' -%}
+                      {%- endunless -%}
                     {%- endif -%}
-                  {%- endfor -%}
-                  
-                  {%- unless available_sizes contains size_value -%}
-                    {%- assign available_sizes = available_sizes | push: size_value -%}
-                  {%- endunless -%}
-                {%- endif -%}
+                  {%- endif -%}
+                {%- endfor -%}
               {%- endif -%}
             {%- endfor -%}
           {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 按标准顺序排序SIZE {%- endcomment -%}
-        {%- assign size_order = 'XS,S,M,L,XL,XXL,XXXL,2XL,3XL,4XL,5XL' | split: ',' -%}
-        {%- assign sorted_sizes = '' | split: '' -%}
-        
-        {%- for standard_size in size_order -%}
-          {%- if available_sizes contains standard_size -%}
-            {%- assign sorted_sizes = sorted_sizes | push: standard_size -%}
+        {%- comment -%} 显示调试信息 {%- endcomment -%}
+        <li style="color: blue;">调试：找到尺码数量 {{ available_sizes.size }}</li>
+        {%- for i in (0..available_sizes.size) -%}
+          {%- if available_sizes[i] != blank -%}
+            <li style="color: green;">调试：{{ available_sizes[i] }} (来源: {{ debug_sizes[i] }})</li>
           {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 添加剩余的SIZE {%- endcomment -%}
-        {%- for size in available_sizes -%}
-          {%- unless size_order contains size -%}
-            {%- assign sorted_sizes = sorted_sizes | push: size -%}
-          {%- endunless -%}
+        {%- comment -%} 显示实际尺码选项 {%- endcomment -%}
+        {%- assign size_order = 'XS,S,M,L,XL,XXL,XXXL' | split: ',' -%}
+        {%- for standard_size in size_order -%}
+          {%- if available_sizes contains standard_size -%}
+            <li>
+              <input type="checkbox" name="size" value="{{ standard_size }}">
+              {{ standard_size }}
+            </li>
+          {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 显示SIZE选项 {%- endcomment -%}
-        {%- for size in sorted_sizes -%}
-          {%- assign is_checked = false -%}
-          {%- assign current_params = request.query_string | split: '&' -%}
-          {%- for param in current_params -%}
-            {%- if param contains 'filter.v.size' -%}
-              {%- assign param_parts = param | split: '=' -%}
-              {%- if param_parts.size > 1 -%}
-                {%- assign selected_sizes = param_parts[1] | split: '+' -%}
-                {%- if selected_sizes contains size -%}
-                  {%- assign is_checked = true -%}
-                {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-          
-          <li>
-            <input type="checkbox" 
-                   name="size" 
-                   value="{{ size }}" 
-                   {% if is_checked %}checked{% endif %}>
-            {{ size }}
-          </li>
-        {%- endfor -%}
+        {%- comment -%} 如果没有找到尺码，显示备用选项 {%- endcomment -%}
+        {%- if available_sizes.size == 0 -%}
+          <li style="color: orange;">没有找到尺码数据，显示备用选项：</li>
+          <li><input type="checkbox" name="size" value="S"> S</li>
+          <li><input type="checkbox" name="size" value="M"> M</li>
+          <li><input type="checkbox" name="size" value="L"> L</li>
+          <li><input type="checkbox" name="size" value="XL"> XL</li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
@@ -316,69 +281,66 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 从产品元字段获取产品类型数据 {%- endcomment -%}
         {%- assign available_types = '' | split: '' -%}
+        {%- assign debug_types = '' | split: '' -%}
         
-        {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
           {%- assign base_products = collection.products -%}
         {%- else -%}
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 从产品元字段中提取产品类型 {%- endcomment -%}
-        {%- for product in base_products limit: 300 -%}
+        {%- comment -%} 从多个来源获取产品类型数据 {%- endcomment -%}
+        {%- for product in base_products limit: 50 -%}
           {%- assign type_value = '' -%}
+          {%- assign source = '' -%}
           
-          {%- comment -%} 方式1: 从custom.product_type元字段获取 {%- endcomment -%}
-          {%- if product.metafields.custom.product_type != blank -%}
+          {%- if product.metafields.custom.product_type.value != blank -%}
+            {%- assign type_value = product.metafields.custom.product_type.value -%}
+            {%- assign source = 'custom.product_type.value' -%}
+          {%- elsif product.metafields.custom.product_type != blank -%}
             {%- assign type_value = product.metafields.custom.product_type -%}
-          {%- comment -%} 方式2: 从namespace.product_type元字段获取 {%- endcomment -%}
-          {%- elsif product.metafields.namespace.product_type != blank -%}
-            {%- assign type_value = product.metafields.namespace.product_type -%}
-          {%- comment -%} 方式3: 从custom.category元字段获取 {%- endcomment -%}
+            {%- assign source = 'custom.product_type' -%}
           {%- elsif product.metafields.custom.category != blank -%}
             {%- assign type_value = product.metafields.custom.category -%}
-          {%- comment -%} 方式4: 从product.type字段获取 {%- endcomment -%}
+            {%- assign source = 'custom.category' -%}
           {%- elsif product.type != blank -%}
             {%- assign type_value = product.type -%}
+            {%- assign source = 'product.type' -%}
           {%- endif -%}
           
           {%- if type_value != blank -%}
             {%- unless available_types contains type_value -%}
               {%- assign available_types = available_types | push: type_value -%}
+              {%- assign debug_types = debug_types | push: source -%}
             {%- endunless -%}
           {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 按字母顺序排序产品类型 {%- endcomment -%}
-        {%- assign sorted_types = available_types | sort -%}
+        {%- comment -%} 显示调试信息 {%- endcomment -%}
+        <li style="color: blue;">调试：找到产品类型数量 {{ available_types.size }}</li>
+        {%- for i in (0..available_types.size) -%}
+          {%- if available_types[i] != blank -%}
+            <li style="color: green;">调试：{{ available_types[i] }} (来源: {{ debug_types[i] }})</li>
+          {%- endif -%}
+        {%- endfor -%}
         
-        {%- comment -%} 显示产品类型选项 {%- endcomment -%}
+        {%- comment -%} 显示实际产品类型选项 {%- endcomment -%}
+        {%- assign sorted_types = available_types | sort -%}
         {%- for type in sorted_types -%}
-          {%- assign is_checked = false -%}
-          {%- assign current_params = request.query_string | split: '&' -%}
-          {%- for param in current_params -%}
-            {%- if param contains 'filter.v.product_type' -%}
-              {%- assign param_parts = param | split: '=' -%}
-              {%- if param_parts.size > 1 -%}
-                {%- assign selected_types = param_parts[1] | split: '+' -%}
-                {%- assign type_value = type | replace: ' ', '-' -%}
-                {%- if selected_types contains type_value -%}
-                  {%- assign is_checked = true -%}
-                {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-          
           <li>
-            <input type="checkbox" 
-                   name="type" 
-                   value="{{ type | replace: ' ', '-' }}" 
-                   {% if is_checked %}checked{% endif %}>
+            <input type="checkbox" name="type" value="{{ type | replace: ' ', '-' }}">
             {{ type }}
           </li>
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有找到产品类型，显示备用选项 {%- endcomment -%}
+        {%- if available_types.size == 0 -%}
+          <li style="color: orange;">没有找到产品类型数据，显示备用选项：</li>
+          <li><input type="checkbox" name="type" value="T-Shirt"> T-Shirt</li>
+          <li><input type="checkbox" name="type" value="Jeans"> Jeans</li>
+          <li><input type="checkbox" name="type" value="Shoes"> Shoes</li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
@@ -390,99 +352,83 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 从产品元字段获取颜色数据 {%- endcomment -%}
         {%- assign available_colors = '' | split: '' -%}
+        {%- assign debug_colors = '' | split: '' -%}
         
-        {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
           {%- assign base_products = collection.products -%}
         {%- else -%}
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 从产品元字段和变体中提取颜色 {%- endcomment -%}
-        {%- for product in base_products limit: 300 -%}
-          {%- comment -%} 方式1: 从产品元字段获取颜色列表 {%- endcomment -%}
-          {%- if product.metafields.custom.color != blank -%}
+        {%- comment -%} 从多个来源获取颜色数据 {%- endcomment -%}
+        {%- for product in base_products limit: 50 -%}
+          {%- comment -%} 尝试从产品元字段获取 {%- endcomment -%}
+          {%- if product.metafields.custom.color.value != blank -%}
+            {%- assign color_list = product.metafields.custom.color.value | split: ',' -%}
+            {%- for color in color_list -%}
+              {%- assign color_value = color | strip -%}
+              {%- unless available_colors contains color_value -%}
+                {%- assign available_colors = available_colors | push: color_value -%}
+                {%- assign debug_colors = debug_colors | push: 'custom.color.value' -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- elsif product.metafields.custom.color != blank -%}
             {%- assign color_list = product.metafields.custom.color | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
               {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | push: color_value -%}
-              {%- endunless -%}
-            {%- endfor -%}
-          {%- elsif product.metafields.namespace.color != blank -%}
-            {%- assign color_list = product.metafields.namespace.color | split: ',' -%}
-            {%- for color in color_list -%}
-              {%- assign color_value = color | strip -%}
-              {%- unless available_colors contains color_value -%}
-                {%- assign available_colors = available_colors | push: color_value -%}
+                {%- assign debug_colors = debug_colors | push: 'custom.color' -%}
               {%- endunless -%}
             {%- endfor -%}
           {%- else -%}
-            {%- comment -%} 方式2: 从变体选项中提取 {%- endcomment -%}
-            {%- for variant in product.variants -%}
+            {%- comment -%} 从变体选项获取 {%- endcomment -%}
+            {%- for variant in product.variants limit: 10 -%}
               {%- if variant.available -%}
-                {%- assign color_value = '' -%}
-                
-                {%- comment -%} 从变体元字段获取 {%- endcomment -%}
-                {%- if variant.metafields.custom.color != blank -%}
-                  {%- assign color_value = variant.metafields.custom.color -%}
-                {%- comment -%} 从变体选项获取（排除尺码） {%- endcomment -%}
-                {%- elsif variant.option1 and variant.option1 != 'Default Title' -%}
-                  {%- assign option1_lower = variant.option1 | downcase -%}
-                  {%- unless option1_lower contains 'small' or option1_lower contains 'medium' or option1_lower contains 'large' or option1_lower contains 'xs' or option1_lower contains 'xl' or option1_lower == 's' or option1_lower == 'm' or option1_lower == 'l' -%}
-                    {%- assign color_value = variant.option1 -%}
-                  {%- endunless -%}
-                {%- elsif variant.option2 -%}
-                  {%- assign option2_lower = variant.option2 | downcase -%}
-                  {%- unless option2_lower contains 'small' or option2_lower contains 'medium' or option2_lower contains 'large' or option2_lower contains 'xs' or option2_lower contains 'xl' or option2_lower == 's' or option2_lower == 'm' or option2_lower == 'l' -%}
-                    {%- assign color_value = variant.option2 -%}
-                  {%- endunless -%}
-                {%- elsif variant.option3 -%}
-                  {%- assign option3_lower = variant.option3 | downcase -%}
-                  {%- unless option3_lower contains 'small' or option3_lower contains 'medium' or option3_lower contains 'large' or option3_lower contains 'xs' or option3_lower contains 'xl' or option3_lower == 's' or option3_lower == 'm' or option3_lower == 'l' -%}
-                    {%- assign color_value = variant.option3 -%}
-                  {%- endunless -%}
-                {%- endif -%}
-                
-                {%- if color_value != blank and color_value != 'Default Title' -%}
-                  {%- unless available_colors contains color_value -%}
-                    {%- assign available_colors = available_colors | push: color_value -%}
-                  {%- endunless -%}
-                {%- endif -%}
+                {%- comment -%} 检查所有选项，排除尺码 {%- endcomment -%}
+                {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+                {%- for option in options -%}
+                  {%- if option != blank and option != 'Default Title' -%}
+                    {%- assign option_lower = option | downcase -%}
+                    {%- unless option_lower contains 'small' or option_lower contains 'medium' or option_lower contains 'large' or option_lower contains 'xs' or option_lower contains 'xl' or option_lower == 's' or option_lower == 'm' or option_lower == 'l' -%}
+                      {%- unless available_colors contains option -%}
+                        {%- assign available_colors = available_colors | push: option -%}
+                        {%- assign debug_colors = debug_colors | push: 'variant_option' -%}
+                      {%- endunless -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                {%- endfor -%}
               {%- endif -%}
             {%- endfor -%}
           {%- endif -%}
         {%- endfor -%}
         
-        {%- comment -%} 按字母顺序排序颜色 {%- endcomment -%}
-        {%- assign sorted_colors = available_colors | sort -%}
+        {%- comment -%} 显示调试信息 {%- endcomment -%}
+        <li style="color: blue;">调试：找到颜色数量 {{ available_colors.size }}</li>
+        {%- for i in (0..available_colors.size) -%}
+          {%- if available_colors[i] != blank -%}
+            <li style="color: green;">调试：{{ available_colors[i] }} (来源: {{ debug_colors[i] }})</li>
+          {%- endif -%}
+        {%- endfor -%}
         
-        {%- comment -%} 显示颜色选项 {%- endcomment -%}
+        {%- comment -%} 显示实际颜色选项 {%- endcomment -%}
+        {%- assign sorted_colors = available_colors | sort -%}
         {%- for color in sorted_colors -%}
-          {%- assign is_checked = false -%}
-          {%- assign current_params = request.query_string | split: '&' -%}
-          {%- for param in current_params -%}
-            {%- if param contains 'filter.v.color' -%}
-              {%- assign param_parts = param | split: '=' -%}
-              {%- if param_parts.size > 1 -%}
-                {%- assign selected_colors = param_parts[1] | split: '+' -%}
-                {%- if selected_colors contains color -%}
-                  {%- assign is_checked = true -%}
-                {%- endif -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-          
           <li>
-            <input type="checkbox" 
-                   name="color" 
-                   value="{{ color }}" 
-                   {% if is_checked %}checked{% endif %}>
+            <input type="checkbox" name="color" value="{{ color }}">
             {{ color }}
           </li>
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有找到颜色，显示备用选项 {%- endcomment -%}
+        {%- if available_colors.size == 0 -%}
+          <li style="color: orange;">没有找到颜色数据，显示备用选项：</li>
+          <li><input type="checkbox" name="color" value="Red"> Red</li>
+          <li><input type="checkbox" name="color" value="Blue"> Blue</li>
+          <li><input type="checkbox" name="color" value="Black"> Black</li>
+          <li><input type="checkbox" name="color" value="White"> White</li>
+        {%- endif -%}
       </ul>
     </div>
   </div>
