@@ -660,6 +660,16 @@ window.toggleFilterGroup = function(header) {
   icon.textContent = group.classList.contains('active') ? '-' : '+';
 }
 
+// 确保toggleFilterGroup在全局作用域可用（兼容旧版本）
+if (typeof toggleFilterGroup === 'undefined') {
+  window.toggleFilterGroup = function(header) {
+    const group = header.parentElement;
+    group.classList.toggle('active');
+    const icon = header.querySelector('span');
+    icon.textContent = group.classList.contains('active') ? '-' : '+';
+  };
+}
+
 // 增强筛选器交互功能
 (function() {
   function initFilterEvents() {
