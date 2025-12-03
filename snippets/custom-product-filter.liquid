@@ -134,9 +134,9 @@
             {%- assign brand_value = product.vendor -%}
           {%- endif -%}
           
-          {%- if brand_value != blank and available_brands contains brand_value == false -%}
+          {%- unless available_brands contains brand_value -%}
             {%- assign available_brands = available_brands | append: ',' | append: brand_value -%}
-          {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
         
         {%- assign brand_array = available_brands | remove_first: ',' | split: ',' | sort -%}
@@ -178,25 +178,25 @@
             {%- assign size_list = product.metafields.shopify.size.value | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and clothing_sizes contains size_value == false -%}
+              {%- unless clothing_sizes contains size_value -%}
                 {%- assign clothing_sizes = clothing_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.size.value != blank -%}
             {%- assign size_list = product.metafields.custom.size.value | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and clothing_sizes contains size_value == false -%}
+              {%- unless clothing_sizes contains size_value -%}
                 {%- assign clothing_sizes = clothing_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.size != blank -%}
             {%- assign size_list = product.metafields.custom.size | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and clothing_sizes contains size_value == false -%}
+              {%- unless clothing_sizes contains size_value -%}
                 {%- assign clothing_sizes = clothing_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- else -%}
             {%- for variant in product.variants limit: 10 -%}
@@ -206,9 +206,9 @@
                   {%- if option != blank and option != 'Default Title' -%}
                     {%- assign option_upper = option | upcase -%}
                     {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' -%}
-                      {%- if option != blank and clothing_sizes contains option == false -%}
+                      {%- unless clothing_sizes contains option -%}
                         {%- assign clothing_sizes = clothing_sizes | append: ',' | append: option -%}
-                      {%- endif -%}
+                      {%- endunless -%}
                     {%- endif -%}
                   {%- endif -%}
                 {%- endfor -%}
@@ -267,25 +267,25 @@
             {%- assign size_list = product.metafields.shopify.shoe-size.value | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and shoe_sizes contains size_value == false -%}
+              {%- unless shoe_sizes contains size_value -%}
                 {%- assign shoe_sizes = shoe_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.shoe_size.value != blank -%}
             {%- assign size_list = product.metafields.custom.shoe_size.value | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and shoe_sizes contains size_value == false -%}
+              {%- unless shoe_sizes contains size_value -%}
                 {%- assign shoe_sizes = shoe_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.shoe_size != blank -%}
             {%- assign size_list = product.metafields.custom.shoe_size | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
-              {%- if size_value != blank and shoe_sizes contains size_value == false -%}
+              {%- unless shoe_sizes contains size_value -%}
                 {%- assign shoe_sizes = shoe_sizes | append: ',' | append: size_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- else -%}
             {%- for variant in product.variants limit: 10 -%}
@@ -296,9 +296,9 @@
                     {%- assign option_clean = option | remove: 'US' | remove: 'UK' | remove: 'EU' | strip -%}
                     {%- assign option_num = option_clean | times: 1 -%}
                     {%- if option_num > 0 and option_num < 20 -%}
-                      {%- if option != blank and shoe_sizes contains option == false -%}
+                      {%- unless shoe_sizes contains option -%}
                         {%- assign shoe_sizes = shoe_sizes | append: ',' | append: option -%}
-                      {%- endif -%}
+                      {%- endunless -%}
                     {%- endif -%}
                   {%- endif -%}
                 {%- endfor -%}
@@ -354,9 +354,9 @@
             {%- assign type_value = product.type -%}
           {%- endif -%}
           
-          {%- if type_value != blank and available_types contains type_value == false -%}
+          {%- unless available_types contains type_value -%}
             {%- assign available_types = available_types | append: ',' | append: type_value -%}
-          {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
         
         {%- assign type_array = available_types | remove_first: ',' | split: ',' | sort -%}
@@ -397,25 +397,25 @@
             {%- assign color_list = product.metafields.shopify.color-pattern.value | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
-              {%- if color_value != blank and available_colors contains color_value == false -%}
+              {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | append: ',' | append: color_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.color.value != blank -%}
             {%- assign color_list = product.metafields.custom.color.value | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
-              {%- if color_value != blank and available_colors contains color_value == false -%}
+              {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | append: ',' | append: color_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- elsif product.metafields.custom.color != blank -%}
             {%- assign color_list = product.metafields.custom.color | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
-              {%- if color_value != blank and available_colors contains color_value == false -%}
+              {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | append: ',' | append: color_value -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endfor -%}
           {%- else -%}
             {%- for variant in product.variants limit: 10 -%}
@@ -425,9 +425,9 @@
                   {%- if option != blank and option != 'Default Title' -%}
                     {%- assign option_lower = option | downcase -%}
                     {%- unless option_lower contains 'small' or option_lower contains 'medium' or option_lower contains 'large' or option_lower contains 'xs' or option_lower contains 'xl' or option_lower == 's' or option_lower == 'm' or option_lower == 'l' -%}
-                      {%- if option != blank and available_colors contains option == false -%}
+                      {%- unless available_colors contains option -%}
                         {%- assign available_colors = available_colors | append: ',' | append: option -%}
-                      {%- endif -%}
+                      {%- endunless -%}
                     {%- endunless -%}
                   {%- endif -%}
                 {%- endfor -%}
@@ -518,18 +518,18 @@
         {%- assign color_list = product.metafields.shopify.color-pattern.value | split: ',' -%}
         {%- for color in color_list -%}
           {%- assign color_value = color | strip -%}
-          {%- if color_value != blank and product_colors contains color_value == false -%}
+          {%- unless product_colors contains color_value -%}
             {%- assign product_colors = product_colors | append: ',' | append: color_value -%}
-          {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
       {%- else -%}
         {%- comment -%} 从变体选项获取 {%- endcomment -%}
         {%- for variant in product.variants -%}
           {%- if variant.available -%}
             {%- assign variant_color = variant.title | split: ' / ' | first -%}
-            {%- if variant_color != blank and product_colors contains variant_color == false -%}
+            {%- unless product_colors contains variant_color -%}
               {%- assign product_colors = product_colors | append: ',' | append: variant_color -%}
-            {%- endif -%}
+            {%- endunless -%}
           {%- endif -%}
         {%- endfor -%}
       {%- endif -%}
@@ -562,9 +562,9 @@
         {%- assign size_list = product.metafields.shopify.size.value | split: ',' -%}
         {%- for size in size_list -%}
           {%- assign size_value = size | strip -%}
-          {%- if size_value != blank and product_clothing_sizes contains size_value == false -%}
+          {%- unless product_clothing_sizes contains size_value -%}
             {%- assign product_clothing_sizes = product_clothing_sizes | append: ',' | append: size_value -%}
-          {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
       {%- else -%}
         {%- comment -%} 从变体选项获取 {%- endcomment -%}
@@ -573,9 +573,9 @@
             {%- assign variant_size = variant.title | split: ' / ' | last -%}
             {%- assign size_upper = variant_size | upcase -%}
             {%- if size_upper contains 'XS' or size_upper contains 'SMALL' or size_upper contains 'MEDIUM' or size_upper contains 'LARGE' or size_upper == 'S' or size_upper == 'M' or size_upper == 'L' or size_upper == 'XL' or size_upper == 'XXL' or size_upper == 'XXXL' -%}
-              {%- if variant_size != blank and product_clothing_sizes contains variant_size == false -%}
+              {%- unless product_clothing_sizes contains variant_size -%}
                 {%- assign product_clothing_sizes = product_clothing_sizes | append: ',' | append: variant_size -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
@@ -609,9 +609,9 @@
         {%- assign size_list = product.metafields.shopify.shoe-size.value | split: ',' -%}
         {%- for size in size_list -%}
           {%- assign size_value = size | strip -%}
-          {%- if size_value != blank and product_shoe_sizes contains size_value == false -%}
+          {%- unless product_shoe_sizes contains size_value -%}
             {%- assign product_shoe_sizes = product_shoe_sizes | append: ',' | append: size_value -%}
-          {%- endif -%}
+          {%- endunless -%}
         {%- endfor -%}
       {%- else -%}
         {%- comment -%} 从变体选项获取可能的鞋码 {%- endcomment -%}
@@ -621,9 +621,9 @@
             {%- assign option_clean = variant_size | remove: 'US' | remove: 'UK' | remove: 'EU' | strip -%}
             {%- assign option_num = option_clean | times: 1 -%}
             {%- if option_num > 0 and option_num < 20 -%}
-              {%- if variant_size != blank and product_shoe_sizes contains variant_size == false -%}
+              {%- unless product_shoe_sizes contains variant_size -%}
                 {%- assign product_shoe_sizes = product_shoe_sizes | append: ',' | append: variant_size -%}
-              {%- endif -%}
+              {%- endunless -%}
             {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
@@ -670,7 +670,7 @@ window.toggleFilterGroup = function(header) {
     document.addEventListener('click', function(e) {
       if (sidebar.classList.contains('active') && 
           !sidebar.contains(e.target) && 
-          !e.target.closest('[onclick*="toggleFilter"]')) {
+          !e.target.closest('.filter-btn')) {
         sidebar.classList.remove('active');
       }
     });
@@ -690,8 +690,6 @@ window.toggleFilterGroup = function(header) {
     initFilterEvents();
   }
 })();
-
-
 
 function applyFilters() {
   const selectedSort = document.querySelector('input[name="sort"]:checked').value;
