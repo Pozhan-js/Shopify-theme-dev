@@ -254,8 +254,32 @@ h3.product-title {
 <script>
   function toggleFilter() {
     const sidebar = document.getElementById('filter-sidebar');
-    sidebar.classList.toggle('active');
+    if (sidebar) {
+      sidebar.classList.toggle('active');
+    }
   }
+
+  // 增强筛选器交互功能
+  document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('filter-sidebar');
+    if (!sidebar) return;
+    
+    // 点击侧边栏外部关闭
+    document.addEventListener('click', function(e) {
+      if (sidebar.classList.contains('active') && 
+          !sidebar.contains(e.target) && 
+          !e.target.closest('.filter-btn')) {
+        sidebar.classList.remove('active');
+      }
+    });
+    
+    // ESC键关闭
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+  });
 
   function prevImage(button) {
     const container = button.parentNode;
