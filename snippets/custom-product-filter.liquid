@@ -652,6 +652,35 @@
 </div>
 
 <script>
+function toggleFilter() {
+  const sidebar = document.querySelector('.filter-sidebar');
+  if (sidebar) {
+    sidebar.classList.toggle('active');
+  }
+}
+
+// 点击外部区域关闭筛选器
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.querySelector('.filter-sidebar');
+  if (sidebar) {
+    // 点击侧边栏外部关闭
+    document.addEventListener('click', function(e) {
+      if (sidebar.classList.contains('active') && 
+          !sidebar.contains(e.target) && 
+          !e.target.closest('[onclick="toggleFilter()"]')) {
+        sidebar.classList.remove('active');
+      }
+    });
+    
+    // ESC键关闭
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+        sidebar.classList.remove('active');
+      }
+    });
+  }
+});
+
 function toggleFilterGroup(header) {
   const group = header.parentElement;
   group.classList.toggle('active');
