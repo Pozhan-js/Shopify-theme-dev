@@ -113,11 +113,8 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 获取当前筛选条件下的所有品牌 {%- endcomment -%}
+        {%- comment -%} 简化品牌获取逻辑，直接从所有产品中提取 {%- endcomment -%}
         {%- assign available_brands = '' | split: '' -%}
-        
-        {%- comment -%} 获取当前URL参数（排除BRAND） {%- endcomment -%}
-        {%- assign query_params = request.query_string | split: '&' -%}
         
         {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
@@ -126,89 +123,21 @@
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 基于当前筛选条件过滤产品并提取品牌 {%- endcomment -%}
-        {%- for product in base_products limit: 500 -%}
-          {%- assign include_product = true -%}
-          
-          {%- comment -%} 检查SIZE筛选 {%- endcomment -%}
-          {%- assign size_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.size' -%}
-              {%- assign size_filter = param | remove: 'filter.v.size=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if size_filter != blank -%}
-            {%- assign selected_sizes = size_filter | split: '+' -%}
-            {%- assign product_sizes = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_size = variant.title | split: ' / ' | last -%}
-                {%- unless product_sizes contains variant_size -%}
-                  {%- assign product_sizes = product_sizes | push: variant_size -%}
-                {%- endunless -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- assign size_match = false -%}
-            {%- for size in product_sizes -%}
-              {%- if selected_sizes contains size -%}
-                {%- assign size_match = true -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless size_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查产品类型筛选 {%- endcomment -%}
-          {%- assign type_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.product_type' -%}
-              {%- assign type_filter = param | remove: 'filter.v.product_type=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if type_filter != blank -%}
-            {%- assign selected_types = type_filter | split: '+' -%}
-            {%- assign product_type = product.type | replace: ' ', '-' -%}
-            {%- unless selected_types contains product_type -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查颜色筛选 {%- endcomment -%}
-          {%- assign color_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.color' -%}
-              {%- assign color_filter = param | remove: 'filter.v.color=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if color_filter != blank -%}
-            {%- assign selected_colors = color_filter | split: '+' -%}
-            {%- assign product_colors = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_color = variant.title | split: ' / ' | first -%}
-                {%- unless product_colors contains variant_color -%}
-                  {%- assign product_colors = product_colors | push: variant_color -%}
-                {%- endunless -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- assign color_match = false -%}
-            {%- for color in product_colors -%}
-              {%- if selected_colors contains color -%}
-                {%- assign color_match = true -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless color_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- if include_product -%}
+        {%- comment -%} 直接提取所有品牌，不进行复杂筛选 {%- endcomment -%}
+        {%- for product in base_products limit: 200 -%}
+          {%- if product.vendor != blank -%}
             {%- unless available_brands contains product.vendor -%}
               {%- assign available_brands = available_brands | push: product.vendor -%}
             {%- endunless -%}
           {%- endif -%}
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有品牌数据，使用备用方案 {%- endcomment -%}
+        {%- if available_brands.size == 0 -%}
+          {%- for link in linklists.brands.links -%}
+            {%- assign available_brands = available_brands | push: link.title -%}
+          {%- endfor -%}
+        {%- endif -%}
         
         {%- comment -%} 按字母顺序排序品牌 {%- endcomment -%}
         {%- assign sorted_brands = available_brands | sort -%}
@@ -248,11 +177,8 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 获取当前筛选条件下的所有产品SIZE {%- endcomment -%}
+        {%- comment -%} 简化SIZE获取逻辑 {%- endcomment -%}
         {%- assign available_sizes = '' | split: '' -%}
-        
-        {%- comment -%} 获取当前URL参数（排除SIZE） {%- endcomment -%}
-        {%- assign query_params = request.query_string | split: '&' -%}
         
         {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
@@ -261,109 +187,77 @@
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 基于当前筛选条件过滤产品并提取SIZE {%- endcomment -%}
-        {%- for product in base_products limit: 500 -%}
-          {%- assign include_product = true -%}
-          
-          {%- comment -%} 检查品牌筛选 {%- endcomment -%}
-          {%- assign brand_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.brand' -%}
-              {%- assign brand_filter = param | remove: 'filter.v.brand=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if brand_filter != blank -%}
-            {%- assign selected_brands = brand_filter | split: '+' -%}
-            {%- unless selected_brands contains product.vendor -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查产品类型筛选 {%- endcomment -%}
-          {%- assign type_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.product_type' -%}
-              {%- assign type_filter = param | remove: 'filter.v.product_type=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if type_filter != blank -%}
-            {%- assign selected_types = type_filter | split: '+' -%}
-            {%- assign product_type = product.type | replace: ' ', '-' -%}
-            {%- unless selected_types contains product_type -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查颜色筛选 {%- endcomment -%}
-          {%- assign color_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.color' -%}
-              {%- assign color_filter = param | remove: 'filter.v.color=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if color_filter != blank -%}
-            {%- assign selected_colors = color_filter | split: '+' -%}
-            {%- assign product_colors = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_color = variant.title | split: ' / ' | first -%}
-                {%- unless product_colors contains variant_color -%}
-                  {%- assign product_colors = product_colors | push: variant_color -%}
-                {%- endunless -%}
+        {%- comment -%} 直接从所有产品变体中提取SIZE {%- endcomment -%}
+        {%- for product in base_products limit: 200 -%}
+          {%- for variant in product.variants -%}
+            {%- if variant.available -%}
+              {%- comment -%} 多种SIZE提取方式 {%- endcomment -%}
+              {%- assign size_value = '' -%}
+              
+              {%- comment -%} 方式1: 从option1, option2, option3中查找SIZE {%- endcomment -%}
+              {%- if variant.option1 and variant.option1 != 'Default Title' -%}
+                {%- assign option1_upper = variant.option1 | upcase -%}
+                {%- if option1_upper contains 'XS' or option1_upper contains 'SMALL' or option1_upper contains 'MEDIUM' or option1_upper contains 'LARGE' -%}
+                  {%- assign size_value = variant.option1 -%}
+                {%- endif -%}
               {%- endif -%}
-            {%- endfor -%}
-            {%- assign color_match = false -%}
-            {%- for color in product_colors -%}
-              {%- if selected_colors contains color -%}
-                {%- assign color_match = true -%}
+              
+              {%- if size_value == blank and variant.option2 -%}
+                {%- assign option2_upper = variant.option2 | upcase -%}
+                {%- if option2_upper contains 'XS' or option2_upper contains 'SMALL' or option2_upper contains 'MEDIUM' or option2_upper contains 'LARGE' -%}
+                  {%- assign size_value = variant.option2 -%}
+                {%- endif -%}
               {%- endif -%}
-            {%- endfor -%}
-            {%- unless color_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- if include_product -%}
-            {%- comment -%} 从筛选后的产品中提取SIZE {%- endcomment -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- comment -%} 提取SIZE值 {%- endcomment -%}
+              
+              {%- if size_value == blank and variant.option3 -%}
+                {%- assign option3_upper = variant.option3 | upcase -%}
+                {%- if option3_upper contains 'XS' or option3_upper contains 'SMALL' or option3_upper contains 'MEDIUM' or option3_upper contains 'LARGE' -%}
+                  {%- assign size_value = variant.option3 -%}
+                {%- endif -%}
+              {%- endif -%}
+              
+              {%- comment -%} 方式2: 从变体标题中提取 {%- endcomment -%}
+              {%- if size_value == blank -%}
                 {%- assign variant_title = variant.title -%}
-                {%- assign size_value = '' -%}
-                
-                {%- comment -%} 尝试从变体标题中提取SIZE {%- endcomment -%}
                 {%- if variant_title contains ' / ' -%}
                   {%- assign parts = variant_title | split: ' / ' -%}
-                  {%- if parts.size >= 2 -%}
-                    {%- assign size_value = parts[-1] -%}
-                  {%- endif -%}
-                {%- else -%}
-                  {%- comment -%} 直接作为SIZE值 {%- endcomment -%}
-                  {%- assign size_value = variant_title -%}
+                  {%- for part in parts -%}
+                    {%- assign part_upper = part | upcase -%}
+                    {%- if part_upper contains 'XS' or part_upper contains 'SMALL' or part_upper contains 'MEDIUM' or part_upper contains 'LARGE' or part_upper == 'S' or part_upper == 'M' or part_upper == 'L' -%}
+                      {%- assign size_value = part -%}
+                      {%- break -%}
+                    {%- endif -%}
+                  {%- endfor -%}
                 {%- endif -%}
-                
-                {%- comment -%} 标准化SIZE值 {%- endcomment -%}
+              {%- endif -%}
+              
+              {%- comment -%} 标准化SIZE值 {%- endcomment -%}
+              {%- if size_value != blank -%}
                 {%- assign normalized_size = size_value | strip | upcase -%}
                 {%- assign standard_mapping = 'SMALL:S,MEDIUM:M,LARGE:L,X-SMALL:XS,X-LARGE:XL,XX-LARGE:XXL,XXX-LARGE:XXXL' | split: ',' -%}
                 {%- for mapping in standard_mapping -%}
                   {%- assign parts = mapping | split: ':' -%}
                   {%- if parts.size == 2 and normalized_size == parts[0] -%}
                     {%- assign size_value = parts[1] -%}
+                    {%- break -%}
                   {%- endif -%}
                 {%- endfor -%}
                 
-                {%- unless size_value == blank -%}
-                  {%- unless available_sizes contains size_value -%}
-                    {%- assign available_sizes = available_sizes | push: size_value -%}
-                  {%- endunless -%}
+                {%- unless available_sizes contains size_value -%}
+                  {%- assign available_sizes = available_sizes | push: size_value -%}
                 {%- endunless -%}
               {%- endif -%}
-            {%- endfor -%}
-          {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
         
+        {%- comment -%} 如果没有找到SIZE，使用默认值 {%- endcomment -%}
+        {%- if available_sizes.size == 0 -%}
+          {%- assign available_sizes = 'XS,S,M,L,XL,XXL' | split: ',' -%}
+        {%- endif -%}
+        
         {%- comment -%} 按标准顺序排序SIZE {%- endcomment -%}
-        {%- assign size_order = 'XS,S,M,L,XL,XXL,XXXL,2XL,3XL,4XL,5XL,6XL,7XL,8XL,9XL,10XL' | split: ',' -%}
+        {%- assign size_order = 'XS,S,M,L,XL,XXL,XXXL,2XL,3XL,4XL,5XL' | split: ',' -%}
         {%- assign sorted_sizes = '' | split: '' -%}
         
         {%- for standard_size in size_order -%}
@@ -414,11 +308,8 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 获取当前筛选条件下的所有产品类型 {%- endcomment -%}
+        {%- comment -%} 简化产品类型获取逻辑 {%- endcomment -%}
         {%- assign available_types = '' | split: '' -%}
-        
-        {%- comment -%} 获取当前URL参数（排除PRODUCT TYPE） {%- endcomment -%}
-        {%- assign query_params = request.query_string | split: '&' -%}
         
         {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
@@ -427,88 +318,21 @@
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 基于当前筛选条件过滤产品并提取产品类型 {%- endcomment -%}
-        {%- for product in base_products limit: 500 -%}
-          {%- assign include_product = true -%}
-          
-          {%- comment -%} 检查品牌筛选 {%- endcomment -%}
-          {%- assign brand_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.brand' -%}
-              {%- assign brand_filter = param | remove: 'filter.v.brand=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if brand_filter != blank -%}
-            {%- assign selected_brands = brand_filter | split: '+' -%}
-            {%- unless selected_brands contains product.vendor -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查SIZE筛选 {%- endcomment -%}
-          {%- assign size_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.size' -%}
-              {%- assign size_filter = param | remove: 'filter.v.size=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if size_filter != blank -%}
-            {%- assign selected_sizes = size_filter | split: '+' -%}
-            {%- assign product_sizes = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_size = variant.title | split: ' / ' | last -%}
-                {%- unless product_sizes contains variant_size -%}
-                  {%- assign product_sizes = product_sizes | push: variant_size -%}
-                {%- endunless -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- assign size_match = false -%}
-            {%- for size in product_sizes -%}
-              {%- if selected_sizes contains size -%}
-                {%- assign size_match = true -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless size_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查颜色筛选 {%- endcomment -%}
-          {%- assign color_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.color' -%}
-              {%- assign color_filter = param | remove: 'filter.v.color=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if color_filter != blank -%}
-            {%- assign selected_colors = color_filter | split: '+' -%}
-            {%- assign product_colors = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_color = variant.title | split: ' / ' | first -%}
-                {%- unless product_colors contains variant_color -%}
-                  {%- assign product_colors = product_colors | push: variant_color -%}
-                {%- endunless -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- assign color_match = false -%}
-            {%- for color in product_colors -%}
-              {%- if selected_colors contains color -%}
-                {%- assign color_match = true -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless color_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- if include_product -%}
+        {%- comment -%} 直接提取所有产品类型 {%- endcomment -%}
+        {%- for product in base_products limit: 200 -%}
+          {%- if product.type != blank -%}
             {%- unless available_types contains product.type -%}
               {%- assign available_types = available_types | push: product.type -%}
             {%- endunless -%}
           {%- endif -%}
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有产品类型数据，使用备用方案 {%- endcomment -%}
+        {%- if available_types.size == 0 -%}
+          {%- for link in linklists.product-types.links -%}
+            {%- assign available_types = available_types | push: link.title -%}
+          {%- endfor -%}
+        {%- endif -%}
         
         {%- comment -%} 按字母顺序排序产品类型 {%- endcomment -%}
         {%- assign sorted_types = available_types | sort -%}
@@ -549,11 +373,8 @@
     </div>
     <div class="filter-group-content">
       <ul>
-        {%- comment -%} 获取当前筛选条件下的所有颜色 {%- endcomment -%}
+        {%- comment -%} 简化颜色获取逻辑 {%- endcomment -%}
         {%- assign available_colors = '' | split: '' -%}
-        
-        {%- comment -%} 获取当前URL参数（排除COLOR） {%- endcomment -%}
-        {%- assign query_params = request.query_string | split: '&' -%}
         
         {%- comment -%} 使用当前集合或所有产品 {%- endcomment -%}
         {%- if collection and collection.products.size > 0 -%}
@@ -562,80 +383,60 @@
           {%- assign base_products = collections.all.products -%}
         {%- endif -%}
         
-        {%- comment -%} 基于当前筛选条件过滤产品并提取颜色 {%- endcomment -%}
-        {%- for product in base_products limit: 500 -%}
-          {%- assign include_product = true -%}
-          
-          {%- comment -%} 检查品牌筛选 {%- endcomment -%}
-          {%- assign brand_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.brand' -%}
-              {%- assign brand_filter = param | remove: 'filter.v.brand=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if brand_filter != blank -%}
-            {%- assign selected_brands = brand_filter | split: '+' -%}
-            {%- unless selected_brands contains product.vendor -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查SIZE筛选 {%- endcomment -%}
-          {%- assign size_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.size' -%}
-              {%- assign size_filter = param | remove: 'filter.v.size=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if size_filter != blank -%}
-            {%- assign selected_sizes = size_filter | split: '+' -%}
-            {%- assign product_sizes = '' | split: '' -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_size = variant.title | split: ' / ' | last -%}
-                {%- unless product_sizes contains variant_size -%}
-                  {%- assign product_sizes = product_sizes | push: variant_size -%}
+        {%- comment -%} 直接从所有产品变体中提取颜色 {%- endcomment -%}
+        {%- for product in base_products limit: 200 -%}
+          {%- for variant in product.variants -%}
+            {%- if variant.available -%}
+              {%- comment -%} 多种颜色提取方式 {%- endcomment -%}
+              {%- assign color_value = '' -%}
+              
+              {%- comment -%} 方式1: 从option1, option2, option3中查找颜色 {%- endcomment -%}
+              {%- if variant.option1 and variant.option1 != 'Default Title' -%}
+                {%- assign option1_lower = variant.option1 | downcase -%}
+                {%- unless option1_lower contains 'small' or option1_lower contains 'medium' or option1_lower contains 'large' or option1_lower contains 'xs' or option1_lower contains 'xl' -%}
+                  {%- assign color_value = variant.option1 -%}
                 {%- endunless -%}
               {%- endif -%}
-            {%- endfor -%}
-            {%- assign size_match = false -%}
-            {%- for size in product_sizes -%}
-              {%- if selected_sizes contains size -%}
-                {%- assign size_match = true -%}
-              {%- endif -%}
-            {%- endfor -%}
-            {%- unless size_match -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- comment -%} 检查产品类型筛选 {%- endcomment -%}
-          {%- assign type_filter = '' -%}
-          {%- for param in query_params -%}
-            {%- if param contains 'filter.v.product_type' -%}
-              {%- assign type_filter = param | remove: 'filter.v.product_type=' -%}
-            {%- endif -%}
-          {%- endfor -%}
-          {%- if type_filter != blank -%}
-            {%- assign selected_types = type_filter | split: '+' -%}
-            {%- assign product_type = product.type | replace: ' ', '-' -%}
-            {%- unless selected_types contains product_type -%}
-              {%- assign include_product = false -%}
-            {%- endunless -%}
-          {%- endif -%}
-          
-          {%- if include_product -%}
-            {%- comment -%} 从筛选后的产品中提取颜色 {%- endcomment -%}
-            {%- for variant in product.variants -%}
-              {%- if variant.available -%}
-                {%- assign variant_color = variant.title | split: ' / ' | first -%}
-                {%- unless available_colors contains variant_color -%}
-                  {%- assign available_colors = available_colors | push: variant_color -%}
+              
+              {%- if color_value == blank and variant.option2 -%}
+                {%- assign option2_lower = variant.option2 | downcase -%}
+                {%- unless option2_lower contains 'small' or option2_lower contains 'medium' or option2_lower contains 'large' or option2_lower contains 'xs' or option2_lower contains 'xl' -%}
+                  {%- assign color_value = variant.option2 -%}
                 {%- endunless -%}
               {%- endif -%}
-            {%- endfor -%}
-          {%- endif -%}
+              
+              {%- comment -%} 方式2: 从变体标题中提取 {%- endcomment -%}
+              {%- if color_value == blank -%}
+                {%- assign variant_title = variant.title -%}
+                {%- if variant_title contains ' / ' -%}
+                  {%- assign parts = variant_title | split: ' / ' -%}
+                  {%- assign color_value = parts[0] -%}
+                {%- else -%}
+                  {%- assign color_value = variant_title -%}
+                {%- endif -%}
+              {%- endif -%}
+              
+              {%- if color_value != blank and color_value != 'Default Title' -%}
+                {%- unless available_colors contains color_value -%}
+                  {%- assign available_colors = available_colors | push: color_value -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
+        
+        {%- comment -%} 如果没有找到颜色，使用备用方案 {%- endcomment -%}
+        {%- if available_colors.size == 0 -%}
+          {%- assign color_options = shop.metaobjects.standard_product_attributes.values | where: "definition_name", "颜色" -%}
+          {%- for color in color_options -%}
+            {%- assign available_colors = available_colors | push: color.system.name -%}
+          {%- endfor -%}
+        {%- endif -%}
+        
+        {%- comment -%} 如果还是没有，使用默认颜色 {%- endcomment -%}
+        {%- if available_colors.size == 0 -%}
+          {%- assign available_colors = 'Black,White,Red,Blue,Green,Yellow,Pink,Purple,Gray,Brown' | split: ',' -%}
+        {%- endif -%}
         
         {%- comment -%} 按字母顺序排序颜色 {%- endcomment -%}
         {%- assign sorted_colors = available_colors | sort -%}
