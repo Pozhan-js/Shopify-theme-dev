@@ -545,70 +545,48 @@
         {%- assign size_filter = param | remove: 'filter.v.size=' -%}
       {%- endif -%}
     {%- endfor -%}
+    {%- comment -%} 调试：SIZE筛选参数 {{ size_filter }} {%- endcomment -%}
     {%- if size_filter != blank -%}
       {%- assign selected_sizes = size_filter | split: '+' -%}
       {%- assign product_sizes = '' -%}
       
       {%- comment -%} 从所有元字段获取尺码 {%- endcomment -%}
+      {%- assign all_size_sources = '' -%}
+      
+      {%- comment -%} 收集所有来源的尺码 {%- endcomment -%}
+      {%- assign sources = '' | split: ',' -%}
       {%- if product.metafields.shopify.shoe-size.value != blank -%}
-        {%- assign size_list = product.metafields.shopify.shoe-size.value | split: ',' -%}
-        {%- for size in size_list -%}
-          {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
-        {%- endfor -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.shopify.shoe-size.value -%}
       {%- endif -%}
-      
       {%- if product.metafields.shopify.size.value != blank -%}
-        {%- assign size_list = product.metafields.shopify.size.value | split: ',' -%}
-        {%- for size in size_list -%}
-          {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
-        {%- endfor -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.shopify.size.value -%}
       {%- endif -%}
-      
       {%- if product.metafields.custom.shoe_size.value != blank -%}
-        {%- assign size_list = product.metafields.custom.shoe_size.value | split: ',' -%}
-        {%- for size in size_list -%}
-          {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
-        {%- endfor -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.custom.shoe_size.value -%}
       {%- endif -%}
-      
       {%- if product.metafields.custom.size.value != blank -%}
-        {%- assign size_list = product.metafields.custom.size.value | split: ',' -%}
-        {%- for size in size_list -%}
-          {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
-        {%- endfor -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.custom.size.value -%}
       {%- endif -%}
-      
       {%- if product.metafields.custom.shoe_size != blank -%}
-        {%- assign size_list = product.metafields.custom.shoe_size | split: ',' -%}
-        {%- for size in size_list -%}
-          {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
-        {%- endfor -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.custom.shoe_size -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.size != blank -%}
+        {%- assign sources = sources | append: ',' | append: product.metafields.custom.size -%}
       {%- endif -%}
       
-      {%- if product.metafields.custom.size != blank -%}
-        {%- assign size_list = product.metafields.custom.size | split: ',' -%}
+      {%- assign sources_string = sources | remove_first: ',' -%}
+      {%- assign sources_array = sources_string | split: ',' -%}
+      {%- for source in sources_array -%}
+        {%- assign size_list = source | split: ',' -%}
         {%- for size in size_list -%}
           {%- assign size_value = size | strip -%}
-          {%- unless product_sizes contains size_value -%}
-            {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
-          {%- endunless -%}
+          {%- if size_value != blank -%}
+            {%- unless product_sizes contains size_value -%}
+              {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
+            {%- endunless -%}
+          {%- endif -%}
         {%- endfor -%}
-      {%- endif -%}
+      {%- endfor -%}
       
       {%- comment -%} 从变体选项获取 {%- endcomment -%}
       {%- for variant in product.variants -%}
@@ -715,10 +693,18 @@ if (typeof toggleFilterGroup === 'undefined') {
 
 function applyFilters() {
   const selectedSort = document.querySelector('input[name="sort"]:checked').value;
-  const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(el => el.value);
   const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map(el => el.value);
+  const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(el => el.value);
   const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(el => el.value);
   const selectedColors = Array.from(document.querySelectorAll('input[name="color"]:checked')).map(el => el.value);
+
+  console.log('Apply Filters:', {
+    sort: selectedSort,
+    sizes: selectedSizes,
+    brands: selectedBrands,
+    types: selectedTypes,
+    colors: selectedColors
+  });
 
   // 构建查询参数
   let queryParams = [];
@@ -760,7 +746,10 @@ function applyFilters() {
   if (selectedTypes.length) queryParams.push(`filter.v.product_type=${selectedTypes.join('+')}`);
   if (selectedColors.length) queryParams.push(`filter.v.color=${selectedColors.join('+')}`);
 
+  const finalQuery = queryParams.join('&');
+  console.log('Final query:', finalQuery);
+  
   // 重新加载页面应用筛选
-  window.location.search = queryParams.join('&');
+  window.location.search = finalQuery;
 }
 </script>
