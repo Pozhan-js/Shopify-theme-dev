@@ -247,7 +247,17 @@
                   {%- assign option_upper = option | upcase -%}
                   
                   {%- comment -%} 包含衣服尺码和鞋码的判断 {%- endcomment -%}
-                  {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' or (option_num > 0 and option_num < 20) -%}
+                  {%- assign is_clothing_size = false -%}
+                  {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' -%}
+                    {%- assign is_clothing_size = true -%}
+                  {%- endif -%}
+                  
+                  {%- assign is_shoe_size = false -%}
+                  {%- if option_num > 0 and option_num < 20 -%}
+                    {%- assign is_shoe_size = true -%}
+                  {%- endif -%}
+                  
+                  {%- if is_clothing_size or is_shoe_size -%}
                     {%- unless all_sizes contains option -%}
                       {%- assign all_sizes = all_sizes | append: ',' | append: option -%}
                     {%- endunless -%}
@@ -611,7 +621,17 @@
               {%- assign option_upper = option | upcase -%}
               
               {%- comment -%} 包含衣服尺码和鞋码的判断 {%- endcomment -%}
-              {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' or (option_num > 0 and option_num < 20) -%}
+              {%- assign is_clothing_size = false -%}
+              {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' -%}
+                {%- assign is_clothing_size = true -%}
+              {%- endif -%}
+              
+              {%- assign is_shoe_size = false -%}
+              {%- if option_num > 0 and option_num < 20 -%}
+                {%- assign is_shoe_size = true -%}
+              {%- endif -%}
+              
+              {%- if is_clothing_size or is_shoe_size -%}
                 {%- unless product_sizes contains option -%}
                   {%- assign product_sizes = product_sizes | append: ',' | append: option -%}
                 {%- endunless -%}
