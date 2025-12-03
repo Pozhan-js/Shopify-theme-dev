@@ -202,45 +202,82 @@
         
         {%- comment -%} 从多个来源获取尺码数据 {%- endcomment -%}
         {%- for product in base_products limit: 50 -%}
-          {%- comment -%} 尝试从产品元字段获取 {%- endcomment -%}
-          {%- if product.metafields.custom.size.value != blank -%}
-            {%- assign size_list = product.metafields.custom.size.value | split: ',' -%}
+          {%- comment -%} 尝试从Shopify标准元字段获取尺码 {%- endcomment -%}
+          {%- if product.metafields.shopify.size.value != blank -%}
+            {%- assign size_list = product.metafields.shopify.size.value | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
               {%- unless available_sizes contains size_value -%}
                 {%- assign available_sizes = available_sizes | push: size_value -%}
-                {%- assign debug_sizes = debug_sizes | push: 'custom.size.value' -%}
+                {%- assign debug_sizes = debug_sizes | push: 'shopify.size.value' -%}
               {%- endunless -%}
             {%- endfor -%}
-          {%- elsif product.metafields.custom.size != blank -%}
-            {%- assign size_list = product.metafields.custom.size | split: ',' -%}
+          {%- elsif product.metafields.shopify.size != blank -%}
+            {%- assign size_list = product.metafields.shopify.size | split: ',' -%}
             {%- for size in size_list -%}
               {%- assign size_value = size | strip -%}
               {%- unless available_sizes contains size_value -%}
                 {%- assign available_sizes = available_sizes | push: size_value -%}
-                {%- assign debug_sizes = debug_sizes | push: 'custom.size' -%}
+                {%- assign debug_sizes = debug_sizes | push: 'shopify.size' -%}
               {%- endunless -%}
-            {%- endfor -%}
-          {%- else -%}
-            {%- comment -%} 从变体选项获取 {%- endcomment -%}
-            {%- for variant in product.variants limit: 10 -%}
-              {%- if variant.available -%}
-                {%- comment -%} 检查所有选项 {%- endcomment -%}
-                {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
-                {%- for option in options -%}
-                  {%- if option != blank and option != 'Default Title' -%}
-                    {%- assign option_upper = option | upcase -%}
-                    {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' -%}
-                      {%- unless available_sizes contains option -%}
-                        {%- assign available_sizes = available_sizes | push: option -%}
-                        {%- assign debug_sizes = debug_sizes | push: 'variant_option' -%}
-                      {%- endunless -%}
-                    {%- endif -%}
-                  {%- endif -%}
-                {%- endfor -%}
-              {%- endif -%}
             {%- endfor -%}
           {%- endif -%}
+          
+          {%- comment -%} 获取鞋码 {%- endcomment -%}
+          {%- if product.metafields.shopify['shoe-size'].value != blank -%}
+            {%- assign shoe_size_list = product.metafields.shopify['shoe-size'].value | split: ',' -%}
+            {%- for size in shoe_size_list -%}
+              {%- assign size_value = size | strip -%}
+              {%- unless available_sizes contains size_value -%}
+                {%- assign available_sizes = available_sizes | push: size_value -%}
+                {%- assign debug_sizes = debug_sizes | push: 'shopify.shoe-size.value' -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- elsif product.metafields.shopify['shoe-size'] != blank -%}
+            {%- assign shoe_size_list = product.metafields.shopify['shoe-size'] | split: ',' -%}
+            {%- for size in shoe_size_list -%}
+              {%- assign size_value = size | strip -%}
+              {%- unless available_sizes contains size_value -%}
+                {%- assign available_sizes = available_sizes | push: size_value -%}
+                {%- assign debug_sizes = debug_sizes | push: 'shopify.shoe-size' -%}
+              {%- endunless -%}
+            {%- endfor -%}
+          {%- endif -%}
+          
+          {%- comment -%} 从变体元字段获取 {%- endcomment -%}
+          {%- for variant in product.variants limit: 10 -%}
+            {%- if variant.available -%}
+              {%- if variant.metafields.shopify.size != blank -%}
+                {%- assign variant_size = variant.metafields.shopify.size -%}
+                {%- unless available_sizes contains variant_size -%}
+                  {%- assign available_sizes = available_sizes | push: variant_size -%}
+                  {%- assign debug_sizes = debug_sizes | push: 'variant.shopify.size' -%}
+                {%- endunless -%}
+              {%- endif -%}
+              
+              {%- if variant.metafields.shopify['shoe-size'] != blank -%}
+                {%- assign variant_shoe_size = variant.metafields.shopify['shoe-size'] -%}
+                {%- unless available_sizes contains variant_shoe_size -%}
+                  {%- assign available_sizes = available_sizes | push: variant_shoe_size -%}
+                  {%- assign debug_sizes = debug_sizes | push: 'variant.shopify.shoe-size' -%}
+                {%- endunless -%}
+              {%- endif -%}
+              
+              {%- comment -%} 从变体选项获取（备用方案） {%- endcomment -%}
+              {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+              {%- for option in options -%}
+                {%- if option != blank and option != 'Default Title' -%}
+                  {%- assign option_upper = option | upcase -%}
+                  {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper matches '^\d+(\.\d+)?$' -%}
+                    {%- unless available_sizes contains option -%}
+                      {%- assign available_sizes = available_sizes | push: option -%}
+                      {%- assign debug_sizes = debug_sizes | push: 'variant_option' -%}
+                    {%- endunless -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
         
         {%- comment -%} 显示调试信息 {%- endcomment -%}
@@ -363,45 +400,55 @@
         
         {%- comment -%} 从多个来源获取颜色数据 {%- endcomment -%}
         {%- for product in base_products limit: 50 -%}
-          {%- comment -%} 尝试从产品元字段获取 {%- endcomment -%}
-          {%- if product.metafields.custom.color.value != blank -%}
-            {%- assign color_list = product.metafields.custom.color.value | split: ',' -%}
+          {%- comment -%} 尝试从Shopify标准元字段获取颜色 {%- endcomment -%}
+          {%- if product.metafields.shopify['color-pattern'].value != blank -%}
+            {%- assign color_list = product.metafields.shopify['color-pattern'].value | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
               {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | push: color_value -%}
-                {%- assign debug_colors = debug_colors | push: 'custom.color.value' -%}
+                {%- assign debug_colors = debug_colors | push: 'shopify.color-pattern.value' -%}
               {%- endunless -%}
             {%- endfor -%}
-          {%- elsif product.metafields.custom.color != blank -%}
-            {%- assign color_list = product.metafields.custom.color | split: ',' -%}
+          {%- elsif product.metafields.shopify['color-pattern'] != blank -%}
+            {%- assign color_list = product.metafields.shopify['color-pattern'] | split: ',' -%}
             {%- for color in color_list -%}
               {%- assign color_value = color | strip -%}
               {%- unless available_colors contains color_value -%}
                 {%- assign available_colors = available_colors | push: color_value -%}
-                {%- assign debug_colors = debug_colors | push: 'custom.color' -%}
+                {%- assign debug_colors = debug_colors | push: 'shopify.color-pattern' -%}
               {%- endunless -%}
-            {%- endfor -%}
-          {%- else -%}
-            {%- comment -%} 从变体选项获取 {%- endcomment -%}
-            {%- for variant in product.variants limit: 10 -%}
-              {%- if variant.available -%}
-                {%- comment -%} 检查所有选项，排除尺码 {%- endcomment -%}
-                {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
-                {%- for option in options -%}
-                  {%- if option != blank and option != 'Default Title' -%}
-                    {%- assign option_lower = option | downcase -%}
-                    {%- unless option_lower contains 'small' or option_lower contains 'medium' or option_lower contains 'large' or option_lower contains 'xs' or option_lower contains 'xl' or option_lower == 's' or option_lower == 'm' or option_lower == 'l' -%}
-                      {%- unless available_colors contains option -%}
-                        {%- assign available_colors = available_colors | push: option -%}
-                        {%- assign debug_colors = debug_colors | push: 'variant_option' -%}
-                      {%- endunless -%}
-                    {%- endunless -%}
-                  {%- endif -%}
-                {%- endfor -%}
-              {%- endif -%}
             {%- endfor -%}
           {%- endif -%}
+          
+          {%- comment -%} 从变体元字段获取 {%- endcomment -%}
+          {%- for variant in product.variants limit: 10 -%}
+            {%- if variant.available -%}
+              {%- if variant.metafields.shopify['color-pattern'] != blank -%}
+                {%- assign variant_color = variant.metafields.shopify['color-pattern'] -%}
+                {%- unless available_colors contains variant_color -%}
+                  {%- assign available_colors = available_colors | push: variant_color -%}
+                  {%- assign debug_colors = debug_colors | push: 'variant.shopify.color-pattern' -%}
+                {%- endunless -%}
+              {%- endif -%}
+              
+              {%- comment -%} 从变体选项获取（备用方案），排除尺码 {%- endcomment -%}
+              {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+              {%- for option in options -%}
+                {%- if option != blank and option != 'Default Title' -%}
+                  {%- assign option_lower = option | downcase -%}
+                  {%- assign option_upper = option | upcase -%}
+                  {%- comment -%} 排除尺码关键词和数字 {%- endcomment -%}
+                  {%- unless option_lower contains 'small' or option_lower contains 'medium' or option_lower contains 'large' or option_lower contains 'xs' or option_lower contains 'xl' or option_lower == 's' or option_lower == 'm' or option_lower == 'l' or option_upper == 'XS' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option matches '^\d+(\.\d+)?$' -%}
+                    {%- unless available_colors contains option -%}
+                      {%- assign available_colors = available_colors | push: option -%}
+                      {%- assign debug_colors = debug_colors | push: 'variant_option' -%}
+                    {%- endunless -%}
+                  {%- endunless -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endfor -%}
         {%- endfor -%}
         
         {%- comment -%} 显示调试信息 {%- endcomment -%}
