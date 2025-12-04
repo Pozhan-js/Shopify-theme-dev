@@ -740,20 +740,11 @@ function applyFilters() {
     queryParams.push('force_reload=1');
   }
 
-  // 添加筛选参数 - 使用Shopify标准格式
-  if (selectedBrands.length) queryParams.push(`filter.p.vendor=${selectedBrands.join('+')}`);
-  if (selectedTypes.length) queryParams.push(`filter.p.product_type=${selectedTypes.join('+')}`);
-  
-  {%- comment -%} 使用正确的Shopify筛选格式 {%- endcomment -%}
-  if (selectedSizes.length) {
-    {%- comment -%} 使用变体选项筛选SIZE {%- endcomment -%}
-    queryParams.push(`filter.p.variant.option1=${selectedSizes.join('+')}`);
-  }
-  
-  {%- comment -%} 使用变体选项筛选COLOR {%- endcomment -%}
-  if (selectedColors.length) {
-    queryParams.push(`filter.p.variant.option2=${selectedColors.join('+')}`);
-  }
+  // 添加筛选参数 - 使用自定义格式
+  if (selectedBrands.length) queryParams.push(`brand=${selectedBrands.join('+')}`);
+  if (selectedTypes.length) queryParams.push(`type=${selectedTypes.join('+')}`);
+  if (selectedSizes.length) queryParams.push(`size=${selectedSizes.join('+')}`);
+  if (selectedColors.length) queryParams.push(`color=${selectedColors.join('+')}`);
 
   const finalQuery = queryParams.join('&');
   console.log('Final query:', finalQuery);
