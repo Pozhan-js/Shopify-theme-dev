@@ -217,15 +217,6 @@ h3.product-title {
 }
 {%- endstyle -%}
 
-<!-- debug 产品系列头部信息 {{ section.settings.collection }}-->
-<!-- debug page url {{ page.url }}-->
-<!-- debug request.params: {{ request.params | json }} -->
-<!-- debug request.path: {{ request.path }} -->
-<!-- debug request.query_string: {{ request.query_string }} -->
-<!-- debug request.query: {{ request.query | json }} -->
-
-{%- comment -%} 显示调试信息在页面上 - 移到变量定义后 {%- endcomment -%}
-
 {%- comment -%} 获取当前集合的多种方式 {%- endcomment -%}
 {%- assign current_collection_handle = '' -%}
 
@@ -242,11 +233,6 @@ h3.product-title {
 
 {%- comment -%} 方法3: 使用默认collection对象 {%- endcomment -%}
 {%- assign selected_collection = collections[current_collection_handle] | default: collection -%}
-
-<!-- debug current_collection_handle: {{ current_collection_handle }}-->
-<!-- debug selected_collection.title: {{ selected_collection.title }}-->
-<!-- debug selected_collection.description: {{ selected_collection.description }} -->
-<!-- debug selected_collection.handle: {{ selected_collection.handle }} -->
 {%- if selected_collection -%}
   {%- comment -%} 获取URL参数 - 使用多种方式尝试获取 {%- endcomment -%}
   {%- assign brand_filters = '' -%}
@@ -255,63 +241,37 @@ h3.product-title {
   {%- assign size_filters = '' -%}
   
   {%- comment -%} 方法1: 使用 request.query (Shopify推荐方式) {%- endcomment -%}
-  <!-- debug 开始request.query方法 -->
   {%- if request.query.brand -%}
     {%- assign brand_filters = request.query.brand -%}
-    <!-- debug request.query.brand成功: {{ request.query.brand }} -->
-  {%- else -%}
-    <!-- debug request.query.brand不存在 -->
   {%- endif -%}
   {%- if request.query.type -%}
     {%- assign type_filters = request.query.type -%}
-    <!-- debug request.query.type成功: {{ request.query.type }} -->
-  {%- else -%}
-    <!-- debug request.query.type不存在 -->
   {%- endif -%}
   {%- if request.query.color -%}
     {%- assign color_filters = request.query.color -%}
-    <!-- debug request.query.color成功: {{ request.query.color }} -->
-  {%- else -%}
-    <!-- debug request.query.color不存在 -->
   {%- endif -%}
   {%- if request.query.size -%}
     {%- assign size_filters = request.query.size -%}
-    <!-- debug request.query.size成功: {{ request.query.size }} -->
-  {%- else -%}
-    <!-- debug request.query.size不存在 -->
   {%- endif -%}
   
   {%- comment -%} 方法2: 使用 query_string 解析作为备选 {%- endcomment -%}
-  <!-- debug 开始query_string解析方法 -->
   {%- if brand_filters == '' and request.query_string contains 'brand=' -%}
-    <!-- debug query_string包含brand=，开始解析 -->
     {%- assign query_parts = request.query_string | split: '&' -%}
     {%- for part in query_parts -%}
       {%- if part contains 'brand=' -%}
         {%- assign brand_filters = part | split: '=' | last | url_decode -%}
-        <!-- debug query_string解析brand成功: {{ brand_filters }} -->
       {%- endif -%}
       {%- if part contains 'type=' -%}
         {%- assign type_filters = part | split: '=' | last | url_decode -%}
-        <!-- debug query_string解析type成功: {{ type_filters }} -->
       {%- endif -%}
       {%- if part contains 'color=' -%}
         {%- assign color_filters = part | split: '=' | last | url_decode -%}
-        <!-- debug query_string解析color成功: {{ color_filters }} -->
       {%- endif -%}
       {%- if part contains 'size=' -%}
         {%- assign size_filters = part | split: '=' | last | url_decode -%}
-        <!-- debug query_string解析size成功: {{ size_filters }} -->
       {%- endif -%}
     {%- endfor -%}
-  {%- else -%}
-    <!-- debug query_string不包含相关参数或已获取到值 -->
   {%- endif -%}
-  
-  <!-- debug brand_filters: {{ brand_filters }} -->
-  <!-- debug type_filters: {{ type_filters }} -->
-  <!-- debug color_filters: {{ color_filters }} -->
-  <!-- debug size_filters: {{ size_filters }} -->
 
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
@@ -341,33 +301,6 @@ h3.product-title {
   
   {%- comment -%} 获取排序方式 {%- endcomment -%}
   {%- assign sort_by = request.query.sort_by | default: 'manual' -%}
-  <!-- debug 排序方式: {{ sort_by }} -->
-  
-  {%- comment -%} 显示完整的调试信息在页面上 {%- endcomment -%}
-  <div style="background: #f0f0f0; border: 2px solid #ff0000; padding: 10px; margin: 10px 0; font-family: monospace; font-size: 12px;">
-    <h4 style="color: #ff0000; margin: 0 0 10px 0;">🔍 完整调试信息</h4>
-    <div><strong>当前URL:</strong> {{ page.url }}</div>
-    <div><strong>查询字符串:</strong> {{ request.query_string }}</div>
-    <div><strong>request.query对象:</strong> {{ request.query | json }}</div>
-    <div><strong>request.params对象:</strong> {{ request.params | json }}</div>
-    <hr style="margin: 10px 0;">
-    <div><strong>sort_by参数:</strong> {{ request.query.sort_by | default: '未获取到' }}</div>
-    <div><strong>size参数:</strong> {{ request.query.size | default: '未获取到' }}</div>
-    <div><strong>brand参数:</strong> {{ request.query.brand | default: '未获取到' }}</div>
-    <div><strong>type参数:</strong> {{ request.query.type | default: '未获取到' }}</div>
-    <div><strong>color参数:</strong> {{ request.query.color | default: '未获取到' }}</div>
-    <hr style="margin: 10px 0;">
-    <div><strong>解析后的sort_by:</strong> {{ sort_by }}</div>
-    <div><strong>解析后的items_per_page:</strong> {{ items_per_page }}</div>
-    <div><strong>解析后的brand_filters:</strong> {{ brand_filters | default: '空' }}</div>
-    <div><strong>解析后的type_filters:</strong> {{ type_filters | default: '空' }}</div>
-    <div><strong>解析后的color_filters:</strong> {{ color_filters | default: '空' }}</div>
-    <div><strong>解析后的size_filters:</strong> {{ size_filters | default: '空' }}</div>
-    <hr style="margin: 10px 0;">
-    <div><strong>当前集合句柄:</strong> {{ current_collection_handle | default: '空' }}</div>
-    <div><strong>选中集合:</strong> {{ selected_collection.title | default: '未找到' }}</div>
-    <div><strong>集合产品数量:</strong> {{ selected_collection.products_count }}</div>
-  </div>
   {%- assign page_param = request.path | split: 'page=' | last -%}
   {%- if page_param contains '&' -%}
     {%- assign current_page = page_param | split: '&' | first | times: 1 -%}
@@ -399,25 +332,17 @@ h3.product-title {
   {%- for product in sorted_products -%}
     {%- assign include_product = true -%}
     
-    {%- comment -%} 显示每个产品的调试信息 {%- endcomment -%}
-    <!-- debug 产品 {{ forloop.index }}: {{ product.title }} | vendor: {{ product.vendor }} | type: {{ product.type }} -->
-    
     {%- comment -%} 品牌筛选 {%- endcomment -%}
     {%- if brand_filters != blank -%}
       {%- assign brand_match = false -%}
       {%- assign brand_array = brand_filters | split: '+' -%}
-      <!-- debug 品牌筛选 - brand_filters: {{ brand_filters }}, brand_array: {{ brand_array | json }}, product.vendor: {{ product.vendor }} -->
       {%- for brand in brand_array -%}
         {%- if product.vendor == brand -%}
           {%- assign brand_match = true -%}
-          <!-- debug 品牌匹配成功: {{ brand }} == {{ product.vendor }} -->
         {%- endif -%}
       {%- endfor -%}
       {%- unless brand_match -%}
         {%- assign include_product = false -%}
-        <!-- debug 品牌筛选未通过 -->
-      {%- else -%}
-        <!-- debug 品牌筛选通过 -->
       {%- endunless -%}
     {%- endif -%}
     
@@ -465,7 +390,6 @@ h3.product-title {
     
     {%- if include_product -%}
       {%- assign filtered_count = filtered_count | plus: 1 -%}
-      <!-- debug 产品 {{ product.title }} 通过筛选，当前筛选计数: {{ filtered_count }} -->
       {%- assign current_index = forloop.index0 -%}
       {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
       {%- assign end_index = start_index | plus: items_per_page -%}
@@ -493,16 +417,6 @@ h3.product-title {
     {%- endif -%}
   {% endfor %}
 
-</div>
-
-{%- comment -%} 显示最终筛选统计 {%- endcomment -%}
-<div style="background: #e8f4f8; border: 1px solid #0066cc; padding: 8px; margin: 5px 0; font-family: monospace; font-size: 11px;">
-  <strong>📊 最终筛选统计:</strong>
-  总数: {{ selected_collection.products_count }} | 
-  筛选后: {{ filtered_count }} | 
-  每页: {{ items_per_page }} | 
-  排序: {{ sort_by }} |
-  总页数: {{ filtered_count | divided_by: items_per_page | ceil }}
 </div>
 
 {%- assign total_pages = filtered_count | divided_by: items_per_page | ceil -%}
