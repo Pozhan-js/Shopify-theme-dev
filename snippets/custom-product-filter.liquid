@@ -639,6 +639,26 @@
   <button class="apply-btn" onclick="applyFilters()">
     SHOW {{ filtered_product_count }} RESULTS 
   </button>
+  
+  <!-- 测试按钮 -->
+  <button type="button" onclick="testFilters()" style="background: red; color: white; margin-top: 10px; padding: 10px;">
+    测试筛选功能
+  </button>
+  
+  <script>
+    function testFilters() {
+      const selectedBrands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(el => el.value);
+      const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(el => el.value);
+      const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map(el => el.value);
+      const selectedColors = Array.from(document.querySelectorAll('input[name="color"]:checked')).map(el => el.value);
+      
+      alert('选择的筛选条件：\n' +
+        '品牌: ' + selectedBrands.join(', ') + '\n' +
+        '类型: ' + selectedTypes.join(', ') + '\n' +
+        '尺码: ' + selectedSizes.join(', ') + '\n' +
+        '颜色: ' + selectedColors.join(', '));
+    }
+  </script>
 </div>
 
 <script>
@@ -750,12 +770,15 @@ function applyFilters() {
   console.log('Final query:', finalQuery);
   console.log('Full URL will be:', window.location.origin + window.location.pathname + '?' + finalQuery);
   
+  // 显示调试信息
+  alert('即将跳转到: ' + window.location.pathname + '?' + finalQuery);
+  
   // 重新加载页面应用筛选
   if (finalQuery) {
-    window.location.search = finalQuery;
+    window.location.href = window.location.pathname + '?' + finalQuery;
   } else {
     // 如果没有筛选条件，清除所有参数
-    window.location.search = '';
+    window.location.href = window.location.pathname;
   }
 }
 </script>
