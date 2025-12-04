@@ -230,9 +230,12 @@ h3.product-title {
   {%- assign query_string = request.query_string -%}
   {%- assign params = query_string | split: '&' -%}
   
-  <!-- DEBUG: Full URL = {{ request.url }} -->
-  <!-- DEBUG: Query string = {{ query_string }} -->
-  <!-- DEBUG: Params array = {{ params | json }} -->
+  <!-- 调试信息 -->
+  <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
+    <h3>筛选调试信息</h3>
+    <p><strong>当前URL:</strong> {{ request.url }}</p>
+    <p><strong>查询参数:</strong> {{ query_string }}</p>
+  </div>
   
   {%- comment -%} 解析筛选参数 {%- endcomment -%}
   {%- assign brand_filters = '' -%}
@@ -252,21 +255,11 @@ h3.product-title {
     {%- endif -%}
   {%- endfor -%}
   
-  <!-- DEBUG: Brand filters raw = {{ brand_filters }} -->
-  <!-- DEBUG: Type filters raw = {{ type_filters }} -->
-  <!-- DEBUG: Color filters raw = {{ color_filters }} -->
-  <!-- DEBUG: Size filters raw = {{ size_filters }} -->
-  
   {%- comment -%} 将筛选条件转换为数组 {%- endcomment -%}
   {%- assign brand_array = brand_filters | split: '+' -%}
   {%- assign type_array = type_filters | split: '+' -%}
   {%- assign color_array = color_filters | split: '+' -%}
   {%- assign size_array = size_filters | split: '+' -%}
-  
-  <!-- DEBUG: Brand array = {{ brand_array | json }} -->
-  <!-- DEBUG: Type array = {{ type_array | json }} -->
-  <!-- DEBUG: Color array = {{ color_array | json }} -->
-  <!-- DEBUG: Size array = {{ size_array | json }} -->
 
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
@@ -277,28 +270,75 @@ h3.product-title {
   {% endif %}
 </div>
 
+{%- comment -%} 计算筛选后的产品数量 {%- endcomment -%}
+{%- assign filtered_products = '' | split: '' -%}
+{%- assign filtered_count = 0 -%}
+
+{%- for product in selected_collection.products -%}
+  {%- assign include_product = true -%}
+  
+  {%- comment -%} 品牌筛选 {%- endcomment -%}
+  {%- if brand_filters != blank -%}
+    {%- assign brand_match = false -%}
+    {%- for brand in brand_array -%}
+      {%- if product.vendor == brand -%}
+        {%- assign brand_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless brand_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 产品类型筛选 {%- endcomment -%}
+  {%- if type_filters != blank and include_product -%}
+    {%- assign type_match = false -%}
+    {%- for type in type_array -%}
+      {%- if product.type == type -%}
+        {%- assign type_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless type_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 颜色筛选 {%- endcomment -%}
+  {%- if color_filters != blank and include_product -%}
+    {%- assign color_match = false -%}
+    {%- for color in color_array -%}
+      {%- if product.title contains color -%}
+        {%- assign color_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless color_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 尺码筛选 {%- endcomment -%}
+  {%- if size_filters != blank and include_product -%}
+    {%- assign size_match = false -%}
+    {%- for size in size_array -%}
+      {%- if product.title contains size -%}
+        {%- assign size_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless size_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- if include_product -%}
+    {%- assign filtered_count = filtered_count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
 <div class="product-header">
   <div class="product-count">
-    {% if selected_collection %}
-      <span id="filtered-count-display">{{ selected_collection.products_count }}</span> of {{ selected_collection.products_count }} products
-    {% else %}
-      0 products
-    {% endif %}
+    {{ filtered_count }} of {{ selected_collection.products_count }} products
   </div>
   <div class="filter-btn" onclick="toggleFilter()">Filter</div>
-</div>
-
-<!-- DEBUG SUMMARY -->
-<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
-  <h3>调试信息</h3>
-  <p><strong>当前URL:</strong> {{ request.url }}</p>
-  <p><strong>查询参数:</strong> {{ request.query_string }}</p>
-  <p><strong>品牌筛选:</strong> {{ brand_filters }} ({{ brand_array | json }})</p>
-  <p><strong>类型筛选:</strong> {{ type_filters }} ({{ type_array | json }})</p>
-  <p><strong>颜色筛选:</strong> {{ color_filters }} ({{ color_array | json }})</p>
-  <p><strong>尺码筛选:</strong> {{ size_filters }} ({{ size_array | json }})</p>
-  <p><strong>总产品数:</strong> {{ selected_collection.products.size }}</p>
-  <p><strong>筛选后产品数:</strong> <span id="filtered-count">计算中...</span></p>
 </div>
 
 <div class="product-grid">
@@ -312,101 +352,66 @@ h3.product-title {
   {%- endif -%}
   
   {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
-  {%- assign filtered_count = 0 -%}
   {%- assign displayed_count = 0 -%}
-  
-  <!-- DEBUG: Starting product loop -->
-  {%- assign total_products = selected_collection.products.size -%}
-  {%- assign filtered_products_debug = '' -%}
   
   {%- for product in selected_collection.products -%}
     {%- assign include_product = true -%}
-    <!-- DEBUG: Processing product {{ forloop.index }}: {{ product.title }} -->
-    <!-- DEBUG: Product vendor: {{ product.vendor }} -->
-    <!-- DEBUG: Product type: {{ product.type }} -->
     
-    {%- comment -%} 品牌筛选 {%- endcomment -%}
+    {%- comment -%} 重新应用相同的筛选逻辑用于显示 {%- endcomment -%}
     {%- if brand_filters != blank -%}
-      <!-- DEBUG: Brand filters active: {{ brand_array | json }} -->
       {%- assign brand_match = false -%}
       {%- for brand in brand_array -%}
-        <!-- DEBUG: Checking brand: {{ brand }} vs {{ product.vendor }} -->
         {%- if product.vendor == brand -%}
           {%- assign brand_match = true -%}
-          <!-- DEBUG: Brand match found! -->
         {%- endif -%}
       {%- endfor -%}
-      <!-- DEBUG: Brand match result: {{ brand_match }} -->
       {%- unless brand_match -%}
         {%- assign include_product = false -%}
-        <!-- DEBUG: Product excluded due to brand filter -->
       {%- endunless -%}
     {%- endif -%}
     
-    {%- comment -%} 产品类型筛选 {%- endcomment -%}
     {%- if type_filters != blank and include_product -%}
-      <!-- DEBUG: Type filters active: {{ type_array | json }} -->
       {%- assign type_match = false -%}
       {%- for type in type_array -%}
-        <!-- DEBUG: Checking type: {{ type }} vs {{ product.type }} -->
         {%- if product.type == type -%}
           {%- assign type_match = true -%}
-          <!-- DEBUG: Type match found! -->
         {%- endif -%}
       {%- endfor -%}
-      <!-- DEBUG: Type match result: {{ type_match }} -->
       {%- unless type_match -%}
         {%- assign include_product = false -%}
-        <!-- DEBUG: Product excluded due to type filter -->
       {%- endunless -%}
     {%- endif -%}
     
-    {%- comment -%} 颜色筛选 {%- endcomment -%}
     {%- if color_filters != blank and include_product -%}
-      <!-- DEBUG: Color filters active: {{ color_array | json }} -->
       {%- assign color_match = false -%}
       {%- for color in color_array -%}
-        <!-- DEBUG: Checking color: {{ color }} in {{ product.title }} -->
         {%- if product.title contains color -%}
           {%- assign color_match = true -%}
-          <!-- DEBUG: Color match found! -->
         {%- endif -%}
       {%- endfor -%}
-      <!-- DEBUG: Color match result: {{ color_match }} -->
       {%- unless color_match -%}
         {%- assign include_product = false -%}
-        <!-- DEBUG: Product excluded due to color filter -->
       {%- endunless -%}
     {%- endif -%}
     
-    {%- comment -%} 尺码筛选 {%- endcomment -%}
     {%- if size_filters != blank and include_product -%}
-      <!-- DEBUG: Size filters active: {{ size_array | json }} -->
       {%- assign size_match = false -%}
       {%- for size in size_array -%}
-        <!-- DEBUG: Checking size: {{ size }} in {{ product.title }} -->
         {%- if product.title contains size -%}
           {%- assign size_match = true -%}
-          <!-- DEBUG: Size match found! -->
         {%- endif -%}
       {%- endfor -%}
-      <!-- DEBUG: Size match result: {{ size_match }} -->
       {%- unless size_match -%}
         {%- assign include_product = false -%}
-        <!-- DEBUG: Product excluded due to size filter -->
       {%- endunless -%}
     {%- endif -%}
     
     {%- if include_product -%}
-      {%- assign filtered_count = filtered_count | plus: 1 -%}
-      <!-- DEBUG: Product INCLUDED in results -->
       {%- assign current_index = forloop.index0 -%}
       {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
       {%- assign end_index = start_index | plus: items_per_page -%}
       
       {%- if current_index >= start_index and current_index < end_index -%}
-        {%- assign displayed_count = displayed_count | plus: 1 -%}
-        <!-- DEBUG: Product displayed on this page -->
         <div class="product-card">
           <a href="{{ product.url }}" class="product-link">
             <div class="product-image-container">
@@ -508,22 +513,4 @@ h3.product-title {
     const translateX = -currentIndex * 100;
     slider.style.transform = `translateX(${translateX}%)`;
   }
-  
-  // 调试信息
-  console.log('Filter Debug Summary:', {
-    totalProducts: {{ selected_collection.products.size }},
-    filteredProducts: {{ filtered_count }},
-    brandFilters: {{ brand_array | json }},
-    typeFilters: {{ type_array | json }},
-    colorFilters: {{ color_array | json }},
-    sizeFilters: {{ size_array | json }}
-  });
-  
-  // 更新调试信息中的筛选计数
-  document.addEventListener('DOMContentLoaded', function() {
-    const filteredCountElement = document.getElementById('filtered-count-display');
-    if (filteredCountElement) {
-      filteredCountElement.textContent = '{{ filtered_count }}';
-    }
-  });
 </script>
