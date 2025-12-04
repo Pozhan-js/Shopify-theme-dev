@@ -227,53 +227,10 @@ h3.product-title {
 <!-- debug selected_collection json: {{ selected_collection | json }} -->
 {%- if selected_collection -%}
   {%- comment -%} 获取URL参数 {%- endcomment -%}
-  {%- assign query_string = request.query_string -%}
-  {%- assign params = query_string | split: '&' -%}
-  
-  <!-- 调试信息 -->
-  <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
-    <h3>筛选状态</h3>
-    <p><strong>当前URL:</strong> {{ request.url }}</p>
-    <p><strong>完整查询字符串:</strong> {{ request.query_string }}</p>
-    <p><strong>分割后的参数:</strong> {{ params | join: ', ' }}</p>
-    <p><strong>品牌筛选:</strong> {{ brand_filters | default: '无' }}</p>
-    <p><strong>类型筛选:</strong> {{ type_filters | default: '无' }}</p>
-    <p><strong>颜色筛选:</strong> {{ color_filters | default: '无' }}</p>
-    <p><strong>尺码筛选:</strong> {{ size_filters | default: '无' }}</p>
-  </div>
-  
-  {%- comment -%} 解析筛选参数 {%- endcomment -%}
-  {%- assign brand_filters = '' -%}
-  {%- assign type_filters = '' -%}
-  {%- assign color_filters = '' -%}
-  {%- assign size_filters = '' -%}
-  
-  <!-- DEBUG: Raw params = {{ params | json }} -->
-  
-  {%- for param in params -%}
-    {%- assign clean_param = param | strip -%}
-    {%- if clean_param contains 'brand=' -%}
-      {%- assign brand_filters = clean_param | remove: 'brand=' -%}
-    {%- elsif clean_param contains 'type=' -%}
-      {%- assign type_filters = clean_param | remove: 'type=' -%}
-    {%- elsif clean_param contains 'size=' -%}
-      {%- assign size_filters = clean_param | remove: 'size=' -%}
-    {%- elsif clean_param contains 'color=' -%}
-      {%- assign color_filters = clean_param | remove: 'color=' -%}
-    {%- endif -%}
-  {%- endfor -%}
-  
-  <!-- DEBUG: Parsed filters -->
-  <!-- DEBUG: brand_filters = {{ brand_filters }} -->
-  <!-- DEBUG: type_filters = {{ type_filters }} -->
-  <!-- DEBUG: color_filters = {{ color_filters }} -->
-  <!-- DEBUG: size_filters = {{ size_filters }} -->
-  
-  {%- comment -%} 将筛选条件转换为数组 {%- endcomment -%}
-  {%- assign brand_array = brand_filters | split: '+' -%}
-  {%- assign type_array = type_filters | split: '+' -%}
-  {%- assign color_array = color_filters | split: '+' -%}
-  {%- assign size_array = size_filters | split: '+' -%}
+  {%- assign brand_filters = request.params.brand | default: '' -%}
+  {%- assign type_filters = request.params.type | default: '' -%}
+  {%- assign color_filters = request.params.color | default: '' -%}
+  {%- assign size_filters = request.params.size | default: '' -%}
 
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
@@ -284,73 +241,9 @@ h3.product-title {
   {% endif %}
 </div>
 
-{%- comment -%} 计算筛选后的产品数量 {%- endcomment -%}
-{%- assign filtered_products = '' | split: '' -%}
-{%- assign filtered_count = 0 -%}
-
-{%- for product in selected_collection.products -%}
-  {%- assign include_product = true -%}
-  
-  {%- comment -%} 品牌筛选 {%- endcomment -%}
-  {%- if brand_filters != blank -%}
-    {%- assign brand_match = false -%}
-    {%- for brand in brand_array -%}
-      {%- if product.vendor == brand -%}
-        {%- assign brand_match = true -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- unless brand_match -%}
-      {%- assign include_product = false -%}
-    {%- endunless -%}
-  {%- endif -%}
-  
-  {%- comment -%} 产品类型筛选 {%- endcomment -%}
-  {%- if type_filters != blank and include_product -%}
-    {%- assign type_match = false -%}
-    {%- for type in type_array -%}
-      {%- if product.type == type -%}
-        {%- assign type_match = true -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- unless type_match -%}
-      {%- assign include_product = false -%}
-    {%- endunless -%}
-  {%- endif -%}
-  
-  {%- comment -%} 颜色筛选 {%- endcomment -%}
-  {%- if color_filters != blank and include_product -%}
-    {%- assign color_match = false -%}
-    {%- for color in color_array -%}
-      {%- if product.title contains color -%}
-        {%- assign color_match = true -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- unless color_match -%}
-      {%- assign include_product = false -%}
-    {%- endunless -%}
-  {%- endif -%}
-  
-  {%- comment -%} 尺码筛选 {%- endcomment -%}
-  {%- if size_filters != blank and include_product -%}
-    {%- assign size_match = false -%}
-    {%- for size in size_array -%}
-      {%- if product.title contains size -%}
-        {%- assign size_match = true -%}
-      {%- endif -%}
-    {%- endfor -%}
-    {%- unless size_match -%}
-      {%- assign include_product = false -%}
-    {%- endunless -%}
-  {%- endif -%}
-  
-  {%- if include_product -%}
-    {%- assign filtered_count = filtered_count | plus: 1 -%}
-  {%- endif -%}
-{%- endfor -%}
-
 <div class="product-header">
   <div class="product-count">
-    {{ filtered_count }} of {{ selected_collection.products_count }} products
+    {{ selected_collection.products_count }} products
   </div>
   <div class="filter-btn" onclick="toggleFilter()">Filter</div>
 </div>
@@ -365,15 +258,15 @@ h3.product-title {
     {%- assign current_page = page_param | times: 1 -%}
   {%- endif -%}
   
-  {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
-  {%- assign displayed_count = 0 -%}
+  {%- assign filtered_count = 0 -%}
   
   {%- for product in selected_collection.products -%}
     {%- assign include_product = true -%}
     
-    {%- comment -%} 重新应用相同的筛选逻辑用于显示 {%- endcomment -%}
+    {%- comment -%} 品牌筛选 {%- endcomment -%}
     {%- if brand_filters != blank -%}
       {%- assign brand_match = false -%}
+      {%- assign brand_array = brand_filters | split: '+' -%}
       {%- for brand in brand_array -%}
         {%- if product.vendor == brand -%}
           {%- assign brand_match = true -%}
@@ -384,8 +277,10 @@ h3.product-title {
       {%- endunless -%}
     {%- endif -%}
     
+    {%- comment -%} 产品类型筛选 {%- endcomment -%}
     {%- if type_filters != blank and include_product -%}
       {%- assign type_match = false -%}
+      {%- assign type_array = type_filters | split: '+' -%}
       {%- for type in type_array -%}
         {%- if product.type == type -%}
           {%- assign type_match = true -%}
@@ -396,8 +291,10 @@ h3.product-title {
       {%- endunless -%}
     {%- endif -%}
     
+    {%- comment -%} 颜色筛选 {%- endcomment -%}
     {%- if color_filters != blank and include_product -%}
       {%- assign color_match = false -%}
+      {%- assign color_array = color_filters | split: '+' -%}
       {%- for color in color_array -%}
         {%- if product.title contains color -%}
           {%- assign color_match = true -%}
@@ -408,8 +305,10 @@ h3.product-title {
       {%- endunless -%}
     {%- endif -%}
     
+    {%- comment -%} 尺码筛选 {%- endcomment -%}
     {%- if size_filters != blank and include_product -%}
       {%- assign size_match = false -%}
+      {%- assign size_array = size_filters | split: '+' -%}
       {%- for size in size_array -%}
         {%- if product.title contains size -%}
           {%- assign size_match = true -%}
@@ -421,6 +320,7 @@ h3.product-title {
     {%- endif -%}
     
     {%- if include_product -%}
+      {%- assign filtered_count = filtered_count | plus: 1 -%}
       {%- assign current_index = forloop.index0 -%}
       {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
       {%- assign end_index = start_index | plus: items_per_page -%}
@@ -456,7 +356,7 @@ h3.product-title {
   {% if total_pages > 1 %}
     {%- assign base_url = request.path -%}
     {%- assign query_without_page = '' -%}
-    {%- for param in params -%}
+    {%- for param in request.params -%}
       {%- unless param contains 'page=' -%}
         {%- assign query_without_page = query_without_page | append: param | append: '&' -%}
       {%- endunless -%}
