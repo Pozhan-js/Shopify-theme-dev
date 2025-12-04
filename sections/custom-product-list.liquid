@@ -219,18 +219,76 @@ h3.product-title {
 
 <!-- debug 产品系列头部信息 {{ section.settings.collection }}-->
 <!-- debug page url {{ page.url }}-->
-{% assign current_collection = page.url | split: '/' | last %}
-<!-- debug current_collection {{ current_collection }}-->
-{%- assign selected_collection = collections[current_collection] | default: collection -%}
+<!-- debug request.params: {{ request.params | json }} -->
+<!-- debug request.path: {{ request.path }} -->
+<!-- debug request.query_string: {{ request.query_string }} -->
+<!-- debug request.query: {{ request.query | json }} -->
+
+{%- comment -%} 获取当前集合的多种方式 {%- endcomment -%}
+{%- assign current_collection_handle = '' -%}
+
+{%- comment -%} 方法1: 从page.url获取 {%- endcomment -%}
+{%- if page.url contains '/collections/' -%}
+  {%- assign url_parts = page.url | split: '/collections/' | last -%}
+  {%- assign current_collection_handle = url_parts | split: '/' | first -%}
+{%- endif -%}
+
+{%- comment -%} 方法2: 从section设置获取 {%- endcomment -%}
+{%- if section.settings.collection and current_collection_handle == '' -%}
+  {%- assign current_collection_handle = section.settings.collection -%}
+{%- endif -%}
+
+{%- comment -%} 方法3: 使用默认collection对象 {%- endcomment -%}
+{%- assign selected_collection = collections[current_collection_handle] | default: collection -%}
+
+<!-- debug current_collection_handle: {{ current_collection_handle }}-->
 <!-- debug selected_collection.title: {{ selected_collection.title }}-->
 <!-- debug selected_collection.description: {{ selected_collection.description }} -->
-<!-- debug selected_collection json: {{ selected_collection | json }} -->
+<!-- debug selected_collection.handle: {{ selected_collection.handle }} -->
 {%- if selected_collection -%}
-  {%- comment -%} 获取URL参数 {%- endcomment -%}
-  {%- assign brand_filters = request.params.brand | default: '' -%}
-  {%- assign type_filters = request.params.type | default: '' -%}
-  {%- assign color_filters = request.params.color | default: '' -%}
-  {%- assign size_filters = request.params.size | default: '' -%}
+  {%- comment -%} 获取URL参数 - 使用多种方式尝试获取 {%- endcomment -%}
+  {%- assign brand_filters = '' -%}
+  {%- assign type_filters = '' -%}
+  {%- assign color_filters = '' -%}
+  {%- assign size_filters = '' -%}
+  
+  {%- comment -%} 方法1: 使用 request.query (Shopify推荐方式) {%- endcomment -%}
+  {%- if request.query.brand -%}
+    {%- assign brand_filters = request.query.brand -%}
+  {%- endif -%}
+  {%- if request.query.type -%}
+    {%- assign type_filters = request.query.type -%}
+  {%- endif -%}
+  {%- if request.query.color -%}
+    {%- assign color_filters = request.query.color -%}
+  {%- endif -%}
+  {%- if request.query.size -%}
+    {%- assign size_filters = request.query.size -%}
+  {%- endif -%}
+  
+  {%- comment -%} 方法2: 使用 query_string 解析作为备选 {%- endcomment -%}
+  {%- if brand_filters == '' and request.query_string contains 'brand=' -%}
+    {%- assign query_parts = request.query_string | split: '&' -%}
+    {%- for part in query_parts -%}
+      {%- if part contains 'brand=' -%}
+        {%- assign brand_filters = part | split: '=' | last | url_decode -%}
+      {%- endif -%}
+      {%- if part contains 'type=' -%}
+        {%- assign type_filters = part | split: '=' | last | url_decode -%}
+      {%- endif -%}
+      {%- if part contains 'color=' -%}
+        {%- assign color_filters = part | split: '=' | last | url_decode -%}
+      {%- endif -%}
+      {%- if part contains 'size=' -%}
+        {%- assign size_filters = part | split: '=' | last | url_decode -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  
+  <!-- debug brand_filters: {{ brand_filters }} -->
+  <!-- debug type_filters: {{ type_filters }} -->
+  <!-- debug color_filters: {{ color_filters }} -->
+  <!-- debug size_filters: {{ size_filters }} -->
 
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
@@ -249,8 +307,6 @@ h3.product-title {
 </div>
 
 <div class="product-grid">
-
-  1111
   {%- assign items_per_page = 24 -%}
   {%- assign current_page = 1 -%}
   {%- assign page_param = request.path | split: 'page=' | last -%}
@@ -269,13 +325,18 @@ h3.product-title {
     {%- if brand_filters != blank -%}
       {%- assign brand_match = false -%}
       {%- assign brand_array = brand_filters | split: '+' -%}
+      <!-- debug 品牌筛选 - brand_filters: {{ brand_filters }}, brand_array: {{ brand_array | json }}, product.vendor: {{ product.vendor }} -->
       {%- for brand in brand_array -%}
         {%- if product.vendor == brand -%}
           {%- assign brand_match = true -%}
+          <!-- debug 品牌匹配成功: {{ brand }} == {{ product.vendor }} -->
         {%- endif -%}
       {%- endfor -%}
       {%- unless brand_match -%}
         {%- assign include_product = false -%}
+        <!-- debug 品牌筛选未通过 -->
+      {%- else -%}
+        <!-- debug 品牌筛选通过 -->
       {%- endunless -%}
     {%- endif -%}
     
