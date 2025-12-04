@@ -225,8 +225,198 @@ h3.product-title {
 <!-- debug selected_collection.description: {{ selected_collection.description }} -->
 <!-- debug selected_collection json: {{ selected_collection | json }} -->
 {%- if selected_collection -%}
-  {% paginate selected_collection.products by 24 %}
+  {%- comment -%} 获取URL参数 {%- endcomment -%}
+  {%- assign query_string = request.query_string -%}
+  {%- assign params = query_string | split: '&' -%}
+  
+  {%- comment -%} 解析筛选参数 {%- endcomment -%}
+  {%- assign brand_filters = '' -%}
+  {%- assign type_filters = '' -%}
+  {%- assign color_filters = '' -%}
+  {%- assign size_filters = '' -%}
+  
+  {%- for param in params -%}
+    {%- if param contains 'filter.p.vendor=' -%}
+      {%- assign brand_filters = param | remove: 'filter.p.vendor=' -%}
+    {%- elsif param contains 'filter.p.product_type=' -%}
+      {%- assign type_filters = param | remove: 'filter.p.product_type=' -%}
+    {%- elsif param contains 'filter.p.variant.option1=' -%}
+      {%- assign size_filters = param | remove: 'filter.p.variant.option1=' -%}
+    {%- elsif param contains 'filter.p.variant.option2=' -%}
+      {%- assign color_filters = param | remove: 'filter.p.variant.option2=' -%}
+    {%- endif -%}
+  {%- endfor -%}
+  
+  {%- comment -%} 将筛选条件转换为数组 {%- endcomment -%}
+  {%- assign brand_array = brand_filters | split: '+' -%}
+  {%- assign type_array = type_filters | split: '+' -%}
+  {%- assign color_array = color_filters | split: '+' -%}
+  {%- assign size_array = size_filters | split: '+' -%}
+  
+  {%- comment -%} 获取并筛选产品 {%- endcomment -%}
+  {%- assign all_products = selected_collection.products -%}
+  {%- assign filtered_count = 0 -%}
+  
+  {%- for product in all_products -%}
+    {%- assign include_product = true -%}
     
+    {%- comment -%} 品牌筛选 {%- endcomment -%}
+    {%- if brand_filters != blank -%}
+      {%- assign brand_match = false -%}
+      {%- for brand in brand_array -%}
+        {%- if product.vendor == brand -%}
+          {%- assign brand_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless brand_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 产品类型筛选 {%- endcomment -%}
+    {%- if type_filters != blank and include_product -%}
+      {%- assign type_match = false -%}
+      {%- assign product_type = product.type | replace: ' ', '-' -%}
+      {%- for type in type_array -%}
+        {%- if product_type == type -%}
+          {%- assign type_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless type_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 颜色筛选 {%- endcomment -%}
+    {%- if color_filters != blank and include_product -%}
+      {%- assign color_match = false -%}
+      {%- assign product_colors = '' -%}
+      
+      {%- comment -%} 从元字段获取颜色 {%- endcomment -%}
+      {%- if product.metafields.shopify.color-pattern.value != blank -%}
+        {%- assign color_list = product.metafields.shopify.color-pattern.value | split: ',' -%}
+        {%- for color in color_list -%}
+          {%- assign color_value = color | strip -%}
+          {%- unless product_colors contains color_value -%}
+            {%- assign product_colors = product_colors | append: ',' | append: color_value -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} 从变体选项获取颜色 {%- endcomment -%}
+        {%- for variant in product.variants -%}
+          {%- if variant.available -%}
+            {%- assign variant_color = variant.title | split: ' / ' | first -%}
+            {%- unless product_colors contains variant_color -%}
+              {%- assign product_colors = product_colors | append: ',' | append: variant_color -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      
+      {%- assign product_color_array = product_colors | remove_first: ',' | split: ',' -%}
+      {%- for color in product_color_array -%}
+        {%- if color_array contains color -%}
+          {%- assign color_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless color_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- comment -%} 尺码筛选 {%- endcomment -%}
+    {%- if size_filters != blank and include_product -%}
+      {%- assign size_match = false -%}
+      {%- assign product_sizes = '' -%}
+      
+      {%- comment -%} 从所有来源收集尺码 {%- endcomment -%}
+      {%- assign all_size_sources = '' -%}
+      
+      {%- if product.metafields.shopify.shoe-size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.shopify.shoe-size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.shopify.size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.shopify.size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.shoe_size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.custom.shoe_size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.custom.size.value -%}
+      {%- endif -%}
+      
+      {%- assign sources_string = all_size_sources | remove_first: ',' -%}
+      {%- assign sources_array = sources_string | split: ',' -%}
+      {%- for source in sources_array -%}
+        {%- assign size_list = source | split: ',' -%}
+        {%- for size in size_list -%}
+          {%- assign size_value = size | strip -%}
+          {%- if size_value != blank -%}
+            {%- unless product_sizes contains size_value -%}
+              {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      
+      {%- comment -%} 从变体选项获取尺码 {%- endcomment -%}
+      {%- for variant in product.variants -%}
+        {%- if variant.available -%}
+          {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+          {%- for option in options -%}
+            {%- if option != blank and option != 'Default Title' -%}
+              {%- assign option_clean = option | remove: 'US' | remove: 'UK' | remove: 'EU' | strip -%}
+              {%- assign option_num = option_clean | times: 1 -%}
+              {%- assign option_upper = option | upcase -%}
+              
+              {%- assign is_clothing_size = false -%}
+              {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' -%}
+                {%- assign is_clothing_size = true -%}
+              {%- endif -%}
+              
+              {%- assign is_shoe_size = false -%}
+              {%- if option_num > 0 and option_num < 20 -%}
+                {%- assign is_shoe_size = true -%}
+              {%- endif -%}
+              
+              {%- if is_clothing_size or is_shoe_size -%}
+                {%- unless product_sizes contains option -%}
+                  {%- assign product_sizes = product_sizes | append: ',' | append: option -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      
+      {%- assign product_size_array = product_sizes | remove_first: ',' | split: ',' -%}
+      {%- for size in product_size_array -%}
+        {%- if size_array contains size -%}
+          {%- assign size_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless size_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if include_product -%}
+      {%- assign filtered_count = filtered_count | plus: 1 -%}
+    {%- endif -%}
+  {%- endfor -%}
+  
+  {%- comment -%} 分页处理 {%- endcomment -%}
+  {%- assign items_per_page = 24 -%}
+  {%- assign current_page = 1 -%}
+  {%- assign page_param = request.path | split: 'page=' | last -%}
+  {%- if page_param contains '&' -%}
+    {%- assign current_page = page_param | split: '&' | first | times: 1 -%}
+  {%- elsif page_param != request.path -%}
+    {%- assign current_page = page_param | times: 1 -%}
+  {%- endif -%}
+  
+  {%- assign total_pages = filtered_count | divided_by: items_per_page | ceil -%}
+
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
     <h2 style="font-weight: {{ section.settings.title_font_weight }}">{{ selected_collection.title }}</h2>
@@ -238,45 +428,209 @@ h3.product-title {
 
 <div class="product-header">
   <div class="product-count">
-    {% if selected_collection %}
-      {{ selected_collection.products_count }} products
-    {% else %}
-      0 products
-    {% endif %}
+    {{ filtered_count }} products
   </div>
   <div class="filter-btn" onclick="toggleFilter()">Filter</div>
 </div>
 
 <div class="product-grid">
-  {% for product in selected_collection.products %}
-    <div class="product-card">
-      <a href="{{ product.url }}" class="product-link">
-        <div class="product-image-container">
-          <div class="product-image-slider" data-current="0" data-count="{{ product.images.size }}">
-            {% for image in product.images %}
-              <img class="product-image" src="{{ image | img_url: '400x' }}" alt="{{ product.title }}" width="400" height="400" loading="lazy">
-            {% endfor %}
-          </div>
-          {% if product.images.size > 1 %}
-            <button class="image-nav prev" onclick="prevImage(event, this)">❮</button>
-            <button class="image-nav next" onclick="nextImage(event, this)">❯</button>
-          {% endif %}
-        </div>
+  {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
+  {%- assign displayed_count = 0 -%}
+  
+  {%- for product in all_products -%}
+    {%- assign include_product = true -%}
+    
+    {%- comment -%} 重新应用相同的筛选逻辑 {%- endcomment -%}
+    {%- if brand_filters != blank -%}
+      {%- assign brand_match = false -%}
+      {%- for brand in brand_array -%}
+        {%- if product.vendor == brand -%}
+          {%- assign brand_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless brand_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if type_filters != blank and include_product -%}
+      {%- assign type_match = false -%}
+      {%- assign product_type = product.type | replace: ' ', '-' -%}
+      {%- for type in type_array -%}
+        {%- if product_type == type -%}
+          {%- assign type_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless type_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if color_filters != blank and include_product -%}
+      {%- assign color_match = false -%}
+      {%- assign product_colors = '' -%}
+      
+      {%- if product.metafields.shopify.color-pattern.value != blank -%}
+        {%- assign color_list = product.metafields.shopify.color-pattern.value | split: ',' -%}
+        {%- for color in color_list -%}
+          {%- assign color_value = color | strip -%}
+          {%- unless product_colors contains color_value -%}
+            {%- assign product_colors = product_colors | append: ',' | append: color_value -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for variant in product.variants -%}
+          {%- if variant.available -%}
+            {%- assign variant_color = variant.title | split: ' / ' | first -%}
+            {%- unless product_colors contains variant_color -%}
+              {%- assign product_colors = product_colors | append: ',' | append: variant_color -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+      
+      {%- assign product_color_array = product_colors | remove_first: ',' | split: ',' -%}
+      {%- for color in product_color_array -%}
+        {%- if color_array contains color -%}
+          {%- assign color_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless color_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if size_filters != blank and include_product -%}
+      {%- assign size_match = false -%}
+      {%- assign product_sizes = '' -%}
+      
+      {%- assign all_size_sources = '' -%}
+      {%- if product.metafields.shopify.shoe-size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.shopify.shoe-size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.shopify.size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.shopify.size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.shoe_size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.custom.shoe_size.value -%}
+      {%- endif -%}
+      {%- if product.metafields.custom.size.value != blank -%}
+        {%- assign all_size_sources = all_size_sources | append: ',' | append: product.metafields.custom.size.value -%}
+      {%- endif -%}
+      
+      {%- assign sources_string = all_size_sources | remove_first: ',' -%}
+      {%- assign sources_array = sources_string | split: ',' -%}
+      {%- for source in sources_array -%}
+        {%- assign size_list = source | split: ',' -%}
+        {%- for size in size_list -%}
+          {%- assign size_value = size | strip -%}
+          {%- if size_value != blank -%}
+            {%- unless product_sizes contains size_value -%}
+              {%- assign product_sizes = product_sizes | append: ',' | append: size_value -%}
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      
+      {%- for variant in product.variants -%}
+        {%- if variant.available -%}
+          {%- assign options = variant.option1 | append: ',' | append: variant.option2 | append: ',' | append: variant.option3 | split: ',' -%}
+          {%- for option in options -%}
+            {%- if option != blank and option != 'Default Title' -%}
+              {%- assign option_clean = option | remove: 'US' | remove: 'UK' | remove: 'EU' | strip -%}
+              {%- assign option_num = option_clean | times: 1 -%}
+              {%- assign option_upper = option | upcase -%}
+              
+              {%- assign is_clothing_size = false -%}
+              {%- if option_upper contains 'XS' or option_upper contains 'SMALL' or option_upper contains 'MEDIUM' or option_upper contains 'LARGE' or option_upper == 'S' or option_upper == 'M' or option_upper == 'L' or option_upper == 'XL' or option_upper == 'XXL' or option_upper == 'XXXL' -%}
+                {%- assign is_clothing_size = true -%}
+              {%- endif -%}
+              
+              {%- assign is_shoe_size = false -%}
+              {%- if option_num > 0 and option_num < 20 -%}
+                {%- assign is_shoe_size = true -%}
+              {%- endif -%}
+              
+              {%- if is_clothing_size or is_shoe_size -%}
+                {%- unless product_sizes contains option -%}
+                  {%- assign product_sizes = product_sizes | append: ',' | append: option -%}
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endif -%}
+      {%- endfor -%}
+      
+      {%- assign product_size_array = product_sizes | remove_first: ',' | split: ',' -%}
+      {%- for size in product_size_array -%}
+        {%- if size_array contains size -%}
+          {%- assign size_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless size_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if include_product -%}
+      {%- assign current_index = forloop.index0 -%}
+      {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
+      {%- assign end_index = start_index | plus: items_per_page -%}
+      
+      {%- if current_index >= start_index and current_index < end_index -%}
+        {%- assign displayed_count = displayed_count | plus: 1 -%}
+        <div class="product-card">
+          <a href="{{ product.url }}" class="product-link">
+            <div class="product-image-container">
+              <div class="product-image-slider" data-current="0" data-count="{{ product.images.size }}">
+                {% for image in product.images %}
+                  <img class="product-image" src="{{ image | image_url: width: 400 }}" alt="{{ product.title }}" width="400" height="400" loading="lazy">
+                {% endfor %}
+              </div>
+              {% if product.images.size > 1 %}
+                <button class="image-nav prev" onclick="prevImage(event, this)">❮</button>
+                <button class="image-nav next" onclick="nextImage(event, this)">❯</button>
+              {% endif %}
+            </div>
 
-        <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
-        <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
-      </a>
-    </div>
+            <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
+            <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
+          </a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
   {% endfor %}
 
 </div>
 
 <div class="pagination">
-  {% if paginate.pages > 1 %}
-    {{ paginate | default_pagination }}
+  {% if total_pages > 1 %}
+    {%- assign base_url = request.path -%}
+    {%- assign query_without_page = '' -%}
+    {%- for param in params -%}
+      {%- unless param contains 'page=' -%}
+        {%- assign query_without_page = query_without_page | append: param | append: '&' -%}
+      {%- endunless -%}
+    {%- endfor -%}
+    {%- assign query_without_page = query_without_page | remove: '&' | remove: '?' -%}
+    
+    {%- if current_page > 1 -%}
+      <a href="{{ base_url }}?page={{ current_page | minus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Previous</a>
+    {%- endif -%}
+    
+    {%- for page_num in (1..total_pages) -%}
+      {%- if page_num == current_page -%}
+        <span class="current">{{ page_num }}</span>
+      {%- else -%}
+        <a href="{{ base_url }}?page={{ page_num }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">{{ page_num }}</a>
+      {%- endif -%}
+    {%- endfor -%}
+    
+    {%- if current_page < total_pages -%}
+      <a href="{{ base_url }}?page={{ current_page | plus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Next</a>
+    {%- endif -%}
   {% endif %}
 </div>
-  {% endpaginate %}
 {%- else -%}
   <p>请选择一个产品系列</p>
 {%- endif -%}
