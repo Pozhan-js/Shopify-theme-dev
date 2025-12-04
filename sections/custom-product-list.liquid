@@ -234,7 +234,8 @@ h3.product-title {
   <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
     <h3>筛选状态</h3>
     <p><strong>当前URL:</strong> {{ request.url }}</p>
-    <p><strong>查询参数:</strong> {{ request.query_string }}</p>
+    <p><strong>完整查询字符串:</strong> {{ request.query_string }}</p>
+    <p><strong>分割后的参数:</strong> {{ params | join: ', ' }}</p>
     <p><strong>品牌筛选:</strong> {{ brand_filters | default: '无' }}</p>
     <p><strong>类型筛选:</strong> {{ type_filters | default: '无' }}</p>
     <p><strong>颜色筛选:</strong> {{ color_filters | default: '无' }}</p>
@@ -247,17 +248,26 @@ h3.product-title {
   {%- assign color_filters = '' -%}
   {%- assign size_filters = '' -%}
   
+  <!-- DEBUG: Raw params = {{ params | json }} -->
+  
   {%- for param in params -%}
-    {%- if param contains 'brand=' -%}
-      {%- assign brand_filters = param | remove: 'brand=' -%}
-    {%- elsif param contains 'type=' -%}
-      {%- assign type_filters = param | remove: 'type=' -%}
-    {%- elsif param contains 'size=' -%}
-      {%- assign size_filters = param | remove: 'size=' -%}
-    {%- elsif param contains 'color=' -%}
-      {%- assign color_filters = param | remove: 'color=' -%}
+    {%- assign clean_param = param | strip -%}
+    {%- if clean_param contains 'brand=' -%}
+      {%- assign brand_filters = clean_param | remove: 'brand=' -%}
+    {%- elsif clean_param contains 'type=' -%}
+      {%- assign type_filters = clean_param | remove: 'type=' -%}
+    {%- elsif clean_param contains 'size=' -%}
+      {%- assign size_filters = clean_param | remove: 'size=' -%}
+    {%- elsif clean_param contains 'color=' -%}
+      {%- assign color_filters = clean_param | remove: 'color=' -%}
     {%- endif -%}
   {%- endfor -%}
+  
+  <!-- DEBUG: Parsed filters -->
+  <!-- DEBUG: brand_filters = {{ brand_filters }} -->
+  <!-- DEBUG: type_filters = {{ type_filters }} -->
+  <!-- DEBUG: color_filters = {{ color_filters }} -->
+  <!-- DEBUG: size_filters = {{ size_filters }} -->
   
   {%- comment -%} 将筛选条件转换为数组 {%- endcomment -%}
   {%- assign brand_array = brand_filters | split: '+' -%}
