@@ -289,6 +289,8 @@ h3.product-title {
   <!-- debug type_filters: {{ type_filters }} -->
   <!-- debug color_filters: {{ color_filters }} -->
   <!-- debug size_filters: {{ size_filters }} -->
+  <!-- debug sort_by: {{ request.query.sort_by }} -->
+  <!-- debug 每页显示数量: {{ request.query.size }} -->
 
 <div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
   {% if selected_collection %}
@@ -307,8 +309,15 @@ h3.product-title {
 </div>
 
 <div class="product-grid">
-  {%- assign items_per_page = 24 -%}
-  {%- assign current_page = 1 -%}
+  {%- comment -%} 获取每页显示数量，默认24 {%- endcomment -%}
+  {%- assign items_per_page = request.query.size | default: 24 | times: 1 -%}
+  {%- if items_per_page <= 0 -%}
+    {%- assign items_per_page = 24 -%}
+  {%- endif -%}
+  
+  {%- comment -%} 获取排序方式 {%- endcomment -%}
+  {%- assign sort_by = request.query.sort_by | default: 'manual' -%}
+  <!-- debug 排序方式: {{ sort_by }} -->
   {%- assign page_param = request.path | split: 'page=' | last -%}
   {%- if page_param contains '&' -%}
     {%- assign current_page = page_param | split: '&' | first | times: 1 -%}
@@ -318,7 +327,28 @@ h3.product-title {
   
   {%- assign filtered_count = 0 -%}
   
-  {%- for product in selected_collection.products -%}
+  {%- comment -%} 根据排序方式获取产品列表 {%- endcomment -%}
+  {%- assign sorted_products = selected_collection.products -%}
+  {%- case sort_by -%}
+    {%- when 'best-selling' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'sales' | reverse -%}
+    {%- when 'title-ascending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'title' -%}
+    {%- when 'title-descending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'title' | reverse -%}
+    {%- when 'price-ascending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'price' -%}
+    {%- when 'price-descending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'price' | reverse -%}
+    {%- when 'created-ascending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'created_at' -%}
+    {%- when 'created-descending' -%}
+      {%- assign sorted_products = selected_collection.products | sort: 'created_at' | reverse -%}
+    {%- else -%}
+      {%- assign sorted_products = selected_collection.products -%}
+  {%- endcase -%}
+  
+  {%- for product in sorted_products -%}
     {%- assign include_product = true -%}
     
     {%- comment -%} 品牌筛选 {%- endcomment -%}
@@ -418,28 +448,33 @@ h3.product-title {
 <div class="pagination">
   {% if total_pages > 1 %}
     {%- assign base_url = request.path -%}
-    {%- assign query_without_page = '' -%}
-    {%- for param in request.params -%}
-      {%- unless param contains 'page=' -%}
-        {%- assign query_without_page = query_without_page | append: param | append: '&' -%}
-      {%- endunless -%}
-    {%- endfor -%}
-    {%- assign query_without_page = query_without_page | remove: '&' | remove: '?' -%}
+    
+    {%- comment -%} 构建保留排序和每页数量的查询字符串 {%- endcomment -%}
+    {%- assign query_params = '' -%}
+    {%- if sort_by != 'manual' -%}
+      {%- assign query_params = query_params | append: 'sort_by=' | append: sort_by -%}
+    {%- endif -%}
+    {%- if items_per_page != 24 -%}
+      {%- if query_params != blank -%}
+        {%- assign query_params = query_params | append: '&' -%}
+      {%- endif -%}
+      {%- assign query_params = query_params | append: 'size=' | append: items_per_page -%}
+    {%- endif -%}
     
     {%- if current_page > 1 -%}
-      <a href="{{ base_url }}?page={{ current_page | minus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Previous</a>
+      <a href="{{ base_url }}?page={{ current_page | minus: 1 }}{% if query_params != blank %}&{{ query_params }}{% endif %}">Previous</a>
     {%- endif -%}
     
     {%- for page_num in (1..total_pages) -%}
       {%- if page_num == current_page -%}
         <span class="current">{{ page_num }}</span>
       {%- else -%}
-        <a href="{{ base_url }}?page={{ page_num }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">{{ page_num }}</a>
+        <a href="{{ base_url }}?page={{ page_num }}{% if query_params != blank %}&{{ query_params }}{% endif %}">{{ page_num }}</a>
       {%- endif -%}
     {%- endfor -%}
     
     {%- if current_page < total_pages -%}
-      <a href="{{ base_url }}?page={{ current_page | plus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Next</a>
+      <a href="{{ base_url }}?page={{ current_page | plus: 1 }}{% if query_params != blank %}&{{ query_params }}{% endif %}">Next</a>
     {%- endif -%}
   {% endif %}
 </div>
