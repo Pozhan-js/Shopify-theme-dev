@@ -1,0 +1,516 @@
+{% schema %}
+{
+  "name": "自定义产品网格列表",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "选择产品系列"
+    },
+    {
+      "type": "header",
+      "content": "文字样式"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "产品名称字体大小",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "产品名称字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "常规"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "加粗"
+        }
+      ],
+      "default": "600"
+    },
+    {
+      "type": "range",
+      "id": "price_font_size",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "label": "产品价格字体大小",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "price_font_weight",
+      "label": "产品价格字体粗细",
+      "options": [
+        {
+          "value": "400",
+          "label": "常规"
+        },
+        {
+          "value": "600",
+          "label": "半粗"
+        },
+        {
+          "value": "700",
+          "label": "加粗"
+        }
+      ],
+      "default": "400"
+    }
+  ],
+  "presets": [
+    {
+      "name": "自定义产品网格列表"
+    }
+  ]
+}
+{% endschema %}
+
+{%- style -%}
+.pagination {
+  margin-top: 3rem;
+  text-align: center;
+}
+.pagination a,
+.pagination .current {
+  padding: 0.5rem 1rem;
+  margin: 0 0.25rem;
+  border: 1px solid #ddd;
+  text-decoration: none;
+}
+.pagination .current {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  padding: 2rem 1rem 2rem 0;
+  min-height: 60rem;
+}
+
+@media (max-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  main#MainContent.content-for-layout {
+    padding-left: 1.6rem !important;
+  }
+}
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: opacity 0.3s ease;
+}
+.product-link:hover {
+  opacity: 0.8;
+}
+.product-image-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* 1:1 Aspect Ratio */
+}
+.product-image-slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+}
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+h3.product-title {
+  margin-block-start:0;
+  margin-block-end:0;
+}
+.product-price {
+  padding-bottom: 2rem;
+  margin-top: 1rem;
+}
+.image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+.product-image-container:hover .image-nav {
+  opacity: 1;
+}
+.prev {
+  left: 1rem;
+}
+.next {
+  right: 1rem;
+}
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+.product-count {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #000;
+}
+.filter-btn {
+  width:10rem;
+  height:3rem;
+  background: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.filter-btn::before {
+  content: "+";
+  font-size: 3rem;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+.filter-sidebar.active ~ .product-header .filter-btn::after {
+  transform: rotate(90deg);
+}
+{%- endstyle -%}
+
+<!-- debug 产品系列头部信息 {{ section.settings.collection }}-->
+<!-- debug page url {{ page.url }}-->
+{% assign current_collection = page.url | split: '/' | last %}
+<!-- debug current_collection {{ current_collection }}-->
+{%- assign selected_collection = collections[current_collection] | default: collection -%}
+<!-- debug selected_collection.title: {{ selected_collection.title }}-->
+<!-- debug selected_collection.description: {{ selected_collection.description }} -->
+<!-- debug selected_collection json: {{ selected_collection | json }} -->
+{%- if selected_collection -%}
+  {%- comment -%} 获取URL参数 {%- endcomment -%}
+  {%- assign query_string = request.query_string -%}
+  {%- assign params = query_string | split: '&' -%}
+  
+  <!-- 调试信息 -->
+  <div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
+    <h3>筛选调试信息</h3>
+    <p><strong>当前URL:</strong> {{ request.url }}</p>
+    <p><strong>查询参数:</strong> {{ query_string }}</p>
+  </div>
+  
+  {%- comment -%} 解析筛选参数 {%- endcomment -%}
+  {%- assign brand_filters = '' -%}
+  {%- assign type_filters = '' -%}
+  {%- assign color_filters = '' -%}
+  {%- assign size_filters = '' -%}
+  
+  {%- for param in params -%}
+    {%- if param contains 'brand=' -%}
+      {%- assign brand_filters = param | remove: 'brand=' -%}
+    {%- elsif param contains 'type=' -%}
+      {%- assign type_filters = param | remove: 'type=' -%}
+    {%- elsif param contains 'size=' -%}
+      {%- assign size_filters = param | remove: 'size=' -%}
+    {%- elsif param contains 'color=' -%}
+      {%- assign color_filters = param | remove: 'color=' -%}
+    {%- endif -%}
+  {%- endfor -%}
+  
+  {%- comment -%} 将筛选条件转换为数组 {%- endcomment -%}
+  {%- assign brand_array = brand_filters | split: '+' -%}
+  {%- assign type_array = type_filters | split: '+' -%}
+  {%- assign color_array = color_filters | split: '+' -%}
+  {%- assign size_array = size_filters | split: '+' -%}
+
+<div class="collection-header" style="margin-bottom: 2rem; text-align: left;">
+  {% if selected_collection %}
+    <h2 style="font-weight: {{ section.settings.title_font_weight }}">{{ selected_collection.title }}</h2>
+    {% if selected_collection.description != blank %}
+      <p>{{ selected_collection.description }}</p>
+    {% endif %}
+  {% endif %}
+</div>
+
+{%- comment -%} 计算筛选后的产品数量 {%- endcomment -%}
+{%- assign filtered_products = '' | split: '' -%}
+{%- assign filtered_count = 0 -%}
+
+{%- for product in selected_collection.products -%}
+  {%- assign include_product = true -%}
+  
+  {%- comment -%} 品牌筛选 {%- endcomment -%}
+  {%- if brand_filters != blank -%}
+    {%- assign brand_match = false -%}
+    {%- for brand in brand_array -%}
+      {%- if product.vendor == brand -%}
+        {%- assign brand_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless brand_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 产品类型筛选 {%- endcomment -%}
+  {%- if type_filters != blank and include_product -%}
+    {%- assign type_match = false -%}
+    {%- for type in type_array -%}
+      {%- if product.type == type -%}
+        {%- assign type_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless type_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 颜色筛选 {%- endcomment -%}
+  {%- if color_filters != blank and include_product -%}
+    {%- assign color_match = false -%}
+    {%- for color in color_array -%}
+      {%- if product.title contains color -%}
+        {%- assign color_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless color_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- comment -%} 尺码筛选 {%- endcomment -%}
+  {%- if size_filters != blank and include_product -%}
+    {%- assign size_match = false -%}
+    {%- for size in size_array -%}
+      {%- if product.title contains size -%}
+        {%- assign size_match = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- unless size_match -%}
+      {%- assign include_product = false -%}
+    {%- endunless -%}
+  {%- endif -%}
+  
+  {%- if include_product -%}
+    {%- assign filtered_count = filtered_count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div class="product-header">
+  <div class="product-count">
+    {{ filtered_count }} of {{ selected_collection.products_count }} products
+  </div>
+  <div class="filter-btn" onclick="toggleFilter()">Filter</div>
+</div>
+
+<div class="product-grid">
+  {%- assign items_per_page = 24 -%}
+  {%- assign current_page = 1 -%}
+  {%- assign page_param = request.path | split: 'page=' | last -%}
+  {%- if page_param contains '&' -%}
+    {%- assign current_page = page_param | split: '&' | first | times: 1 -%}
+  {%- elsif page_param != request.path -%}
+    {%- assign current_page = page_param | times: 1 -%}
+  {%- endif -%}
+  
+  {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
+  {%- assign displayed_count = 0 -%}
+  
+  {%- for product in selected_collection.products -%}
+    {%- assign include_product = true -%}
+    
+    {%- comment -%} 重新应用相同的筛选逻辑用于显示 {%- endcomment -%}
+    {%- if brand_filters != blank -%}
+      {%- assign brand_match = false -%}
+      {%- for brand in brand_array -%}
+        {%- if product.vendor == brand -%}
+          {%- assign brand_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless brand_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if type_filters != blank and include_product -%}
+      {%- assign type_match = false -%}
+      {%- for type in type_array -%}
+        {%- if product.type == type -%}
+          {%- assign type_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless type_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if color_filters != blank and include_product -%}
+      {%- assign color_match = false -%}
+      {%- for color in color_array -%}
+        {%- if product.title contains color -%}
+          {%- assign color_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless color_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if size_filters != blank and include_product -%}
+      {%- assign size_match = false -%}
+      {%- for size in size_array -%}
+        {%- if product.title contains size -%}
+          {%- assign size_match = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless size_match -%}
+        {%- assign include_product = false -%}
+      {%- endunless -%}
+    {%- endif -%}
+    
+    {%- if include_product -%}
+      {%- assign current_index = forloop.index0 -%}
+      {%- assign start_index = current_page | minus: 1 | times: items_per_page -%}
+      {%- assign end_index = start_index | plus: items_per_page -%}
+      
+      {%- if current_index >= start_index and current_index < end_index -%}
+        <div class="product-card">
+          <a href="{{ product.url }}" class="product-link">
+            <div class="product-image-container">
+              <div class="product-image-slider" data-current="0" data-count="{{ product.images.size }}">
+                {% for image in product.images %}
+                  <img class="product-image" src="{{ image | image_url: width: 400 }}" alt="{{ product.title }}" width="400" height="400" loading="lazy">
+                {% endfor %}
+              </div>
+              {% if product.images.size > 1 %}
+                <button class="image-nav prev" onclick="prevImage(event, this)">❮</button>
+                <button class="image-nav next" onclick="nextImage(event, this)">❯</button>
+              {% endif %}
+            </div>
+
+            <h3 class="product-title" style="font-size: {{ section.settings.title_font_size }}px; font-weight: {{ section.settings.title_font_weight }}">{{ product.title }}</h3>
+            <div class="product-price" style="font-size: {{ section.settings.price_font_size }}px; font-weight: {{ section.settings.price_font_weight }}">{{ product.price | money }}</div>
+          </a>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  {% endfor %}
+
+</div>
+
+{%- assign total_pages = filtered_count | divided_by: items_per_page | ceil -%}
+
+<div class="pagination">
+  {% if total_pages > 1 %}
+    {%- assign base_url = request.path -%}
+    {%- assign query_without_page = '' -%}
+    {%- for param in params -%}
+      {%- unless param contains 'page=' -%}
+        {%- assign query_without_page = query_without_page | append: param | append: '&' -%}
+      {%- endunless -%}
+    {%- endfor -%}
+    {%- assign query_without_page = query_without_page | remove: '&' | remove: '?' -%}
+    
+    {%- if current_page > 1 -%}
+      <a href="{{ base_url }}?page={{ current_page | minus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Previous</a>
+    {%- endif -%}
+    
+    {%- for page_num in (1..total_pages) -%}
+      {%- if page_num == current_page -%}
+        <span class="current">{{ page_num }}</span>
+      {%- else -%}
+        <a href="{{ base_url }}?page={{ page_num }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">{{ page_num }}</a>
+      {%- endif -%}
+    {%- endfor -%}
+    
+    {%- if current_page < total_pages -%}
+      <a href="{{ base_url }}?page={{ current_page | plus: 1 }}{% if query_without_page != blank %}&{{ query_without_page }}{% endif %}">Next</a>
+    {%- endif -%}
+  {% endif %}
+</div>
+{%- else -%}
+  <p>请选择一个产品系列</p>
+{%- endif -%}
+
+<div id="filter-sidebar" class="filter-sidebar">
+  {% render 'custom-product-filter' %}
+</div>
+
+<script>
+  function toggleFilter() {
+    const sidebar = document.getElementById('filter-sidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('active');
+    }
+  }
+
+  function prevImage(event, button) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const container = button.parentNode;
+    const slider = container.querySelector('.product-image-slider');
+    const imageCount = parseInt(slider.dataset.count);
+    let currentIndex = parseInt(slider.dataset.current);
+    
+    currentIndex = (currentIndex - 1 + imageCount) % imageCount;
+    slider.dataset.current = currentIndex;
+    
+    const translateX = -currentIndex * 100;
+    slider.style.transform = `translateX(${translateX}%)`;
+  }
+
+  function nextImage(event, button) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const container = button.parentNode;
+    const slider = container.querySelector('.product-image-slider');
+    const imageCount = parseInt(slider.dataset.count);
+    let currentIndex = parseInt(slider.dataset.current);
+    
+    currentIndex = (currentIndex + 1) % imageCount;
+    slider.dataset.current = currentIndex;
+    
+    const translateX = -currentIndex * 100;
+    slider.style.transform = `translateX(${translateX}%)`;
+  }
+</script>
