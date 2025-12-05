@@ -909,11 +909,10 @@ if (!customElements.get('joy-redeem-programs')) {
         card.classList.add(JoyRedeemPrograms.CSS_CLASSES.CARD_DISABLED);
       }
 
-      {% comment %} this.addCardClickHandler(card, program, canRedeem); {% endcomment %}
+      this.addCardClickHandler(card, program, canRedeem);
 
       const displayText = this.getProgramDisplayText(program);
       card.innerHTML = this.generateCardHTML(program, displayText, canRedeem);
-      this.attachModalEventListeners(card, program);
 
       return card;
     }
@@ -926,8 +925,9 @@ if (!customElements.get('joy-redeem-programs')) {
           this.redirectToLogin();
           return;
         }
+        this.attachModalEventListeners(card, program);
 
-        this.createRedeemModal(program);
+        {% comment %} this.createRedeemModal(program); {% endcomment %}
       } catch (error) {
         console.error('Error handling redeem click:', error);
         this.showRedeemError(JoyRedeemPrograms.ERROR_MESSAGES.REDEEM_ERROR);
