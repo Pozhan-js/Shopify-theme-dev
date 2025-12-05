@@ -689,9 +689,6 @@ if (!customElements.get('joy-redeem-programs')) {
         currentFilter === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_SHIPPING 
         ? programs.filter(p => p.event.includes(currentFilter))
         : programs;
-       console.log(this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.DISCOUNT)
-
-      console.log(this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_PRODUCT)
 
       const redeemingPrograms = filteredDisplayPrograms.filter(program =>
         program.type === JoyRedeemPrograms.PROGRAM_TYPES.REDEEMING ||
@@ -1265,11 +1262,12 @@ if (!customElements.get('joy-redeem-programs')) {
       try {
         // Try to redeem via Joy SDK using the correct method name
         if (window.joyInstance && typeof window.joyInstance.redeem === 'function') {
-          console.log('3. Calling redeem...');
+          // For dynamic programs, pass the selected points
           const result = await window.joyInstance.redeem(
             program.id,
             pointsToRedeem
           );
+
           console.log('Redeem result:', result);
 
           // Check if the result indicates an error
@@ -1384,7 +1382,6 @@ if (!customElements.get('joy-redeem-programs')) {
             </div>
           `;
         }
-        console.log({discountCode})
         document.body.appendChild(modal);
         // Add copy and apply functionality
         this.setupDiscountCodeCopy(discountCode);
