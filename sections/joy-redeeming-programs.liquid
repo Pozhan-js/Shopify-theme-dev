@@ -1,0 +1,1585 @@
+{% comment %}
+  Joy Redeeming Programs Component
+  Displays loyalty reward redemption options with modal interactions
+
+  Usage:
+    {% render 'joy-redeeming-programs' %}
+    <joy-redeeming-programs
+      data-customer-id="{{ customer.id | default: '' }}"
+      data-layout="cards"
+      data-show-disabled="false"
+      data-max-programs="8"
+      data-modal-size="medium"
+    ></joy-redeeming-programs>
+
+  Attributes:
+  - data-customer-id: Customer ID (required for redemption)
+  - data-layout: Layout type - "grid", "list", or "cards" (default: "cards")
+  - data-show-disabled: Show programs customer can't afford (default: "true")
+  - data-max-programs: Limit number of programs to display (default: all)
+  - data-modal-size: Modal size - "small", "medium", "large" (default: "medium")
+  - data-modal-cancel-text: Custom cancel button text (default: "Cancel")
+  - data-modal-redeem-text: Custom redeem button text (default: "Redeem")
+
+  Features:
+  - Interactive modal for redemption confirmation
+  - Dynamic point selection for variable reward programs
+  - Real-time value calculation for dynamic rewards
+  - Shows point requirements and discount values
+  - Auto-applies discount codes to checkout
+  - Handles both fixed and dynamic reward types
+  - Responsive modal design
+
+  Customization:
+  <style>
+    joy-redeeming-programs {
+      --joy-primary-color: #YOUR_COLOR;
+      --joy-border-color: #YOUR_COLOR;
+      --joy-text-primary: #YOUR_COLOR;
+    }
+  </style>
+{% endcomment %}
+
+{% render 'joy-base-component' %}
+
+<script>
+/**
+ * Joy Redeeming Programs Component
+ * Displays customer loyalty redemption programs with modal interactions
+ * @extends JoyBaseComponent
+ */
+class JoyRedeemingPrograms extends window.JoyComponents.BaseComponent {
+  // Component-specific constants
+  static COMPONENT_NAME = 'joy-redeeming-programs';
+  static PROGRAM_TYPES = {
+    REDEEMING: 'redeeming',
+    SPENDING: 'spending',
+    DYNAMIC: 'dynamic'
+  };
+
+  static DISCOUNT_TYPES = {
+    PERCENTAGE: 'discount_percentage',
+    AMOUNT: 'discount_amount'
+  };
+
+  static LAYOUT_TYPES = {
+    GRID: 'grid',
+    LIST: 'list',
+    CARDS: 'cards'
+  };
+
+  static CSS_CLASSES = {
+    ...window.JoyComponents.BaseComponent.CSS_CLASSES,
+    PROGRAMS_CONTAINER: 'joy-redeeming-programs',
+    PROGRAM_CARD: 'joy-redeeming-programs__card',
+    PROGRAM_ICON: 'joy-redeeming-programs__icon',
+    PROGRAM_CONTENT: 'joy-redeeming-programs__content',
+    PROGRAM_TITLE: 'joy-redeeming-programs__title',
+    PROGRAM_DESCRIPTION: 'joy-redeeming-programs__description',
+    PROGRAM_POINTS: 'joy-redeeming-programs__points',
+    PROGRAM_BUTTON: 'joy-redeeming-programs__button',
+    PROGRAM_DISABLED: 'joy-redeeming-programs__card--disabled',
+    MODAL: 'joy-redeeming-modal',
+    MODAL_OVERLAY: 'joy-redeeming-modal__overlay',
+    MODAL_CONTENT: 'joy-redeeming-modal__content',
+    MODAL_HEADER: 'joy-redeeming-modal__header',
+    MODAL_BODY: 'joy-redeeming-modal__body',
+    MODAL_ACTIONS: 'joy-redeeming-modal__actions'
+  };
+
+  constructor() {
+    super();
+
+    // Component-specific properties
+    this.programs = [];
+    this.layoutType = this.dataset.layout || JoyRedeemingPrograms.LAYOUT_TYPES.CARDS;
+    this.showDisabled = this.dataset.showDisabled !== 'false';
+    this.maxPrograms = parseInt(this.dataset.maxPrograms) || 0;
+    this.currentModal = null;
+
+    // Modal settings from data attributes
+    this.modalSettings = {
+      size: this.dataset.modalSize || 'medium',
+      cancelText: this.dataset.modalCancelText || 'Cancel',
+      redeemText: this.dataset.modalRedeemText || 'Redeem',
+      processingText: this.dataset.processingText || 'Processing...',
+      successText: this.dataset.successText || 'Success!'
+    };
+  }
+
+  /**
+   * Initialize redeeming programs component
+   * @param {Object} joyInstance - Joy SDK instance
+   */
+  async onJoyReady(joyInstance) {
+    try {
+      await this.loadRedeemingPrograms(joyInstance);
+
+      if (this.programs.length === 0) {
+        this.renderEmptyState('No redemption programs are currently available.');
+        return;
+      }
+
+      this.renderPrograms();
+      this.attachEventListeners();
+
+    } catch (error) {
+      this.error('Failed to load redeeming programs', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Load redeeming programs from Joy SDK
+   * @param {Object} joyInstance - Joy SDK instance
+   */
+  async loadRedeemingPrograms(joyInstance) {
+    this.log('Loading redeeming programs');
+
+    // Validate SDK method availability
+    if (typeof joyInstance.redeemPrograms !== 'function') {
+      throw new Error('redeemPrograms method not available in Joy SDK');
+    }
+
+    try {
+      const programsData = await joyInstance.redeemPrograms();
+      this.log('Raw redeeming programs data received', programsData);
+
+      // Extract programs from response
+      let programs = this.extractPrograms(programsData);
+
+      if (!Array.isArray(programs)) {
+        throw new Error('Invalid redeeming programs data format');
+      }
+
+      // Process and filter programs
+      this.programs = this.processPrograms(programs);
+      this.log(`Processed ${this.programs.length} redeeming programs`);
+
+    } catch (error) {
+      this.error('Failed to fetch redeeming programs from SDK', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract programs from API response
+   * @param {Object} programsData - Raw programs data
+   * @returns {Array} Programs array
+   */
+  extractPrograms(programsData) {
+    if (programsData.redeeming) {
+      return programsData.redeeming;
+    }
+    if (programsData.data) {
+      return programsData.data;
+    }
+    return programsData;
+  }
+
+  /**
+   * Process and filter programs based on component settings
+   * @param {Array} rawPrograms - Raw programs from SDK
+   * @returns {Array} Processed programs
+   */
+  processPrograms(rawPrograms) {
+    let programs = rawPrograms.filter(program => {
+      // Basic validation
+      if (!program || !program.title) {
+        this.warn('Invalid program data, skipping', program);
+        return false;
+      }
+
+      // Filter by status (only active, non-draft programs)
+      if (!program.status || program.isDraft) {
+        this.log('Skipping inactive/draft program', program.title);
+        return false;
+      }
+
+      // Filter by program types (redeeming/spending only)
+      if (![JoyRedeemingPrograms.PROGRAM_TYPES.REDEEMING, JoyRedeemingPrograms.PROGRAM_TYPES.SPENDING].includes(program.type)) {
+        this.log('Skipping non-redeeming program', program.title);
+        return false;
+      }
+
+      return true;
+    });
+
+    // Filter programs customer can't redeem if not showing disabled
+    if (!this.showDisabled) {
+      programs = programs.filter(program => this.canCustomerRedeem(program));
+    }
+
+    // Limit number of programs if specified
+    if (this.maxPrograms > 0) {
+      programs = programs.slice(0, this.maxPrograms);
+    }
+
+    // Sort programs by point cost (ascending)
+    programs.sort((a, b) => {
+      const pointsA = this.getProgramPointCost(a);
+      const pointsB = this.getProgramPointCost(b);
+      return pointsA - pointsB;
+    });
+
+    return programs;
+  }
+
+  /**
+   * Check if customer can redeem a program
+   * @param {Object} program - Program object
+   * @returns {boolean} True if customer can redeem
+   */
+  canCustomerRedeem(program) {
+    const customerPoints = this.getCustomerPoints();
+    const requiredPoints = this.getProgramPointCost(program);
+    return customerPoints >= requiredPoints;
+  }
+
+  /**
+   * Get point cost for a program
+   * @param {Object} program - Program object
+   * @returns {number} Point cost
+   */
+  getProgramPointCost(program) {
+    return this.isDynamicProgram(program) ?
+      (program.minSpendPoint || program.spendPoint || 0) :
+      (program.spendPoint || program.pointCost || 0);
+  }
+
+  /**
+   * Check if program is dynamic (variable points)
+   * @param {Object} program - Program object
+   * @returns {boolean} True if dynamic
+   */
+  isDynamicProgram(program) {
+    return program.redeemType === JoyRedeemingPrograms.PROGRAM_TYPES.DYNAMIC;
+  }
+
+  /**
+   * Render programs based on layout type
+   */
+  renderPrograms() {
+    this.innerHTML = '';
+
+    // Create container with appropriate layout
+    const container = this.createProgramsContainer();
+
+    // Render each program
+    this.programs.forEach((program, index) => {
+      try {
+        const programElement = this.createProgramElement(program, index);
+        container.appendChild(programElement);
+      } catch (error) {
+        this.error(`Failed to render program ${program.title}`, error);
+      }
+    });
+
+    this.appendChild(container);
+    this.log(`Rendered ${this.programs.length} programs with ${this.layoutType} layout`);
+  }
+
+  /**
+   * Create programs container with appropriate layout classes
+   * @returns {HTMLElement} Container element
+   */
+  createProgramsContainer() {
+    const container = document.createElement('div');
+    container.className = `${JoyRedeemingPrograms.CSS_CLASSES.PROGRAMS_CONTAINER} ${JoyRedeemingPrograms.CSS_CLASSES.PROGRAMS_CONTAINER}--${this.layoutType}`;
+
+    // Add data attributes for styling
+    container.dataset.layout = this.layoutType;
+    container.dataset.count = this.programs.length;
+
+    return container;
+  }
+
+  /**
+   * Create individual program element
+   * @param {Object} program - Program data
+   * @param {number} index - Program index
+   * @returns {HTMLElement} Program element
+   */
+  createProgramElement(program, index) {
+    const element = document.createElement('div');
+    const canRedeem = this.canCustomerRedeem(program);
+
+    // Set up element classes and attributes
+    element.className = JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_CARD;
+    if (!canRedeem) {
+      element.classList.add(JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_DISABLED);
+    }
+
+    element.dataset.programId = program.id;
+    element.dataset.programType = program.type;
+    element.dataset.programIndex = index;
+    element.setAttribute('tabindex', '0');
+    element.setAttribute('role', 'button');
+    element.setAttribute('aria-label', `Redeem ${program.title}`);
+
+    // Generate program content
+    element.innerHTML = this.generateProgramHTML(program, canRedeem);
+
+    return element;
+  }
+
+  /**
+   * Generate HTML content for a program
+   * @param {Object} program - Program data
+   * @param {boolean} canRedeem - Whether customer can redeem
+   * @returns {string} HTML content
+   */
+  generateProgramHTML(program, canRedeem) {
+    const iconHTML = this.generateProgramIcon(program);
+    const pointsText = this.generatePointsText(program);
+    const buttonText = canRedeem ? 'Redeem' : 'Not enough points';
+
+    return `
+      <div class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_ICON}">
+        ${iconHTML}
+      </div>
+      <div class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_CONTENT}">
+        <h3 class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_TITLE}">
+          ${this.escapeHtml(program.title)}
+        </h3>
+        <p class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_DESCRIPTION}">
+          ${this.escapeHtml(this.getProgramDescription(program))}
+        </p>
+        <div class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_POINTS}">
+          ${pointsText}
+        </div>
+        <button class="${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_BUTTON}" ${!canRedeem ? 'disabled' : ''}>
+          ${buttonText}
+        </button>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate program icon HTML with fallback
+   * @param {Object} program - Program data
+   * @returns {string} Icon HTML
+   */
+  generateProgramIcon(program) {
+    const iconUrl = program.loyaltyPageCustomIcon;
+    const fallbackEmoji = this.getFallbackEmoji(program.event || 'discount');
+    const hasValidIcon = this.isValidIconUrl(iconUrl);
+
+    if (hasValidIcon) {
+      return `
+        <img src="${iconUrl}"
+             alt="${this.escapeHtml(program.title)}"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="joy-redeeming-programs__icon-fallback" style="display:none;">
+          ${fallbackEmoji}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="joy-redeeming-programs__icon-fallback">
+        ${fallbackEmoji}
+      </div>
+    `;
+  }
+
+  /**
+   * Generate points text for program
+   * @param {Object} program - Program data
+   * @returns {string} Points text
+   */
+  generatePointsText(program) {
+    if (this.isDynamicProgram(program)) {
+      return this.getDynamicPointsText(program);
+    }
+
+    const points = this.getProgramPointCost(program);
+    return this.formatPointsText(points);
+  }
+
+  /**
+   * Get points text for dynamic programs
+   * @param {Object} program - Program data
+   * @returns {string} Dynamic points text
+   */
+  getDynamicPointsText(program) {
+    if (this.isPercentageDiscount(program)) {
+      const percentage = program.earnPercentage || program.discount || 0;
+      const minPoints = program.minSpendPoint || program.spendPoint || 100;
+      return `${percentage}% off (min ${this.formatPointsText(minPoints)})`;
+    }
+
+    if (this.isAmountDiscount(program)) {
+      const amount = program.earnAmount || program.discount || 0;
+      const minPoints = program.minSpendPoint || program.spendPoint || 100;
+      return `$${amount} off (min ${this.formatPointsText(minPoints)})`;
+    }
+
+    const ratio = program.earnAmount || 1;
+    const basePoints = program.spendPoint || 1;
+    return `${this.formatPointsText(basePoints)} = $${ratio}`;
+  }
+
+  /**
+   * Check if program offers percentage discount
+   * @param {Object} program - Program data
+   * @returns {boolean} True if percentage discount
+   */
+  isPercentageDiscount(program) {
+    return program.typeEarn === JoyRedeemingPrograms.DISCOUNT_TYPES.PERCENTAGE ||
+           program.discountType === 'percentage';
+  }
+
+  /**
+   * Check if program offers amount discount
+   * @param {Object} program - Program data
+   * @returns {boolean} True if amount discount
+   */
+  isAmountDiscount(program) {
+    return program.typeEarn === JoyRedeemingPrograms.DISCOUNT_TYPES.AMOUNT ||
+           program.discountType === 'amount';
+  }
+
+  /**
+   * Get program description with fallbacks
+   * @param {Object} program - Program data
+   * @returns {string} Program description
+   */
+  getProgramDescription(program) {
+    if (program.description) {
+      return program.description;
+    }
+
+    // Generate description based on program type
+    if (this.isDynamicProgram(program)) {
+      return 'Choose how many points to spend for discount';
+    }
+
+    const points = this.getProgramPointCost(program);
+    return `Spend ${this.formatPointsText(points)} to redeem this reward`;
+  }
+
+  /**
+   * Check if icon URL is valid
+   * @param {string} iconUrl - Icon URL to check
+   * @returns {boolean} True if valid
+   */
+  isValidIconUrl(iconUrl) {
+    return iconUrl &&
+           typeof iconUrl === 'string' &&
+           iconUrl.trim() !== '' &&
+           !iconUrl.includes('undefined') &&
+           !iconUrl.includes('null');
+  }
+
+  /**
+   * Attach event listeners to program elements
+   */
+  attachEventListeners() {
+    // Use event delegation for better performance
+    this.addEventListener('click', this.handleProgramClick.bind(this));
+    this.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+
+  /**
+   * Handle program click events
+   * @param {Event} event - Click event
+   */
+  async handleProgramClick(event) {
+    const programCard = event.target.closest(`.${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_CARD}`);
+    const button = event.target.closest(`.${JoyRedeemingPrograms.CSS_CLASSES.PROGRAM_BUTTON}`);
+
+    if (!programCard || (button && button.disabled)) return;
+
+    const programId = programCard.dataset.programId;
+    const program = this.programs.find(p => p.id === programId);
+
+    if (!program) {
+      this.warn('Program not found for click event', { programId });
+      return;
+    }
+
+    // Check if user is logged in
+    if (!this.customerId) {
+      this.redirectToAuth();
+      return;
+    }
+
+    this.log('Program redeem clicked', { title: program.title, type: program.type });
+
+    try {
+      await this.handleRedemptionFlow(program);
+    } catch (error) {
+      this.error('Failed to handle redemption flow', error);
+    }
+  }
+
+  /**
+   * Handle keyboard navigation
+   * @param {Event} event - Keyboard event
+   */
+  handleKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.handleProgramClick(event);
+    }
+  }
+
+  /**
+   * Handle redemption flow for a program
+   * @param {Object} program - Program data
+   */
+  async handleRedemptionFlow(program) {
+    // Show redemption modal
+    await this.showRedemptionModal(program);
+  }
+
+  /**
+   * Show redemption modal for program
+   * @param {Object} program - Program data
+   */
+  async showRedemptionModal(program) {
+    try {
+      // Remove any existing modal
+      this.removeExistingModal();
+
+      // Create and show modal
+      const modal = this.createRedemptionModal(program);
+      document.body.appendChild(modal);
+
+      // Store reference and setup interactions
+      this.currentModal = modal;
+      this.setupModalInteractions(modal, program);
+
+      this.log('Redemption modal displayed', program.title);
+
+    } catch (error) {
+      this.error('Failed to show redemption modal', error);
+    }
+  }
+
+  /**
+   * Create redemption modal element
+   * @param {Object} program - Program data
+   * @returns {HTMLElement} Modal element
+   */
+  createRedemptionModal(program) {
+    const modal = document.createElement('div');
+    modal.className = `${JoyRedeemingPrograms.CSS_CLASSES.MODAL} ${JoyRedeemingPrograms.CSS_CLASSES.MODAL}--${this.modalSettings.size}`;
+
+    const isDynamic = this.isDynamicProgram(program);
+    const customerPoints = this.getCustomerPoints();
+    const minPoints = this.getProgramPointCost(program);
+    const maxPoints = isDynamic && program.maxSpendPoint ?
+      Math.min(customerPoints, program.maxSpendPoint) :
+      customerPoints;
+
+    modal.innerHTML = this.generateModalHTML(program, {
+      isDynamic,
+      minPoints,
+      maxPoints,
+      selectedPoints: minPoints
+    });
+
+    return modal;
+  }
+
+  /**
+   * Generate modal HTML
+   * @param {Object} program - Program data
+   * @param {Object} options - Modal options
+   * @returns {string} Modal HTML
+   */
+  generateModalHTML(program, options) {
+    const { isDynamic, minPoints, maxPoints, selectedPoints } = options;
+    const iconHTML = this.generateProgramIcon(program);
+
+    return `
+      <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_OVERLAY}">
+        <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_CONTENT}">
+          <button class="joy-modal-close" aria-label="Close modal">&times;</button>
+
+          <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_HEADER}">
+            <div class="joy-modal-program-info">
+              <div class="joy-modal-program-icon">
+                ${iconHTML}
+              </div>
+              <div class="joy-modal-program-details">
+                <h3>${this.escapeHtml(program.title)}</h3>
+                <p>${this.escapeHtml(this.getProgramDescription(program))}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_BODY}">
+            ${isDynamic ? this.generateSliderHTML(program, minPoints, maxPoints, selectedPoints) : ''}
+            ${this.generateSummaryHTML(program, selectedPoints)}
+          </div>
+
+          <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_ACTIONS}">
+            <button class="joy-modal-button joy-modal-button--secondary" data-action="cancel">
+              ${this.modalSettings.cancelText}
+            </button>
+            <button class="joy-modal-button joy-modal-button--primary" data-action="redeem" data-program-id="${program.id}" data-points="${selectedPoints}">
+              ${this.modalSettings.redeemText}
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate slider HTML for dynamic programs
+   * @param {Object} program - Program data
+   * @param {number} minPoints - Minimum points
+   * @param {number} maxPoints - Maximum points
+   * @param {number} selectedPoints - Currently selected points
+   * @returns {string} Slider HTML
+   */
+  generateSliderHTML(program, minPoints, maxPoints, selectedPoints) {
+    const dynamicValue = this.calculateDynamicValue(program, selectedPoints);
+
+    return `
+      <div class="joy-points-selector">
+        <label class="joy-points-selector-label">Select points to redeem:</label>
+        <div class="joy-slider-container">
+          <input type="range"
+                 class="joy-points-slider"
+                 id="joy-points-slider-${program.id}"
+                 min="${minPoints}"
+                 max="${maxPoints}"
+                 step="${program.spendPoint || 1}"
+                 value="${selectedPoints}">
+          <div class="joy-slider-values">
+            <span class="joy-slider-min">${minPoints}</span>
+            <span class="joy-slider-value" id="joy-slider-value-${program.id}">
+              ${this.formatPointsText(selectedPoints)}
+            </span>
+            <span class="joy-slider-max">${maxPoints}</span>
+          </div>
+        </div>
+        <div class="joy-dynamic-value">
+          You'll get: <strong id="joy-dynamic-amount-${program.id}">$${dynamicValue}</strong> off
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Generate summary HTML
+   * @param {Object} program - Program data
+   * @param {number} points - Points to redeem
+   * @returns {string} Summary HTML
+   */
+  generateSummaryHTML(program, points) {
+    return `
+      <div class="joy-reward-summary">
+        <div class="joy-reward-summary-title">Redemption Summary</div>
+        <div class="joy-reward-summary-content" id="joy-reward-summary-${program.id}">
+          You will spend <strong>${this.formatPointsText(points)}</strong> to redeem this reward.
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Calculate dynamic value for program
+   * @param {Object} program - Program data
+   * @param {number} points - Selected points
+   * @returns {string} Dynamic value
+   */
+  calculateDynamicValue(program, points) {
+    const ratio = (program.earnAmount || 1) / (program.spendPoint || 1);
+    return (points * ratio).toFixed(2);
+  }
+
+  /**
+   * Setup modal interactions
+   * @param {HTMLElement} modal - Modal element
+   * @param {Object} program - Program data
+   */
+  setupModalInteractions(modal, program) {
+    // Close button
+    const closeBtn = modal.querySelector('.joy-modal-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeRedemptionModal());
+    }
+
+    // Overlay click to close
+    const overlay = modal.querySelector(`.${JoyRedeemingPrograms.CSS_CLASSES.MODAL_OVERLAY}`);
+    if (overlay) {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          this.closeRedemptionModal();
+        }
+      });
+    }
+
+    // Action buttons
+    const actionButtons = modal.querySelectorAll('.joy-modal-button[data-action]');
+    actionButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const action = e.target.dataset.action;
+        if (action === 'cancel') {
+          this.closeRedemptionModal();
+        } else if (action === 'redeem') {
+          this.executeRedemption(program, e.target);
+        }
+      });
+    });
+
+    // Slider for dynamic programs
+    if (this.isDynamicProgram(program)) {
+      this.setupSliderInteractions(modal, program);
+    }
+
+    // Escape key to close
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        this.closeRedemptionModal();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    modal.handleEscape = handleEscape; // Store for cleanup
+  }
+
+  /**
+   * Setup slider interactions for dynamic programs
+   * @param {HTMLElement} modal - Modal element
+   * @param {Object} program - Program data
+   */
+  setupSliderInteractions(modal, program) {
+    const slider = modal.querySelector(`#joy-points-slider-${program.id}`);
+    if (!slider) return;
+
+    slider.addEventListener('input', (e) => {
+      const points = parseInt(e.target.value);
+      this.updateSliderDisplay(modal, program, points);
+    });
+  }
+
+  /**
+   * Update slider display values
+   * @param {HTMLElement} modal - Modal element
+   * @param {Object} program - Program data
+   * @param {number} points - Selected points
+   */
+  updateSliderDisplay(modal, program, points) {
+    // Update slider value display
+    const valueDisplay = modal.querySelector(`#joy-slider-value-${program.id}`);
+    if (valueDisplay) {
+      valueDisplay.textContent = this.formatPointsText(points);
+    }
+
+    // Update dynamic amount
+    const amountDisplay = modal.querySelector(`#joy-dynamic-amount-${program.id}`);
+    if (amountDisplay) {
+      const dynamicValue = this.calculateDynamicValue(program, points);
+      amountDisplay.textContent = `$${dynamicValue}`;
+    }
+
+    // Update summary
+    const summary = modal.querySelector(`#joy-reward-summary-${program.id}`);
+    if (summary) {
+      summary.innerHTML = `You will spend <strong>${this.formatPointsText(points)}</strong> to redeem this reward.`;
+    }
+
+    // Update redeem button
+    const redeemButton = modal.querySelector('.joy-modal-button[data-action="redeem"]');
+    if (redeemButton) {
+      redeemButton.dataset.points = points;
+    }
+  }
+
+  /**
+   * Execute redemption process
+   * @param {Object} program - Program data
+   * @param {HTMLElement} button - Redeem button element
+   */
+  async executeRedemption(program, button) {
+    const pointsToRedeem = parseInt(button.dataset.points) || this.getProgramPointCost(program);
+    const originalText = button.textContent;
+
+    this.log('Executing redemption', { program: program.title, points: pointsToRedeem });
+
+    try {
+      // Update button state
+      button.disabled = true;
+      button.innerHTML = `
+        <span style="display: inline-flex; align-items: center; gap: 8px;">
+          <span class="joy-spinner"></span>
+          ${this.modalSettings.processingText}
+        </span>
+      `;
+
+      // Execute redemption via Joy SDK
+      const joyInstance = this.getJoyInstance();
+      if (!joyInstance || typeof joyInstance.redeem !== 'function') {
+        throw new Error('Joy SDK redeem method not available');
+      }
+
+      const result = await joyInstance.redeem(program.id, pointsToRedeem);
+      this.log('Redemption result', result);
+
+      // Check for errors
+      if (result && result.status === false && result.error) {
+        throw new Error(result.error);
+      }
+
+      // Show success
+      await this.showRedemptionSuccess(program, pointsToRedeem, result);
+
+      // Refresh component data
+      setTimeout(() => {
+        this.refresh();
+      }, 2000);
+
+    } catch (error) {
+      this.error('Redemption failed', error);
+
+      // Reset button state
+      button.disabled = false;
+      button.textContent = originalText;
+
+      // Show error message
+      this.showRedemptionError(error.message || 'Redemption failed. Please try again.');
+    }
+  }
+
+  /**
+   * Show redemption success message
+   * @param {Object} program - Program data
+   * @param {number} points - Points redeemed
+   * @param {Object} result - Redemption result
+   */
+  async showRedemptionSuccess(program, points, result) {
+    const modal = this.currentModal;
+    if (!modal) return;
+
+    const discountCode = result?.data?.discount?.code || result?.discount?.code || result?.code;
+
+    // Update modal content to show success
+    const modalContent = modal.querySelector(`.${JoyRedeemingPrograms.CSS_CLASSES.MODAL_CONTENT}`);
+    if (modalContent) {
+      modalContent.innerHTML = `
+        <button class="joy-modal-close" aria-label="Close modal">&times;</button>
+
+        <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_HEADER}">
+          <div class="joy-success-header">
+            <div class="joy-success-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <h3>${this.modalSettings.successText}</h3>
+            <p>You've successfully redeemed <strong>${program.title}</strong> for <strong>${this.formatPointsText(points)}</strong>!</p>
+          </div>
+        </div>
+
+        <div class="${JoyRedeemingPrograms.CSS_CLASSES.MODAL_BODY}">
+          ${discountCode ? this.generateDiscountCodeHTML(discountCode) : ''}
+          <div class="joy-success-actions">
+            <button class="joy-modal-button joy-modal-button--primary" onclick="this.closest('.${JoyRedeemingPrograms.CSS_CLASSES.MODAL}').remove()">
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Re-attach close handlers
+    this.setupModalCloseHandlers(modal);
+  }
+
+  /**
+   * Generate discount code HTML
+   * @param {string} discountCode - Discount code
+   * @returns {string} Discount code HTML
+   */
+  generateDiscountCodeHTML(discountCode) {
+    return `
+      <div class="joy-discount-code-section">
+        <p>Your discount code:</p>
+        <div class="joy-discount-code">
+          <span class="joy-discount-code-text">${discountCode}</span>
+          <button class="joy-copy-button" onclick="this.copyDiscountCode('${discountCode}')">
+            Copy
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Show redemption error message
+   * @param {string} message - Error message
+   */
+  showRedemptionError(message) {
+    const modal = this.currentModal;
+    if (!modal) return;
+
+    const modalBody = modal.querySelector(`.${JoyRedeemingPrograms.CSS_CLASSES.MODAL_BODY}`);
+    if (!modalBody) return;
+
+    // Add or update error message
+    let errorDiv = modalBody.querySelector('.joy-error-message');
+    if (!errorDiv) {
+      errorDiv = document.createElement('div');
+      errorDiv.className = 'joy-error-message';
+      modalBody.insertBefore(errorDiv, modalBody.firstChild);
+    }
+
+    errorDiv.innerHTML = `
+      <div class="joy-error-content">
+        <strong>Error:</strong> ${this.escapeHtml(message)}
+      </div>
+    `;
+
+    // Remove error after 5 seconds
+    setTimeout(() => {
+      if (errorDiv.parentNode) {
+        errorDiv.parentNode.removeChild(errorDiv);
+      }
+    }, 5000);
+  }
+
+  /**
+   * Setup modal close handlers
+   * @param {HTMLElement} modal - Modal element
+   */
+  setupModalCloseHandlers(modal) {
+    const closeBtn = modal.querySelector('.joy-modal-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeRedemptionModal());
+    }
+  }
+
+  /**
+   * Close redemption modal
+   */
+  closeRedemptionModal() {
+    if (!this.currentModal) return;
+
+    // Clean up escape handler
+    if (this.currentModal.handleEscape) {
+      document.removeEventListener('keydown', this.currentModal.handleEscape);
+    }
+
+    // Remove modal with animation
+    this.currentModal.style.opacity = '0';
+    setTimeout(() => {
+      if (this.currentModal && this.currentModal.parentNode) {
+        this.currentModal.parentNode.removeChild(this.currentModal);
+      }
+      this.currentModal = null;
+    }, 300);
+
+    this.log('Redemption modal closed');
+  }
+
+  /**
+   * Remove existing modal
+   */
+  removeExistingModal() {
+    const existingModal = document.querySelector(`.${JoyRedeemingPrograms.CSS_CLASSES.MODAL}`);
+    if (existingModal) {
+      existingModal.remove();
+    }
+    this.currentModal = null;
+  }
+
+  /**
+   * Redirect to authentication
+   */
+  redirectToAuth() {
+    this.log('Redirecting to authentication');
+
+    // Try to use Joy SDK auth if available
+    const joyInstance = this.getJoyInstance();
+    if (joyInstance && typeof joyInstance.showAuth === 'function') {
+      joyInstance.showAuth();
+    } else {
+      // Fallback to login page
+      window.location.href = '/account/login';
+    }
+  }
+
+  /**
+   * Refresh programs data
+   */
+  async refresh() {
+    this.log('Refreshing redeeming programs');
+
+    try {
+      this.setState(JoyBaseComponent.STATES.LOADING);
+      this.cachedData.clear(); // Clear cached data
+
+      const joyInstance = this.getJoyInstance();
+      if (joyInstance) {
+        await this.onJoyReady(joyInstance);
+      }
+    } catch (error) {
+      this.error('Failed to refresh programs', error);
+      this.setState(JoyBaseComponent.STATES.ERROR);
+    }
+  }
+
+  /**
+   * Clean up component resources
+   */
+  cleanup() {
+    super.cleanup();
+
+    if (this.currentModal) {
+      this.closeRedemptionModal();
+    }
+  }
+}
+
+// Register the custom element
+if (!customElements.get(JoyRedeemingPrograms.COMPONENT_NAME)) {
+  customElements.define(JoyRedeemingPrograms.COMPONENT_NAME, JoyRedeemingPrograms);
+  console.log(`[Joy] Registered ${JoyRedeemingPrograms.COMPONENT_NAME} component`);
+}
+
+// Export to global namespace
+window.JoyComponents.RedeemingPrograms = JoyRedeemingPrograms;
+
+// Copy discount code utility
+window.copyDiscountCode = function(code) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      // Show feedback
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = 'Copied!';
+      setTimeout(() => {
+        button.textContent = originalText;
+      }, 2000);
+    });
+  }
+};
+</script>
+
+<style>
+  /* Redeeming Programs Component Styles */
+  .joy-redeeming-programs {
+    display: grid;
+    gap: var(--joy-spacing-lg);
+    width: 100%;
+  }
+
+  /* Layout variations */
+  .joy-redeeming-programs--grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .joy-redeeming-programs--list {
+    grid-template-columns: 1fr;
+  }
+
+  .joy-redeeming-programs--cards {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--joy-spacing-lg);
+  }
+
+  /* Program card */
+  .joy-redeeming-programs__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--joy-spacing-md);
+    padding: var(--joy-spacing-lg);
+    background: var(--joy-background);
+    border: 1px solid var(--joy-border-color);
+    border-radius: var(--joy-border-radius);
+    transition: var(--joy-transition);
+    cursor: pointer;
+    text-align: center;
+    min-height: 200px;
+  }
+
+  .joy-redeeming-programs__card:hover:not(.joy-redeeming-programs__card--disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-color: var(--joy-primary-color);
+  }
+
+  .joy-redeeming-programs__card:focus {
+    outline: 2px solid var(--joy-primary-color);
+    outline-offset: 2px;
+  }
+
+  /* Disabled state */
+  .joy-redeeming-programs__card--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Program icon */
+  .joy-redeeming-programs__icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--joy-spacing-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: calc(var(--joy-border-radius) * 0.75);
+  }
+
+  .joy-redeeming-programs__icon img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  .joy-redeeming-programs__icon-fallback {
+    font-size: 32px;
+    color: var(--joy-primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Program content */
+  .joy-redeeming-programs__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--joy-spacing-sm);
+  }
+
+  .joy-redeeming-programs__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--joy-text-primary);
+    line-height: 1.4;
+  }
+
+  .joy-redeeming-programs__description {
+    margin: 0;
+    font-size: 14px;
+    color: var(--joy-text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .joy-redeeming-programs__points {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--joy-primary-color);
+    margin: var(--joy-spacing-sm) 0;
+  }
+
+  .joy-redeeming-programs__button {
+    background: var(--joy-primary-color);
+    color: white;
+    border: none;
+    padding: var(--joy-spacing-sm) var(--joy-spacing-md);
+    border-radius: calc(var(--joy-border-radius) * 0.75);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--joy-transition);
+    margin-top: auto;
+  }
+
+  .joy-redeeming-programs__button:hover:not(:disabled) {
+    background: var(--joy-primary-hover);
+    transform: translateY(-1px);
+  }
+
+  .joy-redeeming-programs__button:disabled {
+    background: var(--joy-text-secondary);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Modal Styles */
+  .joy-redeeming-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--joy-spacing-md);
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .joy-redeeming-modal__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .joy-redeeming-modal__content {
+    position: relative;
+    background: white;
+    border-radius: var(--joy-border-radius);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: modalSlideIn 0.3s ease;
+  }
+
+  .joy-redeeming-modal--small .joy-redeeming-modal__content {
+    max-width: 400px;
+  }
+
+  .joy-redeeming-modal--large .joy-redeeming-modal__content {
+    max-width: 650px;
+  }
+
+  .joy-modal-close {
+    position: absolute;
+    top: var(--joy-spacing-md);
+    right: var(--joy-spacing-md);
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--joy-text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--joy-transition);
+    z-index: 1;
+  }
+
+  .joy-modal-close:hover {
+    background: #f5f5f5;
+    color: var(--joy-text-primary);
+  }
+
+  .joy-redeeming-modal__header {
+    padding: var(--joy-spacing-xl) var(--joy-spacing-lg) 0;
+  }
+
+  .joy-modal-program-info {
+    display: flex;
+    gap: var(--joy-spacing-md);
+    align-items: flex-start;
+  }
+
+  .joy-modal-program-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: calc(var(--joy-border-radius) * 0.75);
+  }
+
+  .joy-modal-program-icon img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+  }
+
+  .joy-modal-program-details h3 {
+    margin: 0 0 var(--joy-spacing-xs) 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--joy-text-primary);
+  }
+
+  .joy-modal-program-details p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--joy-text-secondary);
+    line-height: 1.5;
+  }
+
+  .joy-redeeming-modal__body {
+    padding: var(--joy-spacing-lg);
+  }
+
+  .joy-redeeming-modal__actions {
+    padding: 0 var(--joy-spacing-lg) var(--joy-spacing-xl);
+    display: flex;
+    gap: var(--joy-spacing-sm);
+    justify-content: flex-end;
+  }
+
+  .joy-modal-button {
+    padding: var(--joy-spacing-sm) var(--joy-spacing-lg);
+    border: none;
+    border-radius: calc(var(--joy-border-radius) * 0.75);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--joy-transition);
+    min-width: 100px;
+  }
+
+  .joy-modal-button--primary {
+    background: var(--joy-primary-color);
+    color: white;
+  }
+
+  .joy-modal-button--primary:hover:not(:disabled) {
+    background: var(--joy-primary-hover);
+  }
+
+  .joy-modal-button--secondary {
+    background: #f3f4f6;
+    color: var(--joy-text-secondary);
+  }
+
+  .joy-modal-button--secondary:hover {
+    background: #e5e7eb;
+  }
+
+  .joy-modal-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Points Selector */
+  .joy-points-selector {
+    background: #f9fafb;
+    border: 1px solid var(--joy-border-color);
+    border-radius: var(--joy-border-radius);
+    padding: var(--joy-spacing-lg);
+    margin-bottom: var(--joy-spacing-lg);
+  }
+
+  .joy-points-selector-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--joy-text-primary);
+    margin-bottom: var(--joy-spacing-md);
+  }
+
+  .joy-slider-container {
+    margin: var(--joy-spacing-md) 0;
+  }
+
+  .joy-points-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--joy-border-color);
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .joy-points-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--joy-primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .joy-slider-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--joy-spacing-sm);
+    font-size: 13px;
+    color: var(--joy-text-secondary);
+  }
+
+  .joy-slider-value {
+    font-weight: 600;
+    color: var(--joy-primary-color);
+    font-size: 16px;
+  }
+
+  .joy-dynamic-value {
+    text-align: center;
+    margin-top: var(--joy-spacing-md);
+    padding: var(--joy-spacing-sm);
+    background: rgba(212, 165, 116, 0.08);
+    border-radius: calc(var(--joy-border-radius) * 0.5);
+    font-size: 15px;
+    color: var(--joy-text-primary);
+  }
+
+  .joy-dynamic-value strong {
+    color: var(--joy-primary-color);
+    font-size: 18px;
+  }
+
+  /* Reward Summary */
+  .joy-reward-summary {
+    background: rgba(212, 165, 116, 0.08);
+    border: 1px solid rgba(212, 165, 116, 0.2);
+    border-radius: var(--joy-border-radius);
+    padding: var(--joy-spacing-md);
+    margin-bottom: var(--joy-spacing-lg);
+  }
+
+  .joy-reward-summary-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--joy-primary-color);
+    margin: 0 0 var(--joy-spacing-xs) 0;
+  }
+
+  .joy-reward-summary-content {
+    font-size: 14px;
+    color: var(--joy-text-primary);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Success States */
+  .joy-success-header {
+    text-align: center;
+  }
+
+  .joy-success-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--joy-spacing-md);
+    background: #10b981;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .joy-success-actions {
+    text-align: center;
+    margin-top: var(--joy-spacing-lg);
+  }
+
+  /* Discount Code */
+  .joy-discount-code-section {
+    text-align: center;
+    margin-bottom: var(--joy-spacing-lg);
+  }
+
+  .joy-discount-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--joy-spacing-sm);
+    margin-top: var(--joy-spacing-sm);
+  }
+
+  .joy-discount-code-text {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--joy-primary-color);
+    letter-spacing: 1px;
+    padding: var(--joy-spacing-sm) var(--joy-spacing-md);
+    background: #f3f4f6;
+    border-radius: calc(var(--joy-border-radius) * 0.5);
+  }
+
+  .joy-copy-button {
+    padding: var(--joy-spacing-sm) var(--joy-spacing-md);
+    background: var(--joy-primary-color);
+    color: white;
+    border: none;
+    border-radius: calc(var(--joy-border-radius) * 0.5);
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--joy-transition);
+  }
+
+  .joy-copy-button:hover {
+    background: var(--joy-primary-hover);
+  }
+
+  /* Error Message */
+  .joy-error-message {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+    border-radius: calc(var(--joy-border-radius) * 0.5);
+    padding: var(--joy-spacing-sm);
+    margin-bottom: var(--joy-spacing-md);
+  }
+
+  .joy-error-content {
+    color: #dc2626;
+    font-size: 14px;
+  }
+
+  /* Spinner */
+  .joy-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  /* Animations */
+  @keyframes modalSlideIn {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .joy-redeeming-programs--grid,
+    .joy-redeeming-programs--cards {
+      grid-template-columns: 1fr;
+    }
+
+    .joy-redeeming-modal__content {
+      margin: var(--joy-spacing-md);
+      max-height: calc(100vh - 2 * var(--joy-spacing-md));
+    }
+
+    .joy-modal-program-info {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .joy-redeeming-modal__actions {
+      flex-direction: column-reverse;
+    }
+
+    .joy-modal-button {
+      width: 100%;
+    }
+  }
+</style>
