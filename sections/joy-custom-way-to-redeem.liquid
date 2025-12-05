@@ -1023,8 +1023,23 @@ if (!customElements.get('joy-redeem-programs')) {
       `;
     }
 
-    generateModalIconHTML(iconUrl, fallbackEmoji, hasValidIcon, altText) {
-      if (hasValidIcon) {
+    generateModalIconHTML(fallbackEmoji, altText) {
+      // Priority: loyaltyPageCustomIcon > specificProducts[0].image.src > fallback emoji
+      let iconUrl = null;
+
+      // First, check if loyaltyPageCustomIcon is set
+      if (this.hasValidIcon(program.loyaltyPageCustomIcon)) {
+        iconUrl = program.loyaltyPageCustomIcon;
+      }
+      // If no custom icon, try to get product image from specificProducts
+      else if (program.specificProducts &&
+               program.specificProducts.length > 0 &&
+               program.specificProducts[0].image &&
+               program.specificProducts[0].image.src) {
+        iconUrl = program.specificProducts[0].image.src;
+      }
+
+      if (iconUrl) {
         return `
           <img src="${iconUrl}" alt="${altText}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div style="display:none; width:36px; height:36px; background:#f0f0f0; border-radius:8px; align-items:center; justify-content:center; font-size:18px; color:#888;">${fallbackEmoji}</div>
