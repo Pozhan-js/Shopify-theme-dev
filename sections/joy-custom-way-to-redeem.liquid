@@ -884,7 +884,7 @@ if (!customElements.get('joy-redeem-programs')) {
           <div class="joy-redeem-description">${description}</div>
         </div>
         <div class="joy-redeem-action">
-          <button class="joy-redeem-button ${JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON}" ${!canRedeem ? 'disabled' : ''}>
+          <button class="joy-redeem-button ${JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON}" ${!canRedeem ? 'disabled' : ''} data-program-id="${program.id}" data-points="${points}">
             ${canRedeem ? '{{ section.settings.redeem_button_text | default: "Redeem" }}' : '{{ section.settings.not_enough_points_text | default: "Not enough points" }}'}
           </button>
         </div>
@@ -1178,8 +1178,8 @@ if (!customElements.get('joy-redeem-programs')) {
       }
     }
 
-    attachModalEventListeners(modal, program) {
-      modal.addEventListener('click', (e) => this.handleModalClick(e, program));
+    attachModalEventListeners(card, program) {
+      card.addEventListener('click', (e) => this.handleModalClick(e, program));
       this.attachEscapeKeyListener();
     }
 
@@ -1194,7 +1194,7 @@ if (!customElements.get('joy-redeem-programs')) {
       }
 
       if (target.classList.contains(JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON)) {
-        this.confirmRedeem(program);
+        this.confirmRedeem(program, card);
       }
     }
 
@@ -1208,7 +1208,7 @@ if (!customElements.get('joy-redeem-programs')) {
       document.addEventListener('keydown', handleEscape);
     }
 
-    async confirmRedeem(program) {
+    async confirmRedeem(program, card) {
       const confirmButton = document.querySelector('.joy-confirm-button');
       const originalButtonText = confirmButton ? confirmButton.textContent : 'Confirm Redeem';
 
