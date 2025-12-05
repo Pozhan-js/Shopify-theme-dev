@@ -1244,15 +1244,10 @@ if (!customElements.get('joy-redeem-programs')) {
       const confirmButton = card.querySelector('.joy-confirm-button');
       const originalButtonText = confirmButton ? confirmButton.textContent : 'Confirm Redeem';
 
-      console.log('1. confirmRedeem started');
-      console.log('Program event:', program.event);
-
       // Get the points to redeem (for dynamic programs, this comes from the slider)
       const pointsToRedeem = confirmButton && confirmButton.getAttribute('data-points') ?
         parseInt(confirmButton.getAttribute('data-points')) :
         (program.spendPoint || program.pointCost || 0);
-
-      console.log('Redeeming with points:', pointsToRedeem, 'Program:', program);
 
       // Disable button and show loading state with spinner
       if (confirmButton) {
@@ -1270,14 +1265,11 @@ if (!customElements.get('joy-redeem-programs')) {
       try {
         // Try to redeem via Joy SDK using the correct method name
         if (window.joyInstance && typeof window.joyInstance.redeem === 'function') {
-          // For dynamic programs, pass the selected points
           console.log('3. Calling redeem...');
           const result = await window.joyInstance.redeem(
             program.id,
             pointsToRedeem
           );
-           console.log('4. Redeem result:', result);
-          console.log('5. About to call showRedeemSuccess');
           console.log('Redeem result:', result);
 
           // Check if the result indicates an error
