@@ -895,7 +895,7 @@ if (!customElements.get('joy-redeem-programs')) {
       card.addEventListener('click', (e) => {
         e.preventDefault();
         if (canRedeem) {
-          this.handleRedeemClick(program);
+          this.handleRedeemClick(program, card);
         }
       });
     }
@@ -917,9 +917,9 @@ if (!customElements.get('joy-redeem-programs')) {
       return card;
     }
 
-    handleRedeemClick(program) {
+    handleRedeemClick(program, card) {
       try {
-        console.log('Redeem clicked:', program);
+        console.log('Redeem clicked:', program, card);
 
         if (!this.isCustomerLoggedIn()) {
           this.redirectToLogin();
@@ -930,7 +930,7 @@ if (!customElements.get('joy-redeem-programs')) {
         {% comment %} this.createRedeemModal(program); {% endcomment %}
       } catch (error) {
         console.error('Error handling redeem click:', error);
-        this.showRedeemError(JoyRedeemPrograms.ERROR_MESSAGES.REDEEM_ERROR);
+        this.showRedeemError(JoyRedeemPrograms.ERROR_MESSAGES.REDEEM_ERROR, card);
       }
     }
 
@@ -1450,10 +1450,10 @@ if (!customElements.get('joy-redeem-programs')) {
       });
     }
 
-    showRedeemError(message) {
-      const modalBody = document.querySelector('.joy-redeem-modal-body');
-      if (modalBody) {
-        const errorDiv = modalBody.querySelector('.joy-redeem-error') || document.createElement('div');
+    showRedeemError(message, card) {
+      {% comment %} const modalBody = document.querySelector('.joy-redeem-modal-body'); {% endcomment %}
+      if (card) {
+        const errorDiv = card.querySelector('.joy-redeem-error') || document.createElement('div');
         errorDiv.className = 'joy-redeem-error';
         errorDiv.innerHTML = `
           <div style="background: #fee; border: 1px solid #fcc; border-radius: 6px; padding: 12px; margin: 16px 0; color: #c33;">
@@ -1461,8 +1461,8 @@ if (!customElements.get('joy-redeem-programs')) {
           </div>
         `;
 
-        if (!modalBody.querySelector('.joy-redeem-error')) {
-          modalBody.insertBefore(errorDiv, modalBody.querySelector('.joy-redeem-modal-actions'));
+        if (!card.querySelector('.joy-redeem-error')) {
+          card.insertBefore(errorDiv, modalBody.querySelector('.joy-redeem-actions'));
         }
 
         // Remove error after 5 seconds
