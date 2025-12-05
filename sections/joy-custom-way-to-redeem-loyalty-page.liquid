@@ -1,1315 +1,1046 @@
 {% comment %}
-  Joy: Custom Way to Redeem Section (Legacy)
-
-  A comprehensive redeeming programs display with interactive modals and dynamic point selection.
-  Displays all available redemption options with clickable cards and redemption modals.
-
-  Note: This is a legacy section. For new implementations, prefer using:
-  - joy-redeeming-programs.liquid snippet for embedded widgets
-  - joy-loyalty-hub.liquid section for complete loyalty pages
-  - Joy App blocks in the theme editor
-
-  Usage:
-    Add this section through the Theme Editor:
-    1. Go to theme customizer
-    2. Click "Add section"
-    3. Search for "Joy: Custom Way to Redeem"
-    4. Configure layout and styling settings
-
-  Key Features:
-    - Flex-wrap grid layout of redemption program cards
-    - Interactive redemption modals with dynamic or fixed point selection
-    - Discount code display with copy-to-clipboard functionality
-    - Automatic cart discount application
-    - Point slider for dynamic redemption programs
-    - Real-time discount calculation display
-    - Login prompts for guest users
-    - Disabled state for programs customer can't afford
-    - Extensive customization options for cards, modals, typography
-    - Hover effects and transitions
-    - Success states with visual feedback
-
-  Program Types:
-    - Fixed Redemption: Spend exact points for a reward (e.g., 500 points for $5 off)
-    - Dynamic Redemption: Variable points with slider (e.g., 100 points = $1 off, scalable)
-    - Discount types: Percentage or amount discounts
-    - Free shipping rewards
-    - Gift card redemptions
-    - Product discounts
-
-  Modal Features:
-    - Dynamic Programs: Point slider with real-time discount calculation
-    - Fixed Programs: Simple confirmation with point cost
-    - Discount code display: Copy button and auto-apply functionality
-    - Success animations with checkmarks
-    - Error handling with user-friendly messages
-    - Processing states with spinner animations
-    - Escape key to close, overlay click to close
-
-  Redemption Flow:
-    1. Customer clicks program card
-    2. Modal opens with program details
-    3. For dynamic: Slider to select points amount
-    4. Customer confirms redemption
-    5. Joy SDK processes redemption
-    6. Discount code displayed with copy/apply buttons
-    7. Customer can apply code and redirect to cart
-
-  Customization (Theme Editor):
-    - Layout: Max width, section padding, card gaps
-    - Typography: Title, program names, descriptions, points text sizes
-    - Card Styling: Background, border, padding, hover states, border radius
-    - Icons: Size, background color, border radius, show/hide
-    - Button Styling: Text size, border radius, colors
-    - Colors: Primary, background, title, text, borders
-    - Text Settings: All button and message text customizable
-    - Modal Settings: Slider labels, success messages, discount code instructions
-    - Responsive: Separate settings for mobile
-
-  Guest User Experience:
-    - Shows redeem buttons but redirects to /account/login when clicked
-    - Can browse available rewards before signing in
-
-  Discount Code Features:
-    - Displays generated coupon code after redemption
-    - Copy-to-clipboard with visual feedback
-    - "Apply code" button that redirects to cart with discount applied
-    - Fallback to standard /discount/{code} URL redirect
-
-  Performance Features:
-    - Lazy modal rendering (only when needed)
-    - Optimized animations with CSS transforms
-    - Efficient event delegation
-    - Error boundaries and fallbacks
-
+  Joy Loyalty - Custom Way to Redeem Section
+  This section displays redeem programs in a simple list layout
 {% endcomment %}
 
 <div class="joy-custom-redeem-section" data-section-id="{{ section.id }}">
-    <style>
-
-        {% comment %} Start Doris custom redeem modal {% endcomment %}
-        div.joy-redeem-modal-icon img, div.joy-redeem-modal-icon {
-            width: 250px;
-            height: 250px;
-            margin: 0 auto !important;
-            border-radius: 15px;
-        }
-        .joy-redeem-modal-header > div {
-            justify-content: center;
-            flex-direction: column;    
-            align-items: center !important;
-            gap: 40px !important;
-        }
-        .joy-redeem-modal-content {
-            max-height: 90vh !important;
-        }
-
-        .joy-redeem-modal-description, .joy-redeem-modal-title {
-            text-align: center;
-        }
-        {% comment %} End Doris custom {% endcomment %}
-     
-        .joy-custom-redeem-container {
-            max-width: {{ section.settings.max_width | default: 1200 }}px;
-            margin: 0 auto;
-            padding: {{ section.settings.section_padding | default: 60 }}px 24px;
-            background: {{ section.settings.background_color | default: '#FFFFFF' }};
-            font-family: inherit;
-        }
-
-        .joy-custom-redeem-section { 
-            background: {{ section.settings.background_color | default: '#FFFFFF' }};
-        }
-
-        .joy-redeem-header {
-            text-align: {{ section.settings.header_alignment | default: 'center' }};
-            margin-bottom: 56px;
-        }
-
-        .joy-redeem-title {
-            font-size: {{ section.settings.title_size | default: 28 }}px;
-            color: {{ section.settings.title_color | default: '#1A1A1A' }};
-            margin: 0 0 8px 0;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-        }
-
-        .joy-redeem-subtitle {
-            font-size: 16px;
-            color: {{ section.settings.subtitle_color | default: '#6B7280' }};
-            margin: 0;
-            line-height: 1.5;
-            font-weight: 400;
-        }
-
-        .joy-programs-list .joy-redeem-card, .joy-programs-list .joy-see-more-card {
-            flex: 0 0 200px;
-            max-width: 200px;
-        }
-
-        .joy-redeem-card:hover {
-            transform: translateY(-1px);
-            border-color: {{ section.settings.card_hover_border_color | default: '#6B7280' }};
-            background: {{ section.settings.card_hover_background | default: '#F9FAFB' }};
-        }
-
-        .joy-redeem-card-disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        {% comment %} Disable redeem button {% endcomment %}
-        .joy-redeem-button-disabled {
-            border: none;
-            padding: 12px 24px;
-            border-radius: {{ section.settings.button_border_radius | default: 6 }}px;
-            font-size: {{ section.settings.button_text_size | default: 14 }}px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            width: 100%;
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .joy-redeem-icon {
-            width: {{ section.settings.icon_size | default: 64 }}px;
-            height: {{ section.settings.icon_size | default: 64 }}px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: {{ section.settings.icon_background | default: '#F3F4F6' }};
-            border-radius: {{ section.settings.icon_border_radius | default: 12 }}px;
-            margin-bottom: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        .joy-redeem-icon img {
-            width: {{ section.settings.icon_image_size | default: 64 }}px;
-            height: {{ section.settings.icon_image_size | default: 64 }}px;
-            object-fit: contain;
-            opacity: 0.9;
-        }
-
-        .joy-redeem-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .joy-redeem-name {
-            font-size: {{ section.settings.program_name_size | default: 18 }}px;
-            font-weight: 600;
-            color: {{ section.settings.text_color | default: '#111827' }};
-            margin: 0 0 8px 0;
-            line-height: 1.4;
-            letter-spacing: -0.01em;
-        }
-
-        .joy-redeem-description {
-            font-size: {{ section.settings.program_description_size | default: 14 }}px;
-            color: {{ section.settings.description_color | default: '#6B7280' }};
-            line-height: 1.6;
-            margin: 0 0 auto 0;
-            font-weight: 400;
-        }
-
-        .joy-redeem-action {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            margin-top: auto;
-        }
-
-        .joy-redeem-button {
-            background: {{ section.settings.primary_color | default: '#6B7280' }};
-            color: {{ section.settings.button_color | default: '#FFFFFF' }};
-            border: none;
-            padding: 12px 24px;
-            border-radius: {{ section.settings.button_border_radius | default: 6 }}px;
-            font-size: {{ section.settings.button_text_size | default: 14 }}px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        .joy-redeem-button:hover {
-            background: {{ section.settings.primary_color_hover | default: '#4B5563' }};
-            transform: none;
-        }
-
-        .joy-see-more-button {
-            background: {{ section.settings.primary_color | default: '#6B7280' }};
-            color: {{ section.settings.button_color | default: '#FFFFFF' }};
-            border: none;
-            padding: 12px 24px;
-            border-radius: {{ section.settings.button_border_radius | default: 6 }}px;
-            font-size: {{ section.settings.button_text_size | default: 14 }}px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            width: 100%;
-            justify-content: center;
-            display: flex;
-        }
-
-        .joy-see-more-reward-icon {
-            height: 100%;
-            margin-bottom: 20px;
-            border-radius: {{ section.settings.icon_border_radius | default: 12 }}px !important;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        }
-        .joy-see-more-reward-icon img {
-            aspect-ratio: 9/14;
-            object-fit: cover;
-            object-position: left;
-        }
-
-        .joy-see-more-button:hover {
-            background: {{ section.settings.primary_color_hover | default: '#4B5563' }};
-            transform: none;
-        }
-
-        .joy-redeem-points {
-            font-size: {{ section.settings.points_size | default: 18 }}px;
-            color: {{ section.settings.primary_color | default: '#6B7280' }};
-            font-weight: 600;
-            white-space: nowrap;
-            margin-bottom: 8px;
-        }
-
-        .joy-error-state {
-            background: #FFF3E0;
-            border: 2px solid #FFB74D;
-            border-radius: {{ section.settings.list_border_radius | default: 12 }}px;
-            padding: 24px;
-            text-align: center;
-            color: #E65100;
-            margin: 20px 0;
-        }
-
-        /* Redeem Modal Styles */
-        .joy-redeem-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            animation: joy-modal-fade-in 0.3s ease;
-            font-family: inherit;
-            display: none;
-        }
-
-        .joy-redeem-modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .joy-redeem-modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-            animation: joy-modal-slide-up 0.3s ease;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        /* Modal Size Variants */
-        .joy-redeem-modal-small .joy-redeem-modal-content {
-            max-width: 400px;
-        }
-
-        .joy-redeem-modal-medium .joy-redeem-modal-content {
-            max-width: 500px;
-        }
-
-        .joy-redeem-modal-large .joy-redeem-modal-content {
-            max-width: 650px;
-        }
-
-        .joy-redeem-modal-header {
-            text-align: center;
-            padding: 32px 32px 0 32px;
-        }
-
-        .joy-redeem-modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            z-index: 1;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background 0.2s ease;
-        }
-
-        .joy-redeem-modal-close:hover {
-            background: #f5f5f5;
-        }
-
-        .joy-redeem-modal-icon {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 20px;
-            background: {{ section.settings.primary_color | default: '#D4A574' }}10;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .joy-redeem-modal-icon img {
-            width: 36px;
-            height: 36px;
-            object-fit: contain;
-            opacity: 0.9;
-        }
-
-        .joy-redeem-modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
-            margin: 0 0 8px 0;
-            letter-spacing: -0.02em;
-        }
-
-        .joy-redeem-modal-description {
-            font-size: 14px;
-            color: #6B7280;
-            margin: 0 0 28px 0;
-            line-height: 1.5;
-        }
-
-        .joy-redeem-modal-body {
-            padding: 0 32px 32px 32px;
-        }
-
-        .joy-points-selector {
-            background: #F9FAFB;
-            padding: 8px 0px;
-            margin-bottom: 24px;
-        }
-
-        .joy-points-selector-label {
-            font-size: 14px;
-            color: #374151;
-            font-weight: 500;
-            margin-bottom: 16px;
-            display: block;
-        }
-
-        .joy-slider-container {
-            margin: 20px 0;
-        }
-
-        .joy-points-slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #E5E7EB;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .joy-points-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: {{ section.settings.primary_color | default: '#D4A574' }};
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .joy-points-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: {{ section.settings.primary_color | default: '#D4A574' }};
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .joy-slider-values {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            font-size: 13px;
-            color: #6B7280;
-        }
-
-        .joy-slider-value {
-            font-weight: 600;
-            color: {{ section.settings.primary_color | default: '#D4A574' }};
-            font-size: 16px;
-        }
-
-        .joy-dynamic-value {
-            text-align: center;
-            margin-top: 20px;
-            padding: 12px;
-            background: #F8F9FA;
-            border: 1px solid #E9ECEF;
-            border-radius: 8px;
-            font-size: 15px;
-            color: #374151;
-        }
-
-        .joy-dynamic-value strong {
-            color: {{ section.settings.primary_color | default: '#6B7280' }};
-            font-size: 18px;
-        }
-
-        .joy-redeem-modal-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .joy-redeem-modal-button {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .joy-cancel-button {
-            background: #F3F4F6;
-            color: #6B7280;
-        }
-
-        .joy-cancel-button:hover {
-            background: #E5E7EB;
-        }
-
-        .joy-confirm-button {
-            background: {{ section.settings.primary_color | default: '#D4A574' }};
-            color: white;
-            min-width: 120px;
-            position: relative;
-        }
-
-        .joy-confirm-button:hover:not(:disabled) {
-            background: {{ section.settings.primary_color | default: '#D4A574' | color_darken: 10 }};
-            transform: translateY(-1px);
-        }
-
-        .joy-confirm-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .joy-confirm-button .joy-spinner {
-            animation: joy-spin 1s linear infinite;
-        }
-
-        .joy-reward-summary {
-            background: #F8F9FA;
-            border: 1px solid #E9ECEF;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 24px;
-        }
-
-        .joy-reward-summary-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin: 0 0 8px 0;
-        }
-
-        .joy-reward-summary-content {
-            font-size: 13px;
-            color: #6B7280;
-            line-height: 1.4;
-            margin: 0;
-        }
-
-        @keyframes joy-modal-fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes joy-modal-fade-out {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        @keyframes joy-modal-slide-up {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes joy-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        {% comment %} Custom css from Mentzer{% endcomment %}
-
-         .joy-programs-list {
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
-            gap: {{ section.settings.card_gap | default: 24 }}px;
-            justify-content: center;
-        }
-
-
-        .joy-redeem-card, .joy-see-more-card {
-            background: {{ section.settings.card_background | default: '#FFFFFF' }};
-            border: {{ section.settings.card_border_width | default: 1 }}px solid {{ section.settings.card_border_color | default: '#E5E7EB' }};
-            border-radius: {{ section.settings.card_border_radius | default: 8 }}px;
-            padding: {{ section.settings.card_padding | default: 24 }}px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: {{ section.settings.card_gap_internal | default: 12 }}px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            text-align: center;
-            min-height: 180px;
-        }
-
-        .joy-see-more-card:hover {
-            transform: translateY(-1px);
-            border-color: {{ section.settings.card_hover_border_color | default: '#6B7280' }};
-            background: {{ section.settings.card_hover_background | default: '#F9FAFB' }};
-        }
-
-        .joy-see-more-content {
-            width: 100%;
-        }
-
-        /* Responsive */
-        @media screen and (max-width: 460px) {
-            .joy-redeem-title {
-                font-size: 24px;
-            }
-
-            .joy-programs-list {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                width: 100%;
-                gap: {{ section.settings.card_gap | default: 24 }}px;
-                justify-content: center;
-            }
-
-            .joy-redeem-card, .joy-see-more-card {
-                padding: {{ section.settings.card_padding_mobile | default: 16 }}px;
-                gap: {{ section.settings.card_gap_mobile | default: 12 }}px;
-            }
-
-            .joy-redeem-action {
-                align-items: center;
-            }
-        }
-        @media screen and (max-width: 400px) {
-            .joy-programs-list {
-                justify-content: center;
-                display: flex;
-            }
-
-            .joy-see-more-
-        }
-    </style>
-
-    <div class="joy-custom-redeem-container">
-        {% if section.settings.show_header %}
-            <div class="joy-redeem-header">
-                <h2 class="joy-redeem-title">{{ section.settings.title | default: 'Ways to Redeem' }}</h2>
-                {% if section.settings.subtitle %}
-                    <p class="joy-redeem-subtitle">{{ section.settings.subtitle }}</p>
-                {% endif %}
-            </div>
-        {% endif %}
-
-        <joy-redeem-programs
-                class="joy-programs-list"
-                data-section-id="{{ section.id }}"
-                data-customer-id="{{ customer.id | default: '' }}"
-                data-icon-visible="{{ section.settings.show_icon }}"
-                data-show-redeem="{{ section.settings.show_redeem }}"
-                data-max-range="{{ section.settings.max_range }}"
-        >
-            <!-- No loading state - content will appear when ready -->
-        </joy-redeem-programs>
+  <style>
+    .joy-custom-redeem-container {
+      max-width: {{ section.settings.max_width | default: 1200 }}px;
+      margin: 0 auto;
+      padding: {{ section.settings.section_padding | default: 60 }}px 24px;
+      background: {{ section.settings.background_color | default: '#FFFFFF' }};
+      font-family: inherit;
+    }
+
+    .joy-redeem-header {
+      text-align: {{ section.settings.header_alignment | default: 'center' }};
+      margin-bottom: 56px;
+    }
+
+    .joy-redeem-title {
+      font-size: {{ section.settings.title_size | default: 28 }}px;
+      color: {{ section.settings.title_color | default: '#1A1A1A' }};
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .joy-redeem-subtitle {
+      font-size: 16px;
+      color: {{ section.settings.subtitle_color | default: '#6B7280' }};
+      margin: 0;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .joy-programs-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: {{ section.settings.card_gap | default: 24 }}px;
+      justify-content: center;
+    }
+
+    .joy-programs-list .joy-redeem-card {
+      flex: 0 0 260px;
+      max-width: 260px;
+    }
+
+    .joy-redeem-card {
+      background: {{ section.settings.card_background | default: '#FFFFFF' }};
+      border: {{ section.settings.card_border_width | default: 1 }}px solid {{ section.settings.card_border_color | default: '#E5E7EB' }};
+      border-radius: {{ section.settings.card_border_radius | default: 8 }}px;
+      padding: {{ section.settings.card_padding | default: 32 }}px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: {{ section.settings.card_gap_internal | default: 16 }}px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      text-align: center;
+      min-height: 200px;
+    }
+
+    .joy-redeem-card:hover {
+      transform: translateY(-1px);
+      border-color: {{ section.settings.card_hover_border_color | default: '#6B7280' }};
+      background: {{ section.settings.card_hover_background | default: '#F9FAFB' }};
+    }
+
+    .joy-redeem-card-disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .joy-redeem-icon {
+      width: {{ section.settings.icon_size | default: 56 }}px;
+      height: {{ section.settings.icon_size | default: 56 }}px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: {{ section.settings.icon_background | default: '#F3F4F6' }};
+      border-radius: {{ section.settings.icon_border_radius | default: 12 }}px;
+      margin-bottom: 16px;
+    }
+
+    .joy-redeem-icon img {
+      width: {{ section.settings.icon_image_size | default: 32 }}px;
+      height: {{ section.settings.icon_image_size | default: 32 }}px;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    .joy-redeem-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .joy-redeem-name {
+      font-size: {{ section.settings.program_name_size | default: 18 }}px;
+      font-weight: 600;
+      color: {{ section.settings.text_color | default: '#111827' }};
+      margin: 0 0 8px 0;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+    }
+
+    .joy-redeem-description {
+      font-size: {{ section.settings.program_description_size | default: 14 }}px;
+      color: {{ section.settings.description_color | default: '#6B7280' }};
+      line-height: 1.6;
+      margin: 0 0 auto 0;
+      font-weight: 400;
+    }
+
+    .joy-redeem-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .joy-redeem-button {
+      background: {{ section.settings.primary_color | default: '#6B7280' }};
+      color: {{ section.settings.button_color | default: '#FFFFFF' }};
+      border: none;
+      padding: 12px 24px;
+      border-radius: {{ section.settings.button_border_radius | default: 6 }}px;
+      font-size: {{ section.settings.button_text_size | default: 14 }}px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .joy-redeem-button:hover {
+      background: {{ section.settings.primary_color_hover | default: '#4B5563' }};
+      transform: none;
+    }
+
+    .joy-redeem-points {
+      font-size: {{ section.settings.points_size | default: 18 }}px;
+      color: {{ section.settings.primary_color | default: '#6B7280' }};
+      font-weight: 600;
+      white-space: nowrap;
+      margin-bottom: 8px;
+    }
+
+    .joy-error-state {
+      background: #FFF3E0;
+      border: 2px solid #FFB74D;
+      border-radius: {{ section.settings.list_border_radius | default: 12 }}px;
+      padding: 24px;
+      text-align: center;
+      color: #E65100;
+      margin: 20px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .joy-redeem-title {
+        font-size: 24px;
+      }
+
+      .joy-redeem-card {
+        padding: {{ section.settings.card_padding_mobile | default: 16 }}px;
+        gap: {{ section.settings.card_gap_mobile | default: 12 }}px;
+      }
+
+      .joy-redeem-action {
+        align-items: center;
+      }
+    }
+
+    /* Redeem Modal Styles */
+    .joy-redeem-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 9999;
+      animation: joy-modal-fade-in 0.3s ease;
+      font-family: inherit;
+      display: none;
+    }
+
+    .joy-redeem-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .joy-redeem-modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      animation: joy-modal-slide-up 0.3s ease;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Modal Size Variants */
+    .joy-redeem-modal-small .joy-redeem-modal-content {
+      max-width: 400px;
+    }
+
+    .joy-redeem-modal-medium .joy-redeem-modal-content {
+      max-width: 500px;
+    }
+
+    .joy-redeem-modal-large .joy-redeem-modal-content {
+      max-width: 650px;
+    }
+
+    .joy-redeem-modal-header {
+      text-align: center;
+      padding: 32px 32px 0 32px;
+    }
+
+    .joy-redeem-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      z-index: 1;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s ease;
+    }
+
+    .joy-redeem-modal-close:hover {
+      background: #f5f5f5;
+    }
+
+    .joy-redeem-modal-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      background: {{ section.settings.primary_color | default: '#D4A574' }}10;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .joy-redeem-modal-icon img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    .joy-redeem-modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 8px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .joy-redeem-modal-description {
+      font-size: 14px;
+      color: #6B7280;
+      margin: 0 0 28px 0;
+      line-height: 1.5;
+    }
+
+    .joy-redeem-modal-body {
+      padding: 0 32px 32px 32px;
+    }
+
+    .joy-points-selector {
+      background: #F9FAFB;
+      padding: 8px 0px;
+      margin-bottom: 24px;
+    }
+
+    .joy-points-selector-label {
+      font-size: 14px;
+      color: #374151;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .joy-slider-container {
+      margin: 20px 0;
+    }
+
+    .joy-points-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #E5E7EB;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .joy-points-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: {{ section.settings.primary_color | default: '#D4A574' }};
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .joy-points-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: {{ section.settings.primary_color | default: '#D4A574' }};
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .joy-slider-values {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #6B7280;
+    }
+
+    .joy-slider-value {
+      font-weight: 600;
+      color: {{ section.settings.primary_color | default: '#D4A574' }};
+      font-size: 16px;
+    }
+
+    .joy-dynamic-value {
+      text-align: center;
+      margin-top: 20px;
+      padding: 12px;
+      background: #F8F9FA;
+      border: 1px solid #E9ECEF;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #374151;
+    }
+
+    .joy-dynamic-value strong {
+      color: {{ section.settings.primary_color | default: '#6B7280' }};
+      font-size: 18px;
+    }
+
+    .joy-redeem-modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .joy-redeem-modal-button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .joy-cancel-button {
+      background: #F3F4F6;
+      color: #6B7280;
+    }
+
+    .joy-cancel-button:hover {
+      background: #E5E7EB;
+    }
+
+    .joy-confirm-button {
+      background: {{ section.settings.primary_color | default: '#D4A574' }};
+      color: white;
+      min-width: 120px;
+      position: relative;
+    }
+
+    .joy-confirm-button:hover:not(:disabled) {
+      background: {{ section.settings.primary_color | default: '#D4A574' | color_darken: 10 }};
+      transform: translateY(-1px);
+    }
+
+    .joy-confirm-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .joy-confirm-button .joy-spinner {
+      animation: joy-spin 1s linear infinite;
+    }
+
+    .joy-reward-summary {
+      background: #F8F9FA;
+      border: 1px solid #E9ECEF;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .joy-reward-summary-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin: 0 0 8px 0;
+    }
+
+    .joy-reward-summary-content {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    @keyframes joy-modal-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes joy-modal-fade-out {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    @keyframes joy-modal-slide-up {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes joy-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+
+  <div class="joy-custom-redeem-container">
+    {% if section.settings.show_header %}
+    <div class="joy-redeem-header">
+      <h2 class="joy-redeem-title">{{ section.settings.title | default: 'Ways to Redeem' }}</h2>
+      {% if section.settings.subtitle %}
+        <p class="joy-redeem-subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
     </div>
+    {% endif %}
+
+    <joy-redeem-programs
+      class="joy-programs-list"
+      data-section-id="{{ section.id }}"
+      data-customer-id="{{ customer.id | default: '' }}"
+      data-icon-visible="{{ section.settings.show_icon }}"
+      data-program-display="{{ section.settings.display_redeeming_program }}"
+    >
+      <!-- No loading state - content will appear when ready -->
+    </joy-redeem-programs>
+  </div>
 </div>
 
 <script>
-    if (!customElements.get('joy-redeem-programs')) {
-        customElements.define(
-            'joy-redeem-programs',
-            class JoyRedeemPrograms extends HTMLElement {
-                // Constants
-                static PROGRAM_TYPES = {
-                    REDEEMING: 'redeeming',
-                    SPENDING: 'spending',
-                    DYNAMIC: 'dynamic',
-                };
+if (!customElements.get('joy-redeem-programs')) {
+  customElements.define('joy-redeem-programs', class JoyRedeemPrograms extends HTMLElement {
+    // Constants
+    static PROGRAM_TYPES = {
+      REDEEMING: 'redeeming',
+      SPENDING: 'spending',
+      DYNAMIC: 'dynamic'
+    };
+    static PROGRAM_DISPLAY = {
+      ALL: 'all',
+      FREE_PRODUCT: 'free_gift',
+      DISCOUNT: 'discount',
+      FREE_SHIPPING: 'free_shipping',
+      BUY_X_GET_Y: 'buy_x_get_y'
+    };
 
-                static CSS_CLASSES = {
-                    CARD: 'joy-redeem-card',
-                    CARD_DISABLED: 'joy-redeem-card-disabled',
-                    MODAL: 'joy-redeem-modal',
-                    MODAL_MEDIUM: 'joy-redeem-modal-medium',
-                    CONFIRM_BUTTON: 'joy-confirm-button',
-                    CANCEL_BUTTON: 'joy-cancel-button',
-                    REDEEM_BUTTON: 'joy-redeem-button',
-                    REDEEM_BUTTON_DISABLED: 'joy-redeem-button-disabled'
-                };
+    static CSS_CLASSES = {
+      CARD: 'joy-redeem-card',
+      CARD_DISABLED: 'joy-redeem-card-disabled',
+      MODAL: 'joy-redeem-modal',
+      MODAL_MEDIUM: 'joy-redeem-modal-medium',
+      CONFIRM_BUTTON: 'joy-confirm-button',
+      CANCEL_BUTTON: 'joy-cancel-button'
+    };
 
-                static DISCOUNT_TYPES = {
-                    PERCENTAGE: 'discount_percentage',
-                    AMOUNT: 'discount_amount',
-                };
+    static DISCOUNT_TYPES = {
+      PERCENTAGE: 'discount_percentage',
+      AMOUNT: 'discount_amount'
+    };
 
-                static ERROR_MESSAGES = {
-                    SDK_NOT_LOADED: 'Joy SDK not loaded',
-                    SDK_NOT_INITIALIZED: 'Joy SDK not properly initialized',
-                    NO_PROGRAMS: 'No redeem programs found',
-                    API_ERROR: 'Error accessing Joy API',
-                    REDEEM_ERROR: 'Unable to process redemption request',
-                };
+    static ERROR_MESSAGES = {
+      SDK_NOT_LOADED: 'Joy SDK not loaded',
+      SDK_NOT_INITIALIZED: 'Joy SDK not properly initialized',
+      NO_PROGRAMS: 'No redeem programs found',
+      API_ERROR: 'Error accessing Joy API',
+      REDEEM_ERROR: 'Unable to process redemption request'
+    };
 
-                constructor() {
-                    super();
-                    this.sectionId = this.dataset.sectionId;
-                    this.customerId = this.dataset.customerId;
-                    // Handle icon visibility setting
-                    const iconSetting = this.dataset.iconVisible;
-                    if (iconSetting === 'false' || iconSetting === '' || iconSetting === undefined || iconSetting === null) {
-                        this.showIcon = false;
-                    } else if (iconSetting === 'true') {
-                        this.showIcon = true;
-                    } else {
-                        // Default to true if setting is not properly defined
-                        this.showIcon = true;
-                    }
-                    // Handle show_redeem filter setting
-                    this.showRedeem = this.dataset.showRedeem;
-                    this.cachedCustomer = null;
-                    this.isInitialized = false;
-                }
+    constructor() {
+      super();
+      this.sectionId = this.dataset.sectionId;
+      this.customerId = this.dataset.customerId;
+      // Handle icon visibility setting
+      const iconSetting = this.dataset.iconVisible;
+      if (iconSetting === 'false' || iconSetting === '' || iconSetting === undefined || iconSetting === null) {
+        this.showIcon = false;
+      } else if (iconSetting === 'true') {
+        this.showIcon = true;
+      } else {
+        // Default to true if setting is not properly defined
+        this.showIcon = true;
+      }
+      this.programDisplay =  this.dataset.programDisplay
+      this.cachedCustomer = null;
+      this.isInitialized = false;
 
-                connectedCallback() {
-                    console.log('Joy Redeem Programs component connected for section:', this.sectionId);
-                    this.initializeJoyIntegration();
-                }
+    }
 
-                initializeJoyIntegration() {
-                    window.addEventListener('joy:ready', () => {
-                        console.log('joy:ready event received for tier status card');
-                        this.loadRedeemPrograms();
-                    });
+    connectedCallback() {
+      console.log('Joy Redeem Programs component connected for section:', this.sectionId);
+              console.log('Section:', this.dataset.sectionId);
+  console.log('Program Display:', this.programDisplay);
+  console.log('Dataset:', this.dataset);
+      this.initializeJoyIntegration();
+    }
 
-                    if (window.joyInstance) {
-                        console.log('Joy instance already available for tier status card');
-                        this.loadRedeemPrograms();
-                    }
-                }
+    initializeJoyIntegration() {
+      // Prevent duplicate initialization
+      if (this.isInitialized) {
+        console.log('Joy integration already initialized for redeem programs, skipping');
+        return;
+      }
 
-                async loadRedeemPrograms() {
-                    try {
+      // Listen for Joy ready event
+      window.addEventListener('joy:ready', () => {
+        console.log('joy:ready event received for redeem programs');
+        if (!this.isInitialized) {
+          this.isInitialized = true;
+          this.loadRedeemPrograms();
+        }
+      });
 
-                        const joyInstance = this.validateJoyInstance();
-                        if (!joyInstance) return;
+      // Also try immediately in case Joy is already loaded
+      if (window.joyInstance && !this.isInitialized) {
+        console.log('Joy instance already available for redeem programs');
+        this.isInitialized = true;
+        this.loadRedeemPrograms();
+      }
+    }
 
-                        await this.loadCustomerData(joyInstance);
-                        const programs = await this.fetchRedeemPrograms(joyInstance);
-                        console.log(programs)
-                        if (!programs) return;
+    async loadRedeemPrograms() {
+      try {
+        const joyInstance = this.validateJoyInstance();
+        if (!joyInstance) return;
 
-                        this.processAndRenderPrograms(programs);
-                    } catch (error) {
-                        console.error('Error in loadRedeemPrograms:', error);
-                        this.showNoDataMessage('Error loading redeem programs: ' + (error.message || 'Unknown error'));
-                    }
-                }
+        await this.loadCustomerData(joyInstance);
+        const programs = await this.fetchRedeemPrograms(joyInstance);
+        {% comment %} Doris {% endcomment %}
 
-                validateJoyInstance() {
-                    const joyInstance = window.joyInstance;
+        {% comment %} const filterProgram =
+        this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_PRODUCT ||
+        this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.DISCOUNT
+          ? programs.filter(p => p.event.includes(this.programDisplay))
+          : [];  {% endcomment %}
+    
+        {% comment %} Doris {% endcomment %}
+        if (!programs) return;
 
-                    if (!joyInstance) {
-                        console.log('Joy instance not available for redeem programs');
-                        this.showNoDataMessage(JoyRedeemPrograms.ERROR_MESSAGES.SDK_NOT_LOADED);
-                        return null;
-                    }
+        this.processAndRenderPrograms(programs);
+      } catch (error) {
+        console.error('Error in loadRedeemPrograms:', error);
+        this.showNoDataMessage('Error loading redeem programs: ' + (error.message || 'Unknown error'));
+      }
+    }
 
-                    if (typeof joyInstance.redeemPrograms !== 'function') {
-                        console.warn('redeemPrograms method not available on Joy instance');
-                        this.showNoDataMessage(JoyRedeemPrograms.ERROR_MESSAGES.SDK_NOT_INITIALIZED);
-                        return null;
-                    }
+    validateJoyInstance() {
+      const joyInstance = window.joyInstance;
 
-                    return joyInstance;
-                }
+      if (!joyInstance) {
+        console.log('Joy instance not available for redeem programs');
+        this.showNoDataMessage(JoyRedeemPrograms.ERROR_MESSAGES.SDK_NOT_LOADED);
+        return null;
+      }
 
-                async loadCustomerData(joyInstance) {
-                    if (!this.customerId || this.cachedCustomer) return;
+      if (typeof joyInstance.redeemPrograms !== 'function') {
+        console.warn('redeemPrograms method not available on Joy instance');
+        this.showNoDataMessage(JoyRedeemPrograms.ERROR_MESSAGES.SDK_NOT_INITIALIZED);
+        return null;
+      }
 
-                    try {
-                        this.cachedCustomer = await joyInstance.customer();
-                    } catch (error) {
-                        console.error('Error fetching customer data for redeem programs:', error);
-                        // Don't stop execution, continue without customer data
-                    }
-                }
+      return joyInstance;
+    }
 
-                async fetchRedeemPrograms(joyInstance) {
-                    try {
-                        const redeemProgramsData = await joyInstance.redeemPrograms();
-                        console.log('Joy redeemPrograms data:', redeemProgramsData);
-                        return redeemProgramsData;
-                    } catch (error) {
-                        console.error('Error fetching redeem programs:', error);
-                        this.showNoDataMessage(
-                            JoyRedeemPrograms.ERROR_MESSAGES.API_ERROR + ': ' + (error.message || 'Unknown error')
-                        );
-                        return null;
-                    }
-                }
+    async loadCustomerData(joyInstance) {
+      if (!this.customerId || this.cachedCustomer) return;
 
-                processAndRenderPrograms(redeemProgramsData) {
-                    if (!redeemProgramsData) {
-                        console.log('No redeemPrograms data available');
-                        this.showNoDataMessage('No redeem programs data available');
-                        return;
-                    }
+      try {
+        this.cachedCustomer = await joyInstance.customer();
+      } catch (error) {
+        console.error('Error fetching customer data for redeem programs:', error);
+        // Don't stop execution, continue without customer data
+      }
+    }
 
-                    let programs = this.extractPrograms(redeemProgramsData);
+    async fetchRedeemPrograms(joyInstance) {
+      try {
+        const redeemProgramsData = await joyInstance.redeemPrograms();
+        console.log('Joy redeemPrograms data:', redeemProgramsData);
+        return redeemProgramsData;
+      } catch (error) {
+        console.error('Error fetching redeem programs:', error);
+        this.showNoDataMessage(JoyRedeemPrograms.ERROR_MESSAGES.API_ERROR + ': ' + (error.message || 'Unknown error'));
+        return null;
+      }
+    }
 
-                    if (!this.isValidProgramsArray(programs)) {
-                        console.log('No redeem programs array found in response');
-                        this.showNoDataMessage('No redeem programs configured');
-                        return;
-                    }
+    processAndRenderPrograms(redeemProgramsData) {
+      if (!redeemProgramsData) {
+        console.log('No redeemPrograms data available');
+        this.showNoDataMessage('No redeem programs data available');
+        return;
+      }
 
-                    const redeemingPrograms = programs.filter(
-                        (program) =>
-                            (program.type === JoyRedeemPrograms.PROGRAM_TYPES.REDEEMING ||
-                                program.type === JoyRedeemPrograms.PROGRAM_TYPES.SPENDING)
-                    );
+      let programs = this.extractPrograms(redeemProgramsData);
+      
+      if (!this.isValidProgramsArray(programs)) {
+        console.log('No redeem programs array found in response');
+        this.showNoDataMessage('No redeem programs configured');
+        return;
+      }
 
-                    if (redeemingPrograms.length === 0) {
-                        this.showNoDataMessage('No redeem programs found');
-                        return;
-                    }
+      const currentFilter = this.dataset.programDisplay;
+      console.log('Current filter from dataset:', currentFilter);
 
-                    // Apply filter based on show_redeem setting
-                    const filteredPrograms = this.filterProgramsByType(redeemingPrograms);
+      const filteredDisplayPrograms =
+        currentFilter === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_PRODUCT ||
+        currentFilter === JoyRedeemPrograms.PROGRAM_DISPLAY.DISCOUNT ||
+        currentFilter === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_SHIPPING 
+        ? programs.filter(p => p.event.includes(currentFilter))
+        : programs;
+       console.log(this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.DISCOUNT)
 
-                    if (filteredPrograms.length === 0) {
-                        this.showNoDataMessage('No programs match the selected filter');
-                        return;
-                    }
+      console.log(this.programDisplay === JoyRedeemPrograms.PROGRAM_DISPLAY.FREE_PRODUCT)
 
-                    this.renderPrograms(filteredPrograms);
-                }
+      const redeemingPrograms = filteredDisplayPrograms.filter(program =>
+        program.type === JoyRedeemPrograms.PROGRAM_TYPES.REDEEMING ||
+        program.type === JoyRedeemPrograms.PROGRAM_TYPES.SPENDING
+      );
 
-                extractPrograms(redeemProgramsData) {
-                    if (redeemProgramsData.redeeming) {
-                        return redeemProgramsData.redeeming;
-                    }
-                    if (redeemProgramsData.data) {
-                        return redeemProgramsData.data;
-                    }
-                    return redeemProgramsData;
-                }
 
-                isValidProgramsArray(programs) {
-                    return programs && Array.isArray(programs) && programs.length > 0;
-                }
+      if (redeemingPrograms.length === 0) {
+        this.showNoDataMessage('No redeem programs found');
+        return;
+      }
 
-                isFreeProduct(program) {
-                    // Check event types that indicate free products
-                    const freeProductEvents = 'free_gift';
-                    if (freeProductEvents.includes(program.event)) {
-                        return true;
-                    }
-                }
+      this.renderPrograms(redeemingPrograms);
+    }
 
-                isFreeShipping(program) {
-                    const freeShippingEvents = 'free_shipping';
-                    if (freeShippingEvents.includes(program.event)) {
-                        return true
-                    }
-                }
+    extractPrograms(redeemProgramsData) {
+      if (redeemProgramsData.redeeming) {
+        return redeemProgramsData.redeeming;
+      }
+      if (redeemProgramsData.data) {
+        return redeemProgramsData.data;
+      }
+      return redeemProgramsData;
+    }
 
-                isDiscount(program) {
-                    // Check event types that indicate discounts
-                    const discountEvents = ['percentage_discount', 'buy_x_get_y', 'amount_discount'];
-                    if (discountEvents.includes(program.event)) {
-                        return true;
-                    }
-                }
+    isValidProgramsArray(programs) {
+      return programs && Array.isArray(programs) && programs.length > 0;
+    }
 
-                filterProgramsByType(programs) {
-                    switch (this.showRedeem) {
-                        case 'all':
-                            return programs;
-                            break;
-                        case 'free_product':
-                            return programs.filter(program => this.isFreeProduct(program));
-                            break;
-                        case 'discount_only':
-                            return programs.filter(program => this.isDiscount(program));
-                            break;
-                        case 'free_shipping':
-                            return programs.filter(program => this.isFreeShipping(program));
-                            break;
-                        default:
-                            return programs;
-                    }
-                }
+    renderPrograms(programs) {
+      try {
+        this.innerHTML = '';
 
-                renderPrograms(programs) {
-                    try {
-                        this.innerHTML = '';
+        const activePrograms = this.getActivePrograms(programs);
+        if (activePrograms.length === 0) {
+          this.showNoDataMessage('No active redeem programs');
+          return;
+        }
 
-                        const activePrograms = this.getActivePrograms(programs);
-                        if (activePrograms.length === 0) {
-                            this.showNoDataMessage('No active redeem programs');
-                            return;
-                        }
-                        const maxRewards = parseInt({{ section.settings.max_rewards | default: 10 }});
-                        const limitedPrograms = activePrograms.slice(0, maxRewards)
-                        this.renderProgramCards(limitedPrograms);
-                    } catch (error) {
-                        console.error('Error rendering programs:', error);
-                        this.showNoDataMessage('Error displaying programs');
-                    }
-                }
+        this.renderProgramCards(activePrograms);
+      } catch (error) {
+        console.error('Error rendering programs:', error);
+        this.showNoDataMessage('Error displaying programs');
+      }
+    }
 
-                getActivePrograms(programs) {
-                    if (!Array.isArray(programs)) {
-                        console.warn('Invalid programs array provided to renderPrograms');
-                        return [];
-                    }
+    getActivePrograms(programs) {
+      if (!Array.isArray(programs)) {
+        console.warn('Invalid programs array provided to renderPrograms');
+        return [];
+      }
 
-                    return programs.filter((program) => program && program.status && !program.isDraft);
-                }
+      return programs.filter(program =>
+        program && program.status && !program.isDraft
+      );
+    }
 
-                renderProgramCards(activePrograms) {
-                    {% comment %} const seeMoreCard = this.createSeeMoreCard();
-                    this.appendChild(seeMoreCard); {% endcomment %}
-                    activePrograms.forEach((program, index) => {
-                        try {
-                            const card = this.createProgramCard(program);
-                            this.appendChild(card);
-                        } catch (error) {
-                            console.error(`Error creating card for program ${index}:`, error);
-                            // Continue with other programs
-                        }
-                    });
-                }
+    renderProgramCards(activePrograms) {
+      activePrograms.forEach((program, index) => {
+        try {
+          const card = this.createProgramCard(program);
+          this.appendChild(card);
+        } catch (error) {
+          console.error(`Error creating card for program ${index}:`, error);
+          // Continue with other programs
+        }
+      });
+    }
 
-                // Helper functions for program card creation
-                isDynamicProgram(program) {
-                    return program.redeemType === JoyRedeemPrograms.PROGRAM_TYPES.DYNAMIC;
-                }
+    // Helper functions for program card creation
+    isDynamicProgram(program) {
+      return program.redeemType === JoyRedeemPrograms.PROGRAM_TYPES.DYNAMIC;
+    }
 
-                getMinPointsRequired(program) {
-                    const isDynamic = this.isDynamicProgram(program);
-                    return isDynamic
-                        ? program.minSpendPoint || program.spendPoint || 0
-                        : program.spendPoint || program.pointCost || 0;
-                }
+    getMinPointsRequired(program) {
+      const isDynamic = this.isDynamicProgram(program);
+      return isDynamic ?
+        (program.minSpendPoint || program.spendPoint || 0) :
+        (program.spendPoint || program.pointCost || 0);
+    }
 
-                canCustomerRedeem(program) {
-                    const customerPoints = this.getCustomerPoints();
-                    const minPointsRequired = this.getMinPointsRequired(program);
-                    return customerPoints >= minPointsRequired;
-                }
+    canCustomerRedeem(program) {
+      const customerPoints = this.getCustomerPoints();
+      const minPointsRequired = this.getMinPointsRequired(program);
+      return customerPoints >= minPointsRequired;
+    }
 
-                hasValidIcon(iconUrl) {
-                    return iconUrl && iconUrl !== '' && !iconUrl.includes('undefined') && !iconUrl.includes('null');
-                }
+    hasValidIcon(iconUrl) {
+      return iconUrl && iconUrl !== '' && !iconUrl.includes('undefined') && !iconUrl.includes('null');
+    }
 
-                // Shared utility functions for point formatting
-                getPointTerminology() {
-                    return {
-                        singular: window.AVADA_JOY?.settings?.pointSingular || 'point',
-                        plural: window.AVADA_JOY?.settings?.pointPlural || 'points',
-                    };
-                }
+    // Shared utility functions for point formatting
+    getPointTerminology() {
+      return {
+        singular: window.AVADA_JOY?.settings?.pointSingular || 'point',
+        plural: window.AVADA_JOY?.settings?.pointPlural || 'points'
+      };
+    }
 
-                formatPointText(points) {
-                    if (!points || points === 0) return this.getPointTerminology().plural;
-                    const { singular, plural } = this.getPointTerminology();
-                    return points === 1 ? singular : plural;
-                }
-                {% comment %} Doris custom {% endcomment %}
-                formatPointsWithText(points) {
-                    return `${this.pointFormatter(points)} ${this.formatPointText(points)}`;
-                }
+    formatPointText(points) {
+      if (!points || points === 0) return this.getPointTerminology().plural;
+      const { singular, plural } = this.getPointTerminology();
+      return points === 1 ? singular : plural;
+    }
 
-                getDynamicDisplayText(program) {
-                    if (this.isPercentageDiscount(program)) {
-                        return this.formatPercentageDiscountText(program);
-                    }
+    formatPointsWithText(points) {
+      return `${points} ${this.formatPointText(points)}`;
+    }
 
-                    if (this.isAmountDiscount(program)) {
-                        return this.formatAmountDiscountText(program);
-                    }
+    getDynamicDisplayText(program) {
+      if (this.isPercentageDiscount(program)) {
+        return this.formatPercentageDiscountText(program);
+      }
 
-                    return this.formatDefaultDynamicText(program);
-                }
+      if (this.isAmountDiscount(program)) {
+        return this.formatAmountDiscountText(program);
+      }
 
-                isPercentageDiscount(program) {
-                    return (
-                        program.typeEarn === JoyRedeemPrograms.DISCOUNT_TYPES.PERCENTAGE || program.discountType === 'percentage'
-                    );
-                }
+      return this.formatDefaultDynamicText(program);
+    }
 
-                isAmountDiscount(program) {
-                    return program.typeEarn === JoyRedeemPrograms.DISCOUNT_TYPES.AMOUNT || program.discountType === 'amount';
-                }
+    isPercentageDiscount(program) {
+      return program.typeEarn === JoyRedeemPrograms.DISCOUNT_TYPES.PERCENTAGE ||
+             program.discountType === 'percentage';
+    }
 
-                formatPercentageDiscountText(program) {
-                    const points = program.minSpendPoint || program.spendPoint || 100;
-                    const pointText = this.formatPointText(points);
-                    const percentage = program.earnPercentage || program.discount || 0;
-                    return `${percentage}% for ${points} ${pointText}`;
-                }
+    isAmountDiscount(program) {
+      return program.typeEarn === JoyRedeemPrograms.DISCOUNT_TYPES.AMOUNT ||
+             program.discountType === 'amount';
+    }
 
-                formatAmountDiscountText(program) {
-                    const points = program.minSpendPoint || program.spendPoint || 100;
-                    const pointText = this.formatPointText(points);
-                    const amount = program.earnAmount || program.discount || 0;
-                    return `$${amount} for ${points} ${pointText}`;
-                }
+    formatPercentageDiscountText(program) {
+      const points = program.minSpendPoint || program.spendPoint || 100;
+      const pointText = this.formatPointText(points);
+      const percentage = program.earnPercentage || program.discount || 0;
+      return `${percentage}% for ${points} ${pointText}`;
+    }
 
-                formatDefaultDynamicText(program) {
-                    const ratio = program.earnAmount || 1;
-                    const points = program.spendPoint || 1;
-                    const pointText = this.formatPointText(points);
-                    return `${points} ${pointText} for $${ratio}`;
-                }
+    formatAmountDiscountText(program) {
+      const points = program.minSpendPoint || program.spendPoint || 100;
+      const pointText = this.formatPointText(points);
+      const amount = program.earnAmount || program.discount || 0;
+      return `$${amount} for ${points} ${pointText}`;
+    }
 
-                getFixedDisplayText(program) {
-                    const points = program.spendPoint || program.pointCost || 0;
-                    const pointText = this.formatPointText(points);
-                    return `${points} ${pointText}`;
-                }
+    formatDefaultDynamicText(program) {
+      const ratio = program.earnAmount || 1;
+      const points = program.spendPoint || 1;
+      const pointText = this.formatPointText(points);
+      return `${points} ${pointText} for $${ratio}`;
+    }
 
-                getProgramDisplayText(program) {
-                    return this.isDynamicProgram(program)
-                        ? this.getDynamicDisplayText(program)
-                        : this.getFixedDisplayText(program);
-                }
+    getFixedDisplayText(program) {
+      const points = program.spendPoint || program.pointCost || 0;
+      const pointText = this.formatPointText(points);
+      return `${points} ${pointText}`;
+    }
 
-                pointFormatter(spendPoint) {
-                    return spendPoint.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                }
+    getProgramDisplayText(program) {
+      return this.isDynamicProgram(program) ?
+        this.getDynamicDisplayText(program) :
+        this.getFixedDisplayText(program);
+    }
 
-                generateIconHTML(program) {
-                    // Priority: loyaltyPageCustomIcon > specificProducts[0].image.src > fallback emoji
-                    let iconUrl = null;
+    generateIconHTML(program) {
+      const iconUrl = program.loyaltyPageCustomIcon;
+      const fallbackEmoji = this.getFallbackEmoji(program.event);
+      const hasValid = this.hasValidIcon(iconUrl);
 
-                    // First, check if loyaltyPageCustomIcon is set
-                    if (this.hasValidIcon(program.loyaltyPageCustomIcon)) {
-                        iconUrl = program.loyaltyPageCustomIcon;
-                    }
-                    // If no custom icon, try to get product image from specificProducts
-                    else if (program.specificProducts &&
-                             program.specificProducts.length > 0 &&
-                             program.specificProducts[0].image &&
-                             program.specificProducts[0].image.src) {
-                        iconUrl = program.specificProducts[0].image.src;
-                    }
-
-                    const fallbackEmoji = this.getFallbackEmoji(program.event);
-
-                    if (iconUrl) {
-                        return `
+      if (hasValid) {
+        return `
           <img src="${iconUrl}" alt="${program.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div style="display:none; width:100%; height:100%; background:rgba(212, 165, 116, 0.08); border-radius:inherit; align-items:center; justify-content:center; font-size:18px; color:#D4A574;">${fallbackEmoji}</div>
         `;
-                    }
+      }
 
-                    return `
+      return `
         <div style="width:100%; height:100%; background:rgba(212, 165, 116, 0.08); border-radius:inherit; display:flex; align-items:center; justify-content:center; font-size:18px; color:#D4A574;">${fallbackEmoji}</div>
       `;
-                }
-                {% comment %} const spendPoint = this.redeemProgramsData.spendPoint; {% endcomment %}
-                generateCardHTML(program, displayText, canRedeem) {
-                    const description = this.getProgramDescription(program);
-                    const iconHTML = this.generateIconHTML(program);
-                    return `
-        ${
-                        this.showIcon
-                            ? `<div class="joy-redeem-icon">
+    }
+
+    generateCardHTML(program, displayText, canRedeem) {
+      const description = this.getProgramDescription(program);
+      const iconHTML = this.generateIconHTML(program);
+      return `
+        ${this.showIcon ? `<div class="joy-redeem-icon">
           ${iconHTML}
-        </div>`
-                            : ''
-                    }
+        </div>` : ''}
         <div class="joy-redeem-content">
           <div class="joy-redeem-name">${program.title}</div>
-          <div class="joy-redeem-description">${this.pointFormatter(program.spendPoint)} points</div>
+          <div class="joy-redeem-description">${description}</div>
         </div>
-        {% comment %} Doris custom remove disable {% endcomment %}
         <div class="joy-redeem-action">
-          <button class="joy-redeem-button">
-            ${
-                        canRedeem
-                            ? '{{ section.settings.redeem_button_text | default: "Redeem" }}'
-                            : '{{ section.settings.not_enough_points_text | default: "Not enough points" }}'
-                    }
+          <button class="joy-redeem-button" ${!canRedeem ? 'disabled' : ''}>
+            ${canRedeem ? '{{ section.settings.redeem_button_text | default: "Redeem" }}' : '{{ section.settings.not_enough_points_text | default: "Not enough points" }}'}
           </button>
         </div>
       `;
-                }
+    }
 
-                addCardClickHandler(card, program) {
-                    card.addEventListener('click', (e) => {
-                        e.preventDefault();
-                            this.handleRedeemClick(program);
-                    });
-                }
+    addCardClickHandler(card, program, canRedeem) {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (canRedeem) {
+          this.handleRedeemClick(program);
+        }
+      });
+    }
 
-                {% comment %} createSeeMoreCard() {
-                    const card = document.createElement('div');
-                    card.className = 'joy-see-more-card';
-                    const imageUrl = '{{ section.settings.see_more_image | image_url: width: 400 | image_url: height: 400 }}';
-                    const buttonText = '{{ section.settings.see_more_button_text | escape }}';
-                    const redirectUrl = '{{ section.settings.see_more_page.url | default: "/pages/redeem-program" }}';
-                    card.innerHTML = `
-                        <div class="joy-see-more-reward-icon"> ${imageUrl
-                        ? `<img src="${imageUrl}" alt="See more rewards" style="width:100%;height:100%;border-radius:inherit;">`
-                        : `<div style="width:100%; height:100%; background:rgba(212,165,116,0.08); border-radius:inherit; display:flex; align-items:center; justify-content:center; font-size:32px; color:${'{{ section.settings.primary_color | default: "#6B7280" }}'};">➕</div>`
-                      }
-                      </div>
-                    <div class="joy-see-more-content">
-                        <div class="joy-see-more-action">
-                        <button class="joy-see-more-button">${buttonText}</button>
-                        </div>
-                    </div>
-                    `;
+    createProgramCard(program) {
+      const card = document.createElement('div');
+      card.className = JoyRedeemPrograms.CSS_CLASSES.CARD;
 
-                    card.addEventListener('click', () => {
-                        window.location.href = redirectUrl;
-                    });
+      const canRedeem = this.canCustomerRedeem(program);
+      if (!canRedeem) {
+        card.classList.add(JoyRedeemPrograms.CSS_CLASSES.CARD_DISABLED);
+      }
 
-                    return card;
-                } {% endcomment %}
+      this.addCardClickHandler(card, program, canRedeem);
 
-                createProgramCard(program) {
-                    const card = document.createElement('div');
-                    card.className = JoyRedeemPrograms.CSS_CLASSES.CARD;
+      const displayText = this.getProgramDisplayText(program);
+      card.innerHTML = this.generateCardHTML(program, displayText, canRedeem);
 
-                    const canRedeem = this.canCustomerRedeem(program);
-                    
-                    this.addCardClickHandler(card, program, canRedeem);
+      return card;
+    }
 
-                    const displayText = this.getProgramDisplayText(program);
-                    card.innerHTML = this.generateCardHTML(program, displayText, canRedeem);
+    handleRedeemClick(program) {
+      try {
+        console.log('Redeem clicked:', program);
 
-                    return card;
-                }
+        if (!this.isCustomerLoggedIn()) {
+          this.redirectToLogin();
+          return;
+        }
 
-                handleRedeemClick(program) {
-                    try {
-                        console.log('Redeem clicked:', program);
+        this.createRedeemModal(program);
+      } catch (error) {
+        console.error('Error handling redeem click:', error);
+        this.showRedeemError(JoyRedeemPrograms.ERROR_MESSAGES.REDEEM_ERROR);
+      }
+    }
 
-                        if (!this.isCustomerLoggedIn()) {
-                            this.redirectToLogin();
-                            return;
-                        }
+    isCustomerLoggedIn() {
+      return Boolean(this.customerId);
+    }
 
-                        this.createRedeemModal(program);
-                    } catch (error) {
-                        console.error('Error handling redeem click:', error);
-                        this.showRedeemError(JoyRedeemPrograms.ERROR_MESSAGES.REDEEM_ERROR);
-                    }
-                }
+    redirectToLogin() {
+      try {
+        window.location.href = '/account/login';
+      } catch (error) {
+        console.error('Error redirecting to login:', error);
+      }
+    }
 
-                isCustomerLoggedIn() {
-                    return Boolean(this.customerId);
-                }
+    createRedeemModal(program) {
+      try {
+        this.removeExistingModal();
+        const modal = this.createModalElement(program);
+        const modalData = this.prepareModalData(program);
 
-                redirectToLogin() {
-                    try {
-                        window.location.href = '/account/login';
-                    } catch (error) {
-                        console.error('Error redirecting to login:', error);
-                    }
-                }
+        modal.innerHTML = this.generateModalHTML(program, modalData);
+        document.body.appendChild(modal);
 
-                createRedeemModal(program) {
-                    try {
-                        this.removeExistingModal();
-                        const modal = this.createModalElement(program);
-                        const modalData = this.prepareModalData(program);
+        this.setupModalInteractions(modal, program, modalData);
+        this.attachModalEventListeners(modal, program);
+      } catch (error) {
+        console.error('Error creating redeem modal:', error);
+        this.showRedeemError('Unable to open redemption modal');
+      }
+    }
 
-                        modal.innerHTML = this.generateModalHTML(program, modalData);
-                        document.body.appendChild(modal);
+    removeExistingModal() {
+      const existingModal = document.querySelector(`.${JoyRedeemPrograms.CSS_CLASSES.MODAL}`);
+      if (existingModal) {
+        existingModal.remove();
+      }
+    }
 
-                        this.setupModalInteractions(modal, program, modalData);
-                        this.attachModalEventListeners(modal, program);
-                    } catch (error) {
-                        console.error('Error creating redeem modal:', error);
-                        this.showRedeemError('Unable to open redemption modal');
-                    }
-                }
+    createModalElement(program) {
+      const modal = document.createElement('div');
+      modal.className = `${JoyRedeemPrograms.CSS_CLASSES.MODAL} ${JoyRedeemPrograms.CSS_CLASSES.MODAL_MEDIUM}`;
+      modal.style.display = 'block';
+      return modal;
+    }
 
-                removeExistingModal() {
-                    const existingModal = document.querySelector(`.${JoyRedeemPrograms.CSS_CLASSES.MODAL}`);
-                    if (existingModal) {
-                        existingModal.remove();
-                    }
-                }
+    prepareModalData(program) {
+      const isDynamic = this.isDynamicProgram(program);
+      const customerPoints = this.getCustomerPoints();
+      const selectedPoints = program.minSpendPoint || program.spendPoint || 1;
+      const maxPoints = isDynamic && program.hasMaxSpend ?
+        Math.min(customerPoints, program.maxSpendPoint) :
+        customerPoints;
 
-                createModalElement(program) {
-                    const modal = document.createElement('div');
-                    modal.className = `${JoyRedeemPrograms.CSS_CLASSES.MODAL} ${JoyRedeemPrograms.CSS_CLASSES.MODAL_MEDIUM}`;
-                    modal.style.display = 'block';
-                    return modal;
-                }
+      return {
+        isDynamic,
+        selectedPoints,
+        maxPoints,
+        iconUrl: program.loyaltyPageCustomIcon,
+        fallbackEmoji: this.getFallbackEmoji(program.event),
+        hasValidIcon: this.hasValidIcon(program.loyaltyPageCustomIcon)
+      };
+    }
 
-                prepareModalData(program) {
-                    const isDynamic = this.isDynamicProgram(program);
-                    const customerPoints = this.getCustomerPoints();
-                    const selectedPoints = program.minSpendPoint || program.spendPoint || 1;
-                    const maxPoints =
-                        isDynamic && program.hasMaxSpend ? Math.min(customerPoints, program.maxSpendPoint) : customerPoints;
+    generateModalHTML(program, modalData) {
+      const { isDynamic, selectedPoints, maxPoints, iconUrl, fallbackEmoji, hasValidIcon } = modalData;
 
-                    return {
-                        isDynamic,
-                        selectedPoints,
-                        maxPoints
-                    };
-                }
-
-                generateModalHTML(program, modalData) {
-                    const { isDynamic, selectedPoints, maxPoints } = modalData;
-                    const fallbackEmoji = this.getFallbackEmoji(program.event);
-
-                    return `
+      return `
         <div class="joy-redeem-modal-overlay">
           <div class="joy-redeem-modal-content">
             <button class="joy-redeem-modal-close">&times;</button>
-            ${this.generateModalHeader(program, null, fallbackEmoji, false)}
+            ${this.generateModalHeader(program, iconUrl, fallbackEmoji, hasValidIcon)}
             ${this.generateModalBody(program, isDynamic, selectedPoints, maxPoints)}
           </div>
         </div>
       `;
-                }
+    }
 
-                generateModalHeader(program, iconUrl, fallbackEmoji, hasValidIcon) {
-                    const iconHTML = this.generateModalIconHTML(program, fallbackEmoji);
-                    return `
+    generateModalHeader(program, iconUrl, fallbackEmoji, hasValidIcon) {
+      const iconHTML = this.generateModalIconHTML(iconUrl, fallbackEmoji, hasValidIcon, program.title);
+      return `
         <div class="joy-redeem-modal-header">
           <div style="display: flex; align-items: flex-start; gap: 16px; text-align: left;">
-            ${
-                        this.showIcon
-                            ? `<div class="joy-redeem-modal-icon" style="margin: 0; flex-shrink: 0;">
+            ${this.showIcon ? `<div class="joy-redeem-modal-icon" style="margin: 0; flex-shrink: 0;">
               ${iconHTML}
-            </div>`
-                            : ''
-                    }
+            </div>` : ''}
             <div style="flex: 1;">
               <h3 class="joy-redeem-modal-title" style="margin: 0 0 8px 0;">${program.title}</h3>
-              <p class="joy-redeem-modal-description" style="margin: 0 0 16px 0;">${this.getProgramDescription(
-                        program)}</p>
+              <p class="joy-redeem-modal-description" style="margin: 0 0 16px 0;">${this.getProgramDescription(program)}</p>
             </div>
           </div>
         </div>
       `;
-                }
+    }
 
-                generateModalIconHTML(program, fallbackEmoji) {
-                    // Priority: loyaltyPageCustomIcon > specificProducts[0].image.src > fallback emoji
-                    let iconUrl = null;
-
-                    // First, check if loyaltyPageCustomIcon is set
-                    if (this.hasValidIcon(program.loyaltyPageCustomIcon)) {
-                        iconUrl = program.loyaltyPageCustomIcon;
-                    }
-                    // If no custom icon, try to get product image from specificProducts
-                    else if (program.specificProducts &&
-                             program.specificProducts.length > 0 &&
-                             program.specificProducts[0].image &&
-                             program.specificProducts[0].image.src) {
-                        iconUrl = program.specificProducts[0].image.src;
-                    }
-
-                    if (iconUrl) {
-                        return `
-          <img src="${iconUrl}" alt="${program.title}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    generateModalIconHTML(iconUrl, fallbackEmoji, hasValidIcon, altText) {
+      if (hasValidIcon) {
+        return `
+          <img src="${iconUrl}" alt="${altText}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
           <div style="display:none; width:36px; height:36px; background:#f0f0f0; border-radius:8px; align-items:center; justify-content:center; font-size:18px; color:#888;">${fallbackEmoji}</div>
         `;
-                    }
+      }
 
-                    return `
+      return `
         <div style="width:36px; height:36px; background:#f0f0f0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#888;">${fallbackEmoji}</div>
       `;
-                }
+    }
 
-                generateModalBody(program, isDynamic, selectedPoints, maxPoints) {
-                    const sliderHTML = isDynamic ? this.generateSliderHTML(program, selectedPoints, maxPoints) : '';
-                    const summaryHTML = this.generateSummaryHTML(program, isDynamic, selectedPoints);
-                    const actionsHTML = this.generateActionsHTML(program, isDynamic, selectedPoints);
+    generateModalBody(program, isDynamic, selectedPoints, maxPoints) {
+      const sliderHTML = isDynamic ? this.generateSliderHTML(program, selectedPoints, maxPoints) : '';
+      const summaryHTML = this.generateSummaryHTML(program, isDynamic, selectedPoints);
+      const actionsHTML = this.generateActionsHTML(program, isDynamic, selectedPoints);
 
-                    return `
+      return `
         <div class="joy-redeem-modal-body">
           ${sliderHTML}
           ${summaryHTML}
           ${actionsHTML}
         </div>
       `;
-                }
+    }
 
-                generateSliderHTML(program, selectedPoints, maxPoints) {
-                    const minPoints = program.minSpendPoint || program.spendPoint || 1;
-                    const pointText = this.formatPointsWithText(selectedPoints);
-                    const dynamicAmount = ((selectedPoints * (program.earnAmount || 1)) / (program.spendPoint || 1)).toFixed(2);
+    generateSliderHTML(program, selectedPoints, maxPoints) {
+      const minPoints = program.minSpendPoint || program.spendPoint || 1;
+      const pointText = this.formatPointsWithText(selectedPoints);
+      const dynamicAmount = (selectedPoints * (program.earnAmount || 1) / (program.spendPoint || 1)).toFixed(2);
 
-                    return `
+      return `
         <div class="joy-points-selector">
           <label class="joy-points-selector-label">{{ section.settings.slider_label_text | default: 'Select points to redeem' }}</label>
           <div class="joy-slider-container">
@@ -1327,18 +1058,16 @@
             </div>
           </div>
           <div class="joy-dynamic-value">
-            {{ section.settings.slider_value_prefix | default: "You'll get:" }} <strong>$<span id="joy-dynamic-amount-${
-                        program.id
-                    }">${dynamicAmount}</span> {{ section.settings.slider_value_suffix | default: 'off' }}</strong>
+            {{ section.settings.slider_value_prefix | default: "You'll get:" }} <strong>$<span id="joy-dynamic-amount-${program.id}">${dynamicAmount}</span> {{ section.settings.slider_value_suffix | default: 'off' }}</strong>
           </div>
         </div>
       `;
-                }
+    }
 
-                generateSummaryHTML(program, isDynamic, selectedPoints) {
-                    const points = isDynamic ? selectedPoints : program.spendPoint || program.pointCost || 0;
+    generateSummaryHTML(program, isDynamic, selectedPoints) {
+      const points = isDynamic ? selectedPoints : (program.spendPoint || program.pointCost || 0);
 
-                    return `
+      return `
         <div class="joy-reward-summary">
           <div class="joy-reward-summary-title">{{ section.settings.reward_summary_title | default: 'Reward summary' }}</div>
           <div class="joy-reward-summary-content" id="joy-reward-summary-${program.id}">
@@ -1346,12 +1075,12 @@
           </div>
         </div>
       `;
-                }
+    }
 
-                generateActionsHTML(program, isDynamic, selectedPoints) {
-                    const points = isDynamic ? selectedPoints : program.spendPoint || program.pointCost || 0;
+    generateActionsHTML(program, isDynamic, selectedPoints) {
+      const points = isDynamic ? selectedPoints : (program.spendPoint || program.pointCost || 0);
 
-                    return `
+      return `
         <div class="joy-redeem-modal-actions">
           <button class="joy-redeem-modal-button ${JoyRedeemPrograms.CSS_CLASSES.CANCEL_BUTTON}">{{ section.settings.modal_cancel_text | default: 'Cancel' }}</button>
           <button class="joy-redeem-modal-button ${JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON}" data-program-id="${program.id}" data-points="${points}">
@@ -1359,110 +1088,107 @@
           </button>
         </div>
       `;
-                }
+    }
 
-                setupModalInteractions(modal, program, modalData) {
-                    if (modalData.isDynamic) {
-                        this.setupSliderInteractions(program);
-                    }
-                }
+    setupModalInteractions(modal, program, modalData) {
+      if (modalData.isDynamic) {
+        this.setupSliderInteractions(program);
+      }
+    }
 
-                setupSliderInteractions(program) {
-                    const slider = document.getElementById(`joy-points-slider-${program.id}`);
-                    if (!slider) return;
+    setupSliderInteractions(program) {
+      const slider = document.getElementById(`joy-points-slider-${program.id}`);
+      if (!slider) return;
 
-                    slider.addEventListener('input', (e) => {
-                        this.handleSliderChange(e, program);
-                    });
-                }
+      slider.addEventListener('input', (e) => {
+        this.handleSliderChange(e, program);
+      });
+    }
 
-                handleSliderChange(event, program) {
-                    const points = parseInt(event.target.value);
-                    const pointText = this.formatPointsWithText(points);
+    handleSliderChange(event, program) {
+      const points = parseInt(event.target.value);
+      const pointText = this.formatPointsWithText(points);
 
-                    this.updateSliderDisplay(program.id, points, pointText);
-                    this.updateDynamicAmount(program, points);
-                    this.updateRewardSummary(program.id, pointText);
-                    this.updateConfirmButton(points);
-                }
+      this.updateSliderDisplay(program.id, points, pointText);
+      this.updateDynamicAmount(program, points);
+      this.updateRewardSummary(program.id, pointText);
+      this.updateConfirmButton(points);
+    }
 
-                updateSliderDisplay(programId, points, pointText) {
-                    const sliderValue = document.getElementById(`joy-slider-value-${programId}`);
-                    if (sliderValue) {
-                        sliderValue.textContent = pointText;
-                    }
-                }
+    updateSliderDisplay(programId, points, pointText) {
+      const sliderValue = document.getElementById(`joy-slider-value-${programId}`);
+      if (sliderValue) {
+        sliderValue.textContent = pointText;
+      }
+    }
 
-                updateDynamicAmount(program, points) {
-                    const dynamicAmount = document.getElementById(`joy-dynamic-amount-${program.id}`);
-                    if (dynamicAmount) {
-                        const amount = ((points * (program.earnAmount || 1)) / (program.spendPoint || 1)).toFixed(2);
-                        dynamicAmount.textContent = amount;
-                    }
-                }
+    updateDynamicAmount(program, points) {
+      const dynamicAmount = document.getElementById(`joy-dynamic-amount-${program.id}`);
+      if (dynamicAmount) {
+        const amount = (points * (program.earnAmount || 1) / (program.spendPoint || 1)).toFixed(2);
+        dynamicAmount.textContent = amount;
+      }
+    }
 
-                updateRewardSummary(programId, pointText) {
-                    const rewardSummary = document.getElementById(`joy-reward-summary-${programId}`);
-                    if (rewardSummary) {
-                        rewardSummary.innerHTML = `You will spend <strong>${pointText}</strong> to redeem this reward.`;
-                    }
-                }
+    updateRewardSummary(programId, pointText) {
+      const rewardSummary = document.getElementById(`joy-reward-summary-${programId}`);
+      if (rewardSummary) {
+        rewardSummary.innerHTML = `You will spend <strong>${pointText}</strong> to redeem this reward.`;
+      }
+    }
 
-                updateConfirmButton(points) {
-                    const confirmButton = document.querySelector(`.${JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON}`);
-                    if (confirmButton) {
-                        confirmButton.setAttribute('data-points', points);
-                    }
-                }
+    updateConfirmButton(points) {
+      const confirmButton = document.querySelector(`.${JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON}`);
+      if (confirmButton) {
+        confirmButton.setAttribute('data-points', points);
+      }
+    }
 
-                attachModalEventListeners(modal, program) {
-                    modal.addEventListener('click', (e) => this.handleModalClick(e, program));
-                    this.attachEscapeKeyListener();
-                }
+    attachModalEventListeners(modal, program) {
+      modal.addEventListener('click', (e) => this.handleModalClick(e, program));
+      this.attachEscapeKeyListener();
+    }
 
-                handleModalClick(event, program) {
-                    const { target } = event;
+    handleModalClick(event, program) {
+      const { target } = event;
 
-                    if (
-                        target.classList.contains('joy-redeem-modal-overlay') ||
-                        target.classList.contains('joy-redeem-modal-close') ||
-                        target.classList.contains(JoyRedeemPrograms.CSS_CLASSES.CANCEL_BUTTON)
-                    ) {
-                        this.closeRedeemModal();
-                        return;
-                    }
+      if (target.classList.contains('joy-redeem-modal-overlay') ||
+          target.classList.contains('joy-redeem-modal-close') ||
+          target.classList.contains(JoyRedeemPrograms.CSS_CLASSES.CANCEL_BUTTON)) {
+        this.closeRedeemModal();
+        return;
+      }
 
-                    if (target.classList.contains(JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON)) {
-                        this.confirmRedeem(program);
-                    }
-                }
+      if (target.classList.contains(JoyRedeemPrograms.CSS_CLASSES.CONFIRM_BUTTON)) {
+        this.confirmRedeem(program);
+      }
+    }
 
-                attachEscapeKeyListener() {
-                    const handleEscape = (e) => {
-                        if (e.key === 'Escape') {
-                            this.closeRedeemModal();
-                            document.removeEventListener('keydown', handleEscape);
-                        }
-                    };
-                    document.addEventListener('keydown', handleEscape);
-                }
+    attachEscapeKeyListener() {
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          this.closeRedeemModal();
+          document.removeEventListener('keydown', handleEscape);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+    }
 
-                async confirmRedeem(program) {
-                    const confirmButton = document.querySelector('.joy-confirm-button');
-                    const originalButtonText = confirmButton ? confirmButton.textContent : 'Confirm Redeem';
+    async confirmRedeem(program) {
+      const confirmButton = document.querySelector('.joy-confirm-button');
+      const originalButtonText = confirmButton ? confirmButton.textContent : 'Confirm Redeem';
 
-                    // Get the points to redeem (for dynamic programs, this comes from the slider)
-                    const pointsToRedeem =
-                        confirmButton && confirmButton.getAttribute('data-points')
-                            ? parseInt(confirmButton.getAttribute('data-points'))
-                            : program.spendPoint || program.pointCost || 0;
+      // Get the points to redeem (for dynamic programs, this comes from the slider)
+      const pointsToRedeem = confirmButton && confirmButton.getAttribute('data-points') ?
+        parseInt(confirmButton.getAttribute('data-points')) :
+        (program.spendPoint || program.pointCost || 0);
 
-                    console.log('Redeeming with points:', pointsToRedeem, 'Program:', program);
+      console.log('Redeeming with points:', pointsToRedeem, 'Program:', program);
 
-                    // Disable button and show loading state with spinner
-                    if (confirmButton) {
-                        confirmButton.disabled = true;
-                        confirmButton.innerHTML = `
+      // Disable button and show loading state with spinner
+      if (confirmButton) {
+        confirmButton.disabled = true;
+        confirmButton.innerHTML = `
           <span style="display: inline-flex; align-items: center; gap: 8px;">
             <svg class="joy-spinner" width="16" height="16" viewBox="0 0 24 24" style="animation: joy-spin 1s linear infinite;">
               <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4" stroke-dashoffset="10.5"></circle>
@@ -1470,27 +1196,30 @@
             {{ section.settings.processing_text | default: 'Processing...' }}
           </span>
         `;
-                    }
+      }
 
-                    try {
-                        // Try to redeem via Joy SDK using the correct method name
-                        if (window.joyInstance && typeof window.joyInstance.redeem === 'function') {
-                            // For dynamic programs, pass the selected points
-                            const result = await window.joyInstance.redeem(program.id, pointsToRedeem);
-                            {% comment %} console.log(result) {% endcomment %}
-                            console.log('Redeem result:', result);
+      try {
+        // Try to redeem via Joy SDK using the correct method name
+        if (window.joyInstance && typeof window.joyInstance.redeem === 'function') {
+          // For dynamic programs, pass the selected points
+          const result = await window.joyInstance.redeem(
+            program.id,
+            pointsToRedeem
+          );
 
-                            // Check if the result indicates an error
-                            // The Joy SDK returns {status: false, error: message} for errors
-                            if (result && result.status === false && result.error) {
-                                throw new Error(result.error);
-                            }
+          console.log('Redeem result:', result);
 
-                            // If result exists and doesn't have status:false, it's successful
-                            if (result) {
-                                // Show success state in button first
-                                if (confirmButton) {
-                                    confirmButton.innerHTML = `
+          // Check if the result indicates an error
+          // The Joy SDK returns {status: false, error: message} for errors
+          if (result && result.status === false && result.error) {
+            throw new Error(result.error);
+          }
+
+          // If result exists and doesn't have status:false, it's successful
+          if (result) {
+            // Show success state in button first
+            if (confirmButton) {
+              confirmButton.innerHTML = `
                 <span style="display: inline-flex; align-items: center; gap: 8px;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1498,68 +1227,64 @@
                   {{ section.settings.redeemed_text | default: 'Redeemed!' }}
                 </span>
               `;
-                                }
+            }
 
-                                // Extract discount code from result
-                                const discountCode = result.data?.discount?.code || result.discount?.code || result.code;
+            // Extract discount code from result
+            const discountCode = result.data?.discount?.code || result.discount?.code || result.code;
 
-                                // Show success modal content with discount code
-                                this.showRedeemSuccess(program, pointsToRedeem, discountCode);
+            // Show success modal content with discount code
+            this.showRedeemSuccess(program, pointsToRedeem, discountCode);
 
-                                // Refresh customer data cache
-                                if (this.customerId) {
-                                    try {
-                                        this.cachedCustomer = await window.joyInstance.customer();
-                                    } catch (refreshError) {
-                                        console.warn('Could not refresh customer data:', refreshError);
-                                    }
-                                }
+            // Refresh customer data cache
+            if (this.customerId) {
+              try {
+                this.cachedCustomer = await window.joyInstance.customer();
+              } catch (refreshError) {
+                console.warn('Could not refresh customer data:', refreshError);
+              }
+            }
 
-                                // Reload the programs to update points (keep modal open for user to see success)
-                                setTimeout(() => {
-                                    this.loadRedeemPrograms();
-                                }, 2500);
-                            } else {
-                                throw new Error('Redemption failed - no data returned');
-                            }
-                        } else {
-                            // Fallback: try generic redeem method
-                            throw new Error('Redeem functionality not available');
-                        }
-                    } catch (error) {
-                        console.error('Redeem error:', error);
-                        this.showRedeemError(error.message || 'An error occurred. Please try again.');
+            // Reload the programs to update points (keep modal open for user to see success)
+            setTimeout(() => {
+              this.loadRedeemPrograms();
+            }, 2500);
+          } else {
+            throw new Error('Redemption failed - no data returned');
+          }
+        } else {
+          // Fallback: try generic redeem method
+          throw new Error('Redeem functionality not available');
+        }
+      } catch (error) {
+        console.error('Redeem error:', error);
+        this.showRedeemError(error.message || 'An error occurred. Please try again.');
 
-                        // Re-enable button with original text
-                        if (confirmButton) {
-                            confirmButton.disabled = false;
-                            confirmButton.textContent = originalButtonText;
-                        }
-                    }
-                }
+        // Re-enable button with original text
+        if (confirmButton) {
+          confirmButton.disabled = false;
+          confirmButton.textContent = originalButtonText;
+        }
+      }
+    }
 
-                showRedeemSuccess(program, pointsRedeemed, discountCode) {
-                    const modal = document.querySelector('.joy-redeem-modal');
-                    const modalBody = document.querySelector('.joy-redeem-modal-body');
-                    if (!modalBody || !modal) return;
+    showRedeemSuccess(program, pointsRedeemed, discountCode) {
+      const modal = document.querySelector('.joy-redeem-modal');
+      const modalBody = document.querySelector('.joy-redeem-modal-body');
+      if (!modalBody || !modal) return;
 
-                    const pointText = this.formatPointsWithText(pointsRedeemed || program.spendPoint || program.pointCost || 0);
+      const pointText = this.formatPointsWithText(pointsRedeemed || program.spendPoint || program.pointCost || 0);
 
-                    if (discountCode) {
-                        // Replace entire modal content to avoid duplication
-                        const modalContent = modal.querySelector('.joy-redeem-modal-content');
-                        if (modalContent) {
-                            modalContent.innerHTML = `
+      if (discountCode) {
+        // Replace entire modal content to avoid duplication
+        const modalContent = modal.querySelector('.joy-redeem-modal-content');
+        if (modalContent) {
+          modalContent.innerHTML = `
             <button class="joy-redeem-modal-close">&times;</button>
             <div class="joy-redeem-modal-header">
               <div style="display: flex; align-items: flex-start; gap: 16px; text-align: left;">
-                ${
-                                this.showIcon
-                                    ? `<div class="joy-redeem-modal-icon" style="margin: 0; flex-shrink: 0;">
-                  ${this.generateModalIconHTML(program, this.getFallbackEmoji(program.event))}
-                </div>`
-                                    : ''
-                            }
+                ${this.showIcon ? `<div class="joy-redeem-modal-icon" style="margin: 0; flex-shrink: 0;">
+                  ${this.generateModalIconHTML(program.loyaltyPageCustomIcon, this.getFallbackEmoji(program.event), this.hasValidIcon(program.loyaltyPageCustomIcon), program.title)}
+                </div>` : ''}
                 <div style="flex: 1;">
                   <h3 class="joy-redeem-modal-title" style="margin: 0 0 8px 0;">${program.title}</h3>
                   <p class="joy-redeem-modal-description" style="margin: 0 0 16px 0;">${pointText}</p>
@@ -1594,17 +1319,17 @@
               </div>
             </div>
           `;
-                        }
+        }
 
-                        // Add copy and apply functionality
-                        this.setupDiscountCodeCopy(discountCode);
-                        this.setupApplyCodeButton(discountCode);
+        // Add copy and apply functionality
+        this.setupDiscountCodeCopy(discountCode);
+        this.setupApplyCodeButton(discountCode);
 
-                        // Re-attach modal event listeners since we replaced the content
-                        this.reattachModalEventListeners(modal, program);
-                    } else {
-                        // Show generic success message if no discount code
-                        modalBody.innerHTML = `
+        // Re-attach modal event listeners since we replaced the content
+        this.reattachModalEventListeners(modal, program);
+      } else {
+        // Show generic success message if no discount code
+        modalBody.innerHTML = `
           <div style="text-align: center; padding: 20px;">
             <div style="width: 80px; height: 80px; background: {{ section.settings.primary_color | default: '#D4A574' }}; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white;">
               ✓
@@ -1618,225 +1343,224 @@
             </div>
           </div>
         `;
-                    }
-                }
+      }
+    }
 
-                setupDiscountCodeCopy(discountCode) {
-                    const copyButton = document.getElementById('copy-discount-code');
-                    if (!copyButton) return;
+    setupDiscountCodeCopy(discountCode) {
+      const copyButton = document.getElementById('copy-discount-code');
+      if (!copyButton) return;
 
-                    copyButton.addEventListener('click', async () => {
-                        try {
-                            if (navigator.clipboard) {
-                                await navigator.clipboard.writeText(discountCode);
-                            } else {
-                                // Fallback for older browsers
-                                const textArea = document.createElement('textarea');
-                                textArea.value = discountCode;
-                                document.body.appendChild(textArea);
-                                textArea.select();
-                                document.execCommand('copy');
-                                document.body.removeChild(textArea);
-                            }
+      copyButton.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard) {
+            await navigator.clipboard.writeText(discountCode);
+          } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = discountCode;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+          }
 
-                            // Show visual feedback
-                            copyButton.style.color = '#10b981';
-                            setTimeout(() => {
-                                copyButton.style.color = '#6B7280';
-                            }, 1000);
-                        } catch (error) {
-                            console.error('Failed to copy discount code:', error);
-                        }
-                    });
-                }
+          // Show visual feedback
+          copyButton.style.color = '#10b981';
+          setTimeout(() => {
+            copyButton.style.color = '#6B7280';
+          }, 1000);
+        } catch (error) {
+          console.error('Failed to copy discount code:', error);
+        }
+      });
+    }
 
-                setupApplyCodeButton(discountCode) {
-                    const applyButton = document.getElementById('apply-code-button');
-                    if (!applyButton) return;
+    setupApplyCodeButton(discountCode) {
+      const applyButton = document.getElementById('apply-code-button');
+      if (!applyButton) return;
 
-                    applyButton.addEventListener('click', async () => {
-                        try {
-                            // Apply the discount code using Joy SDK or redirect to cart
-                            if (window.joyInstance && typeof window.joyInstance.applyDiscount === 'function') {
-                                await window.joyInstance.applyDiscount(discountCode);
-                            } else {
-                                // Fallback: redirect to cart with discount code
-                                const cartUrl = '/cart';
-                                const discountUrl = `/discount/${discountCode}`;
-                                window.location.href = discountUrl + '?redirect=' + encodeURIComponent(cartUrl);
-                            }
-                        } catch (error) {
-                            console.error('Failed to apply discount code:', error);
-                            // Still redirect as fallback
-                            const cartUrl = '/cart';
-                            const discountUrl = `/discount/${discountCode}`;
-                            window.location.href = discountUrl + '?redirect=' + encodeURIComponent(cartUrl);
-                        }
-                    });
-                }
+      applyButton.addEventListener('click', async () => {
+        try {
+          // Apply the discount code using Joy SDK or redirect to cart
+          if (window.joyInstance && typeof window.joyInstance.applyDiscount === 'function') {
+            await window.joyInstance.applyDiscount(discountCode);
+          } else {
+            // Fallback: redirect to cart with discount code
+            const cartUrl = '/cart';
+            const discountUrl = `/discount/${discountCode}`;
+            window.location.href = discountUrl + '?redirect=' + encodeURIComponent(cartUrl);
+          }
+        } catch (error) {
+          console.error('Failed to apply discount code:', error);
+          // Still redirect as fallback
+          const cartUrl = '/cart';
+          const discountUrl = `/discount/${discountCode}`;
+          window.location.href = discountUrl + '?redirect=' + encodeURIComponent(cartUrl);
+        }
+      });
+    }
 
-                reattachModalEventListeners(modal, program) {
-                    // Re-attach close functionality
-                    const closeBtn = modal.querySelector('.joy-redeem-modal-close');
-                    if (closeBtn) {
-                        closeBtn.addEventListener('click', () => this.closeRedeemModal());
-                    }
+    reattachModalEventListeners(modal, program) {
+      // Re-attach close functionality
+      const closeBtn = modal.querySelector('.joy-redeem-modal-close');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => this.closeRedeemModal());
+      }
 
-                    // Re-attach overlay click to close
-                    modal.addEventListener('click', (e) => {
-                        if (e.target.classList.contains('joy-redeem-modal-overlay')) {
-                            this.closeRedeemModal();
-                        }
-                    });
-                }
+      // Re-attach overlay click to close
+      modal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('joy-redeem-modal-overlay')) {
+          this.closeRedeemModal();
+        }
+      });
+    }
 
-                showRedeemError(message) {
-                    const modalBody = document.querySelector('.joy-redeem-modal-body');
-                    if (modalBody) {
-                        const errorDiv = modalBody.querySelector('.joy-redeem-error') || document.createElement('div');
-                        errorDiv.className = 'joy-redeem-error';
-                        errorDiv.innerHTML = `
-                    <div style="background: #fee; border: 1px solid #fcc; border-radius: 6px; padding: 12px; margin: 16px 0; color: #c33;">
-                        <strong>Error:</strong> ${message}
-                    </div>
-                    `;
+    showRedeemError(message) {
+      const modalBody = document.querySelector('.joy-redeem-modal-body');
+      if (modalBody) {
+        const errorDiv = modalBody.querySelector('.joy-redeem-error') || document.createElement('div');
+        errorDiv.className = 'joy-redeem-error';
+        errorDiv.innerHTML = `
+          <div style="background: #fee; border: 1px solid #fcc; border-radius: 6px; padding: 12px; margin: 16px 0; color: #c33;">
+            <strong>Error:</strong> ${message}
+          </div>
+        `;
 
-                        if (!modalBody.querySelector('.joy-redeem-error')) {
-                            modalBody.insertBefore(errorDiv, modalBody.querySelector('.joy-redeem-modal-actions'));
-                        }
+        if (!modalBody.querySelector('.joy-redeem-error')) {
+          modalBody.insertBefore(errorDiv, modalBody.querySelector('.joy-redeem-modal-actions'));
+        }
 
-                        // Remove error after 5 seconds
-                        setTimeout(() => errorDiv.remove(), 5000);
-                    }
-                }
+        // Remove error after 5 seconds
+        setTimeout(() => errorDiv.remove(), 5000);
+      }
+    }
 
-                closeRedeemModal() {
-                    const modal = document.querySelector('.joy-redeem-modal');
-                    if (modal) {
-                        modal.style.animation = 'joy-modal-fade-out 0.3s ease forwards';
-                        setTimeout(() => {
-                            modal.remove();
-                            // Clean up any event listeners
-                            document.removeEventListener('keydown', this.handleEscape);
-                        }, 300);
-                    }
-                }
+    closeRedeemModal() {
+      const modal = document.querySelector('.joy-redeem-modal');
+      if (modal) {
+        modal.style.animation = 'joy-modal-fade-out 0.3s ease forwards';
+        setTimeout(() => {
+          modal.remove();
+          // Clean up any event listeners
+          document.removeEventListener('keydown', this.handleEscape);
+        }, 300);
+      }
+    }
 
-                getCustomerPoints() {
-                    try {
-                        // First try cached customer data
-                        const cachedPoints = this.getCachedCustomerPoints();
-                        if (cachedPoints !== null) return cachedPoints;
+    getCustomerPoints() {
+      try {
+        // First try cached customer data
+        const cachedPoints = this.getCachedCustomerPoints();
+        if (cachedPoints !== null) return cachedPoints;
 
-                        // Try Joy SDK global data
-                        const globalPoints = this.getGlobalJoyPoints();
-                        if (globalPoints !== null) return globalPoints;
+        // Try Joy SDK global data
+        const globalPoints = this.getGlobalJoyPoints();
+        if (globalPoints !== null) return globalPoints;
 
-                        // Fallback to Joy instance customer data
-                        const instancePoints = this.getInstanceCustomerPoints();
-                        if (instancePoints !== null) return instancePoints;
+        // Fallback to Joy instance customer data
+        const instancePoints = this.getInstanceCustomerPoints();
+        if (instancePoints !== null) return instancePoints;
 
-                        return 0;
-                    } catch (error) {
-                        console.error('Error getting customer points:', error);
-                        return 0;
-                    }
-                }
+        return 0;
+      } catch (error) {
+        console.error('Error getting customer points:', error);
+        return 0;
+      }
+    }
 
-                getCachedCustomerPoints() {
-                    try {
-                        if (this.cachedCustomer && this.cachedCustomer.point) {
-                            return parseInt(this.cachedCustomer.point) || 0;
-                        }
-                        return null;
-                    } catch (error) {
-                        console.error('Error accessing cached customer points:', error);
-                        return null;
-                    }
-                }
+    getCachedCustomerPoints() {
+      try {
+        if (this.cachedCustomer && this.cachedCustomer.point) {
+          return parseInt(this.cachedCustomer.point) || 0;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error accessing cached customer points:', error);
+        return null;
+      }
+    }
 
-                getGlobalJoyPoints() {
-                    try {
-                        if (window.AVADA_JOY?.points) {
-                            return parseInt(window.AVADA_JOY.points) || 0;
-                        }
-                        return null;
-                    } catch (error) {
-                        console.error('Error accessing global Joy points:', error);
-                        return null;
-                    }
-                }
+    getGlobalJoyPoints() {
+      try {
+        if (window.AVADA_JOY?.points) {
+          return parseInt(window.AVADA_JOY.points) || 0;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error accessing global Joy points:', error);
+        return null;
+      }
+    }
 
-                getInstanceCustomerPoints() {
-                    try {
-                        if (window.joyInstance && window.joyInstance.customer && window.joyInstance.customer.point) {
-                            return parseInt(window.joyInstance.customer.point) || 0;
-                        }
-                        return null;
-                    } catch (error) {
-                        console.error('Error accessing Joy instance customer points:', error);
-                        return null;
-                    }
-                }
+    getInstanceCustomerPoints() {
+      try {
+        if (window.joyInstance && window.joyInstance.customer && window.joyInstance.customer.point) {
+          return parseInt(window.joyInstance.customer.point) || 0;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error accessing Joy instance customer points:', error);
+        return null;
+      }
+    }
 
-                getProgramDescription(program) {
-                    if (program.description) {
-                        return program.description;
-                    }
+    getProgramDescription(program) {
+      if (program.description) {
+        return program.description;
+      }
 
-                    const isDynamic = this.isDynamicProgram(program);
+      const isDynamic = this.isDynamicProgram(program);
 
-                    if (isDynamic) {
-                        return this.getDynamicProgramDescription(program);
-                    }
+      if (isDynamic) {
+        return this.getDynamicProgramDescription(program);
+      }
 
-                    if (program.spendPoint || program.pointCost) {
-                        const points = program.spendPoint || program.pointCost;
-                        return `Spend ${this.formatPointsWithText(points)} to redeem this reward`;
-                    }
+      if (program.spendPoint || program.pointCost) {
+        const points = program.spendPoint || program.pointCost;
+        return `Spend ${this.formatPointsWithText(points)} to redeem this reward`;
+      }
 
-                    return `Redeem this reward with your ${this.getPointTerminology().plural}`;
-                }
+      return `Redeem this reward with your ${this.getPointTerminology().plural}`;
+    }
 
-                getDynamicProgramDescription(program) {
-                    if (this.isPercentageDiscount(program)) {
-                        const percentage = program.earnPercentage || program.discount || 0;
-                        return `Get ${percentage}% off your purchase`;
-                    }
+    getDynamicProgramDescription(program) {
+      if (this.isPercentageDiscount(program)) {
+        const percentage = program.earnPercentage || program.discount || 0;
+        return `Get ${percentage}% off your purchase`;
+      }
 
-                    if (this.isAmountDiscount(program)) {
-                        const amount = program.earnAmount || program.discount || 0;
-                        return `Get $${amount} off your purchase`;
-                    }
+      if (this.isAmountDiscount(program)) {
+        const amount = program.earnAmount || program.discount || 0;
+        return `Get $${amount} off your purchase`;
+      }
 
-                    // Default for points-for-dollars programs
-                    const ratio = program.earnAmount || 1;
-                    const points = program.spendPoint || 1;
-                    return `Exchange ${this.formatPointsWithText(points)} for $${ratio} discount`;
-                }
+      // Default for points-for-dollars programs
+      const ratio = program.earnAmount || 1;
+      const points = program.spendPoint || 1;
+      return `Exchange ${this.formatPointsWithText(points)} for $${ratio} discount`;
+    }
 
-                getFallbackEmoji(event) {
-                    const emojiMap = {
-                        discount: '💰',
-                        free_shipping: '🚚',
-                        gift_card: '🎁',
-                        product_discount: '🏷️',
-                        custom_reward: '⭐',
-                    };
-                    return emojiMap[event] || '🎁';
-                }
+    getFallbackEmoji(event) {
+      const emojiMap = {
+        'discount': '💰',
+        'free_shipping': '🚚',
+        'gift_card': '🎁',
+        'product_discount': '🏷️',
+        'custom_reward': '⭐'
+      };
+      return emojiMap[event] || '🎁';
+    }
 
-                showNoDataMessage(message) {
-                    this.innerHTML = `
+    showNoDataMessage(message) {
+      this.innerHTML = `
         <div class="joy-error-state">
           <h3>No programs available</h3>
           <p>${message}</p>
         </div>
       `;
-                }
-            }
-        );
     }
+  });
+}
 </script>
 
 {% schema %}
@@ -1869,42 +1593,16 @@
       "id": "header_alignment",
       "label": "Header Alignment",
       "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
+        {"value": "left", "label": "Left"},
+        {"value": "center", "label": "Center"},
+        {"value": "right", "label": "Right"}
       ],
       "default": "center"
     },
     {
       "type": "header",
-      "content": "Display Program"
-    },
-    {
-      "type": "select",
-      "id": "show_redeem",
-      "label": "Select program",
-      "options": [
-        { "value": "all", "label": "All" },
-        { "value": "free_product", "label": "Free products only" },
-        { "value": "discount_only", "label": "Discount only" },
-        { "value": "free_shipping", "label": "Free shipping only"}
-      ],
-      "default": "all"
-    },
-    {
-      "type": "range",
-      "id": "max_rewards",
-      "label": "Max rewards",
-      "min": 5,
-      "max": 10,
-      "step": 1,
-      "default": 5
-    },
-    {
-      "type": "header",
       "content": "Layout"
     },
-
     {
       "type": "range",
       "id": "max_width",
@@ -1934,6 +1632,34 @@
       "unit": "px",
       "label": "Card Gap",
       "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Display"
+    },
+    {
+      "type": "select",
+      "id": "display_redeeming_program",
+      "label": "Display redeeming program",
+       "options": [
+        {
+          "value": "all",
+          "label": "All"
+        },
+        {
+          "value": "free_gift",
+          "label": "Free product only"
+        },
+        {
+          "value": "discount",
+          "label": "Discount only"
+        },
+        {
+          "value": "free_shipping",
+          "label": "Free Shipping only"
+        }
+      ],
+      "default": "all"
     },
     {
       "type": "header",
@@ -2081,22 +1807,22 @@
     {
       "type": "range",
       "id": "icon_size",
-      "min": 64,
-      "max": 200,
+      "min": 48,
+      "max": 96,
       "step": 8,
       "unit": "px",
       "label": "Icon Container Size",
-      "default": 64
+      "default": 56
     },
     {
       "type": "range",
       "id": "icon_image_size",
-      "min": 64,
-      "max": 200,
+      "min": 24,
+      "max": 64,
       "step": 4,
       "unit": "px",
       "label": "Icon Image Size",
-      "default": 64
+      "default": 32
     },
     {
       "type": "color",
