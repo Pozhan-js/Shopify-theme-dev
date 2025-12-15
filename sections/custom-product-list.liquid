@@ -502,8 +502,11 @@ h3.product-title {
     const imageCount = parseInt(slider.dataset.count);
     let currentIndex = parseInt(slider.dataset.current);
     
-    // 使用无缝切换函数
-    navigateToImage(currentIndex - 1, slider, imageCount);
+    currentIndex = (currentIndex - 1 + imageCount) % imageCount;
+    slider.dataset.current = currentIndex;
+    
+    const translateX = -currentIndex * 100;
+    slider.style.transform = `translateX(${translateX}%)`;
   }
 
   function nextImage(event, button) {
@@ -515,8 +518,11 @@ h3.product-title {
     const imageCount = parseInt(slider.dataset.count);
     let currentIndex = parseInt(slider.dataset.current);
     
-    // 使用无缝切换函数
-    navigateToImage(currentIndex + 1, slider, imageCount);
+    currentIndex = (currentIndex + 1) % imageCount;
+    slider.dataset.current = currentIndex;
+    
+    const translateX = -currentIndex * 100;
+    slider.style.transform = `translateX(${translateX}%)`;
   }
 
   // 添加触摸滑动支持
@@ -548,96 +554,20 @@ h3.product-title {
         if (Math.abs(diff) > swipeThreshold) {
           if (diff > 0) {
             // 向左滑动，显示下一张图片
-            navigateToImage(currentIndex + 1, slider, imageCount);
+            currentIndex = (currentIndex + 1) % imageCount;
           } else {
             // 向右滑动，显示上一张图片
-            navigateToImage(currentIndex - 1, slider, imageCount);
+            currentIndex = (currentIndex - 1 + imageCount) % imageCount;
           }
+          
+          slider.dataset.current = currentIndex;
+          const translateX = -currentIndex * 100;
+          slider.style.transform = `translateX(${translateX}%)`;
         }
       }
     });
   }
   
-  // 无缝切换图片函数
-  function navigateToImage(targetIndex, slider, imageCount) {
-    let currentIndex = parseInt(slider.dataset.current);
-    
-    // 计算目标索引（处理循环）
-    let newIndex = targetIndex;
-    if (newIndex < 0) {
-      newIndex = imageCount - 1;
-    } else if (newIndex >= imageCount) {
-      newIndex = 0;
-    }
-    
-    // 检查是否启用了无缝轮播
-    const isSeamless = slider.dataset.seamless === 'true';
-    
-    if (isSeamless) {
-      // 无缝轮播模式
-      const targetPosition = -(newIndex + 1) * 100; // +1 因为前面添加了克隆图片
-      
-      slider.dataset.current = newIndex;
-      slider.style.transform = `translateX(${targetPosition}%)`;
-      
-      // 处理无缝循环的特殊情况
-      if (newIndex === 0 && currentIndex === imageCount - 1) {
-        // 从最后一张切换到第一张，滑动完成后重置位置
-        setTimeout(() => {
-          slider.style.transition = 'none';
-          slider.style.transform = 'translateX(-100%)';
-          slider.offsetHeight; // 强制重绘
-          setTimeout(() => {
-            slider.style.transition = 'transform 0.4s ease-in-out';
-          }, 50);
-        }, 400);
-      } else if (newIndex === imageCount - 1 && currentIndex === 0) {
-        // 从第一张切换到最后一张，滑动完成后重置位置
-        setTimeout(() => {
-          slider.style.transition = 'none';
-          slider.style.transform = `translateX(-${imageCount * 100}%)`;
-          slider.offsetHeight; // 强制重绘
-          setTimeout(() => {
-            slider.style.transition = 'transform 0.4s ease-in-out';
-          }, 50);
-        }, 400);
-      }
-    } else {
-      // 普通模式（只有一张图片或没有启用无缝轮播）
-      slider.dataset.current = newIndex;
-      const translateX = -newIndex * 100;
-      slider.style.transform = `translateX(${translateX}%)`;
-    }
-  }
-  
-  // 增强版无缝轮播初始化
-  function initSeamlessSliders() {
-    const sliders = document.querySelectorAll('.product-image-slider');
-    
-    sliders.forEach(slider => {
-      const images = Array.from(slider.querySelectorAll('.product-image'));
-      const imageCount = images.length;
-      
-      if (imageCount <= 1) return; // 如果只有一张图片，不需要处理
-      
-      // 克隆第一张和最后一张图片用于无缝切换
-      const firstImage = images[0].cloneNode(true);
-      const lastImage = images[imageCount - 1].cloneNode(true);
-      
-      // 添加到slider中
-      slider.appendChild(firstImage);
-      slider.insertBefore(lastImage, slider.firstChild);
-      
-      // 设置初始位置（显示真正的第一张图片）
-      slider.style.transform = 'translateX(-100%)';
-      slider.dataset.current = '0';
-      slider.dataset.seamless = 'true';
-    });
-  }
-  
-  // 页面加载完成后初始化
-  document.addEventListener('DOMContentLoaded', function() {
-    initSeamlessSliders();
-    initTouchSliders();
-  });
+  // 页面加载完成后初始化触摸滑动
+  document.addEventListener('DOMContentLoaded', initTouchSliders);
 </script>
