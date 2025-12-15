@@ -183,6 +183,29 @@ h3.product-title {
 .next {
   right: 1rem;
 }
+
+/* 移动端隐藏箭头按钮 */
+@media (max-width: 768px) {
+  .image-nav {
+    display: none;
+  }
+  
+  /* 移动端优化滑动体验 */
+  .product-image-slider {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  .product-image-slider:active {
+    cursor: grabbing;
+  }
+  
+  .product-image-container {
+    touch-action: pan-y;
+  }
+}
 .product-header {
   display: flex;
   justify-content: space-between;
@@ -501,4 +524,50 @@ h3.product-title {
     const translateX = -currentIndex * 100;
     slider.style.transform = `translateX(${translateX}%)`;
   }
+
+  // 添加触摸滑动支持
+  function initTouchSliders() {
+    const sliders = document.querySelectorAll('.product-image-slider');
+    
+    sliders.forEach(slider => {
+      let touchStartX = 0;
+      let touchEndX = 0;
+      let currentIndex = parseInt(slider.dataset.current);
+      const imageCount = parseInt(slider.dataset.count);
+      
+      // 触摸开始
+      slider.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      
+      // 触摸结束
+      slider.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+      
+      // 处理滑动逻辑
+      function handleSwipe() {
+        const swipeThreshold = 50; // 最小滑动距离阈值
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+          if (diff > 0) {
+            // 向左滑动，显示下一张图片
+            currentIndex = (currentIndex + 1) % imageCount;
+          } else {
+            // 向右滑动，显示上一张图片
+            currentIndex = (currentIndex - 1 + imageCount) % imageCount;
+          }
+          
+          slider.dataset.current = currentIndex;
+          const translateX = -currentIndex * 100;
+          slider.style.transform = `translateX(${translateX}%)`;
+        }
+      }
+    });
+  }
+  
+  // 页面加载完成后初始化触摸滑动
+  document.addEventListener('DOMContentLoaded', initTouchSliders);
 </script>
