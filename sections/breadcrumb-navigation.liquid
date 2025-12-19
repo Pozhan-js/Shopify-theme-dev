@@ -255,6 +255,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    width: 100%;
   }
 
   .breadcrumb-item {
@@ -384,11 +385,16 @@
   @media (max-width: 768px) {
     .breadcrumb-container {
       padding: 0 15px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .breadcrumb-list {
       gap: calc({{ section.settings.item_spacing }}px * 0.5);
       min-gap: 4px;
+      flex-wrap: nowrap;
+      min-width: max-content;
+      padding-bottom: 6px;
     }
 
     .breadcrumb-item {
@@ -396,6 +402,7 @@
       font-size: calc(12px * 0.75);
       min-gap: 4px;
       min-font-size: 10px;
+      flex-shrink: 0;
     }
 
     .breadcrumb-home-icon {
@@ -407,6 +414,34 @@
       width: 6px;
       height: 10px;
     }
+
+    /* 平板端文本优化 */
+    .breadcrumb-text,
+    .breadcrumb-link {
+      max-width: none;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    /* 为长文本添加智能截断 */
+    .breadcrumb-text,
+    .breadcrumb-link {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 180px;
+    }
+
+    /* 当前页面项保持单行 */
+    .breadcrumb-current .breadcrumb-current-text {
+      white-space: nowrap;
+      max-width: 150px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
   }
 
   /* 超小屏幕优化 */
@@ -417,15 +452,21 @@
 
     .breadcrumb-container {
       padding: 0 10px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .breadcrumb-list {
       gap: clamp(4px, 1vw, 8px);
+      flex-wrap: nowrap;
+      min-width: max-content;
+      padding-bottom: 8px;
     }
 
     .breadcrumb-item {
       gap: clamp(4px, 1vw, 6px);
       font-size: clamp(10px, 2.5vw, 12px);
+      flex-shrink: 0;
     }
 
     .breadcrumb-home-icon {
@@ -438,13 +479,70 @@
       height: clamp(8px, 2vw, 12px);
     }
 
-    /* 移动端文本截断 */
+    /* 移动端文本优化 - 移除强制截断 */
     .breadcrumb-text,
     .breadcrumb-link {
-      max-width: 120px;
+      max-width: none;
+      overflow: visible;
+      text-overflow: clip;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    /* 可选：为长文本添加渐变截断效果 */
+    .breadcrumb-text,
+    .breadcrumb-link {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
+    /* 当前页面项保持单行 */
+    .breadcrumb-current .breadcrumb-current-text {
       white-space: nowrap;
+      max-width: 120px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  /* 极超小屏幕优化 (320px以下) */
+  @media (max-width: 320px) {
+    .breadcrumb-container {
+      padding: 0 8px;
+    }
+
+    .breadcrumb-list {
+      gap: 2px;
+      padding-bottom: 6px;
+    }
+
+    .breadcrumb-item {
+      gap: 2px;
+      font-size: 10px;
+    }
+
+    .breadcrumb-home-icon {
+      width: 12px;
+      height: 12px;
+    }
+
+    .breadcrumb-separator-icon {
+      width: 6px;
+      height: 8px;
+    }
+
+    /* 极超小屏幕文本截断 */
+    .breadcrumb-text,
+    .breadcrumb-link {
+      max-width: 100px;
+      -webkit-line-clamp: 1;
+    }
+
+    .breadcrumb-current .breadcrumb-current-text {
+      max-width: 80px;
     }
   }
 </style>
