@@ -16,7 +16,7 @@
       {% endif %}
       <div
         class="background-overlay"
-        style="background-color: {{ section.settings.overlaycolor | default: '#000000' }}; opacity: {{ section.settings.overlayopacity | default: 50 |  divided_by: 100.0 }};"
+        {% comment %} style="background-color: {{ section.settings.overlaycolor | default: '#000000' }}; opacity: {{ section.settings.overlayopacity | default: 50 |  divided_by: 100.0 }};" {% endcomment %}
       ></div>
     </div>
 
@@ -173,8 +173,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2;
-    mix-blend-mode: overlay;
+    z-index: 999 !important; /* 强制高于背景图 */
+    background-color: {{ section.settings.overlaycolor | default: '#CF2424' }} !important;
+    opacity: {{ section.settings.overlayopacity | default: 50 | divided_by: 100.0 }} !important;
+    mix-blend-mode: multiply !important; /* 增强颜色融合，必加 */
+    pointer-events: none !important; /* 不影响按钮点击 */
   }
 
   .contact-hero-content {
