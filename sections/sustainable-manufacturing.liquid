@@ -58,7 +58,7 @@
     <!-- 统计数据轮播区域 -->
     <div class="sustainable-manufacturing-statistics-carousel">
       <div class="sustainable-manufacturing-carousel-container">
-        <button class="sustainable-manufacturing-carousel-btn sustainable-manufacturing-prev-btn" aria-label="Previous">
+        {% comment %} <button class="sustainable-manufacturing-carousel-btn sustainable-manufacturing-prev-btn" aria-label="Previous">
           <svg
             width="24"
             height="24"
@@ -72,7 +72,7 @@
               stroke-linecap="round"
               stroke-linejoin="round" />
           </svg>
-        </button>
+        </button> {% endcomment %}
 
         <div class="sustainable-manufacturing-carousel-wrapper">
           <div class="sustainable-manufacturing-carousel-track">
@@ -81,11 +81,18 @@
               <div class="sustainable-manufacturing-statistic-item" {{ block.shopifyattributes }}>
                 <div class="sustainable-manufacturing-statistic-image">
                   {% if block.settings.image != blank %}
+                    {% assign image_link = block.settings.image_link | default: '/' %}
+                      <!-- 关键：判断是否配置了链接，有则渲染a标签，无则仅显示图片 -->
+                      {% if block.settings.image_link != blank%}
+                        <a href="{{ block.settings.image_link }}" {% comment %} 可选：新窗口打开加 target="_blank" rel="noopener noreferrer" {% endcomment %}>
+                      {% endif %}
                     <img
                       src="{{ block.settings.image | img_url: '400x300' }}"
                       alt="{{ block.settings.number }}"
-                      loading="lazy"
-                    >
+                      loading="lazy">
+                      {% if block.settings.image_link != blank %}
+                        </a>
+                      {% endif %}
                   {% else %}
                     <div class="sustainable-manufacturing-placeholder-image">
                       <svg
@@ -122,7 +129,7 @@
                 </div>
               </div>
             {% endfor %}
-            <!-- 克隆前itemsPerView个元素到末尾，实现无缝循环 -->
+            {% comment %} <!-- 克隆前itemsPerView个元素到末尾，实现无缝循环 -->
             {% assign statblocks = section.blocks | where: 'type', 'statistic' %}
             {% for block in statblocks limit: 3 %}
               <div class="sustainable-manufacturing-statistic-item clone-item" {{ block.shopifyattributes }}>
@@ -151,9 +158,9 @@
                           width="100"
                           height="50"
                           fill="#ddd" />
-                      </svg>
+                      </svg> {% endcomment %}
                     </div>
-                  {% endif %}
+                  {% comment %} {% endif %}
                 </div>
                 <div class="sustainable-manufacturing-statistic-content">
                   {% if block.settings.number != blank %}
@@ -201,7 +208,7 @@
           ></button>
         {% endfor %}
       </div>
-    </div>
+    </div> {% endcomment %}
   </div>
 </div>
 
@@ -302,6 +309,7 @@
   /* 轮播样式 */
   .sustainable-manufacturing-statistics-carousel {
     position: relative;
+    width:100%
   }
 
   .sustainable-manufacturing-carousel-container {
@@ -309,6 +317,8 @@
     display: flex;
     align-items: center;
     gap: 20px;
+    max-width: 100%;
+    justify-content:center;
   }
 
   .sustainable-manufacturing-carousel-wrapper {
@@ -316,22 +326,26 @@
     overflow: hidden;
     border-radius: 12px;
     min-width: 0;
+    width:100%;
+    max-width:1400px;
   }
 
   .sustainable-manufacturing-carousel-track {
     display: flex;
-    transition: transform 0.5s ease;
-    width: fit-content;
-  }
+    {% comment %} transition: transform 0.5s ease; {% endcomment %}
+    width: 100%;
+    flex-wrap:nowrap;
+    justify-content: space-around;
+    }
 
   .sustainable-manufacturing-statistic-item {
     flex-shrink: 0;
-    width: 456px !important;
-    min-width: 456px !important;
-    max-width: 456px !important;
-    {% comment %} height: 626px; {% endcomment %}
-    height: auto;
-    margin-right: 30px;
+    width: 32%;
+    min-width: 30%;
+    max-width: 33%;
+    height: 626px;
+    {% comment %} height: auto;
+    margin-right: 30px; {% endcomment %}
     box-sizing: border-box;
     background-color: white;
     border-radius: 8px;
@@ -339,12 +353,12 @@
   }
 
   .sustainable-manufacturing-statistic-image {
-    width: 456px !important;
-    min-width: 456px !important;
-    max-width: 456px !important;
-    height: 360px !important;
-    min-height: 360px !important;
-    max-height: 360px !important;
+    width: 100%;
+    {% comment %} min-width: 456px !important;
+    max-width: 456px !important; {% endcomment %}
+    height: 360px;
+    {% comment %} min-height: 360px !important;
+    max-height: 360px !important; {% endcomment %}
     border-radius: 8px;
     overflow: hidden;
     background: #f8f8f8;
@@ -353,7 +367,11 @@
   .sustainable-manufacturing-statistic-image img {
     width: 100%;
     height: 100%;
+    transition: transform 0.3s ease;
     object-fit: cover;
+  }
+   .sustainable-manufacturing-statistic-item:hover .sustainable-manufacturing-statistic-image img{
+    transform: scale(1.05);
   }
 
   .sustainable-manufacturing-placeholder-image {
@@ -504,6 +522,7 @@
     .sustainable-manufacturing-carousel-track {
       transition: none;
       transform: none !important;
+      justify-content: space-around;
     }
 
     .sustainable-manufacturing-statistic-item {
@@ -583,7 +602,7 @@
   }
 </style>
 
-<script>
+{% comment %} <script>
         document.addEventListener('DOMContentLoaded', function() {
           const carousel = document.querySelector('.sustainable-manufacturing-carousel-track');
           const carouselWrapper = document.querySelector('.sustainable-manufacturing-carousel-wrapper');
@@ -769,7 +788,7 @@
           setupCarousel();
           updateCarousel(false);
         });
-</script>
+</script> {% endcomment %}
 
 {% schema %}
 {
@@ -1133,7 +1152,7 @@
       "type": "checkbox",
       "id": "autoplay",
       "label": "自动播放",
-      "default": true
+      "default": false
     },
     {
       "type": "range",
@@ -1142,7 +1161,7 @@
       "min": 3,
       "max": 10,
       "step": 1,
-      "default": 3,
+      "default": 5,
       "unit": "秒"
     }
   ],
@@ -1178,6 +1197,12 @@
           "type": "image_picker",
           "id": "image",
           "label": "统计图片"
+        },
+        {
+          "type": "url",
+          "id": "image_link",
+          "label": "图片跳转链接",
+          "info": "支持内部页面（如/pages/xxx）或外部链接（如https://xxx.com）"
         },
         {
           "type": "text",
