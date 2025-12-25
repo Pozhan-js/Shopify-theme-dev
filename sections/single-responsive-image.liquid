@@ -1,0 +1,108 @@
+{% comment %} 单张响应式图片模块 - 支持后台配置宽高/边距，适配手机端 {% endcomment %}
+<div class="single-responsive-image-module" 
+     style="
+       margin-top: {{ section.settings.margin_top }}px; /* 后台配置上外边距 */
+       margin-bottom: {{ section.settings.margin_bottom }}px; /* 后台配置下外边距 */
+       padding: {{ section.settings.padding }}px; /* 后台配置内边距 */
+       max-width: 100%;
+       box-sizing: border-box;
+     ">
+  {% if section.settings.image != blank %}
+    {% comment %} 核心：图片渲染 + 响应式样式 {% endcomment %}
+    <img 
+      src="{{ section.settings.image | image_url: width: section.settings.image_width, height: section.settings.image_height }}" 
+      alt="{{ section.settings.image.alt | default: 'Custom Image' }}"
+      class="single-responsive-image-module__img"
+      style="
+        width: {{ section.settings.image_width }}px;
+        height: {{ section.settings.image_height }}px;
+        object-fit: contain; /* 图片完整显示，不变形（推荐） */
+        display: block;
+        margin: 0 auto; /* 图片水平居中 */
+      "
+    >
+  {% else %}
+    {% comment %} 无图片时的占位框 {% endcomment %}
+    <div class="single-responsive-image-placeholder"
+         style="
+           width: {{ section.settings.image_width }}px;
+           height: {{ section.settings.image_height }}px;
+           background: #f5f5f5;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           color: #999;
+           margin: 0 auto;
+         ">
+      请上传图片
+    </div>
+  {% endif %}
+</div>
+
+{% comment %} 后台配置项（Schema）- 仅保留核心参数 {% endcomment %}
+{% schema %}
+{
+  "name": "单张响应式图片",
+  "tag": "section",
+  "class": "single-responsive-image-section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "上传图片"
+    },
+    {
+      "type": "number",
+      "id": "image_width",
+      "label": "图片宽度（px）",
+      "default": 300,
+    },
+    {
+      "type": "number",
+      "id": "image_height",
+      "label": "图片高度（px）",
+      "default": 200,
+    },
+    {
+      "type": "number",
+      "id": "margin_top",
+      "label": "模块上外边距（px）",
+      "default": 20,
+    },
+    {
+      "type": "number",
+      "id": "margin_bottom",
+      "label": "模块下外边距（px）",
+      "default": 20,
+    },
+    {
+      "type": "number",
+      "id": "padding",
+      "label": "模块内边距（px）",
+      "default": 10,
+    }
+  ],
+  "presets": [
+    {
+      "name": "单张响应式图片"
+    }
+  ]
+}
+{% endschema %}
+
+{% comment %} 响应式样式（核心：手机端适配） {% endcomment %}
+{% style %}
+/* 手机端适配：宽度≤768px时生效 */
+@media (max-width: 768px) {
+  .single-responsive-image-module__img {
+    width: 100% !important; /* 图片宽度占满容器 */
+    height: auto !important; /* 高度自动，避免变形 */
+    max-width: {{ section.settings.image_width }}px; /* 最大不超过后台设置的宽度 */
+  }
+  .single-responsive-image-placeholder {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 150px; /* 占位框最小高度，避免太矮 */
+  }
+}
+{% endstyle %}
