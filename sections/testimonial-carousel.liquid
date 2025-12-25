@@ -2,7 +2,7 @@
 <div class="testimonial-carousel-section">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
-      {% for block in section.blocks %}
+      {% for block in section.blocks %} {# 移除个数限制，保留所有案例 #}
         {% if block.settings.image != blank and block.settings.name != blank %}
           <div class="testimonial-card">
             {% comment %} 左侧区域：上层红底 + 下层“红棕背景+白色子div” {% endcomment %}
@@ -42,7 +42,7 @@
     <div class="testimonial-carousel-nav" id="testimonialNav">
       <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
       <div class="testimonial-nav-tracks">
-        {% for block in section.blocks %}
+        {% for block in section.blocks %} {# 移除个数限制，显示所有指示器 #}
           <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
         {% endfor %}
       </div>
@@ -60,7 +60,7 @@
     {
       "type": "testimonial_card",
       "name": "案例卡片",
-      "limit": 10,
+      // 移除limit限制，允许添加任意个数案例
       "settings": [
         {
           "type": "image_picker",
@@ -139,9 +139,9 @@
   transition: transform 0.5s ease;
 }
 
-/* 案例卡片：左55%+右45% */
+/* 案例卡片：大屏固定显示3张（仅修改宽度，保留所有原有样式） */
 .testimonial-card {
-  flex: 0 0 calc(32%);
+  flex: 0 0 calc(33.333% - 13.333px); /* 3张平分宽度，扣除gap间距 */
   min-width: 320px;
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -249,7 +249,7 @@
   object-fit: cover;
 }
 
-/* 响应式适配 */
+/* 响应式适配（保留原有逻辑） */
 @media (max-width: 1200px) {
   .testimonial-card {
     flex: 0 0 calc(50% - 10px);
@@ -266,7 +266,7 @@
   }
 }
 
-/* 滑动指示器 */
+/* 滑动指示器（保留原有样式） */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
@@ -310,49 +310,67 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!cardContainer || cards.length === 0) return;
 
   let currentIndex = 0;
+  // 核心修改：大屏固定每次展示3张，小屏按原有逻辑
+  function getVisibleCardCount() {
+    if (window.innerWidth >= 1200) return 3; // 大屏强制显示3张
+    if (window.innerWidth >= 768) return 2;  // 平板2张
+    return 1;                                // 手机1张
+  }
   let visibleCards = getVisibleCardCount();
 
+  // 窗口 resize 时重新计算可见卡片数
   window.addEventListener('resize', function() {
     visibleCards = getVisibleCardCount();
     updateCarousel();
   });
 
+  // 上一组（每次移动3张，无重复轮播）
   navLeft.addEventListener('click', function() {
-    currentIndex = Math.max(currentIndex - visibleCards, 0);
+    currentIndex = Math.max(currentIndex - visibleCards, 0); // 不小于0，避免重复
     updateCarousel();
   });
 
+  // 下一组（每次移动3张，无重复轮播）
   navRight.addEventListener('click', function() {
-    const maxIndex = cards.length - visibleCards;
-    currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
+    const maxIndex = cards.length - visibleCards; // 最大索引=总数-3，避免显示不全
+    currentIndex = Math.min(currentIndex + visibleCards, maxIndex); // 不超过最大索引
     updateCarousel();
   });
 
+  // 指示器点击：始终跳转到对应组，显示3张（核心修改）
   navTracks.forEach(track => {
     track.addEventListener('click', function() {
       const index = parseInt(this.dataset.index);
-      currentIndex = index - (index % visibleCards);
+      // 关键逻辑：点击任意下标，都对齐到“3张一组”的起始位置
+      currentIndex = Math.floor(index / visibleCards) * visibleCards;
+      // 限制最大索引，避免显示不全
+      const maxIndex = cards.length - visibleCards;
+      currentIndex = Math.min(currentIndex, maxIndex);
       updateCarousel();
     });
   });
 
+  // 更新轮播位置+指示器状态
   function updateCarousel() {
-    const cardWidth = cards[0].offsetWidth + 20;
+    const cardWidth = cards[0].offsetWidth + 20; // 卡片宽度 + gap
     cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
     
+    // 指示器激活逻辑：当前组内的下标都激活
     navTracks.forEach((track, idx) => {
-      track.classList.toggle('active', idx === currentIndex);
+      track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
     });
+
+    // 禁用/启用箭头（到最左/最右时禁用）
+    navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
+    navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
+    const maxIndex = cards.length - visibleCards;
+    navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
+    navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
   }
 
-  function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 4;
-    if (window.innerWidth >= 768) return 2;
-    return 1;
-  }
-
+  // 初始化激活第一个指示器组
   if (navTracks.length > 0) {
-    navTracks[0].classList.add('active');
+    updateCarousel();
   }
 });
 {% endjavascript %}
