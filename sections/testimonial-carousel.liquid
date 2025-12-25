@@ -1,184 +1,333 @@
-{% comment %}
-  Testimonials Slider Section
-  - Swiper.js
-  - Arrow navigation
-  - Responsive
-{% endcomment %}
+{% comment %} 可点击互动的客户评价轮播模块（修复repeater无效错误） {% endcomment %}
+<div class="testimonial-carousel-section">
+  {% comment %} 轮播容器 {% endcomment %}
+  <div class="testimonial-carousel-container">
+    {% comment %} 轮播箭头（可点击切换） {% endcomment %}
+    <button class="testimonial-carousel-arrow testimonial-carousel-arrow--prev" aria-label="上一组评价">
+      ←
+    </button>
+    <button class="testimonial-carousel-arrow testimonial-carousel-arrow--next" aria-label="下一组评价">
+      →
+    </button>
 
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"
-/>
-
-<style>
-.testimonials-wrapper {
-  padding: 60px 0;
-}
-
-.testimonial-card {
-  background: #c92b2b;
-  color: #fff;
-  border-radius: 14px;
-  padding: 28px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.testimonial-header h3 {
-  font-size: 20px;
-  margin: 0 0 6px;
-  font-weight: 700;
-}
-
-.testimonial-header .title {
-  font-size: 14px;
-  opacity: 0.85;
-  margin-bottom: 10px;
-}
-
-.testimonial-content {
-  font-size: 14px;
-  line-height: 1.6;
-  opacity: 0.95;
-  margin-bottom: 20px;
-}
-
-.testimonial-footer {
-  margin-top: auto;
-}
-
-.testimonial-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid #fff;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  text-decoration: none;
-  transition: all .2s ease;
-}
-
-.testimonial-btn:hover {
-  background: #fff;
-  color: #c92b2b;
-}
-
-.swiper-button-next,
-.swiper-button-prev {
-  color: #333;
-}
-
-@media (max-width: 768px) {
-  .testimonials-wrapper {
-    padding: 40px 0;
-  }
-}
-</style>
-
-<div class="testimonials-wrapper">
-  <div class="swiper testimonials-swiper">
-    <div class="swiper-wrapper">
-
+    {% comment %} 评价卡片容器（轮播核心）- 遍历blocks而非repeater {% endcomment %}
+    <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
-        <div class="swiper-slide">
-          <div class="testimonial-card">
-            <div class="testimonial-header">
-              <h3>{{ block.settings.name }}</h3>
-              <div class="title">{{ block.settings.title }}</div>
-            </div>
-
-            <div class="testimonial-content">
-              {{ block.settings.content }}
-            </div>
-
-            {% if block.settings.link != blank %}
-              <div class="testimonial-footer">
-                <a class="testimonial-btn" href="{{ block.settings.link }}">
-                  Learn more →
+        {% if block.settings.image != blank and block.settings.name != blank %}
+          <div class="testimonial-card" data-block-id="{{ block.id }}">
+            <div class="testimonial-card__content">
+              <h3 class="testimonial-card__name">{{ block.settings.name }}</h3>
+              <p class="testimonial-card__role">{{ block.settings.role }}</p>
+              <span class="testimonial-card__country">{{ block.settings.country }}</span>
+              <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
+              {% if block.settings.button_link != blank %}
+                <a href="{{ block.settings.button_link }}" class="testimonial-card__button" target="{{ block.settings.button_target }}">
+                  {{ block.settings.button_text | default: "LEARN MORE" }}
                 </a>
-              </div>
-            {% endif %}
+              {% endif %}
+            </div>
+            <div class="testimonial-card__image">
+              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的评价">
+            </div>
           </div>
-        </div>
+        {% endif %}
       {% endfor %}
-
     </div>
-
-    <!-- Navigation -->
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
   </div>
+
+  {% comment %} 轮播指示器（可选） {% endcomment %}
+  {% if section.blocks.size > 0 %}
+    <div class="testimonial-carousel-indicators" id="testimonialIndicators">
+      {% for block in section.blocks %}
+        <button class="testimonial-carousel-indicator" data-index="{{ forloop.index0 }}" aria-label="切换到第{{ forloop.index }}个评价"></button>
+      {% endfor %}
+    </div>
+  {% endif %}
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  new Swiper('.testimonials-swiper', {
-    slidesPerView: 4,
-    spaceBetween: 24,
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-    },
-    breakpoints: {
-      0: {
-        slidesPerView: 1.1
-      },
-      768: {
-        slidesPerView: 2.2
-      },
-      1024: {
-        slidesPerView: 4
-      }
-    }
-  });
-});
-</script>
-
+{% comment %} 后台配置项（改用blocks实现可重复添加卡片） {% endcomment %}
 {% schema %}
 {
-  "name": "Testimonials Slider",
+  "name": "客户评价轮播（可点击）",
+  "tag": "section",
+  "class": "testimonial-carousel-section",
   "blocks": [
     {
-      "type": "testimonial",
-      "name": "Testimonial",
+      "type": "testimonial_card",
+      "name": "评价卡片",
+      "limit": 10, // 最多添加10个卡片（可选）
       "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "评价配图"
+        },
         {
           "type": "text",
           "id": "name",
-          "label": "Name",
+          "label": "客户姓名",
           "default": "James Rylee"
         },
         {
           "type": "text",
-          "id": "title",
-          "label": "Title",
+          "id": "role",
+          "label": "客户职位/机构",
           "default": "Owner, Core Point Studio"
         },
         {
+          "type": "text",
+          "id": "country",
+          "label": "国家/地区",
+          "default": "Australia"
+        },
+        {
           "type": "textarea",
-          "id": "content",
-          "label": "Content",
-          "default": "This is a testimonial content example. You can replace this text."
+          "id": "quote",
+          "label": "评价内容",
+          "default": "\"We've tried other pilates equipment before, but XS just feels right...\""
         },
         {
           "type": "url",
-          "id": "link",
-          "label": "Learn more link"
+          "id": "button_link",
+          "label": "按钮跳转链接"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "按钮文字",
+          "default": "LEARN MORE"
+        },
+        {
+          "type": "select",
+          "id": "button_target",
+          "label": "链接打开方式",
+          "options": [
+            { "value": "_self", "label": "当前窗口" },
+            { "value": "_blank", "label": "新窗口" }
+          ],
+          "default": "_self"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Testimonials Slider",
-      "category": "Custom"
+      "name": "客户评价轮播（可点击）"
     }
   ]
 }
 {% endschema %}
+
+{% comment %} 样式（响应式适配） {% endcomment %}
+{% style %}
+.testimonial-carousel-section {
+  max-width: 1400px;
+  margin: 40px auto;
+  padding: 0 20px;
+  position: relative;
+}
+.testimonial-carousel-container {
+  position: relative;
+  overflow: hidden;
+}
+.testimonial-carousel-cards {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.5s ease;
+  will-change: transform;
+}
+.testimonial-card {
+  flex: 0 0 calc(25% - 15px); /* 桌面端显示4个 */
+  min-width: 280px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  overflow: hidden;
+}
+@media (max-width: 1024px) {
+  .testimonial-card {
+    flex: 0 0 calc(50% - 10px); /* 平板显示2个 */
+  }
+}
+@media (max-width: 768px) {
+  .testimonial-card {
+    flex: 0 0 100%; /* 手机显示1个 */
+  }
+}
+.testimonial-card__content {
+  padding: 25px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.testimonial-card__name {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 5px;
+  color: #222;
+}
+.testimonial-card__role {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 10px;
+}
+.testimonial-card__country {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #e53935;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 3px;
+  margin-bottom: 15px;
+}
+.testimonial-card__quote {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #444;
+  margin: 0 0 20px;
+  flex: 1;
+}
+.testimonial-card__button {
+  display: inline-block;
+  padding: 8px 15px;
+  border: 1px solid #e53935;
+  color: #e53935;
+  text-decoration: none;
+  font-size: 14px;
+  border-radius: 3px;
+  transition: background 0.3s;
+  width: fit-content;
+  cursor: pointer; /* 强调可点击 */
+}
+.testimonial-card__button:hover {
+  background: #e53935;
+  color: #fff;
+}
+.testimonial-card__image {
+  height: 180px;
+  overflow: hidden;
+}
+.testimonial-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* 轮播箭头 */
+.testimonial-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #ddd;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.3s;
+}
+.testimonial-carousel-arrow:hover {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.testimonial-carousel-arrow--prev {
+  left: -20px;
+}
+.testimonial-carousel-arrow--next {
+  right: -20px;
+}
+@media (max-width: 768px) {
+  .testimonial-carousel-arrow--prev { left: 10px; }
+  .testimonial-carousel-arrow--next { right: 10px; }
+}
+/* 轮播指示器 */
+.testimonial-carousel-indicators {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.testimonial-carousel-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ddd;
+  border: none;
+  cursor: pointer;
+}
+.testimonial-carousel-indicator.active {
+  background: #e53935;
+}
+{% endstyle %}
+
+{% comment %} 交互逻辑（轮播+点击） {% endcomment %}
+{% javascript %}
+document.addEventListener('DOMContentLoaded', function() {
+  const cardContainer = document.getElementById('testimonialCards');
+  const cards = document.querySelectorAll('.testimonial-card');
+  const prevBtn = document.querySelector('.testimonial-carousel-arrow--prev');
+  const nextBtn = document.querySelector('.testimonial-carousel-arrow--next');
+  const indicators = document.querySelectorAll('.testimonial-carousel-indicator');
+  
+  if (!cardContainer || cards.length === 0) return;
+
+  let currentIndex = 0;
+  let visibleCards = getVisibleCardCount(); // 计算当前屏幕可见卡片数
+
+  // 窗口 resize 时重新计算可见卡片数
+  window.addEventListener('resize', function() {
+    visibleCards = getVisibleCardCount();
+    updateCarousel();
+  });
+
+  // 上一组
+  prevBtn.addEventListener('click', function() {
+    currentIndex = Math.max(currentIndex - visibleCards, 0);
+    updateCarousel();
+  });
+
+  // 下一组
+  nextBtn.addEventListener('click', function() {
+    const maxIndex = cards.length - visibleCards;
+    currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
+    updateCarousel();
+  });
+
+  // 指示器点击
+  indicators.forEach(indicator => {
+    indicator.addEventListener('click', function() {
+      const index = parseInt(this.dataset.index);
+      currentIndex = index - (index % visibleCards); // 对齐到可见组
+      updateCarousel();
+    });
+  });
+
+  // 更新轮播位置+指示器状态
+  function updateCarousel() {
+    const cardWidth = cards[0].offsetWidth + 20; // 卡片宽度 + gap
+    cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    
+    // 更新指示器激活状态
+    indicators.forEach((indicator, idx) => {
+      indicator.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
+    });
+  }
+
+  // 计算当前屏幕可见卡片数
+  function getVisibleCardCount() {
+    if (window.innerWidth >= 1024) return 4; // 桌面端4个
+    if (window.innerWidth >= 768) return 2; // 平板2个
+    return 1; // 手机1个
+  }
+
+  // 初始化激活第一个指示器
+  if (indicators.length > 0) {
+    indicators[0].classList.add('active');
+  }
+});
+{% endjavascript %}
