@@ -1,4 +1,4 @@
-<div class="testimonial-carousel-section">
+<div class="testimonial-carousel-section" data-autoplay-interval="{{ section.settings.autoplay_interval | default: 5000 }}">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
@@ -47,9 +47,21 @@
 
 {% schema %}
 {
-  "name": "客户案例轮播（最终匹配版）",
+  "name": "客户案例轮播（自动轮播版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "自动轮播间隔时间（毫秒）",
+      "min": 2000,
+      "max": 9000,
+      "step": 500,
+      "default": 5000,
+      "info": "设置自动轮播切换的时间间隔，1000毫秒 = 1秒"
+    }
+  ],
   "blocks": [
     {
       "type": "testimonial_card",
@@ -110,7 +122,10 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（最终匹配版）"
+      "name": "客户案例轮播（自动轮播版）",
+      "settings": {
+        "autoplay_interval": 5000
+      }
     }
   ]
 }
@@ -154,6 +169,7 @@
   max-height: 370px;
   overflow: hidden;
   border-radius: 12px;
+  cursor: pointer; /* 添加鼠标指针样式 */
   /* 移除min-width强制限制，避免窄屏溢出 */
 }
 
@@ -331,7 +347,15 @@ document.addEventListener('DOMContentLoaded', function() {
   
   if (!cardContainer || cards.length === 0) return;
 
+  // 获取自动轮播间隔时间（从Shopify设置）
+  const section = document.querySelector('.testimonial-carousel-section');
+  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
+  
   let currentIndex = 0;
+  let autoplayTimer = null;
+  let isAnimating = false;
+  let isAutoplayActive = true;
+  
   function getVisibleCardCount() {
     if (window.innerWidth >= 1200) return 3; // Mac端固定3张
     if (window.innerWidth >= 768) return 2;
@@ -350,17 +374,61 @@ document.addEventListener('DOMContentLoaded', function() {
     return width + marginLeft + marginRight; // 总宽度=卡片宽+左右margin
   }
 
+  // 启动自动轮播
+  function startAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    
+    autoplayTimer = setInterval(function() {
+      if (!isAutoplayActive || isAnimating) return;
+      
+      const maxIndex = cards.length - visibleCards;
+      const nextIndex = currentIndex + visibleCards;
+      
+      if (nextIndex > maxIndex) {
+        // 如果已经是最后一组，回到第一组
+        currentIndex = 0;
+      } else {
+        currentIndex = nextIndex;
+      }
+      
+      updateCarousel();
+    }, autoplayInterval);
+  }
+  
+  // 暂停自动轮播
+  function pauseAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+  }
+  
+  // 恢复自动轮播（离开卡片后）
+  function resumeAutoplay() {
+    if (isAutoplayActive && !autoplayTimer) {
+      startAutoplay();
+    }
+  }
+
   window.addEventListener('resize', function() {
     visibleCards = getVisibleCardCount();
     updateCarousel();
   });
 
   navLeft.addEventListener('click', function() {
+    // 点击时短暂暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
     currentIndex = Math.max(currentIndex - visibleCards, 0);
     updateCarousel();
   });
 
   navRight.addEventListener('click', function() {
+    // 点击时短暂暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
     const maxIndex = cards.length - visibleCards;
     currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
     updateCarousel();
@@ -368,6 +436,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   navTracks.forEach(track => {
     track.addEventListener('click', function() {
+      // 点击时短暂暂停自动轮播，3秒后恢复
+      pauseAutoplay();
+      setTimeout(resumeAutoplay, 3000);
+      
       const index = parseInt(this.dataset.index);
       currentIndex = Math.floor(index / visibleCards) * visibleCards;
       const maxIndex = cards.length - visibleCards;
@@ -391,9 +463,53 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxIndex = cards.length - visibleCards;
     navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
     navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
+    
+    // 标记动画开始
+    isAnimating = true;
+    setTimeout(() => {
+      isAnimating = false;
+    }, 500);
+  }
+
+  // 鼠标悬停暂停功能
+  cardContainer.addEventListener('mouseenter', function() {
+    pauseAutoplay();
+  });
+  
+  cardContainer.addEventListener('mouseleave', function() {
+    if (isAutoplayActive) {
+      startAutoplay();
+    }
+  });
+  
+  // 单个卡片悬停也暂停（增强体验）
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      pauseAutoplay();
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      // 检查鼠标是否还在整个轮播区域内
+      const containerRect = cardContainer.getBoundingClientRect();
+      const event = new MouseEvent('mouseleave');
+      if (!isMouseInContainer(event, containerRect) && isAutoplayActive) {
+        startAutoplay();
+      }
+    });
+  });
+  
+  // 辅助函数：检查鼠标是否在容器内
+  function isMouseInContainer(event, containerRect) {
+    return (
+      event.clientX >= containerRect.left &&
+      event.clientX <= containerRect.right &&
+      event.clientY >= containerRect.top &&
+      event.clientY <= containerRect.bottom
+    );
   }
 
   // 初始化
   updateCarousel();
+  startAutoplay(); // 默认开始自动轮播
 });
 {% endjavascript %}
