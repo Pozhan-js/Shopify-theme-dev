@@ -47,7 +47,7 @@
 
 {% schema %}
 {
-  "name": "客户案例轮播（最终匹配版）",
+  "name": "客户案例轮播（Mac优化版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
   "blocks": [
@@ -110,7 +110,7 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（最终匹配版）"
+      "name": "客户案例轮播（Mac优化版）"
     }
   ]
 }
@@ -127,34 +127,35 @@
 .testimonial-carousel-section {
   max-width: 1920px;
   margin: 20px auto;
-  padding: 0 10px;
+  padding: 0;
   width: 100%; /* 强制占满可用宽度 */
 }
 
 .testimonial-carousel-container {
   overflow: hidden;
   width: 100%; /* 确保容器宽度100% */
+  padding: 0 10px; /* 将padding移到容器内部 */
 }
 
-/* 核心修改：用padding代替gap，避免flex gap溢出 */
+/* 核心修改：用gap替代margin，精确控制间距 */
 .testimonial-carousel-cards {
   display: flex;
   transition: transform 0.5s ease;
   width: 100%;
+  gap: 16px; /* 使用gap替代margin，更精确控制间距 */
 }
 
 /* 适配Mac全分辨率：3张卡片精准分配宽度，无溢出 */
 .testimonial-card {
-  flex: 0 0 calc(33.333% - 16px); /* 调整间距计算，适配Mac */
-  margin: 0 8px; /* 用margin代替gap，避免溢出 */
+  flex: 0 0 calc(33.333% - 11px); /* 精确计算，减去gap的2/3 */
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
   height: auto;
   max-height: 370px;
+  min-height: 370px;
   overflow: hidden;
   border-radius: 12px;
-  /* 移除min-width强制限制，避免窄屏溢出 */
 }
 
 .testimonial-card__left {
@@ -254,33 +255,96 @@
   object-fit: cover;
 }
 
-/* Mac窄屏适配（1200-1440px） */
-@media (max-width: 1440px) and (min-width: 1200px) {
+/* Mac中等尺寸适配（1512px及以下） */
+@media (max-width: 1512px) {
   .testimonial-card {
-    flex: 0 0 calc(33.333% - 14px); /* 微调间距，适配1440px Mac */
-    margin: 0 7px;
+    flex: 0 0 calc(33.333% - 10.67px); /* 更精确的计算 */
   }
 }
 
-/* 平板适配 */
+/* Mac窄屏适配（1440px及以下） */
+@media (max-width: 1440px) {
+  .testimonial-carousel-container {
+    padding: 0 15px; /* 增加内边距，提供更多空间 */
+  }
+  
+  .testimonial-card {
+    flex: 0 0 calc(33.333% - 10px); /* 进一步调整间距 */
+    max-height: 360px;
+    min-height: 360px;
+  }
+  
+  .testimonial-card__header {
+    min-height: 130px;
+    padding: 12px 18px;
+  }
+  
+  .testimonial-card__name {
+    font-size: 22px;
+  }
+}
+
+/* 大平板适配（1200px及以下） */
 @media (max-width: 1200px) {
+  .testimonial-carousel-container {
+    padding: 0 12px;
+  }
+  
   .testimonial-card {
-    flex: 0 0 calc(50% - 10px);
-    margin: 0 5px;
+    flex: 0 0 calc(50% - 8px); /* 改为2列 */
   }
 }
 
-/* 手机适配 */
+/* 平板适配（992px及以下） */
+@media (max-width: 992px) {
+  .testimonial-carousel-cards {
+    gap: 12px;
+  }
+  
+  .testimonial-card {
+    flex: 0 0 calc(50% - 6px);
+    max-height: 350px;
+    min-height: 350px;
+  }
+}
+
+/* 手机适配（768px及以下） */
 @media (max-width: 768px) {
   .testimonial-card {
     flex: 0 0 100%;
     margin: 0;
     flex-direction: column;
     height: auto;
-    max-height: none; /* 移除最大高度限制 */
+    max-height: none;
+    min-height: auto;
   }
+  
   .testimonial-card__right {
     height: 250px;
+  }
+  
+  .testimonial-carousel-cards {
+    gap: 20px; /* 手机端增加间距 */
+  }
+}
+
+/* 小手机适配（480px及以下） */
+@media (max-width: 480px) {
+  .testimonial-carousel-container {
+    padding: 0 8px;
+  }
+  
+  .testimonial-carousel-cards {
+    gap: 16px;
+  }
+  
+  .testimonial-card__header {
+    min-height: 120px;
+    padding: 10px 15px;
+  }
+  
+  .testimonial-card__name {
+    font-size: 20px;
   }
 }
 
@@ -293,12 +357,14 @@
   margin-top: 30px;
   font-size: 14px;
   color: #333;
+  padding: 0 10px;
 }
 
 .testimonial-nav-arrow--left,
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
+  padding: 5px;
 }
 
 .testimonial-nav-tracks {
@@ -332,68 +398,118 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!cardContainer || cards.length === 0) return;
 
   let currentIndex = 0;
+  let isAnimating = false;
+  
   function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 3; // Mac端固定3张
+    if (window.innerWidth >= 1200) return 3;
     if (window.innerWidth >= 768) return 2;
     return 1;
   }
+  
   let visibleCards = getVisibleCardCount();
 
-  // 修复：Mac端宽度计算错误导致的偏移问题
+  // 优化：获取卡片真实宽度（包括gap）
   function getCardWidth() {
-    // 取第一个卡片的实际宽度（包含margin）
+    if (cards.length === 0) return 0;
+    
     const card = cards[0];
-    const style = window.getComputedStyle(card);
-    const width = parseFloat(style.width);
-    const marginLeft = parseFloat(style.marginLeft);
-    const marginRight = parseFloat(style.marginRight);
-    return width + marginLeft + marginRight; // 总宽度=卡片宽+左右margin
+    const containerStyle = window.getComputedStyle(cardContainer);
+    const gap = parseFloat(containerStyle.gap) || 0;
+    
+    const cardStyle = window.getComputedStyle(card);
+    const width = parseFloat(cardStyle.width);
+    
+    return width + gap;
   }
 
+  // 防抖处理resize事件
+  let resizeTimeout;
   window.addEventListener('resize', function() {
-    visibleCards = getVisibleCardCount();
-    updateCarousel();
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      visibleCards = getVisibleCardCount();
+      updateCarousel();
+    }, 150);
   });
 
   navLeft.addEventListener('click', function() {
+    if (isAnimating || currentIndex === 0) return;
+    
     currentIndex = Math.max(currentIndex - visibleCards, 0);
     updateCarousel();
   });
 
   navRight.addEventListener('click', function() {
-    const maxIndex = cards.length - visibleCards;
+    if (isAnimating) return;
+    
+    const maxIndex = Math.max(cards.length - visibleCards, 0);
     currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
     updateCarousel();
   });
 
   navTracks.forEach(track => {
     track.addEventListener('click', function() {
+      if (isAnimating) return;
+      
       const index = parseInt(this.dataset.index);
       currentIndex = Math.floor(index / visibleCards) * visibleCards;
-      const maxIndex = cards.length - visibleCards;
+      const maxIndex = Math.max(cards.length - visibleCards, 0);
       currentIndex = Math.min(currentIndex, maxIndex);
       updateCarousel();
     });
   });
 
   function updateCarousel() {
-    // 核心修复：用实际卡片宽度计算偏移，避免Mac端错位
-    const cardWidth = getCardWidth();
-    cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    if (cards.length === 0) return;
     
+    isAnimating = true;
+    
+    const cardWidth = getCardWidth();
+    const translateX = -currentIndex * cardWidth;
+    
+    cardContainer.style.transform = `translateX(${translateX}px)`;
+    cardContainer.style.transition = 'transform 0.5s ease';
+    
+    // 更新指示器状态
     navTracks.forEach((track, idx) => {
-      track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
+      const isActive = idx >= currentIndex && idx < currentIndex + visibleCards;
+      track.classList.toggle('active', isActive);
     });
 
-    // 禁用/启用箭头
-    navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
-    navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
-    const maxIndex = cards.length - visibleCards;
-    navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
-    navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
+    // 更新箭头状态
+    const maxIndex = Math.max(cards.length - visibleCards, 0);
+    
+    if (navLeft) {
+      navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
+      navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
+    }
+    
+    if (navRight) {
+      navRight.style.opacity = currentIndex >= maxIndex ? '0.5' : '1';
+      navRight.style.cursor = currentIndex >= maxIndex ? 'not-allowed' : 'pointer';
+    }
+    
+    // 动画结束后重置状态
+    setTimeout(() => {
+      isAnimating = false;
+    }, 500);
   }
 
   // 初始化
   updateCarousel();
+  
+  // 确保轮播容器宽度正确
+  function updateContainerWidth() {
+    const container = document.querySelector('.testimonial-carousel-container');
+    if (container) {
+      const section = document.querySelector('.testimonial-carousel-section');
+      const sectionRect = section.getBoundingClientRect();
+      container.style.width = `${sectionRect.width}px`;
+    }
+  }
+  
+  // 初始化时更新一次
+  setTimeout(updateContainerWidth, 100);
+  window.addEventListener('resize', updateContainerWidth);
 });
 {% endjavascript %}
