@@ -1,321 +1,10 @@
-<div class="testimonial-carousel-section" data-autoplay-interval="{{ section.settings.autoplay_interval | default: 5000 }}">
-  <div class="testimonial-carousel-container">
-    <div class="testimonial-carousel-cards" id="testimonialCards">
-      {% for block in section.blocks %}
-        {% if block.settings.image != blank and block.settings.name != blank %}
-          <div class="testimonial-card">
-            <div class="testimonial-card__left">
-              <div class="testimonial-card__header" style="background-color: #c22e35;">
-                <h3 class="testimonial-card__name">{{ block.settings.name }}</h3>
-                <p class="testimonial-card__role">{{ block.settings.role }}</p>
-                <span class="testimonial-card__country">{{ block.settings.country }}</span>
-              </div>
-              
-              <div class="testimonial-card__content-wrapper">
-                <div class="testimonial-card__content">
-                  <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
-                  {% if block.settings.button_link != blank %}
-                    <a href="{{ block.settings.button_link }}" class="testimonial-card__button" target="{{ block.settings.button_target }}">
-                      → {{ block.settings.button_text | default: "LEARN MORE" }}
-                    </a>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-            
-            <div class="testimonial-card__right">
-              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例">
-            </div>
-          </div>
-        {% endif %}
-      {% endfor %}
-    </div>
-  </div>
-
-  {% if section.blocks.size > 0 %}
-    <div class="testimonial-carousel-nav" id="testimonialNav">
-      <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
-      <div class="testimonial-nav-tracks">
-        {% for block in section.blocks %}
-          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
-        {% endfor %}
-      </div>
-      <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
-    </div>
-  {% endif %}
-</div>
-
-{% schema %}
-{
-  "name": "客户案例轮播（单张轮播版）",
-  "tag": "section",
-  "class": "testimonial-carousel-section",
-  "settings": [
-    {
-      "type": "range",
-      "id": "autoplay_interval",
-      "label": "自动轮播间隔时间（毫秒）",
-      "min": 2000,
-      "max": 9000,
-      "step": 500,
-      "default": 5000,
-      "info": "设置自动轮播切换的时间间隔，1000毫秒 = 1秒"
-    }
-  ],
-  "blocks": [
-    {
-      "type": "testimonial_card",
-      "name": "案例卡片",
-      "settings": [
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "右侧图片"
-        },
-        {
-          "type": "text",
-          "id": "name",
-          "label": "客户姓名",
-          "default": "Camille Duret"
-        },
-        {
-          "type": "text",
-          "id": "role",
-          "label": "客户职位/机构",
-          "default": "Head Trainer, Studio Linea"
-        },
-        {
-          "type": "text",
-          "id": "country",
-          "label": "国家/地区",
-          "default": "France"
-        },
-        {
-          "type": "textarea",
-          "id": "quote",
-          "label": "案例评价",
-          "default": "\"From the upholstery colors to the smooth glide—it's just beautiful to teach and shoot on. My audience often asks where I get my machines; I tell them—XS makes everything better.\""
-        },
-        {
-          "type": "url",
-          "id": "button_link",
-          "label": "按钮跳转链接"
-        },
-        {
-          "type": "text",
-          "id": "button_text",
-          "label": "按钮文字",
-          "default": "LEARN MORE"
-        },
-        {
-          "type": "select",
-          "id": "button_target",
-          "label": "链接打开方式",
-          "options": [
-            { "value": "_self", "label": "当前窗口" },
-            { "value": "_blank", "label": "新窗口" }
-          ],
-          "default": "_self"
-        }
-      ]
-    }
-  ],
-  "presets": [
-    {
-      "name": "客户案例轮播（单张轮播版）",
-      "settings": {
-        "autoplay_interval": 5000
-      }
-    }
-  ]
-}
-{% endschema %}
-
 {% style %}
-/* 全局盒模型重置，避免宽度计算错误 */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-.testimonial-carousel-section {
-  max-width: 1920px;
-  margin: 20px auto;
-  padding: 0 10px;
-  width: 100%; /* 强制占满可用宽度 */
-}
-
-.testimonial-carousel-container {
-  overflow: hidden;
-  width: 100%; /* 确保容器宽度100% */
-  position: relative;
-}
-
-/* 核心修改：用padding代替gap，避免flex gap溢出 */
-.testimonial-carousel-cards {
-  display: flex;
-  transition: transform 0.5s ease;
-  width: 100%;
-}
-
-/* 适配Mac全分辨率：3张卡片精准分配宽度，无溢出 */
-.testimonial-card {
-  flex: 0 0 calc(33.333% - 16px); /* 调整间距计算，适配Mac */
-  margin: 0 8px; /* 用margin代替gap，避免溢出 */
-  background: #c22e35;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  display: flex;
-  height: auto;
-  max-height: 370px;
-  overflow: hidden;
-  border-radius: 12px;
-  cursor: pointer; /* 添加鼠标指针样式 */
-  /* 移除min-width强制限制，避免窄屏溢出 */
-}
-
-.testimonial-card__left {
-  flex: 0 0 60%;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.testimonial-card__header {
-  padding: 15px 20px;
-  background-color: #c22e35;
-  color: #ffffff;
-  min-height: 139px;
-}
-
-.testimonial-card__name {
-  font-size: 24px;
-  font-weight: 400;
-  margin: 0 0 8px;
-  line-height: 1.2;
-  color: white;
-}
-
-.testimonial-card__role {
-  font-size: 13px;
-  margin: 0 0 12px;
-  line-height: 1.2;
-  opacity: 0.9;
-}
-
-.testimonial-card__country {
-  display: inline-block;
-  padding: 4px 10px;
-  background: rgba(255,255,255,0.3);
-  color: #c22e35;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 4px;
-}
-
-.testimonial-card__content-wrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0;
-}
-
-.testimonial-card__content {
-  width: 90%;
-  height: 90%;
-  background-color: #ffffff;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  border-radius: 12px;
-}
-
-.testimonial-card__quote {
-  font-size: 12px;
-  line-height: 1.6;
-  color: rgba(32,32,32,0.7);
-  margin: 0 0 20px;
-  flex: 1;
-}
-
-.testimonial-card__button {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 15px;
-  border: 1px solid #c22e35;
-  background-color: #ffffff;
-  color: #c22e35;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.3s;
-}
-
-.testimonial-card__button:hover {
-  background-color: #c22e35;
-  color: #ffffff;
-}
-
-.testimonial-card__right {
-  flex: 1;
-  height: 100%;
-  overflow: hidden;
-}
-
-.testimonial-card__right img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Mac窄屏适配（1200-1440px） */
-@media (max-width: 1440px) and (min-width: 1200px) {
-  .testimonial-card {
-    flex: 0 0 calc(33.333% - 14px); /* 微调间距，适配1440px Mac */
-    margin: 0 7px;
-  }
-}
-
-/* 平板适配 */
-@media (max-width: 1200px) {
-  .testimonial-carousel-cards {
-    flex-wrap: nowrap;
-  }
-  
-  .testimonial-card {
-    flex: 0 0 calc(50% - 10px);
-    margin: 0 5px;
-  }
-}
-
-/* 手机适配 */
-@media (max-width: 768px) {
-  .testimonial-card {
-    flex: 0 0 100%;
-    margin: 0 10px;
-    flex-direction: column;
-    height: auto;
-    max-height: none; /* 移除最大高度限制 */
-  }
-  
-  .testimonial-carousel-cards {
-    padding: 0 10px;
-  }
-  
-  .testimonial-card__right {
-    height: 250px;
-  }
-}
-
-/* 新的导航样式 - 改为一个一个小圆点 */
+/* 原有的导航样式保持不变 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 8px;
   margin-top: 30px;
   font-size: 14px;
   color: #333;
@@ -325,53 +14,24 @@
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
-  padding: 8px 12px;
-  background: #f5f5f5;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.testimonial-nav-arrow--left:hover,
-.testimonial-nav-arrow--right:hover {
-  background-color: #c22e35;
-  color: white;
-}
-
-.testimonial-nav-arrow--left.disabled,
-.testimonial-nav-arrow--right.disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.testimonial-nav-arrow--left.disabled:hover,
-.testimonial-nav-arrow--right.disabled:hover {
-  background-color: #f5f5f5;
-  color: #333;
 }
 
 .testimonial-nav-tracks {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .testimonial-nav-track {
-  width: 8px;
-  height: 8px;
+  width: 25px;
+  height: 2px;
   background-color: #ddd;
-  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: width 0.3s;
 }
 
 .testimonial-nav-track.active {
-  width: 12px;
-  height: 12px;
+  width: 40px;
   background-color: #c22e35;
 }
 {% endstyle %}
@@ -418,6 +78,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // 计算最大可移动的索引（考虑显示数量）
   function getMaxIndex() {
     return Math.max(cards.length - visibleCards, 0);
+  }
+  
+  // 计算指示器应该激活的索引
+  function getActiveIndicatorIndex() {
+    // 计算当前激活的指示器（基于当前显示的第一个卡片）
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    
+    // 如果有多个指示器且不是最后一个位置
+    if (totalIndicators > 1 && maxIndex > 0) {
+      // 线性映射当前卡片位置到指示器索引
+      return Math.min(currentIndex, totalIndicators - 1);
+    }
+    return currentIndex;
   }
   
   // 启动自动轮播（单张移动）
@@ -479,13 +153,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
   }
   
-  // 更新指示器状态 - 现在每个指示点对应一个卡片
+  // 更新指示器状态 - 修正：现在每个指示点一个一个变化
   function updateIndicators() {
+    const activeIndex = getActiveIndicatorIndex();
+    
     navTracks.forEach((track, idx) => {
-      // 当前激活的指示点是当前显示的第一个卡片
-      // 但我们也需要激活当前显示的其他卡片吗？不，只需要第一个
-      // 为了更好的视觉效果，我们激活当前显示的第一个卡片对应的指示点
-      const isActive = idx === currentIndex;
+      // 激活当前卡片对应的指示点
+      const isActive = idx === activeIndex;
       track.classList.toggle('active', isActive);
     });
   }
@@ -496,12 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (navLeft) {
       const isDisabled = currentIndex === 0;
-      navLeft.classList.toggle('disabled', isDisabled);
+      navLeft.style.opacity = isDisabled ? '0.5' : '1';
+      navLeft.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
     }
     
     if (navRight) {
       const isDisabled = currentIndex >= maxIndex;
-      navRight.classList.toggle('disabled', isDisabled);
+      navRight.style.opacity = isDisabled ? '0.5' : '1';
+      navRight.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
     }
   }
   
