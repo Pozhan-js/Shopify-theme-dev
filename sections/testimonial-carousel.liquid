@@ -1,4 +1,4 @@
-<div class="testimonial-carousel-section" data-autoplay-interval="{{ section.settings.autoplay_interval | default: 5000 }}">
+<div class="testimonial-carousel-section">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
@@ -24,7 +24,7 @@
             </div>
             
             <div class="testimonial-card__right">
-              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例" loading="lazy">
+              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例">
             </div>
           </div>
         {% endif %}
@@ -33,50 +33,23 @@
   </div>
 
   {% if section.blocks.size > 0 %}
-    <div class="testimonial-carousel-controls">
-      <div class="testimonial-carousel-nav" id="testimonialNav">
-        <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
-        <div class="testimonial-nav-tracks">
-          {% comment %} 计算精简指示器数量：每3个卡片对应1个指示点 {% endcomment %}
-          {% assign total_cards = section.blocks.size %}
-          {% assign indicator_count = total_cards | divided_by: 3.0 | ceil %}
-          {% for i in (1..indicator_count) %}
-            <span class="testimonial-nav-track" data-group-index="{{ forloop.index0 }}"></span>
-          {% endfor %}
-        </div>
-        <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
+    <div class="testimonial-carousel-nav" id="testimonialNav">
+      <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
+      <div class="testimonial-nav-tracks">
+        {% for block in section.blocks %}
+          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
+        {% endfor %}
       </div>
-      
-      <div class="testimonial-carousel-auto-control">
-        <button class="testimonial-auto-toggle" id="autoToggle" aria-label="切换自动轮播">
-          <span class="auto-toggle-text">暂停自动轮播</span>
-          <div class="auto-toggle-icon">
-            <span class="icon-pause">❚❚</span>
-            <span class="icon-play">▶</span>
-          </div>
-        </button>
-      </div>
+      <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
     </div>
   {% endif %}
 </div>
 
 {% schema %}
 {
-  "name": "客户案例轮播（自动+精简版）",
+  "name": "客户案例轮播（最终匹配版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
-  "settings": [
-    {
-      "type": "range",
-      "id": "autoplay_interval",
-      "label": "自动轮播间隔时间（毫秒）",
-      "min": 2000,
-      "max": 9000,
-      "step": 500,
-      "default": 5000,
-      "info": "设置自动轮播切换的时间间隔，1000毫秒 = 1秒"
-    }
-  ],
   "blocks": [
     {
       "type": "testimonial_card",
@@ -137,17 +110,14 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（自动+精简版）",
-      "settings": {
-        "autoplay_interval": 5000
-      }
+      "name": "客户案例轮播（最终匹配版）"
     }
   ]
 }
 {% endschema %}
 
 {% style %}
-/* 全局盒模型重置 */
+/* 全局盒模型重置，避免宽度计算错误 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -157,33 +127,34 @@
 .testimonial-carousel-section {
   max-width: 1920px;
   margin: 20px auto;
-  padding: 0;
-  width: 100%;
+  padding: 0 10px;
+  width: 100%; /* 强制占满可用宽度 */
 }
 
 .testimonial-carousel-container {
   overflow: hidden;
-  width: 100%;
-  padding: 0 10px;
+  width: 100%; /* 确保容器宽度100% */
 }
 
+/* 核心修改：用padding代替gap，避免flex gap溢出 */
 .testimonial-carousel-cards {
   display: flex;
   transition: transform 0.5s ease;
   width: 100%;
-  gap: 16px;
 }
 
+/* 适配Mac全分辨率：3张卡片精准分配宽度，无溢出 */
 .testimonial-card {
-  flex: 0 0 calc(33.333% - 11px);
+  flex: 0 0 calc(33.333% - 16px); /* 调整间距计算，适配Mac */
+  margin: 0 8px; /* 用margin代替gap，避免溢出 */
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
   height: auto;
   max-height: 370px;
-  min-height: 370px;
   overflow: hidden;
   border-radius: 12px;
+  /* 移除min-width强制限制，避免窄屏溢出 */
 }
 
 .testimonial-card__left {
@@ -283,36 +254,51 @@
   object-fit: cover;
 }
 
-/* 控制区域样式 */
-.testimonial-carousel-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 30px;
-  padding: 0 10px;
+/* Mac窄屏适配（1200-1440px） */
+@media (max-width: 1440px) and (min-width: 1200px) {
+  .testimonial-card {
+    flex: 0 0 calc(33.333% - 14px); /* 微调间距，适配1440px Mac */
+    margin: 0 7px;
+  }
 }
 
+/* 平板适配 */
+@media (max-width: 1200px) {
+  .testimonial-card {
+    flex: 0 0 calc(50% - 10px);
+    margin: 0 5px;
+  }
+}
+
+/* 手机适配 */
+@media (max-width: 768px) {
+  .testimonial-card {
+    flex: 0 0 100%;
+    margin: 0;
+    flex-direction: column;
+    height: auto;
+    max-height: none; /* 移除最大高度限制 */
+  }
+  .testimonial-card__right {
+    height: 250px;
+  }
+}
+
+/* 指示器样式 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: 30px;
   font-size: 14px;
   color: #333;
-  margin-bottom: 15px;
 }
 
 .testimonial-nav-arrow--left,
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
-  padding: 5px 10px;
-  transition: opacity 0.3s;
-}
-
-.testimonial-nav-arrow--left:hover,
-.testimonial-nav-arrow--right:hover {
-  opacity: 0.7;
 }
 
 .testimonial-nav-tracks {
@@ -326,166 +312,12 @@
   height: 2px;
   background-color: #ddd;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: width 0.3s;
 }
 
 .testimonial-nav-track.active {
   width: 40px;
   background-color: #c22e35;
-}
-
-/* 自动轮播控制按钮样式 */
-.testimonial-carousel-auto-control {
-  margin-top: 10px;
-}
-
-.testimonial-auto-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
-  transition: all 0.3s;
-}
-
-.testimonial-auto-toggle:hover {
-  background-color: #e9e9e9;
-  border-color: #c22e35;
-}
-
-.auto-toggle-icon {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-pause,
-.icon-play {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 10px;
-  transition: opacity 0.3s;
-}
-
-.icon-play {
-  opacity: 0;
-}
-
-.testimonial-auto-toggle.paused .icon-pause {
-  opacity: 0;
-}
-
-.testimonial-auto-toggle.paused .icon-play {
-  opacity: 1;
-}
-
-.testimonial-auto-toggle.paused .auto-toggle-text {
-  content: "开始自动轮播";
-}
-
-/* 响应式设计 */
-@media (max-width: 1512px) {
-  .testimonial-card {
-    flex: 0 0 calc(33.333% - 10.67px);
-  }
-}
-
-@media (max-width: 1440px) {
-  .testimonial-carousel-container {
-    padding: 0 15px;
-  }
-  
-  .testimonial-card {
-    flex: 0 0 calc(33.333% - 10px);
-    max-height: 360px;
-    min-height: 360px;
-  }
-  
-  .testimonial-card__header {
-    min-height: 130px;
-    padding: 12px 18px;
-  }
-  
-  .testimonial-card__name {
-    font-size: 22px;
-  }
-}
-
-@media (max-width: 1200px) {
-  .testimonial-carousel-container {
-    padding: 0 12px;
-  }
-  
-  .testimonial-card {
-    flex: 0 0 calc(50% - 8px);
-  }
-}
-
-@media (max-width: 992px) {
-  .testimonial-carousel-cards {
-    gap: 12px;
-  }
-  
-  .testimonial-card {
-    flex: 0 0 calc(50% - 6px);
-    max-height: 350px;
-    min-height: 350px;
-  }
-}
-
-@media (max-width: 768px) {
-  .testimonial-card {
-    flex: 0 0 100%;
-    flex-direction: column;
-    height: auto;
-    max-height: none;
-    min-height: auto;
-  }
-  
-  .testimonial-card__right {
-    height: 250px;
-  }
-  
-  .testimonial-carousel-cards {
-    gap: 20px;
-  }
-  
-  .testimonial-carousel-controls {
-    flex-direction: column;
-  }
-  
-  .testimonial-auto-toggle {
-    margin-top: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .testimonial-carousel-container {
-    padding: 0 8px;
-  }
-  
-  .testimonial-carousel-cards {
-    gap: 16px;
-  }
-  
-  .testimonial-card__header {
-    min-height: 120px;
-    padding: 10px 15px;
-  }
-  
-  .testimonial-card__name {
-    font-size: 20px;
-  }
 }
 {% endstyle %}
 
@@ -496,233 +328,72 @@ document.addEventListener('DOMContentLoaded', function() {
   const navTracks = document.querySelectorAll('.testimonial-nav-track');
   const navLeft = document.querySelector('.testimonial-nav-arrow--left');
   const navRight = document.querySelector('.testimonial-nav-arrow--right');
-  const autoToggle = document.getElementById('autoToggle');
-  const toggleText = document.querySelector('.auto-toggle-text');
   
   if (!cardContainer || cards.length === 0) return;
 
-  // 从Shopify设置获取自动轮播间隔
-  const section = document.querySelector('.testimonial-carousel-section');
-  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
-  
   let currentIndex = 0;
-  let isAnimating = false;
-  let autoplayTimer = null;
-  let isAutoplayActive = true; // 默认开启自动轮播
-  
-  // 计算每屏显示的卡片数量（响应式）
   function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 3;
+    if (window.innerWidth >= 1200) return 3; // Mac端固定3张
     if (window.innerWidth >= 768) return 2;
     return 1;
   }
-  
   let visibleCards = getVisibleCardCount();
-  
-  // 计算总组数（用于精简指示器）
-  function getTotalGroups() {
-    return Math.ceil(cards.length / visibleCards);
-  }
-  
-  // 获取当前所在的组索引（用于精简指示器高亮）
-  function getCurrentGroupIndex() {
-    return Math.floor(currentIndex / visibleCards);
-  }
-  
-  // 获取卡片宽度（包括gap）
-  function getCardWidth() {
-    if (cards.length === 0) return 0;
-    
-    const card = cards[0];
-    const containerStyle = window.getComputedStyle(cardContainer);
-    const gap = parseFloat(containerStyle.gap) || 0;
-    const cardStyle = window.getComputedStyle(card);
-    const width = parseFloat(cardStyle.width);
-    
-    return width + gap;
-  }
-  
-  // 启动自动轮播
-  function startAutoplay() {
-    if (autoplayTimer) clearInterval(autoplayTimer);
-    
-    autoplayTimer = setInterval(function() {
-      if (!isAutoplayActive || isAnimating) return;
-      
-      const maxIndex = Math.max(cards.length - visibleCards, 0);
-      const nextIndex = currentIndex + visibleCards;
-      
-      if (nextIndex > maxIndex) {
-        // 如果已经是最后一组，回到第一组
-        currentIndex = 0;
-      } else {
-        currentIndex = nextIndex;
-      }
-      
-      updateCarousel();
-    }, autoplayInterval);
-    
-    // 更新按钮状态
-    if (autoToggle) {
-      autoToggle.classList.remove('paused');
-      toggleText.textContent = '暂停自动轮播';
-    }
-  }
-  
-  // 暂停自动轮播
-  function pauseAutoplay() {
-    if (autoplayTimer) {
-      clearInterval(autoplayTimer);
-      autoplayTimer = null;
-    }
-    
-    if (autoToggle) {
-      autoToggle.classList.add('paused');
-      toggleText.textContent = '开始自动轮播';
-    }
-  }
-  
-  // 切换自动轮播状态
-  function toggleAutoplay() {
-    isAutoplayActive = !isAutoplayActive;
-    
-    if (isAutoplayActive) {
-      startAutoplay();
-    } else {
-      pauseAutoplay();
-    }
-  }
-  
-  // 更新轮播位置
-  function updateCarousel() {
-    if (cards.length === 0) return;
-    
-    isAnimating = true;
-    
-    const cardWidth = getCardWidth();
-    const translateX = -currentIndex * cardWidth;
-    
-    cardContainer.style.transform = `translateX(${translateX}px)`;
-    cardContainer.style.transition = 'transform 0.5s ease';
-    
-    // 更新精简指示器状态
-    const currentGroupIndex = getCurrentGroupIndex();
-    navTracks.forEach((track, idx) => {
-      track.classList.toggle('active', idx === currentGroupIndex);
-    });
 
-    // 更新箭头状态
-    const maxIndex = Math.max(cards.length - visibleCards, 0);
-    
-    if (navLeft) {
-      navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
-      navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
-    }
-    
-    if (navRight) {
-      navRight.style.opacity = currentIndex >= maxIndex ? '0.5' : '1';
-      navRight.style.cursor = currentIndex >= maxIndex ? 'not-allowed' : 'pointer';
-    }
-    
-    // 动画结束后重置状态
-    setTimeout(() => {
-      isAnimating = false;
-    }, 500);
+  // 修复：Mac端宽度计算错误导致的偏移问题
+  function getCardWidth() {
+    // 取第一个卡片的实际宽度（包含margin）
+    const card = cards[0];
+    const style = window.getComputedStyle(card);
+    const width = parseFloat(style.width);
+    const marginLeft = parseFloat(style.marginLeft);
+    const marginRight = parseFloat(style.marginRight);
+    return width + marginLeft + marginRight; // 总宽度=卡片宽+左右margin
   }
-  
-  // 事件监听器
+
+  window.addEventListener('resize', function() {
+    visibleCards = getVisibleCardCount();
+    updateCarousel();
+  });
+
   navLeft.addEventListener('click', function() {
-    if (isAnimating || currentIndex === 0) return;
-    
-    // 用户交互时暂停自动轮播一小段时间
-    pauseAutoplay();
-    setTimeout(() => {
-      if (isAutoplayActive) startAutoplay();
-    }, 3000);
-    
     currentIndex = Math.max(currentIndex - visibleCards, 0);
     updateCarousel();
   });
 
   navRight.addEventListener('click', function() {
-    if (isAnimating) return;
-    
-    // 用户交互时暂停自动轮播一小段时间
-    pauseAutoplay();
-    setTimeout(() => {
-      if (isAutoplayActive) startAutoplay();
-    }, 3000);
-    
-    const maxIndex = Math.max(cards.length - visibleCards, 0);
+    const maxIndex = cards.length - visibleCards;
     currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
     updateCarousel();
   });
 
-  // 精简指示器点击事件
   navTracks.forEach(track => {
     track.addEventListener('click', function() {
-      if (isAnimating) return;
-      
-      // 用户交互时暂停自动轮播一小段时间
-      pauseAutoplay();
-      setTimeout(() => {
-        if (isAutoplayActive) startAutoplay();
-      }, 3000);
-      
-      const groupIndex = parseInt(this.dataset.groupIndex);
-      currentIndex = groupIndex * visibleCards;
-      
-      // 确保不超过最大索引
-      const maxIndex = Math.max(cards.length - visibleCards, 0);
+      const index = parseInt(this.dataset.index);
+      currentIndex = Math.floor(index / visibleCards) * visibleCards;
+      const maxIndex = cards.length - visibleCards;
       currentIndex = Math.min(currentIndex, maxIndex);
-      
       updateCarousel();
     });
   });
-  
-  // 自动轮播切换按钮
-  if (autoToggle) {
-    autoToggle.addEventListener('click', toggleAutoplay);
+
+  function updateCarousel() {
+    // 核心修复：用实际卡片宽度计算偏移，避免Mac端错位
+    const cardWidth = getCardWidth();
+    cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    
+    navTracks.forEach((track, idx) => {
+      track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
+    });
+
+    // 禁用/启用箭头
+    navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
+    navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
+    const maxIndex = cards.length - visibleCards;
+    navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
+    navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
   }
-  
-  // 窗口调整事件处理
-  let resizeTimeout;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-      visibleCards = getVisibleCardCount();
-      updateCarousel();
-    }, 150);
-  });
-  
-  // 鼠标悬停时暂停自动轮播
-  cardContainer.addEventListener('mouseenter', function() {
-    if (isAutoplayActive) {
-      pauseAutoplay();
-    }
-  });
-  
-  cardContainer.addEventListener('mouseleave', function() {
-    if (isAutoplayActive) {
-      startAutoplay();
-    }
-  });
-  
+
   // 初始化
   updateCarousel();
-  startAutoplay(); // 默认开始自动轮播
-  
-  // 确保轮播容器宽度正确
-  function updateContainerWidth() {
-    const container = document.querySelector('.testimonial-carousel-container');
-    if (container) {
-      const section = document.querySelector('.testimonial-carousel-section');
-      const sectionRect = section.getBoundingClientRect();
-      container.style.width = `${sectionRect.width}px`;
-    }
-  }
-  
-  setTimeout(updateContainerWidth, 100);
-  window.addEventListener('resize', updateContainerWidth);
 });
 {% endjavascript %}
