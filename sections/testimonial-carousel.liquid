@@ -117,30 +117,44 @@
 {% endschema %}
 
 {% style %}
+/* 全局盒模型重置，避免宽度计算错误 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .testimonial-carousel-section {
   max-width: 1920px;
   margin: 20px auto;
   padding: 0 10px;
-}
-.testimonial-carousel-container {
-  overflow: hidden;
-}
-.testimonial-carousel-cards {
-  display: flex;
-  gap: 20px;
-  transition: transform 0.5s ease;
+  width: 100%; /* 强制占满可用宽度 */
 }
 
+.testimonial-carousel-container {
+  overflow: hidden;
+  width: 100%; /* 确保容器宽度100% */
+}
+
+/* 核心修改：用padding代替gap，避免flex gap溢出 */
+.testimonial-carousel-cards {
+  display: flex;
+  transition: transform 0.5s ease;
+  width: 100%;
+}
+
+/* 适配Mac全分辨率：3张卡片精准分配宽度，无溢出 */
 .testimonial-card {
-  flex: 0 0 calc(33.333% - 13.333px);
-  min-width: 320px;
+  flex: 0 0 calc(33.333% - 16px); /* 调整间距计算，适配Mac */
+  margin: 0 8px; /* 用margin代替gap，避免溢出 */
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
   height: auto;
-  max-height:370px;
+  max-height: 370px;
   overflow: hidden;
-  border-radius:12px;
+  border-radius: 12px;
+  /* 移除min-width强制限制，避免窄屏溢出 */
 }
 
 .testimonial-card__left {
@@ -154,21 +168,24 @@
   padding: 15px 20px;
   background-color: #c22e35;
   color: #ffffff;
-  min-height:139px;
+  min-height: 139px;
 }
+
 .testimonial-card__name {
   font-size: 24px;
   font-weight: 400;
   margin: 0 0 8px;
   line-height: 1.2;
-  color:white;
+  color: white;
 }
+
 .testimonial-card__role {
   font-size: 13px;
   margin: 0 0 12px;
   line-height: 1.2;
   opacity: 0.9;
 }
+
 .testimonial-card__country {
   display: inline-block;
   padding: 4px 10px;
@@ -185,6 +202,7 @@
   justify-content: center;
   align-items: center;
   padding: 0;
+  background-color: #a8333c; /* 补回背景色，之前遗漏 */
 }
 
 .testimonial-card__content {
@@ -195,7 +213,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius:12px;
+  border-radius: 12px;
 }
 
 .testimonial-card__quote {
@@ -205,6 +223,7 @@
   margin: 0 0 20px;
   flex: 1;
 }
+
 .testimonial-card__button {
   display: inline-flex;
   align-items: center;
@@ -218,6 +237,7 @@
   font-weight: 600;
   transition: all 0.3s;
 }
+
 .testimonial-card__button:hover {
   background-color: #c22e35;
   color: #ffffff;
@@ -228,28 +248,44 @@
   height: 100%;
   overflow: hidden;
 }
+
 .testimonial-card__right img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+/* Mac窄屏适配（1200-1440px） */
+@media (max-width: 1440px) and (min-width: 1200px) {
+  .testimonial-card {
+    flex: 0 0 calc(33.333% - 14px); /* 微调间距，适配1440px Mac */
+    margin: 0 7px;
+  }
+}
+
+/* 平板适配 */
 @media (max-width: 1200px) {
   .testimonial-card {
     flex: 0 0 calc(50% - 10px);
+    margin: 0 5px;
   }
 }
+
+/* 手机适配 */
 @media (max-width: 768px) {
   .testimonial-card {
     flex: 0 0 100%;
+    margin: 0;
     flex-direction: column;
     height: auto;
+    max-height: none; /* 移除最大高度限制 */
   }
   .testimonial-card__right {
     height: 250px;
   }
 }
 
+/* 指示器样式 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
@@ -259,16 +295,19 @@
   font-size: 14px;
   color: #333;
 }
+
 .testimonial-nav-arrow--left,
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
 }
+
 .testimonial-nav-tracks {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .testimonial-nav-track {
   width: 25px;
   height: 2px;
@@ -276,6 +315,7 @@
   cursor: pointer;
   transition: width 0.3s;
 }
+
 .testimonial-nav-track.active {
   width: 40px;
   background-color: #c22e35;
@@ -294,11 +334,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentIndex = 0;
   function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 3;
+    if (window.innerWidth >= 1200) return 3; // Mac端固定3张
     if (window.innerWidth >= 768) return 2;
     return 1;
   }
   let visibleCards = getVisibleCardCount();
+
+  // 修复：Mac端宽度计算错误导致的偏移问题
+  function getCardWidth() {
+    // 取第一个卡片的实际宽度（包含margin）
+    const card = cards[0];
+    const style = window.getComputedStyle(card);
+    const width = parseFloat(style.width);
+    const marginLeft = parseFloat(style.marginLeft);
+    const marginRight = parseFloat(style.marginRight);
+    return width + marginLeft + marginRight; // 总宽度=卡片宽+左右margin
+  }
 
   window.addEventListener('resize', function() {
     visibleCards = getVisibleCardCount();
@@ -327,13 +378,15 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function updateCarousel() {
-    const cardWidth = cards[0].offsetWidth + 20;
+    // 核心修复：用实际卡片宽度计算偏移，避免Mac端错位
+    const cardWidth = getCardWidth();
     cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
     
     navTracks.forEach((track, idx) => {
       track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
     });
 
+    // 禁用/启用箭头
     navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
     navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
     const maxIndex = cards.length - visibleCards;
@@ -341,8 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
     navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
   }
 
-  if (navTracks.length > 0) {
-    updateCarousel();
-  }
+  // 初始化
+  updateCarousel();
 });
 {% endjavascript %}
