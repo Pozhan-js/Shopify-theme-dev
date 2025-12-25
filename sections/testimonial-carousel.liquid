@@ -1,28 +1,32 @@
-{% comment %} 客户案例轮播（1:1匹配模板图） {% endcomment %}
+{% comment %} 客户案例轮播（匹配嵌套div+层级背景色） {% endcomment %}
 <div class="testimonial-carousel-section">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
         {% if block.settings.image != blank and block.settings.name != blank %}
           <div class="testimonial-card">
-            {% comment %} 左侧：红底头部 + 白底内容（完全匹配模板） {% endcomment %}
+            {% comment %} 左侧区域：上层红底 + 下层“红棕背景+白色子div” {% endcomment %}
             <div class="testimonial-card__left">
-              {% comment %} 红底头部（姓名+职位+国家） {% endcomment %}
+              {% comment %} 上层：红底头部（#c22e35） {% endcomment %}
               <div class="testimonial-card__header" style="background-color: #c22e35;">
                 <h3 class="testimonial-card__name">{{ block.settings.name }}</h3>
                 <p class="testimonial-card__role">{{ block.settings.role }}</p>
                 <span class="testimonial-card__country">{{ block.settings.country }}</span>
               </div>
-              {% comment %} 白底内容（引用文本+按钮） {% endcomment %}
-              <div class="testimonial-card__content">
-                <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
-                {% if block.settings.button_link != blank %}
-                  <a href="{{ block.settings.button_link }}" class="testimonial-card__button" target="{{ block.settings.button_target }}">
-                    → {{ block.settings.button_text | default: "LEARN MORE" }}
-                  </a>
-                {% endif %}
+              
+              {% comment %} 下层：父div（背景#a8333c）+ 子div（宽高90%+白色背景） {% endcomment %}
+              <div class="testimonial-card__content-wrapper" style="background-color: #a8333c;">
+                <div class="testimonial-card__content">
+                  <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
+                  {% if block.settings.button_link != blank %}
+                    <a href="{{ block.settings.button_link }}" class="testimonial-card__button" target="{{ block.settings.button_target }}">
+                      → {{ block.settings.button_text | default: "LEARN MORE" }}
+                    </a>
+                  {% endif %}
+                </div>
               </div>
             </div>
+            
             {% comment %} 右侧：图片区 {% endcomment %}
             <div class="testimonial-card__right">
               <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例">
@@ -33,7 +37,7 @@
     </div>
   </div>
 
-  {% comment %} 滑动指示器（< — — — — >） {% endcomment %}
+  {% comment %} 滑动指示器 {% endcomment %}
   {% if section.blocks.size > 0 %}
     <div class="testimonial-carousel-nav" id="testimonialNav">
       <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
@@ -49,7 +53,7 @@
 
 {% schema %}
 {
-  "name": "客户案例轮播（模板匹配版）",
+  "name": "客户案例轮播（最终匹配版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
   "blocks": [
@@ -113,7 +117,7 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（模板匹配版）"
+      "name": "客户案例轮播（最终匹配版）"
     }
   ]
 }
@@ -135,26 +139,26 @@
   transition: transform 0.5s ease;
 }
 
-/* 案例卡片：核心布局（左55%+右45%） */
+/* 案例卡片：左55%+右45% */
 .testimonial-card {
-  flex: 0 0 calc(25% - 15px); /* 桌面端4个卡片 */
+  flex: 0 0 calc(25% - 15px);
   min-width: 320px;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
-  height: 420px; /* 匹配模板高度 */
+  height: 420px;
   overflow: hidden;
 }
 
-/* 左侧区域：红底头部 + 白底内容 */
+/* 左侧主容器：垂直分布上层+下层 */
 .testimonial-card__left {
-  flex: 0 0 55%; /* 左侧占比55%（匹配模板） */
+  flex: 0 0 55%;
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-/* 红底头部（完全匹配模板） */
+/* 上层：红底头部（#c22e35） */
 .testimonial-card__header {
   padding: 25px 20px;
   background-color: #c22e35;
@@ -182,15 +186,28 @@
   border-radius: 2px;
 }
 
-/* 白底内容区（完全匹配模板） */
+/* 下层父div：背景# a8333c，占满剩余高度 */
+.testimonial-card__content-wrapper {
+  flex: 1; /* 占左侧剩余高度 */
+  background-color: #a8333c;
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 让子div居中 */
+  padding: 0;
+}
+
+/* 下层子div：宽高90%+白色背景，显示内容 */
 .testimonial-card__content {
-  flex: 1;
-  padding: 20px;
+  width: 90%;
+  height: 90%;
   background-color: #ffffff;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
+
+/* 评价文本+按钮 */
 .testimonial-card__quote {
   font-size: 14px;
   line-height: 1.6;
@@ -216,7 +233,7 @@
   color: #ffffff;
 }
 
-/* 右侧图片区（完全匹配模板） */
+/* 右侧图片区 */
 .testimonial-card__right {
   flex: 1;
   height: 100%;
@@ -225,18 +242,18 @@
 .testimonial-card__right img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 图片填满区域（匹配模板） */
+  object-fit: cover;
 }
 
 /* 响应式适配 */
 @media (max-width: 1200px) {
   .testimonial-card {
-    flex: 0 0 calc(50% - 10px); /* 平板显示2个 */
+    flex: 0 0 calc(50% - 10px);
   }
 }
 @media (max-width: 768px) {
   .testimonial-card {
-    flex: 0 0 100%; /* 手机显示1个 */
+    flex: 0 0 100%;
     flex-direction: column;
     height: auto;
   }
@@ -245,7 +262,7 @@
   }
 }
 
-/* 滑动指示器样式 */
+/* 滑动指示器 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
