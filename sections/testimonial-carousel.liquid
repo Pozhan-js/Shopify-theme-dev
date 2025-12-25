@@ -47,7 +47,7 @@
 
 {% schema %}
 {
-  "name": "客户案例轮播（自动轮播版）",
+  "name": "客户案例轮播（单张轮播版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
   "settings": [
@@ -122,7 +122,7 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（自动轮播版）",
+      "name": "客户案例轮播（单张轮播版）",
       "settings": {
         "autoplay_interval": 5000
       }
@@ -149,6 +149,7 @@
 .testimonial-carousel-container {
   overflow: hidden;
   width: 100%; /* 确保容器宽度100% */
+  position: relative;
 }
 
 /* 核心修改：用padding代替gap，避免flex gap溢出 */
@@ -280,6 +281,10 @@
 
 /* 平板适配 */
 @media (max-width: 1200px) {
+  .testimonial-carousel-cards {
+    flex-wrap: nowrap;
+  }
+  
   .testimonial-card {
     flex: 0 0 calc(50% - 10px);
     margin: 0 5px;
@@ -290,11 +295,16 @@
 @media (max-width: 768px) {
   .testimonial-card {
     flex: 0 0 100%;
-    margin: 0;
+    margin: 0 10px;
     flex-direction: column;
     height: auto;
     max-height: none; /* 移除最大高度限制 */
   }
+  
+  .testimonial-carousel-cards {
+    padding: 0 10px;
+  }
+  
   .testimonial-card__right {
     height: 250px;
   }
@@ -315,6 +325,15 @@
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.testimonial-nav-arrow--left:hover,
+.testimonial-nav-arrow--right:hover {
+  background-color: #e0e0e0;
 }
 
 .testimonial-nav-tracks {
@@ -351,46 +370,62 @@ document.addEventListener('DOMContentLoaded', function() {
   const section = document.querySelector('.testimonial-carousel-section');
   const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
   
-  let currentIndex = 0;
+  let currentIndex = 0; // 当前显示的第一个卡片的索引
   let autoplayTimer = null;
   let isAnimating = false;
   let isAutoplayActive = true;
   
-  function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 3; // Mac端固定3张
-    if (window.innerWidth >= 768) return 2;
-    return 1;
-  }
-  let visibleCards = getVisibleCardCount();
-
-  // 修复：Mac端宽度计算错误导致的偏移问题
+  // 获取单个卡片的宽度（包括margin）
   function getCardWidth() {
-    // 取第一个卡片的实际宽度（包含margin）
+    if (cards.length === 0) return 0;
     const card = cards[0];
     const style = window.getComputedStyle(card);
     const width = parseFloat(style.width);
     const marginLeft = parseFloat(style.marginLeft);
     const marginRight = parseFloat(style.marginRight);
-    return width + marginLeft + marginRight; // 总宽度=卡片宽+左右margin
+    return width + marginLeft + marginRight;
   }
-
-  // 启动自动轮播
+  
+  // 获取当前视口中显示的卡片数量
+  function getVisibleCardCount() {
+    if (window.innerWidth >= 1200) return 3; // 桌面端显示3张
+    if (window.innerWidth >= 768) return 2;  // 平板显示2张
+    return 1;  // 手机显示1张
+  }
+  
+  let visibleCards = getVisibleCardCount();
+  
+  // 计算最大可移动的索引（考虑显示数量）
+  function getMaxIndex() {
+    return Math.max(cards.length - visibleCards, 0);
+  }
+  
+  // 启动自动轮播（单张移动）
   function startAutoplay() {
     if (autoplayTimer) clearInterval(autoplayTimer);
     
     autoplayTimer = setInterval(function() {
       if (!isAutoplayActive || isAnimating) return;
       
-      const maxIndex = cards.length - visibleCards;
-      const nextIndex = currentIndex + visibleCards;
+      const maxIndex = getMaxIndex();
+      let nextIndex = currentIndex + 1; // 每次移动一个卡片
       
+      // 如果到达末尾，回到开头
       if (nextIndex > maxIndex) {
-        // 如果已经是最后一组，回到第一组
-        currentIndex = 0;
-      } else {
-        currentIndex = nextIndex;
+        nextIndex = 0;
+        
+        // 添加一个瞬移动画，实现无缝循环
+        cardContainer.style.transition = 'none';
+        cardContainer.style.transform = `translateX(0px)`;
+        
+        // 强制浏览器重绘
+        cardContainer.offsetHeight;
+        
+        // 恢复过渡效果
+        cardContainer.style.transition = 'transform 0.5s ease';
       }
       
+      currentIndex = nextIndex;
       updateCarousel();
     }, autoplayInterval);
   }
@@ -409,68 +444,141 @@ document.addEventListener('DOMContentLoaded', function() {
       startAutoplay();
     }
   }
-
-  window.addEventListener('resize', function() {
-    visibleCards = getVisibleCardCount();
-    updateCarousel();
-  });
-
-  navLeft.addEventListener('click', function() {
-    // 点击时短暂暂停自动轮播，3秒后恢复
-    pauseAutoplay();
-    setTimeout(resumeAutoplay, 3000);
-    
-    currentIndex = Math.max(currentIndex - visibleCards, 0);
-    updateCarousel();
-  });
-
-  navRight.addEventListener('click', function() {
-    // 点击时短暂暂停自动轮播，3秒后恢复
-    pauseAutoplay();
-    setTimeout(resumeAutoplay, 3000);
-    
-    const maxIndex = cards.length - visibleCards;
-    currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
-    updateCarousel();
-  });
-
-  navTracks.forEach(track => {
-    track.addEventListener('click', function() {
-      // 点击时短暂暂停自动轮播，3秒后恢复
-      pauseAutoplay();
-      setTimeout(resumeAutoplay, 3000);
-      
-      const index = parseInt(this.dataset.index);
-      currentIndex = Math.floor(index / visibleCards) * visibleCards;
-      const maxIndex = cards.length - visibleCards;
-      currentIndex = Math.min(currentIndex, maxIndex);
-      updateCarousel();
-    });
-  });
-
+  
+  // 更新轮播位置
   function updateCarousel() {
-    // 核心修复：用实际卡片宽度计算偏移，避免Mac端错位
-    const cardWidth = getCardWidth();
-    cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    if (cards.length === 0) return;
     
-    navTracks.forEach((track, idx) => {
-      track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
-    });
-
-    // 禁用/启用箭头
-    navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
-    navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
-    const maxIndex = cards.length - visibleCards;
-    navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
-    navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
-    
-    // 标记动画开始
     isAnimating = true;
+    
+    const cardWidth = getCardWidth();
+    const translateX = -(currentIndex * cardWidth);
+    
+    cardContainer.style.transform = `translateX(${translateX}px)`;
+    
+    // 更新指示器状态
+    updateIndicators();
+    
+    // 更新箭头状态
+    updateArrows();
+    
+    // 动画结束后重置状态
     setTimeout(() => {
       isAnimating = false;
     }, 500);
   }
-
+  
+  // 更新指示器状态
+  function updateIndicators() {
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    
+    // 计算当前应该高亮的指示器
+    if (totalIndicators > 0) {
+      const indicatorIndex = Math.floor((currentIndex / maxIndex) * (totalIndicators - 1)) || 0;
+      
+      navTracks.forEach((track, idx) => {
+        track.classList.toggle('active', idx === indicatorIndex);
+      });
+    }
+  }
+  
+  // 更新箭头状态
+  function updateArrows() {
+    const maxIndex = getMaxIndex();
+    
+    if (navLeft) {
+      const isDisabled = currentIndex === 0;
+      navLeft.style.opacity = isDisabled ? '0.5' : '1';
+      navLeft.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+    }
+    
+    if (navRight) {
+      const isDisabled = currentIndex >= maxIndex;
+      navRight.style.opacity = isDisabled ? '0.5' : '1';
+      navRight.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+    }
+  }
+  
+  // 窗口调整事件处理
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      visibleCards = getVisibleCardCount();
+      // 确保当前索引有效
+      const maxIndex = getMaxIndex();
+      if (currentIndex > maxIndex) {
+        currentIndex = maxIndex;
+      }
+      updateCarousel();
+    }, 150);
+  });
+  
+  // 左箭头点击事件
+  navLeft.addEventListener('click', function() {
+    if (isAnimating || currentIndex === 0) return;
+    
+    // 点击时暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
+    currentIndex = Math.max(currentIndex - 1, 0);
+    updateCarousel();
+  });
+  
+  // 右箭头点击事件
+  navRight.addEventListener('click', function() {
+    if (isAnimating) return;
+    
+    // 点击时暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
+    const maxIndex = getMaxIndex();
+    let nextIndex = currentIndex + 1;
+    
+    // 如果到达末尾，回到开头
+    if (nextIndex > maxIndex) {
+      nextIndex = 0;
+      
+      // 添加瞬移动画实现无缝循环
+      cardContainer.style.transition = 'none';
+      cardContainer.style.transform = `translateX(0px)`;
+      cardContainer.offsetHeight;
+      cardContainer.style.transition = 'transform 0.5s ease';
+    }
+    
+    currentIndex = nextIndex;
+    updateCarousel();
+  });
+  
+  // 指示器点击事件
+  navTracks.forEach((track, idx) => {
+    track.addEventListener('click', function() {
+      if (isAnimating) return;
+      
+      // 点击时暂停自动轮播，3秒后恢复
+      pauseAutoplay();
+      setTimeout(resumeAutoplay, 3000);
+      
+      const totalIndicators = navTracks.length;
+      const maxIndex = getMaxIndex();
+      
+      // 根据指示器索引计算卡片索引
+      // 确保至少有一个卡片的情况
+      if (maxIndex > 0 && totalIndicators > 1) {
+        currentIndex = Math.floor((idx / (totalIndicators - 1)) * maxIndex);
+      } else {
+        currentIndex = idx;
+      }
+      
+      // 确保不超过最大索引
+      currentIndex = Math.min(currentIndex, maxIndex);
+      updateCarousel();
+    });
+  });
+  
   // 鼠标悬停暂停功能
   cardContainer.addEventListener('mouseenter', function() {
     pauseAutoplay();
@@ -487,26 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
     card.addEventListener('mouseenter', function() {
       pauseAutoplay();
     });
-    
-    card.addEventListener('mouseleave', function() {
-      // 检查鼠标是否还在整个轮播区域内
-      const containerRect = cardContainer.getBoundingClientRect();
-      const event = new MouseEvent('mouseleave');
-      if (!isMouseInContainer(event, containerRect) && isAutoplayActive) {
-        startAutoplay();
-      }
-    });
   });
-  
-  // 辅助函数：检查鼠标是否在容器内
-  function isMouseInContainer(event, containerRect) {
-    return (
-      event.clientX >= containerRect.left &&
-      event.clientX <= containerRect.right &&
-      event.clientY >= containerRect.top &&
-      event.clientY <= containerRect.bottom
-    );
-  }
 
   // 初始化
   updateCarousel();
