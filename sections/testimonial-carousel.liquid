@@ -1,20 +1,16 @@
-{% comment %} 客户案例轮播（匹配嵌套div+层级背景色） {% endcomment %}
 <div class="testimonial-carousel-section">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
         {% if block.settings.image != blank and block.settings.name != blank %}
           <div class="testimonial-card">
-            {% comment %} 左侧区域：上层红底 + 下层“红棕背景+白色子div” {% endcomment %}
             <div class="testimonial-card__left">
-              {% comment %} 上层：红底头部（#c22e35） {% endcomment %}
               <div class="testimonial-card__header" style="background-color: #c22e35;">
                 <h3 class="testimonial-card__name">{{ block.settings.name }}</h3>
                 <p class="testimonial-card__role">{{ block.settings.role }}</p>
                 <span class="testimonial-card__country">{{ block.settings.country }}</span>
               </div>
               
-              {% comment %} 下层：父div（背景#a8333c）+ 子div（宽高90%+白色背景） {% endcomment %}
               <div class="testimonial-card__content-wrapper">
                 <div class="testimonial-card__content">
                   <p class="testimonial-card__quote">{{ block.settings.quote }}</p>
@@ -27,7 +23,6 @@
               </div>
             </div>
             
-            {% comment %} 右侧：图片区 {% endcomment %}
             <div class="testimonial-card__right">
               <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例">
             </div>
@@ -37,7 +32,6 @@
     </div>
   </div>
 
-  {% comment %} 滑动指示器 {% endcomment %}
   {% if section.blocks.size > 0 %}
     <div class="testimonial-carousel-nav" id="testimonialNav">
       <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
@@ -60,7 +54,6 @@
     {
       "type": "testimonial_card",
       "name": "案例卡片",
-      "limit": 10,
       "settings": [
         {
           "type": "image_picker",
@@ -124,7 +117,6 @@
 {% endschema %}
 
 {% style %}
-/* 全局容器 */
 .testimonial-carousel-section {
   max-width: 1920px;
   margin: 20px auto;
@@ -139,9 +131,8 @@
   transition: transform 0.5s ease;
 }
 
-/* 案例卡片：左55%+右45% */
 .testimonial-card {
-  flex: 0 0 calc(32%);
+  flex: 0 0 calc(33.333% - 13.333px);
   min-width: 320px;
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -152,7 +143,6 @@
   border-radius:12px;
 }
 
-/* 左侧主容器：垂直分布上层+下层 */
 .testimonial-card__left {
   flex: 0 0 60%;
   display: flex;
@@ -160,12 +150,11 @@
   height: 100%;
 }
 
-/* 上层：红底头部（#c22e35） */
 .testimonial-card__header {
   padding: 15px 20px;
   background-color: #c22e35;
   color: #ffffff;
-  min-height:390px;
+  min-height:139px;
 }
 .testimonial-card__name {
   font-size: 24px;
@@ -190,16 +179,14 @@
   border-radius: 4px;
 }
 
-/* 下层父div：背景# a8333c，占满剩余高度 */
 .testimonial-card__content-wrapper {
-  flex: 1; /* 占左侧剩余高度 */
+  flex: 1;
   display: flex;
   justify-content: center;
-  align-items: center; /* 让子div居中 */
+  align-items: center;
   padding: 0;
 }
 
-/* 下层子div：宽高90%+白色背景，显示内容 */
 .testimonial-card__content {
   width: 90%;
   height: 90%;
@@ -211,7 +198,6 @@
   border-radius:12px;
 }
 
-/* 评价文本+按钮 */
 .testimonial-card__quote {
   font-size: 12px;
   line-height: 1.6;
@@ -237,7 +223,6 @@
   color: #ffffff;
 }
 
-/* 右侧图片区 */
 .testimonial-card__right {
   flex: 1;
   height: 100%;
@@ -249,7 +234,6 @@
   object-fit: cover;
 }
 
-/* 响应式适配 */
 @media (max-width: 1200px) {
   .testimonial-card {
     flex: 0 0 calc(50% - 10px);
@@ -266,7 +250,6 @@
   }
 }
 
-/* 滑动指示器 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
@@ -310,6 +293,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if (!cardContainer || cards.length === 0) return;
 
   let currentIndex = 0;
+  function getVisibleCardCount() {
+    if (window.innerWidth >= 1200) return 3;
+    if (window.innerWidth >= 768) return 2;
+    return 1;
+  }
   let visibleCards = getVisibleCardCount();
 
   window.addEventListener('resize', function() {
@@ -331,7 +319,9 @@ document.addEventListener('DOMContentLoaded', function() {
   navTracks.forEach(track => {
     track.addEventListener('click', function() {
       const index = parseInt(this.dataset.index);
-      currentIndex = index - (index % visibleCards);
+      currentIndex = Math.floor(index / visibleCards) * visibleCards;
+      const maxIndex = cards.length - visibleCards;
+      currentIndex = Math.min(currentIndex, maxIndex);
       updateCarousel();
     });
   });
@@ -341,18 +331,18 @@ document.addEventListener('DOMContentLoaded', function() {
     cardContainer.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
     
     navTracks.forEach((track, idx) => {
-      track.classList.toggle('active', idx === currentIndex);
+      track.classList.toggle('active', idx >= currentIndex && idx < currentIndex + visibleCards);
     });
-  }
 
-  function getVisibleCardCount() {
-    if (window.innerWidth >= 1200) return 4;
-    if (window.innerWidth >= 768) return 2;
-    return 1;
+    navLeft.style.opacity = currentIndex === 0 ? '0.5' : '1';
+    navLeft.style.cursor = currentIndex === 0 ? 'not-allowed' : 'pointer';
+    const maxIndex = cards.length - visibleCards;
+    navRight.style.opacity = currentIndex === maxIndex ? '0.5' : '1';
+    navRight.style.cursor = currentIndex === maxIndex ? 'not-allowed' : 'pointer';
   }
 
   if (navTracks.length > 0) {
-    navTracks[0].classList.add('active');
+    updateCarousel();
   }
 });
 {% endjavascript %}
