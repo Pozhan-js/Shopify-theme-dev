@@ -310,12 +310,12 @@
   }
 }
 
-/* 指示器样式 */
+/* 新的导航样式 - 改为一个一个小圆点 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 15px;
   margin-top: 30px;
   font-size: 14px;
   color: #333;
@@ -327,31 +327,51 @@
   user-select: none;
   padding: 8px 12px;
   background: #f5f5f5;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
 }
 
 .testimonial-nav-arrow--left:hover,
 .testimonial-nav-arrow--right:hover {
-  background-color: #e0e0e0;
+  background-color: #c22e35;
+  color: white;
+}
+
+.testimonial-nav-arrow--left.disabled,
+.testimonial-nav-arrow--right.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.testimonial-nav-arrow--left.disabled:hover,
+.testimonial-nav-arrow--right.disabled:hover {
+  background-color: #f5f5f5;
+  color: #333;
 }
 
 .testimonial-nav-tracks {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .testimonial-nav-track {
-  width: 25px;
-  height: 2px;
+  width: 8px;
+  height: 8px;
   background-color: #ddd;
+  border-radius: 50%;
   cursor: pointer;
-  transition: width 0.3s;
+  transition: all 0.3s;
 }
 
 .testimonial-nav-track.active {
-  width: 40px;
+  width: 12px;
+  height: 12px;
   background-color: #c22e35;
 }
 {% endstyle %}
@@ -408,24 +428,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (!isAutoplayActive || isAnimating) return;
       
       const maxIndex = getMaxIndex();
-      let nextIndex = currentIndex + 1; // 每次移动一个卡片
       
-      // 如果到达末尾，回到开头
-      if (nextIndex > maxIndex) {
-        nextIndex = 0;
-        
-        // 添加一个瞬移动画，实现无缝循环
-        cardContainer.style.transition = 'none';
-        cardContainer.style.transform = `translateX(0px)`;
-        
-        // 强制浏览器重绘
-        cardContainer.offsetHeight;
-        
-        // 恢复过渡效果
-        cardContainer.style.transition = 'transform 0.5s ease';
+      // 如果已经到达最后一个案例，停止自动轮播
+      if (currentIndex >= maxIndex) {
+        pauseAutoplay();
+        return;
       }
       
-      currentIndex = nextIndex;
+      // 每次移动一个卡片
+      currentIndex = currentIndex + 1;
       updateCarousel();
     }, autoplayInterval);
   }
@@ -440,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // 恢复自动轮播（离开卡片后）
   function resumeAutoplay() {
-    if (isAutoplayActive && !autoplayTimer) {
+    if (isAutoplayActive && !autoplayTimer && currentIndex < getMaxIndex()) {
       startAutoplay();
     }
   }
@@ -468,19 +479,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
   }
   
-  // 更新指示器状态
+  // 更新指示器状态 - 现在每个指示点对应一个卡片
   function updateIndicators() {
-    const maxIndex = getMaxIndex();
-    const totalIndicators = navTracks.length;
-    
-    // 计算当前应该高亮的指示器
-    if (totalIndicators > 0) {
-      const indicatorIndex = Math.floor((currentIndex / maxIndex) * (totalIndicators - 1)) || 0;
-      
-      navTracks.forEach((track, idx) => {
-        track.classList.toggle('active', idx === indicatorIndex);
-      });
-    }
+    navTracks.forEach((track, idx) => {
+      // 当前激活的指示点是当前显示的第一个卡片
+      // 但我们也需要激活当前显示的其他卡片吗？不，只需要第一个
+      // 为了更好的视觉效果，我们激活当前显示的第一个卡片对应的指示点
+      const isActive = idx === currentIndex;
+      track.classList.toggle('active', isActive);
+    });
   }
   
   // 更新箭头状态
@@ -489,14 +496,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (navLeft) {
       const isDisabled = currentIndex === 0;
-      navLeft.style.opacity = isDisabled ? '0.5' : '1';
-      navLeft.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+      navLeft.classList.toggle('disabled', isDisabled);
     }
     
     if (navRight) {
       const isDisabled = currentIndex >= maxIndex;
-      navRight.style.opacity = isDisabled ? '0.5' : '1';
-      navRight.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+      navRight.classList.toggle('disabled', isDisabled);
     }
   }
   
@@ -512,6 +517,10 @@ document.addEventListener('DOMContentLoaded', function() {
         currentIndex = maxIndex;
       }
       updateCarousel();
+      // 重新启动自动轮播（如果还没到末尾）
+      if (isAutoplayActive && currentIndex < maxIndex) {
+        startAutoplay();
+      }
     }, 150);
   });
   
@@ -531,29 +540,18 @@ document.addEventListener('DOMContentLoaded', function() {
   navRight.addEventListener('click', function() {
     if (isAnimating) return;
     
+    const maxIndex = getMaxIndex();
+    if (currentIndex >= maxIndex) return;
+    
     // 点击时暂停自动轮播，3秒后恢复
     pauseAutoplay();
     setTimeout(resumeAutoplay, 3000);
     
-    const maxIndex = getMaxIndex();
-    let nextIndex = currentIndex + 1;
-    
-    // 如果到达末尾，回到开头
-    if (nextIndex > maxIndex) {
-      nextIndex = 0;
-      
-      // 添加瞬移动画实现无缝循环
-      cardContainer.style.transition = 'none';
-      cardContainer.style.transform = `translateX(0px)`;
-      cardContainer.offsetHeight;
-      cardContainer.style.transition = 'transform 0.5s ease';
-    }
-    
-    currentIndex = nextIndex;
+    currentIndex = Math.min(currentIndex + 1, maxIndex);
     updateCarousel();
   });
   
-  // 指示器点击事件
+  // 指示器点击事件 - 现在每个指示点对应一个卡片位置
   navTracks.forEach((track, idx) => {
     track.addEventListener('click', function() {
       if (isAnimating) return;
@@ -562,19 +560,11 @@ document.addEventListener('DOMContentLoaded', function() {
       pauseAutoplay();
       setTimeout(resumeAutoplay, 3000);
       
-      const totalIndicators = navTracks.length;
       const maxIndex = getMaxIndex();
+      // 确保点击的索引不超过最大索引
+      const targetIndex = Math.min(idx, maxIndex);
       
-      // 根据指示器索引计算卡片索引
-      // 确保至少有一个卡片的情况
-      if (maxIndex > 0 && totalIndicators > 1) {
-        currentIndex = Math.floor((idx / (totalIndicators - 1)) * maxIndex);
-      } else {
-        currentIndex = idx;
-      }
-      
-      // 确保不超过最大索引
-      currentIndex = Math.min(currentIndex, maxIndex);
+      currentIndex = targetIndex;
       updateCarousel();
     });
   });
@@ -585,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   cardContainer.addEventListener('mouseleave', function() {
-    if (isAutoplayActive) {
+    if (isAutoplayActive && currentIndex < getMaxIndex()) {
       startAutoplay();
     }
   });
@@ -599,6 +589,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 初始化
   updateCarousel();
-  startAutoplay(); // 默认开始自动轮播
+  if (currentIndex < getMaxIndex()) {
+    startAutoplay(); // 默认开始自动轮播，但如果是最后一个则不启动
+  }
 });
 {% endjavascript %}
