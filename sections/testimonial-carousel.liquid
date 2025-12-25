@@ -1,4 +1,4 @@
-<div class="testimonial-carousel-section">
+<div class="testimonial-carousel-section" data-autoplay-interval="{{ section.settings.autoplay_interval | default: 5000 }}">
   <div class="testimonial-carousel-container">
     <div class="testimonial-carousel-cards" id="testimonialCards">
       {% for block in section.blocks %}
@@ -24,7 +24,7 @@
             </div>
             
             <div class="testimonial-card__right">
-              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例">
+              <img src="{{ block.settings.image | image_url: width: 400, height: 400 }}" alt="{{ block.settings.name }}的案例" loading="lazy">
             </div>
           </div>
         {% endif %}
@@ -33,23 +33,50 @@
   </div>
 
   {% if section.blocks.size > 0 %}
-    <div class="testimonial-carousel-nav" id="testimonialNav">
-      <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
-      <div class="testimonial-nav-tracks">
-        {% for block in section.blocks %}
-          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
-        {% endfor %}
+    <div class="testimonial-carousel-controls">
+      <div class="testimonial-carousel-nav" id="testimonialNav">
+        <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
+        <div class="testimonial-nav-tracks">
+          {% comment %} 计算精简指示器数量：每3个卡片对应1个指示点 {% endcomment %}
+          {% assign total_cards = section.blocks.size %}
+          {% assign indicator_count = total_cards | divided_by: 3.0 | ceil %}
+          {% for i in (1..indicator_count) %}
+            <span class="testimonial-nav-track" data-group-index="{{ forloop.index0 }}"></span>
+          {% endfor %}
+        </div>
+        <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
       </div>
-      <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
+      
+      <div class="testimonial-carousel-auto-control">
+        <button class="testimonial-auto-toggle" id="autoToggle" aria-label="切换自动轮播">
+          <span class="auto-toggle-text">暂停自动轮播</span>
+          <div class="auto-toggle-icon">
+            <span class="icon-pause">❚❚</span>
+            <span class="icon-play">▶</span>
+          </div>
+        </button>
+      </div>
     </div>
   {% endif %}
 </div>
 
 {% schema %}
 {
-  "name": "客户案例轮播（Mac优化版）",
+  "name": "客户案例轮播（自动+精简版）",
   "tag": "section",
   "class": "testimonial-carousel-section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "自动轮播间隔时间（毫秒）",
+      "min": 2000,
+      "max": 9000,
+      "step": 500,
+      "default": 5000,
+      "info": "设置自动轮播切换的时间间隔，1000毫秒 = 1秒"
+    }
+  ],
   "blocks": [
     {
       "type": "testimonial_card",
@@ -110,14 +137,17 @@
   ],
   "presets": [
     {
-      "name": "客户案例轮播（Mac优化版）"
+      "name": "客户案例轮播（自动+精简版）",
+      "settings": {
+        "autoplay_interval": 5000
+      }
     }
   ]
 }
 {% endschema %}
 
 {% style %}
-/* 全局盒模型重置，避免宽度计算错误 */
+/* 全局盒模型重置 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -128,26 +158,24 @@
   max-width: 1920px;
   margin: 20px auto;
   padding: 0;
-  width: 100%; /* 强制占满可用宽度 */
+  width: 100%;
 }
 
 .testimonial-carousel-container {
   overflow: hidden;
-  width: 100%; /* 确保容器宽度100% */
-  padding: 0 10px; /* 将padding移到容器内部 */
+  width: 100%;
+  padding: 0 10px;
 }
 
-/* 核心修改：用gap替代margin，精确控制间距 */
 .testimonial-carousel-cards {
   display: flex;
   transition: transform 0.5s ease;
   width: 100%;
-  gap: 16px; /* 使用gap替代margin，更精确控制间距 */
+  gap: 16px;
 }
 
-/* 适配Mac全分辨率：3张卡片精准分配宽度，无溢出 */
 .testimonial-card {
-  flex: 0 0 calc(33.333% - 11px); /* 精确计算，减去gap的2/3 */
+  flex: 0 0 calc(33.333% - 11px);
   background: #c22e35;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
@@ -255,21 +283,130 @@
   object-fit: cover;
 }
 
-/* Mac中等尺寸适配（1512px及以下） */
+/* 控制区域样式 */
+.testimonial-carousel-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  padding: 0 10px;
+}
+
+.testimonial-carousel-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.testimonial-nav-arrow--left,
+.testimonial-nav-arrow--right {
+  cursor: pointer;
+  user-select: none;
+  padding: 5px 10px;
+  transition: opacity 0.3s;
+}
+
+.testimonial-nav-arrow--left:hover,
+.testimonial-nav-arrow--right:hover {
+  opacity: 0.7;
+}
+
+.testimonial-nav-tracks {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.testimonial-nav-track {
+  width: 25px;
+  height: 2px;
+  background-color: #ddd;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.testimonial-nav-track.active {
+  width: 40px;
+  background-color: #c22e35;
+}
+
+/* 自动轮播控制按钮样式 */
+.testimonial-carousel-auto-control {
+  margin-top: 10px;
+}
+
+.testimonial-auto-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s;
+}
+
+.testimonial-auto-toggle:hover {
+  background-color: #e9e9e9;
+  border-color: #c22e35;
+}
+
+.auto-toggle-icon {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-pause,
+.icon-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  transition: opacity 0.3s;
+}
+
+.icon-play {
+  opacity: 0;
+}
+
+.testimonial-auto-toggle.paused .icon-pause {
+  opacity: 0;
+}
+
+.testimonial-auto-toggle.paused .icon-play {
+  opacity: 1;
+}
+
+.testimonial-auto-toggle.paused .auto-toggle-text {
+  content: "开始自动轮播";
+}
+
+/* 响应式设计 */
 @media (max-width: 1512px) {
   .testimonial-card {
-    flex: 0 0 calc(33.333% - 10.67px); /* 更精确的计算 */
+    flex: 0 0 calc(33.333% - 10.67px);
   }
 }
 
-/* Mac窄屏适配（1440px及以下） */
 @media (max-width: 1440px) {
   .testimonial-carousel-container {
-    padding: 0 15px; /* 增加内边距，提供更多空间 */
+    padding: 0 15px;
   }
   
   .testimonial-card {
-    flex: 0 0 calc(33.333% - 10px); /* 进一步调整间距 */
+    flex: 0 0 calc(33.333% - 10px);
     max-height: 360px;
     min-height: 360px;
   }
@@ -284,18 +421,16 @@
   }
 }
 
-/* 大平板适配（1200px及以下） */
 @media (max-width: 1200px) {
   .testimonial-carousel-container {
     padding: 0 12px;
   }
   
   .testimonial-card {
-    flex: 0 0 calc(50% - 8px); /* 改为2列 */
+    flex: 0 0 calc(50% - 8px);
   }
 }
 
-/* 平板适配（992px及以下） */
 @media (max-width: 992px) {
   .testimonial-carousel-cards {
     gap: 12px;
@@ -308,11 +443,9 @@
   }
 }
 
-/* 手机适配（768px及以下） */
 @media (max-width: 768px) {
   .testimonial-card {
     flex: 0 0 100%;
-    margin: 0;
     flex-direction: column;
     height: auto;
     max-height: none;
@@ -324,11 +457,18 @@
   }
   
   .testimonial-carousel-cards {
-    gap: 20px; /* 手机端增加间距 */
+    gap: 20px;
+  }
+  
+  .testimonial-carousel-controls {
+    flex-direction: column;
+  }
+  
+  .testimonial-auto-toggle {
+    margin-top: 10px;
   }
 }
 
-/* 小手机适配（480px及以下） */
 @media (max-width: 480px) {
   .testimonial-carousel-container {
     padding: 0 8px;
@@ -347,44 +487,6 @@
     font-size: 20px;
   }
 }
-
-/* 指示器样式 */
-.testimonial-carousel-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 30px;
-  font-size: 14px;
-  color: #333;
-  padding: 0 10px;
-}
-
-.testimonial-nav-arrow--left,
-.testimonial-nav-arrow--right {
-  cursor: pointer;
-  user-select: none;
-  padding: 5px;
-}
-
-.testimonial-nav-tracks {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.testimonial-nav-track {
-  width: 25px;
-  height: 2px;
-  background-color: #ddd;
-  cursor: pointer;
-  transition: width 0.3s;
-}
-
-.testimonial-nav-track.active {
-  width: 40px;
-  background-color: #c22e35;
-}
 {% endstyle %}
 
 {% javascript %}
@@ -394,12 +496,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const navTracks = document.querySelectorAll('.testimonial-nav-track');
   const navLeft = document.querySelector('.testimonial-nav-arrow--left');
   const navRight = document.querySelector('.testimonial-nav-arrow--right');
+  const autoToggle = document.getElementById('autoToggle');
+  const toggleText = document.querySelector('.auto-toggle-text');
   
   if (!cardContainer || cards.length === 0) return;
 
+  // 从Shopify设置获取自动轮播间隔
+  const section = document.querySelector('.testimonial-carousel-section');
+  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
+  
   let currentIndex = 0;
   let isAnimating = false;
+  let autoplayTimer = null;
+  let isAutoplayActive = true; // 默认开启自动轮播
   
+  // 计算每屏显示的卡片数量（响应式）
   function getVisibleCardCount() {
     if (window.innerWidth >= 1200) return 3;
     if (window.innerWidth >= 768) return 2;
@@ -407,58 +518,82 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   let visibleCards = getVisibleCardCount();
-
-  // 优化：获取卡片真实宽度（包括gap）
+  
+  // 计算总组数（用于精简指示器）
+  function getTotalGroups() {
+    return Math.ceil(cards.length / visibleCards);
+  }
+  
+  // 获取当前所在的组索引（用于精简指示器高亮）
+  function getCurrentGroupIndex() {
+    return Math.floor(currentIndex / visibleCards);
+  }
+  
+  // 获取卡片宽度（包括gap）
   function getCardWidth() {
     if (cards.length === 0) return 0;
     
     const card = cards[0];
     const containerStyle = window.getComputedStyle(cardContainer);
     const gap = parseFloat(containerStyle.gap) || 0;
-    
     const cardStyle = window.getComputedStyle(card);
     const width = parseFloat(cardStyle.width);
     
     return width + gap;
   }
-
-  // 防抖处理resize事件
-  let resizeTimeout;
-  window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-      visibleCards = getVisibleCardCount();
-      updateCarousel();
-    }, 150);
-  });
-
-  navLeft.addEventListener('click', function() {
-    if (isAnimating || currentIndex === 0) return;
+  
+  // 启动自动轮播
+  function startAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
     
-    currentIndex = Math.max(currentIndex - visibleCards, 0);
-    updateCarousel();
-  });
-
-  navRight.addEventListener('click', function() {
-    if (isAnimating) return;
-    
-    const maxIndex = Math.max(cards.length - visibleCards, 0);
-    currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
-    updateCarousel();
-  });
-
-  navTracks.forEach(track => {
-    track.addEventListener('click', function() {
-      if (isAnimating) return;
+    autoplayTimer = setInterval(function() {
+      if (!isAutoplayActive || isAnimating) return;
       
-      const index = parseInt(this.dataset.index);
-      currentIndex = Math.floor(index / visibleCards) * visibleCards;
       const maxIndex = Math.max(cards.length - visibleCards, 0);
-      currentIndex = Math.min(currentIndex, maxIndex);
+      const nextIndex = currentIndex + visibleCards;
+      
+      if (nextIndex > maxIndex) {
+        // 如果已经是最后一组，回到第一组
+        currentIndex = 0;
+      } else {
+        currentIndex = nextIndex;
+      }
+      
       updateCarousel();
-    });
-  });
-
+    }, autoplayInterval);
+    
+    // 更新按钮状态
+    if (autoToggle) {
+      autoToggle.classList.remove('paused');
+      toggleText.textContent = '暂停自动轮播';
+    }
+  }
+  
+  // 暂停自动轮播
+  function pauseAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+    
+    if (autoToggle) {
+      autoToggle.classList.add('paused');
+      toggleText.textContent = '开始自动轮播';
+    }
+  }
+  
+  // 切换自动轮播状态
+  function toggleAutoplay() {
+    isAutoplayActive = !isAutoplayActive;
+    
+    if (isAutoplayActive) {
+      startAutoplay();
+    } else {
+      pauseAutoplay();
+    }
+  }
+  
+  // 更新轮播位置
   function updateCarousel() {
     if (cards.length === 0) return;
     
@@ -470,10 +605,10 @@ document.addEventListener('DOMContentLoaded', function() {
     cardContainer.style.transform = `translateX(${translateX}px)`;
     cardContainer.style.transition = 'transform 0.5s ease';
     
-    // 更新指示器状态
+    // 更新精简指示器状态
+    const currentGroupIndex = getCurrentGroupIndex();
     navTracks.forEach((track, idx) => {
-      const isActive = idx >= currentIndex && idx < currentIndex + visibleCards;
-      track.classList.toggle('active', isActive);
+      track.classList.toggle('active', idx === currentGroupIndex);
     });
 
     // 更新箭头状态
@@ -494,9 +629,88 @@ document.addEventListener('DOMContentLoaded', function() {
       isAnimating = false;
     }, 500);
   }
+  
+  // 事件监听器
+  navLeft.addEventListener('click', function() {
+    if (isAnimating || currentIndex === 0) return;
+    
+    // 用户交互时暂停自动轮播一小段时间
+    pauseAutoplay();
+    setTimeout(() => {
+      if (isAutoplayActive) startAutoplay();
+    }, 3000);
+    
+    currentIndex = Math.max(currentIndex - visibleCards, 0);
+    updateCarousel();
+  });
 
+  navRight.addEventListener('click', function() {
+    if (isAnimating) return;
+    
+    // 用户交互时暂停自动轮播一小段时间
+    pauseAutoplay();
+    setTimeout(() => {
+      if (isAutoplayActive) startAutoplay();
+    }, 3000);
+    
+    const maxIndex = Math.max(cards.length - visibleCards, 0);
+    currentIndex = Math.min(currentIndex + visibleCards, maxIndex);
+    updateCarousel();
+  });
+
+  // 精简指示器点击事件
+  navTracks.forEach(track => {
+    track.addEventListener('click', function() {
+      if (isAnimating) return;
+      
+      // 用户交互时暂停自动轮播一小段时间
+      pauseAutoplay();
+      setTimeout(() => {
+        if (isAutoplayActive) startAutoplay();
+      }, 3000);
+      
+      const groupIndex = parseInt(this.dataset.groupIndex);
+      currentIndex = groupIndex * visibleCards;
+      
+      // 确保不超过最大索引
+      const maxIndex = Math.max(cards.length - visibleCards, 0);
+      currentIndex = Math.min(currentIndex, maxIndex);
+      
+      updateCarousel();
+    });
+  });
+  
+  // 自动轮播切换按钮
+  if (autoToggle) {
+    autoToggle.addEventListener('click', toggleAutoplay);
+  }
+  
+  // 窗口调整事件处理
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      visibleCards = getVisibleCardCount();
+      updateCarousel();
+    }, 150);
+  });
+  
+  // 鼠标悬停时暂停自动轮播
+  cardContainer.addEventListener('mouseenter', function() {
+    if (isAutoplayActive) {
+      pauseAutoplay();
+    }
+  });
+  
+  cardContainer.addEventListener('mouseleave', function() {
+    if (isAutoplayActive) {
+      startAutoplay();
+    }
+  });
+  
   // 初始化
   updateCarousel();
+  startAutoplay(); // 默认开始自动轮播
   
   // 确保轮播容器宽度正确
   function updateContainerWidth() {
@@ -508,7 +722,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // 初始化时更新一次
   setTimeout(updateContainerWidth, 100);
   window.addEventListener('resize', updateContainerWidth);
 });
