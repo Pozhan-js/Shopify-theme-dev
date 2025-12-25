@@ -310,12 +310,12 @@
   }
 }
 
-/* 新的导航样式 - 改为一个一个小圆点 */
+/* 保持原有的导航样式 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: 8px;
   margin-top: 30px;
   font-size: 14px;
   color: #333;
@@ -325,53 +325,24 @@
 .testimonial-nav-arrow--right {
   cursor: pointer;
   user-select: none;
-  padding: 8px 12px;
-  background: #f5f5f5;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.testimonial-nav-arrow--left:hover,
-.testimonial-nav-arrow--right:hover {
-  background-color: #c22e35;
-  color: white;
-}
-
-.testimonial-nav-arrow--left.disabled,
-.testimonial-nav-arrow--right.disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.testimonial-nav-arrow--left.disabled:hover,
-.testimonial-nav-arrow--right.disabled:hover {
-  background-color: #f5f5f5;
-  color: #333;
 }
 
 .testimonial-nav-tracks {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .testimonial-nav-track {
-  width: 8px;
-  height: 8px;
+  width: 25px;
+  height: 2px;
   background-color: #ddd;
-  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: width 0.3s;
 }
 
 .testimonial-nav-track.active {
-  width: 12px;
-  height: 12px;
+  width: 40px;
   background-color: #c22e35;
 }
 {% endstyle %}
@@ -418,6 +389,20 @@ document.addEventListener('DOMContentLoaded', function() {
   // 计算最大可移动的索引（考虑显示数量）
   function getMaxIndex() {
     return Math.max(cards.length - visibleCards, 0);
+  }
+  
+  // 计算指示器应该激活的索引
+  function getActiveIndicatorIndex() {
+    // 计算当前激活的指示器（基于当前显示的第一个卡片）
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    
+    // 如果有多个指示器且不是最后一个位置
+    if (totalIndicators > 1 && maxIndex > 0) {
+      // 线性映射当前卡片位置到指示器索引
+      return Math.min(currentIndex, totalIndicators - 1);
+    }
+    return currentIndex;
   }
   
   // 启动自动轮播（单张移动）
@@ -479,13 +464,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
   }
   
-  // 更新指示器状态 - 现在每个指示点对应一个卡片
+  // 更新指示器状态 - 修正：现在每个指示点一个一个变化
   function updateIndicators() {
+    const activeIndex = getActiveIndicatorIndex();
+    
     navTracks.forEach((track, idx) => {
-      // 当前激活的指示点是当前显示的第一个卡片
-      // 但我们也需要激活当前显示的其他卡片吗？不，只需要第一个
-      // 为了更好的视觉效果，我们激活当前显示的第一个卡片对应的指示点
-      const isActive = idx === currentIndex;
+      // 激活当前卡片对应的指示点
+      const isActive = idx === activeIndex;
       track.classList.toggle('active', isActive);
     });
   }
@@ -496,12 +481,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (navLeft) {
       const isDisabled = currentIndex === 0;
-      navLeft.classList.toggle('disabled', isDisabled);
+      navLeft.style.opacity = isDisabled ? '0.5' : '1';
+      navLeft.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
     }
     
     if (navRight) {
       const isDisabled = currentIndex >= maxIndex;
-      navRight.classList.toggle('disabled', isDisabled);
+      navRight.style.opacity = isDisabled ? '0.5' : '1';
+      navRight.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
     }
   }
   
