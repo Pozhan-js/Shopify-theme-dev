@@ -35,11 +35,21 @@
   {% if section.blocks.size > 0 %}
     <div class="testimonial-carousel-nav" id="testimonialNav">
       <span class="testimonial-nav-arrow--left" aria-label="上一组案例">←</span>
+      
+      {% comment %} 计算指示器数量：卡片总数减2，但最少为1个 {% endcomment %}
+      {% assign total_cards = section.blocks.size %}
+      {% assign indicator_count = total_cards | minus: 2 %}
+      {% if indicator_count < 1 %}
+        {% assign indicator_count = 1 %}
+      {% endif %}
+      
       <div class="testimonial-nav-tracks">
-        {% for block in section.blocks %}
-          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
+        {% for i in (1..indicator_count) %}
+          {% assign card_index = forloop.index0 %}
+          <span class="testimonial-nav-track" data-index="{{ card_index }}"></span>
         {% endfor %}
       </div>
+      
       <span class="testimonial-nav-arrow--right" aria-label="下一组案例">→</span>
     </div>
   {% endif %}
@@ -391,18 +401,38 @@ document.addEventListener('DOMContentLoaded', function() {
     return Math.max(cards.length - visibleCards, 0);
   }
   
-  // 计算指示器应该激活的索引
+  // 计算指示器应该激活的索引（适配指示器数量减少的情况）
   function getActiveIndicatorIndex() {
-    // 计算当前激活的指示器（基于当前显示的第一个卡片）
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    const totalCards = cards.length;
+    
+    // 如果没有指示器，返回0
+    if (totalIndicators === 0) return 0;
+    
+    // 如果只有一个指示器，始终激活它
+    if (totalIndicators === 1) return 0;
+    
+    // 如果有多个指示器，计算当前卡片位置对应的指示器索引
+    // 因为指示器数量是卡片总数-2，我们需要映射当前卡片位置到指示器索引
+    if (maxIndex > 0) {
+      // 线性映射当前卡片位置到指示器索引
+      const indicatorIndex = Math.floor((currentIndex / maxIndex) * (totalIndicators - 1));
+      return Math.min(indicatorIndex, totalIndicators - 1);
+    }
+    
+    return 0;
+  }
+  
+  // 根据指示器索引计算对应的卡片索引
+  function getCardIndexFromIndicator(indicatorIndex) {
     const maxIndex = getMaxIndex();
     const totalIndicators = navTracks.length;
     
-    // 如果有多个指示器且不是最后一个位置
-    if (totalIndicators > 1 && maxIndex > 0) {
-      // 线性映射当前卡片位置到指示器索引
-      return Math.min(currentIndex, totalIndicators - 1);
-    }
-    return currentIndex;
+    if (totalIndicators <= 1) return 0;
+    
+    // 线性映射指示器索引到卡片索引
+    return Math.floor((indicatorIndex / (totalIndicators - 1)) * maxIndex);
   }
   
   // 启动自动轮播（单张移动）
@@ -538,7 +568,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCarousel();
   });
   
-  // 指示器点击事件 - 现在每个指示点对应一个卡片位置
+  // 指示器点击事件 - 现在指示器数量减少了，需要映射到正确的卡片索引
   navTracks.forEach((track, idx) => {
     track.addEventListener('click', function() {
       if (isAnimating) return;
@@ -547,11 +577,12 @@ document.addEventListener('DOMContentLoaded', function() {
       pauseAutoplay();
       setTimeout(resumeAutoplay, 3000);
       
+      // 根据指示器索引计算对应的卡片索引
+      const targetIndex = getCardIndexFromIndicator(idx);
       const maxIndex = getMaxIndex();
-      // 确保点击的索引不超过最大索引
-      const targetIndex = Math.min(idx, maxIndex);
       
-      currentIndex = targetIndex;
+      // 确保不超过最大索引
+      currentIndex = Math.min(targetIndex, maxIndex);
       updateCarousel();
     });
   });
