@@ -15,25 +15,29 @@
       {% for block in section.blocks %}
         {% if block.type == 'feature_card' %}
           <div class="feature-card" {{ block.shopifyattributes }}>
-            <!-- 功能图标 -->
-            <div class="feature-card-icon">
-              {% if block.settings.icon != blank %}
-                <img
-                  src="{{ block.settings.icon | img_url: '80x80' }}"
-                  alt="{{ block.settings.title }}"
-                  loading="lazy"
-                >
-              {% else %}
-                <!-- 占位图标 -->
-                <div class="feature-card-placeholder-icon">
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="18" fill="#F8EFEA" />
-                  </svg>
-                </div>
-              {% endif %}
+            <!-- 新增：控制背景圆靠左的容器 -->
+            <div class="feature-card-icon-wrapper">
+              <!-- 功能图标（背景圆靠左 + 图标占右侧） -->
+              <div class="feature-card-icon">
+                {% if block.settings.icon != blank %}
+                  <img
+                    src="{{ block.settings.icon | img_url: '80x80' }}"
+                    alt="{{ block.settings.title }}"
+                    loading="lazy"
+                    class="feature-card-icon-inner"
+                  >
+                {% else %}
+                  <!-- 占位图标（默认占背景圆右侧） -->
+                  <div class="feature-card-placeholder-icon-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M5 10h10" stroke="#C22E35" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
             </div>
 
-            <!-- 功能标题 + 描述 -->
+            <!-- 功能标题 + 描述（保持居中） -->
             <h3 class="feature-card-title">{{ block.settings.title }}</h3>
             <p class="feature-card-desc">{{ block.settings.desc }}</p>
           </div>
@@ -84,28 +88,47 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 30px;
     justify-items: center;
-    text-align: center;
   }
 
+  /* 卡片容器：标题/描述保持居中 */
   .feature-card {
     max-width: 220px;
+    text-align: center; /* 标题、描述居中 */
   }
 
+  /* 控制背景圆靠左的容器 */
+  .feature-card-icon-wrapper {
+    text-align: left; /* 让背景圆靠左 */
+    margin-bottom: 20px;
+  }
+
+  /* 背景圆样式（靠左 + 图标占右侧） */
   .feature-card-icon {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: #F8EFEA; /* 示例图中图标背景色 */
+    background-color: #F8EFEA; /* 示例图背景色 */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* 图标靠背景圆右侧显示 */
+    padding-right: 12px; /* 给图标留右侧间距 */
+    margin: 0; /* 取消居中margin，跟随父容器靠左 */
+  }
+
+  /* 图标样式：仅占背景圆右侧部分 */
+  .feature-card-icon-inner {
+    width: 35%; /* 缩小图标，仅占背景圆右侧区域 */
+    height: 35%;
+    object-fit: contain;
+  }
+
+  /* 占位图标的默认样式（占背景圆右侧） */
+  .feature-card-placeholder-icon-inner {
+    width: 35%;
+    height: 35%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
-  }
-
-  .feature-card-icon img {
-    width: 40%;
-    height: 40%;
-    object-fit: contain;
   }
 
   .feature-card-title {
@@ -123,7 +146,7 @@
     margin: 0;
   }
 
-  /* 响应式适配（与之前模块逻辑一致） */
+  /* 响应式适配 */
   @media (max-width: 768px) {
     .sustainable-manufacturing-title {
       font-size: 30px;
