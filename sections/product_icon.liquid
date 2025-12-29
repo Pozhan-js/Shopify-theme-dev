@@ -86,28 +86,29 @@
   .feature-highlights-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 0;
+    gap: 30px;
     justify-items: center;
-    align-items: start;
+    position: relative;
   }
 
   /* 卡片容器：标题/描述保持居中 */
   .feature-card {
     position: relative;
-    max-width: 260px;
-    width:100%;
+    max-width: 220px;
     text-align: left; /* 标题、描述居中 */
     padding:15px;
     box-sizing: border-box;
-    border-left: 1px solid rgba(22, 22, 22, 0.1); 
-    padding: 10px 20px 10px 40px;
-  }
-  .feature-card:first-child,
-  .feature-card:first-of-type {
-    border-left: none !important;
-    padding-left: 0;
   }
 
+  .feature-card::after {
+  content: "";
+  position: absolute;
+  right: -15px; /* 刚好等于 gap 的一半 (30px / 2) */
+  top: 10%;    /* 控制线的高度，不顶天立地 */
+  height: 80%; /* 线的高度为卡片的 80% */
+  width: 1px;  /* 线宽 */
+  background-color: #e0e0e0; /* 线的颜色，可以改为 rgba(0,0,0,0.1) */
+}
 
   .feature-card-icon-wrapper {
     position: relative;
@@ -178,11 +179,6 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 20px;
     }
-    .feature-card:nth-child(2n+1) {
-        border-left: none;
-        padding-left: 0;
-        margin-left: 0;
-    }
   }
 
   @media (max-width: 480px) {
@@ -198,18 +194,16 @@
       grid-template-columns: 1fr;
     }
 
-    .feature-card {
-        border-left: none;
-        padding-left: 0;
-        margin-left: 0;
-        border-bottom: 1px solid rgba(22, 22, 22, 0.1);
-        padding-bottom: 20px;
-        margin-bottom: 20px;
-        max-width: 100%;
-    }
-    .feature-card:last-child {
-        border-bottom: none;
-    }
+    .feature-card::after {
+    display: none;
+  }
+  .feature-card {
+    border-bottom: 1px solid #f0f0f0; /* 手机端改用底部分割线 */
+    padding-bottom: 20px;
+  }
+  .feature-card:last-child {
+    border-bottom: none;
+  }
   }
 </style>
 
