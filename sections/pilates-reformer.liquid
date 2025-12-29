@@ -1,1726 +1,297 @@
-<div class="prf-pilates-reformer-section" {{ section.shopifyattributes }}>
-  <div class="prf-container">
-    <div class="prf-product-layout">
-      <!-- 左侧产品图片区域 -->
-      <div class="prf-product-images">
-        <!-- 主图 -->
-        <div class="prf-main-image">
-          {% comment %} 优先使用当前产品页面的产品，然后是设置中选择的产品，最后是回退图片 {% endcomment %}
-          {% assign currentproduct = product %}
-          {% assign selectedproduct = allproducts[section.settings.producthandle] %}
-          {% assign displayproduct = currentproduct | default: selectedproduct %}
+<div class="feature-highlights-section">
+  <div class="feature-highlights-container">
+    <!-- 标题区域（样式与之前保持一致） -->
+    <div class="sustainable-manufacturing-header">
+      {% if section.settings.title != blank %}
+        <h2 class="sustainable-manufacturing-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <p class="sustainable-manufacturing-description">{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
 
-          {% if displayproduct and displayproduct.images.size > 0 %}
-            <img
-              src="{{ displayproduct.images.first | image_url: width: 1200 }}"
-              alt="{{ displayproduct.title }}"
-              class="prf-main-product-image"
-              id="prf-main-product-image"
-            >
-          {% elsif section.settings.fallbackimage %}
-            <img
-              src="{{ section.settings.fallbackimage | image_url: width: 1200 }}"
-              alt="{{ section.settings.producttitle }}"
-              class="prf-main-product-image"
-              id="prf-main-product-image"
-            >
-          {% endif %}
-        </div>
-
-        <!-- 缩略图 -->
-        <div class="prf-thumbnail-images">
-          {% if displayproduct and displayproduct.images.size > 0 %}
-            {% for image in displayproduct.images limit: 6 %}
-              <div
-                class="prf-thumbnail-item {% if forloop.first %}prf-active{% endif %}"
-                data-image-url="{{ image | image_url: width: 1200 }}"
-              >
-                <img
-                  src="{{ image | image_url: width: 150 }}"
-                  alt="Product image {{ forloop.index }}"
-                  class="prf-thumbnail-image"
-                >
-              </div>
-            {% endfor %}
-          {% else %}
-            {% for block in section.blocks %}
-              {% if block.type == 'thumbnail' and forloop.index <= 6 %}
-                <div
-                  class="prf-thumbnail-item"
-                  {{ block.shopifyattributes }}
-                  data-image-url="{{ block.settings.thumbnailimage | image_url: width: 1200 }}"
-                >
-                  {% if block.settings.thumbnailimage %}
-                    <img
-                      src="{{ block.settings.thumbnailimage | image_url: width: 150 }}"
-                      alt="Product thumbnail"
-                      class="prf-thumbnail-image"
-                    >
-                  {% endif %}
-                </div>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- 右侧产品信息区域 -->
-      <div class="prf-product-info">
-        <!-- 产品标题和型号 -->
-        <div class="prf-product-header">
-          {% if displayproduct %}
-            <h1 class="prf-product-title">{{ displayproduct.title }}</h1>
-            {% assign model_tag = displayproduct.metafields.custom.tag %}
-            {% if model_tag and model_tag != blank %}
-              <div class="prf-model-info">
-                <span class="prf-model-number"> Model No: {{ model_tag }} </span>
-              </div>
-            {% endif %}
-          {% else %}
-            <h1 class="prf-product-title">{{ section.settings.producttitle }}</h1>
-            {% assign fallback_model = section.settings.modelnumber %}
-            {% if fallback_model and fallback_model != blank %}
-              <div class="prf-model-info">
-                <span class="prf-model-number">Model No: {{ fallback_model }}</span>
-              </div>
-            {% endif %}
-          {% endif %}
-        </div>
-
-        <!-- 定制询问区域 -->
-        {% if section.settings.showcustomizationsection %}
-          <div class="prf-customization-section">
-            {% if product.metafields.custom.color_show %}
-              <div>
-                <h2 class="prf-customization-title">{{ section.settings.customizationtitle }}</h2>
-                <p class="prf-customization-description">{{ section.settings.customizationdescription }}</p>
-              </div>
-            {% endif %}
-
-            {% if section.settings.quotebuttontext %}
-              {% assign quotelink = section.settings.quotebuttonlink %}
-              {% if quotelink == blank and displayproduct %}
-                {% assign quotelink = '/pages/contact?product=' | append: displayproduct.handle %}
-              {% endif %}
-              <a href="{{ quotelink }}" class="prf-quote-button">
-                {{ section.settings.quotebuttontext }}
-              </a>
-            {% endif %}
-          </div>
-        {% endif %}
-
-        <!-- 颜色选择区域 -->
-        {% if product.metafields.custom.color_show %}
-          {% if section.settings.showcolorselection %}
-            <div class="prf-color-selection">
-              <h3 class="prf-color-title">{{ section.settings.colorsectiontitle }}</h3>
-              <div class="prf-color-options">
-                {% comment %} 优先显示区块配置的颜色选项，确保总是有内容显示 {% endcomment %}
-                {% assign has_colors = false %}
-
-                {% comment %} 首先尝试从产品获取颜色选项 {% endcomment %}
-                {% if displayproduct and displayproduct.options_with_values.size > 0 %}
-                  {% assign firstcolorprocessed = false %}
-                  {% assign coloroptionname = section.settings.coloroptionname | default: 'Color' %}
-
-                  {% for option in displayproduct.options_with_values %}
-                    {% assign optionnamelower = option.name | downcase %}
-                    {% assign targetnamelower = coloroptionname | downcase %}
-
-                    {% if optionnamelower == targetnamelower
-                      or optionnamelower == '颜色'
-                      or optionnamelower == 'color'
-                      or optionnamelower == 'colour'
-                      or optionnamelower == 'upholstery'
-                      or optionnamelower == 'fabric'
-                    %}
-                      {% assign has_colors = true %}
-                      {% for value in option.values %}
-                        {% assign variantfound = false %}
-                        {% assign variantid = '' %}
-                        {% assign variantimage = '' %}
-                        {% assign colorhex = '#CCCCCC' %}
-
-                        {% comment %} 尝试获取颜色值 {% endcomment %}
-                        {% assign colorswatch = value.swatch %}
-                        {% if colorswatch and colorswatch.color %}
-                          {% assign colorhex = colorswatch.color %}
-                        {% else %}
-                          {% assign valuelower = value | downcase %}
-                          {% case valuelower %}
-                            {% when 'black' %}
-                              {% assign colorhex = '#000000' %}
-                            {% when 'white' %}
-                              {% assign colorhex = '#FFFFFF' %}
-                            {% when 'red' %}
-                              {% assign colorhex = '#FF0000' %}
-                            {% when 'blue' %}
-                              {% assign colorhex = '#0000FF' %}
-                            {% when 'green' %}
-                              {% assign colorhex = '#008000' %}
-                            {% when 'gray', 'grey' %}
-                              {% assign colorhex = '#808080' %}
-                            {% when 'steel gray', 'steel grey' %}
-                              {% assign colorhex = '#71797E' %}
-                            {% when 'brown' %}
-                              {% assign colorhex = '#8B4513' %}
-                            {% when 'navy' %}
-                              {% assign colorhex = '#000080' %}
-                            {% when 'beige' %}
-                              {% assign colorhex = '#F5F5DC' %}
-                            {% when 'tan' %}
-                              {% assign colorhex = '#D2B48C' %}
-                            {% else %}
-                              {% assign colorhex = '#CCCCCC' %}
-                          {% endcase %}
-                        {% endif %}
-
-                        {% comment %} 查找对应的变体 {% endcomment %}
-                        {% for variant in displayproduct.variants %}
-                          {% assign valuematches = false %}
-
-                          {% if variant.option1 == value %}
-                            {% assign valuematches = true %}
-                          {% elsif variant.option2 == value %}
-                            {% assign valuematches = true %}
-                          {% elsif variant.option3 == value %}
-                            {% assign valuematches = true %}
-                          {% endif %}
-
-                          {% if valuematches and variantfound == false %}
-                            {% assign variantfound = true %}
-                            {% assign variantid = variant.id %}
-
-                            {% if variant.image %}
-                              {% assign variantimage = variant.image | image_url: width: 1200 %}
-                            {% endif %}
-                          {% endif %}
-                        {% endfor %}
-
-                        {% unless colorhex contains '#' %}
-                          {% if colorhex != '' %}
-                            {% assign colorhex = '#' | append: colorhex %}
-                          {% else %}
-                            {% assign colorhex = '#CCCCCC' %}
-                          {% endif %}
-                        {% endunless %}
-
-                        <div
-                          class="prf-color-option {% unless firstcolorprocessed %}prf-selected{% endunless %}"
-                          data-color="{{ value }}"
-                          data-variant-id="{{ variantid }}"
-                          data-variant-image="{{ variantimage }}"
-                          data-color-hex="{{ colorhex }}"
-                        >
-                          <div class="prf-color-swatch" style="background-color: {{ colorhex }};">
-                            {% unless firstcolorprocessed %}
-                              <div class="prf-color-checkmark">
-                                <svg
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                                </svg>
-                              </div>
-                              {% assign firstcolorprocessed = true %}
-                            {% endunless %}
-                          </div>
-                          <span class="prf-color-name">{{ value }}</span>
-                        </div>
-                      {% endfor %}
-                      {% break %}
-                    {% endif %}
-                  {% endfor %}
+    <!-- 功能图标卡片区域 -->
+    <div class="feature-highlights-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'feature_card' %}
+          <div class="feature-card" {{ block.shopifyattributes }}>
+            <!-- 新增：控制背景圆靠左的容器 -->
+            <div class="feature-card-icon-wrapper">
+              <!-- 功能图标（背景圆靠左 + 图标占右侧） -->
+              <div class="feature-card-icon">
+                {% if block.settings.icon != blank %}
+                  <img
+                    src="{{ block.settings.icon | img_url: '80x80' }}"
+                    alt="{{ block.settings.title }}"
+                    loading="lazy"
+                    class="feature-card-icon-inner"
+                  >
+                {% else %}
+                  <!-- 占位图标（默认占背景圆右侧） -->
+                  <div class="feature-card-placeholder-icon-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M5 10h10" stroke="#C22E35" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
                 {% endif %}
-
-                {% comment %} 如果没有从产品获取到颜色，或者没有产品，使用区块配置的颜色 {% endcomment %}
-                {% unless has_colors %}
-                  {% for block in section.blocks %}
-                    {% if block.type == 'coloroption' %}
-                      <div
-                        class="prf-color-option {% if block.settings.isselected %}prf-selected{% endif %}"
-                        {{ block.shopifyattributes }}
-                        data-color="{{ block.settings.colorname }}"
-                        data-color-hex="{{ block.settings.colorvalue }}"
-                      >
-                        <div class="prf-color-swatch" style="background-color: {{ block.settings.colorvalue }};">
-                          {% if block.settings.isselected %}
-                            <div class="prf-color-checkmark">
-                              <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-                              </svg>
-                            </div>
-                          {% endif %}
-                        </div>
-                        <span class="prf-color-name">{{ block.settings.colorname }}</span>
-                      </div>
-                    {% endif %}
-                  {% endfor %}
-                {% endunless %}
               </div>
             </div>
-          {% endif %}
+
+            <!-- 功能标题 + 描述（保持居中） -->
+            <h3 class="feature-card-title">{{ block.settings.title }}</h3>
+            <p class="feature-card-desc">{{ block.settings.desc }}</p>
+          </div>
         {% endif %}
-      </div>
+      {% endfor %}
     </div>
   </div>
 </div>
 
 <style>
-  .prf-pilates-reformer-section {
-    padding: 0px 0 {{ section.settings.sectionpaddingbottom }}px 0;
-    background-color: #fff;
+  /* 复用之前的标题样式（与可持续制造模块标题一致） */
+  .sustainable-manufacturing-header {
+    text-align: center;
+    margin-bottom: 40px;
   }
 
-  .prf-container {
-    max-width: 1750px;
+  .sustainable-manufacturing-title {
+    font-size: 40px;
+    font-weight: 500;
+    color: #161616;
+    margin: 0 0 20px;
+    line-height: 1.2;
+  }
+
+  .sustainable-manufacturing-description {
+    font-size: {{ section.settings.descriptionsize }}px;
+    color: rgba(22, 22, 22, 0.5);
+    line-height: 1.6;
+    max-width: 940px;
+    margin: 0 auto;
+  }
+
+  /* 功能卡片区域样式 */
+  .feature-highlights-section {
+    padding: 60px 0;
+    background-color: {{ section.settings.backgroundcolor }};
+  }
+
+  .feature-highlights-container {
+    max-width: 1626px;
     margin: 0 auto;
     padding: 0 20px;
+    box-sizing: border-box;
   }
 
-  .prf-product-layout {
+  .feature-highlights-grid {
     display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 60px;
-    align-items: start;
-  }
-
-  /* 产品图片区域 */
-  .prf-product-images {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .prf-main-image {
-    border-radius: 8px;
-    overflow: hidden;
-    background: {{ section.settings.mainimagebackground }};
-    padding: 20px;
-    width: 100%;
-    max-width: 1234px;
-    height: 702px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .prf-main-product-image {
-    width: 100%;
-    max-width: 1139px;
-    height: auto;
-    max-height: 527px;
-    display: block;
-    object-fit: contain;
-  }
-
-  .prf-thumbnail-images {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    width: 100%;
-    max-width: 1234px;
-    justify-content: flex-start;
-  }
-
-  .prf-thumbnail-item {
-    border: 1px solid rgba(22, 22, 22, 0.25);
-    border-radius: 8px;
-    overflow: hidden;
-    background: white;
-    padding: 0;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    aspect-ratio: 190/156;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .prf-thumbnail-item:hover {
-    transform: scale(1.05);
-  }
-
-  .prf-thumbnail-item.prf-active {
-    border: 1px solid rgba(194, 46, 53, 1);
-    box-shadow: 0 2px 8px rgba(194, 46, 53, 0.3);
-  }
-
-  .prf-thumbnail-image {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-  }
-
-  /* 产品信息区域 */
-  .prf-product-info {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 30px;
+    justify-items: center;
   }
 
-  .prf-product-header {
-    text-align: left;
+  /* 卡片容器：标题/描述保持居中 */
+  .feature-card {
+    max-width: 220px;
+    text-align: center; /* 标题、描述居中 */
   }
 
-  .prf-product-title {
-    font-size: {{ section.settings.producttitlesize }}px;
-    font-weight: 500;
-    color: {{ section.settings.producttitlecolor }};
-    margin: 0 0 10px 0;
-    line-height: 1.2;
+  /* 控制背景圆靠左的容器 */
+  .feature-card-icon-wrapper {
+    text-align: left; /* 让背景圆靠左 */
+    margin-bottom: 20px;
   }
 
-  .prf-model-info {
+  /* 背景圆样式（靠左 + 图标占右侧） */
+  .feature-card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #F8EFEA; /* 示例图背景色 */
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    gap: 10px;
+    justify-content: flex-end; /* 图标靠背景圆右侧显示 */
+    padding-right: 12px; /* 给图标留右侧间距 */
+    margin: 0; /* 取消居中margin，跟随父容器靠左 */
   }
 
-  .prf-model-number {
-    border: 1px solid {{ section.settings.modelnumbercolor }};
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    color: {{ section.settings.modelnumbercolor }};
-    background: transparent;
+  /* 图标样式：仅占背景圆右侧部分 */
+  .feature-card-icon-inner {
+    width: 35%; /* 缩小图标，仅占背景圆右侧区域 */
+    height: 35%;
+    object-fit: contain;
   }
 
-  /* 定制区域 */
-  .prf-customization-section {
-    text-align: left;
-  }
-
-  .prf-customization-title {
-    font-size: {{ section.settings.customizationtitlesize }}px;
-    font-weight: 500;
-    color: {{ section.settings.customizationtitlecolor }};
-    margin: 0 0 15px 0;
-  }
-
-  .prf-customization-description {
-    color: {{ section.settings.descriptioncolor }};
-    line-height: 1.6;
-    margin: 0 0 20px 0;
-    font-size: {{ section.settings.descriptionfontsize }}px;
-  }
-
-  .prf-quote-button {
-    display: inline-block;
-    background: white;
-    color: #161616;
-    border: 1px solid #c22e35;
-    padding: 12px 24px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 14px;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
-  }
-
-  .prf-quote-button::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: #c22e35;
-    transition: all 0.7s cubic-bezier(0.83, 0, 0.17, 1);
-    z-index: -1;
-  }
-
-  .prf-quote-button:hover {
-    color: white;
-  }
-
-  .prf-quote-button:hover::before {
-    left: 0;
-  }
-
-  .prf-quote-button::after {
-    content: ">";
-    margin-left: 8px;
-    position: relative;
-    z-index: 2;
-  }
-
-  /* 颜色选择区域 */
-  .prf-color-selection {
-    text-align: left;
-    margin-top: 40px;
-  }
-
-  .prf-color-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 20px 0;
-    padding-bottom: 8px;
-    border-bottom: 2px solid {{ section.settings.quotebuttoncolor }};
-    display: inline-block;
-  }
-
-  .prf-color-options {
-    display: grid;
-    grid-template-columns: repeat({{ section.settings.colorcolumns }}, 1fr);
-    gap: 16px;
-    max-height: 400px;
-    {% comment %} overflow-y: auto; {% endcomment %}
-    padding: 10px 5px;
-    margin: 0 -5px;
-  }
-
-  /* 自定义滚动条样式 */
-  .prf-color-options::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .prf-color-options::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 2px;
-  }
-
-  .prf-color-options::-webkit-scrollbar-thumb {
-    background: #c22e35;
-    border-radius: 2px;
-  }
-
-  .prf-color-options::-webkit-scrollbar-thumb:hover {
-    background: #a52020;
-  }
-
-  .prf-color-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-  }
-
-  .prf-color-swatch {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+  /* 占位图标的默认样式（占背景圆右侧） */
+  .feature-card-placeholder-icon-inner {
+    width: 35%;
+    height: 35%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid transparent;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  /* 处理透明或未设置的颜色 */
-  .prf-color-swatch[style="rgba(0,0,0,0)"],
-  .prf-color-swatch[style="transparent"],
-  .prf-color-option[data-color-hex="#CCCCCC"] .prf-color-swatch {
-    border: 1px solid #ddd;
-    background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
-                      linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
-                      linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
-                      linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
-    background-size: 6px 6px;
-    background-position: 0 0, 0 3px, 3px -3px, -3px 0px;
-  }
-
-  .prf-color-option[data-color-hex="#CCCCCC"] .prf-color-swatch:after {
-    content: "默认";
-    font-size: 11px;
-    color: #666;
-    text-align: center;
-    line-height: 1.2;
-  }
-
-  .prf-color-name {
-    font-size: 13px;
+  .feature-card-title {
+    font-size: 18px;
     font-weight: 500;
     color: #161616;
-    text-align: center;
-    line-height: 1.3;
-    max-width: 100px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    transition: all 0.2s ease;
+    margin: 0 0 10px;
+    text-transform: capitalize;
   }
 
-  .prf-color-option:hover .prf-color-swatch {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  .feature-card-desc {
+    font-size: 14px;
+    color: rgba(22, 22, 22, 0.5);
+    line-height: 1.5;
+    margin: 0;
   }
 
-  .prf-color-option.prf-selected .prf-color-swatch {
-    transform: scale(1.1);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    border-color: {{ section.settings.quotebuttoncolor }};
-  }
-
-  .prf-color-checkmark {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-  }
-
-  .prf-color-checkmark svg {
-    width: 20px;
-    height: 20px;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  }
-
-  /* 响应式颜色选择区域 - 优化版本 */
-  /* 基础响应式规则 */
-  .prf-color-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
-    gap: 16px;
-    max-height: 400px;
-    {% comment %} overflow-y: auto; {% endcomment %}
-    padding: 10px 5px;
-    margin: 0 -5px;
-  }
-
-  .prf-color-swatch {
-    width: clamp(48px, 5vw, 80px);
-    height: clamp(48px, 5vw, 80px);
-    border-radius: clamp(8px, 1vw, 12px);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid transparent;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (min-width: 1920px) {
-    .prf-color-selection {
-      margin-top: 60px;
+  /* 响应式适配 */
+  @media (max-width: 768px) {
+    .sustainable-manufacturing-title {
+      font-size: 30px;
     }
 
-    .prf-color-title {
-      font-size: 22px;
-      margin-bottom: 25px;
+    .sustainable-manufacturing-description {
+      font-size: {{ section.settings.descriptionsize | minus: 2 }}px;
     }
 
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
-      gap: 14px;
-      max-height: 426px;
-      height: 426px;
-    }
-
-    .prf-color-swatch {
-      width: 70px;
-      height: 70px;
-    }
-
-    .prf-color-name {
-      font-size: 14px;
-    }
-  }
-
-  @media (min-width: 1024px) and (max-width: 1919px) {
-    .prf-color-selection {
-      margin-top: 2px;
-    }
-
-    .prf-color-title {
-      font-size: 20px;
-      margin-bottom: 14px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-      gap: 16px;
-      max-height: 400px;
-    }
-
-    .prf-color-swatch {
-      width: 55px;
-      height: 55px;
-    }
-
-    .prf-color-name {
-      font-size: 13px;
-    }
-  }
-
-  @media (max-width: 1023px) and (min-width: 768px) {
-    .prf-color-selection {
-      margin-top: 40px;
-    }
-
-    .prf-color-title {
-      font-size: 18px;
-      margin-bottom: 18px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-      gap: 12px;
-      max-height: 350px;
-    }
-
-    .prf-color-swatch {
-      width: 65px;
-      height: 65px;
-    }
-
-    .prf-color-name {
-      font-size: 12px;
-    }
-
-    .prf-color-checkmark {
-      width: 28px;
-      height: 28px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 18px;
-      height: 18px;
-    }
-  }
-
-  @media (max-width: 767px) and (min-width: 481px) {
-    .prf-color-selection {
-      margin-top: 30px;
-    }
-
-    .prf-color-title {
-      font-size: 16px;
-      margin-bottom: 15px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-      gap: 10px;
-      max-height: 300px;
-    }
-
-    .prf-color-swatch {
-      width: 55px;
-      height: 55px;
-    }
-
-    .prf-color-name {
-      font-size: 11px;
-    }
-
-    .prf-color-checkmark {
-      width: 24px;
-      height: 24px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 16px;
-      height: 16px;
+    .feature-highlights-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
     }
   }
 
   @media (max-width: 480px) {
-    .prf-color-selection {
-      margin-top: 25px;
+    .sustainable-manufacturing-title {
+      font-size: 27px;
     }
 
-    .prf-color-title {
-      font-size: 15px;
-      margin-bottom: 12px;
+    .sustainable-manufacturing-description {
+      font-size: {{ section.settings.descriptionsize | minus: 3 }}px;
     }
 
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-      gap: 8px;
-      max-height: 250px;
-    }
-
-    .prf-color-swatch {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-    }
-
-    .prf-color-name {
-      font-size: 10px;
-    }
-
-    .prf-color-checkmark {
-      width: 20px;
-      height: 20px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 14px;
-      height: 14px;
-    }
-  }
-
-  @media (max-width: 320px) {
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
-      gap: 6px;
-    }
-
-    .prf-color-swatch {
-      width: 42px;
-      height: 42px;
-    }
-
-    .prf-color-name {
-      font-size: 9px;
-    }
-  }
-
-  /* 响应式设计 - 移动端优化 */
-
-  /* 平板设备 (768px - 1023px) */
-  @media (max-width: 1023px) and (min-width: 768px) {
-    .prf-container {
-      padding: 0 20px;
-    }
-
-    .prf-product-layout {
+    .feature-highlights-grid {
       grid-template-columns: 1fr;
-      gap: 40px;
-    }
-
-    .prf-main-image {
-      height: 400px;
-      padding: 15px;
-    }
-
-    .prf-thumbnail-images {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    .prf-color-selection {
-      margin-top: 40px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-      grid-auto-rows: 110px;
-      height: 300px;
-      gap: 15px;
-      padding: 15px 20px 15px 15px;
-    }
-
-    .prf-color-swatch {
-      width: 65px;
-      height: 65px;
-    }
-
-    .prf-color-checkmark {
-      width: 35px;
-      height: 35px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 35px;
-      height: 35px;
-    }
-  }
-
-  /* 移动设备 (481px - 767px) */
-  @media (max-width: 767px) and (min-width: 481px) {
-    .prf-container {
-      padding: 0 15px;
-    }
-
-    .prf-product-layout {
-      grid-template-columns: 1fr;
-      gap: 30px;
-    }
-
-    .prf-main-image {
-      height: 300px;
-      padding: 10px;
-    }
-
-    .prf-thumbnail-images {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      max-width: 320px;
-    }
-
-    .prf-thumbnail-item {
-      aspect-ratio: 1;
-      min-height: 70px;
-    }
-
-    .prf-product-title {
-      font-size: 20px;
-    }
-
-    .prf-customization-title {
-      font-size: 18px;
-    }
-
-    .prf-customization-description {
-      font-size: 14px;
-    }
-
-    .prf-quote-button {
-      width: 100%;
-      text-align: center;
-      padding: 15px 20px;
-    }
-
-    .prf-color-selection {
-      margin-top: 30px;
-    }
-
-    .prf-color-title {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-      grid-auto-rows: 95px;
-      height: 250px;
-      gap: 12px;
-      padding: 10px 24px 10px 24px;
-    }
-
-    .prf-color-swatch {
-      width: 55px;
-      height: 55px;
-    }
-
-    .prf-color-name {
-      font-size: 10px;
-      max-width: 80px;
-    }
-
-    .prf-color-checkmark {
-      width: 30px;
-      height: 30px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 30px;
-      height: 30px;
-    }
-  }
-
-  /* 小屏移动设备 (320px - 480px) */
-  @media (max-width: 480px) {
-    .prf-container {
-      padding: 0 10px;
-    }
-
-    .prf-pilates-reformer-section {
-      padding-bottom: {{ section.settings.sectionpaddingbottom | divided_by: 2 }}px;
-    }
-
-    .prf-product-layout {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .prf-main-image {
-      height: 250px;
-      padding: 8px;
-      border-radius: 6px;
-    }
-
-    .prf-thumbnail-images {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
-      max-width: 280px;
-    }
-
-    .prf-thumbnail-item {
-      border-radius: 4px;
-      aspect-ratio: 1;
-      min-height: 60px;
-    }
-
-    .prf-product-title {
-      font-size: 18px;
-      margin-bottom: 8px;
-    }
-
-    .prf-model-number {
-      font-size: 12px;
-      padding: 3px 8px;
-    }
-
-    .prf-customization-title {
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-
-    .prf-customization-description {
-      font-size: 13px;
-      margin-bottom: 15px;
-    }
-
-    .prf-quote-button {
-      width: 100%;
-      text-align: center;
-      padding: 12px 16px;
-      font-size: 13px;
-    }
-
-    .prf-color-selection {
-      margin-top: 25px;
-    }
-
-    .prf-color-title {
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
-      grid-auto-rows: 80px;
-      height: 200px;
-      gap: 10px;
-      padding: 8px 24px 8px 24px;
-    }
-
-    .prf-color-swatch {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
-    }
-
-    .prf-color-name {
-      font-size: 9px;
-      max-width: 60px;
-    }
-
-    .prf-color-option.prf-selected .prf-color-swatch {
-      transform: scale(1.2);
-    }
-
-    .prf-color-option.prf-selected .prf-color-name {
-      margin-top: 4px;
-    }
-
-    .prf-color-checkmark {
-      width: 25px;
-      height: 25px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 25px;
-      height: 25px;
-    }
-  }
-
-  /* 超小屏设备 (< 320px) */
-  @media (max-width: 319px) {
-    .prf-container {
-      padding: 0 8px;
-    }
-
-    .prf-main-image {
-      height: 200px;
-      padding: 5px;
-    }
-
-    .prf-thumbnail-images {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3px;
-      max-width: 240px;
-    }
-
-    .prf-thumbnail-item {
-      aspect-ratio: 1;
-      min-height: 50px;
-      border-radius: 3px;
-    }
-
-    .prf-product-title {
-      font-size: 16px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
-      grid-auto-rows: 75px;
-      height: 180px;
-      gap: 8px;
-    }
-
-    .prf-color-swatch {
-      width: 42px;
-      height: 42px;
-    }
-
-    .prf-color-name {
-      font-size: 8px;
-      max-width: 50px;
-    }
-  }
-
-  /* 笔记本端优化 (1024px - 1919px) */
-  @media (min-width: 1024px) and (max-width: 1919px) {
-    .prf-container {
-      {% comment %} max-width: 1200px; {% endcomment %}
-      padding: 0 40px;
-    }
-
-    .prf-product-layout {
-      grid-template-columns: 1fr 380px;
-      gap: 50px;
-    }
-
-    .prf-main-image {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1234/702;
-      max-height: 600px;
-      padding: 20px;
-    }
-
-    .prf-main-product-image {
-      width: 100%;
-      height: 100%;
-      max-width: none;
-      max-height: none;
-      object-fit: contain;
-    }
-
-    .prf-thumbnail-images {
-      width: 100%;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
-    }
-
-    .prf-thumbnail-item {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 190/156;
-    }
-
-    .prf-thumbnail-image {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .prf-product-title {
-      font-size: 32px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-      grid-auto-rows: 100px;
-      gap: 20px;
-      height: 400px;
-    }
-
-    .prf-color-swatch {
-      width: 55px;
-      height: 55px;
-    }
-
-    .prf-color-checkmark {
-      width: 35px;
-      height: 35px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 35px;
-      height: 35px;
-    }
-  }
-
-  /* 大屏幕保持原有样式 */
-  @media (min-width: 1920px) {
-    .prf-main-image {
-      width: 1234px;
-    }
-
-    .prf-main-product-image {
-      width: 1139px;
-      height: 527px;
-    }
-
-    .prf-thumbnail-images {
-      width: 1234px;
-      grid-template-columns: repeat(6, 190px);
-    }
-
-    .prf-thumbnail-item {
-      width: 190px;
-      height: 156px;
-    }
-
-    .prf-thumbnail-image {
-      width: 186px;
-      max-height: 156px;
-    }
-  }
-
-  /* 中等屏幕 (768px - 1023px) */
-  @media (max-width: 1023px) and (min-width: 768px) {
-    .prf-container {
-      padding: 0 20px;
-    }
-
-    .prf-product-layout {
-      grid-template-columns: 1fr;
-      gap: 40px;
-    }
-
-    .prf-main-image {
-      height: 400px;
-      padding: 15px;
-    }
-
-    .prf-thumbnail-images {
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-
-    .prf-color-selection {
-      margin-top: 40px;
-    }
-
-    .prf-color-options {
-      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-      grid-auto-rows: 100px;
-      height: 300px;
-      gap: 15px;
-      padding: 15px 20px 15px 15px;
-    }
-
-    .prf-color-swatch {
-      width: 65px;
-      height: 65px;
-    }
-
-    .prf-color-checkmark {
-      width: 35px;
-      height: 35px;
-    }
-
-    .prf-color-checkmark svg {
-      width: 35px;
-      height: 35px;
     }
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // 缩略图切换功能
-    const prfThumbnailItems = document.querySelectorAll('.prf-thumbnail-item');
-    const prfMainImage = document.getElementById('prf-main-product-image');
-
-    prfThumbnailItems.forEach(function (item) {
-      item.addEventListener('click', function () {
-        const imageUrl = this.getAttribute('data-image-url');
-
-        if (imageUrl && prfMainImage) {
-          // 移除所有active类
-          prfThumbnailItems.forEach(function (thumb) {
-            thumb.classList.remove('prf-active');
-          });
-
-          // 添加active类到当前点击的缩略图
-          this.classList.add('prf-active');
-
-          // 更换主图
-          prfMainImage.src = imageUrl;
-        }
-      });
-    });
-
-    // 颜色选择功能
-    const prfColorOptions = document.querySelectorAll('.prf-color-option');
-
-    prfColorOptions.forEach(function (option) {
-      option.addEventListener('click', function () {
-        // 移除所有选中状态
-        prfColorOptions.forEach(function (opt) {
-          opt.classList.remove('prf-selected');
-          const checkmark = opt.querySelector('.prf-color-checkmark');
-          if (checkmark) {
-            checkmark.remove();
-          }
-        });
-
-        // 添加选中状态到当前选项
-        this.classList.add('prf-selected');
-
-        // 添加选中标记
-        const checkmark = document.createElement('div');
-        checkmark.className = 'prf-color-checkmark';
-        checkmark.innerHTML = `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
-          </svg>
-        `;
-        this.querySelector('.prf-color-swatch').appendChild(checkmark);
-
-        // 切换主图片
-        const variantImage = this.getAttribute('data-variant-image');
-        if (variantImage && variantImage !== '' && prfMainImage) {
-          prfMainImage.src = variantImage;
-        }
-
-        // 触发自定义事件，可用于其他功能
-        const colorName = this.getAttribute('data-color');
-        const variantId = this.getAttribute('data-variant-id');
-        const colorHex = this.getAttribute('data-color-hex');
-
-        const event = new CustomEvent('prfColorSelected', {
-          detail: {
-            colorName: colorName,
-            colorHex: colorHex,
-            variantId: variantId,
-            variantImage: variantImage,
-          },
-        });
-
-        document.dispatchEvent(event);
-
-        console.log('Selected color:', colorName, 'Variant ID:', variantId);
-      });
-    });
-
-    // 监听颜色选择事件，可以用于与其他组件通信
-    document.addEventListener('prfColorSelected', function (event) {
-      // 这里可以添加其他逻辑，比如更新购物车、价格等
-      // 例如：更新产品变体选择
-      if (event.detail.variantId) {
-        const productForm = document.querySelector('form[action="/cart/add"]');
-        if (productForm) {
-          const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
-          if (variantInput) {
-            variantInput.value = event.detail.variantId;
-
-            // 触发变化事件
-            const changeEvent = new Event('change', { bubbles: true });
-            variantInput.dispatchEvent(changeEvent);
-          }
-        }
-      }
-    });
-
-    // 移动端触摸优化
-    if ('ontouchstart' in window) {
-      // 为颜色选项添加触摸反馈
-      prfColorOptions.forEach(function (option) {
-        option.addEventListener('touchstart', function () {
-          this.style.opacity = '0.7';
-        });
-
-        option.addEventListener('touchend', function () {
-          this.style.opacity = '1';
-        });
-
-        option.addEventListener('touchcancel', function () {
-          this.style.opacity = '1';
-        });
-      });
-
-      // 为缩略图添加触摸反馈
-      prfThumbnailItems.forEach(function (item) {
-        item.addEventListener('touchstart', function () {
-          this.style.opacity = '0.7';
-        });
-
-        item.addEventListener('touchend', function () {
-          this.style.opacity = '1';
-        });
-
-        item.addEventListener('touchcancel', function () {
-          this.style.opacity = '1';
-        });
-      });
-    }
-  });
-</script>
-
 {% schema %}
 {
-  "name": "Pilates Reformer Product",
+  "name": "功能亮点展示",
   "tag": "section",
-  "class": "product-section",
+  "class": "feature-highlights-section",
   "settings": [
     {
       "type": "header",
-      "content": "Section Layout"
-    },
-    {
-      "type": "range",
-      "id": "sectionpaddingtop",
-      "min": 0,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "label": "Top Padding",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "sectionpaddingbottom",
-      "min": 0,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "label": "Bottom Padding",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "sectionmargintop",
-      "min": 0,
-      "max": 200,
-      "step": 10,
-      "unit": "px",
-      "label": "Top Margin",
-      "default": 100
-    },
-    {
-      "type": "color",
-      "id": "sectionbackgroundcolor",
-      "label": "Section Background Color",
-      "default": "#fff"
-    },
-    {
-      "type": "header",
-      "content": "Product Settings"
-    },
-    {
-      "type": "paragraph",
-      "content": "This section will automatically use the current product when placed on a product page. You can also manually select a product for other pages."
-    },
-    {
-      "type": "product",
-      "id": "producthandle",
-      "label": "Manual Product Selection (optional)",
-      "info": "Leave empty to use current product on product pages"
-    },
-    {
-      "type": "image_picker",
-      "id": "fallbackimage",
-      "label": "Fallback Image",
-      "info": "Used when no product is available"
+      "content": "标题设置"
     },
     {
       "type": "text",
-      "id": "producttitle",
-      "label": "Fallback Product Title",
-      "default": "PILATES REFORMER XSRF100"
-    },
-    {
-      "type": "text",
-      "id": "modelnumber",
-      "label": "Fallback Model Number",
-      "default": "XSRF100"
-    },
-    {
-      "type": "header",
-      "content": "Product Images"
+      "id": "title",
+      "label": "模块标题",
+      "default": "Silent Strength. Built to Perform."
     },
     {
       "type": "range",
-      "id": "mainimageheight",
-      "min": 300,
-      "max": 800,
-      "step": 50,
-      "unit": "px",
-      "label": "Main Image Height",
-      "default": 600
-    },
-    {
-      "type": "color",
-      "id": "mainimagebackground",
-      "label": "Main Image Background Color",
-      "default": "#F1EFEE"
-    },
-    {
-      "type": "range",
-      "id": "thumbnailcolumns",
-      "min": 3,
-      "max": 6,
-      "step": 1,
-      "label": "Thumbnail Columns",
-      "default": 6
-    },
-    {
-      "type": "header",
-      "content": "Customization Section"
-    },
-    {
-      "type": "checkbox",
-      "id": "showcustomizationsection",
-      "label": "Show Customization Section",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "customizationtitle",
-      "label": "Customization Section Title",
-      "default": "Ready to Customize This Product?"
+      "id": "titlesize",
+      "label": "标题字体大小",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "default": 40,
+      "unit": "px"
     },
     {
       "type": "textarea",
-      "id": "customizationdescription",
-      "label": "Customization Description",
-      "default": "Send us your requirements — from size to surface finish, we'll help tailor the product to your needs. Fast response. Flexible MOQ. Global shipping available."
+      "id": "description",
+      "label": "模块描述",
+      "default": "Engineered for total-body control, studio-grade durability, and brand-level customization."
     },
     {
-      "type": "text",
-      "id": "quotebuttontext",
-      "label": "Quote Button Text",
-      "default": "GET A QUOTE"
-    },
-    {
-      "type": "url",
-      "id": "quotebuttonlink",
-      "label": "Quote Button Link",
-      "info": "Leave empty to auto-generate contact link with product info"
-    },
-    {
-      "type": "color",
-      "id": "quotebuttoncolor",
-      "label": "Quote Button Color",
-      "default": "#d32f2f"
-    },
-    {
-      "type": "color",
-      "id": "quotebuttonhovercolor",
-      "label": "Quote Button Hover Color",
-      "default": "#b71c1c"
+      "type": "range",
+      "id": "descriptionsize",
+      "label": "描述字体大小",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
     },
     {
       "type": "header",
-      "content": "Color Options"
-    },
-    {
-      "type": "checkbox",
-      "id": "showcolorselection",
-      "label": "Show Color Selection",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "colorsectiontitle",
-      "label": "Color Section Title",
-      "default": "Upholstery Colors"
-    },
-    {
-      "type": "text",
-      "id": "coloroptionname",
-      "label": "Color Option Name",
-      "default": "Color",
-      "info": "The name of the product option that represents colors (e.g., 'Color', 'Upholstery', 'Fabric', '颜色')"
-    },
-    {
-      "type": "range",
-      "id": "colorcolumns",
-      "min": 2,
-      "max": 4,
-      "step": 1,
-      "label": "Color Options Columns",
-      "default": 3
-    },
-    {
-      "type": "header",
-      "content": "Typography"
-    },
-    {
-      "type": "range",
-      "id": "producttitlesize",
-      "min": 18,
-      "max": 36,
-      "step": 2,
-      "unit": "px",
-      "label": "Product Title Font Size",
-      "default": 24
+      "content": "布局设置"
     },
     {
       "type": "color",
-      "id": "producttitlecolor",
-      "label": "Product Title Color",
-      "default": "#333"
-    },
-    {
-      "type": "range",
-      "id": "customizationtitlesize",
-      "min": 16,
-      "max": 28,
-      "step": 2,
-      "unit": "px",
-      "label": "Customization Title Font Size",
-      "default": 20
-    },
-    {
-      "type": "color",
-      "id": "customizationtitlecolor",
-      "label": "Customization Title Color",
-      "default": "#333"
-    },
-    {
-      "type": "range",
-      "id": "descriptionfontsize",
-      "min": 12,
-      "max": 18,
-      "step": 1,
-      "unit": "px",
-      "label": "Description Font Size",
-      "default": 14
-    },
-    {
-      "type": "color",
-      "id": "descriptioncolor",
-      "label": "Description Text Color",
-      "default": "#16161680"
-    },
-    {
-      "type": "color",
-      "id": "modelnumbercolor",
-      "label": "Model Number Color",
-      "default": "#16161680"
+      "id": "backgroundcolor",
+      "label": "背景颜色",
+      "default": "#FFFFFF"
     }
   ],
   "blocks": [
     {
-      "type": "thumbnail",
-      "name": "Thumbnail Image",
+      "type": "feature_card",
+      "name": "功能卡片",
       "settings": [
         {
           "type": "image_picker",
-          "id": "thumbnailimage",
-          "label": "Thumbnail Image"
+          "id": "icon",
+          "label": "卡片图标"
         },
         {
           "type": "text",
-          "id": "thumbnailalt",
-          "label": "Thumbnail Alt Text",
-          "info": "Describe the image for accessibility"
-        }
-      ]
-    },
-    {
-      "type": "coloroption",
-      "name": "Color Option",
-      "settings": [
-        {
-          "type": "text",
-          "id": "colorname",
-          "label": "Color Name"
+          "id": "title",
+          "label": "卡片标题",
+          "default": "Precision Glide System"
         },
         {
-          "type": "color",
-          "id": "colorvalue",
-          "label": "Color Value"
-        },
-        {
-          "type": "checkbox",
-          "id": "isselected",
-          "label": "Selected by Default",
-          "default": false
-        },
-        {
-          "type": "text",
-          "id": "colordescription",
-          "label": "Color Description (optional)",
-          "info": "Additional description for this color option"
+          "type": "textarea",
+          "id": "desc",
+          "label": "卡片描述",
+          "default": "Dual-rail carriage and sealed bearings deliver ultra-smooth, silent motion."
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Pilates Reformer Product",
+      "name": "功能亮点预设",
       "blocks": [
         {
-          "type": "coloroption",
+          "type": "feature_card",
           "settings": {
-            "colorname": "Black",
-            "colorvalue": "#2c2c2c",
-            "isselected": true
+            "title": "Precision Glide System",
+            "desc": "Dual-rail carriage and sealed bearings deliver ultra-smooth, silent motion."
           }
         },
         {
-          "type": "coloroption",
+          "type": "feature_card",
           "settings": {
-            "colorname": "Steel Gray",
-            "colorvalue": "#6b7280"
+            "title": "Reinforced Frame Integrity",
+            "desc": "Whether crafted from aluminum or solid wood — built for strength and longevity."
           }
         },
         {
-          "type": "coloroption",
+          "type": "feature_card",
           "settings": {
-            "colorname": "Mocha Brown",
-            "colorvalue": "#8b7355"
+            "title": "Balanced Spring Resistance",
+            "desc": "Fine-tuned tension supports deep-core activation and movement control."
           }
         },
         {
-          "type": "coloroption",
+          "type": "feature_card",
           "settings": {
-            "colorname": "Espresso Brown",
-            "colorvalue": "#4a3728"
+            "title": "Comfort-Driven Craftsmanship",
+            "desc": "Soft-touch upholstery and ergonomic contours for lasting comfort in every session."
           }
         },
         {
-          "type": "coloroption",
+          "type": "feature_card",
           "settings": {
-            "colorname": "Pearl Pink",
-            "colorvalue": "#f8c8c8"
-          }
-        },
-        {
-          "type": "coloroption",
-          "settings": {
-            "colorname": "Ivory",
-            "colorvalue": "#f5f5dc"
-          }
-        },
-        {
-          "type": "coloroption",
-          "settings": {
-            "colorname": "Vivid Red",
-            "colorvalue": "#dc2626"
-          }
-        },
-        {
-          "type": "coloroption",
-          "settings": {
-            "colorname": "Magenta Pink",
-            "colorvalue": "#db2777"
-          }
-        },
-        {
-          "type": "coloroption",
-          "settings": {
-            "colorname": "Soft Pink",
-            "colorvalue": "#f3a8b6"
+            "title": "Fully Customizable Aesthetic",
+            "desc": "14+ upholstery colors and material finishes — scalable OEM personalization for any brand."
           }
         }
       ]
