@@ -96,41 +96,46 @@
     text-align: left; /* 标题、描述居中 */
   }
 
-  /* 控制背景圆靠左的容器 */
   .feature-card-icon-wrapper {
-    text-align: left; /* 让背景圆靠左 */
-    margin-bottom: 20px;
+    position: relative;
+    margin-bottom: 25px;
+    /* 必须给容器预留左侧空间，确保背景圆靠左 */
+    display: block; 
   }
 
-  /* 背景圆样式（靠左 + 图标占右侧） */
   .feature-card-icon {
-    width: 60px;
-    height: 60px;
+    width: 48px;  /* 背景圆大小 */
+    height: 48px;
+    background-color: #F8EFEA;
     border-radius: 50%;
-    background-color: #F8EFEA; /* 示例图背景色 */
     position: relative;
-    margin-bottom:30px;
     display: flex;
     align-items: center;
-    padding-right: 12px; /* 给图标留右侧间距 */
-    margin: 0; /* 取消居中margin，跟随父容器靠左 */
+    justify-content: center;
+    /* 确保背景圆不被压缩 */
+    flex-shrink: 0;
   }
 
-  /* 图标样式：仅占背景圆右侧部分 */
+  /* 图标主体：跨越边界的核心代码 */
   .feature-card-icon-inner, 
-  .feature-card-placeholder-icon-inner
-  {
+  .feature-card-placeholder-icon-inner {
     position: absolute;
-    height: 28px; /* 根据UI调整图标大小 */
+    /* 调整图标尺寸，通常为圆圈的 60%-70% */
+    height: 32px; 
     width: auto;
-    right: 0; /* 靠圆圈右侧 */
+    max-width: none; /* 允许图标宽度超过父容器限制 */
+    
+    /* 定位逻辑： */
+    left: 50%;   /* 先移动到圆圈中心线 */
     top: 50%;
-    /* 关键：X轴移动50%使其一半在圆内，一半在圆外；Y轴-50%居中 */
-    transform: translate(50%, -50%); 
-    z-index: 1;
+    /* translateX(0%)：图标中心在圆中心 (居中)
+       translateX(20%~40%)：图标向右偏移，形成跨越感
+    */
+    transform: translate(15%, -50%); 
+    
+    z-index: 2;
     object-fit: contain;
   }
-
   .feature-card-title {
     font-size: 18px;
     font-weight: 500;
