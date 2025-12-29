@@ -1,0 +1,330 @@
+<div class="feature-highlights-section">
+  <div class="feature-highlights-container">
+    <!-- 标题区域（样式与之前保持一致） -->
+    <div class="sustainable-manufacturing-header">
+      {% if section.settings.title != blank %}
+        <h2 class="sustainable-manufacturing-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.description != blank %}
+        <p class="sustainable-manufacturing-description">{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+
+    <!-- 功能图标卡片区域 -->
+    <div class="feature-highlights-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'feature_card' %}
+          <div class="feature-card" {{ block.shopifyattributes }}>
+            <!-- 新增：控制背景圆靠左的容器 -->
+            <div class="feature-card-icon-wrapper">
+              <!-- 功能图标（背景圆靠左 + 图标占右侧） -->
+              <div class="feature-card-icon">
+                {% if block.settings.icon != blank %}
+                  <img
+                    src="{{ block.settings.icon | img_url: '80x80' }}"
+                    alt="{{ block.settings.title }}"
+                    loading="lazy"
+                    class="feature-card-icon-inner"
+                  >
+                {% else %}
+                  <!-- 占位图标（默认占背景圆右侧） -->
+                  <div class="feature-card-placeholder-icon-inner">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M5 10h10" stroke="#C22E35" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- 功能标题 + 描述（保持居中） -->
+            <h3 class="feature-card-title">{{ block.settings.title }}</h3>
+            <p class="feature-card-desc">{{ block.settings.desc }}</p>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 复用之前的标题样式（与可持续制造模块标题一致） */
+  .sustainable-manufacturing-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .sustainable-manufacturing-title {
+    font-size: 40px;
+    font-weight: 500;
+    color: #161616;
+    margin: 0 0 20px;
+    line-height: 1.2;
+  }
+
+  .sustainable-manufacturing-description {
+    font-size: {{ section.settings.descriptionsize }}px;
+    color: rgba(22, 22, 22, 0.5);
+    line-height: 1.6;
+    max-width: 940px;
+    margin: 0 auto;
+  }
+
+  /* 功能卡片区域样式 */
+  .feature-highlights-section {
+    background-color: {{ section.settings.backgroundcolor }};
+  }
+
+  .feature-highlights-container {
+    max-width: 1626px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  .feature-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    justify-items: center;
+    position: relative;
+  }
+
+  /* 卡片容器：标题/描述保持居中 */
+  .feature-card {
+    position: relative;
+    max-width: 220px;
+    text-align: left; /* 标题、描述居中 */
+    padding:15px;
+    box-sizing: border-box;
+  }
+
+  .feature-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: 30%;
+    height: 60%;
+    width: 1px;
+    background-color: #e0e0e0;
+}
+
+  .feature-card-icon-wrapper {
+    position: relative;
+    margin-bottom: 25px;
+    /* 必须给容器预留左侧空间，确保背景圆靠左 */
+    display: block; 
+  }
+
+  .feature-card-icon {
+    width: 42px;  /* 背景圆大小 */
+    height: 42px;
+    background-color:rgba(194,46,53,0.15);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 确保背景圆不被压缩 */
+    flex-shrink: 0;
+  }
+
+  /* 图标主体：跨越边界的核心代码 */
+  .feature-card-icon-inner, 
+  .feature-card-placeholder-icon-inner {
+    position: absolute;
+    /* 调整图标尺寸，通常为圆圈的 60%-70% */
+    {% comment %} height: 32px;  {% endcomment %}
+    width: auto;
+    max-width: none; /* 允许图标宽度超过父容器限制 */
+    
+    /* 定位逻辑： */
+    left: 50%;   /* 先移动到圆圈中心线 */
+    top: 50%;
+    /* translateX(0%)：图标中心在圆中心 (居中)
+       translateX(20%~40%)：图标向右偏移，形成跨越感
+    */
+    transform: translate(0%, -50%); 
+    
+    z-index: 2;
+    object-fit: contain;
+  }
+  .feature-card-title {
+    font-size: 18px;
+    font-weight: 550;
+    color: #161616;
+    margin: 0 0 10px;
+    text-transform: capitalize;
+  }
+
+  .feature-card-desc {
+    font-size: 14px;
+    color: #161616;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* 响应式适配 */
+  @media (max-width: 768px) {
+    .sustainable-manufacturing-title {
+      font-size: 30px;
+    }
+
+    .sustainable-manufacturing-description {
+      font-size: {{ section.settings.descriptionsize | minus: 2 }}px;
+    }
+
+    .feature-highlights-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .sustainable-manufacturing-title {
+      font-size: 27px;
+    }
+
+    .sustainable-manufacturing-description {
+      font-size: {{ section.settings.descriptionsize | minus: 3 }}px;
+    }
+
+    .feature-highlights-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .feature-card::after {
+    display: none;
+  }
+  .feature-card {
+    border-bottom: 1px solid #f0f0f0; /* 手机端改用底部分割线 */
+    padding-bottom: 20px;
+  }
+  .feature-card:last-child {
+    border-bottom: none;
+  }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Built功能亮点展示",
+  "tag": "section",
+  "class": "feature-highlights-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "标题设置"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "模块标题",
+      "default": "Silent Strength. Built to Perform."
+    },
+    {
+      "type": "range",
+      "id": "titlesize",
+      "label": "标题字体大小",
+      "min": 24,
+      "max": 48,
+      "step": 2,
+      "default": 40,
+      "unit": "px"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "模块描述",
+      "default": "Engineered for total-body control, studio-grade durability, and brand-level customization."
+    },
+    {
+      "type": "range",
+      "id": "descriptionsize",
+      "label": "描述字体大小",
+      "min": 14,
+      "max": 20,
+      "step": 1,
+      "default": 16,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "布局设置"
+    },
+    {
+      "type": "color",
+      "id": "backgroundcolor",
+      "label": "背景颜色",
+      "default": "#FFFFFF"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature_card",
+      "name": "功能卡片",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon",
+          "label": "卡片图标"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "卡片标题",
+          "default": "Precision Glide System"
+        },
+        {
+          "type": "textarea",
+          "id": "desc",
+          "label": "卡片描述",
+          "default": "Dual-rail carriage and sealed bearings deliver ultra-smooth, silent motion."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "功能亮点预设",
+      "blocks": [
+        {
+          "type": "feature_card",
+          "settings": {
+            "title": "Precision Glide System",
+            "desc": "Dual-rail carriage and sealed bearings deliver ultra-smooth, silent motion."
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "title": "Reinforced Frame Integrity",
+            "desc": "Whether crafted from aluminum or solid wood — built for strength and longevity."
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "title": "Balanced Spring Resistance",
+            "desc": "Fine-tuned tension supports deep-core activation and movement control."
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "title": "Comfort-Driven Craftsmanship",
+            "desc": "Soft-touch upholstery and ergonomic contours for lasting comfort in every session."
+          }
+        },
+        {
+          "type": "feature_card",
+          "settings": {
+            "title": "Fully Customizable Aesthetic",
+            "desc": "14+ upholstery colors and material finishes — scalable OEM personalization for any brand."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
