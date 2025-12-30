@@ -2,22 +2,27 @@
   <div class="uc-container">
     <div class="uc-header">
       <h2 class="uc-title">
-        {{ section.settings.title | default: "Upholstery Color" }}
+        {{ section.settings.title | default: 'Upholstery Color' }}
       </h2>
       <p class="uc-subtitle">
-        {{ section.settings.subtitle | default: "Choose from our premium upholstery options to match your studio's aesthetic." }}
+        {{
+          section.settings.subtitle
+          | default: "Choose from our premium upholstery options to match your studio's aesthetic."
+        }}
       </p>
     </div>
-    
+
     <div class="uc-content">
       <div class="uc-equipment-display">
         {% assign selected_product = all_products[section.settings.selected_product] %}
-        <img id="uc-main-image" 
-             src="{% if selected_product and selected_product.featured_image %}{{ selected_product.featured_image | img_url: '890x412' }}{% elsif section.settings.equipment_image != blank %}{{ section.settings.equipment_image | img_url: '890x412' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=890&q=80{% endif %}" 
-             alt="Pilates Equipment" 
-             class="uc-equipment-image">
+        <img
+          id="uc-main-image"
+          src="{% if selected_product and selected_product.featured_image %}{{ selected_product.featured_image | img_url: '890x412' }}{% elsif section.settings.equipment_image != blank %}{{ section.settings.equipment_image | img_url: '890x412' }}{% else %}https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=890&q=80{% endif %}"
+          alt="Pilates Equipment"
+          class="uc-equipment-image"
+        >
       </div>
-      
+
       <div class="uc-color-selection">
         <div class="uc-colors-header">
           <h3 class="uc-colors-title">Upholstery Colors</h3>
@@ -26,19 +31,25 @@
           {% if selected_product %}
             {% assign first_color_processed = false %}
             {% assign color_option_name = section.settings.color_option_name | default: 'Color' %}
-            
+
             {% comment %} 查找颜色选项 - 支持多种命名方式 {% endcomment %}
             {% for option in selected_product.options_with_values %}
               {% assign option_name_lower = option.name | downcase %}
               {% assign target_name_lower = color_option_name | downcase %}
-              
-              {% if option_name_lower == target_name_lower or option_name_lower == '颜色' or option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'upholstery' or option_name_lower == 'fabric' %}
+
+              {% if option_name_lower == target_name_lower
+                or option_name_lower == '颜色'
+                or option_name_lower == 'color'
+                or option_name_lower == 'colour'
+                or option_name_lower == 'upholstery'
+                or option_name_lower == 'fabric'
+              %}
                 {% for value in option.values %}
                   {% assign variant_found = false %}
                   {% assign variant_id = '' %}
                   {% assign variant_image = '' %}
                   {% assign color_hex = '#CCCCCC' %}
-                  
+
                   {% comment %} 首先尝试使用 color_swatch.color 获取颜色 {% endcomment %}
                   {% assign color_swatch = value.swatch %}
                   {% if color_swatch and color_swatch.color %}
@@ -73,11 +84,11 @@
                         {% assign color_hex = '#CCCCCC' %}
                     {% endcase %}
                   {% endif %}
-                  
+
                   {% comment %} 查找对应的变体 {% endcomment %}
                   {% for variant in selected_product.variants %}
                     {% assign value_matches = false %}
-                    
+
                     {% comment %} 检查变体的所有选项值 {% endcomment %}
                     {% if variant.option1 == value %}
                       {% assign value_matches = true %}
@@ -86,18 +97,18 @@
                     {% elsif variant.option3 == value %}
                       {% assign value_matches = true %}
                     {% endif %}
-                    
+
                     {% if value_matches and variant_found == false %}
                       {% assign variant_found = true %}
                       {% assign variant_id = variant.id %}
-                      
+
                       {% comment %} 获取变体图片 {% endcomment %}
                       {% if variant.image %}
                         {% assign variant_image = variant.image | img_url: '890x412' %}
                       {% endif %}
                     {% endif %}
                   {% endfor %}
-                  
+
                   {% comment %} 确保颜色值格式正确 {% endcomment %}
                   {% unless color_hex contains '#' %}
                     {% if color_hex != '' %}
@@ -106,17 +117,25 @@
                       {% assign color_hex = '#CCCCCC' %}
                     {% endif %}
                   {% endunless %}
-                  
+
                   <div class="uc-color-item">
-                    <div class="uc-color-option {% unless first_color_processed %}uc-selected{% endunless %}" 
-                         style="background-color: {{ color_hex }};"
-                         data-color="{{ value }}"
-                         data-variant-id="{{ variant_id }}"
-                         data-variant-image="{{ variant_image }}"
-                         data-color-hex="{{ color_hex }}">
+                    <div
+                      class="uc-color-option {% unless first_color_processed %}uc-selected{% endunless %}"
+                      style="background-color: {{ color_hex }};"
+                      data-color="{{ value }}"
+                      data-variant-id="{{ variant_id }}"
+                      data-variant-image="{{ variant_image }}"
+                      data-color-hex="{{ color_hex }}"
+                    >
                       {% unless first_color_processed %}
                         <div class="uc-color-checkmark">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <svg
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
                             <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
                           </svg>
                         </div>
@@ -134,11 +153,13 @@
             {% for block in section.blocks %}
               {% if block.type == 'color_option' %}
                 <div class="uc-color-item">
-                  <div class="uc-color-option {% if forloop.first %}uc-selected{% endif %}" 
-                       style="background-color: {{ block.settings.color_value | default: '#000000' }};"
-                       data-color="{{ block.settings.color_name }}"
-                       data-variant-image=""
-                       data-color-hex="{{ block.settings.color_value | default: '#000000' }}">
+                  <div
+                    class="uc-color-option {% if forloop.first %}uc-selected{% endif %}"
+                    style="background-color: {{ block.settings.color_value | default: '#000000' }};"
+                    data-color="{{ block.settings.color_name }}"
+                    data-variant-image=""
+                    data-color-hex="{{ block.settings.color_value | default: '#000000' }}"
+                  >
                     {% if forloop.first %}
                       <div class="uc-color-checkmark">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -153,14 +174,21 @@
             {% endfor %}
           {% endif %}
         </div>
-        
+
         {% if section.settings.button_text != blank %}
           <div class="uc-swatch-cta">
             <a href="{{ section.settings.button_url | default: '#' }}" class="uc-btn uc-btn-swatch">
               {% if section.settings.button_icon != blank %}
                 <img src="{{ section.settings.button_icon | img_url: '12x8' }}" alt="Icon" class="uc-btn-icon">
               {% else %}
-                <svg class="uc-btn-icon" width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg
+                  class="uc-btn-icon"
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
                   <path d="M8.5 1L11.5 4L8.5 7M11 4H1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               {% endif %}
@@ -174,774 +202,795 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const colorOptions = document.querySelectorAll('.uc-color-option');
-  const mainImage = document.getElementById('uc-main-image');
-  
-  colorOptions.forEach((option, index) => {
-    option.addEventListener('click', function() {
-      // 移除所有选中状态
-      colorOptions.forEach(opt => {
-        opt.classList.remove('uc-selected');
-        const checkmark = opt.querySelector('.uc-color-checkmark');
-        if (checkmark) {
-          checkmark.remove();
-        }
-      });
-      
-      // 添加选中状态到当前选项
-      this.classList.add('uc-selected');
-      
-      // 添加选中标记
-      const checkmark = document.createElement('div');
-      checkmark.className = 'uc-color-checkmark';
-      checkmark.innerHTML = `
+  document.addEventListener('DOMContentLoaded', function () {
+    const colorOptions = document.querySelectorAll('.uc-color-option');
+    const mainImage = document.getElementById('uc-main-image');
+
+    colorOptions.forEach((option, index) => {
+      option.addEventListener('click', function () {
+        // 移除所有选中状态
+        colorOptions.forEach((opt) => {
+          opt.classList.remove('uc-selected');
+          const checkmark = opt.querySelector('.uc-color-checkmark');
+          if (checkmark) {
+            checkmark.remove();
+          }
+        });
+
+        // 添加选中状态到当前选项
+        this.classList.add('uc-selected');
+
+        // 添加选中标记
+        const checkmark = document.createElement('div');
+        checkmark.className = 'uc-color-checkmark';
+        checkmark.innerHTML = `
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="white"/>
         </svg>
       `;
-      this.appendChild(checkmark);
-      
-      // 切换主图片
-      const variantImage = this.getAttribute('data-variant-image');
-      if (variantImage && variantImage !== '') {
-        mainImage.src = variantImage;
-      }
-      
-      // 触发自定义事件，可用于其他功能
-      const colorName = this.getAttribute('data-color');
-      const variantId = this.getAttribute('data-variant-id');
-      const colorHex = this.getAttribute('data-color-hex');
-      
-      const event = new CustomEvent('colorSelected', {
-        detail: {
-          colorName: colorName,
-          colorHex: colorHex,
-          variantId: variantId,
-          variantImage: variantImage
+        this.appendChild(checkmark);
+
+        // 切换主图片
+        const variantImage = this.getAttribute('data-variant-image');
+        if (variantImage && variantImage !== '') {
+          mainImage.src = variantImage;
         }
+
+        // 触发自定义事件，可用于其他功能
+        const colorName = this.getAttribute('data-color');
+        const variantId = this.getAttribute('data-variant-id');
+        const colorHex = this.getAttribute('data-color-hex');
+
+        const event = new CustomEvent('colorSelected', {
+          detail: {
+            colorName: colorName,
+            colorHex: colorHex,
+            variantId: variantId,
+            variantImage: variantImage,
+          },
+        });
+
+        document.dispatchEvent(event);
       });
-      
-      document.dispatchEvent(event);
+    });
+
+    // 监听颜色选择事件，可以用于与其他组件通信
+    document.addEventListener('colorSelected', function (event) {
+      // 这里可以添加其他逻辑，比如更新购物车、价格等
+      // 例如：更新产品变体选择
+      if (event.detail.variantId) {
+        // 可以触发产品表单的变体选择
+        const productForm = document.querySelector('form[action*="/cart/add"]');
+        if (productForm) {
+          const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
+          if (variantInput) {
+            variantInput.value = event.detail.variantId;
+
+            // 触发变化事件
+            const changeEvent = new Event('change', { bubbles: true });
+            variantInput.dispatchEvent(changeEvent);
+          }
+        }
+      }
     });
   });
-  
-  // 监听颜色选择事件，可以用于与其他组件通信
-  document.addEventListener('colorSelected', function(event) {
-    // 这里可以添加其他逻辑，比如更新购物车、价格等
-    // 例如：更新产品变体选择
-    if (event.detail.variantId) {
-      // 可以触发产品表单的变体选择
-      const productForm = document.querySelector('form[action*="/cart/add"]');
-      if (productForm) {
-        const variantInput = productForm.querySelector('select[name="id"], input[name="id"]');
-        if (variantInput) {
-          variantInput.value = event.detail.variantId;
-          
-          // 触发变化事件
-          const changeEvent = new Event('change', { bubbles: true });
-          variantInput.dispatchEvent(changeEvent);
-        }
-      }
-    }
-  });
-});
 </script>
 
 <style>
-.uc-section {
-  padding: 40px 0;
-  background-color: #ffffff;
-}
-
-.uc-container {
-  max-width: 1520px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.uc-header {
-  text-align: center;
-  margin-bottom: 60px;
-}
-
-.uc-title {
-  font-size: 40px;
-  font-weight: 500;
-  color: #161616;
-  margin: 0 0 16px 0;
-  line-height: 1.2;
-}
-
-.uc-subtitle {
-  font-size: 14px;
-  font-weight: 400;
-  color: rgba(22, 22, 22, 0.5);
-  margin: 0;
-  line-height: 1.5;
-  margin: 0 auto;
-}
-
-.uc-content {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
-  justify-content: center;
-}
-
-.uc-equipment-display {
-  background-color: #F1F0ED;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.uc-equipment-image {
-  object-fit: cover;
-  object-position: center;
-  border-radius: 16px;
-  transition: opacity 0.3s ease;
-  width: 100%;
-  height: 100%;
-}
-
-.uc-equipment-image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.uc-color-selection {
-  flex-shrink: 0;
-}
-
-.uc-colors-header {
-  margin-bottom: 26px;
-}
-
-.uc-colors-title {
-  display: inline;
-  font-size: 24px;
-  font-weight: 500;
-  color: #161616;
-  margin: 0;
-  border-bottom: 1px solid rgba(194, 46, 53, 1);
-  padding-bottom: 8px;
-  line-height: 48px;
-}
-
-.uc-color-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 80px);
-  grid-auto-rows: 110px;
-  gap: 20px;
-  margin-bottom: 40px;
-  height: 280px;
-  overflow-y: auto;
-  padding: 10px 18px 10px 10px;
-}
-
-/* 自定义滚动条样式 */
-.uc-color-grid::-webkit-scrollbar {
-  width: 1px;
-}
-
-.uc-color-grid::-webkit-scrollbar-track {
-  background: #F3F3F3;
-  border-radius: 1px;
-}
-
-.uc-color-grid::-webkit-scrollbar-thumb {
-  background: #AB3A39;
-  border-radius: 1px;
-}
-
-.uc-color-grid::-webkit-scrollbar-thumb:hover {
-  background: #8B2E2F;
-}
-
-/* Firefox 滚动条样式 */
-.uc-color-grid {
-  scrollbar-color: #AB3A39 #F3F3F3;
-}
-
-.uc-color-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.uc-color-option {
-  width: 80px;
-  height: 80px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid transparent;
-}
-
-/* 处理透明或未设置的颜色 */
-.uc-color-option[style*="rgba(0,0,0,0)"],
-.uc-color-option[style*="transparent"],
-.uc-color-option[data-color-hex="#CCCCCC"] {
-  border: 1px solid #ddd;
-  background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%), 
-                    linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), 
-                    linear-gradient(45deg, transparent 75%, #f0f0f0 75%), 
-                    linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
-  background-size: 8px 8px;
-  background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
-}
-
-.uc-color-option[data-color-hex="#CCCCCC"]:after {
-  content: "默认";
-  font-size: 10px;
-  color: #666;
-  text-align: center;
-  line-height: 1.2;
-}
-
-.uc-color-label {
-  font-size: 12px;
-  font-weight: 400;
-  color: #161616;
-  text-align: center;
-  line-height: 1.2;
-  max-width: 80px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.uc-color-option:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-.uc-color-option.uc-selected {
-  transform: scale(1.2);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  z-index: 2;
-  position: relative;
-}
-
-.uc-color-checkmark {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 49px;
-  height: 49px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.uc-color-checkmark svg {
-  width: 49px;
-  height: 49px;
-}
-
-.uc-swatch-cta {
-  text-align: left;
-}
-
-.uc-btn {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.uc-btn-swatch {
-  background-color: #C22E35;
-  color: white;
-  width: 200px;
-  height: 40px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 16px;
-  gap: 8px;
-}
-
-.uc-btn-icon {
-  width: 12px;
-  height: 8px;
-  flex-shrink: 0;
-}
-
-.uc-btn-text {
-  flex: 1;
-  text-align: left;
-}
-
-.uc-btn-swatch:hover {
-  background-color: #A02329;
-  transform: translateY(-2px);
-}
-
-/* 响应式设计 */
-/* 大屏幕 (1920px+) - 使用设计图精确尺寸 */
-@media (min-width: 1920px) {
-  .uc-equipment-display {
-    flex: 0 0 1029px;
-    width: 1029px;
-    height: 532px;
-  }
-  
-  .uc-equipment-image {
-    width: 890px;
-    height: 412px;
-  }
-  
-  .uc-color-selection {
-    width: 366px;
-  }
-
-  .uc-color-grid {
-    height: 374px;
-  }
-}
-
-/* 笔记本电脑 (1366px - 1919px) */
-@media (max-width: 1919px) and (min-width: 1366px) {
-  .uc-container {
-    max-width: 1277px;
-  }
-  
-  .uc-header {
-    margin-bottom: 50px;
-  }
-  
-  .uc-title {
-    font-size: 37px;
-    margin-bottom: 14px;
-  }
-  
-  .uc-subtitle {
-    font-size: 14px;
-  }
-  
-  .uc-content {
-    gap: 30px;
-  }
-  
-  .uc-equipment-display {
-    flex: 1;
-    max-width: 864px;
-    aspect-ratio: 864/447;
-  }
-  
-  .uc-color-selection {
-    width: 308px;
-  }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 68px);
-    grid-auto-rows: 94px;
-    gap: 16px;
-    margin-bottom: 35px;
-    height: 240px;
-    padding: 8px 15px 8px 8px;
-  }
-  
-  .uc-color-option {
-    width: 68px;
-    height: 68px;
-  }
-  
-  .uc-color-label {
-    font-size: 11px;
-    max-width: 68px;
-  }
-}
-
-/* 小笔记本 (1024px - 1365px) */
-@media (max-width: 1365px) and (min-width: 1024px) {
-  .uc-container {
-    max-width: 1018px;
-    padding: 0 30px;
-  }
-  
-  .uc-header {
-    margin-bottom: 45px;
-  }
-  
-  .uc-title {
-    font-size: 37px;
-    margin-bottom: 12px;
-  }
-  
-  .uc-subtitle {
-    font-size: 14px;
-  }
-  
-  .uc-content {
-    gap: 30px;
-  }
-  
-  .uc-equipment-display {
-    flex: 1;
-    max-width: 720px;
-    aspect-ratio: 720/372;
-  }
-  
-  .uc-color-selection {
-    width: 270px;
-  }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 60px);
-    grid-auto-rows: 82px;
-    gap: 15px;
-    margin-bottom: 30px;
-    height: 210px;
-    padding: 7px 12px 7px 7px;
-  }
-  
-  .uc-color-option {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .uc-color-label {
-    font-size: 10px;
-    max-width: 60px;
-  }
-  
-  .uc-color-checkmark {
-    width: 41px;
-    height: 41px;
-  }
-  
-  .uc-color-checkmark svg {
-    width: 41px;
-    height: 41px;
-  }
-}
-
-/* 平板横屏 (768px - 1023px) - 改为单栏布局 */
-@media (max-width: 1023px) and (min-width: 768px) {
-  .uc-section {
-    padding: 60px 0;
-  }
-  
-  .uc-container {
-    padding: 0 25px;
-  }
-  
-  .uc-header {
-    margin-bottom: 40px;
-  }
-  
-  .uc-title {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-  
-  .uc-subtitle {
-    font-size: 13px;
-  }
-  
-  .uc-content {
-    flex-direction: column;
-    gap: 30px;
-    align-items: center;
-  }
-  
-  .uc-equipment-display {
-    width: 100%;
-    max-width: 600px;
-    aspect-ratio: 16/10;
-  }
-  
-  .uc-color-selection {
-    width: 100%;
-    max-width: 300px;
-    text-align: center;
-  }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 55px);
-    grid-auto-rows: 75px;
-    gap: 12px;
-    margin-bottom: 25px;
-    justify-content: center;
-    height: 190px;
-    padding: 6px 10px 6px 6px;
-  }
-  
-  .uc-color-option {
-    width: 55px;
-    height: 55px;
-  }
-  
-  .uc-color-label {
-    font-size: 9px;
-    max-width: 55px;
-  }
-  
-  .uc-color-checkmark {
-    width: 33px;
-    height: 33px;
-  }
-  
-  .uc-color-checkmark svg {
-    width: 33px;
-    height: 33px;
-  }
-}
-
-/* 平板竖屏和大手机 (481px - 767px) - 单栏布局 */
-@media (max-width: 767px) and (min-width: 481px) {
-  .uc-section {
-    padding: 50px 0;
-  }
-  
-  .uc-container {
-    padding: 0 20px;
-  }
-  
-  .uc-header {
-    margin-bottom: 35px;
-  }
-  
-  .uc-title {
-    font-size: 25px;
-    margin-bottom: 8px;
-  }
-  
-  .uc-subtitle {
-    font-size: 12px;
-  }
-  
-  .uc-content {
-    flex-direction: column;
-    gap: 30px;
-    align-items: center;
-  }
-  
-  .uc-equipment-display {
-    width: 100%;
-    max-width: 450px;
-    aspect-ratio: 16/10;
-  }
-  
-  .uc-color-selection {
-    width: 100%;
-    max-width: 250px;
-    text-align: center;
-  }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 50px);
-    grid-auto-rows: 68px;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-    height: 170px;
-    padding: 5px 8px 5px 5px;
-  }
-  
-  .uc-color-option {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .uc-color-label {
-    font-size: 8px;
-    max-width: 50px;
-  }
-  
-  .uc-color-checkmark {
-    width: 25px;
-    height: 25px;
-  }
-  
-  .uc-color-checkmark svg {
-    width: 25px;
-    height: 25px;
-  }
-}
-
-/* 小手机 (320px - 480px) - 单栏布局 */
-@media (max-width: 480px) {
   .uc-section {
     padding: 40px 0;
+    background-color: #ffffff;
   }
-  
-  .uc-container {
-    padding: 0 15px;
-  }
-  
-  .uc-header {
-    margin-bottom: 30px;
-  }
-  
-  .uc-title {
-    font-size: 24px;
-    margin-bottom: 6px;
-  }
-  
-  .uc-subtitle {
-    font-size: 12px;
-  }
-  
-  .uc-content {
-    flex-direction: column;
-    gap: 30px;
-    align-items: center;
-  }
-  
-  .uc-equipment-display {
-    width: 100%;
-    max-width: 320px;
-    aspect-ratio: 16/10;
-  }
-  
-  .uc-color-selection {
-    width: 100%;
-    max-width: 200px;
-    text-align: center;
-  }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 45px);
-    grid-auto-rows: 61px;
-    gap: 8px;
-    margin-bottom: 18px;
-    justify-content: center;
-    height: 155px;
-    padding: 4px 7px 4px 4px;
-  }
-  
-  .uc-color-option {
-    width: 45px;
-    height: 45px;
-  }
-  
-  .uc-color-label {
-    font-size: 7px;
-    max-width: 45px;
-  }
-  
-  .uc-color-checkmark {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .uc-color-checkmark svg {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .uc-btn-swatch {
-    width: 190px;
-    height: 34px;
-    font-size: 11px;
-  }
-  
-  .uc-btn-icon {
-    width: 8px;
-    height: 5px;
-  }
-}
 
-/* 超小屏幕 (最小320px) - 单栏布局 */
-@media (max-width: 320px) {
-  .uc-section {
-    padding: 35px 0;
+  .uc-container {
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
-  
+
   .uc-header {
-    margin-bottom: 25px;
-  }
-  
-  .uc-title {
-    font-size: 24px;
-    margin-bottom: 5px;
-  }
-  
-  .uc-subtitle {
-    font-size: 12px;
-  }
-  
-  .uc-content {
-    flex-direction: column;
-    gap: 25px;
-    align-items: center;
-  }
-  
-  .uc-equipment-display {
-    width: 100%;
-    max-width: 290px;
-    aspect-ratio: 16/10;
-  }
-  
-  .uc-color-selection {
-    width: 100%;
-    max-width: 180px;
     text-align: center;
+    margin-bottom: 60px;
   }
-  
-  .uc-color-grid {
-    grid-template-columns: repeat(3, 40px);
-    grid-auto-rows: 54px;
-    gap: 6px;
-    margin-bottom: 15px;
+
+  .uc-title {
+    font-size: 40px;
+    font-weight: 500;
+    color: #161616;
+    margin: 0 0 16px 0;
+    line-height: 1.2;
+  }
+
+  .uc-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(22, 22, 22, 0.5);
+    margin: 0;
+    line-height: 1.5;
+    margin: 0 auto;
+  }
+
+  .uc-content {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
     justify-content: center;
-    height: 140px;
-    padding: 3px 6px 3px 3px;
   }
-  
+
+  .uc-equipment-display {
+    background-color: #f1f0ed;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .uc-equipment-image {
+    object-fit: cover;
+    object-position: center;
+    border-radius: 16px;
+    transition: opacity 0.3s ease;
+    width: 100%;
+    height: 100%;
+  }
+
+  .uc-equipment-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .uc-color-selection {
+    flex-shrink: 0;
+  }
+
+  .uc-colors-header {
+    margin-bottom: 26px;
+  }
+
+  .uc-colors-title {
+    display: inline;
+    font-size: 24px;
+    font-weight: 500;
+    color: #161616;
+    margin: 0;
+    border-bottom: 1px solid rgba(194, 46, 53, 1);
+    padding-bottom: 8px;
+    line-height: 48px;
+  }
+
+  .uc-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 16px;
+    max-height: 400px;
+    padding: 10px 5px;
+    margin: 0 -5px;
+  }
+
+  /* 自定义滚动条样式 */
+  .uc-color-grid::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .uc-color-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+
+  .uc-color-grid::-webkit-scrollbar-thumb {
+    background: #c22e35;
+    border-radius: 2px;
+  }
+
+  .uc-color-grid::-webkit-scrollbar-thumb:hover {
+    background: #a52020;
+  }
+
+  /* Firefox 滚动条样式 */
+  .uc-color-grid {
+    scrollbar-color: #c22e35 #f1f1f1;
+  }
+
+  .uc-color-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
   .uc-color-option {
-    width: 40px;
-    height: 40px;
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
+  /* 处理透明或未设置的颜色 */
+  .uc-color-option[style*='rgba(0,0,0,0)'],
+  .uc-color-option[style*='transparent'],
+  .uc-color-option[data-color-hex='#CCCCCC'] {
+    border: 1px solid #ddd;
+    background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+      linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+      linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+    background-size: 6px 6px;
+    background-position: 0 0, 0 3px, 3px -3px, -3px 0px;
+  }
+
+  .uc-color-option[data-color-hex='#CCCCCC']:after {
+    content: '默认';
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    line-height: 1.2;
+  }
+
   .uc-color-label {
-    font-size: 6px;
-    max-width: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #161616;
+    text-align: center;
+    line-height: 1.3;
+    max-width: 100px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    transition: all 0.2s ease;
   }
-  
+
+  .uc-color-item:hover .uc-color-option {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .uc-color-option.uc-selected {
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border-color: #c22e35;
+  }
+
   .uc-color-checkmark {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .uc-color-checkmark svg {
-    width: 12px;
-    height: 12px;
-  }
-  
-  .uc-btn-swatch {
-    width: 190px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
     height: 32px;
-    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
   }
-  
+
+  .uc-color-checkmark svg {
+    width: 20px;
+    height: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .uc-swatch-cta {
+    text-align: left;
+  }
+
+  .uc-btn {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .uc-btn-swatch {
+    background-color: #c22e35;
+    color: white;
+    width: 200px;
+    height: 40px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 16px;
+    gap: 8px;
+  }
+
   .uc-btn-icon {
-    width: 7px;
-    height: 5px;
+    width: 12px;
+    height: 8px;
+    flex-shrink: 0;
   }
-}
+
+  .uc-btn-text {
+    flex: 1;
+    text-align: left;
+  }
+
+  .uc-btn-swatch:hover {
+    background-color: #a02329;
+    transform: translateY(-2px);
+  }
+
+  /* 响应式设计 */
+  /* 大屏幕 (1920px+) */
+  @media (min-width: 1920px) {
+    .uc-equipment-display {
+      flex: 0 0 1029px;
+      width: 1029px;
+      height: 532px;
+    }
+
+    .uc-equipment-image {
+      width: 890px;
+      height: 412px;
+    }
+
+    .uc-color-selection {
+      width: 366px;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+      grid-auto-rows: 110px;
+      gap: 14px;
+      height: 426px;
+      padding: 15px 20px 15px 15px;
+    }
+
+    .uc-color-option {
+      width: 70px;
+      height: 70px;
+    }
+
+    .uc-color-label {
+      font-size: 14px;
+    }
+  }
+
+  /* 笔记本电脑 (1366px - 1919px) */
+  @media (max-width: 1919px) and (min-width: 1366px) {
+    .uc-container {
+      max-width: 1277px;
+    }
+
+    .uc-header {
+      margin-bottom: 50px;
+    }
+
+    .uc-title {
+      font-size: 37px;
+      margin-bottom: 14px;
+    }
+
+    .uc-subtitle {
+      font-size: 14px;
+    }
+
+    .uc-content {
+      gap: 30px;
+    }
+
+    .uc-equipment-display {
+      flex: 1;
+      max-width: 864px;
+      aspect-ratio: 864/447;
+    }
+
+    .uc-color-selection {
+      width: 308px;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+      grid-auto-rows: 100px;
+      gap: 20px;
+      height: 400px;
+      padding: 10px 5px;
+    }
+
+    .uc-color-option {
+      width: 55px;
+      height: 55px;
+    }
+
+    .uc-color-label {
+      font-size: 13px;
+    }
+
+    .uc-color-checkmark {
+      width: 35px;
+      height: 35px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 35px;
+      height: 35px;
+    }
+  }
+
+  /* 小笔记本 (1024px - 1365px) */
+  @media (max-width: 1365px) and (min-width: 1024px) {
+    .uc-container {
+      max-width: 1018px;
+      padding: 0 30px;
+    }
+
+    .uc-header {
+      margin-bottom: 45px;
+    }
+
+    .uc-title {
+      font-size: 37px;
+      margin-bottom: 12px;
+    }
+
+    .uc-subtitle {
+      font-size: 14px;
+    }
+
+    .uc-content {
+      gap: 30px;
+    }
+
+    .uc-equipment-display {
+      flex: 1;
+      max-width: 720px;
+      aspect-ratio: 720/372;
+    }
+
+    .uc-color-selection {
+      width: 270px;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+      grid-auto-rows: 100px;
+      gap: 20px;
+      height: 400px;
+      padding: 10px 5px;
+    }
+
+    .uc-color-option {
+      width: 55px;
+      height: 55px;
+    }
+
+    .uc-color-label {
+      font-size: 13px;
+    }
+
+    .uc-color-checkmark {
+      width: 35px;
+      height: 35px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 35px;
+      height: 35px;
+    }
+  }
+
+  /* 平板横屏 (768px - 1023px) - 改为单栏布局 */
+  @media (max-width: 1023px) and (min-width: 768px) {
+    .uc-section {
+      padding: 60px 0;
+    }
+
+    .uc-container {
+      padding: 0 25px;
+    }
+
+    .uc-header {
+      margin-bottom: 40px;
+    }
+
+    .uc-title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .uc-subtitle {
+      font-size: 13px;
+    }
+
+    .uc-content {
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .uc-equipment-display {
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 16/10;
+    }
+
+    .uc-color-selection {
+      width: 100%;
+      max-width: 300px;
+      text-align: center;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+      grid-auto-rows: 110px;
+      gap: 15px;
+      margin-bottom: 25px;
+      justify-content: center;
+      height: 300px;
+      padding: 15px 20px 15px 15px;
+    }
+
+    .uc-color-option {
+      width: 65px;
+      height: 65px;
+    }
+
+    .uc-color-label {
+      font-size: 12px;
+      max-width: 65px;
+    }
+
+    .uc-color-checkmark {
+      width: 35px;
+      height: 35px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 35px;
+      height: 35px;
+    }
+  }
+
+  /* 平板竖屏和大手机 (481px - 767px) - 单栏布局 */
+  @media (max-width: 767px) and (min-width: 481px) {
+    .uc-section {
+      padding: 50px 0;
+    }
+
+    .uc-container {
+      padding: 0 20px;
+    }
+
+    .uc-header {
+      margin-bottom: 35px;
+    }
+
+    .uc-title {
+      font-size: 25px;
+      margin-bottom: 8px;
+    }
+
+    .uc-subtitle {
+      font-size: 12px;
+    }
+
+    .uc-content {
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .uc-equipment-display {
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 16/10;
+    }
+
+    .uc-color-selection {
+      width: 100%;
+      max-width: 250px;
+      text-align: center;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(3, 50px);
+      grid-auto-rows: 68px;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+      height: 170px;
+      padding: 5px 8px 5px 5px;
+    }
+
+    .uc-color-option {
+      width: 50px;
+      height: 50px;
+    }
+
+    .uc-color-label {
+      font-size: 8px;
+      max-width: 50px;
+    }
+
+    .uc-color-checkmark {
+      width: 25px;
+      height: 25px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 25px;
+      height: 25px;
+    }
+  }
+
+  /* 小手机 (320px - 480px) - 单栏布局 */
+  @media (max-width: 480px) {
+    .uc-section {
+      padding: 40px 0;
+    }
+
+    .uc-container {
+      padding: 0 15px;
+    }
+
+    .uc-header {
+      margin-bottom: 30px;
+    }
+
+    .uc-title {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .uc-subtitle {
+      font-size: 12px;
+    }
+
+    .uc-content {
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .uc-equipment-display {
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 16/10;
+    }
+
+    .uc-color-selection {
+      width: 100%;
+      max-width: 200px;
+      text-align: center;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(3, 45px);
+      grid-auto-rows: 61px;
+      gap: 8px;
+      margin-bottom: 18px;
+      justify-content: center;
+      height: 155px;
+      padding: 4px 7px 4px 4px;
+    }
+
+    .uc-color-option {
+      width: 45px;
+      height: 45px;
+    }
+
+    .uc-color-label {
+      font-size: 7px;
+      max-width: 45px;
+    }
+
+    .uc-color-checkmark {
+      width: 20px;
+      height: 20px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .uc-btn-swatch {
+      width: 190px;
+      height: 34px;
+      font-size: 11px;
+    }
+
+    .uc-btn-icon {
+      width: 8px;
+      height: 5px;
+    }
+  }
+
+  /* 超小屏幕 (最小320px) - 单栏布局 */
+  @media (max-width: 320px) {
+    .uc-section {
+      padding: 35px 0;
+    }
+
+    .uc-header {
+      margin-bottom: 25px;
+    }
+
+    .uc-title {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .uc-subtitle {
+      font-size: 12px;
+    }
+
+    .uc-content {
+      flex-direction: column;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .uc-equipment-display {
+      width: 100%;
+      max-width: 290px;
+      aspect-ratio: 16/10;
+    }
+
+    .uc-color-selection {
+      width: 100%;
+      max-width: 180px;
+      text-align: center;
+    }
+
+    .uc-color-grid {
+      grid-template-columns: repeat(3, 40px);
+      grid-auto-rows: 54px;
+      gap: 6px;
+      margin-bottom: 15px;
+      justify-content: center;
+      height: 140px;
+      padding: 3px 6px 3px 3px;
+    }
+
+    .uc-color-option {
+      width: 40px;
+      height: 40px;
+    }
+
+    .uc-color-label {
+      font-size: 6px;
+      max-width: 40px;
+    }
+
+    .uc-color-checkmark {
+      width: 12px;
+      height: 12px;
+    }
+
+    .uc-color-checkmark svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .uc-btn-swatch {
+      width: 190px;
+      height: 32px;
+      font-size: 10px;
+    }
+
+    .uc-btn-icon {
+      width: 7px;
+      height: 5px;
+    }
+  }
 </style>
 
 {% schema %}
