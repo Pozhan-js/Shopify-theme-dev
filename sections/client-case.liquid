@@ -193,87 +193,128 @@ document.addEventListener('DOMContentLoaded', function() {
   const tracks = document.querySelectorAll('.testimonial-nav-track');
   const btnLeft = document.querySelector('.testimonial-nav-arrow--left');
   const btnRight = document.querySelector('.testimonial-nav-arrow--right');
-  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
 
   let currentIndex = 0;
   let autoplayTimer = null;
+  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
 
+  // 1. 获取当前每屏显示的卡片数
   function getVisibleCount() {
     if (window.innerWidth >= 1200) return 3;
     if (window.innerWidth >= 768) return 2;
     return 1;
   }
 
+  // 2. 计算最大允许的索引（防止右侧留白）
   function getMaxIndex() {
-    return Math.max(cards.length - getVisibleCount(), 0);
+    const visible = getVisibleCount();
+    // 关键逻辑：如果你有 10 张图，显示 3 张，最大索引只能是 7 (索引从0开始则为7)
+    return Math.max(cards.length - visible, 0);
   }
 
-  function update() {
-    const visible = getVisibleCount();
+  // 3. 核心更新函数
+  function updateCarousel(isAuto = false) {
     const maxIndex = getMaxIndex();
 
-    // 确保索引不留白
-    if (currentIndex > maxIndex) currentIndex = 0;
-    if (currentIndex < 0) currentIndex = maxIndex;
+    // 索引越界处理
+    if (currentIndex > maxIndex) {
+      currentIndex = 0; // 到底后回到开头
+    } else if (currentIndex < 0) {
+      currentIndex = maxIndex; // 到头后去往末尾
+    }
 
+    // 计算移动距离
     const card = cards[0];
     const cardStyle = window.getComputedStyle(card);
-    const fullWidth = card.offsetWidth + parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
+    const cardFullWidth = card.offsetWidth + parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
     
-    container.style.transform = `translateX(${-currentIndex * fullWidth}px)`;
+    // 执行平滑位移
+    container.style.transform = `translateX(${-currentIndex * cardFullWidth}px)`;
 
-    // 更新指示点激活状态
+    // 更新指示点 (1:1 映射)
     tracks.forEach((track, index) => {
-      // 这里的映射逻辑：当 currentIndex 移动时，对应的点点亮
       track.classList.toggle('active', index === currentIndex);
     });
 
-    // 箭头透明度控制
+    // 箭头透明度反馈
     if(btnLeft) btnLeft.style.opacity = currentIndex === 0 ? "0.3" : "1";
     if(btnRight) btnRight.style.opacity = currentIndex >= maxIndex ? "0.3" : "1";
   }
 
+  // 4. 手动控制逻辑
+  function nextSlide() {
+    const max = getMaxIndex();
+    if (currentIndex < max) {
+      currentIndex++;
+    } else {
+      currentIndex = 0;
+    }
+    updateCarousel();
+  }
+
+  function prevSlide() {
+    if (currentIndex > 0) {
+      currentIndex--;
+    } else {
+      currentIndex = getMaxIndex();
+    }
+    updateCarousel();
+  }
+
+  // 5. 自动播放管理
   function startAutoplay() {
     stopAutoplay();
-    autoplayTimer = setInterval(() => {
-      const max = getMaxIndex();
-      currentIndex = currentIndex >= max ? 0 : currentIndex + 1;
-      update();
-    }, autoplayInterval);
+    autoplayTimer = setInterval(nextSlide, autoplayInterval);
   }
 
   function stopAutoplay() {
-    clearInterval(autoplayTimer);
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
   }
 
-  // 事件绑定
-  if (btnRight) btnRight.onclick = () => { 
-    if(currentIndex < getMaxIndex()) { currentIndex++; update(); } 
-    stopAutoplay(); 
-  };
-  
-  if (btnLeft) btnLeft.onclick = () => { 
-    if(currentIndex > 0) { currentIndex--; update(); } 
-    stopAutoplay(); 
-  };
+  // 6. 绑定点击事件
+  if (btnRight) {
+    btnRight.addEventListener('click', () => {
+      stopAutoplay();
+      nextSlide();
+      // 手动点击后不立即恢复自动播放，给用户观察时间
+    });
+  }
+
+  if (btnLeft) {
+    btnLeft.addEventListener('click', () => {
+      stopAutoplay();
+      prevSlide();
+    });
+  }
 
   tracks.forEach((track, index) => {
-    track.onclick = () => {
-      currentIndex = index;
-      update();
+    track.addEventListener('click', () => {
       stopAutoplay();
-    };
+      currentIndex = index;
+      updateCarousel();
+    });
   });
 
+  // 7. 窗口调整适配
+  let resizeTimeout;
   window.addEventListener('resize', () => {
-    update();
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      const max = getMaxIndex();
+      if (currentIndex > max) currentIndex = max; // 重新对齐
+      updateCarousel();
+    }, 200);
   });
 
+  // 8. 鼠标悬停行为
   section.addEventListener('mouseenter', stopAutoplay);
   section.addEventListener('mouseleave', startAutoplay);
 
-  // 初始化
-  update();
+  // 初始化执行
+  updateCarousel();
   startAutoplay();
 });
 {% endjavascript %}
