@@ -7,11 +7,9 @@
             {% if block.settings.button_link != blank %}
               <a href="{{ block.settings.button_link }}" target="{{ block.settings.button_target }}" class="testimonial-card__full-link">
             {% endif %}
-            
             <div class="testimonial-card__image-box">
-              <img src="{{ block.settings.image | image_url: width: 800 }}" alt="Case Study Image" loading="lazy">
+              <img src="{{ block.settings.image | image_url: width: 600 }}" alt="Case Study Image" loading="lazy">
             </div>
-
             {% if block.settings.button_link != blank %}
               </a>
             {% endif %}
@@ -23,27 +21,28 @@
 
   {% if section.blocks.size > 0 %}
     <div class="testimonial-carousel-nav" id="testimonialNav">
-      <span class="testimonial-nav-arrow--left" style="cursor: pointer;">←</span>
+      <span class="testimonial-nav-arrow--left">←</span>
       <div class="testimonial-nav-tracks">
         {% comment %} 
-          生成指示点：逻辑上，最大有效索引是 总数 - 2 
+          核心计算：展示5个时，可滚动的终点是 总数-5。
+          因此指示点数量设定为 总数减 4。
         {% endcomment %}
         {% assign total_cards = section.blocks.size %}
-        {% assign indicator_count = total_cards | minus: 2 %}
+        {% assign indicator_count = total_cards | minus: 4 %}
         {% if indicator_count < 1 %}{% assign indicator_count = 1 %}{% endif %}
         
         {% for i in (1..indicator_count) %}
-          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
+          <span class="testimonial-nav-track {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}"></span>
         {% endfor %}
       </div>
-      <span class="testimonial-nav-arrow--right" style="cursor: pointer;">→</span>
+      <span class="testimonial-nav-arrow--right">→</span>
     </div>
   {% endif %}
 </div>
 
 {% schema %}
 {
-  "name": "纯图片案例轮播",
+  "name": "5图并排案例轮播",
   "tag": "section",
   "settings": [
     {
@@ -69,7 +68,7 @@
         {
           "type": "url",
           "id": "button_link",
-          "label": "点击图片跳转链接"
+          "label": "点击跳转链接"
         },
         {
           "type": "select",
@@ -86,7 +85,7 @@
   ],
   "presets": [
     {
-      "name": "纯图片案例轮播"
+      "name": "5图并排案例轮播"
     }
   ]
 }
@@ -96,29 +95,29 @@
 .testimonial-carousel-section {
   max-width: 100%;
   margin: 40px auto;
-  padding: 0 15px;
+  padding: 0 10px;
   overflow: hidden;
+  --card-gap: 10px; /* 定义间距 */
 }
 
 .testimonial-carousel-container {
   overflow: hidden;
   width: 100%;
-  position: relative;
 }
 
 .testimonial-carousel-cards {
   display: flex;
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.33, 1);
   will-change: transform;
 }
 
 .testimonial-card {
-  flex: 0 0 calc(33.333% - 16px); /* 桌面端显示3张 */
-  margin: 0 8px;
-  border-radius: 12px;
+  /* 桌面端显示5张：(100% / 5) = 20% */
+  flex: 0 0 calc(20% - var(--card-gap));
+  margin: 0 calc(var(--card-gap) / 2);
+  border-radius: 10px;
   overflow: hidden;
-  background: #f4f4f4;
-  position: relative;
+  background: #f9f9f9;
 }
 
 .testimonial-card__full-link {
@@ -129,7 +128,7 @@
 
 .testimonial-card__image-box {
   width: 100%;
-  aspect-ratio: 1 / 1; /* 正方形展示，可改为 4/3 */
+  aspect-ratio: 1 / 1; /* 图片保持正方形 */
 }
 
 .testimonial-card__image-box img {
@@ -139,30 +138,30 @@
   display: block;
 }
 
-/* 响应式适配 */
-@media (max-width: 1199px) {
-  .testimonial-card { flex: 0 0 calc(50% - 16px); } /* 平板2张 */
+/* 响应式断点 */
+@media (max-width: 1200px) {
+  .testimonial-card { flex: 0 0 calc(33.33% - var(--card-gap)); } /* 平板3张 */
 }
 @media (max-width: 767px) {
-  .testimonial-card { flex: 0 0 calc(100% - 16px); } /* 手机1张 */
+  .testimonial-card { flex: 0 0 calc(50% - var(--card-gap)); } /* 手机2张 */
 }
 
-/* 指示器样式 */
+/* 导航样式 */
 .testimonial-carousel-nav {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
-  margin-top: 30px;
+  margin-top: 25px;
 }
 
 .testimonial-nav-tracks {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .testimonial-nav-track {
-  width: 25px;
+  width: 20px;
   height: 4px;
   background-color: #e0e0e0;
   cursor: pointer;
@@ -171,15 +170,16 @@
 }
 
 .testimonial-nav-track.active {
-  width: 45px;
-  background-color: #c22e35; /* 激活状态颜色 */
+  width: 40px;
+  background-color: #c22e35;
 }
 
-.testimonial-nav-arrow--left, .testimonial-nav-arrow--right {
+.testimonial-nav-arrow--left, 
+.testimonial-nav-arrow--right {
   font-size: 20px;
-  font-weight: bold;
-  color: #333;
+  cursor: pointer;
   user-select: none;
+  color: #333;
 }
 {% endstyle %}
 
@@ -196,125 +196,85 @@ document.addEventListener('DOMContentLoaded', function() {
 
   let currentIndex = 0;
   let autoplayTimer = null;
-  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
 
-  // 1. 获取当前每屏显示的卡片数
   function getVisibleCount() {
-    if (window.innerWidth >= 1200) return 3;
-    if (window.innerWidth >= 768) return 2;
-    return 1;
+    if (window.innerWidth >= 1201) return 5;
+    if (window.innerWidth >= 768) return 3;
+    return 2;
   }
 
-  // 2. 计算最大允许的索引（防止右侧留白）
   function getMaxIndex() {
-    const visible = getVisibleCount();
-    // 关键逻辑：如果你有 10 张图，显示 3 张，最大索引只能是 7 (索引从0开始则为7)
-    return Math.max(cards.length - visible, 0);
+    return Math.max(cards.length - getVisibleCount(), 0);
   }
 
-  // 3. 核心更新函数
-  function updateCarousel(isAuto = false) {
+  function update() {
     const maxIndex = getMaxIndex();
-
-    // 索引越界处理
-    if (currentIndex > maxIndex) {
-      currentIndex = 0; // 到底后回到开头
-    } else if (currentIndex < 0) {
-      currentIndex = maxIndex; // 到头后去往末尾
-    }
-
-    // 计算移动距离
-    const card = cards[0];
-    const cardStyle = window.getComputedStyle(card);
-    const cardFullWidth = card.offsetWidth + parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
     
-    // 执行平滑位移
+    // 边界溢出纠正
+    if (currentIndex > maxIndex) currentIndex = 0;
+    if (currentIndex < 0) currentIndex = maxIndex;
+
+    const card = cards[0];
+    const style = window.getComputedStyle(card);
+    const cardFullWidth = card.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+    
     container.style.transform = `translateX(${-currentIndex * cardFullWidth}px)`;
 
-    // 更新指示点 (1:1 映射)
+    // 精准更新指示点 (1:1 匹配)
     tracks.forEach((track, index) => {
       track.classList.toggle('active', index === currentIndex);
     });
 
-    // 箭头透明度反馈
+    // 箭头可见度
     if(btnLeft) btnLeft.style.opacity = currentIndex === 0 ? "0.3" : "1";
     if(btnRight) btnRight.style.opacity = currentIndex >= maxIndex ? "0.3" : "1";
   }
 
-  // 4. 手动控制逻辑
-  function nextSlide() {
+  function moveNext() {
     const max = getMaxIndex();
-    if (currentIndex < max) {
-      currentIndex++;
-    } else {
-      currentIndex = 0;
-    }
-    updateCarousel();
+    currentIndex = (currentIndex >= max) ? 0 : currentIndex + 1;
+    update();
   }
 
-  function prevSlide() {
-    if (currentIndex > 0) {
-      currentIndex--;
-    } else {
-      currentIndex = getMaxIndex();
-    }
-    updateCarousel();
+  function movePrev() {
+    const max = getMaxIndex();
+    currentIndex = (currentIndex <= 0) ? max : currentIndex - 1;
+    update();
   }
 
-  // 5. 自动播放管理
+  // 绑定事件
+  if(btnRight) btnRight.onclick = () => { stopAutoplay(); moveNext(); };
+  if(btnLeft) btnLeft.onclick = () => { stopAutoplay(); movePrev(); };
+
+  tracks.forEach((track, index) => {
+    track.onclick = () => {
+      stopAutoplay();
+      currentIndex = index;
+      update();
+    };
+  });
+
   function startAutoplay() {
     stopAutoplay();
-    autoplayTimer = setInterval(nextSlide, autoplayInterval);
+    const interval = parseInt(section.dataset.autoplayInterval) || 5000;
+    autoplayTimer = setInterval(moveNext, interval);
   }
 
   function stopAutoplay() {
-    if (autoplayTimer) {
-      clearInterval(autoplayTimer);
-      autoplayTimer = null;
-    }
+    if (autoplayTimer) clearInterval(autoplayTimer);
   }
 
-  // 6. 绑定点击事件
-  if (btnRight) {
-    btnRight.addEventListener('click', () => {
-      stopAutoplay();
-      nextSlide();
-      // 手动点击后不立即恢复自动播放，给用户观察时间
-    });
-  }
-
-  if (btnLeft) {
-    btnLeft.addEventListener('click', () => {
-      stopAutoplay();
-      prevSlide();
-    });
-  }
-
-  tracks.forEach((track, index) => {
-    track.addEventListener('click', () => {
-      stopAutoplay();
-      currentIndex = index;
-      updateCarousel();
-    });
-  });
-
-  // 7. 窗口调整适配
-  let resizeTimeout;
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      const max = getMaxIndex();
-      if (currentIndex > max) currentIndex = max; // 重新对齐
-      updateCarousel();
-    }, 200);
+    const max = getMaxIndex();
+    if (currentIndex > max) currentIndex = max;
+    update();
   });
 
-  // 8. 鼠标悬停行为
   section.addEventListener('mouseenter', stopAutoplay);
   section.addEventListener('mouseleave', startAutoplay);
 
   // 初始化执行
-  updateCarousel();
+  update();
   startAutoplay();
 });
 {% endjavascript %}
