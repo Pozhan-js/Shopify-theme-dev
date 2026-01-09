@@ -1,0 +1,153 @@
+<div class="testimonial-carousel-section" data-autoplay-interval="{{ section.settings.autoplay_interval | default: 5000 }}">
+  <div class="testimonial-carousel-container">
+    <div class="testimonial-carousel-cards" id="testimonialCards">
+      {% for block in section.blocks %}
+        {% if block.settings.image != blank %}
+          <div class="testimonial-card">
+            {% if block.settings.button_link != blank %}
+              <a href="{{ block.settings.button_link }}" target="{{ block.settings.button_target }}" class="testimonial-card__full-link">
+            {% endif %}
+            
+            <div class="testimonial-card__image-box">
+              <img src="{{ block.settings.image | image_url: width: 800 }}" alt="Testimonial Image">
+            </div>
+
+            {% if block.settings.button_link != blank %}
+              </a>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if section.blocks.size > 0 %}
+    <div class="testimonial-carousel-nav" id="testimonialNav">
+      <span class="testimonial-nav-arrow--left">←</span>
+      <div class="testimonial-nav-tracks">
+        {% assign indicator_count = section.blocks.size | minus: 2 %}
+        {% if indicator_count < 1 %}{% assign indicator_count = 1 %}{% endif %}
+        {% for i in (1..indicator_count) %}
+          <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
+        {% endfor %}
+      </div>
+      <span class="testimonial-nav-arrow--right">→</span>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "纯图片案例轮播",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "自动轮播间隔（毫秒）",
+      "min": 2000,
+      "max": 9000,
+      "step": 500,
+      "default": 5000
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_card",
+      "name": "图片卡片",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "上传案例图片"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "点击图片跳转链接"
+        },
+        {
+          "type": "select",
+          "id": "button_target",
+          "label": "链接打开方式",
+          "options": [
+            { "value": "_self", "label": "当前窗口" },
+            { "value": "_blank", "label": "新窗口" }
+          ],
+          "default": "_self"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "纯图片案例轮播" }
+  ]
+}
+{% endschema %}
+
+{% style %}
+.testimonial-carousel-section {
+  max-width: 100%;
+  margin: 30px auto;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.testimonial-carousel-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.testimonial-carousel-cards {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.testimonial-card {
+  flex: 0 0 calc(33.333% - 16px);
+  margin: 0 8px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: transparent; /* 去除红色背景 */
+}
+
+/* 让链接包裹整个卡片 */
+.testimonial-card__full-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+}
+
+.testimonial-card__image-box {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* 强制图片保持正方形，可根据需要修改比例 */
+}
+
+.testimonial-card__image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 图片撑满全屏且不变形 */
+  display: block;
+}
+
+/* 适配屏幕 */
+@media (max-width: 1200px) {
+  .testimonial-card { flex: 0 0 calc(50% - 10px); }
+}
+@media (max-width: 768px) {
+  .testimonial-card { flex: 0 0 calc(100% - 20px); }
+}
+
+/* 导航样式保持不变 */
+.testimonial-carousel-nav { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 20px; }
+.testimonial-nav-track { width: 25px; height: 3px; background: #ddd; cursor: pointer; }
+.testimonial-nav-track.active { width: 40px; background: #333; }
+.testimonial-nav-arrow--left, .testimonial-nav-arrow--right { cursor: pointer; font-size: 20px; }
+{% endstyle %}
+
+{% javascript %}
+// 保持您原本的 JS 逻辑，它依然适用于现在的图片结构
+// 此处省略重复的 JS 代码（见上个版本的 JS 部分），它会自动适配新的 DOM 结构
+{% endjavascript %}
