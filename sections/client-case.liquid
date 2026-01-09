@@ -8,7 +8,7 @@
               <a href="{{ block.settings.button_link }}" target="{{ block.settings.button_target }}" class="testimonial-card__full-link">
             {% endif %}
             <div class="testimonial-card__image-box">
-              <img src="{{ block.settings.image | image_url: width: 600 }}" alt="Case Study Image" loading="lazy">
+              <img src="{{ block.settings.image | image_url: width: 600 }}" alt="Case Study" loading="lazy">
             </div>
             {% if block.settings.button_link != blank %}
               </a>
@@ -24,15 +24,13 @@
       <span class="testimonial-nav-arrow--left">←</span>
       <div class="testimonial-nav-tracks">
         {% comment %} 
-          核心计算：展示5个时，可滚动的终点是 总数-5。
-          因此指示点数量设定为 总数减 4。
+          生成最大可能需要的指示点（总数减1），具体显示由 JS 根据屏幕宽度动态控制
         {% endcomment %}
         {% assign total_cards = section.blocks.size %}
-        {% assign indicator_count = total_cards | minus: 4 %}
-        {% if indicator_count < 1 %}{% assign indicator_count = 1 %}{% endif %}
-        
-        {% for i in (1..indicator_count) %}
-          <span class="testimonial-nav-track {% if forloop.first %}active{% endif %}" data-index="{{ forloop.index0 }}"></span>
+        {% for i in (0..total_cards) %}
+          {% if forloop.index <= total_cards %}
+            <span class="testimonial-nav-track" data-index="{{ forloop.index0 }}"></span>
+          {% endif %}
         {% endfor %}
       </div>
       <span class="testimonial-nav-arrow--right">→</span>
@@ -42,7 +40,7 @@
 
 {% schema %}
 {
-  "name": "5图并排案例轮播",
+  "name": "5图动态案例轮播",
   "tag": "section",
   "settings": [
     {
@@ -85,7 +83,7 @@
   ],
   "presets": [
     {
-      "name": "5图并排案例轮播"
+      "name": "5图动态案例轮播"
     }
   ]
 }
@@ -97,7 +95,7 @@
   margin: 40px auto;
   padding: 0 10px;
   overflow: hidden;
-  --card-gap: 10px; /* 定义间距 */
+  --card-gap: 12px;
 }
 
 .testimonial-carousel-container {
@@ -107,28 +105,20 @@
 
 .testimonial-carousel-cards {
   display: flex;
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.33, 1);
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.3, 1);
   will-change: transform;
 }
 
 .testimonial-card {
-  /* 桌面端显示5张：(100% / 5) = 20% */
-  flex: 0 0 calc(20% - var(--card-gap));
+  flex: 0 0 calc(20% - var(--card-gap)); /* 默认5张 */
   margin: 0 calc(var(--card-gap) / 2);
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  background: #f9f9f9;
-}
-
-.testimonial-card__full-link {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .testimonial-card__image-box {
   width: 100%;
-  aspect-ratio: 1 / 1; /* 图片保持正方形 */
+  aspect-ratio: 1 / 1; 
 }
 
 .testimonial-card__image-box img {
@@ -138,7 +128,7 @@
   display: block;
 }
 
-/* 响应式断点 */
+/* 响应式调整 */
 @media (max-width: 1200px) {
   .testimonial-card { flex: 0 0 calc(33.33% - var(--card-gap)); } /* 平板3张 */
 }
@@ -153,6 +143,7 @@
   justify-content: center;
   gap: 15px;
   margin-top: 25px;
+  min-height: 20px;
 }
 
 .testimonial-nav-tracks {
@@ -167,6 +158,7 @@
   cursor: pointer;
   border-radius: 2px;
   transition: all 0.3s ease;
+  display: none; /* 默认隐藏，由 JS 控制显示 */
 }
 
 .testimonial-nav-track.active {
@@ -180,6 +172,7 @@
   cursor: pointer;
   user-select: none;
   color: #333;
+  padding: 0 10px;
 }
 {% endstyle %}
 
@@ -210,41 +203,45 @@ document.addEventListener('DOMContentLoaded', function() {
   function update() {
     const maxIndex = getMaxIndex();
     
-    // 边界溢出纠正
-    if (currentIndex > maxIndex) currentIndex = 0;
-    if (currentIndex < 0) currentIndex = maxIndex;
+    // 越界修正
+    if (currentIndex > maxIndex) currentIndex = maxIndex;
+    if (currentIndex < 0) currentIndex = 0;
 
+    // 位移计算
     const card = cards[0];
     const style = window.getComputedStyle(card);
     const cardFullWidth = card.offsetWidth + parseFloat(style.marginLeft) + parseFloat(style.marginRight);
-    
     container.style.transform = `translateX(${-currentIndex * cardFullWidth}px)`;
 
-    // 精准更新指示点 (1:1 匹配)
+    // 动态同步指示器：只显示有效的索引点
     tracks.forEach((track, index) => {
-      track.classList.toggle('active', index === currentIndex);
+      if (index <= maxIndex) {
+        track.style.display = "block"; 
+        track.classList.toggle('active', index === currentIndex);
+      } else {
+        track.style.display = "none"; 
+      }
     });
 
     // 箭头可见度
-    if(btnLeft) btnLeft.style.opacity = currentIndex === 0 ? "0.3" : "1";
-    if(btnRight) btnRight.style.opacity = currentIndex >= maxIndex ? "0.3" : "1";
+    if(btnLeft) btnLeft.style.opacity = currentIndex === 0 ? "0.2" : "1";
+    if(btnRight) btnRight.style.opacity = currentIndex >= maxIndex ? "0.2" : "1";
   }
 
-  function moveNext() {
+  function next() {
     const max = getMaxIndex();
     currentIndex = (currentIndex >= max) ? 0 : currentIndex + 1;
     update();
   }
 
-  function movePrev() {
-    const max = getMaxIndex();
-    currentIndex = (currentIndex <= 0) ? max : currentIndex - 1;
+  function prev() {
+    currentIndex = (currentIndex <= 0) ? getMaxIndex() : currentIndex - 1;
     update();
   }
 
   // 绑定事件
-  if(btnRight) btnRight.onclick = () => { stopAutoplay(); moveNext(); };
-  if(btnLeft) btnLeft.onclick = () => { stopAutoplay(); movePrev(); };
+  if(btnRight) btnRight.onclick = () => { stopAutoplay(); next(); };
+  if(btnLeft) btnLeft.onclick = () => { stopAutoplay(); prev(); };
 
   tracks.forEach((track, index) => {
     track.onclick = () => {
@@ -257,23 +254,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function startAutoplay() {
     stopAutoplay();
     const interval = parseInt(section.dataset.autoplayInterval) || 5000;
-    autoplayTimer = setInterval(moveNext, interval);
+    autoplayTimer = setInterval(next, interval);
   }
 
   function stopAutoplay() {
     if (autoplayTimer) clearInterval(autoplayTimer);
   }
 
-  window.addEventListener('resize', () => {
-    const max = getMaxIndex();
-    if (currentIndex > max) currentIndex = max;
-    update();
-  });
-
+  window.addEventListener('resize', update);
   section.addEventListener('mouseenter', stopAutoplay);
   section.addEventListener('mouseleave', startAutoplay);
 
-  // 初始化执行
+  // 初始化
   update();
   startAutoplay();
 });
