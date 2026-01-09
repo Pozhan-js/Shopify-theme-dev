@@ -148,6 +148,257 @@
 {% endstyle %}
 
 {% javascript %}
-// 保持您原本的 JS 逻辑，它依然适用于现在的图片结构
-// 此处省略重复的 JS 代码（见上个版本的 JS 部分），它会自动适配新的 DOM 结构
+document.addEventListener('DOMContentLoaded', function() {
+  const cardContainer = document.getElementById('testimonialCards');
+  const cards = document.querySelectorAll('.testimonial-card');
+  const navTracks = document.querySelectorAll('.testimonial-nav-track');
+  const navLeft = document.querySelector('.testimonial-nav-arrow--left');
+  const navRight = document.querySelector('.testimonial-nav-arrow--right');
+  
+  if (!cardContainer || cards.length === 0) return;
+
+  // 获取自动轮播间隔时间（从Shopify设置）
+  const section = document.querySelector('.testimonial-carousel-section');
+  const autoplayInterval = parseInt(section.dataset.autoplayInterval) || 5000;
+  
+  let currentIndex = 0; // 当前显示的第一个卡片的索引
+  let autoplayTimer = null;
+  let isAnimating = false;
+  let isAutoplayActive = true;
+  
+  // 获取单个卡片的宽度（包括margin）
+  function getCardWidth() {
+    if (cards.length === 0) return 0;
+    const card = cards[0];
+    const style = window.getComputedStyle(card);
+    const width = parseFloat(style.width);
+    const marginLeft = parseFloat(style.marginLeft);
+    const marginRight = parseFloat(style.marginRight);
+    return width + marginLeft + marginRight;
+  }
+  
+  // 获取当前视口中显示的卡片数量
+  function getVisibleCardCount() {
+    if (window.innerWidth >= 1200) return 3; // 桌面端显示3张
+    if (window.innerWidth >= 768) return 2;  // 平板显示2张
+    return 1;  // 手机显示1张
+  }
+  
+  let visibleCards = getVisibleCardCount();
+  
+  // 计算最大可移动的索引（考虑显示数量）
+  function getMaxIndex() {
+    return Math.max(cards.length - visibleCards, 0);
+  }
+  
+  // 计算指示器应该激活的索引（适配指示器数量减少的情况）
+  function getActiveIndicatorIndex() {
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    const totalCards = cards.length;
+    
+    // 如果没有指示器，返回0
+    if (totalIndicators === 0) return 0;
+    
+    // 如果只有一个指示器，始终激活它
+    if (totalIndicators === 1) return 0;
+    
+    // 如果有多个指示器，计算当前卡片位置对应的指示器索引
+    // 因为指示器数量是卡片总数-2，我们需要映射当前卡片位置到指示器索引
+    if (maxIndex > 0) {
+      // 线性映射当前卡片位置到指示器索引
+      const indicatorIndex = Math.floor((currentIndex / maxIndex) * (totalIndicators - 1));
+      return Math.min(indicatorIndex, totalIndicators - 1);
+    }
+    
+    return 0;
+  }
+  
+  // 根据指示器索引计算对应的卡片索引
+  function getCardIndexFromIndicator(indicatorIndex) {
+    const maxIndex = getMaxIndex();
+    const totalIndicators = navTracks.length;
+    
+    if (totalIndicators <= 1) return 0;
+    
+    // 线性映射指示器索引到卡片索引
+    return Math.floor((indicatorIndex / (totalIndicators - 1)) * maxIndex);
+  }
+  
+  // 启动自动轮播（单张移动）
+  function startAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    
+    autoplayTimer = setInterval(function() {
+      if (!isAutoplayActive || isAnimating) return;
+      
+      const maxIndex = getMaxIndex();
+      
+      // 如果已经到达最后一个案例，停止自动轮播
+      if (currentIndex >= maxIndex) {
+        pauseAutoplay();
+        return;
+      }
+      
+      // 每次移动一个卡片
+      currentIndex = currentIndex + 1;
+      updateCarousel();
+    }, autoplayInterval);
+  }
+  
+  // 暂停自动轮播
+  function pauseAutoplay() {
+    if (autoplayTimer) {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+  }
+  
+  // 恢复自动轮播（离开卡片后）
+  function resumeAutoplay() {
+    if (isAutoplayActive && !autoplayTimer && currentIndex < getMaxIndex()) {
+      startAutoplay();
+    }
+  }
+  
+  // 更新轮播位置
+  function updateCarousel() {
+    if (cards.length === 0) return;
+    
+    isAnimating = true;
+    
+    const cardWidth = getCardWidth();
+    const translateX = -(currentIndex * cardWidth);
+    
+    cardContainer.style.transform = `translateX(${translateX}px)`;
+    
+    // 更新指示器状态
+    updateIndicators();
+    
+    // 更新箭头状态
+    updateArrows();
+    
+    // 动画结束后重置状态
+    setTimeout(() => {
+      isAnimating = false;
+    }, 500);
+  }
+  
+  // 更新指示器状态 - 修正：现在每个指示点一个一个变化
+  function updateIndicators() {
+    const activeIndex = getActiveIndicatorIndex();
+    
+    navTracks.forEach((track, idx) => {
+      // 激活当前卡片对应的指示点
+      const isActive = idx === activeIndex;
+      track.classList.toggle('active', isActive);
+    });
+  }
+  
+  // 更新箭头状态
+  function updateArrows() {
+    const maxIndex = getMaxIndex();
+    
+    if (navLeft) {
+      const isDisabled = currentIndex === 0;
+      navLeft.style.opacity = isDisabled ? '0.5' : '1';
+      navLeft.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+    }
+    
+    if (navRight) {
+      const isDisabled = currentIndex >= maxIndex;
+      navRight.style.opacity = isDisabled ? '0.5' : '1';
+      navRight.style.cursor = isDisabled ? 'not-allowed' : 'pointer';
+    }
+  }
+  
+  // 窗口调整事件处理
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      visibleCards = getVisibleCardCount();
+      // 确保当前索引有效
+      const maxIndex = getMaxIndex();
+      if (currentIndex > maxIndex) {
+        currentIndex = maxIndex;
+      }
+      updateCarousel();
+      // 重新启动自动轮播（如果还没到末尾）
+      if (isAutoplayActive && currentIndex < maxIndex) {
+        startAutoplay();
+      }
+    }, 150);
+  });
+  
+  // 左箭头点击事件
+  navLeft.addEventListener('click', function() {
+    if (isAnimating || currentIndex === 0) return;
+    
+    // 点击时暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
+    currentIndex = Math.max(currentIndex - 1, 0);
+    updateCarousel();
+  });
+  
+  // 右箭头点击事件
+  navRight.addEventListener('click', function() {
+    if (isAnimating) return;
+    
+    const maxIndex = getMaxIndex();
+    if (currentIndex >= maxIndex) return;
+    
+    // 点击时暂停自动轮播，3秒后恢复
+    pauseAutoplay();
+    setTimeout(resumeAutoplay, 3000);
+    
+    currentIndex = Math.min(currentIndex + 1, maxIndex);
+    updateCarousel();
+  });
+  
+  // 指示器点击事件 - 现在指示器数量减少了，需要映射到正确的卡片索引
+  navTracks.forEach((track, idx) => {
+    track.addEventListener('click', function() {
+      if (isAnimating) return;
+      
+      // 点击时暂停自动轮播，3秒后恢复
+      pauseAutoplay();
+      setTimeout(resumeAutoplay, 3000);
+      
+      // 根据指示器索引计算对应的卡片索引
+      const targetIndex = getCardIndexFromIndicator(idx);
+      const maxIndex = getMaxIndex();
+      
+      // 确保不超过最大索引
+      currentIndex = Math.min(targetIndex, maxIndex);
+      updateCarousel();
+    });
+  });
+  
+  // 鼠标悬停暂停功能
+  cardContainer.addEventListener('mouseenter', function() {
+    pauseAutoplay();
+  });
+  
+  cardContainer.addEventListener('mouseleave', function() {
+    if (isAutoplayActive && currentIndex < getMaxIndex()) {
+      startAutoplay();
+    }
+  });
+  
+  // 单个卡片悬停也暂停（增强体验）
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      pauseAutoplay();
+    });
+  });
+
+  // 初始化
+  updateCarousel();
+  if (currentIndex < getMaxIndex()) {
+    startAutoplay(); // 默认开始自动轮播，但如果是最后一个则不启动
+  }
+});
 {% endjavascript %}
