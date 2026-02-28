@@ -1,254 +1,172 @@
-{% comment %}
-  Quality Carousel Section with Dynamic Blocks
-  Supports Auto-play and Mobile Swipe
-{% endcomment %}
-
-<div class="proof-of-quality-section" id="section-{{ section.id }}">
+<div class="proof-of-quality-section">
   <div class="proof-of-quality-container">
-    {% if section.settings.title != blank or section.settings.subtitle != blank %}
-      <div class="proof-of-quality-header">
-        {% if section.settings.title != blank %}
-          <h2 class="proof-of-quality-title">{{ section.settings.title }}</h2>
-        {% endif %}
-        {% if section.settings.subtitle != blank %}
-          <p class="proof-of-quality-subtitle">{{ section.settings.subtitle }}</p>
-        {% endif %}
-      </div>
-    {% endif %}
 
-    <div class="splide quality-splide" id="splide-{{ section.id }}">
-      <div class="splide__track">
-        <div class="splide__list">
-          {% for block in section.blocks %}
-            <div class="splide__slide" {{ block.shopify_attributes }}>
-              <div class="quality-item">
-                <div class="quality-card">
-                  <div class="certificate-display">
-                    {% if block.settings.certificate_image != blank %}
-                      <img 
-                        src="{{ block.settings.certificate_image | img_url: '400x550' }}" 
-                        alt="{{ block.settings.title | escape }}" 
-                        class="certificate-image"
-                        loading="lazy"
-                      >
-                    {% else %}
-                      {{ 'image' | placeholder_svg_tag: 'certificate-image placeholder' }}
-                    {% endif %}
-                  </div>
-                </div>
+    <div class="proof-of-quality-header">
+      <h2 class="proof-of-quality-title">
+        {{ section.settings.title }}
+      </h2>
+      <p class="proof-of-quality-subtitle">
+        {{ section.settings.subtitle }}
+      </p>
+    </div>
 
-                {% if block.settings.title != blank or block.settings.description != blank %}
-                  <div class="quality-info">
-                    {% if block.settings.title != blank %}
-                      <h3 class="quality-cert-title">{{ block.settings.title }}</h3>
-                    {% endif %}
-                    {% if block.settings.description != blank %}
-                      <p class="quality-description">{{ block.settings.description }}</p>
-                    {% endif %}
-                  </div>
+    <!-- 轮播容器 -->
+    <div class="quality-carousel">
+      <div class="quality-track">
+
+        {% for block in section.blocks %}
+          <div class="quality-item" {{ block.shopify_attributes }}>
+            <div class="quality-card">
+
+              <div class="certificate-display">
+                {% if block.settings.image != blank %}
+                  <img
+                    src="{{ block.settings.image | img_url: '400x' }}"
+                    class="certificate-image"
+                    alt="{{ block.settings.title }}"
+                  >
                 {% endif %}
               </div>
+
+              <div class="quality-info">
+                <h3 class="quality-cert-title">
+                  {{ block.settings.title }}
+                </h3>
+                <p class="quality-description">
+                  {{ block.settings.text }}
+                </p>
+              </div>
+
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
+
       </div>
     </div>
+
   </div>
 </div>
 
 <style>
-  /* 基础结构样式 */
-  .proof-of-quality-section {
-    background: #ffffff;
-    color: #000000;
-    position: relative;
-    padding-top: 60px;
-    padding-bottom: 0;
-    overflow: hidden;
+.proof-of-quality-section{
+  padding:80px 0;
+  background:#fff;
+}
+
+/* ====== 轮播 ====== */
+
+.quality-carousel{
+  overflow:hidden;
+  position:relative;
+}
+
+.quality-track{
+  display:flex;
+  gap:30px;
+  width:max-content;
+  animation: scroll 30s linear infinite;
+}
+
+.quality-item{
+  flex:0 0 auto;
+}
+
+/* 卡片样式 */
+
+.quality-card{
+  width:320px;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,.1);
+  padding:30px;
+}
+
+.certificate-image{
+  width:100%;
+  height:320px;
+  object-fit:contain;
+}
+
+.quality-cert-title{
+  font-size:22px;
+  margin-top:20px;
+  color:#c22e35;
+}
+
+.quality-description{
+  font-size:14px;
+  opacity:.7;
+}
+
+/* ===== 无限滚动动画 ===== */
+
+@keyframes scroll{
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ===== 移动端适配 ===== */
+
+@media(max-width:768px){
+
+  .quality-track{
+    animation: none;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
   }
 
-  /* 底部红色背景装饰 */
-  .proof-of-quality-section::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 400px;
-    background: #c22e35;
-    z-index: 1;
+  .quality-item{
+    scroll-snap-align:center;
   }
 
-  .proof-of-quality-container {
-    position: relative;
-    z-index: 2;
-    max-width: 1700px;
-    margin: 0 auto;
-    padding: 0 20px 80px 20px;
+  .quality-card{
+    width:260px;
   }
-
-  .proof-of-quality-header {
-    text-align: center;
-    margin-bottom: 60px;
-  }
-
-  .proof-of-quality-title {
-    font-size: 40px;
-    font-weight: 500;
-    color: #161616;
-    margin: 0 0 24px 0;
-  }
-
-  .proof-of-quality-subtitle {
-    font-size: 14px;
-    color: rgba(22, 22, 22, 0.5);
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  /* 轮播卡片样式 */
-  .quality-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-  }
-
-  .quality-card {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    height: 558px;
-    padding: 37px 40px 24px 40px;
-    transition: transform 0.3s ease;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .quality-card:hover {
-    transform: translateY(-8px);
-  }
-
-  .certificate-image {
-    width: 100%;
-    height: auto;
-    max-height: 452px;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  .quality-info {
-    margin-top: 27px;
-    z-index: 3;
-    width: 100%;
-    max-width: 400px;
-  }
-
-  .quality-cert-title {
-    display: inline-flex;
-    height: 48px;
-    border-radius: 30px;
-    border: 1px solid #ffffff;
-    font-size: 24px;
-    color: #ffffff;
-    padding: 0 25px;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-
-  .quality-description {
-    font-size: 16px;
-    color: #ffffff;
-    line-height: 1.5;
-    padding-left: 10px;
-  }
-
-  /* Splide 修正 */
-  .splide__track {
-    overflow: visible !important;
-  }
-
-  /* 响应式适配 */
-  @media (max-width: 767px) {
-    .proof-of-quality-section::after {
-      height: 300px;
-    }
-    .quality-card {
-      height: 400px;
-      padding: 20px;
-    }
-    .quality-cert-title {
-      font-size: 18px;
-      height: 36px;
-    }
-    .quality-description {
-      font-size: 14px;
-    }
-  }
+}
 </style>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const el = document.querySelector('#splide-{{ section.id }}');
-  if (el) {
-    new Splide(el, {
-      type   : 'loop',
-      perPage: 4,
-      perMove: 1,
-      gap    : '30px',
-      autoplay: true,
-      interval: 3000,
-      arrows : false,
-      pagination: false,
-      drag: 'free',
-      breakpoints: {
-        1440: { perPage: 3 },
-        1024: { perPage: 2 },
-        767: { 
-          perPage: 1.2, 
-          focus: 'center',
-          gap: '15px'
-        }
-      }
-    }).mount();
-  }
+/* ===== 无限复制实现真正无缝轮播 ===== */
+
+document.addEventListener("DOMContentLoaded", function(){
+
+  const track = document.querySelector(".quality-track");
+
+  if(!track) return;
+
+  // 复制一份内容实现无缝循环
+  track.innerHTML += track.innerHTML;
+
 });
 </script>
 
 {% schema %}
 {
-  "name": "Quality Carousel Blocks",
+  "name": "Proof of Quality Carousel",
   "settings": [
     {
       "type": "text",
       "id": "title",
-      "label": "Section Title",
+      "label": "Title",
       "default": "Proof of Quality"
     },
     {
       "type": "textarea",
       "id": "subtitle",
-      "label": "Section Subtitle",
-      "default": "Every XS Pilates product is manufactured under internationally recognized standards for quality, safety, and sustainability."
+      "label": "Subtitle",
+      "default": "Every XS Pilates product is manufactured under internationally recognized standards."
     }
   ],
+
   "blocks": [
     {
       "type": "certificate",
-      "name": "Certificate Block",
+      "name": "Certificate Card",
       "settings": [
         {
           "type": "image_picker",
-          "id": "certificate_image",
+          "id": "image",
           "label": "Certificate Image"
         },
         {
@@ -259,21 +177,22 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         {
           "type": "textarea",
-          "id": "description",
-          "label": "Certificate Description",
-          "default": "Certified quality management system for consistent production and reliability."
+          "id": "text",
+          "label": "Description",
+          "default": "Quality management certification."
         }
       ]
     }
   ],
+
   "presets": [
     {
-      "name": "Quality Carousel Blocks",
+      "name": "Proof of Quality Carousel",
       "blocks": [
-        { "type": "certificate", "settings": { "title": "FSC® Certification" } },
-        { "type": "certificate", "settings": { "title": "ISO 9001" } },
-        { "type": "certificate", "settings": { "title": "ISO 14001" } },
-        { "type": "certificate", "settings": { "title": "ISO 45001" } }
+        { "type": "certificate" },
+        { "type": "certificate" },
+        { "type": "certificate" },
+        { "type": "certificate" }
       ]
     }
   ]
