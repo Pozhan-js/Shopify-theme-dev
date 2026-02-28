@@ -1,0 +1,281 @@
+{% comment %}
+  Quality Carousel Section with Dynamic Blocks
+  Supports Auto-play and Mobile Swipe
+{% endcomment %}
+
+<div class="proof-of-quality-section" id="section-{{ section.id }}">
+  <div class="proof-of-quality-container">
+    {% if section.settings.title != blank or section.settings.subtitle != blank %}
+      <div class="proof-of-quality-header">
+        {% if section.settings.title != blank %}
+          <h2 class="proof-of-quality-title">{{ section.settings.title }}</h2>
+        {% endif %}
+        {% if section.settings.subtitle != blank %}
+          <p class="proof-of-quality-subtitle">{{ section.settings.subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <div class="splide quality-splide" id="splide-{{ section.id }}">
+      <div class="splide__track">
+        <div class="splide__list">
+          {% for block in section.blocks %}
+            <div class="splide__slide" {{ block.shopify_attributes }}>
+              <div class="quality-item">
+                <div class="quality-card">
+                  <div class="certificate-display">
+                    {% if block.settings.certificate_image != blank %}
+                      <img 
+                        src="{{ block.settings.certificate_image | img_url: '400x550' }}" 
+                        alt="{{ block.settings.title | escape }}" 
+                        class="certificate-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      {{ 'image' | placeholder_svg_tag: 'certificate-image placeholder' }}
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if block.settings.title != blank or block.settings.description != blank %}
+                  <div class="quality-info">
+                    {% if block.settings.title != blank %}
+                      <h3 class="quality-cert-title">{{ block.settings.title }}</h3>
+                    {% endif %}
+                    {% if block.settings.description != blank %}
+                      <p class="quality-description">{{ block.settings.description }}</p>
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* 基础结构样式 */
+  .proof-of-quality-section {
+    background: #ffffff;
+    color: #000000;
+    position: relative;
+    padding-top: 60px;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  /* 底部红色背景装饰 */
+  .proof-of-quality-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 400px;
+    background: #c22e35;
+    z-index: 1;
+  }
+
+  .proof-of-quality-container {
+    position: relative;
+    z-index: 2;
+    max-width: 1700px;
+    margin: 0 auto;
+    padding: 0 20px 80px 20px;
+  }
+
+  .proof-of-quality-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .proof-of-quality-title {
+    font-size: 40px;
+    font-weight: 500;
+    color: #161616;
+    margin: 0 0 24px 0;
+  }
+
+  .proof-of-quality-subtitle {
+    font-size: 14px;
+    color: rgba(22, 22, 22, 0.5);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* 轮播卡片样式 */
+  .quality-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+
+  .quality-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    height: 558px;
+    padding: 37px 40px 24px 40px;
+    transition: transform 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quality-card:hover {
+    transform: translateY(-8px);
+  }
+
+  .certificate-image {
+    width: 100%;
+    height: auto;
+    max-height: 452px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .quality-info {
+    margin-top: 27px;
+    z-index: 3;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .quality-cert-title {
+    display: inline-flex;
+    height: 48px;
+    border-radius: 30px;
+    border: 1px solid #ffffff;
+    font-size: 24px;
+    color: #ffffff;
+    padding: 0 25px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .quality-description {
+    font-size: 16px;
+    color: #ffffff;
+    line-height: 1.5;
+    padding-left: 10px;
+  }
+
+  /* Splide 修正 */
+  .splide__track {
+    overflow: visible !important;
+  }
+
+  /* 响应式适配 */
+  @media (max-width: 767px) {
+    .proof-of-quality-section::after {
+      height: 300px;
+    }
+    .quality-card {
+      height: 400px;
+      padding: 20px;
+    }
+    .quality-cert-title {
+      font-size: 18px;
+      height: 36px;
+    }
+    .quality-description {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const el = document.querySelector('#splide-{{ section.id }}');
+  if (el) {
+    new Splide(el, {
+      type   : 'loop',
+      perPage: 4,
+      perMove: 1,
+      gap    : '30px',
+      autoplay: true,
+      interval: 3000,
+      arrows : false,
+      pagination: false,
+      drag: 'free',
+      breakpoints: {
+        1440: { perPage: 3 },
+        1024: { perPage: 2 },
+        767: { 
+          perPage: 1.2, 
+          focus: 'center',
+          gap: '15px'
+        }
+      }
+    }).mount();
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Quality Carousel Blocks",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Proof of Quality"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Section Subtitle",
+      "default": "Every XS Pilates product is manufactured under internationally recognized standards for quality, safety, and sustainability."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "certificate",
+      "name": "Certificate Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "certificate_image",
+          "label": "Certificate Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Certificate Title",
+          "default": "ISO 9001"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Certificate Description",
+          "default": "Certified quality management system for consistent production and reliability."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quality Carousel Blocks",
+      "blocks": [
+        { "type": "certificate", "settings": { "title": "FSC® Certification" } },
+        { "type": "certificate", "settings": { "title": "ISO 9001" } },
+        { "type": "certificate", "settings": { "title": "ISO 14001" } },
+        { "type": "certificate", "settings": { "title": "ISO 45001" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
