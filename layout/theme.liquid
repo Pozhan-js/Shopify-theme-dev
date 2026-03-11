@@ -2,68 +2,67 @@
 <html class="js" lang="{{ request.locale.iso_code }}">
   <head>
     <style>
-   /* 1. 彻底移除订阅栏背景、阴影和所有干扰线 */
+   /* 1. 全局背景清理 */
   html body .footer-top,
   html body .footer-newsletter,
   html body .newsletter-wrap,
-  html body .newsletter-form__field-wrapper,
   html body .field {
       background: transparent !important;
       background-color: transparent !important;
       border: none !important;
       box-shadow: none !important;
-      outline: none !important;
   }
 
-  /* 2. 强制整行排布，并只保留一条底部的细黑线 */
+  /* 2. 构建底线布局：让所有元素踩在一条线上 */
   html body .newsletter-wrap {
       display: flex !important;
-      flex-direction: row !important;
-      align-items: flex-end !important; /* 确保文字都踩在底线上 */
-      border-bottom: 1px solid #000 !important; 
-      max-width: 450px !important;
+      align-items: flex-end !important; /* 强制底端对齐 */
+      border-bottom: 1.5px solid #000 !important; /* 你的极简黑线 */
+      max-width: 500px !important;
       padding-bottom: 5px !important;
-      margin-top: 20px !important;
+      position: relative !important;
+      /* 这里的 font-size: 0 是为了彻底消灭那个多余的 '<' 符号 */
+      font-size: 0 !important; 
   }
 
-  /* 3. 输入框：透明化并对齐文字 */
-  html body .field__input {
+  /* 3. 输入框：移除所有残留边框，只留文字 */
+  html body .field__input,
+  html body .newsletter-form__field-wrapper input {
       background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
       color: #000 !important;
+      font-size: 14px !important; /* 恢复文字大小 */
       padding: 0 !important;
-      height: 30px !important;
-      margin-bottom: 0 !important;
+      margin: 0 !important;
+      height: auto !important;
+      width: 100% !important;
   }
 
-  /* 4. 按钮：彻底拆除黑块，变成纯文字 */
-  html body .footer-newsletter button,
+  /* 4. 按钮：纯文字样式 */
   html body button#Subscribe,
   html body .newsletter-form__button {
       background: transparent !important;
-      background-color: transparent !important;
-      color: #000 !important; /* 文字颜色 */
+      color: #000 !important;
       border: none !important;
-      border-radius: 0 !important;
-      width: auto !important;
-      height: 30px !important;
-      padding: 0 0 0 15px !important;
+      padding: 0 0 0 20px !important;
       margin: 0 !important;
-      min-width: unset !important;
+      font-size: 14px !important; /* 根据需要调整 */
       font-weight: bold !important;
       text-transform: uppercase !important;
-      display: inline-block !important;
+      height: auto !important;
+      min-width: unset !important;
+      cursor: pointer !important;
   }
 
-  /* 5. 隐藏那个烦人的箭头 "<" 和所有隐藏边框 */
-  html body .newsletter-wrap::before,
-  html body .newsletter-wrap::after,
-  html body .field::after,
-  html body .field::before,
+  /* 5. 暴力隐藏所有干扰小图标和伪元素 */
+  html body .field:after,
+  html body .field:before,
   html body .newsletter-form__button svg,
   html body .newsletter-form__button .icon,
-  html body [class*="icon"] {
+  html body .field__button svg {
       display: none !important;
-      content: none !important;
   }
 </style>
     <style>
