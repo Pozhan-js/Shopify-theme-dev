@@ -2,19 +2,12 @@
 <html class="js" lang="{{ request.locale.iso_code }}">
   <head>
     <style>
-  /* --- 1. 订阅栏整体变成一条黑线 --- */
-  html body .footer-new .newsletter-wrap {
-      display: flex !important;
-      align-items: center !important;
-      border-bottom: 1.5px solid #000 !important; /* 极简底线 */
-      padding-bottom: 5px !important;
-      gap: 0 !important; /* 清除默认的间距 */
-      max-width: 450px !important;
-  }
-
-  /* --- 2. 彻底剥离输入框的背景和边框 --- */
-  html body .footer-new .newsletter-form__field-wrapper,
-  html body .footer-new input[type="email"] {
+   /* 1. 彻底移除订阅栏背景、阴影和所有干扰线 */
+  html body .footer-top,
+  html body .footer-newsletter,
+  html body .newsletter-wrap,
+  html body .newsletter-form__field-wrapper,
+  html body .field {
       background: transparent !important;
       background-color: transparent !important;
       border: none !important;
@@ -22,35 +15,53 @@
       outline: none !important;
   }
 
-  /* --- 3. 调整输入文字的样式 --- */
-  html body .footer-new input[type="email"] {
-      color: #000 !important;
-      padding: 5px 0 !important;
-      flex: 1 !important; /* 让输入框占满左侧空间 */
-      width: 100% !important;
+  /* 2. 强制整行排布，并只保留一条底部的细黑线 */
+  html body .newsletter-wrap {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: flex-end !important; /* 确保文字都踩在底线上 */
+      border-bottom: 1px solid #000 !important; 
+      max-width: 450px !important;
+      padding-bottom: 5px !important;
+      margin-top: 20px !important;
   }
 
-  /* --- 4. 拆除黑块，按钮变成纯文字 --- */
-  html body button#Subscribe {
+  /* 3. 输入框：透明化并对齐文字 */
+  html body .field__input {
+      background: transparent !important;
+      color: #000 !important;
+      padding: 0 !important;
+      height: 30px !important;
+      margin-bottom: 0 !important;
+  }
+
+  /* 4. 按钮：彻底拆除黑块，变成纯文字 */
+  html body .footer-newsletter button,
+  html body button#Subscribe,
+  html body .newsletter-form__button {
       background: transparent !important;
       background-color: transparent !important;
-      color: #000 !important;
+      color: #000 !important; /* 文字颜色 */
       border: none !important;
-      box-shadow: none !important;
       border-radius: 0 !important;
-      padding: 5px 0 5px 20px !important;
       width: auto !important;
+      height: 30px !important;
+      padding: 0 0 0 15px !important;
+      margin: 0 !important;
       min-width: unset !important;
-      text-transform: uppercase !important; /* 字母大写 */
-      letter-spacing: 0.05em !important;
-      cursor: pointer !important;
+      font-weight: bold !important;
+      text-transform: uppercase !important;
+      display: inline-block !important;
   }
 
-  /* --- 5. 隐藏那个干扰视线的 "<" 箭头和小图标 --- */
-  html body .footer-new .newsletter-wrap::before,
-  html body .footer-new .newsletter-wrap::after,
-  html body button#Subscribe svg,
-  html body button#Subscribe .icon {
+  /* 5. 隐藏那个烦人的箭头 "<" 和所有隐藏边框 */
+  html body .newsletter-wrap::before,
+  html body .newsletter-wrap::after,
+  html body .field::after,
+  html body .field::before,
+  html body .newsletter-form__button svg,
+  html body .newsletter-form__button .icon,
+  html body [class*="icon"] {
       display: none !important;
       content: none !important;
   }
