@@ -2,78 +2,69 @@
 <html class="js" lang="{{ request.locale.iso_code }}">
   <head>
     <style>
-  /* 1. 强制重置整体背景和容器：消灭所有杂质线 */
-  html body .footer-top,
-  html body .footer-newsletter,
-  html body .newsletter-wrap,
-  html body .field,
+  /* 1. 强制隐藏所有不需要的“视觉杂质” */
+  html body .newsletter-wrap::before, 
+  html body .newsletter-wrap::after,
+  html body .field::before, 
   html body .field::after,
-  html body .field::before,
-  html body .newsletter-form__field-wrapper::after,
-  html body .newsletter-form__field-wrapper::before {
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-      content: none !important; /* 拔除所有伪元素线条 */
+  html body .newsletter-form__button svg,
+  html body .footer-newsletter button::after {
+      display: none !important;
+      content: none !important;
   }
 
-  /* 2. 构建纯净底线：消灭那个多余的 '<' */
+  /* 2. 这里的字号设为0，是为了杀掉那个顽固的 '<' 符号 */
   html body .newsletter-wrap {
       display: flex !important;
+      flex-direction: row !important;
       align-items: flex-end !important;
-      border-bottom: 1.2px solid #000 !important; /* 你的极简黑线 */
-      max-width: 550px !important;
-      padding-bottom: 3px !important;
-      margin-top: 20px !important;
-      /* 核心：将包裹层字号设为0，彻底隐藏原本的 '<' 字符 */
       font-size: 0 !important; 
+      background: transparent !important;
+      border: none !important;
+      /* 这里就是你想要的那条长横线 */
+      border-bottom: 1.5px solid #000 !important; 
+      padding-bottom: 5px !important;
+      max-width: 500px !important;
   }
 
-  /* 3. 输入框：纯文字化 */
-  html body .field__input,
+  /* 3. 输入框：把那个白色的框和阴影彻底变透明 */
+  html body .footer-newsletter .field__input,
   html body .newsletter-form__field-wrapper input {
+      background-color: transparent !important;
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
       outline: none !important;
       color: #000 !important;
-      font-size: 14px !important; /* 恢复输入文字的大小 */
-      padding: 0 !important;
-      margin: 0 !important;
-      height: 35px !important;
+      font-size: 14px !important; /* 重新把字号加回来 */
       flex: 1 !important;
+      height: 35px !important;
+      padding: 0 !important;
   }
 
-  /* 4. 按钮：变成纯文字并对齐 */
-  html body button#Subscribe,
-  html body .newsletter-form__button,
-  html body .field__button {
+  /* 4. 按钮：把黑色背景彻底拿掉，只留文字 */
+  html body .footer-newsletter button,
+  html body button#Subscribe {
       background: transparent !important;
       background-color: transparent !important;
       color: #000 !important;
       border: none !important;
-      border-radius: 0 !important;
-      padding: 0 0 0 20px !important; /* 按钮左侧留白 */
+      box-shadow: none !important;
+      padding: 0 0 0 20px !important;
       margin: 0 !important;
-      font-size: 14px !important;
-      font-weight: bold !important;
+      font-size: 14px !important; /* 重新把字号加回来 */
+      font-weight: 600 !important;
       text-transform: uppercase !important;
-      height: 35px !important;
-      min-width: unset !important;
       width: auto !important;
+      min-width: unset !important;
+      height: 35px !important;
       cursor: pointer !important;
-      position: static !important; /* 防止位移产生的线条错位 */
   }
 
-  /* 5. 暴力清除所有图标和残留边框 */
-  html body .newsletter-form__button svg,
-  html body .newsletter-form__button .icon,
-  html body .field__button svg,
-  html body .newsletter-form__button::after,
-  html body .newsletter-form__button::before {
-      display: none !important;
-      content: none !important;
+  /* 5. 修正：如果还出现奇怪的黑块，直接针对 id 锁定颜色 */
+  #Subscribe {
+      background-color: transparent !important;
+      color: black !important;
   }
 </style>
     <style>
