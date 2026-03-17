@@ -497,36 +497,47 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const sizeButtons = document.querySelectorAll('.size-button');
-    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+  const addToCartBtn = document.querySelector('.add-to-cart-btn');
+  
+  // 💡 关键点：Shopify 表单通常需要一个隐藏的 input 来接收当前选中的变体 ID
+  // 请根据你主题里的实际 name 或 class 替换选择器
+  const variantInput = document.querySelector('input[name="id"]'); 
 
-    sizeButtons.forEach((button) => {
-      button.addEventListener('click', function () {
-        // 1. 切换按钮的选中 UI 状态
-        sizeButtons.forEach((btn) => btn.classList.remove('selected'));
-        this.classList.add('selected');
-
-        // 2. 获取当前点击按钮绑定的库存状态
-        // 注意：从 DOM 获取的值是字符串，所以要严格对比 'true'
-        const isAvailable = this.getAttribute('data-available') === 'true';
-
-        // 3. 根据库存状态更新加购按钮
-        if (isAvailable) {
-          // 有货状态
-          addToCartBtn.disabled = false;
-          addToCartBtn.textContent = 'ADD TO CART';
-          addToCartBtn.style.background = '#000';
-          addToCartBtn.style.color = '#fff'; // 确保文字颜色正常
-          addToCartBtn.style.cursor = 'pointer';
-        } else {
-          // 缺货状态
-          addToCartBtn.disabled = true;
-          addToCartBtn.textContent = 'SOLD OUT';
-          addToCartBtn.style.background = '#e0e0e0'; // 变成灰色
-          addToCartBtn.style.color = '#888'; // 文字变暗
-          addToCartBtn.style.cursor = 'not-allowed'; // 鼠标变成禁止符号
-        }
-      });
+  sizeButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      // 1. 视觉交互：移除所有选中状态，给当前点击的按钮加上选中状态（无论是否有货都允许选中）
+      sizeButtons.forEach(btn => btn.classList.remove('selected'));
+      this.classList.add('selected');
+      
+      // 2. 获取绑定在按钮上的数据
+      const isAvailable = this.dataset.available === 'true'; // 判断是否为字符串 'true'
+      const variantId = this.dataset.id;
+      
+      // 3. 同步更新隐藏表单的 value，确保加入购物车的是你刚刚选中的变体
+      if (variantInput && variantId) {
+        variantInput.value = variantId;
+      }
+      
+      // 4. 核心逻辑：根据库存状态控制“加购”按钮
+      if (isAvailable) {
+        // ✅ 有货状态：激活按钮
+        addToCartBtn.disabled = false;
+        addToCartBtn.textContent = 'ADD TO CART';
+        addToCartBtn.style.background = '#000'; // 恢复你原本的黑色
+        addToCartBtn.style.color = '#fff';
+        addToCartBtn.style.cursor = 'pointer';
+        addToCartBtn.style.opacity = '1';
+      } else {
+        // ❌ 无货状态：禁用按钮，文案变 SOLD OUT
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = 'SOLD OUT';
+        addToCartBtn.style.background = '#e0e0e0'; // 变成浅灰色
+        addToCartBtn.style.color = '#888888';      // 字体变成深灰色
+        addToCartBtn.style.cursor = 'not-allowed'; // 鼠标悬停显示禁用图标
+        addToCartBtn.style.opacity = '0.7';
+      }
     });
+  });
 
     // 详情折叠
     const detailHeaders = document.querySelectorAll('.detail-header');
