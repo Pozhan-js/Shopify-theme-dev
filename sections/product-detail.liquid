@@ -331,14 +331,20 @@
   <div class="product-gallery">
     {% if product_to_use.images.size > 0 %}
       {% for image in product_to_use.images limit: 4 %}
-        <img src="{{ image | img_url: '800x' }}" alt="{{ product_to_use.title }}" class="product-image" width="400" height="300">
+        <img
+          src="{{ image | img_url: '800x' }}"
+          alt="{{ product_to_use.title }}"
+          class="product-image"
+          width="400"
+          height="300"
+        >
       {% endfor %}
     {% endif %}
   </div>
 
   <div class="product-info">
     <h1 class="product-title">{{ product_to_use.title }}</h1>
-    
+
     <div class="product-price tt">{{ product_to_use.price | money_with_currency }}</div>
 
     <div class="product-description">
@@ -351,7 +357,12 @@
         {% if product_to_use.variants.size > 0 %}
           {% for variant in product_to_use.variants %}
             <pre>{{ variant.inventory_quantity | default: 0 }}</pre>
-            <button class="size-button" data-variant-id="{{ variant.id }}" data-available="{{ variant.available }}" data-variant-id="{{ variant.id }}">
+            <button
+              class="size-button"
+              data-variant-id="{{ variant.id }}"
+              data-available="{{ variant.available }}"
+              data-variant-id="{{ variant.id }}"
+            >
               {{ variant.title }}
             </button>
           {% endfor %}
@@ -378,7 +389,7 @@
           {% else %}
             <p>Premium quality materials with attention to detail. Designed for comfort and durability.</p>
           {% endif %}
-          
+
           {% if product_to_use.metafields.custom.art_no %}
             <p><span>ART. NO:</span> {{ product_to_use.metafields.custom.art_no }}</p>
           {% else %}
@@ -430,7 +441,9 @@
               <p>Free - Pick up in store within 2 hours</p>
             </div>
             <p style="margin-top:15px;">
-              <a href="/pages/shipping-info" style="color:#00b300;text-decoration:underline;">View full delivery information</a>
+              <a href="/pages/shipping-info" style="color:#00b300;text-decoration:underline;"
+                >View full delivery information</a
+              >
             </p>
           {% endif %}
         </div>
@@ -438,52 +451,90 @@
     </div>
 
     <div class="more-links">
-      {% if section.settings.more_links_title_1 != blank and section.settings.more_links_text_1 != blank and section.settings.more_links_url_1 != blank %}
-        <p>{{ section.settings.more_links_title_1 }} <a href="{{ section.settings.more_links_url_1 }}">{{ section.settings.more_links_text_1 }}</a></p>
+      {% if section.settings.more_links_title_1 != blank
+        and section.settings.more_links_text_1 != blank
+        and section.settings.more_links_url_1 != blank
+      %}
+        <p>
+          {{ section.settings.more_links_title_1 }}
+          <a href="{{ section.settings.more_links_url_1 }}">{{ section.settings.more_links_text_1 }}</a>
+        </p>
       {% endif %}
-      
-      {% if section.settings.more_links_title_2 != blank and section.settings.more_links_text_2 != blank and section.settings.more_links_url_2 != blank %}
-        <p>{{ section.settings.more_links_title_2 }} <a href="{{ section.settings.more_links_url_2 }}">{{ section.settings.more_links_text_2 }}</a></p>
+
+      {% if section.settings.more_links_title_2 != blank
+        and section.settings.more_links_text_2 != blank
+        and section.settings.more_links_url_2 != blank
+      %}
+        <p>
+          {{ section.settings.more_links_title_2 }}
+          <a href="{{ section.settings.more_links_url_2 }}">{{ section.settings.more_links_text_2 }}</a>
+        </p>
       {% endif %}
-      
-      {% if section.settings.more_links_title_3 != blank and section.settings.more_links_text_3 != blank and section.settings.more_links_url_3 != blank %}
-        <p>{{ section.settings.more_links_title_3 }} <a href="{{ section.settings.more_links_url_3 }}">{{ section.settings.more_links_text_3 }}</a></p>
+
+      {% if section.settings.more_links_title_3 != blank
+        and section.settings.more_links_text_3 != blank
+        and section.settings.more_links_url_3 != blank
+      %}
+        <p>
+          {{ section.settings.more_links_title_3 }}
+          <a href="{{ section.settings.more_links_url_3 }}">{{ section.settings.more_links_text_3 }}</a>
+        </p>
       {% endif %}
-      
-      {% if section.settings.more_links_title_4 != blank and section.settings.more_links_text_4 != blank and section.settings.more_links_url_4 != blank %}
-        <p>{{ section.settings.more_links_title_4 }} <a href="{{ section.settings.more_links_url_4 }}">{{ section.settings.more_links_text_4 }}</a></p>
+
+      {% if section.settings.more_links_title_4 != blank
+        and section.settings.more_links_text_4 != blank
+        and section.settings.more_links_url_4 != blank
+      %}
+        <p>
+          {{ section.settings.more_links_title_4 }}
+          <a href="{{ section.settings.more_links_url_4 }}">{{ section.settings.more_links_text_4 }}</a>
+        </p>
       {% endif %}
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // 尺码选择
+  document.addEventListener('DOMContentLoaded', function () {
     const sizeButtons = document.querySelectorAll('.size-button');
     const addToCartBtn = document.querySelector('.add-to-cart-btn');
-    
-    // 确保按钮可点击
-    sizeButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        sizeButtons.forEach(btn => btn.classList.remove('selected'));
+
+    sizeButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        // 1. 切换按钮的选中 UI 状态
+        sizeButtons.forEach((btn) => btn.classList.remove('selected'));
         this.classList.add('selected');
-        
-        // 更新按钮状态
-        addToCartBtn.disabled = false;
-        addToCartBtn.textContent = 'ADD TO CART';
-        addToCartBtn.style.background = '#000';
-        addToCartBtn.style.cursor = 'pointer';
+
+        // 2. 获取当前点击按钮绑定的库存状态
+        // 注意：从 DOM 获取的值是字符串，所以要严格对比 'true'
+        const isAvailable = this.getAttribute('data-available') === 'true';
+
+        // 3. 根据库存状态更新加购按钮
+        if (isAvailable) {
+          // 有货状态
+          addToCartBtn.disabled = false;
+          addToCartBtn.textContent = 'ADD TO CART';
+          addToCartBtn.style.background = '#000';
+          addToCartBtn.style.color = '#fff'; // 确保文字颜色正常
+          addToCartBtn.style.cursor = 'pointer';
+        } else {
+          // 缺货状态
+          addToCartBtn.disabled = true;
+          addToCartBtn.textContent = 'SOLD OUT';
+          addToCartBtn.style.background = '#e0e0e0'; // 变成灰色
+          addToCartBtn.style.color = '#888'; // 文字变暗
+          addToCartBtn.style.cursor = 'not-allowed'; // 鼠标变成禁止符号
+        }
       });
     });
 
     // 详情折叠
     const detailHeaders = document.querySelectorAll('.detail-header');
-    detailHeaders.forEach(header => {
-      header.addEventListener('click', function() {
+    detailHeaders.forEach((header) => {
+      header.addEventListener('click', function () {
         const content = this.nextElementSibling;
         const toggle = this.querySelector('.detail-toggle');
-        
+
         if (content.style.display === 'none') {
           content.style.display = 'block';
           toggle.textContent = '−';
@@ -495,7 +546,7 @@
     });
 
     // 添加到购物车
-    addToCartBtn.addEventListener('click', function() {
+    addToCartBtn.addEventListener('click', function () {
       const selectedSize = document.querySelector('.size-button.selected');
       if (!selectedSize) {
         alert('Please select a size');
@@ -503,7 +554,7 @@
       }
 
       const variantId = selectedSize.dataset.variantId;
-      
+
       // 调用Shopify Cart API添加商品
       fetch('/cart/add.js', {
         method: 'POST',
@@ -512,37 +563,37 @@
         },
         body: JSON.stringify({
           id: variantId,
-          quantity: 1
-        })
+          quantity: 1,
+        }),
       })
-      .then(response => response.json())
-      .then(data => {
-        // 添加成功提示
-        addToCartBtn.textContent = 'ADDED!';
-        addToCartBtn.style.background = '#00b300';
-        
-        setTimeout(() => {
-          addToCartBtn.textContent = 'ADD TO CART';
-          addToCartBtn.style.background = '#000';
-        }, 2000);
+        .then((response) => response.json())
+        .then((data) => {
+          // 添加成功提示
+          addToCartBtn.textContent = 'ADDED!';
+          addToCartBtn.style.background = '#00b300';
 
-        // 更新购物车数量
-        updateCartCount();
-      })
-      .catch(error => {
-        alert('Failed to add to cart. Please try again.');
-      });
+          setTimeout(() => {
+            addToCartBtn.textContent = 'ADD TO CART';
+            addToCartBtn.style.background = '#000';
+          }, 2000);
+
+          // 更新购物车数量
+          updateCartCount();
+        })
+        .catch((error) => {
+          alert('Failed to add to cart. Please try again.');
+        });
     });
 
     // 更新购物车数量
     function updateCartCount() {
       fetch('/cart.js')
-        .then(response => response.json())
-        .then(cart => {
+        .then((response) => response.json())
+        .then((cart) => {
           const cartCount = cart.item_count;
           // 更新页面上的购物车数量显示
           const cartCountElements = document.querySelectorAll('.cart-count');
-          cartCountElements.forEach(element => {
+          cartCountElements.forEach((element) => {
             element.textContent = cartCount;
           });
         });
