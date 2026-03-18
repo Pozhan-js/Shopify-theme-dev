@@ -255,6 +255,170 @@
       right: -1rem;
     }
   }
+
+  /* Combined Language/Currency Modal */
+  .combined-loca-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .combined-loca-modal-overlay[aria-hidden="false"] {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .combined-loca-modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    margin: 20px;
+    overflow: hidden;
+    transform: scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .combined-loca-modal-overlay[aria-hidden="false"] .combined-loca-modal-content {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .combined-loca-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 32px 10px;
+  }
+
+  .combined-loca-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #000;
+    letter-spacing: 0.5px;
+  }
+
+  .combined-loca-modal-close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .combined-loca-modal-close:hover {
+    color: #000;
+  }
+
+  .combined-loca-modal-body {
+    padding: 24px 32px;
+    flex: 1;
+  }
+
+  .combined-loca-modal-field {
+    margin-bottom: 20px;
+  }
+
+  .combined-loca-modal-field:last-child {
+    margin-bottom: 0;
+  }
+
+  .combined-loca-modal-field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    color: #000;
+  }
+
+  .combined-loca-select {
+    width: 100%;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000;
+    background: #DDDDDD;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 20px;
+    transition: border-color 0.2s ease;
+  }
+
+  .combined-loca-select:hover {
+    border-color: #999;
+    background-color: #CCCCCC;
+  }
+
+  .combined-loca-select:focus {
+    outline: none;
+  }
+
+  .combined-loca-modal-footer {
+    padding: 14px 32px 22px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .combined-loca-modal-confirm {
+    padding: 16px 48px;
+    font-size: 16px;
+    font-weight: 600;
+    background: #000;
+    color: white;
+    border: none;
+    border-radius: 999em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .combined-loca-modal-confirm:hover {
+    background: #333;
+  }
+
+  @media (max-width: 480px) {
+    .combined-loca-modal-content {
+      width: 95%;
+      margin: 16px;
+    }
+
+    .combined-loca-modal-header {
+      padding: 20px 24px 16px;
+    }
+
+    .combined-loca-modal-body {
+      padding: 20px 24px;
+    }
+
+    .combined-loca-modal-footer {
+      padding: 16px 24px 20px;
+    }
+  }
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
@@ -412,26 +576,70 @@
       {%- endif -%}
 
       <div class="desktop-localization-wrapper">
-        {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-          <localization-form class="small-hide medium-hide" data-prevent-hide>
-            {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
-              <div>
-                <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
-                {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
-              </div>
-            {%- endform -%}
-          </localization-form>
-        {% endif %}
+        {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 or section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+          <button type="button" class="header__localization-text link link--text small-hide medium-hide" id="combined-localization-trigger" aria-label="Language and Currency" style="font-size:16px !important; cursor:pointer; background:none; border:none; padding:0; white-space:nowrap; margin-right:1rem;">
+            {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+              {{- localization.language.iso_code | upcase -}}
+            {%- endif -%}
+            {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 and section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+              ｜
+            {%- endif -%}
+            {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+              {{- localization.country.currency.iso_code -}}
+            {%- endif -%}
+          </button>
 
-        {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
-          <localization-form class="small-hide medium-hide" data-prevent-hide>
-            {%- form 'localization', id: 'HeaderLanguageForm', class: 'localization-form' -%}
-              <div>
-                <h2 class="visually-hidden" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
-                {%- render 'language-localization', localPosition: 'HeaderLanguage' -%}
+          <div class="combined-loca-modal-overlay" id="combined-loca-modal" aria-hidden="true">
+            <div class="combined-loca-modal-content">
+              <div class="combined-loca-modal-header">
+                <h2 class="combined-loca-modal-title">LANGUAGE / CURRENCY</h2>
+                <button class="combined-loca-modal-close" type="button" data-combined-modal-close>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
               </div>
-            {%- endform -%}
-          </localization-form>
+              <div class="combined-loca-modal-body">
+                {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+                  <div class="combined-loca-modal-field">
+                    <label for="combined-language-select">LANGUAGE</label>
+                    <select id="combined-language-select" class="combined-loca-select">
+                      {%- for language in localization.available_languages -%}
+                        <option value="{{ language.iso_code }}" {% if language.iso_code == localization.language.iso_code %}selected{% endif %}>
+                          {{ language.endonym_name | capitalize }}
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                  </div>
+                {%- endif -%}
+                {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+                  <div class="combined-loca-modal-field">
+                    <label for="combined-country-select">COUNTRY / CURRENCY</label>
+                    <select id="combined-country-select" class="combined-loca-select">
+                      {%- for country in localization.available_countries -%}
+                        <option value="{{ country.iso_code }}" {% if country.iso_code == localization.country.iso_code %}selected{% endif %}>
+                          {{ country.name }} ({{ country.currency.iso_code }})
+                        </option>
+                      {%- endfor -%}
+                    </select>
+                  </div>
+                {%- endif -%}
+              </div>
+              <div class="combined-loca-modal-footer">
+                <button type="button" class="combined-loca-modal-confirm" data-combined-modal-confirm>CONFIRM</button>
+              </div>
+            </div>
+          </div>
+
+          {%- form 'localization', id: 'HeaderCombinedForm', class: 'localization-form', style: 'display:none' -%}
+            {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
+              <input type="hidden" name="locale_code" id="combined-hidden-locale" value="{{ localization.language.iso_code }}">
+            {%- endif -%}
+            {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
+              <input type="hidden" name="country_code" id="combined-hidden-country" value="{{ localization.country.iso_code }}">
+            {%- endif -%}
+          {%- endform -%}
         {%- endif -%}
       </div>
 
@@ -446,28 +654,8 @@
 
       <div class="header-cart-container">
         <button class="header__icon header__icon--cart link focus-inset" id="cart-icon-bubble">
-          {% if cart == empty %}
-            <span class="svg-wrapper">
-              <svg viewBox="0 0 100 100" width="20" height="20" aria-hidden="true" focusable="false" class="icon">
-                <path fill="currentColor" fill-rule="evenodd" d="M35.9812 23.6145c0-7.7423 6.2764-14.01871 14.0187-14.01871 7.7423 0 14.0187 6.27641 14.0187 14.01871v1.8691H35.9812v-1.8691Zm-9.3458 1.8691v-1.8691C26.6354 10.7106 37.096.25 49.9999.25c12.9038 0 23.3645 10.4606 23.3645 23.3645v1.8691h14.0187V100.25H12.6167V25.4836h14.0187Zm-4.6729 65.4206V34.8294h56.0748v56.0748H21.9625Z" clip-rule="evenodd"></path>
-              </svg>        
-            </span>
-          {% else %}
-            <span class="svg-wrapper">
-              <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false" class="icon">
-                <path fill="#000" fill-rule="evenodd" d="M35.9812 23.6145c0-7.7423 6.2764-14.01871 14.0187-14.01871 7.7423 0 14.0187 6.27641 14.0187 14.01871v1.8691H35.9812v-1.8691Zm-9.3458 1.8691v-1.8691C26.6354 10.7106 37.096.25 49.9999.25c12.9038 0 23.3645 10.4606 23.3645 23.3645v1.8691h14.0187V100.25H12.6167V25.4836h14.0187Zm-4.6729 65.4206V34.8294h56.0748v56.0748H21.9625Z" clip-rule="evenodd"></path>
-              </svg>
-            </span>
-          {% endif %}
+          <span style="font-size:16px !important; white-space:nowrap;">BAG({{ cart.item_count }})</span>
           <span class="visually-hidden">{{ 'templates.cart.cart' | t }}</span>
-          {%- if cart != empty -%}
-            <div class="cart-count-bubble">
-              {%- if cart.item_count < 100 -%}
-                <span aria-hidden="true">{{ cart.item_count }}</span>
-              {%- endif -%}
-              <span class="visually-hidden">{{ 'sections.header.cart_count' | t: count: cart.item_count }}</span>
-            </div>
-          {%- endif -%}
         </button>
         
         <div class="cart-dropdown" id="cart-dropdown">
@@ -571,6 +759,66 @@
       });
     }
   });
+
+  // Combined Language/Currency Modal
+  (function() {
+    function initCombinedLocaModal() {
+      const trigger = document.getElementById('combined-localization-trigger');
+      const modal = document.getElementById('combined-loca-modal');
+      if (!trigger || !modal) return;
+
+      const closeBtn = modal.querySelector('[data-combined-modal-close]');
+      const confirmBtn = modal.querySelector('[data-combined-modal-confirm]');
+      const langSelect = document.getElementById('combined-language-select');
+      const countrySelect = document.getElementById('combined-country-select');
+      const hiddenLocale = document.getElementById('combined-hidden-locale');
+      const hiddenCountry = document.getElementById('combined-hidden-country');
+      const form = document.getElementById('HeaderCombinedForm');
+
+      function openModal(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal() {
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      trigger.addEventListener('click', openModal);
+
+      if (closeBtn) closeBtn.addEventListener('click', function(e) { e.preventDefault(); closeModal(); });
+
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeModal();
+      });
+
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (langSelect && hiddenLocale) hiddenLocale.value = langSelect.value;
+          if (countrySelect && hiddenCountry) hiddenCountry.value = countrySelect.value;
+          if (form) form.submit();
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCombinedLocaModal);
+    } else {
+      initCombinedLocaModal();
+    }
+
+    if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+      document.addEventListener('shopify:section:load', initCombinedLocaModal);
+    }
+  })();
 </script>
 
 {% javascript %}
